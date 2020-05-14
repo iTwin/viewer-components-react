@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
+  "rushVersion": "5.22.0",
+  "pnpmVersion": "4.9.3",
+  "nodeSupportedVersionRange": ">=10.13.0 <13.0.0",
+  "projectFolderMinDepth": 2,
+  "projectFolderMaxDepth": 3,
+  "gitPolicy": {
+    "allowedEmailRegExps": [
+      "[^@]+@users\\.noreply\\.github\\.com"
+    ],
+    "sampleEmail": "mrexample@users.noreply.github.com"
+  },
+  "repository": {
+    "url": "https://github.com/imodeljs/viewer-components-react"
+  },
+  "projects": []
+}

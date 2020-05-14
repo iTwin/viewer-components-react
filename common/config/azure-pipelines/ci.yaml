@@ -1,0 +1,42 @@
+# CI Build
+
+trigger:
+  - master
+
+schedules:
+  - cron: "0 9 * * Mon-Fri"
+    displayName: Weekday 4 AM (UTC -5) daily build
+    branches:
+      include:
+        - master
+
+jobs:
+  - job: Build
+    condition: succeeded()
+    strategy:
+      matrix:
+        "Windows - Node 12":
+          NodeVersion: 12
+          OS: windows-latest
+        "Linux - Node 12":
+          NodeVersion: 12
+          OS: ubuntu-latest
+        "Mac - Node 12":
+          NodeVersion: 12
+          OS: macOS-latest
+
+    workspace:
+      clean: all
+
+    pool:
+      vmImage: $(OS)
+    steps:
+      - checkout: self
+        clean: all
+      - task: NodeTool@0
+        displayName: "Use Node $(NodeVersion).x"
+        inputs:
+          versionSpec: "$(NodeVersion).x"
+          checkLatest: true
+
+      - template: templates/core-build.yaml
