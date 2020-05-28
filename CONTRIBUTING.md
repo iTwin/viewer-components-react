@@ -16,13 +16,13 @@ A Project is defined as a self-contained piece of functionality. Each new projec
 Because each Project is self-contained, it is necessary for the contributor of the Project to specify a contact for PRs and bug reports. To do this, add an entry to the CODEOWNERS file in the root directory of the repository, e.g.:
 
     # Clara Developer owns the new extension snippet
-    /imodel-select-ui/clara.developer@bentley.com
+    /imodel-select-react/clara.developer@bentley.com
 
 Remember that the last entry for a matching directory or file name pattern takes precedence over any earlier entries.
 
 ### Naming conventions
 
-- All names should be hyphenated lower case (e.g., imodel-select-ui).
+- All names should be hyphenated lower case (e.g., imodel-select-react).
 
 ## Creating Issues and Enhancements
 

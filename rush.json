@@ -14,5 +14,10 @@
   "repository": {
     "url": "https://github.com/imodeljs/viewer-components-react"
   },
-  "projects": []
+  "projects": [
+    {
+      "packageName": "@bentley/imodel-select-react",
+      "projectFolder": "packages/imodel-select"
+    }
+  ]
 }

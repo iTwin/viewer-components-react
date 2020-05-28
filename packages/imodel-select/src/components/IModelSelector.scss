@@ -1,0 +1,86 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "@bentley/ui-core/lib/ui-core/index";
+
+$appbar-height: 80px;
+$navbar-width: 80px;
+$projectpicker-min-width: 250px; /* project picker minimum width */
+$projectpicker-max-width: 450px; /* project picker maximum width */
+$select-background: #FCFDFD;
+$select-color: #6d6e77;
+$content-background: $uicore-white;
+$border-color: #e7e9ec;
+
+/* top panel */
+.select-pane {
+  width: 100%;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  position: relative;
+  background: $select-background;
+
+  /* application bar*/
+  .select-appbar {
+    height: $appbar-height;
+    background-color: $select-background;
+    color: $select-color;
+    padding-top: 1em;
+    padding-left: 1em;
+    border-bottom: 1px solid $border-color;
+    box-sizing: border-box;
+    position: relative;
+
+      /* backstage icon */
+    .backstage-icon {
+      border-right: 1px solid $border-color;
+      box-sizing: border-box;
+      font-size: 48px;
+      cursor: pointer;
+    }
+
+    /* projects label */
+    .project-picker-content {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      top: 20px;
+      left: $navbar-width;
+
+      /* "Projects" label */
+      .projects-label {
+        margin-left: 70px;
+        margin-right: 1em;
+        font-size: 1.75em;
+      }
+
+      /* project picker */
+      .project-picker {
+        min-width: $projectpicker-min-width;
+        max-width: $projectpicker-max-width;
+        height: 100%;
+
+        > div {
+          height: 100%;
+        }
+      }
+    }
+  }
+
+  /* content area */
+  .select-content {
+    top: $appbar-height;
+    left: $navbar-width;
+    bottom: 0;
+    right: 0;
+    overflow: hidden;
+    position: absolute;
+    background: $content-background;
+    -webkit-transition: all .2s linear;
+    -moz-transition: all .2s linear;
+    -o-transition: all .2s linear;
+    transition: all .2s linear;
+  }
+}
