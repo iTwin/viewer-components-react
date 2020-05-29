@@ -22,22 +22,8 @@ this.reactElement = (
 #### This frontstage example assumes sign-in has already been completed
 
 ```ts
-/*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
- *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import {
-  CoreTools,
-  ContentGroup,
-  ContentControl,
-  ConfigurableCreateInfo,
-  FrontstageProvider,
-  FrontstageProps,
-  Frontstage,
-  IModelInfo,
-  UiFramework,
-} from "@bentley/ui-framework";
+import { CoreTools, ContentGroup, ContentControl, ConfigurableCreateInfo, FrontstageProvider, FrontstageProps, Frontstage, IModelInfo, UiFramework } from "@bentley/ui-framework";
 import { IModelSelector } from "@bentley/imodel-select-react";
 import { remote } from "electron";
 
@@ -119,23 +105,9 @@ this.reactElement = (
 #### This frontstage example assumes sign-in has been completed
 
 ```ts
-/*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
- *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { remote } from "electron";
-import {
-  CoreTools,
-  ContentGroup,
-  ContentControl,
-  ConfigurableCreateInfo,
-  FrontstageProvider,
-  FrontstageProps,
-  Frontstage,
-  ProjectInfo,
-  UiFramework,
-} from "@bentley/ui-framework";
+import { CoreTools, ContentGroup, ContentControl, ConfigurableCreateInfo, FrontstageProvider, FrontstageProps, Frontstage, ProjectInfo, UiFramework } from @bentley/ui-framework";
 import { ProjectSelector } from "@bentley/imodel-select-react";
 
 class ProjectSelectorControl extends ContentControl {

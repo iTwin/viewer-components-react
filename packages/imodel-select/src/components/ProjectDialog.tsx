@@ -40,6 +40,8 @@ export class ProjectDialog extends React.Component<
   ProjectDialogProps,
   ProjectDialogState
 > {
+  private _isMounted = false;
+
   constructor(props?: any, context?: any) {
     super(props, context);
 
@@ -56,7 +58,12 @@ export class ProjectDialog extends React.Component<
 
   // called when this component is first loaded
   public async componentDidMount() {
+    this._isMounted = true;
     this.getRecentProjects(this.props.filterType!);
+  }
+
+  public componentWillUnmount() {
+    this._isMounted = false;
   }
 
   private getRecentProjects(projectScope: ProjectScope) {
@@ -68,8 +75,8 @@ export class ProjectDialog extends React.Component<
     UiFramework.projectServices
       .getProjects(projectScope, 40, 0)
       .then((projectInfos: ProjectInfo[]) => {
-        // tslint:disable-line:no-floating-promises
-        this.setState({ isLoading: false, projects: projectInfos });
+        if (this._isMounted)
+          this.setState({ isLoading: false, projects: projectInfos });
       });
   }
 
@@ -109,7 +116,7 @@ export class ProjectDialog extends React.Component<
         filter: value,
       });
     } else {
-      const filter = IModelSelect.translate("nameLike", { filter: value });
+      const filter = "Name like '" + value + "'";
       this.setState({
         isLoading: true,
         projects: undefined,
@@ -172,8 +179,8 @@ export class ProjectDialog extends React.Component<
       this.state.activeFilter !== ProjectScope.All && "hidden"
     );
     return (
-      <div className="modal-background fade-in-fast">
-        <div className="projects animate">
+      <div className="imodel-select-modal-background imodel-select-fade-in-fast">
+        <div className="imodel-select-projects imodel-select-animate">
           <div className="header">
             <h3>{IModelSelect.translate("selectProject")}</h3>
             <span
@@ -182,7 +189,7 @@ export class ProjectDialog extends React.Component<
               title={IModelSelect.translate("close")}
             />
           </div>
-          <div className="projects-content">
+          <div className="imodel-select-projects-content">
             <div className="tabs-container">
               <ProjectTabs defaultTab={this.getTabIndexFromProjectScope()}>
                 <ProjectTab
@@ -221,7 +228,7 @@ export class ProjectDialog extends React.Component<
                     <th>{IModelSelect.translate("projectNumber")}</th>
                     <th>{IModelSelect.translate("projectName")}</th>
                     <th>{IModelSelect.translate("assetType")}</th>
-                    <th>{IModelSelect.translate("Location")}</th>
+                    <th>{IModelSelect.translate("location")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -233,13 +240,13 @@ export class ProjectDialog extends React.Component<
                 </tbody>
               </table>
               {this.state.isLoading && (
-                <div className="projects-loading">
+                <div className="imodel-select-projects-loading">
                   <Spinner size={SpinnerSize.Large} />
                 </div>
               )}
               {!this.state.isLoading &&
                 (!this.state.projects || this.state.projects.length === 0) && (
-                  <div className="projects-none">
+                  <div className="imodel-select-projects-none">
                     {this.getNoProjectsPrompt()}
                   </div>
                 )}

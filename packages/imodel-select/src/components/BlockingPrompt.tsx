@@ -24,8 +24,8 @@ export class BlockingPrompt extends React.Component<BlockingPromptProps> {
   // @internal
   public render() {
     return (
-      <div className="blocking-modal-background fade-in-fast">
-        <div className="blocking-prompt fade-in">
+      <div className="imodel-select-blocking-modal-background imodel-select-fade-in-fast">
+        <div className="imodel-select-blocking-prompt imodel-select-fade-in">
           <Spinner size={SpinnerSize.Large} />
           <span>{this.props.prompt}</span>
         </div>

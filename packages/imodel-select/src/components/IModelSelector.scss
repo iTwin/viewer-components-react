@@ -4,38 +4,38 @@
 *--------------------------------------------------------------------------------------------*/
 @import "@bentley/ui-core/lib/ui-core/index";
 
-$appbar-height: 80px;
-$navbar-width: 80px;
-$projectpicker-min-width: 250px; /* project picker minimum width */
-$projectpicker-max-width: 450px; /* project picker maximum width */
-$select-background: #FCFDFD;
-$select-color: #6d6e77;
-$content-background: $uicore-white;
-$border-color: #e7e9ec;
+$imodel-select-appbar-height: 80px;
+$imodel-select-navbar-width: 80px;
+$imodel-select-projectpicker-min-width: 250px; /* project picker minimum width */
+$imodel-select-projectpicker-max-width: 450px; /* project picker maximum width */
+$imodel-select-background: #FCFDFD;
+$imodel-select-color: #6d6e77;
+$imodel-select-content-background: $uicore-white;
+$imodel-select-border-color: #e7e9ec;
 
 /* top panel */
-.select-pane {
+.imodel-select-pane {
   width: 100%;
   height: 100%;
   top: 0;
   bottom: 0;
   position: relative;
-  background: $select-background;
+  background: $imodel-select-background;
 
   /* application bar*/
   .select-appbar {
-    height: $appbar-height;
-    background-color: $select-background;
-    color: $select-color;
+    height: $imodel-select-appbar-height;
+    background-color: $imodel-select-background;
+    color: $imodel-select-color;
     padding-top: 1em;
     padding-left: 1em;
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid $imodel-select-border-color;
     box-sizing: border-box;
     position: relative;
 
       /* backstage icon */
     .backstage-icon {
-      border-right: 1px solid $border-color;
+      border-right: 1px solid $imodel-select-border-color;
       box-sizing: border-box;
       font-size: 48px;
       cursor: pointer;
@@ -47,7 +47,7 @@ $border-color: #e7e9ec;
       align-items: center;
       position: absolute;
       top: 20px;
-      left: $navbar-width;
+      left: $imodel-select-navbar-width;
 
       /* "Projects" label */
       .projects-label {
@@ -58,8 +58,8 @@ $border-color: #e7e9ec;
 
       /* project picker */
       .project-picker {
-        min-width: $projectpicker-min-width;
-        max-width: $projectpicker-max-width;
+        min-width: $imodel-select-projectpicker-min-width;
+        max-width: $imodel-select-projectpicker-max-width;
         height: 100%;
 
         > div {
@@ -71,13 +71,13 @@ $border-color: #e7e9ec;
 
   /* content area */
   .select-content {
-    top: $appbar-height;
-    left: $navbar-width;
+    top: $imodel-select-appbar-height;
+    left: $imodel-select-navbar-width;
     bottom: 0;
     right: 0;
     overflow: hidden;
     position: absolute;
-    background: $content-background;
+    background: $imodel-select-content-background;
     -webkit-transition: all .2s linear;
     -moz-transition: all .2s linear;
     -o-transition: all .2s linear;

@@ -36,6 +36,8 @@ export class IModelCard extends React.Component<
   IModelCardProps,
   IModelCardState
 > {
+  private _isMounted = false;
+
   constructor(props: IModelCardProps, context?: any) {
     super(props, context);
     this.state = { waitingForThumbnail: false, showOptions: false };
@@ -47,9 +49,15 @@ export class IModelCard extends React.Component<
 
   // called when this component is first loaded
   public async componentDidMount() {
+    this._isMounted = true;
+
     // we don't get the thumbnail until it's needed.
     if (!this.props.iModel.thumbnail)
       this.startRetrieveThumbnail(this.props.iModel); // tslint:disable-line:no-floating-promises
+  }
+
+  public componentWillUnmount() {
+    this._isMounted = false;
   }
 
   // retrieves the IModels for a Project. Called when first mounted and when a new Project is selected.
@@ -59,7 +67,8 @@ export class IModelCard extends React.Component<
       thisIModel.projectInfo.wsgId,
       thisIModel.wsgId
     );
-    this.setState({ waitingForThumbnail: false });
+    if (this._isMounted)
+      this.setState({ waitingForThumbnail: false });
   }
 
   private _onCardClicked = () => {
@@ -119,7 +128,7 @@ export class IModelCard extends React.Component<
 
   public render() {
     return (
-      <div className="imodel-card">
+      <div className="imodel-select-imodel-card">
         <div className="imodel-card-content">
           <div className="imodel-card-preview" onClick={this._onCardClicked}>
             {this.renderThumbnail()}

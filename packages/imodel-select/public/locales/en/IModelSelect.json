@@ -29,8 +29,8 @@
     "noProjAssigned": "You have no projects assigned. Try a search.",
     "noMatches": "No matches found for '{{filter}}'",
     "searchAllProjects": "Search all projects by name, number, or other project attribute.",
-    "nameLike": "Name like '{{filter}}'",
     "noResultsForFilter": "No matches found for '{{searchText}}'.",
-    "searchProjects": "Search for active projects in your Organization?"
+    "searchProjects": "Search for active projects in your Organization?",
+    "thumbnails": "Thumbnails",
+    "list": "List"
   }
-  

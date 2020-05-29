@@ -113,7 +113,7 @@ export class IModelList extends React.Component<
 
   private renderThumbnails(iModels: IModelInfo[]) {
     return (
-      <div className="cards">
+      <div className="imodel-select-cards">
         {iModels.map((iModelInfo: IModelInfo) => (
           <IModelCard
             key={iModelInfo.wsgId}
@@ -128,7 +128,7 @@ export class IModelList extends React.Component<
 
   private renderList(iModels: IModelInfo[]) {
     return (
-      <div className="table-container fade-in-fast">
+      <div className="table-container imodel-select-fade-in-fast">
         <table>
           <thead>
             <tr>
@@ -151,8 +151,8 @@ export class IModelList extends React.Component<
   private renderContent() {
     if (!this.props.iModels || this.props.iModels.length === 0) {
       return (
-        <div className="cards-empty">
-          <div className="fade-in-fast">
+        <div className="imodel-select-cards-empty">
+          <div className="imodel-select-fade-in-fast">
             {IModelSelect.translate("noIModels")}
             <button onClick={this._onShowProjectsSelector}>
               {IModelSelect.translate("searchProjects")}
@@ -170,7 +170,7 @@ export class IModelList extends React.Component<
           {!this.state.showDetails && this.renderThumbnails(filteredIModels)}
           {this.state.showDetails && this.renderList(filteredIModels)}
           {filteredIModels.length === 0 && (
-            <span className="cards-noresults fade-in-fast">
+            <span className="imodel-select-cards-noresults imodel-select-fade-in-fast">
               {IModelSelect.translate("noResultsForFilter", {
                 searchText: this.state.filter,
               })}
@@ -191,7 +191,7 @@ export class IModelList extends React.Component<
       this.state.showDetails && "active"
     );
     return (
-      <div className="cards-content">
+      <div className="imodel-select-cards-content">
         <div className="header">
           <span className="title">{IModelSelect.translate("recent")}</span>
           <SearchBox
@@ -201,16 +201,16 @@ export class IModelList extends React.Component<
           />
           <span
             className={classThumbnails}
-            title="Thumbnails"
+            title={IModelSelect.translate("thumbnails")}
             onClick={this._onShowThumbnails}
           />
           <span
             className={classList}
-            title="List"
+            title={IModelSelect.translate("list")}
             onClick={this._onShowDetails}
           />
         </div>
-        <div className="cards-scroll-y">{this.renderContent()}</div>
+        <div className="imodel-select-cards-scroll-y">{this.renderContent()}</div>
       </div>
     );
   }

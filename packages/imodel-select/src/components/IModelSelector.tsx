@@ -54,6 +54,8 @@ export class IModelSelector extends React.Component<
   IModelSelectorProps,
   IModelSelectorState
 > {
+  private _isMounted = false;
+
   constructor(props?: any, context?: any) {
     super(props, context);
 
@@ -65,6 +67,7 @@ export class IModelSelector extends React.Component<
   }
 
   public componentDidMount() {
+    this._isMounted = true;
     if (this.props.initialIModels && this.props.initialIModels.length > 0) {
       this.setState(
         Object.assign({}, this.state, {
@@ -81,15 +84,20 @@ export class IModelSelector extends React.Component<
       .getProjects(ProjectScope.MostRecentlyUsed, 100, 0)
       .then((projectInfos: ProjectInfo[]) => {
         // tslint:disable-line:no-floating-promises
-        this.setState(
-          Object.assign({}, this.state, {
-            isLoadingProjects: false,
-            isLoadingiModels: true,
-            recentProjects: projectInfos,
-          })
-        );
+        if (this._isMounted)
+          this.setState(
+            Object.assign({}, this.state, {
+              isLoadingProjects: false,
+              isLoadingiModels: true,
+              recentProjects: projectInfos,
+            })
+          );
         if (projectInfos.length > 0) this._selectProject(projectInfos[0]);
       });
+  }
+
+  public componentWillUnmount() {
+    this._isMounted = false;
   }
 
   // retrieves the IModels for a Project. Called when first mounted and when a new Project is selected.
@@ -112,10 +120,11 @@ export class IModelSelector extends React.Component<
     } catch (e) {
       console.log(e.message);
     }
-    this.setState({
-      isLoadingiModels: false,
-      iModels: iModelInfos,
-    });
+    if (this._isMounted)
+      this.setState({
+        isLoadingiModels: false,
+        iModels: iModelInfos,
+      });
   }
 
   private _selectProject(project: ProjectInfo) {
@@ -147,7 +156,7 @@ export class IModelSelector extends React.Component<
   public render() {
     const contentStyle = classnames("select-content", false);
     return (
-      <div className="select-pane">
+      <div className="imodel-select-pane">
         <div className="select-appbar">
           {this.props.showBackstageButton && (
             <div className="backstage-icon">

@@ -5,7 +5,7 @@
 @import "@bentley/ui-core/lib/ui-core/index";
 
 /* The Modal (background) */
-.modal-background {
+.imodel-select-modal-background {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,7 +21,7 @@
 }
 
 /* dialog box */
-.projects {
+.imodel-select-projects {
   background-color: #fefefe;
   width: 850px;
   height: 500px;
@@ -34,7 +34,7 @@
 }
 
 /* header */
-.projects .header {
+.imodel-select-projects .header {
   flex: initial;
   padding: 1em;
   display: flex;
@@ -44,13 +44,13 @@
 }
 
 /* title */
-.projects .header h3 {
+.imodel-select-projects .header h3 {
   margin: 0;
   color: $uicore-text-color;
 }
 
 /* close button */
-.projects .header .icon {
+.imodel-select-projects .header .icon {
   margin-left: auto;
   font-size: 1em;
   color: $uicore-icons-dark;
@@ -60,12 +60,12 @@
 }
 
 /* close button hover */
-.projects .header .icon:hover {
+.imodel-select-projects .header .icon:hover {
   color: #000;
 }
 
 /* content */
-.projects .projects-content {
+.imodel-select-projects .imodel-select-projects-content {
   height: 100%;
   color: $uicore-gray;
   padding: .5em 1.5em 1.5em 1.5em;
@@ -74,13 +74,13 @@
 }
 
 /* container for tabs */
-.projects-content .tabs-container {
+.imodel-select-projects-content .tabs-container {
   display: flex;
   align-items: center;
 }
 
 /* container for table */
-.projects-content .table-container {
+.imodel-select-projects-content .table-container {
   height: 100%;
   overflow: auto;
   margin-top: 1em;
@@ -88,7 +88,7 @@
 }
 
 /* projects list (table) */
-.projects .projects-content table {
+.imodel-select-projects .imodel-select-projects-content table {
   width: 100%;
   font-family: arial, sans-serif;
   border-collapse: collapse;
@@ -118,19 +118,19 @@
 }
 
 /* search box */
-.projects .projects-content .tabs-searchbox {
+.imodel-select-projects .imodel-select-projects-content .tabs-searchbox {
   margin-left: 3em;
   -webkit-transition: opacity 0.3s;
   -o-transition: opacity 0.3;
 	transition: opacity 0.3s;
 }
 
-.projects .projects-content .tabs-searchbox.hidden {
+.imodel-select-projects .imodel-select-projects-content .tabs-searchbox.hidden {
   opacity: 0;
 }
 
 /* loader */
-.projects-loading {
+.imodel-select-projects-loading {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -141,7 +141,7 @@
 }
 
 /* no projects prompt */
-.projects-none {
+.imodel-select-projects-none {
   position: absolute;
   white-space: nowrap;
   top: 50%;
@@ -150,7 +150,7 @@
 }
 
 /* Add Zoom Animation */
-.animate {
+.imodel-select-animate {
   -webkit-animation: animatezoom 0.6s;
   animation: animatezoom 0.6s
 }

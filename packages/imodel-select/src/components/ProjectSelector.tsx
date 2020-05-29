@@ -28,6 +28,8 @@ export class ProjectSelector extends React.Component<
   ProjectSelectorProps,
   ProjectSelectorState
 > {
+  private _isMounted = false;
+
   constructor(props?: any, context?: any) {
     super(props, context);
 
@@ -38,17 +40,23 @@ export class ProjectSelector extends React.Component<
   }
 
   public componentDidMount() {
+    this._isMounted = true;
     UiFramework.projectServices
       .getProjects(ProjectScope.MostRecentlyUsed, 40, 0)
       .then((projectInfos: ProjectInfo[]) => {
         // tslint:disable-line:no-floating-promises
-        this.setState(
-          Object.assign({}, this.state, {
-            isLoadingProjects: false,
-            recentProjects: projectInfos,
-          })
-        );
+        if (this._isMounted)
+          this.setState(
+            Object.assign({}, this.state, {
+              isLoadingProjects: false,
+              recentProjects: projectInfos,
+            })
+          );
       });
+  }
+
+  public componentWillUnmount() {
+    this._isMounted = false;
   }
 
   private _onProjectSelected = (project: ProjectInfo) => {
