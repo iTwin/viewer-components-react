@@ -9,4 +9,4 @@
 # @global-owner1 and @global-owner2 will be requested for
 # review when someone opens a pull request.
 *  @calebmshafer
-/packages/imodel-select/*  @wilmaier
+/packages/imodel-select  @wilmaier
