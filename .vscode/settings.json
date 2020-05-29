@@ -4,7 +4,6 @@
   "editor.formatOnSave": true,
   "search.exclude": {
     "**/node_modules": true,
-    "**/bower_components": true,
     "**/.nyc_output": true,
     "**/common/temp": true,
     "**/.rush": true
