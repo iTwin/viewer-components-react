@@ -11,7 +11,8 @@
     "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
     "clean": "rimraf lib build",
     "lint": "tslint -p . 1>&2",
-    "test": ""
+    "test": "",
+    "cover": ""
   },
   "keywords": [
     "Bentley",
