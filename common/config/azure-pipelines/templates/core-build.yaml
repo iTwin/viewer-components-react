@@ -1,6 +1,10 @@
 # Handles all of the core build functionality
 
 steps:
+  - script: 'git config --local user.email imodeljsbot@users.noreply.github.com'
+    displayName: 'git config email'
+  - script: 'git config --local user.name iModeljsBot'
+    displayName: 'git config name'
   - script: node common/scripts/install-run-rush.js check
     displayName: rush check
   - script: node common/scripts/install-run-rush.js install
