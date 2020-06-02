@@ -1,17 +1,13 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import classnames from "classnames";
 import { IModelApp } from "@bentley/imodeljs-frontend";
-import {
-  UiFramework,
-  IModelInfo,
-  ProjectInfo,
-  ProjectScope,
-  Backstage,
-} from "@bentley/ui-framework";
+import { ProjectInfo, ProjectInfoService } from "../api/ProjectInfoService";
+import { IModelInfo, IModelInfoService } from "../api/IModelInfoService";
+import { ProjectScope, Backstage } from "@bentley/ui-framework";
 import { ClientRequestContext } from "@bentley/bentleyjs-core";
 import { FrontendAuthorizationClient } from "@bentley/frontend-authorization-client";
 import { Button, ButtonSize, ButtonType } from "@bentley/ui-core";
@@ -50,15 +46,16 @@ export interface IModelSelectorState {
  * Open component showing projects and iModels
  * @public
  */
-export class IModelSelector extends React.Component<
-  IModelSelectorProps,
-  IModelSelectorState
-> {
+export class IModelSelector extends React.Component<IModelSelectorProps, IModelSelectorState> {
   private _isMounted = false;
+  private _projectInfoService: ProjectInfoService;
+  private _iModelInfoService: IModelInfoService;
 
   constructor(props?: any, context?: any) {
     super(props, context);
 
+    this._projectInfoService = new ProjectInfoService();
+    this._iModelInfoService = new IModelInfoService();
     this.state = {
       isLoadingProjects: true,
       isLoadingiModels: false,
@@ -80,7 +77,7 @@ export class IModelSelector extends React.Component<
       return;
     }
 
-    UiFramework.projectServices
+    this._projectInfoService
       .getProjects(ProjectScope.MostRecentlyUsed, 100, 0)
       .then((projectInfos: ProjectInfo[]) => {
         // tslint:disable-line:no-floating-promises
@@ -112,11 +109,7 @@ export class IModelSelector extends React.Component<
     );
     let iModelInfos: IModelInfo[] = [];
     try {
-      iModelInfos = await UiFramework.iModelServices.getIModels(
-        project,
-        1000,
-        0
-      );
+      iModelInfos = await this._iModelInfoService.getIModels(project, 1000, 0);
     } catch (e) {
       console.log(e.message);
     }

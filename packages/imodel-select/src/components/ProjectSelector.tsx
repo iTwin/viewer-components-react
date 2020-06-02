@@ -1,10 +1,11 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { UiFramework, ProjectInfo, ProjectScope } from "@bentley/ui-framework";
+import { ProjectScope } from "@bentley/ui-framework";
 import { ProjectDialog } from "./ProjectDialog";
+import { ProjectInfo, ProjectInfoService } from "../api/ProjectInfoService";
 import { IModelSelect } from "../IModelSelect";
 import "./ProjectDialog.scss";
 
@@ -24,15 +25,14 @@ interface ProjectSelectorState {
 /**
  * Open component showing projects
  */
-export class ProjectSelector extends React.Component<
-  ProjectSelectorProps,
-  ProjectSelectorState
-> {
+export class ProjectSelector extends React.Component<ProjectSelectorProps, ProjectSelectorState> {
   private _isMounted = false;
+  private _projectInfoService: ProjectInfoService;
 
   constructor(props?: any, context?: any) {
     super(props, context);
 
+    this._projectInfoService = new ProjectInfoService();
     this.state = {
       isLoadingProjects: true,
       prompt: IModelSelect.translate("fechingProjInfo"),
@@ -41,7 +41,7 @@ export class ProjectSelector extends React.Component<
 
   public componentDidMount() {
     this._isMounted = true;
-    UiFramework.projectServices
+    this._projectInfoService
       .getProjects(ProjectScope.MostRecentlyUsed, 40, 0)
       .then((projectInfos: ProjectInfo[]) => {
         // tslint:disable-line:no-floating-promises

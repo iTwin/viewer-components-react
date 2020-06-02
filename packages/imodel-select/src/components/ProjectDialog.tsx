@@ -1,10 +1,11 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import classnames from "classnames";
-import { UiFramework, ProjectInfo, ProjectScope } from "@bentley/ui-framework";
+import { ProjectScope } from "@bentley/ui-framework";
+import { ProjectInfo, ProjectInfoService } from "../api/ProjectInfoService";
 import { ProjectTabs, ProjectTab } from "./ProjectTabs";
 import { SearchBox, Spinner, SpinnerSize } from "@bentley/ui-core";
 import { IModelSelect } from "../IModelSelect";
@@ -36,15 +37,14 @@ export interface ProjectDialogState {
  * Project picker dialog
  * @public
  */
-export class ProjectDialog extends React.Component<
-  ProjectDialogProps,
-  ProjectDialogState
-> {
+export class ProjectDialog extends React.Component<ProjectDialogProps, ProjectDialogState> {
   private _isMounted = false;
+  private _projectInfoService: ProjectInfoService;
 
   constructor(props?: any, context?: any) {
     super(props, context);
 
+    this._projectInfoService = new ProjectInfoService();
     this.state = {
       isLoading: true,
       activeFilter: this.props.filterType!,
@@ -72,7 +72,7 @@ export class ProjectDialog extends React.Component<
       projects: undefined,
       activeFilter: projectScope,
     });
-    UiFramework.projectServices
+    this._projectInfoService
       .getProjects(projectScope, 40, 0)
       .then((projectInfos: ProjectInfo[]) => {
         if (this._isMounted)
@@ -122,7 +122,7 @@ export class ProjectDialog extends React.Component<
         projects: undefined,
         activeFilter: ProjectScope.All,
       });
-      UiFramework.projectServices
+      this._projectInfoService
         .getProjects(ProjectScope.All, 40, 0, filter)
         .then((projectInfos: ProjectInfo[]) => {
           // tslint:disable-line:no-floating-promises

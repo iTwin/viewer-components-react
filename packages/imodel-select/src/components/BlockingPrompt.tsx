@@ -21,7 +21,6 @@ export interface BlockingPromptProps {
  */
 export class BlockingPrompt extends React.Component<BlockingPromptProps> {
 
-  // @internal
   public render() {
     return (
       <div className="imodel-select-blocking-modal-background imodel-select-fade-in-fast">

@@ -1,10 +1,10 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import classnames from "classnames";
-import { IModelInfo } from "@bentley/ui-framework";
+import { IModelInfo } from "../api/IModelInfoService";
 import { IModelCard } from "./IModelCard";
 import { ProjectDialog } from "./ProjectDialog";
 import { SearchBox } from "@bentley/ui-core";
@@ -36,10 +36,7 @@ export interface IModelListState {
  * A list of IModelCards (IModels)
  * @public
  */
-export class IModelList extends React.Component<
-  IModelListProps,
-  IModelListState
-> {
+export class IModelList extends React.Component<IModelListProps, IModelListState> {
   constructor(props?: any, context?: any) {
     super(props, context);
 

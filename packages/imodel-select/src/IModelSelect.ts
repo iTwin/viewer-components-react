@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 /** @module Common */
 
 import * as i18next from "i18next";
@@ -9,8 +9,7 @@ import { I18N } from "@bentley/imodeljs-i18n";
 import { UiError, getClassName } from "@bentley/ui-abstract";
 
 /**
- * Entry point for static initialization required by various
- * components used in the package.
+ * Entry point for static initialization required by various components used in the package.
  * @public
  */
 export class IModelSelect {
@@ -37,10 +36,7 @@ export class IModelSelect {
   /** The internationalization service created by the IModelApp. */
   public static get i18n(): I18N {
     if (!IModelSelect._i18n)
-      throw new UiError(
-        IModelSelect.loggerCategory(this),
-        "IModelSelect not initialized"
-      );
+      throw new UiError(IModelSelect.loggerCategory(this), "IModelSelect not initialized");
     return IModelSelect._i18n;
   }
 
@@ -49,26 +45,19 @@ export class IModelSelect {
     return "IModelSelect";
   }
 
-  /** @internal */
   public static get packageName(): string {
     return "imodel-select-react";
   }
 
   /** Calls i18n.translateWithNamespace with the "IModelSelect" namespace. Do NOT include the namespace in the key.
-   * @internal
    */
   public static translate(
     key: string | string[],
     options?: i18next.TranslationOptions
   ): string {
-    return IModelSelect.i18n.translateWithNamespace(
-      IModelSelect.i18nNamespace,
-      key,
-      options
-    );
+    return IModelSelect.i18n.translateWithNamespace(IModelSelect.i18nNamespace, key, options);
   }
 
-  /** @internal */
   public static loggerCategory(obj: any): string {
     const className = getClassName(obj);
     const category =

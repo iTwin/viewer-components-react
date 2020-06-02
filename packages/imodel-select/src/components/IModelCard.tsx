@@ -1,12 +1,11 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { Spinner, SpinnerSize } from "@bentley/ui-core";
-import { UiFramework, IModelInfo } from "@bentley/ui-framework";
+import { IModelInfo, IModelInfoService } from "../api/IModelInfoService";
 import { IModelSelect } from "../IModelSelect";
-
 import "./IModelCard.scss";
 
 /**
@@ -32,14 +31,13 @@ export interface IModelCardState {
  * Card representing a single IModel
  * @public
  */
-export class IModelCard extends React.Component<
-  IModelCardProps,
-  IModelCardState
-> {
+export class IModelCard extends React.Component<IModelCardProps, IModelCardState> {
   private _isMounted = false;
+  private _iModelInfoService: IModelInfoService;
 
   constructor(props: IModelCardProps, context?: any) {
     super(props, context);
+    this._iModelInfoService = new IModelInfoService();
     this.state = { waitingForThumbnail: false, showOptions: false };
   }
 
@@ -63,7 +61,7 @@ export class IModelCard extends React.Component<
   // retrieves the IModels for a Project. Called when first mounted and when a new Project is selected.
   private async startRetrieveThumbnail(thisIModel: IModelInfo) {
     this.setState({ waitingForThumbnail: true });
-    thisIModel.thumbnail = await UiFramework.iModelServices.getThumbnail(
+    thisIModel.thumbnail = await this._iModelInfoService.getThumbnail(
       thisIModel.projectInfo.wsgId,
       thisIModel.wsgId
     );

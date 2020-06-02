@@ -1,10 +1,10 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import classnames from "classnames";
-import { ProjectInfo } from "@bentley/ui-framework";
+import { ProjectInfo } from "../api/ProjectInfoService";
 import { ProjectDialog } from "./ProjectDialog";
 import { Popup } from "@bentley/ui-core";
 import { RelativePosition } from "@bentley/ui-abstract";
@@ -35,10 +35,7 @@ export interface ProjectDropdownState {
  * List of projects in a dropdown
  * @public
  */
-export class ProjectDropdown extends React.Component<
-  ProjectDropdownProps,
-  ProjectDropdownState
-> {
+export class ProjectDropdown extends React.Component<ProjectDropdownProps, ProjectDropdownState> {
   private _itemHeight: number = 3.25; // each item (project) height is (n-em) in the dropdown
   private _target: HTMLElement | null = null;
 

@@ -23,20 +23,16 @@ this.reactElement = (
 
 ```ts
 import * as React from "react";
-import { CoreTools, ContentGroup, ContentControl, ConfigurableCreateInfo, FrontstageProvider, FrontstageProps, Frontstage, IModelInfo, UiFramework } from "@bentley/ui-framework";
-import { IModelSelector } from "@bentley/imodel-select-react";
-import { remote } from "electron";
+import { ConfigurableCreateInfo, ContentControl, ContentGroup, ContentLayoutDef, CoreTools, Frontstage,
+  FrontstageProps, FrontstageProvider, UiFramework,
+} from "@bentley/ui-framework";
+import { IModelInfo, IModelSelector } from "@bentley/imodel-select-react";
 
 class IModelSelectorControl extends ContentControl {
   constructor(info: ConfigurableCreateInfo, options: any) {
     super(info, options);
 
-    this.reactElement = (
-      <IModelSelector
-        onIModelSelected={this._onSelectIModel}
-        showSignoutButton={true}
-      />
-    );
+    this.reactNode = <IModelSelector onIModelSelected={this._onSelectIModel} showSignoutButton={true} showBackstageButton={true} />;
   }
 
   // called when an imodel has been selected on the IModelSelect
@@ -107,8 +103,8 @@ this.reactElement = (
 ```ts
 import * as React from "react";
 import { remote } from "electron";
-import { CoreTools, ContentGroup, ContentControl, ConfigurableCreateInfo, FrontstageProvider, FrontstageProps, Frontstage, ProjectInfo, UiFramework } from @bentley/ui-framework";
-import { ProjectSelector } from "@bentley/imodel-select-react";
+import { CoreTools, ContentGroup, ContentControl, ConfigurableCreateInfo, FrontstageProvider, FrontstageProps, Frontstage, UiFramework } from @bentley/ui-framework";
+import { ProjectInfo, ProjectSelector } from "@bentley/imodel-select-react";
 
 class ProjectSelectorControl extends ContentControl {
   constructor(info: ConfigurableCreateInfo, options: any) {
