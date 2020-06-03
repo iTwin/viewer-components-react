@@ -121,7 +121,7 @@ export class ProjectTabs extends React.Component<TabsProps, TabsState> {
 
   public render() {
     return (
-      <div className="tabs">
+      <div className="imodel-select-project-tabs">
         <nav>
           <ul>
             {this.renderChildren()}

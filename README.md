@@ -10,7 +10,7 @@ List of packages within this repository:
 
 | Name | Folder |
 | ---- | ------ |
-| @bentley\imodel-select-react | packages\imodel-select |
+| @bentley/imodel-select-react | packages/imodel-select |
 | | |
 
 ## Adding a new "project"

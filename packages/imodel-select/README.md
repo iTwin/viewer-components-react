@@ -2,7 +2,7 @@
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 
-The imodel-select-react provides React components to select an iModel or a project on iModelHub.
+The imodel-select-react provides React components to select an iModel or a Project on iModelHub.
 
 ## Sample deployments
 
@@ -37,7 +37,10 @@ class IModelSelectorControl extends ContentControl {
 
   // called when an imodel has been selected on the IModelSelect
   private _onSelectIModel = async (iModelInfo: IModelInfo) => {
-    const accessToken = UiFramework.getAccessToken();
+    let accessToken: AccessToken;
+    if (IModelApp.authorizationClient && IModelApp.authorizationClient.hasSignedIn)
+      accessToken = await IModelApp.authorizationClient.getAccessToken();
+
     const jsonData = {
       token: accessToken,
       project: iModelInfo.projectInfo.wsgId,
@@ -103,7 +106,7 @@ this.reactElement = (
 ```ts
 import * as React from "react";
 import { remote } from "electron";
-import { CoreTools, ContentGroup, ContentControl, ConfigurableCreateInfo, FrontstageProvider, FrontstageProps, Frontstage, UiFramework } from @bentley/ui-framework";
+import { CoreTools, ContentGroup, ContentControl, ConfigurableCreateInfo, FrontstageProvider, FrontstageProps, Frontstage, UiFramework } from "@bentley/ui-framework";
 import { ProjectInfo, ProjectSelector } from "@bentley/imodel-select-react";
 
 class ProjectSelectorControl extends ContentControl {
@@ -121,7 +124,10 @@ class ProjectSelectorControl extends ContentControl {
 
   // called when a project has been selected
   private _onSelectProject = async (projectInfo: ProjectInfo) => {
-    const accessToken = UiFramework.getAccessToken();
+    let accessToken: AccessToken;
+    if (IModelApp.authorizationClient && IModelApp.authorizationClient.hasSignedIn)
+      accessToken = await IModelApp.authorizationClient.getAccessToken();
+
     const jsonData = {
       token: accessToken,
       project: projectInfo.wsgId,

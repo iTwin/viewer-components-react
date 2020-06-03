@@ -22,15 +22,6 @@ export interface IModelInfo {
 }
 
 /**
- * Implementation of IModelInfo interface
- * @public
- */
-class IModelInfoImpl implements IModelInfo {
-  constructor(public name: string, public description: string, public wsgId: string, public createdDate: Date, public projectInfo: ProjectInfo, public status: string = "", public thumbnail: string | undefined) {
-  }
-}
-
-/**
  * IModelInfoService queries iModelHub for list of iModels
  * @public
  */
@@ -74,8 +65,16 @@ export class IModelInfoService {
   }
 
   private createIModelInfo(thisIModel: HubIModel, thisProjectInfo: ProjectInfo): IModelInfo {
-    const createDate: Date = new Date(thisIModel.createdDate!);
-    const thisIModelInfo: IModelInfo = new IModelInfoImpl(thisIModel.name!, thisIModel.description!, thisIModel.wsgId, createDate, thisProjectInfo, "", thisIModel.thumbnail);
+    const createdDate: Date = new Date(thisIModel.createdDate!);
+    const thisIModelInfo: IModelInfo = {
+      name: thisIModel.name!,
+      description: thisIModel.description!,
+      wsgId: thisIModel.wsgId,
+      createdDate,
+      projectInfo: thisProjectInfo,
+      status: "",
+      thumbnail: thisIModel.thumbnail
+    };
     return thisIModelInfo;
   }
 }

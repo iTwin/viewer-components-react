@@ -21,9 +21,7 @@ export class IModelSelect {
    */
   public static async initialize(i18n: I18N): Promise<void> {
     IModelSelect._i18n = i18n;
-    await IModelSelect._i18n.registerNamespace(IModelSelect.i18nNamespace)
-      .readFinished;
-    return Promise.resolve();
+    return IModelSelect._i18n.registerNamespace(IModelSelect.i18nNamespace).readFinished;
   }
 
   /** Unregisters the IModelSelect internationalization service namespace */

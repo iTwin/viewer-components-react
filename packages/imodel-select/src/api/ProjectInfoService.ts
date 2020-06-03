@@ -17,16 +17,6 @@ export interface ProjectInfo {
 }
 
 /**
- * Implementation of ProjectInfo interface
- * @public
- */
-class ProjectInfoImpl implements ProjectInfo {
-
-  constructor(public name: string, public projectNumber: string, public wsgId: string) {
-  }
-}
-
-/**
  * ProjectInfoService queries iModelHub for list of projects
  * @public
  */
@@ -73,7 +63,11 @@ export class ProjectInfoService {
   }
 
   private createProjectInfo(thisProject: Project): ProjectInfo {
-    const thisProjectInfo: ProjectInfo = new ProjectInfoImpl(thisProject.name ? thisProject.name : "", thisProject.number ? thisProject.number : "", thisProject.wsgId);
+    const thisProjectInfo: ProjectInfo = {
+      name: thisProject.name ? thisProject.name : "",
+      projectNumber: thisProject.number ? thisProject.number : "",
+      wsgId: thisProject.wsgId
+    };
     return thisProjectInfo;
   }
 }

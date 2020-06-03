@@ -8,7 +8,7 @@
 /* Tab bar */
 /*****************************/
 
-.tabs {
+.imodel-select-project-tabs {
 	position: relative;
 	overflow: hidden;
 	width: 100%;
@@ -16,11 +16,11 @@
   font-size: $uicore-font-size-leading;
 }
 
-.tabs nav {
+.imodel-select-project-tabs nav {
   text-align: center;
 }
 
-.tabs nav ul {
+.imodel-select-project-tabs nav ul {
   display: flex;
   list-style: none;
   justify-content: center;
@@ -28,19 +28,19 @@
   padding: 0;
 }
 
-.tabs nav ul li {
+.imodel-select-project-tabs nav ul li {
   flex: 1;
 	position: relative;
 	display: block;
 	cursor: pointer;
 }
 
-.tabs nav ul li.tab-active {
+.imodel-select-project-tabs nav ul li.tab-active {
   color: $uicore-blue;
   font-weight: 700;
 }
 
-.tabs nav a {
+.imodel-select-project-tabs nav a {
   position: relative;
   display: block;
   padding: 1em 0;
@@ -51,19 +51,19 @@
 	transition: color 0.3s;
 }
 
-.tabs nav a:hover {
+.imodel-select-project-tabs nav a:hover {
   color: $uicore-gray-4;
 }
 
-.tabs nav a:focus {
+.imodel-select-project-tabs nav a:focus {
 	outline: none;
 }
 
-.tabs nav ul li .icon {
+.imodel-select-project-tabs nav ul li .icon {
   margin-right: .4em;
 }
 
-.tabs nav li:last-child::before {
+.imodel-select-project-tabs nav li:last-child::before {
 	position: absolute;
 	bottom: 0;
 	left: 0;
@@ -76,17 +76,17 @@
 }
 
 /* Move the line */
-.tabs nav li:first-child.tab-active ~ li:last-child::before {
+.imodel-select-project-tabs nav li:first-child.tab-active ~ li:last-child::before {
 	-webkit-transform: translate3d(-300%,0,0);
 	transform: translate3d(-300%,0,0);
 }
 
-.tabs nav li:nth-child(2).tab-active ~ li:last-child::before {
+.imodel-select-project-tabs nav li:nth-child(2).tab-active ~ li:last-child::before {
 	-webkit-transform: translate3d(-200%,0,0);
 	transform: translate3d(-200%,0,0);
 }
 
-.tabs nav li:nth-child(3).tab-active ~ li:last-child::before {
+.imodel-select-project-tabs nav li:nth-child(3).tab-active ~ li:last-child::before {
 	-webkit-transform: translate3d(-100%,0,0);
 	transform: translate3d(-100%,0,0);
 }

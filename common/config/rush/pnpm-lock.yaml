@@ -1,6 +1,7 @@
 dependencies:
   '@bentley/bentleyjs-core': 2.1.0
   '@bentley/build-tools': 2.1.0
+  '@bentley/context-registry-client': 2.1.0_e10ec19da8b1df23caa6cf3268e38b8f
   '@bentley/frontend-authorization-client': 2.1.0_e10ec19da8b1df23caa6cf3268e38b8f
   '@bentley/geometry-core': 2.1.0_@bentley+bentleyjs-core@2.1.0
   '@bentley/imodelhub-client': 2.1.0_41cdc03fb78963e0e0c0d35d03922f3b
@@ -14376,6 +14377,7 @@ packages:
     dependencies:
       '@bentley/bentleyjs-core': 2.1.0
       '@bentley/build-tools': 2.1.0
+      '@bentley/context-registry-client': 2.1.0_e10ec19da8b1df23caa6cf3268e38b8f
       '@bentley/frontend-authorization-client': 2.1.0_e10ec19da8b1df23caa6cf3268e38b8f
       '@bentley/geometry-core': 2.1.0_@bentley+bentleyjs-core@2.1.0
       '@bentley/imodelhub-client': 2.1.0_41cdc03fb78963e0e0c0d35d03922f3b
@@ -14414,18 +14416,20 @@ packages:
     dev: false
     name: '@rush-temp/imodel-select-react'
     resolution:
-      integrity: sha512-t39Bgdi8vlt9CMxwehvEw6+DXlxFDK7ZVTAnSztEVB82+sKgvUnBGPrnvE+ll4UZXhGgfOzrhOPmGFBmpPsq4g==
+      integrity: sha512-Xqcq+odGGaRbgYz2tqtKOgRI8pmq1HCHGvIZGv3XiBm4Agay7kGJKfd2KDV6JvqLCCCqDJowaqHxnorLV6R1aQ==
       tarball: 'file:projects/imodel-select-react.tgz'
     version: 0.0.0
+registry: ''
 specifiers:
-  '@bentley/bentleyjs-core': ^2.0.0
-  '@bentley/build-tools': ^2.0.0
-  '@bentley/frontend-authorization-client': ^2.0.0
+  '@bentley/bentleyjs-core': ^2.1.0
+  '@bentley/build-tools': ^2.1.0
+  '@bentley/context-registry-client': ^2.1.0
+  '@bentley/frontend-authorization-client': ^2.1.0
   '@bentley/geometry-core': ^2.0.0
-  '@bentley/imodelhub-client': ^2.0.0
+  '@bentley/imodelhub-client': ^2.1.0
   '@bentley/imodeljs-common': ^2.0.0
-  '@bentley/imodeljs-frontend': ^2.0.0
-  '@bentley/imodeljs-i18n': ^2.0.0
+  '@bentley/imodeljs-frontend': ^2.1.0
+  '@bentley/imodeljs-i18n': ^2.1.0
   '@bentley/imodeljs-markup': ^2.0.0
   '@bentley/imodeljs-quantity': ^2.0.0
   '@bentley/itwin-client': ^2.0.0
@@ -14434,10 +14438,10 @@ specifiers:
   '@bentley/presentation-frontend': ^2.0.0
   '@bentley/product-settings-client': ^2.0.0
   '@bentley/react-scripts': 3.4.1
-  '@bentley/ui-abstract': ^2.0.0
+  '@bentley/ui-abstract': ^2.1.0
   '@bentley/ui-components': ^2.0.0
-  '@bentley/ui-core': ^2.0.0
-  '@bentley/ui-framework': ^2.0.0
+  '@bentley/ui-core': ^2.1.0
+  '@bentley/ui-framework': ^2.1.0
   '@bentley/ui-ninezone': ^2.0.0
   '@bentley/webgl-compatibility': ^2.0.0
   '@rush-temp/imodel-select-react': 'file:./projects/imodel-select-react.tgz'
