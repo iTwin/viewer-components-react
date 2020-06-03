@@ -90,7 +90,6 @@ export class IModelList extends React.Component<IModelListProps, IModelListState
 
   private renderIModel(iModelInfo: IModelInfo) {
     const size = Math.floor(Math.random() * 100).toString() + " MB";
-    // const checked = Math.random() > .5;
     return (
       <tr key={iModelInfo.wsgId}>
         <td onClick={this._onIModelClick.bind(this, iModelInfo)}>
