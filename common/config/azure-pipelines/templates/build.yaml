@@ -1,12 +1,19 @@
 # Handles all of the core build functionality
 
 steps:
+  - task: NodeTool@0
+    displayName: "Use Node $(NodeVersion).x"
+    inputs:
+      versionSpec: "$(NodeVersion).x"
+      checkLatest: true
   - script: 'git config --local user.email imodeljsbot@users.noreply.github.com'
     displayName: 'git config email'
   - script: 'git config --local user.name iModeljsBot'
     displayName: 'git config name'
   - script: node common/scripts/install-run-rush.js check
     displayName: rush check
+  - script: 'node common/scripts/install-run-rush.js change --verify'
+    displayName: 'rush change --verify'
   - script: node common/scripts/install-run-rush.js install
     displayName: rush install
   - script: node common/scripts/install-run-rush.js change -v

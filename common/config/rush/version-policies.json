@@ -1,7 +1,7 @@
 [
   {
-    "policyName": "",
+    "policyName": "imodel-select",
     "definitionName": "individualVersion",
-    "lockedMajor": 1
+    "lockedMajor": 2
   }
 ]

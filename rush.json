@@ -17,7 +17,8 @@
   "projects": [
     {
       "packageName": "@bentley/imodel-select-react",
-      "projectFolder": "packages/imodel-select"
+      "projectFolder": "packages/imodel-select",
+      "versionPolicyName": "imodel-select"
     }
   ]
 }

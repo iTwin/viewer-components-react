@@ -1,0 +1,6 @@
+pool:
+  vmImage: 'ubuntu-latest'
+variables:
+  NodeVersion: 12
+steps:
+  - template: templates/build-publish.yaml
