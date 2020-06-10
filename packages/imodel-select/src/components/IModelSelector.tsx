@@ -7,7 +7,7 @@ import classnames from "classnames";
 import { IModelApp } from "@bentley/imodeljs-frontend";
 import { ProjectInfo, ProjectInfoService } from "../api/ProjectInfoService";
 import { IModelInfo, IModelInfoService } from "../api/IModelInfoService";
-import { ProjectScope, Backstage } from "@bentley/ui-framework";
+import { BackstageManager, ProjectScope } from "@bentley/ui-framework";
 import { ClientRequestContext } from "@bentley/bentleyjs-core";
 import { FrontendAuthorizationClient } from "@bentley/frontend-authorization-client";
 import { Button, ButtonSize, ButtonType } from "@bentley/ui-core";
@@ -155,7 +155,7 @@ export class IModelSelector extends React.Component<IModelSelectorProps, IModelS
             <div className="backstage-icon">
               <span
                 className="icon icon-home"
-                onPointerUp={() => Backstage.backstageToggleCommand.execute()}
+                onPointerUp={() => BackstageManager.getBackstageToggleCommand().execute()}
               />
               {this.props.showSignoutButton && (
                 <div>
