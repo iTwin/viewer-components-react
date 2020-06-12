@@ -100,8 +100,8 @@ export class IModelSelector extends React.Component<IModelSelectorProps, IModelS
   // retrieves the IModels for a Project. Called when first mounted and when a new Project is selected.
   private async startRetrieveIModels(project: ProjectInfo) {
     if (!this._isMounted)
-    return;
-    
+      return;
+
     this.setState(
       Object.assign({}, this.state, {
         prompt: IModelSelect.translate("fechingModelInfo"),
