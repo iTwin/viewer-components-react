@@ -1,0 +1,17 @@
+{
+  "name": "@bentley/imodel-select-react",
+  "entries": [
+    {
+      "version": "2.0.1",
+      "tag": "@bentley/imodel-select-react_v2.0.1",
+      "date": "Mon, 15 Jun 2020 22:34:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Protect against call to setState after unmount"
+          }
+        ]
+      }
+    }
+  ]
+}
