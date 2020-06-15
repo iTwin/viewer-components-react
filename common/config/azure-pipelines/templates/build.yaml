@@ -6,9 +6,9 @@ steps:
     inputs:
       versionSpec: "$(NodeVersion).x"
       checkLatest: true
-  - script: 'git config --local user.email imodeljsbot@users.noreply.github.com'
+  - script: 'git config --local user.email 38288322+imodeljs-admin@users.noreply.github.com'
     displayName: 'git config email'
-  - script: 'git config --local user.name iModeljsBot'
+  - script: 'git config --local user.name imodeljs-admin'
     displayName: 'git config name'
   - script: node common/scripts/install-run-rush.js check
     displayName: rush check
