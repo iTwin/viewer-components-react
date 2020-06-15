@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-select-react",
+      "comment": "Protect against call to setState after unmount",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/imodel-select-react",
+  "email": "48260215+wilmaier@users.noreply.github.com"
+}
