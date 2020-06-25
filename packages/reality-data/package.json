@@ -1,7 +1,7 @@
 {
   "name": "@bentley/reality-data-react",
   "version": "1.0.0",
-  "description": "iModel Select React",
+  "description": "Reality Data React",
   "license": "MIT",
   "main": "lib/reality-data-react.js",
   "typings": "lib/reality-data-react",

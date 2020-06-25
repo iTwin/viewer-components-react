@@ -1,10 +1,10 @@
-import "./Widget.scss";
-import classnames from "classnames";
-import memoize from "memoize-one";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
  *--------------------------------------------------------------------------------------------*/
+import "./Widget.scss";
+import classnames from "classnames";
+import memoize from "memoize-one";
 import * as React from "react";
 import Highlighter from "react-highlight-words";
 import {

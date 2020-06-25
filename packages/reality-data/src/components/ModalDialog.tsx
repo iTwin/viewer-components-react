@@ -1,9 +1,9 @@
-import "./ModalDialog.scss";
-import classnames from "classnames";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
  *--------------------------------------------------------------------------------------------*/
+import "./ModalDialog.scss";
+import classnames from "classnames";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Button } from "@bentley/ui-core";

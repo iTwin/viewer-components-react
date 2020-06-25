@@ -1,8 +1,8 @@
-import "./CreateClassificationDialog.scss";
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
  *--------------------------------------------------------------------------------------------*/
+import "./CreateClassificationDialog.scss";
 import * as React from "react";
 import {
   ModelProps,
