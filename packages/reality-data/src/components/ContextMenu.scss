@@ -1,0 +1,81 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
+* Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+*--------------------------------------------------------------------------------------------*/
+
+@import "./Widget.scss";
+@import "~@bentley/ui-core/lib/ui-core/index";
+@import "~@bentley/ui-core/lib/ui-core/style/themecolors";
+
+.reality-data-context-menu {
+  cursor: default;
+  box-sizing: border-box;
+  z-index: 100;
+  background: $buic-background-1;
+  border-radius: 3px;
+  max-width: 250px;
+
+  > ul {
+    margin: 0;
+    padding: 6px 0;
+    list-style: none;
+
+    > .separator {
+      padding: 0.5em 0;
+      position: relative;
+
+      &:before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: $uicore-s;
+        right: $uicore-xs;
+        width: auto;
+        height: 1px;
+        background: $buic-background-3; //XXX: test this value in UI
+        transform: translateY(-50%);
+      }
+    }
+  }
+}
+
+.reality-data-context-menu-item {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0.3em 0;
+  color: $buic-foreground-body;
+  font-size: $uicore-font-size;
+  position: relative;
+  user-select: none;
+
+  > .user-icon,
+  > .icon-checkmark {
+    position: absolute;
+    left: 10px;
+  }
+
+  // text
+  > span:last-child {
+    padding-left: 32px;
+    padding-right: 1em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  &:hover:not(.disabled) {
+    background: rgba($buic-foreground-primary-rgb, 0.1);
+    color: rgba($buic-foreground-body-rgb, 1);
+    cursor: pointer;
+  }
+
+  &.disabled {
+    color: rgba($buic-foreground-body-rgb, 0.25);
+    cursor: default;
+  }
+
+  > .icon-checkmark {
+    color: $buic-foreground-primary;
+  }
+}

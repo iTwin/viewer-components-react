@@ -8,10 +8,11 @@ With the repository containing many different packages related to iModel.js, eac
 
 List of packages within this repository:
 
-| Name | Folder |
-| ---- | ------ |
+| Name                         | Folder                 |
+| ---------------------------- | ---------------------- |
 | @bentley/imodel-select-react | packages/imodel-select |
-| | |
+| @bentley/reality-data-react  | packages/reality-data  |
+|                              |                        |
 
 ## Adding a new "project"
 

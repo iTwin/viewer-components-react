@@ -1,0 +1,24 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+*--------------------------------------------------------------------------------------------*/
+@import "~@bentley/ui-core/lib/ui-core/index";
+
+.reality-data-classification-dialog {
+  display: grid;
+  column-gap: 12px;
+  row-gap: 8px;
+  padding: 8px;
+  grid-template-columns: 1fr 2fr;
+  align-items: center;
+  color: $buic-foreground-body;
+  font-size: $uicore-font-size;
+
+  .classifier-checkbox {
+    padding-top: 4px;
+  }
+
+  .classifier-label {
+    text-align: right;
+  }
+}

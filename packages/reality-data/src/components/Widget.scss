@@ -1,0 +1,131 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+*--------------------------------------------------------------------------------------------*/
+@import "~@bentley/ui-core/lib/ui-core/index";
+@import "~@bentley/ui-core/lib/ui-core/style/colors";
+@import "~@bentley/ui-core/lib/ui-core/style/themecolors";
+@import "~@bentley/ui-ninezone/lib/ui-ninezone/_scrollbar";
+
+[data-theme="light"] {
+  --buic-foreground-primary-rgb: 000, 139, 225;
+}
+[data-theme="dark"] {
+  --buic-foreground-primary-rgb: 165, 215, 245;
+}
+$buic-foreground-body-rgb: var(--buic-foreground-body-rgb);
+$buic-foreground-primary-rgb: var(--buic-foreground-primary-rgb);
+
+.reality-data-widget {
+  height: 100%;
+  position: relative;
+
+  .core-ls {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .reality-data-empty-msg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-style: italic;
+  }
+
+  .reality-data-viewer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .reality-data-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 5px;
+
+      .icon {
+        color: $buic-foreground-body;
+
+        &:hover {
+          color: rgba($buic-foreground-body-rgb, 1);
+        }
+      }
+
+      .reality-data-header-buttons .icon {
+        font-size: $uicore-font-size;
+
+        &:hover {
+          color: rgba($buic-foreground-body-rgb, 1);
+          cursor: pointer;
+        }
+
+        &:not(:first-child) {
+          margin-left: 9px;
+        }
+      }
+
+      .options {
+        padding: $uicore-xs;
+      }
+
+      .search-wrapper {
+        margin-left: 6px;
+        position: relative;
+        transition: all 0.5s ease;
+      }
+
+      .core-searchbox {
+        display: flex;
+        width: 100%;
+        overflow: hidden;
+        transition: width 0.5s ease;
+        input {
+          transition: opacity 0.5s ease;
+          width: 100%;
+          font-size: 0;
+          opacity: 0;
+        }
+        .icon-search {
+          color: $buic-foreground-body;
+          &:hover {
+            color: rgba($buic-foreground-body-rgb, 1);
+          }
+        }
+      }
+
+      &.show-search .core-searchbox input {
+        width: 100%;
+        opacity: 1;
+        font-size: inherit;
+      }
+    }
+
+    .core-searchbox {
+      align-self: center;
+      margin: 0;
+      transition: all 0.5s ease;
+    }
+
+    .reality-data-content {
+      @include nz-scrollbar($color: $buic-background-4);
+      flex: 1;
+      overflow-y: auto;
+      width: 98%;
+      align-self: center;
+      margin-bottom: 10px;
+      background-color: $buic-background-1;
+      border: 1px solid $buic-background-4;
+
+      .reality-data-list {
+        margin: 0px;
+        padding: 0px;
+        list-style: none;
+        font-size: 14px;
+        overflow: hidden;
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+*--------------------------------------------------------------------------------------------*/
+@import "~@bentley/ui-core/lib/ui-core/index";
+
+.reality-data-settings-content {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  width: 380px;
+
+  .basic,
+  .enhanced {
+    > label {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 12px;
+      align-items: center;
+      > p {
+        justify-self: left;
+      }
+      > :not(p) {
+        justify-self: right;
+      }
+    }
+  }
+
+  .depth-toggle {
+    height: 24px;
+  }
+
+  .basic {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .enhanced {
+    display: grid;
+    row-gap: 8px;
+    grid-auto-rows: auto;
+  }
+}

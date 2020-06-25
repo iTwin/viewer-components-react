@@ -3,5 +3,10 @@
     "policyName": "imodel-select",
     "definitionName": "individualVersion",
     "lockedMajor": 2
+  },
+  {
+    "policyName": "reality-data",
+    "definitionName": "individualVersion",
+    "lockedMajor": 1
   }
 ]

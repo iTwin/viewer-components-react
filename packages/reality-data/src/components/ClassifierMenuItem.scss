@@ -1,0 +1,75 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
+* Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+*--------------------------------------------------------------------------------------------*/
+@import "~@bentley/ui-core/lib/ui-core/index";
+@import "~@bentley/ui-core/lib/ui-core/style/themecolors";
+@import "./Widget.scss";
+
+.reality-data-classifier-menu-item {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0.3em 0;
+  color: $buic-foreground-body;
+  font-size: $uicore-font-size;
+  position: relative;
+  user-select: none;
+  min-width: 200px;
+
+  > .user-icon,
+  > .icon-checkmark {
+    position: absolute;
+    left: 10px;
+  }
+
+  // text
+  > .menu-label {
+    padding-left: 32px;
+    padding-right: 1em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  > .icon-edit,
+  > .icon-delete {
+    color: $buic-foreground-body;
+    font-size: 12px;
+    visibility: hidden;
+    padding: 4px;
+
+    &:hover {
+      background: $buic-background-2;
+    }
+  }
+
+  > .icon-edit {
+    margin-left: auto;
+  }
+
+  > .icon-delete {
+    margin-left: 4px;
+    margin-right: 4px;
+  }
+
+  &:hover:not(.disabled) {
+    background: rgba($buic-foreground-primary-rgb, 0.1);
+    color: rgba($buic-foreground-body-rgb, 1);
+    cursor: pointer;
+  }
+
+  &:hover .icon-edit,
+  &:hover .icon-delete {
+    visibility: visible;
+  }
+
+  &.disabled {
+    color: rgba($buic-foreground-body-rgb, 0.25);
+    cursor: default;
+  }
+
+  > .icon-checkmark {
+    color: $buic-foreground-primary;
+  }
+}

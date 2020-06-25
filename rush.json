@@ -6,9 +6,7 @@
   "projectFolderMinDepth": 2,
   "projectFolderMaxDepth": 3,
   "gitPolicy": {
-    "allowedEmailRegExps": [
-      "[^@]+@users\\.noreply\\.github\\.com"
-    ],
+    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
   "repository": {
@@ -19,6 +17,11 @@
       "packageName": "@bentley/imodel-select-react",
       "projectFolder": "packages/imodel-select",
       "versionPolicyName": "imodel-select"
+    },
+    {
+      "packageName": "@bentley/reality-data-react",
+      "projectFolder": "packages/reality-data",
+      "versionPolicyName": "reality-data"
     }
   ]
 }
