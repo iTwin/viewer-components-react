@@ -30,4 +30,8 @@
   background-color: $buic-background-1;
   border-radius: 11px;
   padding: 22px;
+  color: $buic-text-color;
+  button:first-child {
+    margin-right: 5px;
+  }
 }
