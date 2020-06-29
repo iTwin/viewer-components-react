@@ -49,9 +49,7 @@ For incremental builds, the `rush build` command can be used to only build packa
 8. Commit the changelog JSON files.
 9. Publish changes on the branch and open a pull request.
 
-If using the command line, steps 5 through 7 above can be completed in one step by running `rushchange.bat` from the imodeljs-core root directory.
-
-> Note: The CI build will break if changes are pushed without running `rush change` and `rush extract-api` (if the API was changed). The fix will be to complete steps 5 through 10.
+> Note: The CI build will break if changes are pushed without running `rush change`. The fix will be to complete steps 5 through 9.
 
 Here is a sample [changelog](https://github.com/Microsoft/web-build-tools/blob/master/apps/rush/CHANGELOG.md) to demonstrate the level of detail expected.
 
@@ -66,5 +64,4 @@ Note that the packages are published by CI builds only.
 Use these instructions to update dependencies and devDependencies on external packages (ones that live outside of this monorepo).
 
 1. Edit the appropriate `package.json` file to update the semantic version range
-2. Run `rush check` to make sure that you are specifying consistent versions across the repository
-3. Run `rush update` to make sure the newer version of the module specified in #1 is installed
+2. Run `rush update` to make sure the newer version of the module specified in #1 is installed
