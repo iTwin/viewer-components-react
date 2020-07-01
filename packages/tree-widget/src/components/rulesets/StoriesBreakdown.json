@@ -1,0 +1,63 @@
+{
+  "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+  "id": "StoreysAndRooms",
+  "rules": [
+    {
+      "ruleType": "RootNodes",
+      "specifications": [
+        {
+          "specType": "InstanceNodesOfSpecificClasses",
+          "classes": [
+            {
+              "schemaName": "BuildingSpatial",
+              "classNames": [
+                "Story"
+              ]
+            }
+          ],
+          "arePolymorphic": true,
+          "relatedInstances": [
+            {
+              "relationshipPath": {
+                "relationship": {
+                  "schemaName": "BisCore",
+                  "className": "ModelContainsElements"
+                },
+                "direction": "Backward"
+              },
+              "isRequired": true,
+              "alias": "model"
+            }
+          ],
+          "instanceFilter": "NOT model.IsPrivate AND this.HasRelatedInstance(\"SpatialComposition:CompositeComposesSubComposites\", \"Forward\", \"BuildingSpatial:Space\")",
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"Story\", \"BuildingSpatial\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "SpatialComposition",
+                "className": "CompositeComposesSubComposites"
+              },
+              "direction": "Forward",
+              "targetClass": {
+                "schemaName": "BuildingSpatial",
+                "className": "Space"
+              }
+            }
+          ],
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    }
+  ]
+}

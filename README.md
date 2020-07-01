@@ -11,6 +11,7 @@ List of packages within this repository:
 | Name                         | Folder                 |
 | ---------------------------- | ---------------------- |
 | @bentley/imodel-select-react | packages/imodel-select |
+| @bentley/tree-widget-react   | packages/tree-widget   |
 |                              |                        |
 
 ## Adding a new "project"

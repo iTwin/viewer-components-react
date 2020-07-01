@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Added in tree-widget package",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "zjzoltek@users.noreply.github.com"
+}
