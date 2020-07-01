@@ -4,6 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 @import "@bentley/ui-core/lib/ui-core/style/index";
 
+$border-color: $buic-foreground-disabled;
+$imodel-select-text-color: $buic-foreground-body;
+
 /*****************************/
 /* Tab bar */
 /*****************************/
@@ -12,7 +15,7 @@
 	position: relative;
 	overflow: hidden;
 	width: 100%;
-  color: $uicore-text-color;
+  color: $imodel-select-text-color;
   font-size: $uicore-font-size-leading;
 }
 
@@ -37,7 +40,11 @@
 
 .imodel-select-project-tabs nav ul li.tab-active {
   color: $uicore-blue;
-  font-weight: 700;
+	font-weight: 700;
+
+	&a:hover {
+		color: $imodel-select-text-color;
+	}
 }
 
 .imodel-select-project-tabs nav a {
@@ -52,7 +59,7 @@
 }
 
 .imodel-select-project-tabs nav a:hover {
-  color: $uicore-gray-4;
+	background-color: $buic-row-selection
 }
 
 .imodel-select-project-tabs nav a:focus {

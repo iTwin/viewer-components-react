@@ -4,7 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 @import "@bentley/ui-core/lib/ui-core/index";
 
-$separator-background: #F0F0F0;
+$card-background: $buic-background-window;
+$border-color: $buic-foreground-disabled;
+$text-color: $buic-foreground-body;
+$separator-background: $buic-foreground-disabled;
+$hovered-label-color: $buic-foreground-primary;
+
 $pp-highlight-size: 4px;
 $pp-max-dropdown-width: 450px;
 
@@ -31,6 +36,7 @@ $pp-max-dropdown-width: 450px;
   height: 100%;
   display: flex;
   flex-direction: column;
+  border: 1px solid $border-color;
 
   &:after {
     position: absolute;
@@ -55,7 +61,6 @@ $pp-max-dropdown-width: 450px;
 .pp-content {
   flex: 1;
   padding: 0 .7em;
-  background: $uicore-blue-highlight;
   display: flex;
   align-items: center;
   outline: none;
@@ -63,7 +68,7 @@ $pp-max-dropdown-width: 450px;
 
   /* change text color on hover */
   &:hover {
-    color: $uicore-blue;
+    color: $hovered-label-color;
   }
 
   /* current project number & name */
@@ -113,12 +118,11 @@ $pp-max-dropdown-width: 450px;
 
 /* dropdown (list of projects) */
 .pp-dropdown {
-  color: #444;
-  background: #fff;
+  color: $text-color;
+  background: $card-background;
   min-width: 100%;
   width: 250px;
   max-width: $pp-max-dropdown-width;
-  padding-bottom: .75em;
 
   /* first part of the dropdown is a list */
   ul {
@@ -172,7 +176,7 @@ $pp-max-dropdown-width: 450px;
 
       /* hover */
       &:hover{
-        background-color: #eee;
+        background-color: $buic-foreground-disabled;
       }
     }
   }
@@ -204,7 +208,7 @@ $pp-max-dropdown-width: 450px;
   transition: background-color .3s ease;
 
   &:hover {
-    background-color: #eee;
+    background-color: $buic-foreground-disabled;
   }
 }
 
@@ -213,8 +217,3 @@ $pp-max-dropdown-width: 450px;
   font-size: 22px;
   margin-right: .75em;
 }
-
-/*
- .content:hover + .highlight, .highlight:hover {
-  background-color: $uicore-gray;}
-*/
