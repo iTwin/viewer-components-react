@@ -41,10 +41,6 @@ $imodel-select-text-color: $buic-foreground-body;
 .imodel-select-project-tabs nav ul li.tab-active {
   color: $uicore-blue;
 	font-weight: 700;
-
-	&a:hover {
-		color: $imodel-select-text-color;
-	}
 }
 
 .imodel-select-project-tabs nav a {
@@ -59,7 +55,8 @@ $imodel-select-text-color: $buic-foreground-body;
 }
 
 .imodel-select-project-tabs nav a:hover {
-	background-color: $buic-row-selection
+	background-color: $buic-row-selection;
+	color: $imodel-select-text-color;
 }
 
 .imodel-select-project-tabs nav a:focus {
