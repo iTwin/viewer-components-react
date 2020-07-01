@@ -10,8 +10,6 @@ steps:
     displayName: 'git config email'
   - script: 'git config --local user.name imodeljs-admin'
     displayName: 'git config name'
-  - script: node common/scripts/install-run-rush.js check
-    displayName: rush check
   - script: 'node common/scripts/install-run-rush.js change --verify'
     displayName: 'rush change --verify'
   - script: node common/scripts/install-run-rush.js install
