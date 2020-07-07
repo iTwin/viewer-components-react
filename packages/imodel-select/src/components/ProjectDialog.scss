@@ -4,6 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 @import "@bentley/ui-core/lib/ui-core/index";
 
+$border-color: $buic-foreground-disabled;
+$imodel-select-text-color: $buic-foreground-body;
+
 /* The Modal (background) */
 .imodel-select-modal-background {
   display: flex;
@@ -16,21 +19,22 @@
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  background-color: $buic-background-window;
 }
 
 /* dialog box */
 .imodel-select-projects {
-  background-color: #fefefe;
+  background-color: $buic-background-window;
+  color: $imodel-select-text-color;
   width: 850px;
   height: 500px;
-  border: 1px solid #888;
+  border: 3px solid $border-color;
   position: relative;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow:  $buic-inputs-boxshadow 0px 1px 1px inset;
 }
 
 /* header */
@@ -39,21 +43,19 @@
   padding: 1em;
   display: flex;
   align-items: center;
-  color: $uicore-text-color;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid $border-color;
+  background-color: $buic-background-table-header
 }
 
 /* title */
 .imodel-select-projects .header h3 {
   margin: 0;
-  color: $uicore-text-color;
 }
 
 /* close button */
 .imodel-select-projects .header .icon {
   margin-left: auto;
   font-size: 1em;
-  color: $uicore-icons-dark;
   cursor: pointer;
   -webkit-transition: color 0.3s;
 	transition: color 0.3s;
@@ -61,13 +63,12 @@
 
 /* close button hover */
 .imodel-select-projects .header .icon:hover {
-  color: #000;
+  color: $buic-foreground-primary-tone;
 }
 
 /* content */
 .imodel-select-projects .imodel-select-projects-content {
   height: 100%;
-  color: $uicore-gray;
   padding: .5em 1.5em 1.5em 1.5em;
   display: flex;
   flex-direction: column;
@@ -94,7 +95,7 @@
   border-collapse: collapse;
 
   th, td {
-    border-bottom: 1px solid $buic-background-control-stroke;
+    border-bottom: 1px solid $border-color;
     cursor: pointer;
   }
 
@@ -103,7 +104,6 @@
     text-align: left;
     padding: .75em;
     font-size: $uicore-font-size-leading;
-    color: dimgray;
     background: $buic-background-table-header;
   }
 
@@ -111,10 +111,9 @@
     text-align: left;
     padding: .75em;
     font-size: $uicore-font-size;
-    color: dimgray;
   }
 
-  tr:hover {background-color: #f5f5f5}
+  tr:hover {background-color: $buic-row-selection}
 }
 
 /* search box */
