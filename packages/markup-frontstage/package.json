@@ -1,0 +1,76 @@
+{
+  "name": "@bentley/markup-frontstage-react",
+  "version": "1.0.0",
+  "description": "Markup Frontstage React",
+  "license": "MIT",
+  "main": "lib/markup-frontstage-react.js",
+  "typings": "lib/markup-frontstage-react",
+  "scripts": {
+    "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
+    "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
+    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
+    "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
+    "clean": "rimraf lib build",
+    "lint": "tslint -p . 1>&2",
+    "test": "",
+    "cover": ""
+  },
+  "keywords": [
+    "Bentley",
+    "iModel Markup Frontstage React",
+    "iModel.js"
+  ],
+  "author": {
+    "name": "Bentley Systems, Inc.",
+    "url": "http://www.bentley.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imodeljs/viewer-components-react/packages/markup-frontstage"
+  },
+  "peerDependencies": {
+    "@bentley/bentleyjs-core": "^2.0.0",
+    "@bentley/imodeljs-common": "^2.0.0",
+    "@bentley/imodeljs-frontend": "^2.0.0",
+    "@bentley/imodeljs-i18n": "^2.0.0",
+    "@bentley/imodeljs-markup": "^2.0.0",
+    "@bentley/presentation-frontend": "^2.0.0",
+    "@bentley/ui-abstract": "^2.0.0",
+    "@bentley/ui-components": "^2.0.0",
+    "@bentley/ui-core": "^2.0.0",
+    "@bentley/ui-framework": "^2.0.0"
+  },
+  "devDependencies": {
+    "@bentley/bentleyjs-core": "^2.0.0",
+    "@bentley/build-tools": "^2.0.0",
+    "@bentley/imodeljs-common": "^2.0.0",
+    "@bentley/imodeljs-frontend": "^2.0.0",
+    "@bentley/imodeljs-i18n": "^2.0.0",
+    "@bentley/imodeljs-markup": "^2.0.0",
+    "@bentley/presentation-frontend": "^2.0.0",
+    "@bentley/react-scripts": "3.4.1",
+    "@bentley/ui-abstract": "^2.0.0",
+    "@bentley/ui-components": "^2.0.0",
+    "@bentley/ui-core": "^2.0.0",
+    "@bentley/ui-framework": "^2.0.0",
+    "@types/classnames": "^2.2.3",
+    "@types/i18next": "^8.4.2",
+    "@types/react": "~16.9.35",
+    "@types/react-dom": "^16.8.0",
+    "@types/react-redux": "^7.0.1",
+    "cpx": "^1.5.0",
+    "rimraf": "^3.0.2",
+    "tslint": "^5.11.0",
+    "typescript": "~3.7.4"
+  },
+  "dependencies": {
+    "@svgdotjs/svg.js": "^3.0.13",
+    "classnames": "^2.2.5",
+    "i18next": "^10.2.2",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.3",
+    "ts-jest": "^26.1.1"
+  }
+}
