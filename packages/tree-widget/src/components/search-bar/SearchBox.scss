@@ -83,4 +83,8 @@
       color: $buic-accessory-primary;
     }
   }
+
+  .searchbox-close-button {
+    z-index: 1000;
+  }
 }
