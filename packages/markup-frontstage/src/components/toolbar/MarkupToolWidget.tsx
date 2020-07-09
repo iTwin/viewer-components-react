@@ -12,7 +12,7 @@ import {
   ToolItemDef,
   ToolWidgetComposer,
 } from "@bentley/ui-framework";
-import * as React from "react";
+import React from "react";
 
 import styles from "./MarkupToolWidget.module.scss";
 import { MarkupFrontstage } from "../../MarkupFrontstage";

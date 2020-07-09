@@ -25,7 +25,7 @@ import {
   Widget,
   Zone,
 } from "@bentley/ui-framework";
-import * as React from "react";
+import React from "react";
 
 import { MarkupFrontstage } from "../../MarkupFrontstage";
 import MarkupSettingsPanel from "../toolbar/MarkupSettings";

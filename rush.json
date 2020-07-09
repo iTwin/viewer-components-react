@@ -22,7 +22,8 @@
     {
       "packageName": "@bentley/markup-frontstage-react",
       "projectFolder": "packages/markup-frontstage",
-      "versionPolicyName": "markup-frontstage"
+      "versionPolicyName": "markup-frontstage",
+      "skipRushCheck": true
     },
     {
       "packageName": "@bentley/tree-widget-react",

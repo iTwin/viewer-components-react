@@ -1,5 +1,5 @@
 import { ColorDef } from "@bentley/imodeljs-common";
-import { MarkupApp } from "@bentley/imodeljs-markup";
+import { MarkupApp, Markup } from "@bentley/imodeljs-markup";
 import {
   AlphaSlider,
   ColorPickerButton,
@@ -7,8 +7,7 @@ import {
 } from "@bentley/ui-components";
 import { Point } from "@bentley/ui-core";
 import { FrontstageManager, PositionPopup } from "@bentley/ui-framework";
-import { useEffect, useState } from "react";
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { Line, Marker, SVG } from "@svgdotjs/svg.js";
 
 import styles from "./MarkupSettings.module.scss";
@@ -104,19 +103,21 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
     const arrowMarkerId = "ArrowMarker" + length + "x" + width + "-" + color;
     let marker = SVG("#" + arrowMarkerId) as Marker;
     if (null === marker) {
-      marker = MarkupApp.markup
-        ?.svgMarkup!.marker(length, width)
-        .id(arrowMarkerId);
-      marker.polygon([0, 0, length, width * 0.5, 0, width]);
-      marker.attr("orient", "auto-start-reverse");
-      marker.attr("overflow", "visible"); // Don't clip the stroke that is being applied to allow the specified start/end to be used directly while hiding the arrow tail fully under the arrow head...
-      marker.attr("refX", length);
-      marker.css({
-        stroke: color,
-        fill: color,
-        "stroke-opacity": alphaValue,
-        "fill-opacity": alphaValue,
-      });
+      if (MarkupApp.markup) {
+        marker = MarkupApp.markup
+          ?.svgMarkup!.marker(length, width)
+          .id(arrowMarkerId);
+        marker.polygon([0, 0, length, width * 0.5, 0, width]);
+        marker.attr("orient", "auto-start-reverse");
+        marker.attr("overflow", "visible"); // Don't clip the stroke that is being applied to allow the specified start/end to be used directly while hiding the arrow tail fully under the arrow head...
+        marker.attr("refX", length);
+        marker.css({
+          stroke: color,
+          fill: color,
+          "stroke-opacity": alphaValue,
+          "fill-opacity": alphaValue,
+        });
+      }
     }
     return marker;
   };

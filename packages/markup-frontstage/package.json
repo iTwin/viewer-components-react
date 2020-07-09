@@ -8,11 +8,12 @@
   "scripts": {
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
-    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
-    "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
+    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize && npm run copy-css",
+    "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets && npm run copy-css",
     "clean": "rimraf lib build",
     "lint": "tslint -p . 1>&2",
-    "test": "",
+    "test": "jest",
+    "copy-css": "copyfiles -u1 \"./src/**/*.scss\" ./lib",
     "cover": ""
   },
   "keywords": [
@@ -41,6 +42,12 @@
     "@bentley/ui-framework": "^2.0.0"
   },
   "devDependencies": {
+    "babel-jest": "^26.1.0",
+    "babel-plugin-import-remove-resource-query": "^1.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.10.0",
+    "@babel/plugin-transform-runtime": "^7.10.0",
+    "@babel/preset-env": "^7.10.0",
+    "@babel/preset-react": "^7.10.0",
     "@bentley/bentleyjs-core": "^2.0.0",
     "@bentley/build-tools": "^2.0.0",
     "@bentley/imodeljs-common": "^2.0.0",
@@ -48,29 +55,49 @@
     "@bentley/imodeljs-i18n": "^2.0.0",
     "@bentley/imodeljs-markup": "^2.0.0",
     "@bentley/presentation-frontend": "^2.0.0",
-    "@bentley/react-scripts": "3.4.1",
     "@bentley/ui-abstract": "^2.0.0",
     "@bentley/ui-components": "^2.0.0",
     "@bentley/ui-core": "^2.0.0",
     "@bentley/ui-framework": "^2.0.0",
+    "jest": "26.1.0",
+    "@testing-library/react": "^10.4.4",
     "@types/classnames": "^2.2.3",
     "@types/i18next": "^8.4.2",
-    "@types/react": "~16.9.35",
-    "@types/react-dom": "^16.8.0",
-    "@types/react-redux": "^7.0.1",
+    "@types/jest": "^26.0.4",
+    "@types/react": "^16.9.41",
+    "@types/react-dom": "^16.9.8",
+    "@types/redux-mock-store": "^1.0.2",
+    "copyfiles": "^2.1.0",
     "cpx": "^1.5.0",
+    "identity-obj-proxy": "^3.0.0",
     "rimraf": "^3.0.2",
     "tslint": "^5.11.0",
-    "typescript": "~3.7.4"
+    "typescript": "^3.9.6"
   },
   "dependencies": {
     "@svgdotjs/svg.js": "^3.0.13",
     "classnames": "^2.2.5",
     "i18next": "^10.2.2",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0",
-    "react-redux": "^7.2.0",
-    "redux": "^4.0.3",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "ts-jest": "^26.1.1"
+  },
+  "jest": {
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest",
+      "^.+\\.(js|jsx|scss)$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "[/\\\\]node_modules[/\\\\](?!@bentley/ui).+\\.(js|jsx|ts|tsx)$",
+      "^.+\\.module\\.(css|sass|scss)$"
+    ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|svg?.+)$": "<rootDir>/src/tests/mocks/fileMock.js",
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    },
+    "verbose": true
   }
 }
