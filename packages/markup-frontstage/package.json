@@ -29,25 +29,16 @@
     "type": "git",
     "url": "https://github.com/imodeljs/viewer-components-react/packages/markup-frontstage"
   },
-  "peerDependencies": {
-    "@bentley/bentleyjs-core": "^2.0.0",
-    "@bentley/imodeljs-common": "^2.0.0",
-    "@bentley/imodeljs-frontend": "^2.0.0",
-    "@bentley/imodeljs-i18n": "^2.0.0",
-    "@bentley/imodeljs-markup": "^2.0.0",
-    "@bentley/presentation-frontend": "^2.0.0",
-    "@bentley/ui-abstract": "^2.0.0",
-    "@bentley/ui-components": "^2.0.0",
-    "@bentley/ui-core": "^2.0.0",
-    "@bentley/ui-framework": "^2.0.0"
+  "dependencies": {
+    "classnames": "^2.2.6",
+    "i18next": "^10.2.2",
+    "i18next-browser-languagedetector": "^4.0.2"
   },
   "devDependencies": {
-    "babel-jest": "^26.1.0",
-    "babel-plugin-import-remove-resource-query": "^1.0.0",
-    "@babel/plugin-proposal-class-properties": "^7.10.0",
-    "@babel/plugin-transform-runtime": "^7.10.0",
-    "@babel/preset-env": "^7.10.0",
-    "@babel/preset-react": "^7.10.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-transform-runtime": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
+    "@babel/preset-react": "^7.9.4",
     "@bentley/bentleyjs-core": "^2.0.0",
     "@bentley/build-tools": "^2.0.0",
     "@bentley/imodeljs-common": "^2.0.0",
@@ -59,28 +50,44 @@
     "@bentley/ui-components": "^2.0.0",
     "@bentley/ui-core": "^2.0.0",
     "@bentley/ui-framework": "^2.0.0",
-    "jest": "26.1.0",
-    "@testing-library/react": "^10.4.4",
+    "@testing-library/react": "^10.4.5",
     "@types/classnames": "^2.2.3",
     "@types/i18next": "^8.4.2",
-    "@types/jest": "^26.0.4",
-    "@types/react": "^16.9.41",
-    "@types/react-dom": "^16.9.8",
+    "@types/jest": "^24.0.15",
+    "@types/react": "16.9.23",
+    "@types/react-dom": "16.9.5",
     "@types/redux-mock-store": "^1.0.2",
+    "babel-jest": "^24.9.0",
+    "babel-plugin-import-remove-resource-query": "^1.0.0",
+    "concurrently": "^4.1.0",
     "copyfiles": "^2.1.0",
     "cpx": "^1.5.0",
     "identity-obj-proxy": "^3.0.0",
+    "jest": "24.9.0",
+    "jest-mock-console": "^1.0.0",
+    "nodemon": "^1.19.1",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-test-renderer": "16.13.1",
     "rimraf": "^3.0.2",
-    "tslint": "^5.11.0",
-    "typescript": "^3.9.6"
+    "ts-jest": "^24.2.0",
+    "typescript": "^3.7.2"
   },
-  "dependencies": {
+  "peerDependencies": {
+    "@bentley/bentleyjs-core": "^2.0.0",
+    "@bentley/build-tools": "^2.0.0",
+    "@bentley/imodeljs-common": "^2.0.0",
+    "@bentley/imodeljs-frontend": "^2.0.0",
+    "@bentley/imodeljs-i18n": "^2.0.0",
+    "@bentley/imodeljs-markup": "^2.0.0",
+    "@bentley/presentation-frontend": "^2.0.0",
+    "@bentley/ui-abstract": "^2.0.0",
+    "@bentley/ui-components": "^2.0.0",
+    "@bentley/ui-core": "^2.0.0",
+    "@bentley/ui-framework": "^2.0.0",
     "@svgdotjs/svg.js": "^3.0.13",
-    "classnames": "^2.2.5",
-    "i18next": "^10.2.2",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "ts-jest": "^26.1.1"
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0"
   },
   "jest": {
     "roots": [
@@ -95,7 +102,7 @@
       "^.+\\.module\\.(css|sass|scss)$"
     ],
     "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|svg?.+)$": "<rootDir>/src/tests/mocks/fileMock.js",
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|svg?.+)$": "<rootDir>/scripts/jestFileMock.js",
       "\\.(css|less|scss|sass)$": "identity-obj-proxy"
     },
     "verbose": true
