@@ -1,0 +1,122 @@
+{
+    "id": "ui-framework/ClassificationSystems",
+    "rules": [
+        {
+            "ruleType": "RootNodes",
+            "specifications": [
+                {
+                    "specType": "InstanceNodesOfSpecificClasses",
+                    "classes": [
+                        {
+                            "schemaName": "ClassificationSystems",
+                            "classNames": [
+                                "ClassificationSystem"
+                            ]
+                        }
+                    ],
+                    "arePolymorphic": false,
+                    "groupByClass": false,
+                    "groupByLabel": false
+                }
+            ]
+        },
+        {
+            "ruleType": "ChildNodes",
+            "condition": "ParentNode.IsOfClass(\"ClassificationSystem\", \"ClassificationSystems\")",
+            "specifications": [
+                {
+                    "specType": "RelatedInstanceNodes",
+                    "relationships": {
+                        "schemaName": "ClassificationSystems",
+                        "classNames": [
+                            "ClassificationSystemOwnsClassificationTable"
+                        ]
+                    },
+                    "relatedClasses": {
+                        "schemaName": "ClassificationSystems",
+                        "classNames": [
+                            "ClassificationTable"
+                        ]
+                    },
+                    "requiredDirection": "Forward",
+                    "groupByClass": false,
+                    "groupByLabel": false,
+                    "doNotSort": true
+                }
+            ]
+        },
+        {
+            "ruleType": "ChildNodes",
+            "condition": "ParentNode.IsOfClass(\"ClassificationTable\", \"ClassificationSystems\")",
+            "specifications": [
+                {
+                    "specType": "RelatedInstanceNodes",
+                    "relationships": {
+                        "schemaName": "BisCore",
+                        "classNames": [
+                            "ModelModelsElement"
+                        ]
+                    },
+                    "relatedClasses": {
+                        "schemaName": "BisCore",
+                        "classNames": [
+                            "Model"
+                        ]
+                    },
+                    "requiredDirection": "Backward",
+                    "groupByClass": false,
+                    "groupByLabel": false,
+                    "hideNodesInHierarchy": true
+                }
+            ]
+        },
+        {
+            "ruleType": "ChildNodes",
+            "condition": "ParentNode.IsOfClass(\"Model\", \"BisCore\")",
+            "specifications": [
+                {
+                    "specType": "RelatedInstanceNodes",
+                    "relationships": {
+                        "schemaName": "BisCore",
+                        "classNames": [
+                            "ModelContainsElements"
+                        ]
+                    },
+                    "relatedClasses": {
+                        "schemaName": "ClassificationSystems",
+                        "classNames": [
+                            "Classification"
+                        ]
+                    },
+                    "requiredDirection": "Forward",
+                    "groupByClass": false,
+                    "groupByLabel": false
+                }
+            ]
+        },
+        {
+            "ruleType": "ChildNodes",
+            "condition": "ParentNode.IsOfClass(\"Classification\", \"ClassificationSystems\")",
+            "specifications": [
+                {
+                    "specType": "RelatedInstanceNodes",
+                    "relationships": {
+                        "schemaName": "ClassificationSystems",
+                        "classNames": [
+                            "ElementHasClassifications"
+                        ]
+                    },
+                    "relatedClasses": {
+                        "schemaName": "BisCore",
+                        "classNames": [
+                            "Element"
+                        ]
+                    },
+                    "requiredDirection": "Backward",
+                    "groupByClass": false,
+                    "groupByLabel": false
+                }
+            ]
+        }
+    ]
+}
