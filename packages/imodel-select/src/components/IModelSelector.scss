@@ -8,10 +8,11 @@ $imodel-select-appbar-height: 80px;
 $imodel-select-navbar-width: 80px;
 $imodel-select-projectpicker-min-width: 250px; /* project picker minimum width */
 $imodel-select-projectpicker-max-width: 450px; /* project picker maximum width */
-$imodel-select-background: #FCFDFD;
-$imodel-select-color: #6d6e77;
-$imodel-select-content-background: $uicore-white;
-$imodel-select-border-color: #e7e9ec;
+
+$imodel-select-background: $buic-background-window;;
+$imodel-select-color: $buic-foreground-body;
+$imodel-select-content-background: $buic-background-window;
+$imodel-select-border-color: $buic-foreground-disabled;
 
 /* top panel */
 .imodel-select-pane {

@@ -111,7 +111,7 @@ export class IModelCard extends React.Component<IModelCardProps, IModelCardState
             src={this.props.iModel.thumbnail}
             alt=""
           />
-          }<span className="select">{IModelSelect.translate("select")}</span>
+          <span className="select">{IModelSelect.translate("select")}</span>
         </div>
       );
     } else {
