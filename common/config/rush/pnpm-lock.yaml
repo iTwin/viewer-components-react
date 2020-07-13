@@ -3,6 +3,7 @@ dependencies:
   '@babel/plugin-transform-runtime': 7.10.4
   '@babel/preset-env': 7.10.1
   '@babel/preset-react': 7.10.1
+  '@babel/preset-typescript': 7.9.0
   '@bentley/react-scripts': 3.4.1
   '@rush-temp/imodel-select-react': 'file:projects/imodel-select-react.tgz'
   '@rush-temp/markup-frontstage-react': 'file:projects/markup-frontstage-react.tgz_react-redux@7.2.0+redux@4.0.5'
@@ -871,10 +872,18 @@ packages:
       '@babel/core': ^7.0.0-0
     resolution:
       integrity: sha512-hgA5RYkmZm8FTFT3yu2N9Bx7yVVOKYT6yEdXXo6j2JTm0wNxgqaGeQVaSHRjhfnQbX91DtjFB6McRFSlcJH3xQ==
+  /@babel/plugin-syntax-typescript/7.10.1:
+    dependencies:
+      '@babel/helper-plugin-utils': 7.10.4
+    dev: false
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    resolution:
+      integrity: sha512-X/d8glkrAtra7CaQGMiGs/OGa6XgUzqPcBXCIGFCpCqnfGlT0Wfbzo/B89xHhnInTaItPK8LALblVXcUOEh95Q==
   /@babel/plugin-syntax-typescript/7.10.1_@babel+core@7.9.0:
     dependencies:
       '@babel/core': 7.9.0
-      '@babel/helper-plugin-utils': 7.10.1
+      '@babel/helper-plugin-utils': 7.10.4
     dev: false
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -1611,11 +1620,21 @@ packages:
       '@babel/core': ^7.0.0-0
     resolution:
       integrity: sha512-qX8KZcmbvA23zDi+lk9s6hC1FM7jgLHYIjuLgULgc8QtYnmB3tAVIYkNoKRQ75qWBeyzcoMoK8ZQmogGtC/w0g==
+  /@babel/plugin-transform-typescript/7.10.1:
+    dependencies:
+      '@babel/helper-create-class-features-plugin': 7.10.1
+      '@babel/helper-plugin-utils': 7.10.4
+      '@babel/plugin-syntax-typescript': 7.10.1
+    dev: false
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    resolution:
+      integrity: sha512-v+QWKlmCnsaimLeqq9vyCsVRMViZG1k2SZTlcZvB+TqyH570Zsij8nvVUZzOASCRiQFUxkLrn9Wg/kH0zgy5OQ==
   /@babel/plugin-transform-typescript/7.10.1_@babel+core@7.9.0:
     dependencies:
       '@babel/core': 7.9.0
       '@babel/helper-create-class-features-plugin': 7.10.1_@babel+core@7.9.0
-      '@babel/helper-plugin-utils': 7.10.1
+      '@babel/helper-plugin-utils': 7.10.4
       '@babel/plugin-syntax-typescript': 7.10.1_@babel+core@7.9.0
     dev: false
     peerDependencies:
@@ -1937,10 +1956,19 @@ packages:
       '@babel/core': ^7.0.0-0
     resolution:
       integrity: sha512-aJBYF23MPj0RNdp/4bHnAP0NVqqZRr9kl0NAOP4nJCex6OYVio59+dnQzsAWFuogdLyeaKA1hmfUIVZkY5J+TQ==
+  /@babel/preset-typescript/7.9.0:
+    dependencies:
+      '@babel/helper-plugin-utils': 7.10.4
+      '@babel/plugin-transform-typescript': 7.10.1
+    dev: false
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    resolution:
+      integrity: sha512-S4cueFnGrIbvYJgwsVFKdvOmpiL0XGw9MFW9D0vgRys5g36PBhZRL8NX8Gr2akz8XRtzq6HuDXPD/1nniagNUg==
   /@babel/preset-typescript/7.9.0_@babel+core@7.9.0:
     dependencies:
       '@babel/core': 7.9.0
-      '@babel/helper-plugin-utils': 7.10.1
+      '@babel/helper-plugin-utils': 7.10.4
       '@babel/plugin-transform-typescript': 7.10.1_@babel+core@7.9.0
     dev: false
     peerDependencies:
@@ -16823,6 +16851,7 @@ packages:
       '@babel/plugin-transform-runtime': 7.10.4
       '@babel/preset-env': 7.10.1
       '@babel/preset-react': 7.10.1
+      '@babel/preset-typescript': 7.9.0
       '@bentley/bentleyjs-core': 2.2.0
       '@bentley/build-tools': 2.2.0
       '@bentley/imodeljs-common': 2.2.0_@bentley+bentleyjs-core@2.2.0
@@ -16869,7 +16898,7 @@ packages:
       react-redux: '*'
       redux: '*'
     resolution:
-      integrity: sha512-5VRPo+KJNE3QJIWPNHHN8Q8/PdmDM9prWX/jHY3JoLtGgGUzkjqIHFC0rpbOf9KLC9bE+KIuSEdGNMIFofR8FQ==
+      integrity: sha512-LEBB2mSwG947Arsqe/ArQ5mWg3zNbQ+HAmjI9kQV9uRytAl6jMrqDYLvXCCf/17N8WspGyNNv6MrlW6FdWJxDQ==
       tarball: 'file:projects/markup-frontstage-react.tgz'
     version: 0.0.0
   'file:projects/tree-widget-react.tgz':
@@ -16925,6 +16954,7 @@ specifiers:
   '@babel/plugin-transform-runtime': ^7.9.6
   '@babel/preset-env': ^7.9.6
   '@babel/preset-react': ^7.9.4
+  '@babel/preset-typescript': 7.9.0
   '@bentley/react-scripts': 3.4.1
   '@rush-temp/imodel-select-react': 'file:./projects/imodel-select-react.tgz'
   '@rush-temp/markup-frontstage-react': 'file:./projects/markup-frontstage-react.tgz'
