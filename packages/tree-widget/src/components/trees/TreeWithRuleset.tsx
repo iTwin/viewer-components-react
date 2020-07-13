@@ -1,8 +1,6 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
- * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
- * Based on unified-navigator from Bentley.
- * See https://bentleycs.visualstudio.com/iModelTechnologies/_git/unified-navigator
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { RegisteredRuleset, Ruleset } from "@bentley/presentation-common";
@@ -22,10 +20,6 @@ import "./TreeWithRulesetTree.scss";
 import { connectIModelConnection } from "@bentley/ui-framework";
 import { IModelConnection } from "@bentley/imodeljs-frontend";
 
-/**
- * Properties for the [[ControlledSpatialContainmentTree]] component
- * @internal
- */
 export interface ControlledTreeProps {
   iModel: IModelConnection;
   dataProvider: IPresentationTreeDataProvider;
@@ -33,29 +27,17 @@ export interface ControlledTreeProps {
   pageSize?: number;
 }
 
-/**
- * Properties for the [[TreeWithRulesetTree]] component
- * @alpha
- */
 export interface TreeProps {
   imodel: IModelConnection;
   ruleSet: Ruleset;
   dataProvider: IPresentationTreeDataProvider;
 }
 
-/**
- * State for the [[TreeWithRuleset]] component
- * @alpha
- */
 export interface TreeState {
   initialized: false;
   dataProvider?: IPresentationTreeDataProvider;
 }
 
-/**
- * Tree which displays and manages models or categories contained in an iModel.
- * @alpha
- */
 export abstract class TreeWithRuleset<
   T extends TreeProps,
   S extends TreeState
@@ -73,7 +55,6 @@ export abstract class TreeWithRuleset<
     }
   }
 
-  /** @internal */
   public componentWillUnmount() {
     this.removeRuleset();
   }
@@ -95,11 +76,6 @@ export abstract class TreeWithRuleset<
   };
 }
 
-/**
- * Tree which displays and manages models or categories contained in an iModel.
- * **Note:** it is required for the tree to use [[PresentationTreeDataProvider]]
- * @internal
- */
 export class SimpleTreeWithRuleset extends TreeWithRuleset<
   TreeProps,
   TreeState
@@ -111,7 +87,6 @@ export class SimpleTreeWithRuleset extends TreeWithRuleset<
     };
   }
 
-  /** @internal */
   public render() {
     const dataProvider = this.state
       .dataProvider as PresentationTreeDataProvider;
@@ -131,11 +106,6 @@ export class SimpleTreeWithRuleset extends TreeWithRuleset<
   }
 }
 
-/**
- * Controlled tree wrapper.
- * **Note:** it is required for the tree to use [[PresentationTreeDataProvider]]
- * @internal
- */
 // tslint:disable-next-line:variable-name naming-convention
 export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (
   props: ControlledTreeProps
