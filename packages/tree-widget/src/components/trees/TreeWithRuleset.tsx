@@ -93,7 +93,7 @@ export class SimpleTreeWithRuleset extends TreeWithRuleset<
     if (!dataProvider) return <div />;
     else {
       return (
-        <div className="dr-spatial-tree">
+        <div className="spatial-tree">
           <ControlledTreeWrapper
             rulesetId={this.props.ruleSet.id}
             iModel={this.props.imodel}
