@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MarkupSettings tool testing should render 1`] = `
+<div
+  data-testid="markup-settings-tool"
+>
+  <div
+    class="uifw-position-popup"
+    style="top: 0px; left: 0px;"
+  >
+    <div
+      class="markupContainer"
+    >
+      <div
+        class="markupContainerSetting"
+        data-testid="stroke-color-picker-button"
+      >
+        <span
+          class="toolName"
+        />
+        <button
+          class="components-colorpicker-button"
+          data-testid="components-colorpicker-button"
+        />
+      </div>
+      <div
+        class="markupContainerSetting"
+        data-testid="fill-color-picker-button"
+      >
+        <span
+          class="toolName"
+        />
+        <button
+          class="components-colorpicker-button"
+          data-testid="components-colorpicker-button"
+        />
+      </div>
+      <div
+        class="markupContainerSetting"
+        data-testid="stroke-weight-picker-button"
+      >
+        <span
+          class="toolName"
+        />
+        <div>
+          <button
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            class="components-lineweight-swatch components-weightpicker-button"
+            data-testid="components-weightpicker-button"
+          >
+            <span>
+              3
+            </span>
+            <div
+              style="height: 3px;"
+            />
+          </button>
+        </div>
+      </div>
+      <div
+        class="markupContainerSetting"
+        data-testid="alpha-slider"
+      >
+        <span
+          class="toolName"
+        />
+        <div
+          class="components-alpha-container-horizontal markupTransparencySlider"
+          data-testid="alpha-container"
+        >
+          <div
+            aria-label="Transparency"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="0.8"
+            class="components-alpha-slider"
+            data-testid="alpha-slider"
+            role="slider"
+            tabindex="0"
+          >
+            <div
+              class="components-alpha-pointer"
+              data-testid="alpha-pointer"
+              style="left: 80%;"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="markupContainerSetting"
+        data-testid="text-color-picker-button"
+      >
+        <span
+          class="toolName"
+        />
+        <button
+          class="components-colorpicker-button"
+          data-testid="components-colorpicker-button"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

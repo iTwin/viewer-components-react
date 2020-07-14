@@ -29,6 +29,7 @@ dependencies:
   react-redux: 7.2.0_redux@4.0.5
   react-test-renderer: 16.13.1
   redux: 4.0.5
+  redux-mock-store: 1.5.4
   rimraf: 3.0.2
   ts-jest: 24.3.0_jest@24.9.0
   tslint: 5.20.1
@@ -10665,6 +10666,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-QVxEePK8wwEgwizhDtMib30+GOA=
+  /lodash.isplainobject/4.0.6:
+    dev: false
+    resolution:
+      integrity: sha1-fFJqUtibRcRcxpC4gWO+BJf1UMs=
   /lodash.memoize/4.1.2:
     dev: false
     resolution:
@@ -13764,6 +13769,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-nRCcW9Sj7NuZwa2XvH9co8NPeXUBhZP7CRKJtU+cS6PW9FpCIFoI5ib0NT1ZrbNuPoRy0ylyCaUL8Gih4LSyFg==
+  /redux-mock-store/1.5.4:
+    dependencies:
+      lodash.isplainobject: 4.0.6
+    dev: false
+    resolution:
+      integrity: sha512-xmcA0O/tjCLXhh9Fuiq6pMrJCwFRaouA8436zcikdIpYWWCjU76CRk+i2bHx8EeiSiMGnB85/lZdU3wIJVXHTA==
   /redux/4.0.5:
     dependencies:
       loose-envify: 1.4.0
@@ -16888,6 +16899,7 @@ packages:
       react-dom: 16.13.1_react@16.13.1
       react-i18next: 11.3.3_i18next@19.5.6+react@16.13.1
       react-test-renderer: 16.13.1_react@16.13.1
+      redux-mock-store: 1.5.4
       rimraf: 3.0.2
       ts-jest: 24.3.0_jest@24.9.0
       typescript: 3.9.6
@@ -16898,7 +16910,7 @@ packages:
       react-redux: '*'
       redux: '*'
     resolution:
-      integrity: sha512-LEBB2mSwG947Arsqe/ArQ5mWg3zNbQ+HAmjI9kQV9uRytAl6jMrqDYLvXCCf/17N8WspGyNNv6MrlW6FdWJxDQ==
+      integrity: sha512-hYU80W1nOF6LCiMnNPF14jUQc+L34UofQSlmne++wZ/8148ba879eTyxaLu+c2HKPXEl0YiIRKXQYU1GW78stA==
       tarball: 'file:projects/markup-frontstage-react.tgz'
     version: 0.0.0
   'file:projects/tree-widget-react.tgz':
@@ -16980,6 +16992,7 @@ specifiers:
   react-redux: ^7.2.0
   react-test-renderer: 16.13.1
   redux: ^4.0.3
+  redux-mock-store: ^1.5.4
   rimraf: ^3.0.2
   ts-jest: ^24.2.0
   tslint: ^5.11.0
