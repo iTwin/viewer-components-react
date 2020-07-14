@@ -103,3 +103,178 @@ exports[`MarkupSettings tool testing should render 1`] = `
   </div>
 </div>
 `;
+
+exports[`MarkupSettings tool testing should render color picker dropdown when clicked on color picking button 1`] = `
+<div
+  class="components-colorpicker-popup-colors"
+  data-testid="components-colorpicker-popup-colors"
+  style="grid-template-columns: repeat(4, 1fr);"
+>
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+  <button
+    class="components-color-swatch components-colorpicker-swatch"
+  />
+</div>
+`;
+
+exports[`MarkupSettings tool testing should render weight picker dropdown when clicked on weight picking button 1`] = `
+<ul
+  class="components-weightpicker-popup-lines"
+  data-testid="components-weightpicker-popup-lines"
+>
+  <button
+    class="components-lineweight-swatch components-weightpicker-swatch"
+    id="ui-core-lineweight-1"
+  >
+    <span>
+      1
+    </span>
+    <div
+      style="height: 1px;"
+    />
+  </button>
+  <button
+    class="components-lineweight-swatch components-weightpicker-swatch"
+    id="ui-core-lineweight-2"
+  >
+    <span>
+      2
+    </span>
+    <div
+      style="height: 2px;"
+    />
+  </button>
+  <button
+    class="components-lineweight-swatch components-weightpicker-swatch active"
+    id="ui-core-lineweight-3"
+  >
+    <span>
+      3
+    </span>
+    <div
+      style="height: 3px;"
+    />
+  </button>
+  <button
+    class="components-lineweight-swatch components-weightpicker-swatch"
+    id="ui-core-lineweight-4"
+  >
+    <span>
+      4
+    </span>
+    <div
+      style="height: 4px;"
+    />
+  </button>
+  <button
+    class="components-lineweight-swatch components-weightpicker-swatch"
+    id="ui-core-lineweight-5"
+  >
+    <span>
+      5
+    </span>
+    <div
+      style="height: 5px;"
+    />
+  </button>
+  <button
+    class="components-lineweight-swatch components-weightpicker-swatch"
+    id="ui-core-lineweight-6"
+  >
+    <span>
+      6
+    </span>
+    <div
+      style="height: 6px;"
+    />
+  </button>
+  <button
+    class="components-lineweight-swatch components-weightpicker-swatch"
+    id="ui-core-lineweight-7"
+  >
+    <span>
+      7
+    </span>
+    <div
+      style="height: 7px;"
+    />
+  </button>
+  <button
+    class="components-lineweight-swatch components-weightpicker-swatch"
+    id="ui-core-lineweight-8"
+  >
+    <span>
+      8
+    </span>
+    <div
+      style="height: 8px;"
+    />
+  </button>
+  <button
+    class="components-lineweight-swatch components-weightpicker-swatch"
+    id="ui-core-lineweight-9"
+  >
+    <span>
+      9
+    </span>
+    <div
+      style="height: 9px;"
+    />
+  </button>
+  <button
+    class="components-lineweight-swatch components-weightpicker-swatch"
+    id="ui-core-lineweight-10"
+  >
+    <span>
+      10
+    </span>
+    <div
+      style="height: 10px;"
+    />
+  </button>
+</ul>
+`;

@@ -64,7 +64,7 @@
     "copyfiles": "^2.1.0",
     "cpx": "^1.5.0",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "24.9.0",
+    "jest": "26.1.0",
     "jest-mock-console": "^1.0.0",
     "nodemon": "^1.19.1",
     "react": "16.13.1",

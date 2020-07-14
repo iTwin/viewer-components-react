@@ -9,10 +9,7 @@ import configureMockStore from "redux-mock-store";
 import { MarkupToolWidget } from "../../../components/toolbar/MarkupToolWidget";
 import { MarkupFrontstage } from "../../../MarkupFrontstage";
 
-jest.mock("@bentley/ui-components");
-jest.mock("@bentley/ui-core");
 jest.mock("@bentley/imodeljs-frontend");
-jest.mock("../../../MarkupFrontstage");
 jest.mock("@bentley/imodeljs-i18n", () => ({
   I18N: jest.fn().mockImplementation(() => {
     return {
@@ -32,6 +29,9 @@ jest.mock("@bentley/imodeljs-i18n", () => ({
     };
   }),
 }));
+jest.mock("@bentley/ui-components");
+jest.mock("@bentley/ui-core");
+jest.mock("../../../MarkupFrontstage");
 
 const mockStore = configureMockStore([]);
 
