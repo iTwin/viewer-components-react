@@ -54,7 +54,7 @@ interface SearchBarState {
 export class SearchBar extends React.PureComponent<
   SearchBarProps,
   SearchBarState
-> {
+  > {
   private _target: HTMLElement | null = null;
   private _searchBox = React.createRef<SearchBox>();
 

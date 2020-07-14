@@ -67,7 +67,7 @@ interface SearchBoxState {
 export class SearchBox extends React.PureComponent<
   SearchBoxProps,
   SearchBoxState
-> {
+  > {
   private _inputElement: HTMLInputElement | null = null;
   private _timeoutId: number = 0;
 
