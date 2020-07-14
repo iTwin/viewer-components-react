@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { ColorDef } from "@bentley/imodeljs-common";
-import { MarkupApp, Markup } from "@bentley/imodeljs-markup";
+import { MarkupApp } from "@bentley/imodeljs-markup";
 import {
   AlphaSlider,
   ColorPickerButton,
