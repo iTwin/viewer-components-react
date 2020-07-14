@@ -10,5 +10,5 @@
 # review when someone opens a pull request.
 *  @calebmshafer
 /packages/imodel-select  @wilmaier
-/packages/tree-widget  @JoeZman
 /packages/markup-frontstage @archana-maharjan
+/packages/tree-widget  @JoeZman, @JValiunas, @michaalx
