@@ -7,7 +7,7 @@ import {
   ViewState,
 } from "@bentley/imodeljs-frontend";
 import { MarkupApp, MarkupSelected } from "@bentley/imodeljs-markup";
-import { WidgetState } from "@bentley/ui-abstract";
+import { WidgetState, UiError } from "@bentley/ui-abstract";
 import { Point } from "@bentley/ui-core";
 import {
   ConfigurableUiControlConstructor,
@@ -189,7 +189,10 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
         });
       }
     } catch (error) {
-      throw error;
+      throw new UiError(
+        MarkupFrontstage.loggerCategory(MarkupFrontstageProvider),
+        error
+      );
     } finally {
       await this._onCloseAsync();
     }
@@ -210,7 +213,8 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
     if (typeof svg === "string") {
       const dom = new DOMParser().parseFromString(svg, "image/svg+xml");
       if (dom.getElementsByTagName("parsererror").length > 0) {
-        throw new Error(
+        throw new UiError(
+          MarkupFrontstage.loggerCategory(MarkupFrontstageProvider),
           `MarkupData.svg is invalid: ${
             dom.getElementsByTagName("parsererror")[0].textContent
           }`
