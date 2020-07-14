@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
- * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import classnames from "classnames";
 import { CommonProps } from "@bentley/ui-core";
@@ -75,7 +75,7 @@ export class SearchBar extends React.PureComponent<
   }
 
   private _onToggleSearch = (
-    _event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    _event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     const showSearch = !this.state.showSearch;
     this.setState({ showSearch }, () => {
@@ -146,6 +146,7 @@ export class SearchBar extends React.PureComponent<
             onFilterClear={this.props.onFilterClear}
             onFilterStart={this.props.onFilterStart}
             resultCount={this.props.resultCount}
+            onIconClick={this._onToggleSearch}
             onSelectedChanged={this.props.onSelectedChanged}
           />
         </div>
