@@ -1,5 +1,7 @@
-// Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import {
   SpatialViewState,
   RemoteBriefcaseConnection,
@@ -34,7 +36,7 @@ jest.mock("@bentley/ui-components");
 jest.mock("@bentley/ui-core");
 jest.mock("@bentley/ui-framework");
 jest.mock("../../../MarkupFrontstage");
-jest.mock("../../../components/toolbar/MarkupSettings");
+jest.mock("../../../components/toolbar/MarkupSettingsPanel");
 jest.mock("../../../components/toolbar/MarkupToolWidget");
 
 describe("Markup Tool Widget testing", () => {

@@ -8,7 +8,7 @@ The markup-frontstage-react provides Markup Frontstage for adding, editing, dele
 
 FrontstageProvider object that requires ViewState, IModelConnection, Editable boolean flag whether or not the markup elements are editable, ConfigurableUiControlContructor, Svg string as optional, ViewElementDictionary with 9 zone layouts to be added in the frontstage as optional, EmphasizeElementsProps as optional to instantiate. It's onAddMarkupEvent allows to raise event on adding markup, onstopMarkupEvent allows to raise event on stopping markup. Additionally there's onCloseAsync and onSaveAsync properties to be called to close the Frontstage and Save the Markup data respectively.
 
-## MarkupSettings
+## MarkupSettingsPanel
 
 It is the flyover component used to set colors, width, opacity of the markup element by MarkupFronstage.
 
@@ -29,7 +29,8 @@ It is an object that stores camera settings, view flags, and markup.
 #### This frontstage example assumes all necessary framework such as UiFramework, UiCore has already been initialized.
 
 ```ts
-const markupFrontstageProvider = new MarkupFrontstage(
+MakrupFrontstage.initialize(new I18N());
+const markupFrontstageProvider = new MarkupFrontstageProvider(
   viewState,
   imodelConnection,
   isEditable,

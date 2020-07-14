@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MarkupSettings tool testing should render 1`] = `
+exports[`MarkupSettingsPanel tool testing should render 1`] = `
 <div
   data-testid="markup-settings-tool"
 >
@@ -104,7 +104,7 @@ exports[`MarkupSettings tool testing should render 1`] = `
 </div>
 `;
 
-exports[`MarkupSettings tool testing should render color picker dropdown when clicked on color picking button 1`] = `
+exports[`MarkupSettingsPanel tool testing should render color picker dropdown when clicked on color picking button 1`] = `
 <div
   class="components-colorpicker-popup-colors"
   data-testid="components-colorpicker-popup-colors"
@@ -161,7 +161,7 @@ exports[`MarkupSettings tool testing should render color picker dropdown when cl
 </div>
 `;
 
-exports[`MarkupSettings tool testing should render weight picker dropdown when clicked on weight picking button 1`] = `
+exports[`MarkupSettingsPanel tool testing should render weight picker dropdown when clicked on weight picking button 1`] = `
 <ul
   class="components-weightpicker-popup-lines"
   data-testid="components-weightpicker-popup-lines"

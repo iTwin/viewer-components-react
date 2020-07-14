@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { ColorDef } from "@bentley/imodeljs-common";
 import { MarkupApp, Markup } from "@bentley/imodeljs-markup";
 import {
@@ -10,7 +14,7 @@ import { FrontstageManager, PositionPopup } from "@bentley/ui-framework";
 import React, { useEffect, useState } from "react";
 import { Line, Marker, SVG } from "@svgdotjs/svg.js";
 
-import styles from "./MarkupSettings.module.scss";
+import styles from "./MarkupSettingsPanel.module.scss";
 import { MarkupFrontstage } from "../../MarkupFrontstage";
 import { MarkupFrontstageConstants } from "../../util/MarkupTypes";
 

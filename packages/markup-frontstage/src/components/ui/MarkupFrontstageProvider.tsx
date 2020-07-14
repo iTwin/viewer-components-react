@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import {
   EmphasizeElements,
   EmphasizeElementsProps,
@@ -28,7 +32,7 @@ import {
 import React from "react";
 
 import { MarkupFrontstage } from "../../MarkupFrontstage";
-import MarkupSettingsPanel from "../toolbar/MarkupSettings";
+import MarkupSettingsPanel from "../toolbar/MarkupSettingsPanel";
 import { MarkupToolWidget } from "../toolbar/MarkupToolWidget";
 import { createSavedViewData } from "../../services/SavedView";
 import {
