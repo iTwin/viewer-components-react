@@ -1,0 +1,31 @@
+{
+  "name": "@bentley/tree-widget-react",
+  "entries": [
+    {
+      "version": "1.1.0",
+      "tag": "@bentley/tree-widget-react_v1.1.0",
+      "date": "Tue, 14 Jul 2020 22:54:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "\"Add classifications tree.\""
+          },
+          {
+            "comment": "Added in tree-widget package"
+          },
+          {
+            "comment": "Replacing ThemedSelect component with SelectableContent component"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Functional component."
+          },
+          {
+            "comment": "Model tree search box will now properly clear itself in addition to closing when its \"X\" icon is hit"
+          }
+        ]
+      }
+    }
+  ]
+}

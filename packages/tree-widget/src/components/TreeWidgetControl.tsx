@@ -14,7 +14,8 @@ import React from "react";
 import { ModelsTreeComponent } from "./trees/ModelsTree";
 import { CategoriesTreeComponent } from "./trees/CategoriesTree";
 import { IModelConnection, Viewport } from "@bentley/imodeljs-frontend";
-import { TreeWidgetTree, TreeWidgetComponent } from "./TreeWidgetComponent";
+import { TreeWidgetComponent } from "./TreeWidgetComponent";
+import { SelectableContentDefinition } from "@bentley/ui-components";
 
 export interface TreeWidgetControlOptions {
   iModelConnection: IModelConnection;
@@ -22,7 +23,7 @@ export interface TreeWidgetControlOptions {
   enablePreloading?: boolean;
   enableElementsClassGrouping?: boolean;
   allViewports?: boolean;
-  additionalTrees?: TreeWidgetTree[];
+  additionalTrees?: SelectableContentDefinition[];
   additionalProps?: {
     modelsTree?: {};
     categoriesTree?: {};
@@ -76,21 +77,21 @@ export class TreeWidgetControl extends WidgetControl {
       />
     );
 
-    const trees: TreeWidgetTree[] = [
+    const trees: SelectableContentDefinition[] = [
       {
         label: UiFramework.translate("visibilityWidget.modeltree"),
         id: "model-tree",
-        component: modelsTreeComponent,
+        render: () => modelsTreeComponent,
       },
       {
         label: UiFramework.translate("visibilityWidget.categories"),
         id: "categories-tree",
-        component: categoriesTreeComponent,
+        render: () => categoriesTreeComponent,
       },
       {
         label: UiFramework.translate("visibilityWidget.containment"),
         id: "spatial-containment-tree",
-        component: spatialContainmentComponent,
+        render: () => spatialContainmentComponent,
       },
     ];
 

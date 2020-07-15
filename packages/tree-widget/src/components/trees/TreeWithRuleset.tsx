@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { RegisteredRuleset, Ruleset } from "@bentley/presentation-common";
 import {
@@ -41,7 +41,7 @@ export interface TreeState {
 export abstract class TreeWithRuleset<
   T extends TreeProps,
   S extends TreeState
-> extends React.Component<T, S> {
+  > extends React.Component<T, S> {
   private _ruleset?: RegisteredRuleset;
   /** @internal */
   public async componentDidMount() {
@@ -79,7 +79,7 @@ export abstract class TreeWithRuleset<
 export class SimpleTreeWithRuleset extends TreeWithRuleset<
   TreeProps,
   TreeState
-> {
+  > {
   constructor(props: TreeProps) {
     super(props);
     this.state = {
