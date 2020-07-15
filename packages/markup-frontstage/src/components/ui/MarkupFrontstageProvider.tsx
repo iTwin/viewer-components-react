@@ -256,6 +256,14 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
           container.style.right = container.style.bottom = "0";
           container.style.margin = "auto";
         }
+        if (markupData?.svg && !this._isEditable) {
+          // following will add CSS pointer events to none so that dragging plus selection of element be
+          // stopped for old non-editable markups, however if dragged and selected the element - then we get
+          // markup setting tool, and it is resizable, requires changes in boxSelect in iModelJs itself.
+          MarkupApp.markup?.svgMarkup?.each((i, el) => {
+            el[i].attr({ "pointer-events": "none" });
+          });
+        }
       }
 
       MarkupApp.markup?.selected.onChanged.addListener((el: MarkupSelected) => {
