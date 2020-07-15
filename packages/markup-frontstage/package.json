@@ -14,7 +14,7 @@
     "lint": "tslint -p . 1>&2",
     "test": "jest",
     "copy-css": "copyfiles -u1 \"./src/**/*.scss\" ./lib",
-    "cover": ""
+    "cover": "npm test"
   },
   "keywords": [
     "Bentley",
@@ -103,6 +103,14 @@
       "[/\\\\]node_modules[/\\\\](?!@bentley/ui).+\\.(js|jsx|ts|tsx)$",
       "^.+\\.module\\.(css|sass|scss)$"
     ],
-    "verbose": true
+    "verbose": true,
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "test",
+      ".d.ts"
+    ],
+    "collectCoverageFrom": [
+      "<rootDir>/src/**"
+    ]
   }
 }
