@@ -36,7 +36,3 @@ common/temp/**
 package-deps.json
 *.build.log
 *.build.error.log
-
-
-#igoner DS store
-.DS_Store

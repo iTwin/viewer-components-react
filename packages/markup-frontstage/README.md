@@ -2,7 +2,7 @@
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 
-The markup-frontstage-react provides Markup Frontstage for adding, editing, deleting markup elements in iModel.js application.
+The markup-frontstage-react provides the Markup Frontstage for adding, editing, deleting markup elements in iModel.js application.
 
 ## MarkupFrontstageProvider
 
@@ -10,11 +10,11 @@ FrontstageProvider object that requires ViewState, IModelConnection, Editable bo
 
 ## MarkupSettingsPanel
 
-It is the flyover component used to set colors, width, opacity of the markup element by MarkupFronstage.
+It is the flyover component used to set colors, width, opacity of the markup element by Markup Fronstage Provider.
 
 ## MarkupToolWdiget
 
-It is the vertical toolbar compoenent placed at left top corner of nine-zone UI in MarkupFrontstage, it includes select, drawing tools like ( rectangle, circle, polygon, line, cloud, sketch, arrow), distnce to create markup elements on MarkupFrontstage.
+It is the vertical toolbar component placed at left top corner of nine-zone UI in MarkupFrontstage, it includes select, drawing tools like ( rectangle, circle, polygon, line, cloud, sketch, arrow), distance to create markup elements on MarkupFrontstage.
 
 ## SavedView
 
