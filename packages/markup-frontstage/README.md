@@ -10,7 +10,7 @@ FrontstageProvider object that requires ViewState, IModelConnection, Editable bo
 
 ## MarkupSettingsPanel
 
-It is the flyover component used to set colors, width, opacity of the markup element by Markup Fronstage Provider.
+It is the flyover component used to set colors, width, opacity of the markup element by MarkupFrontstage Provider.
 
 ## MarkupToolWdiget
 
