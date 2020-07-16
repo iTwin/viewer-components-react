@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import {
   ActionButton,
   CommonToolbarItem,
@@ -101,11 +101,11 @@ export class MarkupToolWidget extends React.Component<MarkupToolWidgetProps> {
                 isEditable
                   ? this._verticalItems
                   : [
-                      ToolbarHelper.createToolbarItemFromItemDef(
-                        10,
-                        this._closeMarkupToolDef
-                      ),
-                    ]
+                    ToolbarHelper.createToolbarItemFromItemDef(
+                      10,
+                      this._closeMarkupToolDef
+                    ),
+                  ]
               }
               usage={ToolbarUsage.ContentManipulation}
               orientation={ToolbarOrientation.Vertical}

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import {
   EmphasizeElements,
   EmphasizeElementsProps,
@@ -220,7 +220,7 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
         throw new UiError(
           MarkupFrontstage.loggerCategory(MarkupFrontstageProvider),
           `MarkupData.svg is invalid: ${
-            dom.getElementsByTagName("parsererror")[0].textContent
+          dom.getElementsByTagName("parsererror")[0].textContent
           }`
         );
       } else {
@@ -238,9 +238,9 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
     if (view) {
       const markupData = this._svg
         ? {
-            rect: this._svgRect(this._svg),
-            svg: this._svg,
-          }
+          rect: this._svgRect(this._svg),
+          svg: this._svg,
+        }
         : undefined;
       if (this._emphasizedElementsProps) {
         this._createEmphasizedElements(this._emphasizedElementsProps, view);
