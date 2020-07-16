@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import { ColorDef } from "@bentley/imodeljs-common";
 import { MarkupApp } from "@bentley/imodeljs-markup";
 import {
@@ -310,8 +310,8 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
         ? firstSelectedElement?.get(0)?.node?.style.strokeOpacity
         : firstSelectedElement?.type === "line" &&
           firstSelectedElement?.node.style.opacity
-        ? firstSelectedElement?.node.style.opacity
-        : firstSelectedElement?.node.style.strokeOpacity;
+          ? firstSelectedElement?.node.style.opacity
+          : firstSelectedElement?.node.style.strokeOpacity;
       const strokeWidth = isBoxedTextGType
         ? firstSelectedElement?.get(0)?.node?.style.strokeWidth
         : firstSelectedElement?.node.style.strokeWidth;

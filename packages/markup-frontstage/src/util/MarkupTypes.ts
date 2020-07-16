@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import { MarkupUiEvent } from "./MarkupUiEvents";
 import { SavedViewData } from "./SavedViewTypes";
 
@@ -57,8 +57,8 @@ export interface AddMarkupEventArgs {
 
 /** Add Markup Event class.
  */
-export class AddMarkupEvent extends MarkupUiEvent<AddMarkupEventArgs> {}
+export class AddMarkupEvent extends MarkupUiEvent<AddMarkupEventArgs> { }
 
 /** Stop Markup Event class.
  */
-export class StopMarkupEvent extends MarkupUiEvent<void> {}
+export class StopMarkupEvent extends MarkupUiEvent<void> { }
