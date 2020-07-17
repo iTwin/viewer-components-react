@@ -1,4 +1,4 @@
-# @bentley\markup-frontstage-react
+# @bentley/markup-frontstage-react
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 

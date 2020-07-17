@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-/** @module Common */
 import { I18N } from "@bentley/imodeljs-i18n";
 import { UiError, getClassName } from "@bentley/ui-abstract";
 import * as i18next from "i18next";
@@ -50,7 +49,7 @@ export class MarkupFrontstage {
    * The internationazlization service namespace.
    */
   public static get i18nNamespace(): string {
-    return "MakrupFrontstage";
+    return "MarkupFrontstage";
   }
 
   public static get packageName(): string {
