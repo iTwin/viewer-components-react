@@ -8,12 +8,11 @@
   "scripts": {
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
-    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize && npm run copy-css",
-    "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets && npm run copy-css",
+    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
+    "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
     "clean": "rimraf lib build",
     "lint": "tslint -p . 1>&2",
     "test": "jest",
-    "copy-css": "copyfiles -u1 \"./src/**/*.scss\" ./lib",
     "cover": "npm test"
   },
   "keywords": [
@@ -61,7 +60,6 @@
     "babel-jest": "^24.9.0",
     "babel-plugin-import-remove-resource-query": "^1.0.0",
     "concurrently": "^4.1.0",
-    "copyfiles": "^2.1.0",
     "cpx": "^1.5.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "26.1.0",
