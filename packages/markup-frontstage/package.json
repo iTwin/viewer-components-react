@@ -10,7 +10,7 @@
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
-    "clean": "rimraf lib build",
+    "clean": "rimraf lib",
     "lint": "tslint -p . 1>&2",
     "test": "jest",
     "cover": "npm test"
