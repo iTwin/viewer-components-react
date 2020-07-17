@@ -9,6 +9,7 @@ dependencies:
   '@rush-temp/markup-frontstage-react': 'file:projects/markup-frontstage-react.tgz_react-redux@7.2.0+redux@4.0.5'
   '@rush-temp/tree-widget-react': 'file:projects/tree-widget-react.tgz'
   '@svgdotjs/svg.js': 3.0.13
+  '@testing-library/jest-dom': 4.2.4
   '@testing-library/react': 10.4.5
   '@types/classnames': 2.2.10
   '@types/i18next': 8.4.6
@@ -18,7 +19,6 @@ dependencies:
   babel-jest: 24.9.0
   babel-plugin-import-remove-resource-query: 1.0.0
   concurrently: 4.1.2
-  copyfiles: 2.3.0
   cpx: 1.5.0
   i18next: 10.6.0
   i18next-browser-languagedetector: 4.3.1
@@ -4240,6 +4240,23 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-TywaC+qDGm/Ro34kRYkFQPdT+pxSF4UjZGLIqcGfFQH5IGR43Y7sGLPnkieIW/GNsu337oxNsLUAgpI0JWhXHw==
+  /@testing-library/jest-dom/4.2.4:
+    dependencies:
+      '@babel/runtime': 7.10.4
+      chalk: 2.4.2
+      css: 2.2.4
+      css.escape: 1.5.1
+      jest-diff: 24.9.0
+      jest-matcher-utils: 24.9.0
+      lodash: 4.17.15
+      pretty-format: 24.9.0
+      redent: 3.0.0
+    dev: false
+    engines:
+      node: '>=8'
+      npm: '>=6'
+    resolution:
+      integrity: sha512-j31Bn0rQo12fhCWOUWy9fl7wtqkp7In/YP2p5ZFyRuiiB9Qs3g+hS4gAmDWONbAHcRmVooNJ5eOHQDCOmUFXHg==
   /@testing-library/react/10.4.5:
     dependencies:
       '@babel/runtime': 7.10.4
@@ -6991,6 +7008,10 @@ packages:
       node: '>= 6'
     resolution:
       integrity: sha512-WwOrosiQTvyms+Ti5ZC5vGEK0Vod3FTt1ca+payZqvKuGJF+dq7bG63DstxtN0dpm6FxY27a/zS3Wten+gEtGw==
+  /css.escape/1.5.1:
+    dev: false
+    resolution:
+      integrity: sha1-QuJ9T6BK4y+TGktNQZH6nN3ul8s=
   /css/2.2.4:
     dependencies:
       inherits: 2.0.4
@@ -12072,6 +12093,12 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==
+  /min-indent/1.0.1:
+    dev: false
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==
   /mini-css-extract-plugin/0.9.0_webpack@4.42.0:
     dependencies:
       loader-utils: 1.4.0
@@ -14868,6 +14895,15 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-nRCcW9Sj7NuZwa2XvH9co8NPeXUBhZP7CRKJtU+cS6PW9FpCIFoI5ib0NT1ZrbNuPoRy0ylyCaUL8Gih4LSyFg==
+  /redent/3.0.0:
+    dependencies:
+      indent-string: 4.0.0
+      strip-indent: 3.0.0
+    dev: false
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg==
   /redux-mock-store/1.5.4:
     dependencies:
       lodash.isplainobject: 4.0.6
@@ -16162,6 +16198,14 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-BrpvfNAE3dcvq7ll3xVumzjKjZQ5tI1sEUIKr3Uoks0XUl45St3FlatVqef9prk4jRDzhW6WZg+3bk93y6pLjA==
+  /strip-indent/3.0.0:
+    dependencies:
+      min-indent: 1.0.1
+    dev: false
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-laJTa3Jb+VQpaC6DseHhF7dXVqHTfJPCRDaEbid/drOhgitgYku/letMUqOXFoWV0zIIUbjpdH2t+tYj4bQMRQ==
   /strip-json-comments/2.0.1:
     dev: false
     engines:
@@ -18143,6 +18187,7 @@ packages:
       '@bentley/ui-core': 2.2.0_22a535e34cdd435cd9ce754bca6cd5d1
       '@bentley/ui-framework': 2.2.0_848c4dccabb1e4ea81ef8312b27eee66
       '@svgdotjs/svg.js': 3.0.13
+      '@testing-library/jest-dom': 4.2.4
       '@testing-library/react': 10.4.5_react-dom@16.13.1+react@16.13.1
       '@types/classnames': 2.2.10
       '@types/i18next': 8.4.6
@@ -18178,7 +18223,7 @@ packages:
       react-redux: '*'
       redux: '*'
     resolution:
-      integrity: sha512-d1RWJVUESZMpqc0VVV39GxnK225CQUEqizY+j9YWgrjySLl59k2ucdz8IoPpbHn06j/+sPBsB3W4eLzfBErcXg==
+      integrity: sha512-MwwoipJgoO14ZABY6E3HnkYlcvbFt/w/lL3+y13k3CJ1xSkwwa+hR39tV8cHFGhRxb3NvO7UTAPVpUZKkJwkaw==
       tarball: 'file:projects/markup-frontstage-react.tgz'
     version: 0.0.0
   'file:projects/tree-widget-react.tgz':
@@ -18240,6 +18285,7 @@ specifiers:
   '@rush-temp/markup-frontstage-react': 'file:./projects/markup-frontstage-react.tgz'
   '@rush-temp/tree-widget-react': 'file:./projects/tree-widget-react.tgz'
   '@svgdotjs/svg.js': ^3.0.13
+  '@testing-library/jest-dom': ^4.2.4
   '@testing-library/react': ^10.4.5
   '@types/classnames': ^2.2.3
   '@types/i18next': ^8.4.2
@@ -18249,7 +18295,6 @@ specifiers:
   babel-jest: ^24.9.0
   babel-plugin-import-remove-resource-query: ^1.0.0
   concurrently: ^4.1.0
-  copyfiles: ^2.1.0
   cpx: ^1.5.0
   i18next: ^10.2.2
   i18next-browser-languagedetector: ^4.0.2

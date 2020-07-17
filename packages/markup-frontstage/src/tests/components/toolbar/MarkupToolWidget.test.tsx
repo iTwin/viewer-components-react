@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { I18N } from "@bentley/imodeljs-i18n";
 import { UiFramework } from "@bentley/ui-framework";
+import "@testing-library/jest-dom/extend-expect";
 import { render } from "@testing-library/react";
 import React from "react";
 import configureMockStore from "redux-mock-store";
@@ -78,7 +79,9 @@ describe("Markup Tool Widget testing", () => {
     );
     //act
     const toolWidget = queryByTestId("markup-tool-widget-container");
+
     //expect
-    expect(toolWidget).toMatchSnapshot();
+    expect(toolWidget).toBeInTheDocument();
+    expect(toolWidget?.firstChild).toHaveClass("markupVerticalToolbar");
   });
 });
