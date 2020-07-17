@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@bentley/markup-frontstage-react",
-      "comment": "Repository Url correction in  markup-frontstage package",
+      "comment": "Repository Url correction and add missing export in  markup-frontstage package",
       "type": "patch"
     }
   ],
