@@ -3,5 +3,15 @@
     "policyName": "imodel-select",
     "definitionName": "individualVersion",
     "lockedMajor": 2
+  },
+  {
+    "policyName": "tree-widget",
+    "definitionName": "individualVersion",
+    "lockedMajor": 1
+  },
+  {
+    "policyName": "property-grid",
+    "definitionName": "individualVersion",
+    "lockedMajor": 1
   }
 ]

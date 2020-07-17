@@ -1,0 +1,25 @@
+{
+  "widget-label": "Properties Widget",
+  "context-menu": {
+    "add-favorite": {
+      "label": "Add to Favorite",
+      "description": "Add this property to Favorite category"
+    },
+    "remove-favorite": {
+      "label": "Remove from Favorite",
+      "description": "Remove this property from Favorite category"
+    },
+    "share-favorite": {
+      "label": "Share this Favorite",
+      "description": "Share this property in Favorite category"
+    },
+    "unshare-favorite": {
+      "label": "Unshare this Favorite",
+      "description": "Unshare this property in Favorite category"
+    },
+    "copy-text": {
+      "label": "Copy Text",
+      "description": "Copy text of this property"
+    }
+  }
+}

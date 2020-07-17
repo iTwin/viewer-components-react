@@ -1,6 +1,6 @@
 {
   "name": "@bentley/imodel-select-react",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "iModel Select React",
   "license": "MIT",
   "main": "lib/imodel-select-react.js",

@@ -144,7 +144,6 @@ export class ProjectDropdown extends React.Component<ProjectDropdownProps, Proje
       >
         <div className="pp-dropdown">
           {this.renderProjects()}
-          <div className="pp-separator" />
           <div
             className="pp-more"
             style={liStyle}

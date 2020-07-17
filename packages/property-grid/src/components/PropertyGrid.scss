@@ -1,0 +1,18 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+@import "~@bentley/ui-core/lib/ui-core/style/index";
+@import "~@bentley/ui-core/lib/ui-core/text/index";
+
+.property-grid-react-panel-label {
+  @include uicore-text(leading);
+  font-size: $uicore-font-size-leading;
+  padding: $uicore-xs 0;
+}
+
+.property-grid-react-panel-class {
+  @include uicore-text;
+  font-size: $uicore-font-size;
+}

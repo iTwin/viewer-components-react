@@ -5,6 +5,7 @@
   "nodeSupportedVersionRange": ">=10.13.0 <13.0.0",
   "projectFolderMinDepth": 2,
   "projectFolderMaxDepth": 3,
+  "ensureConsistentVersions": false,
   "gitPolicy": {
     "allowedEmailRegExps": [
       "[^@]+@users\\.noreply\\.github\\.com"
@@ -19,6 +20,16 @@
       "packageName": "@bentley/imodel-select-react",
       "projectFolder": "packages/imodel-select",
       "versionPolicyName": "imodel-select"
+    },
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "projectFolder": "packages/tree-widget",
+      "versionPolicyName": "tree-widget"
+    },
+    {
+      "packageName": "@bentley/property-grid-react",
+      "projectFolder": "packages/property-grid",
+      "versionPolicyName": "property-grid"
     }
   ]
 }

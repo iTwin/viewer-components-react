@@ -6,16 +6,17 @@
 
  $imodel-select-imodel-card-width: 275px;
  $imodel-select-imodel-thumbnail-height: 200px;
- $imodel-select-card-background: #FCFDFD;
+ $imodel-select-card-background: $buic-background-window;
+ $imodel-select-card-border-color: $buic-foreground-disabled;
  $imodel-select-preview-background: #282B34;
- $imodel-select-text-color: #444;
+ $imodel-select-text-color: $buic-foreground-body;
 
 // imodel card
 .imodel-select-imodel-card {
   width: $imodel-select-imodel-card-width;
   color: $imodel-select-text-color;
   background-color: $imodel-select-card-background;
-  border: 1px solid #ccc;
+  border: 1px solid $imodel-select-card-border-color;
   border-radius: 5px;
   margin: 15px;
   transition: all 0.3s ease;
@@ -35,7 +36,7 @@
   overflow: hidden;
   height: $imodel-select-imodel-thumbnail-height;
   box-sizing: border-box;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid $imodel-select-card-border-color;
   position: relative;
 }
 
@@ -90,7 +91,7 @@
   transition: all 0.3s ease-in;
   opacity: 0;
   filter: alpha(opacity=0);
-  color: $uicore-white;
+  color: $imodel-select-text-color;
   text-transform: uppercase;
 }
 
@@ -99,7 +100,7 @@
   position: absolute;
   margin: 0 auto;
   font-size: 100px;
-  color: #fff;
+  color: $imodel-select-text-color;
 }
 
 // loader
@@ -177,7 +178,7 @@
 .imodel-select-imodel-card .imodel-card-description {
   height: 48px;
   line-height: 16px;
-  color: $uicore-gray;
+  color: $imodel-select-text-color;
   display: block;
   padding: 0 14px;
   margin-bottom: .5em;

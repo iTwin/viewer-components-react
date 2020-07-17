@@ -1,0 +1,17 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "@bentley/ui-core/lib/ui-core/index";
+.spatial-tree {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.components-tree-node-content {
+  height: $uicore-l;
+  line-height: $uicore-font-size-small;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

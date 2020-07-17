@@ -10,3 +10,5 @@
 # review when someone opens a pull request.
 *  @calebmshafer
 /packages/imodel-select  @wilmaier
+/packages/tree-widget  @JoeZman, @JValiunas, @michaalx
+/packages/property-grid @zjzoltek

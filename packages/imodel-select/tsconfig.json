@@ -8,9 +8,6 @@
     "skipLibCheck": true,
     "jsx": "react",
     "preserveSymlinks": true,
-    "types": [
-      "@bentley/react-scripts"
-    ]
   },
   "include": [
     "./src/**/*.ts*"
