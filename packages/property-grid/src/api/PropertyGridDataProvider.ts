@@ -4,12 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 import { IModelConnection } from "@bentley/imodeljs-frontend";
 import { Field } from "@bentley/presentation-common";
-import { PropertyData, PropertyCategory } from "@bentley/ui-components";
+import { PropertyCategory, PropertyData } from "@bentley/ui-components";
 import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
 export class PropertyDataProvider extends PresentationPropertyDataProvider {
   // tslint:disable-next-line:naming-convention
   protected isFieldFavorite = (field: Field): boolean =>
-    this._enableFavoriteProperties ? this._parentIsFieldFavorite(field) : false;
+    this._enableFavoriteProperties ? this._parentIsFieldFavorite(field) : false
 
   private _parentIsFieldFavorite = this.isFieldFavorite;
   private _enableFavoriteProperties: boolean;
@@ -17,7 +17,7 @@ export class PropertyDataProvider extends PresentationPropertyDataProvider {
   constructor(
     iModelConnection: IModelConnection,
     rulesetId?: string,
-    enableFavoriteProperties?: boolean
+    enableFavoriteProperties?: boolean,
   ) {
     super({ imodel: iModelConnection, ruleset: rulesetId });
     this.pagingSize = 50;

@@ -4,8 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as i18next from "i18next";
+
 import { I18N } from "@bentley/imodeljs-i18n";
-import { UiError, getClassName } from "@bentley/ui-abstract";
+import { getClassName, UiError } from "@bentley/ui-abstract";
 
 /**
  * Entry point for static initialization required by various components used in the package.
@@ -18,7 +19,7 @@ export class PropertyGridManager {
    * Called by IModelApp to initialize PropertyGridManager
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n: I18N,): Promise<void> {
+  public static async initialize(i18n: I18N): Promise<void> {
     PropertyGridManager._i18n = i18n;
     return PropertyGridManager._i18n.registerNamespace(PropertyGridManager.i18nNamespace)
       .readFinished;
@@ -36,7 +37,7 @@ export class PropertyGridManager {
     if (!PropertyGridManager._i18n)
       throw new UiError(
         PropertyGridManager.loggerCategory(this),
-        "PropertyGridManager not initialized"
+        "PropertyGridManager not initialized",
       );
     return PropertyGridManager._i18n;
   }
@@ -54,12 +55,12 @@ export class PropertyGridManager {
    */
   public static translate(
     key: string | string[],
-    options?: i18next.TranslationOptions
+    options?: i18next.TranslationOptions,
   ): string {
     return PropertyGridManager.i18n.translateWithNamespace(
       PropertyGridManager.i18nNamespace,
       key,
-      options
+      options,
     );
   }
 

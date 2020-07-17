@@ -17,7 +17,7 @@ export const isiOsDevice = (): boolean => {
   if (window.navigator.platform !== undefined)
     if (
       iDevices.find(
-        (device: string) => device.indexOf(window.navigator.platform) !== -1
+        (device: string) => device.indexOf(window.navigator.platform) !== -1,
       )
     )
       iOS = true;
@@ -38,7 +38,7 @@ const copyToClipboardWin = (info: string) => {
 
 const copyToClipboardiOS = (info: string) => {
   const el: HTMLTextAreaElement = document.createElement(
-    "textArea"
+    "textArea",
   ) as HTMLTextAreaElement;
   el.value = info;
   document.body.appendChild(el);

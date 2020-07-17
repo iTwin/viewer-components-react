@@ -2,13 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
-import { WidgetState } from "@bentley/ui-abstract";
 import { BeEvent, Id64 } from "@bentley/bentleyjs-core";
-import {
-  FrontstageDef,
-  WidgetDef,
-  FrontstageManager,
-} from "@bentley/ui-framework";
+import { WidgetState } from "@bentley/ui-abstract";
+import { FrontstageDef, FrontstageManager, WidgetDef } from "@bentley/ui-framework";
 
 /** Used to control properties grid automatic opening based on selection set changes */
 export class PropertiesGridSelectionContext {
@@ -29,13 +25,13 @@ export class PropertiesGridSelectionContext {
   public static initialize(
     _selectionEvent: BeEvent<(ids: Set<string>) => void>,
     _propertyPanelId: string,
-    widgetIds: string[]
+    widgetIds: string[],
   ) {
     PropertiesGridSelectionContext._priorityWidgetIds = widgetIds;
     PropertiesGridSelectionContext._propertyPanelId = _propertyPanelId;
     PropertiesGridSelectionContext._selectionEvent = _selectionEvent;
     _selectionEvent.addListener(
-      PropertiesGridSelectionContext.selectionChangedHandler
+      PropertiesGridSelectionContext.selectionChangedHandler,
     );
   }
 
@@ -51,13 +47,13 @@ export class PropertiesGridSelectionContext {
   public static clear() {
     if (PropertiesGridSelectionContext._selectionEvent)
       PropertiesGridSelectionContext._selectionEvent.removeListener(
-        PropertiesGridSelectionContext.selectionChangedHandler
+        PropertiesGridSelectionContext.selectionChangedHandler,
       );
   }
 
   /** Returns the priority widgets that are currently opened */
   private static getOpenedPriorityWidgets(
-    activeStage: FrontstageDef
+    activeStage: FrontstageDef,
   ): WidgetDef[] {
     const priorityWidgets: WidgetDef[] = [];
     PropertiesGridSelectionContext._priorityWidgetIds.forEach(
@@ -65,7 +61,7 @@ export class PropertiesGridSelectionContext {
         const widget = activeStage.findWidgetDef(widgetId);
         if (widget && widget.activeState === WidgetState.Open)
           priorityWidgets.push(widget);
-      }
+      },
     );
 
     return priorityWidgets;
@@ -89,14 +85,14 @@ export class PropertiesGridSelectionContext {
     const activeStage = FrontstageManager.activeFrontstageDef;
     if (activeStage) {
       const propertyWidget = activeStage.findWidgetDef(
-        PropertiesGridSelectionContext._propertyPanelId
+        PropertiesGridSelectionContext._propertyPanelId,
       );
       if (propertyWidget) {
         // Get widgets that we want to keep in context if they are open
         const priorityWidgets = PropertiesGridSelectionContext._suspended
           ? []
           : PropertiesGridSelectionContext.getOpenedPriorityWidgets(
-            activeStage
+            activeStage,
           );
 
         if (PropertiesGridSelectionContext.emptyOrValidIds(ids)) {
@@ -109,12 +105,12 @@ export class PropertiesGridSelectionContext {
             propertyWidget.setWidgetState(
               !ids || ids.size === 0
                 ? WidgetState.Hidden
-                : PropertiesGridSelectionContext._propertyWidgetLastState
+                : PropertiesGridSelectionContext._propertyWidgetLastState,
             );
           } else {
             // Hide or close so that user can access property panel
             propertyWidget.setWidgetState(
-              !ids || ids.size === 0 ? WidgetState.Hidden : WidgetState.Closed
+              !ids || ids.size === 0 ? WidgetState.Hidden : WidgetState.Closed,
             );
             // Since the call above will cause the other widgets to close, we must go ahead and open them
             priorityWidgets.forEach((widget: WidgetDef) => {
