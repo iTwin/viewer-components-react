@@ -36,3 +36,6 @@ common/temp/**
 package-deps.json
 *.build.log
 *.build.error.log
+
+# DS store
+.DS_Store
