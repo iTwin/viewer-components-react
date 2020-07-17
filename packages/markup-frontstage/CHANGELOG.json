@@ -1,0 +1,17 @@
+{
+  "name": "@bentley/markup-frontstage-react",
+  "entries": [
+    {
+      "version": "1.0.1",
+      "tag": "@bentley/markup-frontstage-react_v1.0.1",
+      "date": "Fri, 17 Jul 2020 20:05:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added markup frontstage"
+          }
+        ]
+      }
+    }
+  ]
+}
