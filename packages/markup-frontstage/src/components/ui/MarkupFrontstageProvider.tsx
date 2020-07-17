@@ -149,7 +149,7 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
           // change viewflags here if needed, should be before following.
           selectedView.changeView(oldViewState);
         }
-        // As per Diego, emphasized elements are not saved in view state, which we have to preserve manually as follow
+        // Emphasized elements are not saved in view state, which we have to preserve manually as follow
         // order matters so apply following after viewstage changes
         if (selectedView && oldEmphasizedElementsProps) {
           this._createEmphasizedElements(
