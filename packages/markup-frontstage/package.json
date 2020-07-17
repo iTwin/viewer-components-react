@@ -12,7 +12,7 @@
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
     "clean": "rimraf lib",
     "lint": "tslint -p . 1>&2",
-    "test": "jest",
+    "test": "jest -u",
     "cover": "npm test"
   },
   "keywords": [
