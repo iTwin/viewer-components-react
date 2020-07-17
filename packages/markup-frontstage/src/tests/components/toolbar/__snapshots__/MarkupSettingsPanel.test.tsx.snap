@@ -16,7 +16,7 @@ exports[`MarkupSettingsPanel tool testing should render 1`] = `
         data-testid="stroke-color-picker-button"
       >
         <span
-          class="toolName"
+          class="markupToolName"
         />
         <button
           class="components-colorpicker-button"
@@ -28,7 +28,7 @@ exports[`MarkupSettingsPanel tool testing should render 1`] = `
         data-testid="fill-color-picker-button"
       >
         <span
-          class="toolName"
+          class="markupToolName"
         />
         <button
           class="components-colorpicker-button"
@@ -40,7 +40,7 @@ exports[`MarkupSettingsPanel tool testing should render 1`] = `
         data-testid="stroke-weight-picker-button"
       >
         <span
-          class="toolName"
+          class="markupToolName"
         />
         <div>
           <button
@@ -63,7 +63,7 @@ exports[`MarkupSettingsPanel tool testing should render 1`] = `
         data-testid="alpha-slider"
       >
         <span
-          class="toolName"
+          class="markupToolName"
         />
         <div
           class="components-alpha-container-horizontal markupTransparencySlider"
@@ -92,7 +92,7 @@ exports[`MarkupSettingsPanel tool testing should render 1`] = `
         data-testid="text-color-picker-button"
       >
         <span
-          class="toolName"
+          class="markupToolName"
         />
         <button
           class="components-colorpicker-button"

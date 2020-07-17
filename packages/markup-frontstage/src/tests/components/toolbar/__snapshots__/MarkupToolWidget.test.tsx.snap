@@ -5,7 +5,7 @@ exports[`Markup Tool Widget testing should render 1`] = `
   data-testid="markup-tool-widget-container"
 >
   <div
-    class="nz-tools-widget verticalToolbar"
+    class="nz-tools-widget markupVerticalToolbar"
   >
     <div
       class="nz-vertical-tool-area"

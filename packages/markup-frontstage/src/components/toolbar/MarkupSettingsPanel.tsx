@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { ColorDef } from "@bentley/imodeljs-common";
 import { MarkupApp } from "@bentley/imodeljs-markup";
 import {
@@ -310,8 +310,8 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
         ? firstSelectedElement?.get(0)?.node?.style.strokeOpacity
         : firstSelectedElement?.type === "line" &&
           firstSelectedElement?.node.style.opacity
-          ? firstSelectedElement?.node.style.opacity
-          : firstSelectedElement?.node.style.strokeOpacity;
+        ? firstSelectedElement?.node.style.opacity
+        : firstSelectedElement?.node.style.strokeOpacity;
       const strokeWidth = isBoxedTextGType
         ? firstSelectedElement?.get(0)?.node?.style.strokeWidth
         : firstSelectedElement?.node.style.strokeWidth;
@@ -363,7 +363,7 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
             className={styles.markupContainerSetting}
             data-testid={"stroke-color-picker-button"}
           >
-            <span className={styles.toolName}>{stroke}</span>
+            <span className={styles.markupToolName}>{stroke}</span>
             <ColorPickerButton
               activeColor={strokeColor}
               onColorPick={(color: ColorDef) => {
@@ -382,7 +382,7 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
             className={styles.markupContainerSetting}
             data-testid={"fill-color-picker-button"}
           >
-            <span className={styles.toolName}>{fill}</span>
+            <span className={styles.markupToolName}>{fill}</span>
             <ColorPickerButton
               activeColor={fillColor}
               onColorPick={(color: ColorDef) => {
@@ -397,7 +397,7 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
             className={styles.markupContainerSetting}
             data-testid={"stroke-weight-picker-button"}
           >
-            <span className={styles.toolName}>{width}</span>
+            <span className={styles.markupToolName}>{width}</span>
             <WeightPickerButton
               activeWeight={activeWeight}
               onLineWeightPick={(weight: number) => {
@@ -414,7 +414,7 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
             className={styles.markupContainerSetting}
             data-testid={"alpha-slider"}
           >
-            <span className={styles.toolName}>{opacity}</span>
+            <span className={styles.markupToolName}>{opacity}</span>
             <AlphaSlider
               className={styles.markupTransparencySlider}
               alpha={transparency}
@@ -429,7 +429,7 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
             className={styles.markupContainerSetting}
             data-testid={"text-color-picker-button"}
           >
-            <span className={styles.toolName}>{text}</span>
+            <span className={styles.markupToolName}>{text}</span>
             <ColorPickerButton
               activeColor={textColor}
               onColorPick={(color: ColorDef) => {
