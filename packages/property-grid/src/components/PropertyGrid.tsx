@@ -79,7 +79,7 @@ export class PropertyGrid extends React.Component<
   PropertyGridProps,
   PropertyGridState
   > {
-  private static UnifiedSelectionPropertyGrid = propertyGridWithUnifiedSelection(
+  private static _unifiedSelectionPropertyGrid = propertyGridWithUnifiedSelection(
     CorePropertyGrid,
   );
 
@@ -490,7 +490,7 @@ export class PropertyGrid extends React.Component<
             )}
         </div>
         <div className="property-grid-react-panel-class">{this.state.className}</div>
-        <PropertyGrid.UnifiedSelectionPropertyGrid
+        <PropertyGrid._unifiedSelectionPropertyGrid
           orientation={this.props.orientation ?? Orientation.Horizontal}
           isOrientationFixed={this.props.isOrientationFixed ?? true}
           dataProvider={this._dataProvider}
