@@ -8,10 +8,11 @@ import { PropertyCategory, PropertyData } from "@bentley/ui-components";
 import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
 export class PropertyDataProvider extends PresentationPropertyDataProvider {
   // tslint:disable-next-line:naming-convention
+  private _parentIsFieldFavorite = this.isFieldFavorite;
+
   protected isFieldFavorite = (field: Field): boolean =>
     this._enableFavoriteProperties ? this._parentIsFieldFavorite(field) : false
 
-  private _parentIsFieldFavorite = this.isFieldFavorite;
   private _enableFavoriteProperties: boolean;
 
   constructor(
