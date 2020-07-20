@@ -5,6 +5,11 @@
     "lockedMajor": 2
   },
   {
+    "policyName": "markup-frontstage",
+    "definitionName": "individualVersion",
+    "lockedMajor": 1
+  },
+  {
     "policyName": "tree-widget",
     "definitionName": "individualVersion",
     "lockedMajor": 1

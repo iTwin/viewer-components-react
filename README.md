@@ -12,7 +12,7 @@ List of packages within this repository:
 | ---------------------------- | ---------------------------- |
 | @bentley/imodel-select-react | packages/imodel-select       |
 | @bentley/tree-widget-react   | packages/tree-widget         |
-| @bentley/property-grid-react | packages/property-grid-react |
+| @bentley/property-grid       | packages/property-grid       |
 
 ## Adding a new "project"
 

@@ -7,9 +7,7 @@
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
   "gitPolicy": {
-    "allowedEmailRegExps": [
-      "[^@]+@users\\.noreply\\.github\\.com"
-    ],
+    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
   "repository": {
@@ -20,6 +18,11 @@
       "packageName": "@bentley/imodel-select-react",
       "projectFolder": "packages/imodel-select",
       "versionPolicyName": "imodel-select"
+    },
+    {
+      "packageName": "@bentley/markup-frontstage-react",
+      "projectFolder": "packages/markup-frontstage",
+      "versionPolicyName": "markup-frontstage"
     },
     {
       "packageName": "@bentley/tree-widget-react",
