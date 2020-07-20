@@ -1,0 +1,6 @@
+{
+  "extends": "@bentley/build-tools/tslint-docs.json",
+  "rules": {
+    "completed-docs": false
+  }
+}

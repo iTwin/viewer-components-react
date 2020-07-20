@@ -28,6 +28,11 @@
       "packageName": "@bentley/tree-widget-react",
       "projectFolder": "packages/tree-widget",
       "versionPolicyName": "tree-widget"
+    },
+    {
+      "packageName": "@bentley/property-grid-react",
+      "projectFolder": "packages/property-grid",
+      "versionPolicyName": "property-grid"
     }
   ]
 }

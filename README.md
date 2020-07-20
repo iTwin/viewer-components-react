@@ -8,12 +8,11 @@ With the repository containing many different packages related to iModel.js, eac
 
 List of packages within this repository:
 
-| Name                             | Folder                                                      |
-| -------------------------------- | ----------------------------------------------------------- |
-| @bentley/imodel-select-react     | [packages/imodel-select](./packages/imodel-select/)         |
-| @bentley/markup-frontstage-react | [packages/markup-frontstage](./packages/markup-frontstage/) |
-| @bentley/tree-widget-react       | [packages/tree-widget](./packages/tree-widget/)             |
-|                                  |                                                             |
+| Name                         | Folder                       |
+| ---------------------------- | ---------------------------- |
+| @bentley/imodel-select-react | packages/imodel-select       |
+| @bentley/tree-widget-react   | packages/tree-widget         |
+| @bentley/property-grid       | packages/property-grid       |
 
 ## Adding a new "project"
 
