@@ -1,0 +1,17 @@
+{
+  "name": "@bentley/property-grid-react",
+  "entries": [
+    {
+      "version": "1.0.1",
+      "tag": "@bentley/property-grid-react_v1.0.1",
+      "date": "Mon, 20 Jul 2020 19:24:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Adjusted package to conform to PR comments for improvements"
+          }
+        ]
+      }
+    }
+  ]
+}
