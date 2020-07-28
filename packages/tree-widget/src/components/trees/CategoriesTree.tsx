@@ -60,11 +60,11 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
 
   const invert = React.useCallback(async () => {
     const activeView = IModelApp.viewManager.getFirstOpenView();
-    const ids = await getCategories(props.iModel, activeView, filteredProvider);
     if (!activeView) {
       return;
     }
 
+    const ids = await getCategories(props.iModel, activeView, filteredProvider);
     let enabled: string[] = [];
     let disabled: string[] = [];
     for (const id of ids) {
@@ -112,12 +112,14 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
             className={"tree-widget-category-tree-toolbar-icon"}
             key="show-all-btn"
             icon="icon-visibility"
+            title={TreeWidget.translate("showAll")}
             onClick={showAll}
           />
           <IconButton
             className={"tree-widget-category-tree-toolbar-icon"}
             key="hide-all-btn"
             icon="icon-visibility-hide-2"
+            title={TreeWidget.translate("hideAll")}
             onClick={hideAll}
           />
           <IconButton
