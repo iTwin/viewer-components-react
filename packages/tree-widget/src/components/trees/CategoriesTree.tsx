@@ -1,19 +1,24 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import {
   IModelApp,
   IModelConnection,
   Viewport,
 } from "@bentley/imodeljs-frontend";
-import { CategoryTree, toggleAllCategories } from "@bentley/ui-framework";
+import {
+  CategoryTree,
+  toggleAllCategories,
+  getCategories,
+} from "@bentley/ui-framework";
 import { IconButton } from "../IconButton";
 import { SearchBar } from "../search-bar/SearchBar";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
 import { TreeWidget } from "../../TreeWidget";
+import { CategoryVisibilityHandler } from "@bentley/ui-framework/lib/ui-framework/imodel-components/category-tree/CategoryVisibilityHandler";
 
 export interface CategoriesTreeComponentProps {
   iModel: IModelConnection;
@@ -53,6 +58,40 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
     );
   }, [props.iModel, filteredProvider]);
 
+  const invert = React.useCallback(async () => {
+    const activeView = IModelApp.viewManager.getFirstOpenView();
+    const ids = await getCategories(props.iModel, activeView, filteredProvider);
+    if (!activeView) {
+      return;
+    }
+
+    let enabled: string[] = [];
+    let disabled: string[] = [];
+    for (const id of ids) {
+      if (activeView.view.viewsCategory(id)) {
+        enabled.push(id);
+      } else {
+        disabled.push(id);
+      }
+    }
+    // Disabled enabled
+    CategoryVisibilityHandler.enableCategory(
+      IModelApp.viewManager,
+      props.iModel,
+      enabled,
+      false,
+      true
+    );
+    // Enable disabled
+    CategoryVisibilityHandler.enableCategory(
+      IModelApp.viewManager,
+      props.iModel,
+      disabled,
+      true,
+      true
+    );
+  }, [props.iModel, filteredProvider]);
+
   return (
     <>
       <SearchBar
@@ -80,6 +119,13 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
             key="hide-all-btn"
             icon="icon-visibility-hide-2"
             onClick={hideAll}
+          />
+          <IconButton
+            key="invert-all-btn"
+            className={"tree-widget-models-tree-toolbar-icon"}
+            title={TreeWidget.translate("invert")}
+            icon="icon-visibility-invert"
+            onClick={invert}
           />
         </div>
       </SearchBar>
