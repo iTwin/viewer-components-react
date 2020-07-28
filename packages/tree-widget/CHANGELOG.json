@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.1.1",
+      "tag": "@bentley/tree-widget-react_v1.1.1",
+      "date": "Tue, 28 Jul 2020 22:10:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixes for tree widgets consistency: Category tree invert functionality, tooltips on buttons and fix for iFrame height of tree not defined properly"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.0",
       "tag": "@bentley/tree-widget-react_v1.1.0",
       "date": "Tue, 14 Jul 2020 22:54:18 GMT",
