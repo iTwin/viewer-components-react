@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Fixes for tree widgets consistency: Category tree invert functionality, tooltips on buttons and fix for iFrame height of tree not defined properly",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "diegopinate@users.noreply.github.com"
+}
