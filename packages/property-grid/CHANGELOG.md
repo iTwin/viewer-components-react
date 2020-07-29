@@ -1,12 +1,11 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Tue, 28 Jul 2020 22:10:32 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Jul 2020 19:24:20 GMT and should not be manually modified.
 
 ## 1.0.1
-Tue, 28 Jul 2020 22:10:32 GMT
+Mon, 20 Jul 2020 19:24:20 GMT
 
 ### Patches
 
 - Adjusted package to conform to PR comments for improvements
-- Fixing inf recursion with property grid data loader
 
