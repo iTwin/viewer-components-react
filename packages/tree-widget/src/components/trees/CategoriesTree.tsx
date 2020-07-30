@@ -13,12 +13,10 @@ import {
   toggleAllCategories,
   getCategories,
 } from "@bentley/ui-framework";
-import { IconButton } from "../IconButton";
-import { SearchBar } from "../search-bar/SearchBar";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
-import { TreeWidget } from "../../TreeWidget";
 import { CategoryVisibilityHandler } from "@bentley/ui-framework/lib/ui-framework/imodel-components/category-tree/CategoryVisibilityHandler";
+import { TreeHeaderComponent } from "../header/TreeHeader";
 
 export interface CategoriesTreeComponentProps {
   iModel: IModelConnection;
@@ -94,43 +92,12 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
 
   return (
     <>
-      <SearchBar
-        value=""
-        className="tree-widget-category-tree-search-bar"
-        valueChangedDelay={500}
-        placeholder={TreeWidget.translate("search")}
-        title={TreeWidget.translate("searchForSomething")}
-        filteringInProgress={searchOptions.isFiltering}
-        onFilterCancel={searchOptions.onFilterCancel}
-        onFilterClear={searchOptions.onFilterCancel}
-        onFilterStart={searchOptions.onFilterStart}
-        onSelectedChanged={searchOptions.onResultSelectedChanged}
-        resultCount={searchOptions.matchedResultCount ?? 0}
-      >
-        <div className="viewer-categories-toolbar">
-          <IconButton
-            className={"tree-widget-category-tree-toolbar-icon"}
-            key="show-all-btn"
-            icon="icon-visibility"
-            title={TreeWidget.translate("showAll")}
-            onClick={showAll}
-          />
-          <IconButton
-            className={"tree-widget-category-tree-toolbar-icon"}
-            key="hide-all-btn"
-            icon="icon-visibility-hide-2"
-            title={TreeWidget.translate("hideAll")}
-            onClick={hideAll}
-          />
-          <IconButton
-            key="invert-all-btn"
-            className={"tree-widget-models-tree-toolbar-icon"}
-            title={TreeWidget.translate("invert")}
-            icon="icon-visibility-invert"
-            onClick={invert}
-          />
-        </div>
-      </SearchBar>
+      <TreeHeaderComponent
+        searchOptions={searchOptions}
+        showAll={showAll}
+        hideAll={hideAll}
+        invert={invert}
+        />
       <CategoryTree
         {...props}
         enablePreloading={props.enablePreloading}
