@@ -5,6 +5,14 @@
 import React, { useState } from "react";
 import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
 
+export interface SearchOptions {
+  isFiltering: boolean;
+  onFilterCancel: () => void;
+  onFilterStart: (newFilter: string) => void;
+  onResultSelectedChanged: (index: number) => void;
+  matchedResultCount: number | undefined;
+}
+
 export const useTreeFilteringState = () => {
   const [filterString, setFilterString] = useState("");
   const [matchedResultCount, setMatchedResultCount] = useState<number>();
@@ -33,15 +41,16 @@ export const useTreeFilteringState = () => {
   }, []);
 
   const isFiltering = !!filterString && matchedResultCount === undefined;
+  const searchOptions: SearchOptions = {
+    isFiltering,
+    onFilterCancel,
+    onFilterStart,
+    onResultSelectedChanged,
+    matchedResultCount,
+  };
 
   return {
-    searchOptions: {
-      isFiltering,
-      onFilterCancel,
-      onFilterStart,
-      onResultSelectedChanged,
-      matchedResultCount,
-    },
+    searchOptions,
     filterString,
     activeMatchIndex,
     onFilterApplied,

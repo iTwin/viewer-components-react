@@ -18,6 +18,7 @@ import { useTreeFilteringState } from "../TreeFilteringState";
 import "./ModelsTree.scss";
 import { ModelProps, ModelQueryParams } from "@bentley/imodeljs-common";
 import { TreeWidget } from "../../TreeWidget";
+import { TreeHeaderComponent } from "../header/TreeHeader";
 
 export interface ModelTreeProps {
   iModel: IModelConnection;
@@ -111,42 +112,12 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
 
   return (
     <>
-      <SearchBar
-        value=""
-        valueChangedDelay={500}
-        placeholder={TreeWidget.translate("search")}
-        title={TreeWidget.translate("searchForSomething")}
-        filteringInProgress={searchOptions.isFiltering}
-        onFilterCancel={searchOptions.onFilterCancel}
-        onFilterClear={searchOptions.onFilterCancel}
-        onFilterStart={searchOptions.onFilterStart}
-        onSelectedChanged={searchOptions.onResultSelectedChanged}
-        resultCount={searchOptions.matchedResultCount ?? 0}
-      >
-        <div className="viewer-categories-toolbar">
-          <IconButton
-            key="show-all-btn"
-            className={"tree-widget-models-tree-toolbar-icon"}
-            icon="icon-visibility"
-            title={TreeWidget.translate("showAll")}
-            onClick={showAll}
-          />
-          <IconButton
-            key="hide-all-btn"
-            className={"tree-widget-models-tree-toolbar-icon"}
-            title={TreeWidget.translate("hideAll")}
-            icon="icon-visibility-hide-2"
-            onClick={hideAll}
-          />
-          <IconButton
-            key="invert-all-btn"
-            className={"tree-widget-models-tree-toolbar-icon"}
-            title={TreeWidget.translate("invert")}
-            icon="icon-visibility-invert"
-            onClick={invert}
-          />
-        </div>
-      </SearchBar>
+      <TreeHeaderComponent
+        searchOptions={searchOptions}
+        showAll={showAll}
+        hideAll={hideAll}
+        invert={invert}
+        />
       <div className="tree-widget-models-tree-container">
         <ModelsTree
           {...props}
