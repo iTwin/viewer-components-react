@@ -12,9 +12,7 @@ export interface TreeHeaderComponentProps {
   searchOptions: SearchOptions;
 }
 
-export function TreeHeaderComponent(props: TreeHeaderComponentProps) {
-  const { searchOptions } = props;
-
+export function TreeHeaderComponent({ searchOptions, showAll, hideAll, invert }: TreeHeaderComponentProps) {
   return (
       <SearchBar
         value=""
@@ -30,29 +28,29 @@ export function TreeHeaderComponent(props: TreeHeaderComponentProps) {
         resultCount={searchOptions.matchedResultCount ?? 0}
       >
         <div>
-          {props.showAll &&
+          {showAll &&
           <IconButton
             className={"tree-widget-header-tree-toolbar-icon"}
             key="show-all-btn"
             icon="icon-visibility"
             title={TreeWidget.translate("showAll")}
-            onClick={props.showAll}
+            onClick={showAll}
           />}
-          {props.hideAll &&
+          {hideAll &&
           <IconButton
             className={"tree-widget-header-tree-toolbar-icon"}
             key="hide-all-btn"
             icon="icon-visibility-hide-2"
             title={TreeWidget.translate("hideAll")}
-            onClick={props.hideAll}
+            onClick={hideAll}
           />}
-          {props.invert &&
+          {invert &&
           <IconButton
             key="invert-all-btn"
             className={"tree-widget-header-tree-toolbar-icon"}
             title={TreeWidget.translate("invert")}
             icon="icon-visibility-invert"
-            onClick={props.invert}
+            onClick={invert}
           />}
         </div>
       </SearchBar>
