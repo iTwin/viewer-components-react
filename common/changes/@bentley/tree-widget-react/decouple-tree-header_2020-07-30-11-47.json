@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Decouple tree header for using in other widgets",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "diegopinate@users.noreply.github.com"
+}
