@@ -52,3 +52,22 @@
     pointer-events: none;
   }
 }
+
+.tree-widget-icon-label {
+  display: inline-block;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  font-family: $uicore-font-family;
+  font-size: $uicore-font-size;
+  color: $buic-icon-color;
+  margin-left: 5px;
+
+  &[disabled] {
+    opacity: 0.4;
+    color: $uicore-gray;
+    background: transparent;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
