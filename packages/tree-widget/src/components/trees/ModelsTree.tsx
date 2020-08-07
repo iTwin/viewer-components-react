@@ -68,9 +68,6 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
       wantPrivate: false,
     };
     const modelProps = await iModel.models.queryProps(queryParams);
-    console.log("\n\nmodelProps:");
-    console.log(modelProps);
-    console.log("\n\n");
     return modelProps.map((mp: GeometricModel3dProps) => ({
       id: mp.id!,
       isPlanProjection: mp.isPlanProjection,
