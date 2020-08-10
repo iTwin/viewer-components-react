@@ -74,7 +74,7 @@ export function TreeHeaderComponent({
         )}
         {toggle2D && toggle2DIcon && (
           <IconButton
-            className={"tree-widget-models-tree-toolbar-icon"}
+            className={"tree-widget-header-tree-toolbar-icon"}
             key="view-2d-btn"
             icon={toggle2DIcon}
             title={TreeWidget.translate("toggle2DViews")}
@@ -84,7 +84,7 @@ export function TreeHeaderComponent({
         )}
         {toggle3D && toggle3DIcon && (
           <IconButton
-            className={"tree-widget-models-tree-toolbar-icon"}
+            className={"tree-widget-header-tree-toolbar-icon"}
             key="view-3d-btn"
             icon={toggle3DIcon}
             title={TreeWidget.translate("toggle3DViews")}
