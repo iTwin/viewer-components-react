@@ -28,7 +28,7 @@ export interface TreeWidgetControlOptions {
   enablePreloading?: boolean;
   enableElementsClassGrouping?: boolean;
   allViewports?: boolean;
-  additionalTrees?: TreeWidgetTree[];
+  additionalTrees?: SelectableContentDefinition[];
   additionalProps?: {
     modelsTree: {};
     categoriesTree: {};
@@ -146,7 +146,8 @@ import {
 } from "@bentley/ui-framework";
 import React from "react";
 import { IModelConnection, Viewport } from "@bentley/imodeljs-frontend";
-import { TreeWidgetTree, TreeWidgetComponent } from "./TreeWidgetComponent";
+import { SelectableContentDefinition } from "@bentley/ui-components";
+import { TreeWidgetComponent } from "./TreeWidgetComponent";
 
 export interface TreeWidgetControlOptions {
   iModelConnection: IModelConnection;
@@ -158,7 +159,7 @@ export class TreeWidgetControl extends WidgetControl {
 
     const { iModelConnection } = options;
 
-    const spatialContainmentComponent = (
+    const spatialContainmentComponent = () => (
       <SpatialContainmentTree
         iModel={iModelConnection}
         enablePreloading={enablePreloading}
@@ -167,11 +168,11 @@ export class TreeWidgetControl extends WidgetControl {
       />
     );
 
-    const trees: TreeWidgetTree[] = [
+    const trees: SelectableContentDefinition[] = [
       {
         label: UiFramework.translate("visibilityWidget.containment"),
         id: "spatial-containment-tree",
-        component: spatialContainmentComponent,
+        render: spatialContainmentComponent,
       },
     ];
 

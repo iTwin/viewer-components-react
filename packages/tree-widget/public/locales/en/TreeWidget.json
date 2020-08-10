@@ -4,5 +4,9 @@
   "showAll": "Show All",
   "hideAll": "Hide All",
   "invert": "Invert",
+  "toggle2DViews": "Toggle 2D Views",
+  "toggle3DViews": "Toggle 3D Views",
+  "label2D": "2D",
+  "label3D": "3D",
   "learnMore": "Learn more"
 }

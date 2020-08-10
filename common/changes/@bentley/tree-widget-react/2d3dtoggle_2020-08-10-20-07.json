@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Added 2D / 3D toggle to tree view header",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "cortneysmithbentley@users.noreply.github.com"
+}
