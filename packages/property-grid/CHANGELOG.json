@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "1.0.2",
+      "tag": "@bentley/property-grid-react_v1.0.2",
+      "date": "Tue, 11 Aug 2020 14:24:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing inf recursion with property grid data loader"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.1",
       "tag": "@bentley/property-grid-react_v1.0.1",
       "date": "Mon, 20 Jul 2020 19:24:20 GMT",
