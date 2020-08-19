@@ -33,8 +33,8 @@ import {
   ContextMenuItem,
   ContextMenuItemProps,
   GlobalContextMenu,
-  Orientation,
   Icon,
+  Orientation,
 } from "@bentley/ui-core";
 import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
 

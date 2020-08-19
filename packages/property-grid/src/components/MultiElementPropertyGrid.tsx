@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+ *--------------------------------------------------------------------------------------------*/
+import "./MultiElementPropertyGrid.scss";
 import { Presentation } from "@bentley/presentation-frontend";
 
 import { PropertyGrid, PropertyGridProps } from "./PropertyGrid";
@@ -19,6 +24,7 @@ interface MultiElementPropertyGridState {
   mainPropertyGrid: JSX.Element;
   list: JSX.Element;
   singlePropertyGrid?: JSX.Element;
+  animationForward: boolean;
 }
 
 /**
@@ -36,6 +42,7 @@ export class MultiElementPropertyGrid extends React.Component<
       content: MultiElementPropertyContent.PropertyGrid,
       mainPropertyGrid: this._renderMainPropertyGrid(),
       list: this._renderList(),
+      animationForward: true,
     };
   }
 
@@ -43,6 +50,7 @@ export class MultiElementPropertyGrid extends React.Component<
   private _onOpenList = () => {
     this.setState({
       content: MultiElementPropertyContent.ElementList,
+      animationForward: true,
     });
   };
 
@@ -60,6 +68,7 @@ export class MultiElementPropertyGrid extends React.Component<
   private _onCloseList = () => {
     this.setState({
       content: MultiElementPropertyContent.PropertyGrid,
+      animationForward: false,
     });
   };
 
@@ -68,6 +77,7 @@ export class MultiElementPropertyGrid extends React.Component<
     this.setState({
       content: MultiElementPropertyContent.SingleElementPropertyGrid,
       singlePropertyGrid: this._renderSinglePropertyGrid(instanceKey),
+      animationForward: true,
     });
   };
 
@@ -102,6 +112,7 @@ export class MultiElementPropertyGrid extends React.Component<
   private _onCloseSinglePropertyGrid = () => {
     this.setState({
       content: MultiElementPropertyContent.ElementList,
+      animationForward: false,
     });
   };
 
@@ -126,15 +137,38 @@ export class MultiElementPropertyGrid extends React.Component<
 
   /** Render component using react-spring transition component */
   public render() {
-    // TODO: Animations
-    switch (this.state.content) {
-      case MultiElementPropertyContent.PropertyGrid:
-        return this.state.mainPropertyGrid;
-      case MultiElementPropertyContent.ElementList:
-        return this.state.list;
-      case MultiElementPropertyContent.SingleElementPropertyGrid:
-        return this.state.singlePropertyGrid;
+    const items = [this.state.mainPropertyGrid, this.state.list];
+    if (this.state.singlePropertyGrid) {
+      items.push(this.state.singlePropertyGrid);
     }
+
+    const fromAnim = this.state.animationForward
+      ? "translate(100%,0)"
+      : "translate(-100%,0)";
+    const leaveAnim = !this.state.animationForward
+      ? "translate(100%,0)"
+      : "translate(-100%,0)";
+
+    return (
+      <div className="property-grid-react-transition-container">
+        <Transition
+          items={this.state.content as number}
+          config={{ duration: 500 }}
+          from={{ transform: fromAnim }}
+          enter={{ transform: "translate(0,0)" }}
+          leave={{ transform: leaveAnim }}
+        >
+          {(index) => (style) => (
+            <animated.div
+              className="property-grid-react-animated-tab"
+              style={style}
+            >
+              {items[index]}
+            </animated.div>
+          )}
+        </Transition>
+      </div>
+    );
   }
 }
 
