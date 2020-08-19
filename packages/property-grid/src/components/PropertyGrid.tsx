@@ -15,6 +15,7 @@ import {
 import { Field } from "@bentley/presentation-common";
 import {
   IPresentationPropertyDataProvider,
+  PresentationPropertyDataProvider,
   propertyGridWithUnifiedSelection,
 } from "@bentley/presentation-components";
 import { Presentation } from "@bentley/presentation-frontend";
@@ -33,6 +34,7 @@ import {
   ContextMenuItemProps,
   GlobalContextMenu,
   Orientation,
+  Icon,
 } from "@bentley/ui-core";
 import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
 
@@ -67,6 +69,10 @@ export interface PropertyGridProps {
   featureTracking?: PropertyGridFeatureTracking;
   rulesetId?: string;
   rootClassName?: string;
+  dataProvider?: PresentationPropertyDataProvider;
+  onInfoButton?: () => void;
+  onBackButton?: () => void;
+  disableUnifiedSelection?: boolean;
 }
 
 interface PropertyGridState {
@@ -85,17 +91,20 @@ export class PropertyGrid extends React.Component<
     CorePropertyGrid
   );
 
-  private _dataProvider: PropertyDataProvider;
+  private _dataProvider: PresentationPropertyDataProvider;
   private _dataChangedHandler: () => void;
   private _unmounted = false;
   constructor(props: PropertyGridProps) {
     super(props);
 
-    this._dataProvider = new PropertyDataProvider(
-      props.iModelConnection,
-      props.rulesetId,
-      props.enableFavoriteProperties
-    );
+    this._dataProvider =
+      props.dataProvider !== undefined
+        ? props.dataProvider
+        : new PropertyDataProvider(
+            props.iModelConnection,
+            props.rulesetId,
+            props.enableFavoriteProperties
+          );
 
     this._dataChangedHandler = this._onDataChanged.bind(this);
     this.state = { className: "", sharedFavorites: [] };
@@ -471,27 +480,71 @@ export class PropertyGrid extends React.Component<
     );
   }
 
+  private _renderHeader() {
+    return (
+      <div className="property-grid-react-panel-header">
+        {this.props.onBackButton !== undefined && (
+          <div
+            className="property-grid-react-panel-back-btn"
+            onClick={this.props.onBackButton}
+          >
+            <Icon
+              className="property-grid-react-panel-icon"
+              iconSpec="icon-progress-backward"
+            />
+          </div>
+        )}
+        <div className="property-grid-react-panel-label-and-class">
+          <div className="property-grid-react-panel-label">
+            {this.state.title &&
+              PropertyValueRendererManager.defaultManager.render(
+                this.state.title
+              )}
+          </div>
+          <div className="property-grid-react-panel-class">
+            {this.state.className}
+          </div>
+        </div>
+        {this.props.onInfoButton !== undefined && (
+          <div
+            className="property-grid-react-panel-info-btn"
+            onClick={this.props.onInfoButton}
+          >
+            <Icon
+              className="property-grid-react-panel-icon"
+              iconSpec="icon-info-hollow"
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   public render() {
     return (
       <div className={this.props.rootClassName}>
-        <div className="property-grid-react-panel-label">
-          {this.state.title &&
-            PropertyValueRendererManager.defaultManager.render(
-              this.state.title
-            )}
-        </div>
-        <div className="property-grid-react-panel-class">
-          {this.state.className}
-        </div>
-        <PropertyGrid._unifiedSelectionPropertyGrid
-          orientation={this.props.orientation ?? Orientation.Horizontal}
-          isOrientationFixed={this.props.isOrientationFixed ?? true}
-          dataProvider={this._dataProvider}
-          isPropertyHoverEnabled={true}
-          isPropertySelectionEnabled={true}
-          onPropertyContextMenu={this._onPropertyContextMenu}
-          actionButtonRenderers={[this._shareActionButtonRenderer]}
-        />
+        {this._renderHeader()}
+        {this.props.disableUnifiedSelection ? (
+          <CorePropertyGrid
+            orientation={this.props.orientation ?? Orientation.Horizontal}
+            isOrientationFixed={this.props.isOrientationFixed ?? true}
+            dataProvider={this._dataProvider}
+            isPropertyHoverEnabled={true}
+            isPropertySelectionEnabled={true}
+            onPropertyContextMenu={this._onPropertyContextMenu}
+            actionButtonRenderers={[this._shareActionButtonRenderer]}
+          />
+        ) : (
+          <PropertyGrid._unifiedSelectionPropertyGrid
+            orientation={this.props.orientation ?? Orientation.Horizontal}
+            isOrientationFixed={this.props.isOrientationFixed ?? true}
+            dataProvider={this._dataProvider}
+            isPropertyHoverEnabled={true}
+            isPropertySelectionEnabled={true}
+            onPropertyContextMenu={this._onPropertyContextMenu}
+            actionButtonRenderers={[this._shareActionButtonRenderer]}
+          />
+        )}
         {this._renderContextMenu()}
       </div>
     );

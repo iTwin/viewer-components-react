@@ -4,3 +4,4 @@
 *--------------------------------------------------------------------------------------------*/
 export * from "./PropertyGridManager";
 export * from "./components/PropertyGrid";
+export * from "./components/MultiElementPropertyGrid";

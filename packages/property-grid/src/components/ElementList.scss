@@ -1,0 +1,57 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "~@bentley/ui-core/lib/ui-core/style/index";
+@import "~@bentley/ui-core/lib/ui-core/text/index";
+@import "@bentley/ui-core/lib/ui-core/index";
+
+.property-grid-react-element-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.property-grid-react-element-list-header {
+  height: 52px; // specific size based on property grid header
+  display: flex;
+  padding-top: $uicore-xs;
+}
+
+.property-grid-react-element-list-back-btn {
+  padding: $uicore-xs;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.property-grid-react-element-list-icon {
+  font-size: 24px;
+  margin: auto;
+  padding: $uicore-s;
+}
+
+.property-grid-react-element-list-title {
+  @include uicore-text(leading);
+  margin: auto;
+  margin-left: 0;
+  padding: $uicore-xs;
+}
+
+.property-grid-react-element-list-container {
+  @include uicore-scrollbar();
+  margin: $uicore-xs;
+  height: 100%;
+  border: solid;
+  border-width: 1px;
+  border-color: $uicore-gray;
+  overflow: auto;
+}
+
+.property-grid-react-element-list-results-label {
+  padding: $uicore-s;
+  @include uicore-text(body);
+  color: $uicore-gray;
+  font-size: $uicore-font-size-small;
+  font-weight: $uicore-font-weight-light;
+}

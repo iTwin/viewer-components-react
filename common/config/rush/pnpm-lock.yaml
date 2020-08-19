@@ -29,6 +29,7 @@ dependencies:
   jest-mock-console: 1.0.1_jest@26.1.0
   nodemon: 1.19.4
   react-redux: 7.2.0_redux@4.0.5
+  react-spring: 8.0.27
   react-test-renderer: 16.13.1
   redux: 4.0.5
   redux-mock-store: 1.5.4
@@ -16553,6 +16554,28 @@ packages:
     dev: false
     resolution:
       integrity: sha512-xq0PPsbkNI9xEd6yTrGPr7hzf6XfIgnsxuUEdRJELq+kLPHMsO3ymFCjhiYP35wlDPn9W46+rHDsJd7LFYteMw==
+  /react-spring/8.0.27:
+    dependencies:
+      '@babel/runtime': 7.10.5
+      prop-types: 15.7.2
+    dev: false
+    peerDependencies:
+      react: '>= 16.8.0'
+      react-dom: '>= 16.8.0'
+    resolution:
+      integrity: sha512-nDpWBe3ZVezukNRandTeLSPcwwTMjNVu1IDq9qA/AMiUqHuRN4BeSWvKr3eIxxg1vtiYiOLy4FqdfCP5IoP77g==
+  /react-spring/8.0.27_react-dom@16.13.1+react@16.13.1:
+    dependencies:
+      '@babel/runtime': 7.10.5
+      prop-types: 15.7.2
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+    dev: false
+    peerDependencies:
+      react: '>= 16.8.0'
+      react-dom: '>= 16.8.0'
+    resolution:
+      integrity: sha512-nDpWBe3ZVezukNRandTeLSPcwwTMjNVu1IDq9qA/AMiUqHuRN4BeSWvKr3eIxxg1vtiYiOLy4FqdfCP5IoP77g==
   /react-style-proptype/3.2.2:
     dependencies:
       prop-types: 15.7.2
@@ -20715,6 +20738,7 @@ packages:
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
       react-redux: 7.2.0_49f644e2f7de4182503f8b93abece808
+      react-spring: 8.0.27_react-dom@16.13.1+react@16.13.1
       redux: 4.0.5
       rimraf: 3.0.2
       tslint: 5.20.1_typescript@3.7.5
@@ -20722,7 +20746,7 @@ packages:
     dev: false
     name: '@rush-temp/property-grid-react'
     resolution:
-      integrity: sha512-9cy/k2jOYkfX/9ufSEwT3LXGyd4T2giUP6dcziqGEurhMS53BXwtPN+SX0URUxJr5Kvgjel/IuaC001QGaXAaw==
+      integrity: sha512-26qNKyGy8igXwx7tx/DJArgFlh9psiFmUnnva+fcJ+W/iEBNXHijkOC8JKnGg7J6dqwW1VpLRa7pna6r18lKPg==
       tarball: 'file:projects/property-grid-react.tgz'
     version: 0.0.0
   'file:projects/tree-widget-react.tgz':
@@ -20804,6 +20828,7 @@ specifiers:
   jest-mock-console: ^1.0.0
   nodemon: ^1.19.1
   react-redux: ^7.2.0
+  react-spring: ^8.0.27
   react-test-renderer: 16.13.1
   redux: ^4.0.3
   redux-mock-store: ^1.5.4
