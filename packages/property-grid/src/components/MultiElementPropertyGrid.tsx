@@ -12,7 +12,6 @@ import { ElementList } from "./ElementList";
 import { InstanceKey, KeySet } from "@bentley/presentation-common";
 import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
 import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
-import { TileLoadSorter } from "@bentley/orbitgt-core/lib/pointcloud/render/TileLoadSorter";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
