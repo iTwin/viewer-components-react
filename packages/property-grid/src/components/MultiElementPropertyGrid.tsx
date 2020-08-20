@@ -12,6 +12,7 @@ import { ElementList } from "./ElementList";
 import { InstanceKey, KeySet } from "@bentley/presentation-common";
 import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
 import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
+import { TileLoadSorter } from "@bentley/orbitgt-core/lib/pointcloud/render/TileLoadSorter";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
@@ -44,6 +45,24 @@ export class MultiElementPropertyGrid extends React.Component<
       list: this._renderList(),
       animationForward: true,
     };
+  }
+
+  private _onSelectionChange = () => {
+    this.setState({
+      content: MultiElementPropertyContent.PropertyGrid,
+      mainPropertyGrid: this._renderMainPropertyGrid(),
+      list: this._renderList(),
+      singlePropertyGrid: undefined,
+      animationForward: false,
+    });
+  }
+
+  public componentDidMount() {
+    Presentation.selection.selectionChange.addListener(this._onSelectionChange);
+  }
+
+  public componentWillUnmount() {
+    Presentation.selection.selectionChange.removeListener(this._onSelectionChange);
   }
 
   /** Set the element list as our current content */
