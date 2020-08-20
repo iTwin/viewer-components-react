@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "1.1.0",
+      "tag": "@bentley/property-grid-react_v1.1.0",
+      "date": "Thu, 20 Aug 2020 19:13:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added multi-element property grid that has support for selecting single elements based on selection set. First pass at property grid extension."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.2",
       "tag": "@bentley/property-grid-react_v1.0.2",
       "date": "Tue, 11 Aug 2020 14:24:07 GMT",
