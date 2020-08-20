@@ -20,6 +20,8 @@
   cursor: pointer;
   margin-left: auto;
   padding: $uicore-xs;
+  display: flex;
+  flex-direction: column;
 }
 
 .property-grid-react-panel-back-btn {
