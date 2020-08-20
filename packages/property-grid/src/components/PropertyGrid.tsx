@@ -1,20 +1,24 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* Licensed under the MIT License. See LICENSE.md in the project root for license terms.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGrid.scss";
+
 import * as React from "react";
-import { IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
+
 import {
-  AccessToken,
-  AuthorizedClientRequestContext,
-} from "@bentley/itwin-client";
+  AuthorizedFrontendRequestContext,
+  IModelApp,
+  IModelConnection,
+} from "@bentley/imodeljs-frontend";
 import { Field } from "@bentley/presentation-common";
-import { IPresentationPropertyDataProvider, propertyGridWithUnifiedSelection } from "@bentley/presentation-components";
 import {
-  Presentation,
-} from "@bentley/presentation-frontend";
+  IPresentationPropertyDataProvider,
+  PresentationPropertyDataProvider,
+  propertyGridWithUnifiedSelection,
+} from "@bentley/presentation-components";
+import { Presentation } from "@bentley/presentation-frontend";
 import { SettingsStatus } from "@bentley/product-settings-client";
 import { PropertyRecord } from "@bentley/ui-abstract";
 import {
@@ -29,16 +33,17 @@ import {
   ContextMenuItem,
   ContextMenuItemProps,
   GlobalContextMenu,
+  Icon,
   Orientation,
 } from "@bentley/ui-core";
 import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
+
+import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
 import { copyToClipboard } from "../api/WebUtilities";
+import { PropertyGridManager } from "../PropertyGridManager";
 
 const sharedNamespace = "favoriteProperties";
 const sharedName = "sharedProps";
-import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
-import { PropertyGridManager } from "../PropertyGridManager";
-
 type ContextMenuItemInfo = ContextMenuItemProps &
   React.Attributes & { label: string };
 
@@ -54,7 +59,6 @@ export interface OnSelectEventArgs {
 
 export interface PropertyGridProps {
   iModelConnection: IModelConnection;
-  accessToken: AccessToken;
   projectId: string;
   orientation?: Orientation;
   isOrientationFixed?: boolean;
@@ -65,6 +69,10 @@ export interface PropertyGridProps {
   featureTracking?: PropertyGridFeatureTracking;
   rulesetId?: string;
   rootClassName?: string;
+  dataProvider?: PresentationPropertyDataProvider;
+  onInfoButton?: () => void;
+  onBackButton?: () => void;
+  disableUnifiedSelection?: boolean;
 }
 
 interface PropertyGridState {
@@ -78,25 +86,24 @@ interface PropertyGridState {
 export class PropertyGrid extends React.Component<
   PropertyGridProps,
   PropertyGridState
-  > {
+> {
   private static _unifiedSelectionPropertyGrid = propertyGridWithUnifiedSelection(
     CorePropertyGrid,
   );
 
-  private _dataProvider: PropertyDataProvider;
+  private _dataProvider: PresentationPropertyDataProvider;
   private _dataChangedHandler: () => void;
   private _unmounted = false;
-  private _requestContext?: AuthorizedClientRequestContext;
   constructor(props: PropertyGridProps) {
     super(props);
 
-    this._dataProvider = new PropertyDataProvider(props.iModelConnection, props.rulesetId, props.enableFavoriteProperties);
-
-    if (this.props.accessToken) {
-      this._requestContext = new AuthorizedClientRequestContext(
-        this.props.accessToken,
+    this._dataProvider =
+      props.dataProvider ??
+      new PropertyDataProvider(
+        props.iModelConnection,
+        props.rulesetId,
+        props.enableFavoriteProperties,
       );
-    }
 
     this._dataChangedHandler = this._onDataChanged.bind(this);
     this.state = { className: "", sharedFavorites: [] };
@@ -144,9 +151,10 @@ export class PropertyGrid extends React.Component<
   private async _addSharedFavsToData(propertyData: PropertyData) {
     // Get shared favorites & add to data
     let newSharedFavs: string[] = [];
-    if (this._requestContext && this.props.projectId) {
+    if (this.props.projectId) {
+      const requestContext = await AuthorizedFrontendRequestContext.create();
       const result = await IModelApp.settings.getSharedSetting(
-        this._requestContext,
+        requestContext,
         sharedNamespace,
         sharedName,
         false,
@@ -217,35 +225,26 @@ export class PropertyGrid extends React.Component<
 
   private _onAddFavorite = async (propertyField: Field) => {
     // tslint:disable-next-line: no-floating-promises
-    Presentation.favoriteProperties.add(
-      propertyField,
-      this.props.projectId,
-    );
+    Presentation.favoriteProperties.add(propertyField, this.props.projectId);
     this.setState({ contextMenu: undefined });
   }
 
   private _onRemoveFavorite = async (propertyField: Field) => {
     // tslint:disable-next-line: no-floating-promises
-    Presentation.favoriteProperties.remove(
-      propertyField,
-      this.props.projectId,
-    );
+    Presentation.favoriteProperties.remove(propertyField, this.props.projectId);
     this.setState({ contextMenu: undefined });
   }
 
   private _onShareFavorite = async (propName: string) => {
-    if (
-      !this._requestContext ||
-      !this.props.projectId ||
-      !this.state.sharedFavorites
-    ) {
+    if (!this.props.projectId || !this.state.sharedFavorites) {
       this.setState({ contextMenu: undefined });
       return;
     }
     this.state.sharedFavorites.push(propName);
 
+    const requestContext = await AuthorizedFrontendRequestContext.create();
     const result = await IModelApp.settings.saveSharedSetting(
-      this._requestContext,
+      requestContext,
       this.state.sharedFavorites,
       sharedNamespace,
       sharedName,
@@ -259,7 +258,7 @@ export class PropertyGrid extends React.Component<
       );
     }
     const result2 = await IModelApp.settings.getSharedSetting(
-      this._requestContext,
+      requestContext,
       sharedNamespace,
       sharedName,
       false,
@@ -275,11 +274,7 @@ export class PropertyGrid extends React.Component<
   }
 
   private _onUnshareFavorite = async (propName: string) => {
-    if (
-      !this._requestContext ||
-      !this.props.projectId ||
-      !this.state.sharedFavorites
-    ) {
+    if (!this.props.projectId || !this.state.sharedFavorites) {
       this.setState({ contextMenu: undefined });
       return;
     }
@@ -287,8 +282,9 @@ export class PropertyGrid extends React.Component<
     if (index > -1) {
       this.state.sharedFavorites.splice(index, 1);
     }
+    const requestContext = await AuthorizedFrontendRequestContext.create();
     const result = await IModelApp.settings.saveSharedSetting(
-      this._requestContext,
+      requestContext,
       this.state.sharedFavorites,
       sharedNamespace,
       sharedName,
@@ -326,8 +322,8 @@ export class PropertyGrid extends React.Component<
 
   private _onCopyText = async (property: PropertyRecord) => {
     if (property.description) copyToClipboard(property.description);
-    else
-      if (this.props.debugLog) this.props.debugLog(
+    else if (this.props.debugLog)
+      this.props.debugLog(
         "PROPERTIES COPY TEXT FAILED TO RUN DUE TO UNDEFINED PROPERTY RECORD DESCRIPTION",
       );
     this.setState({ contextMenu: undefined });
@@ -373,10 +369,7 @@ export class PropertyGrid extends React.Component<
           ),
         });
       } else if (
-        Presentation.favoriteProperties.has(
-          field,
-          this.props.projectId,
-        )
+        Presentation.favoriteProperties.has(field, this.props.projectId)
       ) {
         items.push({
           key: "share-favorite",
@@ -417,25 +410,31 @@ export class PropertyGrid extends React.Component<
       items.push({
         key: "copy-text",
         onSelect: async () => {
-          if (this.props.featureTracking) this.props.featureTracking.trackCopyPropertyText();
+          if (this.props.featureTracking)
+            this.props.featureTracking.trackCopyPropertyText();
           await this._onCopyText(args.propertyRecord);
         },
         title: PropertyGridManager.translate(
           "context-menu.copy-text.description",
         ),
-        label: PropertyGridManager.translate(
-          "context-menu.copy-text.label",
-        ),
+        label: PropertyGridManager.translate("context-menu.copy-text.label"),
       });
     }
 
-    if (this.props.additionalContextMenuOptions && this.props.additionalContextMenuOptions.length > 0) {
+    if (
+      this.props.additionalContextMenuOptions &&
+      this.props.additionalContextMenuOptions.length > 0
+    ) {
       for (const option of this.props.additionalContextMenuOptions) {
         items.push({
           ...option,
           onSelect: () => {
             if (option.onSelect) {
-              (option.onSelect as (args: OnSelectEventArgs) => void)({ contextMenuArgs: args, field, dataProvider: this._dataProvider });
+              (option.onSelect as (args: OnSelectEventArgs) => void)({
+                contextMenuArgs: args,
+                field,
+                dataProvider: this._dataProvider,
+              });
             }
 
             this.setState({ contextMenu: undefined });
@@ -480,25 +479,71 @@ export class PropertyGrid extends React.Component<
     );
   }
 
+  private _renderHeader() {
+    return (
+      <div className="property-grid-react-panel-header">
+        {this.props.onBackButton !== undefined && (
+          <div
+            className="property-grid-react-panel-back-btn"
+            onClick={this.props.onBackButton}
+          >
+            <Icon
+              className="property-grid-react-panel-icon"
+              iconSpec="icon-progress-backward"
+            />
+          </div>
+        )}
+        <div className="property-grid-react-panel-label-and-class">
+          <div className="property-grid-react-panel-label">
+            {this.state.title &&
+              PropertyValueRendererManager.defaultManager.render(
+                this.state.title,
+              )}
+          </div>
+          <div className="property-grid-react-panel-class">
+            {this.state.className}
+          </div>
+        </div>
+        {this.props.onInfoButton !== undefined && (
+          <div
+            className="property-grid-react-panel-info-btn"
+            onClick={this.props.onInfoButton}
+          >
+            <Icon
+              className="property-grid-react-panel-icon"
+              iconSpec="icon-info-hollow"
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   public render() {
     return (
       <div className={this.props.rootClassName}>
-        <div className="property-grid-react-panel-label">
-          {this.state.title &&
-            PropertyValueRendererManager.defaultManager.render(
-              this.state.title,
-            )}
-        </div>
-        <div className="property-grid-react-panel-class">{this.state.className}</div>
-        <PropertyGrid._unifiedSelectionPropertyGrid
-          orientation={this.props.orientation ?? Orientation.Horizontal}
-          isOrientationFixed={this.props.isOrientationFixed ?? true}
-          dataProvider={this._dataProvider}
-          isPropertyHoverEnabled={true}
-          isPropertySelectionEnabled={true}
-          onPropertyContextMenu={this._onPropertyContextMenu}
-          actionButtonRenderers={[this._shareActionButtonRenderer]}
-        />
+        {this._renderHeader()}
+        {this.props.disableUnifiedSelection ? (
+          <CorePropertyGrid
+            orientation={this.props.orientation ?? Orientation.Horizontal}
+            isOrientationFixed={this.props.isOrientationFixed ?? true}
+            dataProvider={this._dataProvider}
+            isPropertyHoverEnabled={true}
+            isPropertySelectionEnabled={true}
+            onPropertyContextMenu={this._onPropertyContextMenu}
+            actionButtonRenderers={[this._shareActionButtonRenderer]}
+          />
+        ) : (
+          <PropertyGrid._unifiedSelectionPropertyGrid
+            orientation={this.props.orientation ?? Orientation.Horizontal}
+            isOrientationFixed={this.props.isOrientationFixed ?? true}
+            dataProvider={this._dataProvider}
+            isPropertyHoverEnabled={true}
+            isPropertySelectionEnabled={true}
+            onPropertyContextMenu={this._onPropertyContextMenu}
+            actionButtonRenderers={[this._shareActionButtonRenderer]}
+          />
+        )}
         {this._renderContextMenu()}
       </div>
     );
@@ -509,11 +554,10 @@ export class PropertyGridWidgetControl extends WidgetControl {
   constructor(info: ConfigurableCreateInfo, options: any) {
     super(info, options);
 
-    this.reactElement = (
+    this.reactNode = (
       <PropertyGrid
         orientation={options.orientation}
         isOrientationFixed={options.isOrientationFixed}
-        accessToken={options.accessToken}
         enableCopyingPropertyText={options.enableCopyingPropertyText}
         enableFavoriteProperties={options.enableFavoriteProperties}
         iModelConnection={options.iModelConnection}

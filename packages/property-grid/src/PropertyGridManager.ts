@@ -1,12 +1,13 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* Licensed under the MIT License. See LICENSE.md in the project root for license terms.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+ *--------------------------------------------------------------------------------------------*/
 
 import * as i18next from "i18next";
 
 import { I18N } from "@bentley/imodeljs-i18n";
 import { getClassName, UiError } from "@bentley/ui-abstract";
+import { StateManager } from "@bentley/ui-framework";
 
 /**
  * Entry point for static initialization required by various components used in the package.
@@ -20,15 +21,24 @@ export class PropertyGridManager {
    * @param i18n - The internationalization service created by the IModelApp.
    */
   public static async initialize(i18n: I18N): Promise<void> {
+    if (!StateManager.isInitialized()) {
+      throw new Error(
+        "UiFramework's StateManager must be initialized for Property Grid to work properly as an extension",
+      );
+    }
+
     PropertyGridManager._i18n = i18n;
-    return PropertyGridManager._i18n.registerNamespace(PropertyGridManager.i18nNamespace)
-      .readFinished;
+    return PropertyGridManager._i18n.registerNamespace(
+      PropertyGridManager.i18nNamespace,
+    ).readFinished;
   }
 
   /** Unregisters the PropertyGridManager internationalization service namespace */
   public static terminate() {
     if (PropertyGridManager._i18n)
-      PropertyGridManager._i18n.unregisterNamespace(PropertyGridManager.i18nNamespace);
+      PropertyGridManager._i18n.unregisterNamespace(
+        PropertyGridManager.i18nNamespace,
+      );
     PropertyGridManager._i18n = undefined;
   }
 
