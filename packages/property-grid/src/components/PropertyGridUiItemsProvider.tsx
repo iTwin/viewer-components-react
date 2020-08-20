@@ -1,3 +1,5 @@
+import { connect } from "react-redux";
+
 import { I18N } from "@bentley/imodeljs-i18n";
 import {
   AbstractWidgetProps,
@@ -5,12 +7,11 @@ import {
   StagePanelSection,
   UiItemsProvider,
 } from "@bentley/ui-abstract";
-
-import { PropertyGrid, PropertyGridProps } from "./PropertyGrid";
-import React = require("react");
-import { connect } from "react-redux";
 import { FrameworkState } from "@bentley/ui-framework";
 
+import { PropertyGrid, PropertyGridProps } from "./PropertyGrid";
+
+import React = require("react");
 // Map framework state to property grid props
 const mapStateToProps = (state: FrameworkState): PropertyGridProps => {
   return {

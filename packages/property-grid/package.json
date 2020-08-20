@@ -55,7 +55,10 @@
     "@bentley/ui-ninezone": "^2.3.3",
     "@bentley/webgl-compatibility": "^2.3.3",
     "react": "^16.8.0",
-    "react-dom": "^16.8.0"
+    "react-dom": "^16.8.0",
+    "react-redux": "^7.2.0",
+    "react-spring": "^8.0.27",
+    "redux": "^4.0.3"
   },
   "devDependencies": {
     "@bentley/bentleyjs-core": "2.3.3",
@@ -89,13 +92,13 @@
     "cpx": "^1.5.0",
     "rimraf": "^3.0.2",
     "tslint": "^5.11.0",
-    "typescript": "~3.7.4"
-  },
-  "dependencies": {
-    "classnames": "^2.2.5",
-    "i18next": "^10.2.2",
+    "typescript": "~3.7.4",
     "react-redux": "^7.2.0",
     "react-spring": "^8.0.27",
     "redux": "^4.0.3"
+  },
+  "dependencies": {
+    "classnames": "^2.2.5",
+    "i18next": "^10.2.2"
   }
 }

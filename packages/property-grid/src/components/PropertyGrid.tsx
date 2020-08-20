@@ -98,13 +98,12 @@ export class PropertyGrid extends React.Component<
     super(props);
 
     this._dataProvider =
-      props.dataProvider !== undefined
-        ? props.dataProvider
-        : new PropertyDataProvider(
-            props.iModelConnection,
-            props.rulesetId,
-            props.enableFavoriteProperties,
-          );
+      props.dataProvider ??
+      new PropertyDataProvider(
+        props.iModelConnection,
+        props.rulesetId,
+        props.enableFavoriteProperties,
+      );
 
     this._dataChangedHandler = this._onDataChanged.bind(this);
     this.state = { className: "", sharedFavorites: [] };
