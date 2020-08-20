@@ -153,7 +153,7 @@ export class MultiElementPropertyGrid extends React.Component<
       <div className="property-grid-react-transition-container">
         <Transition
           items={this.state.content as number}
-          config={{ duration: 500 }}
+          config={{ duration: 200, easing: (t: number) => t * t }}
           from={{ transform: fromAnim }}
           enter={{ transform: "translate(0,0)" }}
           leave={{ transform: leaveAnim }}
