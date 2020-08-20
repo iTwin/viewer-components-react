@@ -1,4 +1,4 @@
-# @bentley\tree-widget-react
+# @bentley/tree-widget-react
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 

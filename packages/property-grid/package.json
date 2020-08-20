@@ -88,15 +88,15 @@
     "@types/react-dom": "^16.8.0",
     "@types/react-redux": "^7.0.1",
     "cpx": "^1.5.0",
+    "react-redux": "^7.2.0",
     "rimraf": "^3.0.2",
     "tslint": "^5.11.0",
-    "typescript": "~3.7.4",
-    "react-redux": "^7.2.0"
+    "typescript": "~3.7.4"
   },
   "dependencies": {
     "classnames": "^2.2.5",
     "react-spring": "^8.0.27",
-    "i18next": "^10.2.2",
-    "redux": "^4.0.3"
+    "redux": "^4.0.3",
+    "i18next": "^10.2.2"
   }
 }
