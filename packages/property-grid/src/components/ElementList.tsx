@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
  *--------------------------------------------------------------------------------------------*/
 
-import React = require("react");
+import * as React from "react";
 import * as classnames from "classnames";
 import "./ElementList.scss";
 

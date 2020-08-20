@@ -8,10 +8,9 @@ import {
   UiItemsProvider,
 } from "@bentley/ui-abstract";
 import { FrameworkState } from "@bentley/ui-framework";
-
 import { PropertyGrid, PropertyGridProps } from "./PropertyGrid";
+import * as React from "react";
 
-import React = require("react");
 // Map framework state to property grid props
 const mapStateToProps = (state: FrameworkState): PropertyGridProps => {
   return {
