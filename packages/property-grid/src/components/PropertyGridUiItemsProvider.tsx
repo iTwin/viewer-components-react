@@ -31,7 +31,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     _stageId: string,
     _stageUsage: string,
     location: StagePanelLocation,
-    _section: StagePanelSection | undefined
+    _section: StagePanelSection | undefined,
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
     if (location === StagePanelLocation.Right) {

@@ -28,7 +28,7 @@ export class PropertyGridManager {
   public static async initialize(i18n: I18N): Promise<void> {
     PropertyGridManager._i18n = i18n;
     return PropertyGridManager._i18n.registerNamespace(
-      PropertyGridManager.i18nNamespace
+      PropertyGridManager.i18nNamespace,
     ).readFinished;
   }
 
@@ -36,7 +36,7 @@ export class PropertyGridManager {
   public static terminate() {
     if (PropertyGridManager._i18n)
       PropertyGridManager._i18n.unregisterNamespace(
-        PropertyGridManager.i18nNamespace
+        PropertyGridManager.i18nNamespace,
       );
     PropertyGridManager._i18n = undefined;
   }
@@ -46,7 +46,7 @@ export class PropertyGridManager {
     if (!PropertyGridManager._i18n)
       throw new UiError(
         PropertyGridManager.loggerCategory(this),
-        "PropertyGridManager not initialized"
+        "PropertyGridManager not initialized",
       );
     return PropertyGridManager._i18n;
   }
@@ -94,7 +94,7 @@ class PropertyGridExtension extends Extension {
     // TODO:
     // Register namespace
     this._i18NNamespace = this.i18n.getNamespace(
-      PropertyGridManager.i18nNamespace
+      PropertyGridManager.i18nNamespace,
     );
     if (this._i18NNamespace === undefined) {
       throw new Error("Property grid extension could not find locale");

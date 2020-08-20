@@ -7,7 +7,6 @@ import React = require("react");
 import * as classnames from "classnames";
 import "./ElementList.scss";
 
-import { Id64Array } from "@bentley/bentleyjs-core";
 import {
   PropertyDescription,
   PropertyEditorInfo,
@@ -48,7 +47,7 @@ const createPropertyRecord = (
   value: number | string,
   displayValue: string,
   editor?: PropertyEditorInfo,
-  description?: PropertyDescription
+  description?: PropertyDescription,
 ): PropertyRecord => {
   const propValue: PropertyValue = {
     valueFormat: PropertyValueFormat.Primitive,
@@ -73,7 +72,7 @@ const createPropertyRecord = (
 /** Map element ids and requests labels */
 const instanceKeysToRowItems = (
   instanceKeys: InstanceKey[],
-  labels: string[]
+  labels: string[],
 ) => {
   const rows = new Array<RowItem>();
   for (let i = 0; i < instanceKeys.length; ++i) {
@@ -95,7 +94,7 @@ const instanceKeysToRowItems = (
 /** Gets labels from presentation layer, chunks up requests if necessary */
 const getLabels = async (
   labelsProvider: PresentationLabelsProvider,
-  instanceKeys: InstanceKey[]
+  instanceKeys: InstanceKey[],
 ): Promise<string[]> => {
   const chunkSize = 1000;
   if (instanceKeys.length < chunkSize) {
@@ -115,7 +114,7 @@ const getLabels = async (
 /** Creates a data provider with the labels */
 const createDataProvider = async (
   labelsProvider: PresentationLabelsProvider,
-  instanceKeys: InstanceKey[]
+  instanceKeys: InstanceKey[],
 ) => {
   const columns: ColumnDescription[] = [
     {
@@ -151,7 +150,7 @@ export class ElementList extends React.Component<
   public async componentDidMount() {
     const dataProvider = await createDataProvider(
       this._labelsProvider,
-      this.props.instanceKeys
+      this.props.instanceKeys,
     );
 
     if (!this._unmounted) {
@@ -166,7 +165,7 @@ export class ElementList extends React.Component<
   /** On element selected in table, call the onSelect prop */
   private _onRowsSelected = async (
     rowIterator: AsyncIterableIterator<RowItem>,
-    _replace: boolean
+    _replace: boolean,
   ) => {
     for await (const row of rowIterator) {
       if (
@@ -178,14 +177,14 @@ export class ElementList extends React.Component<
       }
     }
     return false;
-  };
+  }
 
   public render() {
     return (
       <div
         className={classnames(
           "property-grid-react-element-list",
-          this.props.rootClassName
+          this.props.rootClassName,
         )}
       >
         <div className="property-grid-react-element-list-header">
