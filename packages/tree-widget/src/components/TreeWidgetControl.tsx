@@ -29,6 +29,11 @@ export interface TreeWidgetControlOptions {
     categoriesTree?: {};
     spatialTree?: {};
   };
+  treeReplacements?: {
+    modelsTree?: () => React.ReactNode;
+    categoriesTree?: () => React.ReactNode;
+    spatialTree?: () => React.ReactNode;
+  }
 }
 
 export class TreeWidgetControl extends WidgetControl {
@@ -42,6 +47,9 @@ export class TreeWidgetControl extends WidgetControl {
     const enableElementsClassGrouping = options.enableElementsClassGrouping;
     const allViewPorts = options.allViewports;
     const additionalTrees = options.additionalTrees;
+    const modelsTreeReplacement = options.treeReplacements?.modelsTree;
+    const categoriesTreeReplacement = options.treeReplacements?.categoriesTree;
+    const spatialTreeReplacement = options.treeReplacements?.spatialTree;
 
     const modelsTreeComponent = (
       <ModelsTreeComponent
@@ -81,17 +89,17 @@ export class TreeWidgetControl extends WidgetControl {
       {
         label: UiFramework.translate("visibilityWidget.modeltree"),
         id: "model-tree",
-        render: () => modelsTreeComponent,
+        render: modelsTreeReplacement ? modelsTreeReplacement : () => modelsTreeComponent,
       },
       {
         label: UiFramework.translate("visibilityWidget.categories"),
         id: "categories-tree",
-        render: () => categoriesTreeComponent,
+        render: categoriesTreeReplacement ? categoriesTreeReplacement : () => categoriesTreeComponent,
       },
       {
         label: UiFramework.translate("visibilityWidget.containment"),
         id: "spatial-containment-tree",
-        render: () => spatialContainmentComponent,
+        render: spatialTreeReplacement ? spatialTreeReplacement : () => spatialContainmentComponent,
       },
     ];
 
