@@ -1,6 +1,6 @@
 {
   "name": "@bentley/tree-widget-react",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Tree Widget React",
   "license": "MIT",
   "main": "lib/tree-widget-react.js",
