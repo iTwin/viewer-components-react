@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGrid.scss";
 
@@ -86,7 +86,7 @@ interface PropertyGridState {
 export class PropertyGrid extends React.Component<
   PropertyGridProps,
   PropertyGridState
-> {
+  > {
   private static _unifiedSelectionPropertyGrid = propertyGridWithUnifiedSelection(
     CorePropertyGrid,
   );
@@ -534,16 +534,16 @@ export class PropertyGrid extends React.Component<
             actionButtonRenderers={[this._shareActionButtonRenderer]}
           />
         ) : (
-          <PropertyGrid._unifiedSelectionPropertyGrid
-            orientation={this.props.orientation ?? Orientation.Horizontal}
-            isOrientationFixed={this.props.isOrientationFixed ?? true}
-            dataProvider={this._dataProvider}
-            isPropertyHoverEnabled={true}
-            isPropertySelectionEnabled={true}
-            onPropertyContextMenu={this._onPropertyContextMenu}
-            actionButtonRenderers={[this._shareActionButtonRenderer]}
-          />
-        )}
+            <PropertyGrid._unifiedSelectionPropertyGrid
+              orientation={this.props.orientation ?? Orientation.Horizontal}
+              isOrientationFixed={this.props.isOrientationFixed ?? true}
+              dataProvider={this._dataProvider}
+              isPropertyHoverEnabled={true}
+              isPropertySelectionEnabled={true}
+              onPropertyContextMenu={this._onPropertyContextMenu}
+              actionButtonRenderers={[this._shareActionButtonRenderer]}
+            />
+          )}
         {this._renderContextMenu()}
       </div>
     );
