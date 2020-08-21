@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
 import * as classnames from "classnames";
@@ -133,7 +133,7 @@ const createDataProvider = async (
 export class ElementList extends React.Component<
   ElementListProps,
   ElementListState
-> {
+  > {
   private _labelsProvider: PresentationLabelsProvider;
   private _unmounted: boolean = false;
 
