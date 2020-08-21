@@ -1,7 +1,8 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
 import "./MultiElementPropertyGrid.scss";
 import { Presentation } from "@bentley/presentation-frontend";
 
@@ -34,7 +35,7 @@ interface MultiElementPropertyGridState {
 export class MultiElementPropertyGrid extends React.Component<
   PropertyGridProps,
   MultiElementPropertyGridState
-> {
+  > {
   constructor(props: PropertyGridProps) {
     super(props);
 
