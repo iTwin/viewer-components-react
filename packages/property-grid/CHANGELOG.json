@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "1.1.2",
+      "tag": "@bentley/property-grid-react_v1.1.2",
+      "date": "Mon, 24 Aug 2020 19:57:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "make react-spring a peer dep to avoid versioning issues in it1"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.1",
       "tag": "@bentley/property-grid-react_v1.1.1",
       "date": "Mon, 24 Aug 2020 17:39:24 GMT",
