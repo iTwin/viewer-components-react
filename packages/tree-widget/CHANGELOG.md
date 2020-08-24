@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Fri, 21 Aug 2020 21:17:48 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Aug 2020 17:39:24 GMT and should not be manually modified.
+
+## 1.2.2
+Mon, 24 Aug 2020 17:39:24 GMT
+
+### Patches
+
+- alphabetize package.json
 
 ## 1.2.1
 Fri, 21 Aug 2020 21:17:48 GMT

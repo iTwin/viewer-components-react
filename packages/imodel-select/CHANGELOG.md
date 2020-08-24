@@ -1,6 +1,13 @@
 # Change Log - @bentley/imodel-select-react
 
-This log was last generated on Tue, 14 Jul 2020 22:54:18 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Aug 2020 17:39:24 GMT and should not be manually modified.
+
+## 2.0.3
+Mon, 24 Aug 2020 17:39:24 GMT
+
+### Patches
+
+- alphabetize package.json
 
 ## 2.0.2
 Tue, 14 Jul 2020 22:54:18 GMT
