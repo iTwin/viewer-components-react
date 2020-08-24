@@ -1,6 +1,14 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Tue, 11 Aug 2020 14:24:07 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2020 21:17:48 GMT and should not be manually modified.
+
+## 1.2.1
+Fri, 21 Aug 2020 21:17:48 GMT
+
+### Patches
+
+- readme update
+- support replacing model/category/spatial trees in TreeWidgetControl
 
 ## 1.2.0
 Tue, 11 Aug 2020 14:24:07 GMT
