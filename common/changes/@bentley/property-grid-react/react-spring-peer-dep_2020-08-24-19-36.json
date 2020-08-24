@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "make react-spring a peer dep to avoid versioning issues in it1",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react",
+  "email": "diegopinate@users.noreply.github.com"
+}
