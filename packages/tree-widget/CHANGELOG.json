@@ -2,6 +2,21 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.2.1",
+      "tag": "@bentley/tree-widget-react_v1.2.1",
+      "date": "Fri, 21 Aug 2020 21:17:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "readme update"
+          },
+          {
+            "comment": "support replacing model/category/spatial trees in TreeWidgetControl"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.0",
       "tag": "@bentley/tree-widget-react_v1.2.0",
       "date": "Tue, 11 Aug 2020 14:24:07 GMT",

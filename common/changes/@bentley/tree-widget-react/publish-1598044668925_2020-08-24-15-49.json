@@ -2,10 +2,10 @@
   "changes": [
     {
       "packageName": "@bentley/tree-widget-react",
-      "comment": "readme update",
+      "comment": "alphabetize package.json",
       "type": "patch"
     }
   ],
   "packageName": "@bentley/tree-widget-react",
-  "email": "aruniverse@users.noreply.github.com"
+  "email": "jason-crow@users.noreply.github.com"
 }
