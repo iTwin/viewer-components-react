@@ -9,7 +9,15 @@
 # @global-owner1 and @global-owner2 will be requested for
 # review when someone opens a pull request.
 *  @calebmshafer
-/packages/imodel-select  @wilmaier
+
+/packages/imodel-select  @wilmaier @calebmshafer
+/common/changes/@bentley/imodel-select-react  @wilmaier @calebmshafer
+
 /packages/markup-frontstage  @JoeZman @archana-maharjan
+/common/changes/@bentley/markup-frontstage-react @JoeZman @archana-maharjan
+
+/packages/property-grid  @JoeZman @aruniverse @diegopinate
+/common/changes/@bentley/property-grid-react  @JoeZman @aruniverse @diegopinate
+
 /packages/tree-widget  @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
-/packages/property-grid  @JoeZman @aruniverse
+/common/changes/@bentley/tree-widget-react @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
