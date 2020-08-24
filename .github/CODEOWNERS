@@ -9,7 +9,7 @@
 # @global-owner1 and @global-owner2 will be requested for
 # review when someone opens a pull request.
 *  @calebmshafer
-/packages/imodel-select  @wilmaier
+/packages/imodel-select  @wilmaier @calebmshafer @aruniverse @JoeZman
 /packages/markup-frontstage  @JoeZman @archana-maharjan
 /packages/tree-widget  @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
 /packages/property-grid  @JoeZman @aruniverse
