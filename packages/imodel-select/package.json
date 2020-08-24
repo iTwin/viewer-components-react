@@ -2,54 +2,39 @@
   "name": "@bentley/imodel-select-react",
   "version": "2.0.2",
   "description": "iModel Select React",
-  "license": "MIT",
-  "main": "lib/imodel-select-react.js",
-  "typings": "lib/imodel-select-react",
-  "scripts": {
-    "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
-    "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
-    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
-    "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
-    "clean": "rimraf lib build",
-    "lint": "tslint -p . 1>&2",
-    "test": "",
-    "cover": ""
-  },
   "keywords": [
     "Bentley",
     "iModel Select React",
     "iModel.js"
   ],
-  "author": {
-    "name": "Bentley Systems, Inc.",
-    "url": "http://www.bentley.com"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/imodeljs/viewer-components-react/tree/imodel-select/packages/imodel-select"
   },
-  "peerDependencies": {
-    "@bentley/bentleyjs-core": "^2.0.0",
-    "@bentley/context-registry-client": "^2.0.0",
-    "@bentley/frontend-authorization-client": "^2.0.0",
-    "@bentley/geometry-core": "^2.0.0",
-    "@bentley/imodelhub-client": "^2.0.0",
-    "@bentley/imodeljs-common": "^2.0.0",
-    "@bentley/imodeljs-frontend": "^2.0.0",
-    "@bentley/imodeljs-i18n": "^2.0.0",
-    "@bentley/imodeljs-markup": "^2.0.0",
-    "@bentley/imodeljs-quantity": "^2.0.0",
-    "@bentley/itwin-client": "^2.0.0",
-    "@bentley/orbitgt-core": "^2.0.0",
-    "@bentley/presentation-common": "^2.0.0",
-    "@bentley/presentation-frontend": "^2.0.0",
-    "@bentley/product-settings-client": "^2.0.0",
-    "@bentley/ui-abstract": "^2.0.0",
-    "@bentley/ui-components": "^2.0.0",
-    "@bentley/ui-core": "^2.0.0",
-    "@bentley/ui-framework": "^2.0.0",
-    "@bentley/ui-ninezone": "^2.0.0",
-    "@bentley/webgl-compatibility": "^2.0.0"
+  "license": "MIT",
+  "author": {
+    "name": "Bentley Systems, Inc.",
+    "url": "http://www.bentley.com"
+  },
+  "main": "lib/imodel-select-react.js",
+  "typings": "lib/imodel-select-react",
+  "scripts": {
+    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
+    "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
+    "clean": "rimraf lib build",
+    "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
+    "cover": "",
+    "lint": "tslint -p . 1>&2",
+    "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
+    "test": ""
+  },
+  "dependencies": {
+    "classnames": "^2.2.5",
+    "i18next": "^10.2.2",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.3"
   },
   "devDependencies": {
     "@bentley/bentleyjs-core": "^2.0.0",
@@ -85,12 +70,27 @@
     "tslint": "^5.11.0",
     "typescript": "~3.7.4"
   },
-  "dependencies": {
-    "classnames": "^2.2.5",
-    "i18next": "^10.2.2",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0",
-    "react-redux": "^7.2.0",
-    "redux": "^4.0.3"
+  "peerDependencies": {
+    "@bentley/bentleyjs-core": "^2.0.0",
+    "@bentley/context-registry-client": "^2.0.0",
+    "@bentley/frontend-authorization-client": "^2.0.0",
+    "@bentley/geometry-core": "^2.0.0",
+    "@bentley/imodelhub-client": "^2.0.0",
+    "@bentley/imodeljs-common": "^2.0.0",
+    "@bentley/imodeljs-frontend": "^2.0.0",
+    "@bentley/imodeljs-i18n": "^2.0.0",
+    "@bentley/imodeljs-markup": "^2.0.0",
+    "@bentley/imodeljs-quantity": "^2.0.0",
+    "@bentley/itwin-client": "^2.0.0",
+    "@bentley/orbitgt-core": "^2.0.0",
+    "@bentley/presentation-common": "^2.0.0",
+    "@bentley/presentation-frontend": "^2.0.0",
+    "@bentley/product-settings-client": "^2.0.0",
+    "@bentley/ui-abstract": "^2.0.0",
+    "@bentley/ui-components": "^2.0.0",
+    "@bentley/ui-core": "^2.0.0",
+    "@bentley/ui-framework": "^2.0.0",
+    "@bentley/ui-ninezone": "^2.0.0",
+    "@bentley/webgl-compatibility": "^2.0.0"
   }
 }

@@ -2,30 +2,52 @@
   "name": "@bentley/markup-frontstage-react",
   "version": "1.0.2",
   "description": "Markup Frontstage React",
-  "license": "MIT",
-  "main": "lib/markup-frontstage-react.js",
-  "typings": "lib/markup-frontstage-react",
-  "scripts": {
-    "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
-    "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
-    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
-    "clean": "rimraf lib",
-    "lint": "tslint -p . 1>&2",
-    "test": "jest",
-    "cover": "npm test"
-  },
   "keywords": [
     "Bentley",
     "iModel Markup Frontstage React",
     "iModel.js"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/markup-frontstage"
+  },
+  "license": "MIT",
   "author": {
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/markup-frontstage"
+  "main": "lib/markup-frontstage-react.js",
+  "typings": "lib/markup-frontstage-react",
+  "scripts": {
+    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
+    "clean": "rimraf lib",
+    "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
+    "cover": "npm test",
+    "lint": "tslint -p . 1>&2",
+    "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
+    "test": "jest"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "<rootDir>/src/**"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "test",
+      ".d.ts"
+    ],
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest",
+      "^.+\\.(js|jsx|scss)$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "[/\\\\]node_modules[/\\\\](?!@bentley/ui).+\\.(js|jsx|ts|tsx)$",
+      "^.+\\.module\\.(css|sass|scss)$"
+    ],
+    "verbose": true
   },
   "dependencies": {
     "classnames": "^2.2.6",
@@ -88,27 +110,5 @@
     "@svgdotjs/svg.js": "^3.0.13",
     "react": "^16.13.0",
     "react-dom": "^16.13.0"
-  },
-  "jest": {
-    "roots": [
-      "<rootDir>/src"
-    ],
-    "transform": {
-      "^.+\\.(ts|tsx)$": "ts-jest",
-      "^.+\\.(js|jsx|scss)$": "babel-jest"
-    },
-    "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\](?!@bentley/ui).+\\.(js|jsx|ts|tsx)$",
-      "^.+\\.module\\.(css|sass|scss)$"
-    ],
-    "verbose": true,
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "test",
-      ".d.ts"
-    ],
-    "collectCoverageFrom": [
-      "<rootDir>/src/**"
-    ]
   }
 }

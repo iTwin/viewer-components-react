@@ -2,56 +2,36 @@
   "name": "@bentley/tree-widget-react",
   "version": "1.2.1",
   "description": "Tree Widget React",
-  "license": "MIT",
-  "main": "lib/tree-widget-react.js",
-  "typings": "lib/tree-widget-react",
-  "scripts": {
-    "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
-    "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
-    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
-    "clean": "rimraf lib",
-    "lint": "tslint -p . 1>&2",
-    "test": "",
-    "cover": ""
-  },
   "keywords": [
     "Bentley",
     "iModel Tree Widget",
     "iModel.js"
   ],
-  "author": {
-    "name": "Bentley Systems, Inc.",
-    "url": "http://www.bentley.com"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/tree-widget"
   },
-  "peerDependencies": {
-    "@bentley/bentleyjs-core": "^2.2.0",
-    "@bentley/context-registry-client": "^2.2.0",
-    "@bentley/frontend-authorization-client": "^2.2.0",
-    "@bentley/geometry-core": "^2.2.0",
-    "@bentley/imodelhub-client": "^2.2.0",
-    "@bentley/imodeljs-common": "^2.2.0",
-    "@bentley/imodeljs-frontend": "^2.2.0",
-    "@bentley/imodeljs-i18n": "^2.2.0",
-    "@bentley/imodeljs-markup": "^2.2.0",
-    "@bentley/imodeljs-quantity": "^2.2.0",
-    "@bentley/itwin-client": "^2.2.0",
-    "@bentley/orbitgt-core": "^2.2.0",
-    "@bentley/presentation-common": "^2.2.0",
-    "@bentley/presentation-components": "^2.2.0",
-    "@bentley/presentation-frontend": "^2.2.0",
-    "@bentley/product-settings-client": "^2.2.0",
-    "@bentley/ui-abstract": "^2.2.0",
-    "@bentley/ui-components": "^2.2.0",
-    "@bentley/ui-core": "^2.2.0",
-    "@bentley/ui-framework": "^2.2.0",
-    "@bentley/ui-ninezone": "^2.2.0",
-    "@bentley/webgl-compatibility": "^2.2.0",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0"
+  "license": "MIT",
+  "author": {
+    "name": "Bentley Systems, Inc.",
+    "url": "http://www.bentley.com"
+  },
+  "main": "lib/tree-widget-react.js",
+  "typings": "lib/tree-widget-react",
+  "scripts": {
+    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
+    "clean": "rimraf lib",
+    "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
+    "cover": "",
+    "lint": "tslint -p . 1>&2",
+    "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
+    "test": ""
+  },
+  "dependencies": {
+    "classnames": "^2.2.5",
+    "i18next": "^10.2.2",
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.3"
   },
   "devDependencies": {
     "@bentley/bentleyjs-core": "2.2.0",
@@ -90,10 +70,30 @@
     "tslint": "^5.11.0",
     "typescript": "~3.7.4"
   },
-  "dependencies": {
-    "classnames": "^2.2.5",
-    "i18next": "^10.2.2",
-    "react-redux": "^7.2.0",
-    "redux": "^4.0.3"
+  "peerDependencies": {
+    "@bentley/bentleyjs-core": "^2.2.0",
+    "@bentley/context-registry-client": "^2.2.0",
+    "@bentley/frontend-authorization-client": "^2.2.0",
+    "@bentley/geometry-core": "^2.2.0",
+    "@bentley/imodelhub-client": "^2.2.0",
+    "@bentley/imodeljs-common": "^2.2.0",
+    "@bentley/imodeljs-frontend": "^2.2.0",
+    "@bentley/imodeljs-i18n": "^2.2.0",
+    "@bentley/imodeljs-markup": "^2.2.0",
+    "@bentley/imodeljs-quantity": "^2.2.0",
+    "@bentley/itwin-client": "^2.2.0",
+    "@bentley/orbitgt-core": "^2.2.0",
+    "@bentley/presentation-common": "^2.2.0",
+    "@bentley/presentation-components": "^2.2.0",
+    "@bentley/presentation-frontend": "^2.2.0",
+    "@bentley/product-settings-client": "^2.2.0",
+    "@bentley/ui-abstract": "^2.2.0",
+    "@bentley/ui-components": "^2.2.0",
+    "@bentley/ui-core": "^2.2.0",
+    "@bentley/ui-framework": "^2.2.0",
+    "@bentley/ui-ninezone": "^2.2.0",
+    "@bentley/webgl-compatibility": "^2.2.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
   }
 }
