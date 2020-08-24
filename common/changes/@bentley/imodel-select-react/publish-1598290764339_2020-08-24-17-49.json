@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-select-react",
+      "comment": "remove trailing whitespace",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/imodel-select-react",
+  "email": "jason-crow@users.noreply.github.com"
+}
