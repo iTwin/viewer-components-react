@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@bentley/markup-frontstage-react",
-      "comment": "alphabetize package.json",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@bentley/markup-frontstage-react",

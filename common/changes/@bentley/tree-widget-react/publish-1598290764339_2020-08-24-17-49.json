@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@bentley/tree-widget-react",
-      "comment": "alphabetize package.json",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@bentley/tree-widget-react",

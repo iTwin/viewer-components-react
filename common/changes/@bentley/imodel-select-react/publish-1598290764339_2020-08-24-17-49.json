@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@bentley/imodel-select-react",
-      "comment": "alphabetize package.json",
+      "comment": "remove trailing whitespace",
       "type": "patch"
     }
   ],

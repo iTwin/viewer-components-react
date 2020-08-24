@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.2.2",
+      "tag": "@bentley/tree-widget-react_v1.2.2",
+      "date": "Mon, 24 Aug 2020 17:39:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "alphabetize package.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.1",
       "tag": "@bentley/tree-widget-react_v1.2.1",
       "date": "Fri, 21 Aug 2020 21:17:48 GMT",
