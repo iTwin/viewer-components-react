@@ -16,8 +16,8 @@
 /packages/markup-frontstage  @JoeZman @archana-maharjan
 /common/changes/@bentley/markup-frontstage-react @JoeZman @archana-maharjan
 
-/packages/property-grid  @JoeZman @aruniverse
-/common/changes/@bentley/property-grid-react  @JoeZman @aruniverse
+/packages/property-grid  @JoeZman @aruniverse @diegopinate
+/common/changes/@bentley/property-grid-react  @JoeZman @aruniverse @diegopinate
 
 /packages/tree-widget  @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
 /common/changes/@bentley/tree-widget-react @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
