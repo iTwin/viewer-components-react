@@ -2,10 +2,10 @@
   "changes": [
     {
       "packageName": "@bentley/imodel-select-react",
-      "comment": "force merge",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@bentley/imodel-select-react",
-  "email": "jason-crow@users.noreply.github.com"
+  "email": "31107829+calebmshafer@users.noreply.github.com"
 }
