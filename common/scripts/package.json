@@ -1,0 +1,14 @@
+{
+  "name": "@bentley/viewer-components-react-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "repository": "https://github.com/imodeljs/viewer-components-react/tree/master/common/scripts",
+  "devDependencies": {
+    "lint-staged": "^10.2.11"
+  },
+  "scripts": {
+    "build": "",
+    "test": ""
+  }
+}
