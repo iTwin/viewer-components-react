@@ -2,6 +2,18 @@
   "name": "@bentley/markup-frontstage-react",
   "entries": [
     {
+      "version": "1.0.3",
+      "tag": "@bentley/markup-frontstage-react_v1.0.3",
+      "date": "Mon, 24 Aug 2020 17:39:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "alphabetize package.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.2",
       "tag": "@bentley/markup-frontstage-react_v1.0.2",
       "date": "Mon, 20 Jul 2020 14:13:08 GMT",

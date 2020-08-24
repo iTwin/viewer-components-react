@@ -2,6 +2,30 @@
   "name": "@bentley/imodel-select-react",
   "entries": [
     {
+      "version": "2.0.4",
+      "tag": "@bentley/imodel-select-react_v2.0.4",
+      "date": "Mon, 24 Aug 2020 18:07:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "remove trailing whitespace"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.3",
+      "tag": "@bentley/imodel-select-react_v2.0.3",
+      "date": "Mon, 24 Aug 2020 17:39:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "alphabetize package.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.2",
       "tag": "@bentley/imodel-select-react_v2.0.2",
       "date": "Tue, 14 Jul 2020 22:54:18 GMT",

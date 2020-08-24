@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@bentley/property-grid-react",
-      "comment": "alphabetize package.json",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@bentley/property-grid-react",
