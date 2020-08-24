@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@bentley/imodel-select-react",
-      "comment": "remove trailing whitespace",
+      "comment": "force publish branch merge",
       "type": "patch"
     }
   ],

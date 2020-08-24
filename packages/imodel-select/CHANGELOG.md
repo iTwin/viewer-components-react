@@ -1,6 +1,13 @@
 # Change Log - @bentley/imodel-select-react
 
-This log was last generated on Mon, 24 Aug 2020 17:39:24 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Aug 2020 18:07:22 GMT and should not be manually modified.
+
+## 2.0.4
+Mon, 24 Aug 2020 18:07:22 GMT
+
+### Patches
+
+- remove trailing whitespace
 
 ## 2.0.3
 Mon, 24 Aug 2020 17:39:24 GMT
