@@ -8,13 +8,13 @@ With the repository containing many different packages related to iModel.js, eac
 
 List of packages within this repository:
 
-| Name                             | Folder                                                         | Version                                                                                                                                            |
-| -------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| @bentley/imodel-select-react     | [packages/imodel-select](./packages/imodel-select/)            | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-select-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-select-react)         |
-| @bentley/markup-frontstage-react | [packages/markup-frontstage](./packages/markup-frontstage/)    | [![npm version](https://badge.fury.io/js/%40bentley%2Fmarkup-frontstage-react.svg)](https://badge.fury.io/js/%40bentley%2Fmarkup-frontstage-react) |
-| @bentley/tree-widget-react       | [packages/tree-widget](./packages/tree-widget/)                | [![npm version](https://badge.fury.io/js/%40bentley%2Ftree-widget-react.svg)](https://badge.fury.io/js/%40bentley%2Ftree-widget-react)             |
-| @bentley/property-grid-react     | [packages/property-grid](./packages/property-grid)             | [![npm version](https://badge.fury.io/js/%40bentley%2Fproperty-grid-react.svg)](https://badge.fury.io/js/%40bentley%2Fproperty-grid-react)         |
-| @bentley/imodel-content-tree     | [packages/imodel-content-tree](./packages/imodel-content-tree) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-content-tree.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-content-tree)         |
+| Name                               | Folder                                                         | Version                                                                                                                                                |
+| ---------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| @bentley/imodel-select-react       | [packages/imodel-select](./packages/imodel-select/)            | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-select-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-select-react)             |
+| @bentley/markup-frontstage-react   | [packages/markup-frontstage](./packages/markup-frontstage/)    | [![npm version](https://badge.fury.io/js/%40bentley%2Fmarkup-frontstage-react.svg)](https://badge.fury.io/js/%40bentley%2Fmarkup-frontstage-react)     |
+| @bentley/tree-widget-react         | [packages/tree-widget](./packages/tree-widget/)                | [![npm version](https://badge.fury.io/js/%40bentley%2Ftree-widget-react.svg)](https://badge.fury.io/js/%40bentley%2Ftree-widget-react)                 |
+| @bentley/property-grid-react       | [packages/property-grid](./packages/property-grid)             | [![npm version](https://badge.fury.io/js/%40bentley%2Fproperty-grid-react.svg)](https://badge.fury.io/js/%40bentley%2Fproperty-grid-react)             |
+| @bentley/imodel-content-tree-react | [packages/imodel-content-tree](./packages/imodel-content-tree) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-content-tree-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-content-tree-react) |
 
 ## Adding a new "project"
 

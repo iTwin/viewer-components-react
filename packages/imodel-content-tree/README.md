@@ -1,8 +1,8 @@
-# @bentley/imodel-content-tree
+# @bentley/imodel-content-tree-react
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 
-The imodel-content-tree package provides an `IModelContentTree` component which displays a hierarchy with content of a given `IModelConnection`.
+The imodel-content-tree-react package provides an `IModelContentTree` component which displays a hierarchy with content of a given `IModelConnection`.
 
 ## Resulting hierarchy
 
@@ -48,7 +48,7 @@ export interface IModelContentTreeProps extends Omit<React.AllHTMLAttributes<HTM
 
 ```ts
 import * as React from "react";
-import { IModelContentTree } from "@bentley/imodel-content-tree";
+import { IModelContentTree } from "@bentley/imodel-content-tree-react";
 import { IModelConnection } from "@bentley/imodeljs-frontend";
 
 interface MyComponentProps {

@@ -35,7 +35,7 @@
       "versionPolicyName": "property-grid"
     },
     {
-      "packageName": "@bentley/imodel-content-tree",
+      "packageName": "@bentley/imodel-content-tree-react",
       "projectFolder": "packages/imodel-content-tree",
       "versionPolicyName": "imodel-content-tree"
     }
