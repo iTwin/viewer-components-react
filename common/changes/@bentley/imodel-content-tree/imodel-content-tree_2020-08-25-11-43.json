@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-content-tree",
+      "comment": "Initial commit",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/imodel-content-tree",
+  "email": "grigasp@users.noreply.github.com"
+}
