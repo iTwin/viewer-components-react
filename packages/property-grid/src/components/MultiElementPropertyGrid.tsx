@@ -1,14 +1,14 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import "./MultiElementPropertyGrid.scss";
 import { Presentation } from "@bentley/presentation-frontend";
 
 import { PropertyGrid, PropertyGridProps } from "./PropertyGrid";
 import * as React from "react";
-import { animated, Transition } from "react-spring/renderprops";
+import { animated, Transition } from "react-spring/renderprops.cjs";
 import { ElementList } from "./ElementList";
 import { InstanceKey, KeySet } from "@bentley/presentation-common";
 import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
@@ -35,7 +35,7 @@ interface MultiElementPropertyGridState {
 export class MultiElementPropertyGrid extends React.Component<
   PropertyGridProps,
   MultiElementPropertyGridState
-  > {
+> {
   constructor(props: PropertyGridProps) {
     super(props);
 
@@ -55,14 +55,16 @@ export class MultiElementPropertyGrid extends React.Component<
       singlePropertyGrid: undefined,
       animationForward: false,
     });
-  }
+  };
 
   public componentDidMount() {
     Presentation.selection.selectionChange.addListener(this._onSelectionChange);
   }
 
   public componentWillUnmount() {
-    Presentation.selection.selectionChange.removeListener(this._onSelectionChange);
+    Presentation.selection.selectionChange.removeListener(
+      this._onSelectionChange
+    );
   }
 
   /** Set the element list as our current content */
@@ -71,7 +73,7 @@ export class MultiElementPropertyGrid extends React.Component<
       content: MultiElementPropertyContent.ElementList,
       animationForward: true,
     });
-  }
+  };
 
   /** Render main property grid with the info button if needed */
   private _renderMainPropertyGrid = () => {
@@ -81,7 +83,7 @@ export class MultiElementPropertyGrid extends React.Component<
 
     const onInfoButton = moreThanOneElement ? this._onOpenList : undefined;
     return <PropertyGrid {...this.props} onInfoButton={onInfoButton} />;
-  }
+  };
 
   /** Go back to property grid as the main content view */
   private _onCloseList = () => {
@@ -89,7 +91,7 @@ export class MultiElementPropertyGrid extends React.Component<
       content: MultiElementPropertyContent.PropertyGrid,
       animationForward: false,
     });
-  }
+  };
 
   /** Set the single property grid as content and the instance key */
   private _onSelectElement = (instanceKey: InstanceKey) => {
@@ -98,12 +100,12 @@ export class MultiElementPropertyGrid extends React.Component<
       singlePropertyGrid: this._renderSinglePropertyGrid(instanceKey),
       animationForward: true,
     });
-  }
+  };
 
   /** Renders element selection list to inspect properties */
   private _renderList = () => {
     const instanceKeyMap = Presentation.selection.getSelection(
-      this.props.iModelConnection,
+      this.props.iModelConnection
     ).instanceKeys;
 
     const instanceKeys: InstanceKey[] = [];
@@ -125,7 +127,7 @@ export class MultiElementPropertyGrid extends React.Component<
         rootClassName={this.props.rootClassName}
       />
     );
-  }
+  };
 
   /** Closes the single element property grid */
   private _onCloseSinglePropertyGrid = () => {
@@ -133,14 +135,14 @@ export class MultiElementPropertyGrid extends React.Component<
       content: MultiElementPropertyContent.ElementList,
       animationForward: false,
     });
-  }
+  };
 
   /** Render single selection property grid */
   private _renderSinglePropertyGrid = (instanceKey: InstanceKey) => {
     const dataProvider = new PropertyDataProvider(
       this.props.iModelConnection,
       this.props.rulesetId,
-      this.props.enableFavoriteProperties,
+      this.props.enableFavoriteProperties
     );
     // Set inspected instance as the key
     dataProvider.keys = new KeySet([instanceKey]);
@@ -152,7 +154,7 @@ export class MultiElementPropertyGrid extends React.Component<
         disableUnifiedSelection={true}
       />
     );
-  }
+  };
 
   /** Render component using react-spring transition component */
   public render() {
