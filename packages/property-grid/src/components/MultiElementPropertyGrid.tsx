@@ -55,7 +55,7 @@ export class MultiElementPropertyGrid extends React.Component<
       singlePropertyGrid: undefined,
       animationForward: false,
     });
-  };
+  }
 
   public componentDidMount() {
     Presentation.selection.selectionChange.addListener(this._onSelectionChange);
@@ -63,7 +63,7 @@ export class MultiElementPropertyGrid extends React.Component<
 
   public componentWillUnmount() {
     Presentation.selection.selectionChange.removeListener(
-      this._onSelectionChange
+      this._onSelectionChange,
     );
   }
 
@@ -73,7 +73,7 @@ export class MultiElementPropertyGrid extends React.Component<
       content: MultiElementPropertyContent.ElementList,
       animationForward: true,
     });
-  };
+  }
 
   /** Render main property grid with the info button if needed */
   private _renderMainPropertyGrid = () => {
@@ -83,7 +83,7 @@ export class MultiElementPropertyGrid extends React.Component<
 
     const onInfoButton = moreThanOneElement ? this._onOpenList : undefined;
     return <PropertyGrid {...this.props} onInfoButton={onInfoButton} />;
-  };
+  }
 
   /** Go back to property grid as the main content view */
   private _onCloseList = () => {
@@ -91,7 +91,7 @@ export class MultiElementPropertyGrid extends React.Component<
       content: MultiElementPropertyContent.PropertyGrid,
       animationForward: false,
     });
-  };
+  }
 
   /** Set the single property grid as content and the instance key */
   private _onSelectElement = (instanceKey: InstanceKey) => {
@@ -100,12 +100,12 @@ export class MultiElementPropertyGrid extends React.Component<
       singlePropertyGrid: this._renderSinglePropertyGrid(instanceKey),
       animationForward: true,
     });
-  };
+  }
 
   /** Renders element selection list to inspect properties */
   private _renderList = () => {
     const instanceKeyMap = Presentation.selection.getSelection(
-      this.props.iModelConnection
+      this.props.iModelConnection,
     ).instanceKeys;
 
     const instanceKeys: InstanceKey[] = [];
@@ -127,7 +127,7 @@ export class MultiElementPropertyGrid extends React.Component<
         rootClassName={this.props.rootClassName}
       />
     );
-  };
+  }
 
   /** Closes the single element property grid */
   private _onCloseSinglePropertyGrid = () => {
@@ -135,14 +135,14 @@ export class MultiElementPropertyGrid extends React.Component<
       content: MultiElementPropertyContent.ElementList,
       animationForward: false,
     });
-  };
+  }
 
   /** Render single selection property grid */
   private _renderSinglePropertyGrid = (instanceKey: InstanceKey) => {
     const dataProvider = new PropertyDataProvider(
       this.props.iModelConnection,
       this.props.rulesetId,
-      this.props.enableFavoriteProperties
+      this.props.enableFavoriteProperties,
     );
     // Set inspected instance as the key
     dataProvider.keys = new KeySet([instanceKey]);
@@ -154,7 +154,7 @@ export class MultiElementPropertyGrid extends React.Component<
         disableUnifiedSelection={true}
       />
     );
-  };
+  }
 
   /** Render component using react-spring transition component */
   public render() {
