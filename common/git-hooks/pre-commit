@@ -9,7 +9,7 @@ echo --------------------------------------------
 echo Starting Git hook: pre-commit
 
 echo Invoking node common/scripts/pre-commit.js
-node common/scripts/pre-commit.js
+# node common/scripts/pre-commit.js
 
 if [ $? -ne 0 ]; then
   # the lint-staged script above will print out appropriate errors

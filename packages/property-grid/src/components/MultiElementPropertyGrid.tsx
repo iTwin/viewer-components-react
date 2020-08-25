@@ -8,7 +8,7 @@ import { Presentation } from "@bentley/presentation-frontend";
 
 import { PropertyGrid, PropertyGridProps } from "./PropertyGrid";
 import * as React from "react";
-import { animated, Transition } from "react-spring/renderprops";
+import { animated, Transition } from "react-spring/renderprops.cjs";
 import { ElementList } from "./ElementList";
 import { InstanceKey, KeySet } from "@bentley/presentation-common";
 import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
@@ -35,7 +35,7 @@ interface MultiElementPropertyGridState {
 export class MultiElementPropertyGrid extends React.Component<
   PropertyGridProps,
   MultiElementPropertyGridState
-  > {
+> {
   constructor(props: PropertyGridProps) {
     super(props);
 
@@ -62,7 +62,9 @@ export class MultiElementPropertyGrid extends React.Component<
   }
 
   public componentWillUnmount() {
-    Presentation.selection.selectionChange.removeListener(this._onSelectionChange);
+    Presentation.selection.selectionChange.removeListener(
+      this._onSelectionChange,
+    );
   }
 
   /** Set the element list as our current content */
