@@ -20,16 +20,16 @@ export interface IModelContentTreeProps extends Omit<React.AllHTMLAttributes<HTM
  * A tree component that shows content of an iModel
  */
 export function IModelContentTree(props: IModelContentTreeProps) {
+  const { iModel, className, ...divProps } = props;
   const nodeLoader = usePresentationTreeNodeLoader({
-    imodel: props.iModel,
+    imodel: iModel,
     ruleset: RULESET_TREE_HIERARCHY as Ruleset,
     pagingSize: 20,
     appendChildrenCountForGroupingNodes: true,
   });
   const eventHandler = useTreeEventsHandler(React.useMemo(() => ({ nodeLoader, modelSource: nodeLoader.modelSource, collapsedChildrenDisposalEnabled: true }), [nodeLoader]));
-  const { iModel, className, ...divProps } = props;
   return (
-    <div {...divProps} className={classNames("imodel-content-tree", props.className)}>
+    <div {...divProps} className={classNames("imodel-content-tree", className)}>
       <ControlledTree
         nodeLoader={nodeLoader}
         selectionMode={SelectionMode.None}
