@@ -2,6 +2,18 @@
   "name": "@bentley/imodel-select-react",
   "entries": [
     {
+      "version": "2.0.6",
+      "tag": "@bentley/imodel-select-react_v2.0.6",
+      "date": "Tue, 25 Aug 2020 16:57:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "rm unecessary dep on react-scripts"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.5",
       "tag": "@bentley/imodel-select-react_v2.0.5",
       "date": "Mon, 24 Aug 2020 19:57:25 GMT",
