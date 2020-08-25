@@ -1,6 +1,13 @@
 # Change Log - @bentley/imodel-select-react
 
-This log was last generated on Mon, 24 Aug 2020 19:57:25 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Aug 2020 16:57:36 GMT and should not be manually modified.
+
+## 2.0.6
+Tue, 25 Aug 2020 16:57:36 GMT
+
+### Patches
+
+- rm unecessary dep on react-scripts
 
 ## 2.0.5
 Mon, 24 Aug 2020 19:57:25 GMT
