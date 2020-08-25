@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "rm unecessary dep on react-scripts",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "aruniverse@users.noreply.github.com"
+}
