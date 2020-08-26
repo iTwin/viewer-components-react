@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "Fix for property panel not maintaining favorite properties",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react",
+  "email": "diegopinate@users.noreply.github.com"
+}
