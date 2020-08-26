@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Tue, 25 Aug 2020 16:57:36 GMT and should not be manually modified.
+This log was last generated on Wed, 26 Aug 2020 14:45:55 GMT and should not be manually modified.
+
+## 1.1.4
+Wed, 26 Aug 2020 14:45:55 GMT
+
+### Patches
+
+- Fix for property panel not maintaining favorite properties
 
 ## 1.1.3
 Tue, 25 Aug 2020 16:57:36 GMT
