@@ -18,5 +18,10 @@
     "policyName": "property-grid",
     "definitionName": "individualVersion",
     "lockedMajor": 1
+  },
+  {
+    "policyName": "imodel-content-tree",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   }
 ]
