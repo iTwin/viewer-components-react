@@ -21,3 +21,6 @@
 
 /packages/tree-widget  @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
 /common/changes/@bentley/tree-widget-react @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
+
+/packages/imodel-content-tree  @grigasp
+/common/changes/@bentley/imodel-content-tree-react @grigasp

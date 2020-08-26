@@ -1,0 +1,17 @@
+{
+  "name": "@bentley/imodel-content-tree-react",
+  "entries": [
+    {
+      "version": "0.0.2",
+      "tag": "@bentley/imodel-content-tree-react_v0.0.2",
+      "date": "Wed, 26 Aug 2020 12:14:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Initial commit"
+          }
+        ]
+      }
+    }
+  ]
+}
