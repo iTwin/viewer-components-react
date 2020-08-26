@@ -135,13 +135,15 @@ export class PropertyGrid extends React.Component<
   public componentWillReceiveProps(nextProps: PropertyGridProps) {
     if (this.props.iModelConnection) {
       // Remove old listener, create a new data provider, and re-add the listener
-      if (nextProps.iModelConnection) {
+      if (nextProps.iModelConnection &&
+        nextProps.iModelConnection !== this.props.iModelConnection) {
         this._dataProvider.onDataChanged.removeListener(
           this._dataChangedHandler,
         );
         this._dataProvider = new PropertyDataProvider(
           this.props.iModelConnection!,
           nextProps.rulesetId,
+          nextProps.enableFavoriteProperties,
         );
         this._dataProvider.onDataChanged.addListener(this._dataChangedHandler);
       }
