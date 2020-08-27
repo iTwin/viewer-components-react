@@ -365,7 +365,7 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
           >
             <span className={styles.markupToolName}>{stroke}</span>
             <ColorPickerButton
-              activeColor={strokeColor}
+              initialColor={strokeColor}
               onColorPick={(color: ColorDef) => {
                 if (color.name) {
                   changeActiveElementSettings(
@@ -384,7 +384,7 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
           >
             <span className={styles.markupToolName}>{fill}</span>
             <ColorPickerButton
-              activeColor={fillColor}
+              initialColor={fillColor}
               onColorPick={(color: ColorDef) => {
                 if (color.name) {
                   changeActiveElementSettings(SvgProp.FILL, color.name, fill);
@@ -431,7 +431,7 @@ const MarkupSettingsPanel = (props: MarkupSettingsPanelProps) => {
           >
             <span className={styles.markupToolName}>{text}</span>
             <ColorPickerButton
-              activeColor={textColor}
+              initialColor={textColor}
               onColorPick={(color: ColorDef) => {
                 if (color.name) {
                   changeActiveElementSettings(SvgProp.FILL, color.name, text);
