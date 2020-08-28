@@ -2808,6 +2808,49 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-0hlKyn88V8+tAIRBqzIYbcSHU5e5+3G5eY8tEdS225zQrz1PNvjEpAI9I3vaP8jfCdi+CE2QRywJgwNdIbGUqQ==
+  /@bentley/build-tools/2.5.3:
+    dependencies:
+      '@microsoft/api-extractor': 7.7.3
+      '@typescript-eslint/eslint-plugin': 2.25.0_94327f671b8b8fcfd6e40ba8fb1b6e1d
+      '@typescript-eslint/parser': 2.25.0_eslint@6.8.0+typescript@3.7.5
+      chai: 4.2.0
+      chalk: 3.0.0
+      cpx: 1.5.0
+      cross-spawn: 7.0.3
+      eslint: 6.8.0
+      eslint-import-resolver-node: 0.3.4
+      eslint-import-resolver-typescript: 2.0.0_70f7a64bd774aaf00fe73c7ab169c95d
+      eslint-plugin-deprecation: 1.1.0_eslint@6.8.0+typescript@3.7.5
+      eslint-plugin-import: 2.20.1_eslint@6.8.0
+      eslint-plugin-prefer-arrow: 1.1.7_eslint@6.8.0
+      eslint-plugin-react: 7.19.0_eslint@6.8.0
+      eslint-plugin-react-hooks: 3.0.0_eslint@6.8.0
+      eslint-plugin-rulesdir: 0.1.0
+      fs-extra: 8.1.0
+      glob: 7.1.6
+      mocha: 5.2.0
+      mocha-junit-reporter: 1.23.3_mocha@5.2.0
+      nyc: 14.1.1
+      recursive-readdir: 2.2.2
+      rimraf: 3.0.2
+      tree-kill: 1.2.2
+      ts-node: 7.0.1
+      tsconfig-paths: 3.9.0
+      tslib: 1.13.0
+      tslint: 5.20.1_typescript@3.7.5
+      tslint-consistent-codestyle: 1.16.0_tslint@5.20.1+typescript@3.7.5
+      tslint-eslint-rules: 5.4.0_tslint@5.20.1+typescript@3.7.5
+      tslint-etc: 1.12.0_tslint@5.20.1+typescript@3.7.5
+      tsutils: 3.17.1_typescript@3.7.5
+      typedoc: 0.16.11
+      typedoc-plugin-external-module-name: 3.0.0_typedoc@0.16.11
+      typedoc-plugin-internal-external: 2.1.1_typedoc@0.16.11
+      typescript: 3.7.5
+      yargs: 15.4.1
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha512-F0Miu2VGxNDivDcHyXpUqMZ58YrF31LEv/GUCouI8xOgOKR9z/YrIRQH02+F91mYovWZPQZNw4BYxQP052J4/Q==
   /@bentley/context-registry-client/2.2.0_6f1b9319c6bff250b4992e3026c76aac:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -20611,7 +20654,7 @@ packages:
       '@babel/preset-react': 7.10.4
       '@babel/preset-typescript': 7.9.0
       '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/build-tools': 2.3.2
+      '@bentley/build-tools': 2.5.3
       '@bentley/imodeljs-common': 2.5.3_@bentley+bentleyjs-core@2.5.3
       '@bentley/imodeljs-frontend': 2.5.3_c789b763165dd0c0b5b3e14525046059
       '@bentley/imodeljs-i18n': 2.5.3_@bentley+bentleyjs-core@2.5.3
@@ -20655,7 +20698,7 @@ packages:
       react-redux: '*'
       redux: '*'
     resolution:
-      integrity: sha512-nqek2QdfEwrdZeP4oZK5yClc7rqA+kbXwdE9X4PsGITiZ5QYt9yqrMA48B2kMKCG3lFPtUVBm1rMQvxhSG8pRA==
+      integrity: sha512-JE9dJCqG3NAh26bFJfKieU+oqhXG73Uwf2EAms/D2IES3X8QoKilcZi7Hv/cTq3LK4aixuHC58S8TzSk8rSfhA==
       tarball: 'file:projects/markup-frontstage-react.tgz'
     version: 0.0.0
   'file:projects/property-grid-react.tgz':
@@ -20768,7 +20811,7 @@ specifiers:
   '@rush-temp/tree-widget-react': 'file:./projects/tree-widget-react.tgz'
   '@svgdotjs/svg.js': ^3.0.13
   '@testing-library/jest-dom': ^4.2.4
-  '@testing-library/react': ^10.4.9
+  '@testing-library/react': ^10.4.5
   '@types/classnames': ^2.2.3
   '@types/i18next': ^8.4.2
   '@types/jest': ^24.0.15

@@ -61,7 +61,7 @@
     "@babel/preset-react": "^7.9.4",
     "@babel/preset-typescript": "7.9.0",
     "@bentley/bentleyjs-core": "^2.5.3",
-    "@bentley/build-tools": "^2.0.0",
+    "@bentley/build-tools": "^2.5.3",
     "@bentley/imodeljs-common": "^2.5.3",
     "@bentley/imodeljs-frontend": "^2.5.3",
     "@bentley/imodeljs-i18n": "^2.5.3",
@@ -97,7 +97,7 @@
   },
   "peerDependencies": {
     "@bentley/bentleyjs-core": "^2.5.3",
-    "@bentley/build-tools": "^2.0.0",
+    "@bentley/build-tools": "^2.5.3",
     "@bentley/imodeljs-common": "^2.5.3",
     "@bentley/imodeljs-frontend": "^2.5.3",
     "@bentley/imodeljs-i18n": "^2.5.3",
