@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "1.2.0",
+      "tag": "@bentley/property-grid-react_v1.2.0",
+      "date": "Tue, 29 Sep 2020 20:33:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add nested property grouping"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.4",
       "tag": "@bentley/property-grid-react_v1.1.4",
       "date": "Wed, 26 Aug 2020 14:45:55 GMT",
