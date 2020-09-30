@@ -2,14 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "@bentley/ui-core/lib/ui-core/index";
+
+@import "~@bentley/ui-core/lib/ui-core/index";
 
 $imodel-select-appbar-height: 80px;
 $imodel-select-navbar-width: 80px;
 $imodel-select-projectpicker-min-width: 250px; /* project picker minimum width */
 $imodel-select-projectpicker-max-width: 450px; /* project picker maximum width */
 
-$imodel-select-background: $buic-background-window;;
+$imodel-select-background: $buic-background-window;
 $imodel-select-color: $buic-foreground-body;
 $imodel-select-content-background: $buic-background-window;
 $imodel-select-border-color: $buic-foreground-disabled;
@@ -34,7 +35,7 @@ $imodel-select-border-color: $buic-foreground-disabled;
     box-sizing: border-box;
     position: relative;
 
-      /* backstage icon */
+    /* backstage icon */
     .backstage-icon {
       border-right: 1px solid $imodel-select-border-color;
       box-sizing: border-box;
@@ -79,9 +80,9 @@ $imodel-select-border-color: $buic-foreground-disabled;
     overflow: hidden;
     position: absolute;
     background: $imodel-select-content-background;
-    -webkit-transition: all .2s linear;
-    -moz-transition: all .2s linear;
-    -o-transition: all .2s linear;
-    transition: all .2s linear;
+    -webkit-transition: all 0.2s linear;
+    -moz-transition: all 0.2s linear;
+    -o-transition: all 0.2s linear;
+    transition: all 0.2s linear;
   }
 }
