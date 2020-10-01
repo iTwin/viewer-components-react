@@ -9,6 +9,12 @@ import { I18N } from "@bentley/imodeljs-i18n";
 import { getClassName, UiError } from "@bentley/ui-abstract";
 import { StateManager } from "@bentley/ui-framework";
 
+/** Supported Feature Flags for PropertyGrid */
+export interface PropertyGridManagerFeatureFlags {
+  /** If true, enables property category group nesting  */
+  enablePropertyGroupNesting?: boolean;
+}
+
 /**
  * Entry point for static initialization required by various components used in the package.
  * @public
@@ -16,15 +22,23 @@ import { StateManager } from "@bentley/ui-framework";
 export class PropertyGridManager {
   private static _i18n?: I18N;
 
+  /** Feature Flag object with default values */
+  private static _featureFlags: PropertyGridManagerFeatureFlags = {
+    enablePropertyGroupNesting: false,
+  };
   /**
    * Called by IModelApp to initialize PropertyGridManager
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n: I18N): Promise<void> {
+  public static async initialize(i18n: I18N, featureFlags?: PropertyGridManagerFeatureFlags): Promise<void> {
     if (!StateManager.isInitialized()) {
       throw new Error(
         "UiFramework's StateManager must be initialized for Property Grid to work properly as an extension",
       );
+    }
+
+    if (featureFlags) {
+      PropertyGridManager.changeFlags(featureFlags);
     }
 
     PropertyGridManager._i18n = i18n;
@@ -79,5 +93,17 @@ export class PropertyGridManager {
     const category =
       PropertyGridManager.packageName + (className ? `.${className}` : "");
     return category;
+  }
+
+  public static changeFlags(featureFlags: any) {
+    PropertyGridManager._featureFlags = {
+      ...PropertyGridManager._featureFlags,
+      ...featureFlags,
+    };
+  }
+
+  /** Return object that contains all feature flags */
+  public static get flags() {
+    return PropertyGridManager._featureFlags;
   }
 }
