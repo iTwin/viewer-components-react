@@ -100,4 +100,9 @@ export class PropertyGridManager {
       ...featureFlags
     };
   }
+
+  /** Return object that contains all feature flags */
+  public static get flags() {
+    return PropertyGridManager._featureFlags;
+  }
 }
