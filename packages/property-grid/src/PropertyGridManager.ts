@@ -24,8 +24,8 @@ export class PropertyGridManager {
 
   /** Feature Flag object with default values */
   private static _featureFlags: PropertyGridMangerFeatureFlags = {
-    enablePropertyGroupNesting: false
-  }
+    enablePropertyGroupNesting: false,
+  };
   /**
    * Called by IModelApp to initialize PropertyGridManager
    * @param i18n - The internationalization service created by the IModelApp.
@@ -37,7 +37,7 @@ export class PropertyGridManager {
       );
     }
 
-    if(featureFlags) {
+    if (featureFlags) {
       PropertyGridManager.changeFlags(featureFlags);
     }
 
@@ -95,11 +95,10 @@ export class PropertyGridManager {
     return category;
   }
 
-  public static changeFlags(featureFlags: any)
-  {
+  public static changeFlags(featureFlags: any) {
     PropertyGridManager._featureFlags = {
       ...PropertyGridManager._featureFlags,
-      ...featureFlags
+      ...featureFlags,
     };
   }
 
