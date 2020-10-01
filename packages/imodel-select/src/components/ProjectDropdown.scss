@@ -2,7 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "@bentley/ui-core/lib/ui-core/index";
+
+@import "~@bentley/ui-core/lib/ui-core/index";
 
 $card-background: $buic-background-window;
 $border-color: $buic-foreground-disabled;
@@ -48,7 +49,7 @@ $pp-max-dropdown-width: 450px;
     height: $pp-highlight-size;
     background-color: $uicore-blue;
     margin: auto;
-    content: '';
+    content: "";
     transition: width 0.4s ease;
   }
 
@@ -60,7 +61,7 @@ $pp-max-dropdown-width: 450px;
 /* current project + splitter container */
 .pp-content {
   flex: 1;
-  padding: 0 .7em;
+  padding: 0 0.7em;
   display: flex;
   align-items: center;
   outline: none;
@@ -89,7 +90,7 @@ $pp-max-dropdown-width: 450px;
     .name {
       @extend .text-clip;
       font-size: $uicore-font-size;
-      margin-top: .25em;
+      margin-top: 0.25em;
     }
   }
 }
@@ -104,16 +105,16 @@ $pp-max-dropdown-width: 450px;
   flex: initial;
   height: $pp-highlight-size;
   background: $uicore-gray-8;
-  transition: background-color .4s ease;
+  transition: background-color 0.4s ease;
 }
 
 /* splitter icon */
 .pp-splitter {
   @extend .text-disable-selection;
   flex: initial;
-  margin-left: .75em;
+  margin-left: 0.75em;
   font-size: 15px;
-  transition: transform .5s ease;
+  transition: transform 0.5s ease;
 }
 
 /* dropdown (list of projects) */
@@ -140,15 +141,15 @@ $pp-max-dropdown-width: 450px;
       justify-content: flex-start;
       align-items: center;
       flex-direction: row;
-      padding: 0px .75em 0px 1.25em;
+      padding: 0px 0.75em 0px 1.25em;
       text-decoration: none;
       cursor: pointer;
-      transition: background-color .3s ease;
+      transition: background-color 0.3s ease;
       border-bottom: 1px solid $separator-background;
       box-sizing: border-box;
 
       /* project number & name */
-      .pp-details{
+      .pp-details {
         flex: 1;
         display: flex;
         justify-content: center;
@@ -156,26 +157,26 @@ $pp-max-dropdown-width: 450px;
         overflow: hidden;
 
         /* clip the number & name */
-        span{
+        span {
           @extend .text-clip;
         }
 
         /* number is a larger font size than name */
-        span:first-child{
+        span:first-child {
           font-size: $uicore-font-size;
           font-weight: 550;
         }
 
         /* name is a smaller font size and space the number/name */
-        span:last-child{
-          margin-top: .4em;
+        span:last-child {
+          margin-top: 0.4em;
           font-size: $uicore-font-size-small;
           font-weight: 300;
         }
       }
 
       /* hover */
-      &:hover{
+      &:hover {
         background-color: $buic-foreground-disabled;
       }
     }
@@ -187,13 +188,13 @@ $pp-max-dropdown-width: 450px;
   display: block;
   color: $uicore-gray;
   font-size: $uicore-font-size;
-  padding: .25em 1.25em;
+  padding: 0.25em 1.25em;
 }
 
 /* menu separator */
 .pp-separator {
   height: 1px;
-  margin: .75em 3em;
+  margin: 0.75em 3em;
   background: $separator-background;
   cursor: default;
 }
@@ -202,10 +203,10 @@ $pp-max-dropdown-width: 450px;
 .pp-more {
   display: flex;
   align-items: center;
-  padding: 0 .75em 0 1.25em;
+  padding: 0 0.75em 0 1.25em;
   font-size: 1em;
   cursor: pointer;
-  transition: background-color .3s ease;
+  transition: background-color 0.3s ease;
 
   &:hover {
     background-color: $buic-foreground-disabled;
@@ -215,5 +216,5 @@ $pp-max-dropdown-width: 450px;
 /* project icon */
 .pp-icon {
   font-size: 22px;
-  margin-right: .75em;
+  margin-right: 0.75em;
 }
