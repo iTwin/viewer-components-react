@@ -9,7 +9,7 @@ import { I18N } from "@bentley/imodeljs-i18n";
 import { getClassName, UiError } from "@bentley/ui-abstract";
 import { StateManager } from "@bentley/ui-framework";
 
-/** Supported Feature Flags for  */
+/** Supported Feature Flags for PropertyGrid */
 export interface PropertyGridMangerFeatureFlags {
   /** If true, enables property category group nesting  */
   enablePropertyGroupNesting?: boolean;
@@ -21,6 +21,8 @@ export interface PropertyGridMangerFeatureFlags {
  */
 export class PropertyGridManager {
   private static _i18n?: I18N;
+
+  /** Feature Flag object with default values */
   private static _featureFlags: PropertyGridMangerFeatureFlags = {
     enablePropertyGroupNesting: false
   }

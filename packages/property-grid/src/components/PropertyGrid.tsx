@@ -105,8 +105,9 @@ export class PropertyGrid extends React.Component<
         props.rulesetId,
         props.enableFavoriteProperties,
       );
-      if(PropertyGridManager.flags.enablePropertyGroupNesting)
+      if(PropertyGridManager.flags.enablePropertyGroupNesting) {
         this._dataProvider.isNestedPropertyCategoryGroupingEnabled = true;
+      }
     }
 
     this._dataChangedHandler = this._onDataChanged.bind(this);
