@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "1.2.1",
+      "tag": "@bentley/property-grid-react_v1.2.1",
+      "date": "Thu, 01 Oct 2020 15:19:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "feature flagged nested property category groups"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.0",
       "tag": "@bentley/property-grid-react_v1.2.0",
       "date": "Tue, 29 Sep 2020 20:33:53 GMT",

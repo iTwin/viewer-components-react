@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Tue, 29 Sep 2020 20:33:53 GMT and should not be manually modified.
+This log was last generated on Thu, 01 Oct 2020 15:19:45 GMT and should not be manually modified.
+
+## 1.2.1
+Thu, 01 Oct 2020 15:19:45 GMT
+
+### Patches
+
+- feature flagged nested property category groups
 
 ## 1.2.0
 Tue, 29 Sep 2020 20:33:53 GMT
