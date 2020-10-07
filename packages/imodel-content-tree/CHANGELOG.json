@@ -2,6 +2,18 @@
   "name": "@bentley/imodel-content-tree-react",
   "entries": [
     {
+      "version": "0.0.3",
+      "tag": "@bentley/imodel-content-tree-react_v0.0.3",
+      "date": "Wed, 07 Oct 2020 18:30:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix 'main' and 'typings' fields by removing the '-react' to match the name of the barrel file instead of package name."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.0.2",
       "tag": "@bentley/imodel-content-tree-react_v0.0.2",
       "date": "Wed, 26 Aug 2020 12:14:46 GMT",
