@@ -17,8 +17,8 @@
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
-  "main": "lib/imodel-content-tree-react.js",
-  "typings": "lib/imodel-content-tree-react",
+  "main": "lib/imodel-content-tree.js",
+  "typings": "lib/imodel-content-tree",
   "scripts": {
     "build": "tsc 1>&2 && npm run copy:assets",
     "clean": "rimraf lib",
