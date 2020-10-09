@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import {
   EmphasizeElements,
   EmphasizeElementsProps,
@@ -34,7 +35,7 @@ import React from "react";
 import { MarkupFrontstage } from "../../MarkupFrontstage";
 import MarkupSettingsPanel from "../toolbar/MarkupSettingsPanel";
 import { MarkupToolWidget } from "../toolbar/MarkupToolWidget";
-import { createSavedViewData } from "../../services/SavedView";
+import { createMarkupSavedViewData } from "../../services/SavedView";
 import {
   AddMarkupEvent,
   MarkupFrontstageConstants,
@@ -179,14 +180,17 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
       MarkupFrontstageConstants.VIEW_LAYOUT_ID
     );
     const currentViewPort = contentControl?.viewport;
-    const savedView = currentViewPort && createSavedViewData(currentViewPort);
+    const savedView =
+      currentViewPort && createMarkupSavedViewData(currentViewPort);
     const markupData = await MarkupApp.stop();
     try {
       if (savedView) {
         savedView.markup = markupData.svg;
-        savedView.emphasizedElementsProps = JSON.stringify(
-          this._emphasizedElementsProps
-        );
+        savedView.emphasizedElementsProps = savedView.is2d
+          ? savedView.emphasizedElementsProps
+          : this._emphasizedElementsProps
+          ? JSON.stringify(this._emphasizedElementsProps)
+          : undefined;
         this.onAddMarkupEvent.raiseEvent({
           savedView,
           thumbImage: markupData.image,
@@ -220,7 +224,7 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
         throw new UiError(
           MarkupFrontstage.loggerCategory(MarkupFrontstageProvider),
           `MarkupData.svg is invalid: ${
-          dom.getElementsByTagName("parsererror")[0].textContent
+            dom.getElementsByTagName("parsererror")[0].textContent
           }`
         );
       } else {
@@ -238,9 +242,9 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
     if (view) {
       const markupData = this._svg
         ? {
-          rect: this._svgRect(this._svg),
-          svg: this._svg,
-        }
+            rect: this._svgRect(this._svg),
+            svg: this._svg,
+          }
         : undefined;
       if (this._emphasizedElementsProps) {
         this._createEmphasizedElements(this._emphasizedElementsProps, view);
