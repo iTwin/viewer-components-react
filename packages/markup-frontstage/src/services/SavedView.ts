@@ -221,7 +221,7 @@ export const createSavedViewData = (vp: Viewport): SavedViewData => {
     alwaysDrawn,
     categories,
     changeSetId,
-    displayStyleProps: jsonStringify(viewState.displayStyle?.toJSON()),
+    displayStyleProps: jsonStringify(viewState?.displayStyle?.toJSON()),
     iModelId,
     is2d: false,
     models,
