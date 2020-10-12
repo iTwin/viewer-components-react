@@ -135,7 +135,6 @@ export const create2DSavedView = (
       classFullName: SheetViewState.classFullName,
       code: Code.createEmpty(),
     };
-    const common2dViewProps = create2dViewProps(vp);
     common2dViewProps.sheetAttachments = viewState.attachmentIds;
     common2dViewProps.sheetProps = jsonStringify(sheetProps);
     return common2dViewProps;
