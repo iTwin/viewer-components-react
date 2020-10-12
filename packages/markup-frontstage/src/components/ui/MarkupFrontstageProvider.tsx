@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import {
   EmphasizeElements,
   EmphasizeElementsProps,
@@ -220,7 +221,10 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
   private _svgRect = (svg: string | SVGSVGElement) => {
     if (typeof svg === "string") {
       const dom = new DOMParser().parseFromString(svg, "image/svg+xml");
-      if (dom.getElementsByTagName("parsererror").length > 0) {
+      if (
+        dom.getElementsByTagName("parsererror") &&
+        dom.getElementsByTagName("parsererror").length > 0
+      ) {
         throw new UiError(
           MarkupFrontstage.loggerCategory(MarkupFrontstageProvider),
           `MarkupData.svg is invalid: ${
