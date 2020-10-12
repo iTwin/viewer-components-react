@@ -1,6 +1,13 @@
 # Change Log - @bentley/markup-frontstage-react
 
-This log was last generated on Fri, 28 Aug 2020 16:19:01 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Oct 2020 19:51:06 GMT and should not be manually modified.
+
+## 1.2.0
+Mon, 12 Oct 2020 19:51:06 GMT
+
+### Minor changes
+
+- Support markup in View2D
 
 ## 1.1.0
 Fri, 28 Aug 2020 16:19:01 GMT
