@@ -195,13 +195,13 @@ export const createSavedViewData = (vp: Viewport): SavedViewData => {
   const state = {
     cameraAngle: viewState.camera.getLensAngle().radians,
     cameraFocalLength: viewState.camera.focusDist,
-    cameraPosition: viewState.camera.getEyePoint().toJSON(),
-    extents: viewState.extents.toJSON(),
+    cameraPosition: viewState.camera?.getEyePoint()?.toJSON(),
+    extents: viewState.extents?.toJSON(),
     flags: viewState.viewFlags,
     isCameraOn: viewState.isCameraOn,
     is2d: false,
-    origin: viewState.origin.toJSON(),
-    rotation: viewState.rotation.toJSON(),
+    origin: viewState.origin?.toJSON(),
+    rotation: viewState.rotation?.toJSON(),
   };
 
   // Ensure the skybox is turned off
@@ -222,7 +222,7 @@ export const createSavedViewData = (vp: Viewport): SavedViewData => {
     alwaysDrawn,
     categories,
     changeSetId,
-    displayStyleProps: JSON.stringify(viewState.displayStyle.toJSON()),
+    displayStyleProps: jsonStringify(viewState.displayStyle?.toJSON()),
     iModelId,
     is2d: false,
     models,
