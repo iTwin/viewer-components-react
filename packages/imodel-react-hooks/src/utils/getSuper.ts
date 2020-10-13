@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 // Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 
 /** `getSuper(this)` emulates the `super` keyword, allowing you
