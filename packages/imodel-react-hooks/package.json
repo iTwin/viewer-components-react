@@ -29,7 +29,8 @@
     "build": "tsc -p tsconfig.json 1>&2",
     "clean": "rimraf lib build",
     "test": "jest",
-    "lint": "tslint -p . 1>&2"
+    "lint": "tslint -p . 1>&2",
+    "cover": ""
   },
   "devDependencies": {
     "@bentley/bentleyjs-core": "^2.0.0",
