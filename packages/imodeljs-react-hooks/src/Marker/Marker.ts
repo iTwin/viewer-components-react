@@ -1,0 +1,15 @@
+// Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+
+import { useMarker, UseMarkerOptions } from "./useMarker";
+
+/** component version of useMarker. Takes the options of useMarker as props.
+ * Very useful when you want a component to control
+ * a dynamic amount of markers, since you can't have a dynamic amount of hooks but can
+ * have a dynamic amount of components.
+ */
+export const Marker = <T extends {} = {}>(props: UseMarkerOptions<T>) => {
+  useMarker<T>(props);
+  return null;
+};
+
+export default Marker;
