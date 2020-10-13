@@ -129,7 +129,7 @@ we can reference all of our React state anywhere in the marker logic naturally.
 
 ```tsx
 import React from "react";
-import { useMarker } from "@bentley/imodeljs-react-hooks";
+import { useMarker } from "@bentley/imodel-react-hooks";
 import { Point3d, Point2d } from "@bentley/geometry-core";
 import { ExpandableBlock, LabeledInput } from "@bentley/ui-core";
 import myPinImageUrl from "pin_image.svg";
@@ -190,7 +190,7 @@ class MyMarker extends Marker {
 We provide a small `getSuper(this)` utility, which works like the `super` keyword.
 
 ```tsx
-import { getSuper } from "@bentley/imodeljs-react-hooks";
+import { getSuper } from "@bentley/imodel-react-hooks";
 
 useMarker({
   onMouseEnter() {

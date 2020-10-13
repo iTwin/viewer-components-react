@@ -15,7 +15,7 @@ List of packages within this repository:
 | @bentley/tree-widget-react         | [packages/tree-widget](./packages/tree-widget/)                | [![npm version](https://badge.fury.io/js/%40bentley%2Ftree-widget-react.svg)](https://badge.fury.io/js/%40bentley%2Ftree-widget-react)                 |
 | @bentley/property-grid-react       | [packages/property-grid](./packages/property-grid)             | [![npm version](https://badge.fury.io/js/%40bentley%2Fproperty-grid-react.svg)](https://badge.fury.io/js/%40bentley%2Fproperty-grid-react)             |
 | @bentley/imodel-content-tree-react | [packages/imodel-content-tree](./packages/imodel-content-tree) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-content-tree-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-content-tree-react) |
-| @bentley/imodeljs-react-hooks | [packages/imodeljs-react-hooks](./packages/imodeljs-react-hooks) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodeljs-react-hooks.svg)](https://badge.fury.io/js/%40bentley%2Fimodeljs-react-hooks) |
+| @bentley/imodel-react-hooks | [packages/imodel-react-hooks](./packages/imodel-react-hooks) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-react-hooks.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-react-hooks) |
 
 ## Adding a new "project"
 
