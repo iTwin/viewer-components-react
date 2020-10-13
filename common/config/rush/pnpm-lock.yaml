@@ -7,7 +7,7 @@ dependencies:
   '@bentley/extension-webpack-tools': 2.4.2
   '@rush-temp/imodel-content-tree-react': 'file:projects/imodel-content-tree-react.tgz'
   '@rush-temp/imodel-select-react': 'file:projects/imodel-select-react.tgz'
-  '@rush-temp/imodeljs-react-hooks': 'file:projects/imodeljs-react-hooks.tgz'
+  '@rush-temp/imodel-react-hooks': 'file:projects/imodel-react-hooks.tgz'
   '@rush-temp/markup-frontstage-react': 'file:projects/markup-frontstage-react.tgz_react-redux@7.2.0+redux@4.0.5'
   '@rush-temp/property-grid-react': 'file:projects/property-grid-react.tgz'
   '@rush-temp/tree-widget-react': 'file:projects/tree-widget-react.tgz'
@@ -20938,7 +20938,7 @@ packages:
       integrity: sha512-MuAWgyAmfRDPrWLAtCQTdJf9FVq14AlgR2i5thTfdFSuYDf/71K3vEBua837Td1Gz+mMWFUK/yTAstl6qL873A==
       tarball: 'file:projects/imodel-select-react.tgz'
     version: 0.0.0
-  'file:projects/imodeljs-react-hooks.tgz':
+  'file:projects/imodel-react-hooks.tgz':
     dependencies:
       '@bentley/bentleyjs-core': 2.5.3
       '@bentley/geometry-core': 2.3.3_@bentley+bentleyjs-core@2.5.3
@@ -20958,10 +20958,10 @@ packages:
       ts-jest: 24.3.0_jest@24.9.0
       typescript: 3.9.7
     dev: false
-    name: '@rush-temp/imodeljs-react-hooks'
+    name: '@rush-temp/imodel-react-hooks'
     resolution:
       integrity: sha512-1SgDyDINBGjulMVeztWheecdHK5yEAqONQ6Ictu2PCrvNBUcetwaA6hOfxB/Ey6uTLt9uGZXgyM+VyRvCDJxDA==
-      tarball: 'file:projects/imodeljs-react-hooks.tgz'
+      tarball: 'file:projects/imodel-react-hooks.tgz'
     version: 0.0.0
   'file:projects/markup-frontstage-react.tgz_react-redux@7.2.0+redux@4.0.5':
     dependencies:
@@ -21123,7 +21123,7 @@ specifiers:
   '@bentley/extension-webpack-tools': ^2.3.3
   '@rush-temp/imodel-content-tree-react': 'file:./projects/imodel-content-tree-react.tgz'
   '@rush-temp/imodel-select-react': 'file:./projects/imodel-select-react.tgz'
-  '@rush-temp/imodeljs-react-hooks': 'file:./projects/imodeljs-react-hooks.tgz'
+  '@rush-temp/imodel-react-hooks': 'file:./projects/imodel-react-hooks.tgz'
   '@rush-temp/markup-frontstage-react': 'file:./projects/markup-frontstage-react.tgz'
   '@rush-temp/property-grid-react': 'file:./projects/property-grid-react.tgz'
   '@rush-temp/tree-widget-react': 'file:./projects/tree-widget-react.tgz'

@@ -40,9 +40,9 @@
       "versionPolicyName": "imodel-content-tree"
     },
     {
-      "packageName": "@bentley/imodeljs-react-hooks",
-      "projectFolder": "packages/imodeljs-react-hooks",
-      "versionPolicyName": "imodeljs-react-hooks"
+      "packageName": "@bentley/imodel-react-hooks",
+      "projectFolder": "packages/imodel-react-hooks",
+      "versionPolicyName": "imodel-react-hooks"
     }
   ]
 }

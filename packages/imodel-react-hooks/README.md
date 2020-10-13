@@ -72,7 +72,7 @@ heavy-duty markers, and other imodel.js subclass-style APIs should prefer this t
 
 ```tsx
 import React from "react";
-import { IModelJsViewProvider, useMarker } from "@bentley/imodeljs-react-hooks";
+import { IModelJsViewProvider, useMarker } from "@bentley/imodel-react-hooks";
 import mySvgUrl from "my.svg";
 import { Point2d } from "@bentley/geometry-core";
 
@@ -151,7 +151,7 @@ The `IModelJsViewProvider` connects to the IModelApp singleton and allows the ho
 
 ```tsx
 import React, {useState} from "react";
-import { FeatureOverrideReactProvider, useFeatureOverrides } from "@bentley/imodeljs-react-hooks";
+import { FeatureOverrideReactProvider, useFeatureOverrides } from "@bentley/imodel-react-hooks";
 import { FeatureSymbology } from "@bentley/imodeljs-frontend";
 import { RgbColor } from "@bentley/imodeljs-common";
 import { myAppState, C } from "./appState";

@@ -25,7 +25,7 @@
     "lockedMajor": 0
   },
   {
-    "policyName": "imodeljs-react-hooks",
+    "policyName": "imodel-react-hooks",
     "definitionName": "individualVersion",
     "lockedMajor": 1
   }
