@@ -1,8 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-// Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
 /** typescript type utilities */
 
 // TODO: this can probably just be replaced with typescript's ThisType but it may require a tsconfig change on consumers so maybe not?

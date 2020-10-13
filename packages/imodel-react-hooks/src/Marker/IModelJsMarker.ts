@@ -1,8 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-// Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { Point2d } from "@bentley/geometry-core";
 import { ColorDef } from "@bentley/imodeljs-common";
@@ -46,9 +45,7 @@ export class IModelJsMarker extends Marker {
       },
       get: (target, prop: keyof Marker, _reciever) => {
         // NOTE: need to better separate whether an image or imageUrl is set in the hook options
-        if (prop === "image" && options.current.imageUrl) {
-          return target.image;
-        } else if (prop in hookChangedInterfaceMapping) {
+        if (prop in hookChangedInterfaceMapping) {
           const actualProp =
             hookChangedInterfaceMapping[
               prop as keyof typeof hookChangedInterfaceMapping

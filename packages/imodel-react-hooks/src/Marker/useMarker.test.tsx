@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-// Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 import { Point3d } from "@bentley/geometry-core";
 import { Viewport } from "@bentley/imodeljs-frontend";
 import { render } from "@testing-library/react";
@@ -11,7 +10,7 @@ import React, { useContext } from "react";
 import {
   IModelJsViewProvider,
   MarkerDecoration,
-  markerDecorationContext,
+  MarkerDecorationContext,
 } from "../IModelJsViewProvider";
 import { IModelJsMarker, useMarker } from "./useMarker";
 
@@ -47,7 +46,7 @@ describe("Hook useMarker", () => {
   it("markers are applied in tree order", async () => {
     let markers: IModelJsMarker[];
     const ListenContext = () => {
-      const { decoration } = useContext(markerDecorationContext);
+      const { decoration } = useContext(MarkerDecorationContext);
       markers = ((decoration as MarkerDecoration) as any)._markersRef;
       return null;
     };
