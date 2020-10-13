@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 // Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 
 import { Point2d, Range1dProps, WritableXAndY } from "@bentley/geometry-core";
@@ -10,8 +10,7 @@ import { Marker, MarkerImage } from "@bentley/imodeljs-frontend";
 import { useContext, useEffect, useMemo, useRef } from "react";
 import ReactDOM from "react-dom";
 
-// TODO: in a major release, officially rename to MarkerDecorationContext
-import { markerDecorationContext as MarkerDecorationContext } from "../IModelJsViewProvider";
+import { MarkerDecorationContext } from "../IModelJsViewProvider";
 import { Rebind } from "../utils";
 import { useOnMountInRenderOrder } from "../utils/basic-hooks";
 
@@ -53,10 +52,6 @@ export type UseMarkerOptions<T extends {} = {}> = Omit<
   hiliteColor?: ColorDef;
   /** the [promised] image  */
   image?: MarkerImage | Promise<MarkerImage> | string;
-  /** @DEPRECATED use the `image` option instead, override the `image` tag but only accepts a url.
-   * this option will be removed in the next major release.
-   */
-  imageUrl?: string;
   /** The size of this Marker, in pixels. Can pass [x,y] or {x, y} if desired */
   size?: [number, number] | WritableXAndY | Point2d;
   /** The size of [[image]], in pixels. If undefined, use [[size]]. Can pass [x,y] or {x, y} if desired */
@@ -172,10 +167,8 @@ export const useMarker = <T extends {} = {}>(options: UseMarkerOptions<T>) => {
   });
 
   useEffect(() => {
-    // options.imageUrl is deprecated and will be remove in the next major version
-    const image = options.image ?? options.imageUrl;
-    if (typeof image === "string") {
-      marker.setImageUrl(image);
+    if (typeof options.image === "string") {
+      marker.setImageUrl(options.image);
     } else {
       const setNewImage = async (image: MarkerImage | Promise<MarkerImage>) => {
         const imageResult = await image;
@@ -184,13 +177,13 @@ export const useMarker = <T extends {} = {}>(options: UseMarkerOptions<T>) => {
           enqueueViewInvalidation();
         }
       };
-      if (image) {
-        setNewImage(image).catch((err) =>
+      if (options.image) {
+        setNewImage(options.image).catch((err) =>
           console.error("setting a marker image failed", err)
         );
       }
     }
-  }, [marker, enqueueViewInvalidation, options.image, options.imageUrl]);
+  }, [marker, enqueueViewInvalidation, options.image]);
 
   useEffect(() => {
     marker.setIsHilited(options.isHilited);

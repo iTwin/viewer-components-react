@@ -27,8 +27,7 @@ export interface MarkerDecorationContext {
   enqueueViewInvalidation: () => void;
 }
 
-// TODO: in a major release change to MarkerDecorationContext
-export const markerDecorationContext = makeContextWithProviderRequired<
+export const MarkerDecorationContext = makeContextWithProviderRequired<
   MarkerDecorationContext
 >("MarkerDecorationContext");
 
@@ -133,8 +132,8 @@ export const IModelJsViewProvider = ({
   //clear order list before rendering?
 
   return (
-    <markerDecorationContext.Provider value={contextState}>
+    <MarkerDecorationContext.Provider value={contextState}>
       {children}
-    </markerDecorationContext.Provider>
+    </MarkerDecorationContext.Provider>
   );
 };

@@ -1,6 +1,6 @@
 {
   "name": "@bentley/imodel-react-hooks",
-  "version": "1.15.0",
+  "version": "0.1.0",
   "description": "Reusable React Hooks to help with iModel.js",
   "author": {
     "name": "Bentley Systems, Inc.",
@@ -14,16 +14,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/imodel-select"
+    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/imodel-react-hooks"
   },
   "license": "MIT",
   "private": false,
-  "publishConfig": {
-    "registry": "https://pkgs.dev.azure.com/bentleycs/_packaging/Packages/npm/registry/",
-    "access": "public"
-  },
   "main": "lib/index.js",
-  "module": "build/index.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib/**/*",

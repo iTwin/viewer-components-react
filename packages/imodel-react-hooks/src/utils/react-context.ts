@@ -1,17 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 // Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 
 import React from "react";
-
-/**
- * @deprecated use "makeContextWithProviderRequired" instead
- * @see makeContextWithProviderRequired
- */
-export const makeInvalidContext = <T extends any>() =>
-  makeContextWithProviderRequired<T>();
 
 /**
  * like React.createContext, but the default state (the one used when no provider is found by a consumer),

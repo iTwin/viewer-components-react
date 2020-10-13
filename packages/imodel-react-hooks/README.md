@@ -220,8 +220,3 @@ There are no recipes for this hook yet, but there is room for one to be contribu
 | Property   | Type                                            | Description                                                                  | Default                           |
 | ---------- | ----------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------- |
 | viewFilter | `((viewport: Viewport) => boolean) | undefined` | A predicate function which filters which viewports to apply the overrides in | apply overrides in every viewport |
-
-## Maintainers
-
-- [Mike Belousov](mailto:Mike.Belousov@bentley.com)
-- [Arun George](mailto:Arun.George@bentley.com)
