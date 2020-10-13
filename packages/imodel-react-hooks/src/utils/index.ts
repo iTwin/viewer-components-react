@@ -4,4 +4,3 @@ export * from "./react-context";
 export * from "./getSuper";
 export * from "./types";
 export * from "./basic-hooks";
-export * from "./useClass";
