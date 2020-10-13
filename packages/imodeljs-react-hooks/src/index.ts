@@ -5,8 +5,10 @@ export {
   getSuper,
   makeInvalidContext,
   makeContextWithProviderRequired,
+  useClass,
 } from "./utils";
 export { useMarker, Marker, UseMarkerOptions } from "./Marker";
+
 export {
   UseFeatureOverridesOpts,
   useFeatureOverrides,

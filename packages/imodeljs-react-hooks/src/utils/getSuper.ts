@@ -5,11 +5,14 @@
  * generic parameter if you want typechecking
  */
 export const getSuper = <T extends object>(thisObj: T): T =>
-  new Proxy(Object.getPrototypeOf(thisObj), {
+  new Proxy(Object.getPrototypeOf(Object.getPrototypeOf(thisObj)), {
     get(obj, k) {
       const val = Reflect.get(obj, k);
-      if (typeof val === "function") return val.bind(thisObj);
-      else return val;
+      if (typeof val === "function") {
+        return val.bind(thisObj);
+      } else {
+        return val;
+      }
     },
   });
 

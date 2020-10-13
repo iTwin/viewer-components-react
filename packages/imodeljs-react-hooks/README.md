@@ -2,9 +2,71 @@
 
 ### Description
 
-React hooks for low-overhead and idiomatic imodeljs usage in React.
+React hooks for low-overhead and idiomatic imodeljs usage in React where appropriate.
 
-Currently, the `useMarker` and `useFeatureOverrides` hooks.
+Currently, the [`useMarker`](#useMarker), and [`useFeatureOverrides`](#useFeatureOverrides) hooks.
+
+## When and when not to use hooks
+
+React's hooks are fun, and often great, but they require you to deal with state in a scope that will
+be thrown away, to which references would be mostly memory leaks and bugs. Because of this, you need
+to stabilize your functions (useCallback), keep track of dependencies manually, etc. And because of this,
+you cannot define a class with access to React state easily (in a functional component). Although this
+package did at one point have a hook for using a class directly in a functional component, managing references
+to outer state requires patterns that thrash prototype chain access caches in modern JS engines and are otherwise a bad
+idea. So it must be said:
+
+**_if you are using a class that needs access to state in React, prefer a class component_**.
+
+Michael Belousov wrote [an article](https://medium.com/imodeljs/provider-local-class-pattern-dc44bab33144) on the iModel.js community
+blog going further in depth than that.
+
+The hooks in this package are either for simple use cases with boiler plate reduction ([`useMarker`](#useMarker)),
+or places where you aren't dealing directly with a dedicated class instance ([`useFeatureOverrides`](#useFeatureOverrides)).
+Otherwise, here's a pattern for integrating any class into your React state:
+
+```tsx
+import React, { useContext } from "react";
+import { UserContext, UserContextType } from "./MyApplicationsContexts";
+import { PrimitiveTool, BeButtonEvent } from "@bentley/imodeljs-frontend";
+
+const ToolProvider = () => {
+  const userContext = useContext(UserContext);
+  return <InnerToolProvider userContext={userContext} />;
+};
+
+class InnerToolProvider extends React.Component<{
+  userContext: UserContextType;
+}> {
+  MyTool = (() => {
+    const componentThis = this;
+    return class MyTool extends PrimitiveTool {
+      static toolId = "myTool";
+
+      onDataButtonDown(ev: BeButtonEvent) {
+        const user = componentThis.props.userContext.name;
+        console.log(`${user} pressed here: ${ev.point}`);
+        return Promise.resolve(EventHandled.Yes);
+      }
+    };
+  })();
+
+  componentWillMount() {
+    IModelApp.tools.register(this.MyTool);
+  }
+
+  componentWillUnmount() {
+    IModelApp.tools.unRegister(this.MyTool.toolId);
+  }
+
+  render() {
+    return null;
+  }
+}
+```
+
+The above works with inheritance, be it in or out of react state, abstract classes, etc. Tools,
+heavy-duty markers, and other imodel.js subclass-style APIs should prefer this technique.
 
 ## useMarker
 
@@ -163,7 +225,3 @@ There are no recipes for this hook yet, but there is room for one to be contribu
 
 - [Mike Belousov](mailto:Mike.Belousov@bentley.com)
 - [Arun George](mailto:Arun.George@bentley.com)
-
-## Planned
-
-- `useTool` hook so your tools can take advantage of changes with react state just like `useMarker` does

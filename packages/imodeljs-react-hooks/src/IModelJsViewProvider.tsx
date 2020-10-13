@@ -6,16 +6,10 @@ import {
   IModelApp,
   Viewport,
 } from "@bentley/imodeljs-frontend";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { IModelJsMarker } from "./Marker";
-import { makeInvalidContext } from "./utils";
+import { makeContextWithProviderRequired } from "./utils";
 
 /**
  * @internal the MarkerDecorationContext is for internal use only and
@@ -30,9 +24,9 @@ export interface MarkerDecorationContext {
 }
 
 // TODO: in a major release change to MarkerDecorationContext
-export const markerDecorationContext = makeInvalidContext<
+export const markerDecorationContext = makeContextWithProviderRequired<
   MarkerDecorationContext
->();
+>("MarkerDecorationContext");
 
 const isViewportValidForDecorations = (v: Viewport) =>
   "invalidateDecorations" in v;
