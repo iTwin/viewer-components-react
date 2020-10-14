@@ -38,6 +38,11 @@
       "packageName": "@bentley/imodel-content-tree-react",
       "projectFolder": "packages/imodel-content-tree",
       "versionPolicyName": "imodel-content-tree"
+    },
+    {
+      "packageName": "@bentley/imodel-react-hooks",
+      "projectFolder": "packages/imodel-react-hooks",
+      "versionPolicyName": "imodel-react-hooks"
     }
   ]
 }

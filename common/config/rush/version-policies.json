@@ -23,5 +23,10 @@
     "policyName": "imodel-content-tree",
     "definitionName": "individualVersion",
     "lockedMajor": 0
+  },
+  {
+    "policyName": "imodel-react-hooks",
+    "definitionName": "individualVersion",
+    "lockedMajor": 1
   }
 ]

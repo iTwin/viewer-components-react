@@ -24,3 +24,6 @@
 
 /packages/imodel-content-tree  @grigasp
 /common/changes/@bentley/imodel-content-tree-react  @grigasp
+
+/packages/imodel-react-hooks @michaelbelousov
+/common/changes/@bentley/imodel-react-hooks @michaelbelousov
