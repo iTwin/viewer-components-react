@@ -2,6 +2,18 @@
   "name": "@bentley/imodel-content-tree-react",
   "entries": [
     {
+      "version": "0.0.4",
+      "tag": "@bentley/imodel-content-tree-react_v0.0.4",
+      "date": "Fri, 16 Oct 2020 19:19:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Handle GraphicalPartition3d similar to PhysicalPartition - it should not be displayed if there's a 'GraphicalPartition3d.Model.Content' attribute in JsonProperties"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.0.3",
       "tag": "@bentley/imodel-content-tree-react_v0.0.3",
       "date": "Wed, 07 Oct 2020 18:30:54 GMT",

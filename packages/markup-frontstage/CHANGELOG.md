@@ -1,6 +1,13 @@
 # Change Log - @bentley/markup-frontstage-react
 
-This log was last generated on Mon, 12 Oct 2020 19:51:06 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Oct 2020 19:19:15 GMT and should not be manually modified.
+
+## 1.2.1
+Fri, 16 Oct 2020 19:19:15 GMT
+
+### Patches
+
+- Fix isSpatialView functionality to filter 3D view type and remove export from jsonStringify
 
 ## 1.2.0
 Mon, 12 Oct 2020 19:51:06 GMT
