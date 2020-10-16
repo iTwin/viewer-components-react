@@ -1,7 +1,6 @@
 {
   "name": "@bentley/imodel-react-hooks",
-  "version": "0.1.0",
-  "private": false,
+  "version": "0.1.1",
   "description": "Reusable React Hooks to help with iModel.js",
   "keywords": [
     "Bentley",

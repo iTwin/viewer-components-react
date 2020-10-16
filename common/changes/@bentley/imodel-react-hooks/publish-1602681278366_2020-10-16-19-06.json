@@ -2,10 +2,10 @@
   "changes": [
     {
       "packageName": "@bentley/imodel-react-hooks",
-      "comment": "added the imodel-react-hooks package",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@bentley/imodel-react-hooks",
-  "email": "MichaelBelousov@users.noreply.github.com"
+  "email": "31107829+calebmshafer@users.noreply.github.com"
 }
