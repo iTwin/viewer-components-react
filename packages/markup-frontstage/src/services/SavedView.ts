@@ -85,7 +85,7 @@ export const parseFromEmphasizeElements = (
  * Convert given object to string or undefined if it's undefined.
  * @param args name of the argument object.
  */
-export const jsonStringify = <T>(args: T): string | undefined => {
+const jsonStringify = <T>(args: T): string | undefined => {
   return args !== undefined ? JSON.stringify(args) : undefined;
 };
 
@@ -246,7 +246,7 @@ export const createSavedViewData = (vp: Viewport): SavedViewData => {
  */
 export const isSpatialSavedView = (view: SavedViewData) => {
   // view.is2d can be undefined for spatialSavedView that are added before 2D saved view feature is added.
-  return !!view.is2d && "models" in view;
+  return !view.is2d && "models" in view;
 };
 
 /**
