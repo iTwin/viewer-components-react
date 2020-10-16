@@ -4,9 +4,12 @@
     {
       "version": "0.1.1",
       "tag": "@bentley/imodel-react-hooks_v0.1.1",
-      "date": "Wed, 14 Oct 2020 13:14:38 GMT",
+      "date": "Wed, 14 Oct 2020 15:59:35 GMT",
       "comments": {
         "patch": [
+          {
+            "comment": "sort package.json for ci support"
+          },
           {
             "comment": "added the imodel-react-hooks package"
           }

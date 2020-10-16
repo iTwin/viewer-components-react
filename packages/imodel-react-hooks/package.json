@@ -1,11 +1,8 @@
 {
   "name": "@bentley/imodel-react-hooks",
   "version": "0.1.1",
+  "private": false,
   "description": "Reusable React Hooks to help with iModel.js",
-  "author": {
-    "name": "Bentley Systems, Inc.",
-    "url": "http://www.bentley.com"
-  },
   "keywords": [
     "Bentley",
     "hooks",
@@ -17,19 +14,40 @@
     "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/imodel-react-hooks"
   },
   "license": "MIT",
-  "private": false,
+  "author": {
+    "name": "Bentley Systems, Inc.",
+    "url": "http://www.bentley.com"
+  },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib/**/*"
   ],
   "scripts": {
-    "start": "tsc -p tsconfig.json -w",
     "build": "tsc -p tsconfig.json 1>&2",
     "clean": "rimraf lib build",
-    "test": "jest",
+    "cover": "",
     "lint": "tslint -p . 1>&2",
-    "cover": ""
+    "start": "tsc -p tsconfig.json -w",
+    "test": "jest"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "<rootDir>/src/**"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "test",
+      ".d.ts"
+    ],
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest",
+      "^.+\\.(js|jsx)$": "babel-jest"
+    },
+    "verbose": true
   },
   "devDependencies": {
     "@bentley/bentleyjs-core": "^2.0.0",
@@ -38,9 +56,9 @@
     "@bentley/imodeljs-frontend": "^2.0.0",
     "@testing-library/react": "^9.1.4",
     "@types/jest": "^24.9.0",
-    "@types/testing-library__react": "*",
     "@types/react": "16.9.16",
     "@types/react-dom": "16.8.2",
+    "@types/testing-library__react": "*",
     "babel-jest": "^24.9.0",
     "jest": "^24.9.0",
     "react": "16.13.1",
@@ -57,23 +75,5 @@
     "@bentley/imodeljs-frontend": "^2.0.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0"
-  },
-  "jest": {
-    "roots": [
-      "<rootDir>/src"
-    ],
-    "transform": {
-      "^.+\\.(ts|tsx)$": "ts-jest",
-      "^.+\\.(js|jsx)$": "babel-jest"
-    },
-    "verbose": true,
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "test",
-      ".d.ts"
-    ],
-    "collectCoverageFrom": [
-      "<rootDir>/src/**"
-    ]
   }
 }
