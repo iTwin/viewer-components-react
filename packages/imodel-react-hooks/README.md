@@ -13,7 +13,7 @@ be thrown away, to which references would be mostly memory leaks and bugs. Becau
 to stabilize your functions (useCallback), keep track of dependencies manually, etc. And because of this,
 you cannot define a class with access to React state easily (in a functional component). Although this
 package did at one point have a hook for using a class directly in a functional component, managing references
-to outer state requires patterns that thrash prototype chain access caches in modern JS engines and are otherwise a bad
+to outer state requires patterns that thrash prototype chain access caches in modern JS engines and are pretty much a bad
 idea. So it must be said:
 
 **_if you are using a class that needs access to state in React, prefer a class component_**.
@@ -21,9 +21,9 @@ idea. So it must be said:
 Michael Belousov wrote [an article](https://medium.com/imodeljs/provider-local-class-pattern-dc44bab33144) on the iModel.js community
 blog going further in depth than that.
 
-The hooks in this package are either for simple use cases with boiler plate reduction ([`useMarker`](#useMarker)),
+The hooks in this package are either for simple use cases with boilerplate reduction ([`useMarker`](#useMarker)),
 or places where you aren't dealing directly with a dedicated class instance ([`useFeatureOverrides`](#useFeatureOverrides)).
-Otherwise, here's a pattern for integrating any class into your React state:
+Otherwise, try this pattern for integrating any class into your React state:
 
 ```tsx
 import React, { useContext } from "react";
@@ -54,11 +54,9 @@ class InnerToolProvider extends React.Component<{
   componentWillMount() {
     IModelApp.tools.register(this.MyTool);
   }
-
   componentWillUnmount() {
     IModelApp.tools.unRegister(this.MyTool.toolId);
   }
-
   render() {
     return null;
   }
@@ -66,7 +64,7 @@ class InnerToolProvider extends React.Component<{
 ```
 
 The above works with inheritance, be it in or out of react state, abstract classes, etc. Tools,
-heavy-duty markers, and other imodel.js subclass-style APIs should prefer this technique.
+heavy-duty markers, and other iModel.js subclass-style APIs should prefer this technique.
 
 ## useMarker
 
@@ -124,9 +122,9 @@ See examples in the [Recipes](recipes) folder.
 
 ### `IModelJsViewProvider`
 
-| Property   | Type                                      | Description                                                     | Default                                         |
-| ---------- | ----------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------- |
-| viewFilter | `((vp: Viewport) => boolean) | undefined` | Filter which vps marker decorations are allowed to be drawn in. | Draw markers in all vps that can be invalidated |
+| Property   | Type                         | Description | Default                                                         |
+| ---------- | ---------------------------- | ----------- | --------------------------------------------------------------- |
+| viewFilter | `((vp: Viewport) => boolean) | undefined`  | Filter which vps marker decorations are allowed to be drawn in. | Draw markers in all vps that can be invalidated |
 
 ### `useMarker(options: UseMarkerOptions): void`
 
@@ -135,13 +133,16 @@ The options come from the fields of the
 
 There are however, a few deviations:
 
-| Name in Marker | Type in Marker | Name in useMarker | Type in useMarker                             | Note                                                                                                                                                               |
-| -------------- | -------------- | ----------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| \_scaleFactor  | `Range1dProps` | scaleFactor       | `Range1dProps | undefined`                    | \_scaleFactor as an option, so you can set it without subclassing (since it's protected)                                                                           |
-| \_isHilited    | `boolean`      | isHilited         | `boolean | undefined`                         | \_isHilited as an option, so you can set it without subclassing (since it's protected)                                                                             |
-| \_hiliteColor  | `ColorDef`     | hiliteColor       | `ColorDef | undefined`                        | \_hiliteColor as an option, so you can set it without subclassing (since it's protected)                                                                           |
-| image          | `boolean`      | image             | `string | MarkerImage | Promise<MarkerImage>` | replacement for `Marker.setImage` and `Marker.setImageUrl`, accepts urls, loaded images, and promises to images and invalidates the view when the promise resolves |
-| N/A            | N/A            | jsxElement        | `React.ReactElement | undefined`              | like htmlElement, but the JSX Element will create the htmlElement for you (used to override the htmlElement)                                                       |
+| Name in Marker | Type in Marker | Name in useMarker | Type in useMarker   | Note                   |
+| -------------- | -------------- | ----------------- | ------------------- | ---------------------- |
+| \_scaleFactor  | `Range1dProps` | scaleFactor       | `Range1dProps       | undefined`             | \_scaleFactor as an option, so you can set it without subclassing (since it's protected) |
+| \_isHilited    | `boolean`      | isHilited         | `boolean            | undefined`             | \_isHilited as an option, so you can set it without subclassing (since it's protected) |
+| \_hiliteColor  | `ColorDef`     | hiliteColor       | `ColorDef           | undefined`             | \_hiliteColor as an option, so you can set it without subclassing (since it's protected) |
+| image          | `boolean`      | image             | `string             | MarkerImage            | Promise<MarkerImage>` | replacement for `Marker.setImage` and `Marker.setImageUrl`, accepts urls, loaded images, and promises to images and invalidates the view when the promise resolves |
+| N/A            | N/A            | jsxElement        | `React.ReactElement | undefined`             | like htmlElement, but the JSX Element will create the htmlElement for you (used to override the htmlElement) |
+| size           | `Point2d`      | size              | `Point2d            | {x: number, y: number} | [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
+| imageSize      | `Point2d`      | imageSize         | `Point2d            | {x: number, y: number} | [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
+| imageOffset    | `Point2d`      | imageOffset       | `Point2d            | {x: number, y: number} | [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
 
 ### How it works
 
@@ -150,44 +151,60 @@ The `IModelJsViewProvider` connects to the IModelApp singleton and allows the ho
 ## useFeatureOverrides
 
 ```tsx
-import React, {useState} from "react";
-import { FeatureOverrideReactProvider, useFeatureOverrides } from "@bentley/imodel-react-hooks";
+import React, { useState } from "react";
+import {
+  FeatureOverrideReactProvider,
+  useFeatureOverrides,
+} from "@bentley/imodel-react-hooks";
 import { FeatureSymbology } from "@bentley/imodeljs-frontend";
 import { RgbColor } from "@bentley/imodeljs-common";
 import { myAppState, C } from "./appState";
 
 const A = () => {
-  useFeatureOverrides({
-    overrider: (overrides, viewport) => {
-      overrides.overrideModel(myAppState.imodelconn.id, FeatureSymbology.Appearance.fromJSON({
-        rgb: new RgbColor(250,0,0),
-        transparent: 0.5,
-      }), true);
-    }
-  }, []);
+  useFeatureOverrides(
+    {
+      overrider: (overrides, viewport) => {
+        overrides.overrideModel(
+          myAppState.imodelconn.id,
+          FeatureSymbology.Appearance.fromJSON({
+            rgb: new RgbColor(250, 0, 0),
+            transparent: 0.5,
+          }),
+          true
+        );
+      },
+    },
+    []
+  );
   return null;
 };
 
 const B = () => {
   const [isHovered, setIsHovered] = useState(false);
-  useFeatureOverrides({
-    overrider: (overrides, viewport) => {
-      if (isHovered)
-        overrides.overrideElement(myAppState.selectedElementId, FeatureSymbology.Appearance.fromJSON({
-          rgb: new RgbColor(0,0,250),
-          transparency: 0,
-        }), true);
-    }
-  }, [isHovered]);
+  useFeatureOverrides(
+    {
+      overrider: (overrides, viewport) => {
+        if (isHovered)
+          overrides.overrideElement(
+            myAppState.selectedElementId,
+            FeatureSymbology.Appearance.fromJSON({
+              rgb: new RgbColor(0, 0, 250),
+              transparency: 0,
+            }),
+            true
+          );
+      },
+    },
+    [isHovered]
+  );
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      style={{height: "40px", width: "40px"}}
+      style={{ height: "40px", width: "40px" }}
     />
   );
 };
-
 
 const MyApp = (props) => (
   <FeatureOverrideReactProvider>
@@ -210,13 +227,13 @@ There are no recipes for this hook yet, but there is room for one to be contribu
 
 ### `useFeatureOverrides(options: UseFeatureOverridesOpts, deps: any[]): void`
 
-| Option           | Type                                                                  | Note                                                                                                                                                                                                                         |
-| ---------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| overrider        | `(overrides: FeatureSymbology.Overrides, viewport: Viewport) => void` | the code to run in the `FeatureOverrideProvider.addFeatureOverrides` function for this component                                                                                                                             |
-| completeOverride | `boolean | undefined`                                                 | whether to skip previous components in the component tree and go straight to this one, useful for performance savings when you're overriding everything and allowing earlier components to add overrides would be redundant. |
+| Option           | Type                                                                  | Note                                                                                             |
+| ---------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| overrider        | `(overrides: FeatureSymbology.Overrides, viewport: Viewport) => void` | the code to run in the `FeatureOverrideProvider.addFeatureOverrides` function for this component |
+| completeOverride | `boolean                                                              | undefined`                                                                                       | whether to skip previous components in the component tree and go straight to this one, useful for performance savings when you're overriding everything and allowing earlier components to add overrides would be redundant. |
 
 ### `FeatureOverrideReactProvider`
 
-| Property   | Type                                            | Description                                                                  | Default                           |
-| ---------- | ----------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------- |
-| viewFilter | `((viewport: Viewport) => boolean) | undefined` | A predicate function which filters which viewports to apply the overrides in | apply overrides in every viewport |
+| Property   | Type                               | Description | Default                                                                      |
+| ---------- | ---------------------------------- | ----------- | ---------------------------------------------------------------------------- |
+| viewFilter | `((viewport: Viewport) => boolean) | undefined`  | A predicate function which filters which viewports to apply the overrides in | apply overrides in every viewport |
