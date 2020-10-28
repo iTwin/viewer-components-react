@@ -230,10 +230,10 @@ There are no recipes for this hook yet, but there is room for one to be contribu
 | Option           | Type                                                                  | Note                                                                                             |
 | ---------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | overrider        | `(overrides: FeatureSymbology.Overrides, viewport: Viewport) => void` | the code to run in the `FeatureOverrideProvider.addFeatureOverrides` function for this component |
-| completeOverride | `boolean                                                              | undefined`                                                                                       | whether to skip previous components in the component tree and go straight to this one, useful for performance savings when you're overriding everything and allowing earlier components to add overrides would be redundant. |
+| completeOverride | `boolean \| undefined`                                                                                       | whether to skip previous components in the component tree and go straight to this one, useful for performance savings when you're overriding everything and allowing earlier components to add overrides would be redundant. |
 
 ### `FeatureOverrideReactProvider`
 
 | Property   | Type                               | Description | Default                                                                      |
 | ---------- | ---------------------------------- | ----------- | ---------------------------------------------------------------------------- |
-| viewFilter | `((viewport: Viewport) => boolean) | undefined`  | A predicate function which filters which viewports to apply the overrides in | apply overrides in every viewport |
+| viewFilter | `((viewport: Viewport) => boolean) \| undefined`  | A predicate function which filters which viewports to apply the overrides in | apply overrides in every viewport |
