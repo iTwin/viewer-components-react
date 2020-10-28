@@ -124,7 +124,7 @@ See examples in the [Recipes](recipes) folder.
 
 | Property   | Type                         | Description | Default                                                         |
 | ---------- | ---------------------------- | ----------- | --------------------------------------------------------------- |
-| viewFilter | `((vp: Viewport) => boolean) | undefined`  | Filter which vps marker decorations are allowed to be drawn in. | Draw markers in all vps that can be invalidated |
+| viewFilter | `((vp: Viewport) => boolean) \| undefined`  | Filter which vps marker decorations are allowed to be drawn in. | Draw markers in all vps that can be invalidated |
 
 ### `useMarker(options: UseMarkerOptions): void`
 
@@ -135,14 +135,14 @@ There are however, a few deviations:
 
 | Name in Marker | Type in Marker | Name in useMarker | Type in useMarker   | Note                   |
 | -------------- | -------------- | ----------------- | ------------------- | ---------------------- |
-| \_scaleFactor  | `Range1dProps` | scaleFactor       | `Range1dProps       | undefined`             | \_scaleFactor as an option, so you can set it without subclassing (since it's protected) |
-| \_isHilited    | `boolean`      | isHilited         | `boolean            | undefined`             | \_isHilited as an option, so you can set it without subclassing (since it's protected) |
-| \_hiliteColor  | `ColorDef`     | hiliteColor       | `ColorDef           | undefined`             | \_hiliteColor as an option, so you can set it without subclassing (since it's protected) |
-| image          | `boolean`      | image             | `string             | MarkerImage            | Promise<MarkerImage>` | replacement for `Marker.setImage` and `Marker.setImageUrl`, accepts urls, loaded images, and promises to images and invalidates the view when the promise resolves |
-| N/A            | N/A            | jsxElement        | `React.ReactElement | undefined`             | like htmlElement, but the JSX Element will create the htmlElement for you (used to override the htmlElement) |
-| size           | `Point2d`      | size              | `Point2d            | {x: number, y: number} | [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
-| imageSize      | `Point2d`      | imageSize         | `Point2d            | {x: number, y: number} | [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
-| imageOffset    | `Point2d`      | imageOffset       | `Point2d            | {x: number, y: number} | [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
+| \_scaleFactor  | `Range1dProps` | scaleFactor       | `Range1dProps \| undefined`             | \_scaleFactor as an option, so you can set it without subclassing (since it's protected) |
+| \_isHilited    | `boolean`      | isHilited         | `boolean \| undefined`             | \_isHilited as an option, so you can set it without subclassing (since it's protected) |
+| \_hiliteColor  | `ColorDef`     | hiliteColor       | `ColorDef \| undefined`             | \_hiliteColor as an option, so you can set it without subclassing (since it's protected) |
+| image          | `boolean`      | image             | `string \| MarkerImage \| Promise<MarkerImage>` | replacement for `Marker.setImage` and `Marker.setImageUrl`, accepts urls, loaded images, and promises to images and invalidates the view when the promise resolves |
+| N/A            | N/A            | jsxElement        | `React.ReactElement \| undefined`             | like htmlElement, but the JSX Element will create the htmlElement for you (used to override the htmlElement) |
+| size           | `Point2d`      | size              | `Point2d \| {x: number, y: number} \| [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
+| imageSize      | `Point2d`      | imageSize         | `Point2d \| {x: number, y: number} \| [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
+| imageOffset    | `Point2d`      | imageOffset       | `Point2d \| {x: number, y: number} \| [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
 
 ### How it works
 
@@ -230,10 +230,10 @@ There are no recipes for this hook yet, but there is room for one to be contribu
 | Option           | Type                                                                  | Note                                                                                             |
 | ---------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | overrider        | `(overrides: FeatureSymbology.Overrides, viewport: Viewport) => void` | the code to run in the `FeatureOverrideProvider.addFeatureOverrides` function for this component |
-| completeOverride | `boolean                                                              | undefined`                                                                                       | whether to skip previous components in the component tree and go straight to this one, useful for performance savings when you're overriding everything and allowing earlier components to add overrides would be redundant. |
+| completeOverride | `boolean \| undefined`                                                                                       | whether to skip previous components in the component tree and go straight to this one, useful for performance savings when you're overriding everything and allowing earlier components to add overrides would be redundant. |
 
 ### `FeatureOverrideReactProvider`
 
 | Property   | Type                               | Description | Default                                                                      |
 | ---------- | ---------------------------------- | ----------- | ---------------------------------------------------------------------------- |
-| viewFilter | `((viewport: Viewport) => boolean) | undefined`  | A predicate function which filters which viewports to apply the overrides in | apply overrides in every viewport |
+| viewFilter | `((viewport: Viewport) => boolean) \| undefined`  | A predicate function which filters which viewports to apply the overrides in | apply overrides in every viewport |
