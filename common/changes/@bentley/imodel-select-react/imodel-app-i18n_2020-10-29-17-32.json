@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-select-react",
+      "comment": "Use IModelApp i18n if it is defined",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/imodel-select-react",
+  "email": "6283674+kckst8@users.noreply.github.com"
+}
