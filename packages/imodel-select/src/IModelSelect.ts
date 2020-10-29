@@ -2,11 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 /** @module Common */
 
 import * as i18next from "i18next";
 import { I18N } from "@bentley/imodeljs-i18n";
 import { UiError, getClassName } from "@bentley/ui-abstract";
+import { IModelApp } from "@bentley/imodeljs-frontend";
 
 /**
  * Entry point for static initialization required by various components used in the package.
@@ -21,7 +23,8 @@ export class IModelSelect {
    */
   public static async initialize(i18n: I18N): Promise<void> {
     IModelSelect._i18n = i18n;
-    return IModelSelect._i18n.registerNamespace(IModelSelect.i18nNamespace).readFinished;
+    return IModelSelect._i18n.registerNamespace(IModelSelect.i18nNamespace)
+      .readFinished;
   }
 
   /** Unregisters the IModelSelect internationalization service namespace */
@@ -33,8 +36,16 @@ export class IModelSelect {
 
   /** The internationalization service created by the IModelApp. */
   public static get i18n(): I18N {
-    if (!IModelSelect._i18n)
-      throw new UiError(IModelSelect.loggerCategory(this), "IModelSelect not initialized");
+    if (!IModelSelect._i18n) {
+      if (IModelApp.i18n) {
+        IModelSelect._i18n = IModelApp.i18n;
+      } else {
+        throw new UiError(
+          IModelSelect.loggerCategory(this),
+          "IModelSelect not initialized"
+        );
+      }
+    }
     return IModelSelect._i18n;
   }
 
@@ -53,7 +64,11 @@ export class IModelSelect {
     key: string | string[],
     options?: i18next.TranslationOptions
   ): string {
-    return IModelSelect.i18n.translateWithNamespace(IModelSelect.i18nNamespace, key, options);
+    return IModelSelect.i18n.translateWithNamespace(
+      IModelSelect.i18nNamespace,
+      key,
+      options
+    );
   }
 
   public static loggerCategory(obj: any): string {
