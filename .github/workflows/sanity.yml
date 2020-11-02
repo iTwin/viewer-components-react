@@ -2,7 +2,6 @@ name: "Codeowners Validator"
 
 on:
   workflow_dispatch:
-  push:
   pull_request:
     paths:
     - '.github/CODEOWNERS'
