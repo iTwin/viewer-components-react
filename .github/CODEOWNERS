@@ -10,20 +10,17 @@
 # review when someone opens a pull request.
 *  @imodeljs/viewer-components-reviewers
 
+# Assigning everyone who owns a package to the common/changes review
+/common/changes @wilmaier @calebmshafer @JoeZman @archana-maharjan @aruniverse @diegopinate @JValiunas @michaalx @grigasp @michaelbelousov
+
 /packages/imodel-select  @wilmaier @calebmshafer
-/common/changes/@bentley/imodel-select-react  @wilmaier @calebmshafer
 
 /packages/markup-frontstage  @JoeZman @archana-maharjan
-/common/changes/@bentley/markup-frontstage-react  @JoeZman @archana-maharjan
 
 /packages/property-grid  @JoeZman @aruniverse @diegopinate
-/common/changes/@bentley/property-grid-react  @JoeZman @aruniverse @diegopinate
 
 /packages/tree-widget  @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
-/common/changes/@bentley/tree-widget-react  @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
 
 /packages/imodel-content-tree  @grigasp
-/common/changes/@bentley/imodel-content-tree-react  @grigasp
 
 /packages/imodel-react-hooks @michaelbelousov
-/common/changes/@bentley/imodel-react-hooks @michaelbelousov
