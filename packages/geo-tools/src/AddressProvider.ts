@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { ClientRequestContext } from "@bentley/bentleyjs-core";
 import { Angle, Range2d } from "@bentley/geometry-core";
 import { request, RequestOptions, Response } from "@bentley/itwin-client";
@@ -27,7 +28,7 @@ export class BingAddressProvider implements AddressProvider {
 
   constructor() {
     this._bingKey = "";
-    if (IModelApp.mapLayerFormatRegistry.configOptions.BingMaps) {
+    if (IModelApp.mapLayerFormatRegistry?.configOptions?.BingMaps) {
       this._bingKey = IModelApp.mapLayerFormatRegistry.configOptions.BingMaps.value;
     }
   }
