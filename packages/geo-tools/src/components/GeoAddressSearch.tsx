@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import "./GeoAddressSearch.scss";
 
 import { AutoSuggest, AutoSuggestData, CommonProps, WebFontIcon } from "@bentley/ui-core";
@@ -31,8 +32,6 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   const getAutoSuggestDataFunc = async (value: string) => {
 
     const data: AutoSuggestData[] = [];
-    if (!value)
-      return data;
     const viewBBox = IModelGeoView.getFrustumLonLatBBox();
     if (viewBBox) {
       const addresses = await addressProvider.getAddresses(value, viewBBox);

@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { Range2d, Range3d } from "@bentley/geometry-core";
 import { CartographicRange } from "@bentley/imodeljs-common";
 import { IModelApp, ViewGlobeLocationTool } from "@bentley/imodeljs-frontend";
@@ -11,7 +12,7 @@ export class IModelGeoView {
   public static getFrustumLonLatBBox(): Range2d | undefined {
     let result: Range2d | undefined;
 
-    const vp = IModelApp.viewManager.selectedView;
+    const vp = IModelApp.viewManager?.selectedView;
     if (vp === undefined || vp.iModel === undefined || vp.iModel.contextId === undefined || vp.iModel.iModelId === undefined)
       return result;
 
@@ -34,7 +35,7 @@ export class IModelGeoView {
 
   public static locateAddress(address: string): boolean {
 
-    const vp = IModelApp.viewManager.selectedView;
+    const vp = IModelApp.viewManager?.selectedView;
     if (vp === undefined || vp.iModel === undefined || vp.iModel.contextId === undefined || vp.iModel.iModelId === undefined)
       return false;
 
