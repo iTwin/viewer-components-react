@@ -28,5 +28,10 @@
     "policyName": "imodel-react-hooks",
     "definitionName": "individualVersion",
     "lockedMajor": 1
+  },
+  {
+    "policyName": "geo-tools",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   }
 ]
