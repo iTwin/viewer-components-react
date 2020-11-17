@@ -7,7 +7,7 @@
 
 import * as i18next from "i18next";
 import { I18N } from "@bentley/imodeljs-i18n";
-import { getClassName, UiError } from "@bentley/ui-abstract";
+import { UiError, getClassName } from "@bentley/ui-abstract";
 
 /**
  * Entry point for static initialization required by various components used in the package.
