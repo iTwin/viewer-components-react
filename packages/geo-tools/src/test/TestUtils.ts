@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { ColorByName } from "@bentley/imodeljs-common";
 import { I18N } from "@bentley/imodeljs-i18n";
 import { GeoTools } from "../GeoTools";
 

@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 
+
 import "./GeoAddressSearch.scss";
 
 import { AutoSuggest, AutoSuggestData, CommonProps, WebFontIcon } from "@bentley/ui-core";
@@ -27,7 +28,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   const onSuggestionSelected = (selected: AutoSuggestData) => {
     setInputValue(selected.label);
     IModelGeoView.locateAddress(selected.label);
-  }
+  };
 
   const getAutoSuggestDataFunc = async (value: string) => {
 
@@ -35,32 +36,32 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
     const viewBBox = IModelGeoView.getFrustumLonLatBBox();
     if (viewBBox) {
       const addresses = await addressProvider.getAddresses(value, viewBBox);
-      addresses.forEach((addr) => { data.push({ value: addr.addressLine, label: addr.formattedAddress }) });
+      addresses.forEach((addr) => { data.push({ value: addr.addressLine, label: addr.formattedAddress }); });
     }
     return data;
-  }
+  };
 
   const clearValue = () => {
     setInputValue("");
-  }
+  };
 
   /** Handler for Enter key. */
   const onPressEnter = (_e: React.KeyboardEvent<HTMLInputElement>) => {
     if (inputValue)
       IModelGeoView.locateAddress(inputValue);
-  }
+  };
 
   /** Handler for Escape key. */
   const onPressEscape = (_e: React.KeyboardEvent<HTMLInputElement>) => {
     clearValue();
-  }
+  };
 
   const getLabel = (value: string | undefined) => {
     if (value)
       return value;
     else
       return "";
-  }
+  };
 
   /** We implement a custom render mainly to hook on the onChange callback, which is not exposed
    * by AutoSuggest.

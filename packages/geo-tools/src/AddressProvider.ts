@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 
+
 import { ClientRequestContext } from "@bentley/bentleyjs-core";
 import { Angle, Range2d } from "@bentley/geometry-core";
 import { request, RequestOptions, Response } from "@bentley/itwin-client";
@@ -45,7 +46,7 @@ export class BingAddressProvider implements AddressProvider {
 
     const degrees = [degreeRange.low.y, degreeRange.low.x, degreeRange.high.y, degreeRange.high.x];
 
-    return `http://dev.virtualearth.net/REST/v1/Autosuggest?query=${query}&userMapView=${degrees}&maxResults=${this._maxResults}&includeEntityTypes=${entityTypesStr}&key=${this._bingKey}`
+    return `http://dev.virtualearth.net/REST/v1/Autosuggest?query=${query}&userMapView=${degrees}&maxResults=${this._maxResults}&includeEntityTypes=${entityTypesStr}&key=${this._bingKey}`;
   }
 
   /**
@@ -63,7 +64,7 @@ export class BingAddressProvider implements AddressProvider {
       if (Array.isArray(value)) {
         value.forEach((address) => {
           addresses.push({ addressLine: address.address.addressLine, formattedAddress: address.address.formattedAddress });
-        })
+        });
       }
       return addresses;
     } catch (error) {
