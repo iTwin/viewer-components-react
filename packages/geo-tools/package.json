@@ -33,16 +33,14 @@
     "test": "mocha --opts ./mocha.opts \"./lib/test/**/*.test.js\""
   },
   "dependencies": {
-    "i18next": "^10.2.2",
     "classnames": "^2.2.5",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0",
-    "react-autosuggest": "^10.0.2",
-    "@bentley/itwin-client": "2.10.0-dev.5"
+    "i18next": "^10.2.2",
+    "react-autosuggest": "^10.0.2"
   },
   "devDependencies": {
     "@bentley/build-tools": "2.10.0-dev.5",
     "@bentley/eslint-plugin": "2.10.0-dev.5",
+    "@bentley/itwin-client": "2.10.0-dev.5",
     "@bentley/telemetry-client": "2.10.0-dev.5",
     "@testing-library/react": "^8.0.1",
     "@testing-library/react-hooks": "^3.2.1",
@@ -72,11 +70,12 @@
     "mocha": "^5.2.0",
     "nyc": "^14.0.0",
     "raf": "^3.4.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
     "rimraf": "^3.0.2",
     "sinon": "^9.0.2",
     "sinon-chai": "^3.2.0",
     "source-map-support": "^0.5.6",
-    "tslint": "^5.11.0",
     "ts-node": "^7.0.1",
     "ts-sinon": "^2.0.1",
     "typescript": "~3.7.4",
@@ -84,14 +83,17 @@
   },
   "peerDependencies": {
     "@bentley/bentleyjs-core": "2.10.0-dev.5",
-    "@bentley/ui-framework": "2.10.0-dev.5",
+    "@bentley/geometry-core": "2.10.0-dev.5",
     "@bentley/imodeljs-common": "2.10.0-dev.5",
+    "@bentley/imodeljs-frontend": "2.10.0-dev.5",
+    "@bentley/imodeljs-i18n": "2.10.0-dev.5",
+    "@bentley/itwin-client": "2.10.0-dev.5",
+    "@bentley/ui-abstract": "2.10.0-dev.5",
     "@bentley/ui-components": "2.10.0-dev.5",
     "@bentley/ui-core": "2.10.0-dev.5",
-    "@bentley/imodeljs-i18n": "^2.10.0-dev.5",
-    "@bentley/imodeljs-frontend": "2.10.0-dev.5",
-    "@bentley/geometry-core": "2.10.0-dev.5",
-    "@bentley/ui-abstract": "2.10.0-dev.5"
+    "@bentley/ui-framework": "2.10.0-dev.5",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
   },
   "nyc": {
     "extends": "./node_modules/@bentley/build-tools/.nycrc",

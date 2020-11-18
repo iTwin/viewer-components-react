@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { Range2d, Range3d } from "@bentley/geometry-core";
 import { CartographicRange } from "@bentley/imodeljs-common";
 import { IModelApp, ViewGlobeLocationTool } from "@bentley/imodeljs-frontend";
@@ -13,9 +12,8 @@ export class IModelGeoView {
     let result: Range2d | undefined;
 
     const vp = IModelApp.viewManager?.selectedView;
-    if (vp === undefined || vp.iModel === undefined || vp.iModel.contextId === undefined || vp.iModel.iModelId === undefined)
+    if (vp?.iModel?.contextId === undefined || vp?.iModel?.iModelId === undefined)
       return result;
-
 
     const view = vp.view;
     const ecef = vp.iModel.ecefLocation;
@@ -34,9 +32,8 @@ export class IModelGeoView {
   }
 
   public static locateAddress(address: string): boolean {
-
     const vp = IModelApp.viewManager?.selectedView;
-    if (vp === undefined || vp.iModel === undefined || vp.iModel.contextId === undefined || vp.iModel.iModelId === undefined)
+    if (vp?.iModel?.contextId === undefined || vp?.iModel?.iModelId === undefined)
       return false;
 
     const locationTool = new ViewGlobeLocationTool(vp);

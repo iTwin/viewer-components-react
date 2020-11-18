@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { ClientRequestContext } from "@bentley/bentleyjs-core";
 import { Angle, Range2d } from "@bentley/geometry-core";
 import { request, RequestOptions, Response } from "@bentley/itwin-client";
@@ -48,9 +49,9 @@ export class BingAddressProvider implements AddressProvider {
   }
 
   /**
- * longitude(X) are expressed in any range between -2PI to +2PI
- * Latitudes(Y) values are kept between -PI and +PI while
- */
+   * longitude(X) are expressed in any range between -2PI to +2PI
+   * Latitudes(Y) values are kept between -PI and +PI while
+   */
   public async getAddresses(query: string, viewLatLongBBox: Range2d): Promise<AddressData[]> {
     const requestUrl = this.getUrl(query, viewLatLongBBox);
     const requestOptions: RequestOptions = { method: "GET", responseType: "json" };

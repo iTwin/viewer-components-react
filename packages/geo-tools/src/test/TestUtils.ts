@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { I18N } from "@bentley/imodeljs-i18n";
 import { GeoTools } from "../GeoTools";
 
@@ -15,8 +16,6 @@ export class TestUtils {
 
   public static get i18n(): I18N {
     if (!TestUtils._i18n) {
-      // const port = process.debugPort;
-      // const i18nOptions = { urlTemplate: "http://localhost:" + port + "/locales/{{lng}}/{{ns}}.json" };
       TestUtils._i18n = new I18N();
     }
     return TestUtils._i18n;

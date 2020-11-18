@@ -6356,7 +6356,7 @@ packages:
       integrity: sha512-NYrtPht0wGzhwe9+/idPaBB+TqkY9AhTvOLMkThm0IoEfLaiVQZwBwyJ5puCkO3AUCWrmcoePjp2mbFocKy4SQ==
   /@types/node-fetch/2.5.7:
     dependencies:
-      '@types/node': 14.0.23
+      '@types/node': 14.14.7
       form-data: 3.0.0
     dev: false
     resolution:
@@ -6517,7 +6517,7 @@ packages:
       integrity: sha512-iCdNPKU3IsYwRK9JieSYAiX0+aYDXOGAmrC/3/M7AqqSDKnWWVv07X+Zk1uFSL7cMTUYzv4lQRfohucEocn5/w==
   /@types/tunnel/0.0.1:
     dependencies:
-      '@types/node': 14.0.23
+      '@types/node': 14.14.7
     dev: false
     resolution:
       integrity: sha512-AOqu6bQu5MSWwYvehMXLukFHnupHrpZ8nvgae5Ggie9UwzDR1CCwoXgSSWNZJuyOlCdfdsWMA5F2LlmvyoTv8A==
@@ -9802,7 +9802,7 @@ packages:
     dependencies:
       asap: 2.0.6
       invariant: 2.2.4
-      lodash: 4.17.19
+      lodash: 4.17.20
       redux: 4.0.5
     dev: false
     resolution:
@@ -9874,7 +9874,7 @@ packages:
       integrity: sha512-gd3ypIPfOMr9h5jIKq8E3sHOTCjeirnl0WK5ZdS1AW0Odt0b1PaWaHdJ4Qk4klv+YB9aJBS7mESXjFoDQPu6DA==
   /dom-helpers/5.1.4:
     dependencies:
-      '@babel/runtime': 7.10.5
+      '@babel/runtime': 7.12.5
       csstype: 2.6.11
     dev: false
     resolution:
@@ -12576,7 +12576,7 @@ packages:
     dependencies:
       es6-promise: 4.2.8
       eventemitter2: 5.0.1
-      lodash: 4.17.19
+      lodash: 4.17.20
       uuid: 3.4.0
     dev: false
     resolution:
@@ -17978,7 +17978,7 @@ packages:
     dependencies:
       autobind-decorator: 2.4.0
       dnd-core: 4.0.5
-      lodash: 4.17.19
+      lodash: 4.17.20
       shallowequal: 1.1.0
     dev: false
     resolution:
@@ -17986,7 +17986,7 @@ packages:
   /react-dnd-test-backend/5.0.1:
     dependencies:
       dnd-core: 4.0.5
-      lodash: 4.17.19
+      lodash: 4.17.20
     dev: false
     resolution:
       integrity: sha1-ABl5UOYedl75pEvRcenKyFFqc9c=
@@ -17995,7 +17995,7 @@ packages:
       dnd-core: 4.0.5
       hoist-non-react-statics: 2.5.5
       invariant: 2.2.4
-      lodash: 4.17.19
+      lodash: 4.17.20
       react: 16.13.1
       recompose: 0.27.1_react@16.13.1
       shallowequal: 1.1.0
@@ -18094,7 +18094,7 @@ packages:
       integrity: sha512-EvCAZYGfOLqwV7gh849xy9/pt55rJXPwmYvI4lilPM5rUT/1NxuuN59ipdBksRVSvz0KInbPnp4IfoXJXCqiDA==
   /react-resize-detector/4.2.3_react-dom@16.13.1+react@16.13.1:
     dependencies:
-      lodash: 4.17.19
+      lodash: 4.17.20
       lodash-es: 4.17.15
       prop-types: 15.7.2
       raf-schd: 4.0.2
@@ -18247,7 +18247,7 @@ packages:
       integrity: sha512-oX7I7KYiUM7lVXQzmhtF4Xg/4UA5duSA+/ZcAvdWlTLFCoFYq1SbauJT5gZK9cZS/wdYR6TPGpX/dqzvTqQeBA==
   /react-window/1.8.5_react-dom@16.13.1+react@16.13.1:
     dependencies:
-      '@babel/runtime': 7.10.5
+      '@babel/runtime': 7.12.5
       memoize-one: 5.1.1
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
@@ -22219,7 +22219,7 @@ packages:
       react-test-renderer: '*'
       redux: '*'
     resolution:
-      integrity: sha512-4Vs2Ty4HgkHEGEm+Xh1MDwRyk1m2GVc5pkPL+P12mrFD3iYhiefJ5lxK7sAtw53hbYEoUT+uECNRihz6j+vPrg==
+      integrity: sha512-b4YDdunjYLsms8vwjJDzpil12x2aJvYMu6KpSWDkasHX5aqZQkAE+1qWTfj2d7M24bD0SE9XyRJgqmLXjBFjTA==
       tarball: 'file:projects/geo-tools-react.tgz'
     version: 0.0.0
   'file:projects/imodel-content-tree-react.tgz':

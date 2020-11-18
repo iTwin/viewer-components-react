@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import "./GeoAddressSearch.scss";
 
 import { AutoSuggest, AutoSuggestData, CommonProps, WebFontIcon } from "@bentley/ui-core";
@@ -21,7 +22,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   const [inputValue, setInputValue] = React.useState("");
 
   // `React.useMemo' is used avoid creating new object on each render cycle
-  const addressProvider = React.useMemo(() => (props.provider ? props.provider : new BingAddressProvider()), [props.provider]);
+  const addressProvider = React.useMemo(() => (props.provider ?? new BingAddressProvider()), [props.provider]);
 
   const onSuggestionSelected = (selected: AutoSuggestData) => {
     setInputValue(selected.label);
