@@ -7,7 +7,9 @@
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
   "gitPolicy": {
-    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
+    "allowedEmailRegExps": [
+      "[^@]+@users\\.noreply\\.github\\.com"
+    ],
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
   "repository": {
@@ -43,6 +45,11 @@
       "packageName": "@bentley/imodel-react-hooks",
       "projectFolder": "packages/imodel-react-hooks",
       "versionPolicyName": "imodel-react-hooks"
+    },
+    {
+      "packageName": "@bentley/geo-tools-react",
+      "projectFolder": "packages/geo-tools",
+      "versionPolicyName": "geo-tools"
     }
   ]
 }
