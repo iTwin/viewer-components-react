@@ -21,8 +21,8 @@
 
 /packages/tree-widget  @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
 
-/packages/imodel-content-tree  @grigasp
+/packages/imodel-content-tree  @grigasp @imodeljs/viewer-components-reviewers
 
-/packages/imodel-react-hooks @michaelbelousov
+/packages/imodel-react-hooks @michaelbelousov @imodeljs/viewer-components-reviewers
 
-/packages/geo-tools @mdastous-bentley
+/packages/geo-tools @mdastous-bentley @imodeljs/viewer-components-reviewers
