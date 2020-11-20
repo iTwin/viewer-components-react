@@ -1,0 +1,17 @@
+{
+  "name": "@bentley/geo-tools-react",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@bentley/geo-tools-react_v0.1.0",
+      "date": "Thu, 19 Nov 2020 19:53:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "First version of geo-tools-react"
+          }
+        ]
+      }
+    }
+  ]
+}
