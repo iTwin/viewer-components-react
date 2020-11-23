@@ -27,7 +27,7 @@ import {
   PropertyData,
   PropertyGridContextMenuArgs,
   PropertyValueRendererManager,
-  VirtualizedPropertyGridWithDataProvider
+  VirtualizedPropertyGridWithDataProvider,
 } from "@bentley/ui-components";
 import {
   ContextMenuItem,
