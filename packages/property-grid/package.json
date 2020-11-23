@@ -54,7 +54,7 @@
     "@bentley/presentation-frontend": "2.3.3",
     "@bentley/product-settings-client": "2.3.3",
     "@bentley/ui-abstract": "2.3.3",
-    "@bentley/ui-components": "2.3.3",
+    "@bentley/ui-components": "2.9.2",
     "@bentley/ui-core": "2.3.3",
     "@bentley/ui-framework": "2.3.3",
     "@bentley/ui-ninezone": "2.3.3",
