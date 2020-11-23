@@ -25,7 +25,6 @@ import {
   ActionButtonRenderer,
   ActionButtonRendererProps,
   PropertyData,
-  PropertyGrid as CorePropertyGrid,
   PropertyGridContextMenuArgs,
   PropertyValueRendererManager,
   VirtualizedPropertyGridWithDataProvider
