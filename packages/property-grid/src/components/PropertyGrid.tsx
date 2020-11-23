@@ -25,9 +25,9 @@ import {
   ActionButtonRenderer,
   ActionButtonRendererProps,
   PropertyData,
-  PropertyGrid as CorePropertyGrid,
   PropertyGridContextMenuArgs,
   PropertyValueRendererManager,
+  VirtualizedPropertyGridWithDataProvider,
 } from "@bentley/ui-components";
 import {
   ContextMenuItem,
@@ -88,7 +88,7 @@ export class PropertyGrid extends React.Component<
   PropertyGridState
   > {
   private static _unifiedSelectionPropertyGrid = propertyGridWithUnifiedSelection(
-    CorePropertyGrid,
+    VirtualizedPropertyGridWithDataProvider,
   );
 
   private _dataProvider: PresentationPropertyDataProvider;
@@ -531,7 +531,7 @@ export class PropertyGrid extends React.Component<
       <div className={this.props.rootClassName}>
         {this._renderHeader()}
         {this.props.disableUnifiedSelection ? (
-          <CorePropertyGrid
+          <VirtualizedPropertyGridWithDataProvider
             orientation={this.props.orientation ?? Orientation.Horizontal}
             isOrientationFixed={this.props.isOrientationFixed ?? true}
             dataProvider={this._dataProvider}
