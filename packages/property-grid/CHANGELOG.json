@@ -2,6 +2,23 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "1.3.0",
+      "tag": "@bentley/property-grid-react_v1.3.0",
+      "date": "Tue, 24 Nov 2020 14:14:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated property grid to virtualized property grid."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Updated core packages to 2.9.2"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.1",
       "tag": "@bentley/property-grid-react_v1.2.1",
       "date": "Thu, 01 Oct 2020 15:19:45 GMT",

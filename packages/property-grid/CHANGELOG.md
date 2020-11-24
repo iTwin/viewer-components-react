@@ -1,6 +1,17 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Thu, 01 Oct 2020 15:19:45 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Nov 2020 14:14:52 GMT and should not be manually modified.
+
+## 1.3.0
+Tue, 24 Nov 2020 14:14:52 GMT
+
+### Minor changes
+
+- Updated core packages to 2.9.2
+
+### Patches
+
+- Updated property grid to virtualized property grid.
 
 ## 1.2.1
 Thu, 01 Oct 2020 15:19:45 GMT
