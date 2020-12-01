@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { ClientRequestContext } from "@bentley/bentleyjs-core";
 import { Angle, Range2d } from "@bentley/geometry-core";
 import { request, RequestOptions, Response } from "@bentley/itwin-client";
@@ -45,7 +44,7 @@ export class BingAddressProvider implements AddressProvider {
 
     const degrees = [degreeRange.low.y, degreeRange.low.x, degreeRange.high.y, degreeRange.high.x];
 
-    return `http://dev.virtualearth.net/REST/v1/Autosuggest?query=${query}&userMapView=${degrees}&maxResults=${this._maxResults}&includeEntityTypes=${entityTypesStr}&key=${this._bingKey}`;
+    return `https://dev.virtualearth.net/REST/v1/Autosuggest?query=${query}&userMapView=${degrees}&maxResults=${this._maxResults}&includeEntityTypes=${entityTypesStr}&key=${this._bingKey}`;
   }
 
   /**
