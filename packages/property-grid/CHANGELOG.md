@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Tue, 24 Nov 2020 14:14:52 GMT and should not be manually modified.
+This log was last generated on Thu, 03 Dec 2020 17:14:23 GMT and should not be manually modified.
+
+## 1.3.1
+Thu, 03 Dec 2020 17:14:23 GMT
+
+### Patches
+
+- removed height on property panel header
 
 ## 1.3.0
 Tue, 24 Nov 2020 14:14:52 GMT
