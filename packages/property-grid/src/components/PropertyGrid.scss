@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 @import "~@bentley/ui-core/lib/ui-core/style/index";
 @import "~@bentley/ui-core/lib/ui-core/text/index";
 
@@ -38,7 +39,6 @@
 }
 
 .property-grid-react-panel-header {
-  height: 52px;
   display: flex;
   padding-top: $uicore-xs;
 }

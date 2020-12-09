@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "removed height on property panel header",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react",
+  "email": "cortneysmithbentley@users.noreply.github.com"
+}

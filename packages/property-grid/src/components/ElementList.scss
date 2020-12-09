@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 @import "~@bentley/ui-core/lib/ui-core/index";
 
 .property-grid-react-element-list {
@@ -11,7 +12,6 @@
 }
 
 .property-grid-react-element-list-header {
-  height: 52px; // specific size based on property grid header
   display: flex;
   padding-top: $uicore-xs;
 }
