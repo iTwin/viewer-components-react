@@ -3,6 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
+
 /** @packageDocumentation
  * @module Tools
  */
@@ -11,6 +13,8 @@ import * as React from "react";
 import { ToolbarPopupContext } from "@bentley/ui-components";
 import { CustomItemDef, PopupButton } from "@bentley/ui-framework";
 import { GeoAddressSearch } from "./components/GeoAddressSearch";
+import geoSearchSvg from "./icons/geosearch.svg?sprite";
+import { IconSpecUtilities } from "@bentley/ui-abstract";
 
 /* eslint-disable deprecation/deprecation */
 
@@ -19,10 +23,12 @@ import { GeoAddressSearch } from "./components/GeoAddressSearch";
  */
 // istanbul ignore next
 export class GeoToolsItemDef {
+  public static iconSpec = IconSpecUtilities.createSvgIconSpec(geoSearchSvg);
+
   public static get geoAddressSearchButtonItemDef() {
     return new CustomItemDef({
       customId: "geo-tools:geoAddressSearch",
-      iconSpec: "icon-search",
+      iconSpec: GeoToolsItemDef.iconSpec,
       labelKey: "GeoTools:geoAddressSearch.label",
       popupPanelNode: <ToolbarPopupContext.Consumer>
         {() => (
@@ -31,7 +37,7 @@ export class GeoToolsItemDef {
       </ToolbarPopupContext.Consumer>,
       // DEPRECATED way (still used by DR)
       reactElement: (
-        <PopupButton iconSpec="icon-search" labelKey="GeoTools:geoAddressSearch.label">
+        <PopupButton iconSpec={GeoToolsItemDef.iconSpec} labelKey="GeoTools:geoAddressSearch.label">
           <GeoAddressSearch />
         </PopupButton>
       ),
