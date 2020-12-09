@@ -43,6 +43,7 @@ import {
   StopMarkupEvent,
   ViewElementDictionary,
 } from "../../util/MarkupTypes";
+import { createViewStateProps } from "../../util/MarkupViewStateAdapter";
 
 export class MarkupFrontstageProvider extends FrontstageProvider {
   private readonly _contentGroup: ContentGroup;
@@ -185,7 +186,11 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
       currentViewPort && createMarkupSavedViewData(currentViewPort);
     const markupData = await MarkupApp.stop();
     try {
-      if (savedView) {
+      if (savedView && currentViewPort && markupData.svg) {
+        const markupViewStateProps = createViewStateProps(
+          currentViewPort,
+          markupData.svg
+        );
         savedView.markup = markupData.svg;
         savedView.emphasizedElementsProps = savedView.is2d
           ? savedView.emphasizedElementsProps
@@ -195,6 +200,7 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
         this.onAddMarkupEvent.raiseEvent({
           savedView,
           thumbImage: markupData.image,
+          markupViewStateProps,
         });
       }
     } catch (error) {
