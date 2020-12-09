@@ -26,7 +26,7 @@
     "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
     "clean": "rimraf lib",
-    "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
+    "copy:assets": "cpx \"./src/**/*.{*css,json,svg}\" \"./lib\" && cpx \"./public/**/*\" \"./lib/public\"",
     "cover": "nyc npm test",
     "lint": "eslint ./src/**/*.{ts,tsx} 1>&2",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
@@ -35,7 +35,8 @@
   "dependencies": {
     "classnames": "^2.2.5",
     "i18next": "^10.2.2",
-    "react-autosuggest": "^10.0.2"
+    "react-autosuggest": "^10.0.2",
+    "svg-sprite-loader": "4.2.1"
   },
   "devDependencies": {
     "@bentley/bentleyjs-core": "^2.9.1",
@@ -46,6 +47,7 @@
     "@bentley/imodeljs-frontend": "^2.9.1",
     "@bentley/imodeljs-i18n": "^2.9.1",
     "@bentley/itwin-client": "^2.9.1",
+    "@bentley/react-scripts": "3.4.6",
     "@bentley/telemetry-client": "^2.9.1",
     "@bentley/ui-abstract": "^2.9.1",
     "@bentley/ui-components": "^2.9.1",
