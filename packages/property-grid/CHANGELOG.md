@@ -1,9 +1,9 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Thu, 03 Dec 2020 17:14:23 GMT and should not be manually modified.
+This log was last generated on Wed, 09 Dec 2020 19:09:13 GMT and should not be manually modified.
 
 ## 1.3.1
-Thu, 03 Dec 2020 17:14:23 GMT
+Wed, 09 Dec 2020 19:09:13 GMT
 
 ### Patches
 

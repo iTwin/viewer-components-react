@@ -1,9 +1,9 @@
 # Change Log - @bentley/imodel-react-hooks
 
-This log was last generated on Tue, 01 Dec 2020 14:48:49 GMT and should not be manually modified.
+This log was last generated on Wed, 09 Dec 2020 19:09:13 GMT and should not be manually modified.
 
 ## 0.1.2
-Tue, 01 Dec 2020 14:48:49 GMT
+Wed, 09 Dec 2020 19:09:13 GMT
 
 ### Patches
 

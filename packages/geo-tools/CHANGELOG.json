@@ -4,11 +4,14 @@
     {
       "version": "0.1.1",
       "tag": "@bentley/geo-tools-react_v0.1.1",
-      "date": "Tue, 01 Dec 2020 14:48:49 GMT",
+      "date": "Wed, 09 Dec 2020 19:09:13 GMT",
       "comments": {
         "patch": [
           {
             "comment": "Now use https url for bing autosuggest api."
+          },
+          {
+            "comment": "Cosmetic changes: New button icon and label."
           }
         ]
       }

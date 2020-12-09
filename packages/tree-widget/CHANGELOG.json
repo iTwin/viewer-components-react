@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.2.4",
+      "tag": "@bentley/tree-widget-react_v1.2.4",
+      "date": "Wed, 09 Dec 2020 19:09:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing resizing issues with the SearchBox in Model tree"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.3",
       "tag": "@bentley/tree-widget-react_v1.2.3",
       "date": "Tue, 25 Aug 2020 16:57:36 GMT",
