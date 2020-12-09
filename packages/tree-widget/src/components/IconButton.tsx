@@ -29,9 +29,11 @@ export function IconButton({
 }: IconButtonProps) {
   return (
     <>
-      <span className={classnames("tree-widget-icon-label", className)}>
-        {label}
-      </span>
+      {label &&
+        <span className={classnames("tree-widget-icon-label", className)}>
+          {label}
+        </span>
+      }
       <button
         {...otherProps}
         className={classnames("tree-widget-icon-button", className)}
