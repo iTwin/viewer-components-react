@@ -2,14 +2,15 @@
   "extends": "./node_modules/@bentley/build-tools/tsconfig-base.json",
   "compilerOptions": {
     "target": "es2017",
-    "module": "commonjs",
-    "declarationMap": true,
-    "outDir": "./lib",
     "skipLibCheck": true,
-    "esModuleInterop": true,
+    "module": "commonjs",
+    "outDir": "./lib",
     "jsx": "react",
-    "preserveSymlinks": true,
-    "resolveJsonModule": true
+    "types": [
+      "sinon-chai",
+      "mocha",
+      "@bentley/react-scripts"
+    ]
   },
   "include": [
     "./src/**/*.ts*"
