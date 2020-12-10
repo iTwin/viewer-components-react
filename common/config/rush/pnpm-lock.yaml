@@ -12,7 +12,7 @@ dependencies:
   '@rush-temp/imodel-content-tree-react': 'file:projects/imodel-content-tree-react.tgz'
   '@rush-temp/imodel-react-hooks': 'file:projects/imodel-react-hooks.tgz'
   '@rush-temp/imodel-select-react': 'file:projects/imodel-select-react.tgz'
-  '@rush-temp/markup-frontstage-react': 'file:projects/markup-frontstage-react.tgz_react-redux@7.2.0+redux@4.0.5'
+  '@rush-temp/markup-frontstage-react': 'file:projects/markup-frontstage-react.tgz_224c658dd7c110ddb24a8bb4e3576ecf'
   '@rush-temp/property-grid-react': 'file:projects/property-grid-react.tgz_0db41527a8babababd1d0c485ed9d35a'
   '@rush-temp/tree-widget-react': 'file:projects/tree-widget-react.tgz'
   '@svgdotjs/svg.js': 3.0.13
@@ -2710,6 +2710,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-1FSBuJr9BJd+MniNIvsjsHl934RUBLdv3myY9UX5YWUN1JG5InA3kC8XD3kaJ4UWOj0Z8QtEyNseVQz7bhJebA==
+  /@bentley/bentleyjs-core/2.9.7:
+    dev: false
+    resolution:
+      integrity: sha512-ZkO04UfMj4od3b72Q37fhJOaPcujqeTEKcQ5Mf3zKUQTUlolDLPWe9fePGRdwZGyle6xoJf+iP10QeZKjFrZwg==
   /@bentley/build-tools/2.2.0:
     dependencies:
       '@microsoft/api-extractor': 7.7.3
@@ -2817,49 +2821,6 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-0hlKyn88V8+tAIRBqzIYbcSHU5e5+3G5eY8tEdS225zQrz1PNvjEpAI9I3vaP8jfCdi+CE2QRywJgwNdIbGUqQ==
-  /@bentley/build-tools/2.5.3:
-    dependencies:
-      '@microsoft/api-extractor': 7.7.3
-      '@typescript-eslint/eslint-plugin': 2.25.0_94327f671b8b8fcfd6e40ba8fb1b6e1d
-      '@typescript-eslint/parser': 2.25.0_eslint@6.8.0+typescript@3.7.5
-      chai: 4.2.0
-      chalk: 3.0.0
-      cpx: 1.5.0
-      cross-spawn: 7.0.3
-      eslint: 6.8.0
-      eslint-import-resolver-node: 0.3.4
-      eslint-import-resolver-typescript: 2.0.0_70f7a64bd774aaf00fe73c7ab169c95d
-      eslint-plugin-deprecation: 1.1.0_eslint@6.8.0+typescript@3.7.5
-      eslint-plugin-import: 2.20.1_eslint@6.8.0
-      eslint-plugin-prefer-arrow: 1.1.7_eslint@6.8.0
-      eslint-plugin-react: 7.19.0_eslint@6.8.0
-      eslint-plugin-react-hooks: 3.0.0_eslint@6.8.0
-      eslint-plugin-rulesdir: 0.1.0
-      fs-extra: 8.1.0
-      glob: 7.1.6
-      mocha: 5.2.0
-      mocha-junit-reporter: 1.23.3_mocha@5.2.0
-      nyc: 14.1.1
-      recursive-readdir: 2.2.2
-      rimraf: 3.0.2
-      tree-kill: 1.2.2
-      ts-node: 7.0.1
-      tsconfig-paths: 3.9.0
-      tslib: 1.13.0
-      tslint: 5.20.1_typescript@3.7.5
-      tslint-consistent-codestyle: 1.16.0_tslint@5.20.1+typescript@3.7.5
-      tslint-eslint-rules: 5.4.0_tslint@5.20.1+typescript@3.7.5
-      tslint-etc: 1.12.0_tslint@5.20.1+typescript@3.7.5
-      tsutils: 3.17.1_typescript@3.7.5
-      typedoc: 0.16.11
-      typedoc-plugin-external-module-name: 3.0.0_typedoc@0.16.11
-      typedoc-plugin-internal-external: 2.1.1_typedoc@0.16.11
-      typescript: 3.7.5
-      yargs: 15.4.1
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha512-F0Miu2VGxNDivDcHyXpUqMZ58YrF31LEv/GUCouI8xOgOKR9z/YrIRQH02+F91mYovWZPQZNw4BYxQP052J4/Q==
   /@bentley/build-tools/2.9.1_eslint@6.8.0:
     dependencies:
       '@bentley/eslint-plugin': 2.9.1_eslint@6.8.0
@@ -2930,6 +2891,41 @@ packages:
       eslint: '*'
     resolution:
       integrity: sha512-QdCcmLuTBVCYc0A7L9i3zxFtW1atn7j6E2lbAig4aHH32PB9bn9R457IqN4nEyH+Gp4L7kFSxrmHrgC2FiCVQg==
+  /@bentley/build-tools/2.9.7_eslint@6.8.0:
+    dependencies:
+      '@bentley/eslint-plugin': 2.9.7_eslint@6.8.0
+      '@microsoft/api-extractor': 7.7.3
+      chai: 4.2.0
+      chalk: 3.0.0
+      cpx: 1.5.0
+      cross-spawn: 7.0.3
+      fs-extra: 8.1.0
+      glob: 7.1.6
+      mocha: 5.2.0
+      mocha-junit-reporter: 1.23.3_mocha@5.2.0
+      nyc: 14.1.1
+      recursive-readdir: 2.2.2
+      rimraf: 3.0.2
+      tree-kill: 1.2.2
+      ts-node: 7.0.1
+      tsconfig-paths: 3.9.0
+      tslib: 1.13.0
+      tslint: 5.20.1_typescript@3.7.5
+      tslint-consistent-codestyle: 1.16.0_tslint@5.20.1+typescript@3.7.5
+      tslint-eslint-rules: 5.4.0_tslint@5.20.1+typescript@3.7.5
+      tslint-etc: 1.12.0_tslint@5.20.1+typescript@3.7.5
+      tsutils: 3.17.1_typescript@3.7.5
+      typedoc: 0.16.11
+      typedoc-plugin-external-module-name: 3.0.0_typedoc@0.16.11
+      typedoc-plugin-internal-external: 2.1.1_typedoc@0.16.11
+      typescript: 3.7.5
+      yargs: 15.4.1
+    dev: false
+    hasBin: true
+    peerDependencies:
+      eslint: '*'
+    resolution:
+      integrity: sha512-tO4desUx/XthMN/eGSVTMHd4v4ZfFF10O8qDYsk1VchJSZfDFcYBWqNgd2/meNIlnKA9mNTn5bjmbyG5clI4jA==
   /@bentley/context-registry-client/2.2.0_6f1b9319c6bff250b4992e3026c76aac:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -2994,6 +2990,16 @@ packages:
       '@bentley/itwin-client': ^2.9.2
     resolution:
       integrity: sha512-avAKtckQkXvY+74D9vwjE40VkboKfZBq64q7/Pw+1uEmct1CAvXNkbtisrStuioplnRRgeF7PcOmORGitQmwoA==
+  /@bentley/context-registry-client/2.9.7_@bentley+bentleyjs-core@2.9.7:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      deep-assign: 2.0.0
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/itwin-client': ^2.9.7
+    resolution:
+      integrity: sha512-gTg2zTPPfeSCNWfOGy7stkGORRDRp0fccbFneHHAOn3qa+J6CL+42F/srpeimB6oKPKwdgu7XCbntRmWWYjyEA==
   /@bentley/eslint-plugin/2.9.1_eslint@6.8.0:
     dependencies:
       '@typescript-eslint/eslint-plugin': 2.25.0_94327f671b8b8fcfd6e40ba8fb1b6e1d
@@ -3038,6 +3044,28 @@ packages:
       eslint: ^6.8.0
     resolution:
       integrity: sha512-t4GrZWZzcuo5qojV+EgQNHHvVq5MKtR1rTzvRFxuhmJ10GO0mTp8E/S/PqFtenMRdnsLoV+1r5rWhxipB561Ng==
+  /@bentley/eslint-plugin/2.9.7_eslint@6.8.0:
+    dependencies:
+      '@typescript-eslint/eslint-plugin': 2.25.0_94327f671b8b8fcfd6e40ba8fb1b6e1d
+      '@typescript-eslint/parser': 2.25.0_eslint@6.8.0+typescript@3.7.5
+      eslint: 6.8.0
+      eslint-import-resolver-node: 0.3.4
+      eslint-import-resolver-typescript: 2.0.0_70f7a64bd774aaf00fe73c7ab169c95d
+      eslint-plugin-deprecation: 1.1.0_eslint@6.8.0+typescript@3.7.5
+      eslint-plugin-import: 2.20.1_eslint@6.8.0
+      eslint-plugin-jam3: 0.2.3
+      eslint-plugin-jsdoc: 30.6.2_eslint@6.8.0
+      eslint-plugin-jsx-a11y: 6.4.1_eslint@6.8.0
+      eslint-plugin-prefer-arrow: 1.1.7_eslint@6.8.0
+      eslint-plugin-react: 7.19.0_eslint@6.8.0
+      eslint-plugin-react-hooks: 3.0.0_eslint@6.8.0
+      require-dir: 1.2.0
+      typescript: 3.7.5
+    dev: false
+    peerDependencies:
+      eslint: ^6.8.0
+    resolution:
+      integrity: sha512-yh7jSRy3PPtY/rD01HWIshE5lUBwZCthGPnf5KeVS7/aEH8Aeg+3yLn6xN/X10njh1mB7cKNiJF0Llv+i1+AUw==
   /@bentley/extension-client/2.2.0_283e4705a8fc75999a3239fbbc7d0067:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -3068,16 +3096,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-K9TSrJC94YN7c1pBSHaSk6pWxxrpdyxLaII2Ei/r3FPD7iL+23ntr/RptURf9rYqX4qzRF4BrScd/XrU93HVxA==
-  /@bentley/extension-client/2.5.3:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/imodeljs-common': 2.5.3_9750a03f5a5f5f7105e8feb4069bb432
-      '@bentley/itwin-client': 2.5.3_@bentley+bentleyjs-core@2.5.3
-    dev: false
-    peerDependencies:
-      '@bentley/geometry-core': '*'
-    resolution:
-      integrity: sha512-1pHzdjGHlfdTFF90UDsapJjUgQF8g5JfoYsqUDNzi0WlkNO7OVjE9fmz76X36QzAeeI0YKJj275k04oCfLmfhw==
   /@bentley/extension-client/2.5.3_@bentley+geometry-core@2.3.3:
     dependencies:
       '@bentley/bentleyjs-core': 2.5.3
@@ -3109,6 +3127,14 @@ packages:
       '@bentley/imodelhub-client': '*'
     resolution:
       integrity: sha512-yynZxMKL3aHN+3IhivnH0SP9C7fanKohDOw0hF2xUh1H92C/2K2qIFm/kwGo0iNClw8YSF1O9Bv1C9V/wtuMMQ==
+  /@bentley/extension-client/2.9.7:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/imodeljs-common': 2.9.7_a77d50a2f61aea3eadefa2273ee95870
+      '@bentley/itwin-client': 2.9.7_@bentley+bentleyjs-core@2.9.7
+    dev: false
+    resolution:
+      integrity: sha512-Psp2hcfaKLiwp+GcIYa4vtDkAHcyZmIwETMvj0YV2hmos6aYbJLc8T73cZiYol32Y7/zWQFJENzePxXdnikAKw==
   /@bentley/extension-webpack-tools/2.9.2:
     dependencies:
       '@babel/core': 7.7.4
@@ -3358,35 +3384,6 @@ packages:
       '@bentley/rbac-client': ^2.5.3
     resolution:
       integrity: sha512-QoIUQ5XAvDHBHwWJ+6z4XvoXLUeO3etI/Rd7HkYIidaIEHJ/tCddPfbE1YJoaMt7gS2ZqsIvsWfJm220rRPB3g==
-  /@bentley/imodeljs-common/2.5.3_9750a03f5a5f5f7105e8feb4069bb432:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/itwin-client': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@ungap/url-search-params': 0.1.4
-      semver: 5.7.1
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-      '@bentley/geometry-core': ^2.5.3
-      '@bentley/imodelhub-client': ^2.5.3
-      '@bentley/itwin-client': ^2.5.3
-      '@bentley/rbac-client': ^2.5.3
-    resolution:
-      integrity: sha512-QoIUQ5XAvDHBHwWJ+6z4XvoXLUeO3etI/Rd7HkYIidaIEHJ/tCddPfbE1YJoaMt7gS2ZqsIvsWfJm220rRPB3g==
-  /@bentley/imodeljs-common/2.5.3_@bentley+bentleyjs-core@2.5.3:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      '@ungap/url-search-params': 0.1.4
-      semver: 5.7.1
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-      '@bentley/geometry-core': ^2.5.3
-      '@bentley/imodelhub-client': ^2.5.3
-      '@bentley/itwin-client': ^2.5.3
-      '@bentley/rbac-client': ^2.5.3
-    resolution:
-      integrity: sha512-QoIUQ5XAvDHBHwWJ+6z4XvoXLUeO3etI/Rd7HkYIidaIEHJ/tCddPfbE1YJoaMt7gS2ZqsIvsWfJm220rRPB3g==
   /@bentley/imodeljs-common/2.5.3_ee21211f57d9af217606889b8739c611:
     dependencies:
       '@bentley/bentleyjs-core': 2.5.3
@@ -3440,6 +3437,39 @@ packages:
       '@bentley/rbac-client': ^2.9.2
     resolution:
       integrity: sha512-LzHY6HDNEFyK6MYjqKAiI3j2kJzpKVynTM/NWP1YkQg3Lr91FXlpCyQ2OcBRVF+aHvZvfS+K9Qu4C1U5tJyfEg==
+  /@bentley/imodeljs-common/2.9.7_@bentley+bentleyjs-core@2.9.7:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@types/js-base64': 2.3.2
+      '@ungap/url-search-params': 0.1.4
+      flatbuffers: 1.12.0
+      semver: 5.7.1
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/geometry-core': ^2.9.7
+      '@bentley/imodelhub-client': ^2.9.7
+      '@bentley/itwin-client': ^2.9.7
+      '@bentley/rbac-client': ^2.9.7
+    resolution:
+      integrity: sha512-CPAoV0L8LHQcGv81FeWYktqqGZdCAGJp06Q/D16wRqOI25ioD7rCGPFK2874tegPUehoefdWEGyBEvnDaX2Lmg==
+  /@bentley/imodeljs-common/2.9.7_a77d50a2f61aea3eadefa2273ee95870:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/itwin-client': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@types/js-base64': 2.3.2
+      '@ungap/url-search-params': 0.1.4
+      flatbuffers: 1.12.0
+      semver: 5.7.1
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/geometry-core': ^2.9.7
+      '@bentley/imodelhub-client': ^2.9.7
+      '@bentley/itwin-client': ^2.9.7
+      '@bentley/rbac-client': ^2.9.7
+    resolution:
+      integrity: sha512-CPAoV0L8LHQcGv81FeWYktqqGZdCAGJp06Q/D16wRqOI25ioD7rCGPFK2874tegPUehoefdWEGyBEvnDaX2Lmg==
   /@bentley/imodeljs-frontend/2.2.0_2e3687f3690ed2faa37c22070dd240a2:
     dependencies:
       '@azure/storage-blob': 10.4.0
@@ -3586,40 +3616,6 @@ packages:
       '@bentley/webgl-compatibility': ^2.5.3
     resolution:
       integrity: sha512-sU2m1kGoMha0877bJgdFJPlk6dqwwXnfiUa/7YI7gylX+gBELsse9VHvb5nDS0g7iaEuK5RH7FS86dDytrDLLw==
-  /@bentley/imodeljs-frontend/2.5.3_c789b763165dd0c0b5b3e14525046059:
-    dependencies:
-      '@azure/storage-blob': 10.4.0
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/context-registry-client': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/extension-client': 2.5.3
-      '@bentley/imodeljs-common': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/imodeljs-i18n': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/reality-data-client': 2.5.3
-      '@bentley/ui-abstract': 2.5.3_853d3c701de4fe4d665c2533a5a38af7
-      '@bentley/usage-logging-client': 2.5.3
-      fuse.js: 3.6.1
-      js-base64: 2.6.3
-      ldclient-js: 2.10.2
-      oidc-client: 1.10.1
-      semver: 5.7.1
-      wms-capabilities: 0.4.0
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-      '@bentley/frontend-authorization-client': ^2.5.3
-      '@bentley/geometry-core': ^2.5.3
-      '@bentley/imodelhub-client': ^2.5.3
-      '@bentley/imodeljs-common': ^2.5.3
-      '@bentley/imodeljs-i18n': ^2.5.3
-      '@bentley/imodeljs-quantity': ^2.5.3
-      '@bentley/itwin-client': ^2.5.3
-      '@bentley/orbitgt-core': ^2.5.3
-      '@bentley/product-settings-client': ^2.5.3
-      '@bentley/rbac-client': ^2.5.3
-      '@bentley/ui-abstract': ^2.5.3
-      '@bentley/webgl-compatibility': ^2.5.3
-    resolution:
-      integrity: sha512-sU2m1kGoMha0877bJgdFJPlk6dqwwXnfiUa/7YI7gylX+gBELsse9VHvb5nDS0g7iaEuK5RH7FS86dDytrDLLw==
   /@bentley/imodeljs-frontend/2.9.1_2b96b4ab2a899de5ad3d80799025a798:
     dependencies:
       '@azure/storage-blob': 10.4.0
@@ -3702,6 +3698,42 @@ packages:
       '@bentley/webgl-compatibility': ^2.9.2
     resolution:
       integrity: sha512-AD4plXsods4Rx6RkjH3YxCWN4qld0Qxnuw7vuVos0i9DvYE5uwVTBdQ/pkpBaU1ETnv14k4WjKNBO1oi7oq1pQ==
+  /@bentley/imodeljs-frontend/2.9.7_a46189dcb93b755dc320b71434ca9f00:
+    dependencies:
+      '@azure/storage-blob': 10.4.0
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/context-registry-client': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/extension-client': 2.9.7
+      '@bentley/imodeljs-common': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/imodeljs-i18n': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/reality-data-client': 2.9.7
+      '@bentley/telemetry-client': 2.9.1
+      '@bentley/ui-abstract': 2.9.7_cebcfd4da4bcd5d6463c7e836ddbe1ba
+      '@bentley/usage-logging-client': 2.9.7_@bentley+telemetry-client@2.9.1
+      fuse.js: 3.6.1
+      js-base64: 2.6.3
+      ldclient-js: 2.10.2
+      oidc-client: 1.10.1
+      semver: 5.7.1
+      wms-capabilities: 0.4.0
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/frontend-authorization-client': ^2.9.7
+      '@bentley/geometry-core': ^2.9.7
+      '@bentley/imodelhub-client': ^2.9.7
+      '@bentley/imodeljs-common': ^2.9.7
+      '@bentley/imodeljs-i18n': ^2.9.7
+      '@bentley/imodeljs-quantity': ^2.9.7
+      '@bentley/itwin-client': ^2.9.7
+      '@bentley/orbitgt-core': ^2.9.7
+      '@bentley/product-settings-client': ^2.9.7
+      '@bentley/rbac-client': ^2.9.7
+      '@bentley/telemetry-client': ^2.9.7
+      '@bentley/ui-abstract': ^2.9.7
+      '@bentley/webgl-compatibility': ^2.9.7
+    resolution:
+      integrity: sha512-Wo6RQ8Y/pCrfUlKXfKmkYnch0hUXPVgNlAfP5ChcFE8lE/dFEeTdU04l6IxjXI6CgQME8tZNetTLxoZh5B5jEg==
   /@bentley/imodeljs-i18n/2.2.0_@bentley+bentleyjs-core@2.2.0:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -3724,17 +3756,6 @@ packages:
       '@bentley/bentleyjs-core': ^2.3.2
     resolution:
       integrity: sha512-zvDSfKaEAKlI4Gokl6CVQM1jVrBgeClniKJ1ZTB3ckoH9yos+WLFmDlp1g/ovxkMZcd2zFJVeESw7MTcVo52uA==
-  /@bentley/imodeljs-i18n/2.5.3_@bentley+bentleyjs-core@2.5.3:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      i18next: 10.6.0
-      i18next-browser-languagedetector: 2.2.4
-      i18next-xhr-backend: 2.0.1
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-    resolution:
-      integrity: sha512-CNzEirCytcFrTufO64ajoYaY2aVa5Olc1PjzxMuRuj65awWkulPZeH1OVAmoiGHMGLTQyfN0E2QCDKmFb6w02A==
   /@bentley/imodeljs-i18n/2.9.1_@bentley+bentleyjs-core@2.9.1:
     dependencies:
       '@bentley/bentleyjs-core': 2.9.1
@@ -3757,6 +3778,17 @@ packages:
       '@bentley/bentleyjs-core': ^2.9.2
     resolution:
       integrity: sha512-x7xmCDhHQ7fIjCGVdpT/cNumo6EnV2q7YaJPmtUk6ZmF0zF92Qy7Wb3F9ITUnwFrxLwl5x2URdmeV2bxbzp7YA==
+  /@bentley/imodeljs-i18n/2.9.7_@bentley+bentleyjs-core@2.9.7:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      i18next: 10.6.0
+      i18next-browser-languagedetector: 2.2.4
+      i18next-xhr-backend: 2.0.1
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+    resolution:
+      integrity: sha512-nnKyoZPX34gkZOE7sZ1zjGh3qeHDCV1MDTwrIvJ1z6lCho9fMm5MeM7YA736soCERSR+2jmQrtWps5xgCC9KWQ==
   /@bentley/imodeljs-markup/2.2.0_9999011c3f417e9aafb3c4e09a744410:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -3791,22 +3823,6 @@ packages:
       '@bentley/imodeljs-i18n': ^2.3.2
     resolution:
       integrity: sha512-UtR+aAABYFuqHbP61knlgXcVyYBF9SSxYs7cXH4yJ4ecM2FTQoucFKeJCORSWl/E7ZRNNyLA9Pl03bZRGxzWqA==
-  /@bentley/imodeljs-markup/2.5.3_7bf4f33df369b6dd55115ac296e298f4:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/imodeljs-common': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/imodeljs-frontend': 2.5.3_c789b763165dd0c0b5b3e14525046059
-      '@bentley/imodeljs-i18n': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@svgdotjs/svg.js': 3.0.13
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-      '@bentley/geometry-core': ^2.5.3
-      '@bentley/imodeljs-common': ^2.5.3
-      '@bentley/imodeljs-frontend': ^2.5.3
-      '@bentley/imodeljs-i18n': ^2.5.3
-    resolution:
-      integrity: sha512-Phll29jVnu0T5sy0B2flDT2dAR5nqq11fOO++rBqe2977B38jntssq99SjLFh/WfDrSqrPLsAexAnANyv8rpEQ==
   /@bentley/imodeljs-markup/2.9.2_34caf41056280a97526f4a50237033c7:
     dependencies:
       '@bentley/bentleyjs-core': 2.9.2
@@ -3824,6 +3840,22 @@ packages:
       '@bentley/imodeljs-i18n': ^2.9.2
     resolution:
       integrity: sha512-0yQ3oRa1BqjZsKr+ONLnyFNY3kekVYni3LEHk2I991wFeGtaZJhiEZ/4byq4y4Z/NKcni3FvGZBLC5ZBSY0QIw==
+  /@bentley/imodeljs-markup/2.9.7_cd35ddd2b9906470054551dedb184d84:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/imodeljs-common': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/imodeljs-frontend': 2.9.7_a46189dcb93b755dc320b71434ca9f00
+      '@bentley/imodeljs-i18n': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@svgdotjs/svg.js': 3.0.13
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/geometry-core': ^2.9.7
+      '@bentley/imodeljs-common': ^2.9.7
+      '@bentley/imodeljs-frontend': ^2.9.7
+      '@bentley/imodeljs-i18n': ^2.9.7
+    resolution:
+      integrity: sha512-KK9z/osJwShm3JCPWUtRiHwlfmi5vCpQYUBPZjCExvMP/02p8h6LYu8CKu4EmCNnQJfZkILHd8xLvbQy1P3Ilg==
   /@bentley/imodeljs-quantity/2.2.0_@bentley+bentleyjs-core@2.2.0:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -3932,6 +3964,20 @@ packages:
       '@bentley/bentleyjs-core': ^2.9.2
     resolution:
       integrity: sha512-jF0Xi5svfoaRkbxmu/uNxorp+42EYRIs6jCbzn8ajSisS59+8HIyzv5oJw6JCQyI78EKePL6IRoYt/RohrbPQQ==
+  /@bentley/itwin-client/2.9.7_@bentley+bentleyjs-core@2.9.7:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      deep-assign: 2.0.0
+      js-base64: 2.6.3
+      qs: 6.9.4
+      superagent: 5.3.1
+      xmldom: 0.1.31
+      xpath: 0.0.27
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+    resolution:
+      integrity: sha512-Jdcpdaehg/HvUkX16W71h0gIWLNiGFusK+Y17BP/o+ya1SbnKmk1LoI942MsK8VVraqVx4mN7V5r600dwjF9eg==
   /@bentley/orbitgt-core/2.2.0:
     dev: false
     resolution:
@@ -4076,36 +4122,6 @@ packages:
       react-dom: ^16.8.0
     resolution:
       integrity: sha512-a9chu+dZ2FLEI1GDpu7V7luonK41x8cF8Qc2cgY7igSK3r3le9FXRODfesTd3r0qc1HBptbWpECMSH3xfU5C9g==
-  /@bentley/presentation-components/2.5.3_82ea25d5d106a83f6791243dafb99504:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/imodeljs-common': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/imodeljs-frontend': 2.5.3_c789b763165dd0c0b5b3e14525046059
-      '@bentley/imodeljs-i18n': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/presentation-frontend': 2.5.3_7bf4f33df369b6dd55115ac296e298f4
-      '@bentley/ui-abstract': 2.5.3_853d3c701de4fe4d665c2533a5a38af7
-      '@bentley/ui-components': 2.5.3_59987c30db53750015c2da5c0e8613fa
-      '@bentley/ui-core': 2.5.3_4ee9ebb4dffeab45a0539e22ce6b1466
-      lodash: 4.17.19
-      micro-memoize: 4.0.9
-      react: 16.13.1
-      react-dom: 16.13.1_react@16.13.1
-      rxjs: 6.6.2
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-      '@bentley/imodeljs-common': ^2.5.3
-      '@bentley/imodeljs-frontend': ^2.5.3
-      '@bentley/imodeljs-i18n': ^2.5.3
-      '@bentley/presentation-common': ^2.5.3
-      '@bentley/presentation-frontend': ^2.5.3
-      '@bentley/ui-abstract': ^2.5.3
-      '@bentley/ui-components': ^2.5.3
-      '@bentley/ui-core': ^2.5.3
-      react: ^16.8.0
-      react-dom: ^16.8.0
-    resolution:
-      integrity: sha512-YgThRgfU0eBK7Jmu8kL/Sf9Tf//UMZqSWbShQa4HvHEBrtfIsoiwCJ4MbxJ8LumPFCV/iOwO8+sZyo4mKFrhTw==
   /@bentley/presentation-components/2.9.1_8b8b8172d6b79508119dea806a54ddc8:
     dependencies:
       '@bentley/bentleyjs-core': 2.9.1
@@ -4166,6 +4182,36 @@ packages:
       react-dom: ^16.8.0
     resolution:
       integrity: sha512-ev3mZop9Rd0lZNVzM0kkhp2SLTDZ9YqKB6tzrQcmNg5ud8G9pNXjn2xD3GQ4f+R4XBkLvsYLu0Kha7Da/S+FQw==
+  /@bentley/presentation-components/2.9.7_6ac59bca58bd836cca9c5e32039e85ac:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/imodeljs-common': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/imodeljs-frontend': 2.9.7_a46189dcb93b755dc320b71434ca9f00
+      '@bentley/imodeljs-i18n': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/presentation-frontend': 2.9.7_cd35ddd2b9906470054551dedb184d84
+      '@bentley/ui-abstract': 2.9.7_cebcfd4da4bcd5d6463c7e836ddbe1ba
+      '@bentley/ui-components': 2.9.7_ae27275f41ead9d9467a60608ea7fd69
+      '@bentley/ui-core': 2.9.7_76e4e496e97950bdfa051796ae023b34
+      lodash: 4.17.20
+      micro-memoize: 4.0.9
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+      rxjs: 6.6.2
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/imodeljs-common': ^2.9.7
+      '@bentley/imodeljs-frontend': ^2.9.7
+      '@bentley/imodeljs-i18n': ^2.9.7
+      '@bentley/presentation-common': ^2.9.7
+      '@bentley/presentation-frontend': ^2.9.7
+      '@bentley/ui-abstract': ^2.9.7
+      '@bentley/ui-components': ^2.9.7
+      '@bentley/ui-core': ^2.9.7
+      react: ^16.8.0
+      react-dom: ^16.8.0
+    resolution:
+      integrity: sha512-K5Yhp6iVKoqPXJoN+duO0JEceIUWSvb2ncGNzEsuFT1SgzkBM5yLakFT3J+N5CIZF5XkB7NP+qBgd35BkYavxA==
   /@bentley/presentation-frontend/2.2.0_6d7c31e4a82d4fea6316c8a0f22745ea:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -4216,22 +4262,6 @@ packages:
       '@bentley/presentation-common': ^2.5.1
     resolution:
       integrity: sha512-irVRjfWkvsQ5Y4miXZ8Cce6ZI6kDBFEHPO8zsnzqHHjWzWduZDzjCGo71rb2OcOm9+vIrdV6LGPEs7v+VVD45Q==
-  /@bentley/presentation-frontend/2.5.3_7bf4f33df369b6dd55115ac296e298f4:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/imodeljs-common': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/imodeljs-frontend': 2.5.3_c789b763165dd0c0b5b3e14525046059
-      '@bentley/imodeljs-i18n': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      lodash: 4.17.19
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-      '@bentley/imodeljs-common': ^2.5.3
-      '@bentley/imodeljs-frontend': ^2.5.3
-      '@bentley/imodeljs-i18n': ^2.5.3
-      '@bentley/presentation-common': ^2.5.3
-    resolution:
-      integrity: sha512-b9wQMXsUBOx+OpwB3mIoNweVFt1WU3KhB27T4sLte6IWv3Mx4C9J3WFO3NY5KX9Ej65DnvB5GFkrzejBkXO7Og==
   /@bentley/presentation-frontend/2.9.2_5f1f19904d869cf3d8bdff000520b185:
     dependencies:
       '@bentley/bentleyjs-core': 2.9.2
@@ -4249,6 +4279,22 @@ packages:
       '@bentley/presentation-common': ^2.9.2
     resolution:
       integrity: sha512-qifJyJG1GLiCXQ92C2Onkrf/kYMjd2FQpgzxB0ITTMnIAryC2hC62lYxSK9gEzn7QABZyJFOabw7R15zXj32AQ==
+  /@bentley/presentation-frontend/2.9.7_cd35ddd2b9906470054551dedb184d84:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/imodeljs-common': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/imodeljs-frontend': 2.9.7_a46189dcb93b755dc320b71434ca9f00
+      '@bentley/imodeljs-i18n': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      lodash: 4.17.20
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/imodeljs-common': ^2.9.7
+      '@bentley/imodeljs-frontend': ^2.9.7
+      '@bentley/imodeljs-i18n': ^2.9.7
+      '@bentley/presentation-common': ^2.9.7
+    resolution:
+      integrity: sha512-EJJr7BlA4EMYOmJycxUO44e+uWvmxMvDTpZI/sN9hzKlutQgA3Gqd5ld+ri4JcfldRMR/PoasB43Wund6LIa1g==
   /@bentley/product-settings-client/2.2.0_6f1b9319c6bff250b4992e3026c76aac:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -4282,40 +4328,40 @@ packages:
   /@bentley/react-scripts/3.4.1_typescript@3.7.5:
     dependencies:
       '@babel/core': 7.9.0
-      '@bentley/webpack-tools-core': 2.3.2_webpack@4.42.0
+      '@bentley/webpack-tools-core': 2.3.2
       '@svgr/webpack': 4.3.3
-      '@typescript-eslint/eslint-plugin': 2.34.0_b19fc4176cc1ce9aa077ffdbf5f88816
-      '@typescript-eslint/parser': 2.34.0_eslint@6.8.0+typescript@3.7.5
-      babel-eslint: 10.1.0_eslint@6.8.0
-      babel-jest: 24.9.0_@babel+core@7.9.0
-      babel-loader: 8.1.0_@babel+core@7.9.0+webpack@4.42.0
+      '@typescript-eslint/eslint-plugin': 2.34.0_typescript@3.7.5
+      '@typescript-eslint/parser': 2.34.0_typescript@3.7.5
+      babel-eslint: 10.1.0
+      babel-jest: 24.9.0
+      babel-loader: 8.1.0
       babel-plugin-import-remove-resource-query: 1.0.0
-      babel-plugin-named-asset-import: 0.3.6_@babel+core@7.9.0
+      babel-plugin-named-asset-import: 0.3.6
       babel-preset-react-app: 9.1.2
       camelcase: 5.3.1
       case-sensitive-paths-webpack-plugin: 2.3.0
-      css-loader: 3.4.2_webpack@4.42.0
+      css-loader: 3.4.2
       dotenv: 8.2.0
       dotenv-expand: 5.1.0
       eslint: 6.8.0
-      eslint-config-react-app: 5.2.1_f8f91f27f800428497667fb337aaf85d
-      eslint-loader: 3.0.3_eslint@6.8.0+webpack@4.42.0
-      eslint-plugin-flowtype: 4.6.0_eslint@6.8.0
-      eslint-plugin-import: 2.20.1_eslint@6.8.0
-      eslint-plugin-jsx-a11y: 6.2.3_eslint@6.8.0
-      eslint-plugin-react: 7.19.0_eslint@6.8.0
-      eslint-plugin-react-hooks: 1.7.0_eslint@6.8.0
-      fast-sass-loader: 1.5.0_webpack@4.42.0
-      file-loader: 4.3.0_webpack@4.42.0
+      eslint-config-react-app: 5.2.1
+      eslint-loader: 3.0.3
+      eslint-plugin-flowtype: 4.6.0
+      eslint-plugin-import: 2.20.1
+      eslint-plugin-jsx-a11y: 6.2.3
+      eslint-plugin-react: 7.19.0
+      eslint-plugin-react-hooks: 1.7.0
+      fast-sass-loader: 1.5.0
+      file-loader: 4.3.0
       fs-extra: 8.1.0
-      html-webpack-plugin: 4.0.0-beta.11_webpack@4.42.0
+      html-webpack-plugin: 4.0.0-beta.11
       identity-obj-proxy: 3.0.0
       jest: 24.9.0
       jest-environment-jsdom-fourteen: 1.0.1
-      jest-resolve: 24.9.0_jest-resolve@24.9.0
+      jest-resolve: 24.9.0
       jest-watch-typeahead: 0.4.2
-      mini-css-extract-plugin: 0.9.0_webpack@4.42.0
-      optimize-css-assets-webpack-plugin: 5.0.3_webpack@4.42.0
+      mini-css-extract-plugin: 0.9.0
+      optimize-css-assets-webpack-plugin: 5.0.3
       pnp-webpack-plugin: 1.6.4_typescript@3.7.5
       postcss-flexbugs-fixes: 4.1.0
       postcss-loader: 3.0.0
@@ -4326,22 +4372,22 @@ packages:
       react-dev-utils: 10.2.1
       resolve: 1.15.0
       resolve-url-loader: 3.1.1
-      sass-loader: 8.0.2_webpack@4.42.0
+      sass-loader: 8.0.2
       semver: 6.3.0
       source-map-loader: 0.2.4
-      speed-measure-webpack-plugin: 1.3.3_webpack@4.42.0
+      speed-measure-webpack-plugin: 1.3.3
       style-loader: 0.23.1
       svg-sprite-loader: 4.2.1
-      terser-webpack-plugin: 2.3.5_webpack@4.42.0
-      ts-jest: 24.3.0_jest@24.9.0
+      terser-webpack-plugin: 2.3.5
+      ts-jest: 24.3.0
       ts-pnp: 1.1.6_typescript@3.7.5
       typescript: 3.7.5
-      url-loader: 2.3.0_file-loader@4.3.0+webpack@4.42.0
-      webpack: 4.42.0_webpack@4.42.0
-      webpack-dev-server: 3.10.3_webpack@4.42.0
-      webpack-filter-warnings-plugin: 1.2.1_webpack@4.42.0
-      webpack-manifest-plugin: 2.2.0_webpack@4.42.0
-      workbox-webpack-plugin: 4.3.1_webpack@4.42.0
+      url-loader: 2.3.0
+      webpack: 4.42.0
+      webpack-dev-server: 3.10.3
+      webpack-filter-warnings-plugin: 1.2.1
+      webpack-manifest-plugin: 2.2.0
+      workbox-webpack-plugin: 4.3.1
     dev: false
     engines:
       node: '>=8.10'
@@ -4484,6 +4530,14 @@ packages:
       '@bentley/itwin-client': ^2.9.2
     resolution:
       integrity: sha512-Xp230ndEWUsEX4cwttmRknCgcsQIJbRr2wvaYi2PhLMR9YoPurnvinwynzGeqS6wilT9X/wJ4dOh3n5SRxVyVQ==
+  /@bentley/reality-data-client/2.9.7:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+    dev: false
+    peerDependencies:
+      '@bentley/itwin-client': ^2.9.7
+    resolution:
+      integrity: sha512-v031mpVx5ILguSDfdCRdOwvQ85yzHLPF3lsBHB9fdoVt4GnGzeKh7o+aEJGRZIBsuXKtQ4HfDsNHzNF+FfUvNg==
   /@bentley/telemetry-client/2.9.1:
     dependencies:
       '@bentley/bentleyjs-core': 2.9.1
@@ -4538,18 +4592,6 @@ packages:
       '@bentley/imodeljs-i18n': ^2.5.1
     resolution:
       integrity: sha512-zzK12LufwH5kzsB9R9JuIOaDz+xjYnAN8BkDITedJI6MpuDWpiYLx6oNDk2zbLeFNTFtyBcR9Sx+6BKFolPyjA==
-  /@bentley/ui-abstract/2.5.3_853d3c701de4fe4d665c2533a5a38af7:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/icons-generic-webfont': 1.0.15
-      '@bentley/imodeljs-i18n': 2.5.3_@bentley+bentleyjs-core@2.5.3
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-      '@bentley/geometry-core': ^2.5.3
-      '@bentley/imodeljs-i18n': ^2.5.3
-    resolution:
-      integrity: sha512-jzZjcnhyeIUJ4fK7Gae0j/i1EDQ3bebudukb+jr1miikVM3x5ghU/jQrKyrsX/oCVlcC7QYnv4NuNC4v+miPYQ==
   /@bentley/ui-abstract/2.9.1_59a24dc8611d0e5a0583a09617c56504:
     dependencies:
       '@bentley/bentleyjs-core': 2.9.1
@@ -4576,6 +4618,18 @@ packages:
       '@bentley/imodeljs-i18n': ^2.9.2
     resolution:
       integrity: sha512-GpKMz4wW7YSyH46119zzf/57WuwYBXG6l3OfidB5Dsr+UgMPQOWa7xjYgOXZHRV8xc5vVK/5LKbOBz1rBaIafA==
+  /@bentley/ui-abstract/2.9.7_cebcfd4da4bcd5d6463c7e836ddbe1ba:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/icons-generic-webfont': 1.0.15
+      '@bentley/imodeljs-i18n': 2.9.7_@bentley+bentleyjs-core@2.9.7
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/geometry-core': ^2.9.7
+      '@bentley/imodeljs-i18n': ^2.9.7
+    resolution:
+      integrity: sha512-wJ6amH/JctFbBqF+na96BERifS2mqyuMTYsbOdfYURiKULfXQoFH4v0h5mVlw2bfjHCZhdgVQnBkSdDZQCcp8g==
   /@bentley/ui-components/2.2.0_81ea3b5a16cfda43022635c6c1ab8f92:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -4712,51 +4766,6 @@ packages:
       react-dom: ^16.8.0
     resolution:
       integrity: sha512-FUWjNDn+VGjm5Ek/qido3ju6bcIoOfqmAF4N9yZu5EMoM2/HuSkVCuGtY9RXcyJ5swsqkgZ4SZ6kwZz60Mj9Zw==
-  /@bentley/ui-components/2.5.3_59987c30db53750015c2da5c0e8613fa:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/icons-generic-webfont': 1.0.15
-      '@bentley/imodeljs-common': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/imodeljs-frontend': 2.5.3_c789b763165dd0c0b5b3e14525046059
-      '@bentley/imodeljs-i18n': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/ui-abstract': 2.5.3_853d3c701de4fe4d665c2533a5a38af7
-      '@bentley/ui-core': 2.5.3_4ee9ebb4dffeab45a0539e22ce6b1466
-      callable-instance2: 1.0.0
-      classnames: 2.2.6
-      eventemitter2: 5.0.1
-      immer: 6.0.9
-      immutable: 3.8.2
-      inspire-tree: 5.0.2
-      linkify-it: 2.2.0
-      lodash: 4.17.19
-      react: 16.13.1
-      react-compound-slider: 2.5.0_react@16.13.1
-      react-data-grid: 6.0.1_react-dom@16.13.1+react@16.13.1
-      react-dnd: 5.0.0_react@16.13.1
-      react-dnd-html5-backend: 5.0.1
-      react-dnd-test-backend: 5.0.1
-      react-dom: 16.13.1_react@16.13.1
-      react-highlight-words: 0.14.0_react@16.13.1
-      react-resize-detector: 4.2.3_react-dom@16.13.1+react@16.13.1
-      react-select: 3.1.0_react-dom@16.13.1+react@16.13.1
-      react-virtualized: 9.21.2_react-dom@16.13.1+react@16.13.1
-      react-virtualized-auto-sizer: 1.0.2_react-dom@16.13.1+react@16.13.1
-      react-window: 1.8.5_react-dom@16.13.1+react@16.13.1
-      rxjs: 6.6.2
-      ts-key-enum: 2.0.3
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-      '@bentley/geometry-core': ^2.5.3
-      '@bentley/imodeljs-common': ^2.5.3
-      '@bentley/imodeljs-frontend': ^2.5.3
-      '@bentley/imodeljs-i18n': ^2.5.3
-      '@bentley/ui-abstract': 2.5.3
-      '@bentley/ui-core': ^2.5.3
-      react: ^16.8.0
-      react-dom: ^16.8.0
-    resolution:
-      integrity: sha512-ihAEuadc9MnDaHcMpZMvjIgQlrc2fODyPOr/u3q/uAKJIW3f9iAb5pVEwKkjpp4k23HIxRFxvoyCh6zBfUFIvQ==
   /@bentley/ui-components/2.9.1_934431367d9d963bd28a49b999351275:
     dependencies:
       '@bentley/bentleyjs-core': 2.9.1
@@ -4856,6 +4865,54 @@ packages:
       react-dom: ^16.8.0
     resolution:
       integrity: sha512-EyxbY45asqy2+aYxhlKWxXhilntlPcysf8uU/mTJs97e4/OQQUeg0leGfMWcuIlrvNW4c73OxiLrhOst7FVvuQ==
+  /@bentley/ui-components/2.9.7_ae27275f41ead9d9467a60608ea7fd69:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/icons-generic-webfont': 1.0.15
+      '@bentley/imodeljs-common': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/imodeljs-frontend': 2.9.7_a46189dcb93b755dc320b71434ca9f00
+      '@bentley/imodeljs-i18n': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/ui-abstract': 2.9.7_cebcfd4da4bcd5d6463c7e836ddbe1ba
+      '@bentley/ui-core': 2.9.7_76e4e496e97950bdfa051796ae023b34
+      '@types/shortid': 0.0.29
+      callable-instance2: 1.0.0
+      classnames: 2.2.6
+      eventemitter2: 5.0.1
+      immer: 6.0.9
+      immutable: 3.8.2
+      inspire-tree: 5.0.2
+      linkify-it: 2.2.0
+      lodash: 4.17.20
+      react: 16.13.1
+      react-compound-slider: 2.5.0_react@16.13.1
+      react-data-grid: 6.0.1_react-dom@16.13.1+react@16.13.1
+      react-dnd: 5.0.0_react@16.13.1
+      react-dnd-html5-backend: 5.0.1
+      react-dnd-test-backend: 5.0.1
+      react-dom: 16.13.1_react@16.13.1
+      react-highlight-words: 0.14.0_react@16.13.1
+      react-resize-detector: 4.2.3_react-dom@16.13.1+react@16.13.1
+      react-select: 3.1.0_react-dom@16.13.1+react@16.13.1
+      react-virtualized: 9.21.2_react-dom@16.13.1+react@16.13.1
+      react-virtualized-auto-sizer: 1.0.2_react-dom@16.13.1+react@16.13.1
+      react-window: 1.8.5_react-dom@16.13.1+react@16.13.1
+      rxjs: 6.6.2
+      shortid: 2.2.16
+      ts-key-enum: 2.0.3
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/geometry-core': ^2.9.7
+      '@bentley/imodeljs-common': ^2.9.7
+      '@bentley/imodeljs-frontend': ^2.9.7
+      '@bentley/imodeljs-i18n': ^2.9.7
+      '@bentley/imodeljs-quantity': ^2.9.7
+      '@bentley/ui-abstract': 2.9.7
+      '@bentley/ui-core': ^2.9.7
+      react: ^16.8.0
+      react-dom: ^16.8.0
+    resolution:
+      integrity: sha512-Bbj9Z8aKCK5uDoiLVmLs03CiwAglNuMbXX3d/0tx2FtU1j8d7Gg7s8RrCiebnOrMRaKSgJ/OdCBVkkxfyrtHUA==
   /@bentley/ui-core/2.2.0_b0def05bbb26e212a1fa690fbb1bcc86:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -4934,31 +4991,6 @@ packages:
       react-dom: ^16.8.0
     resolution:
       integrity: sha512-D1AqcXjAr6jIHmG9Y9ADvtauWzlKtQKG4MeIP7i7UoiBR1Q3y7NzUnt3suheqIwHKS98tlYdDAc7FPycmJVL0Q==
-  /@bentley/ui-core/2.5.3_4ee9ebb4dffeab45a0539e22ce6b1466:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/icons-generic-webfont': 1.0.15
-      '@bentley/imodeljs-i18n': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/ui-abstract': 2.5.3_853d3c701de4fe4d665c2533a5a38af7
-      classnames: 2.2.6
-      lodash: 4.17.19
-      react: 16.13.1
-      react-autosuggest: 9.4.3_react@16.13.1
-      react-compound-slider: 2.5.0_react@16.13.1
-      react-dom: 16.13.1_react@16.13.1
-      react-select: 3.1.0_react-dom@16.13.1+react@16.13.1
-      resize-observer-polyfill: 1.5.1
-      svg-sprite-loader: 4.2.1
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-      '@bentley/geometry-core': ^2.5.3
-      '@bentley/imodeljs-i18n': ^2.5.3
-      '@bentley/ui-abstract': ^2.5.3
-      react: ^16.8.0
-      react-dom: ^16.8.0
-    resolution:
-      integrity: sha512-TOu/HAg1QufPnfnuLWdG41sKdiU6DmiQmJ/tpJV8JHfQn5O51G45kj7wG3Ej7w1mMDKgFiz4+oUfs82t9OZMYg==
   /@bentley/ui-core/2.9.1_6fc56be01edc513a21044efe8a5e656c:
     dependencies:
       '@bentley/bentleyjs-core': 2.9.1
@@ -5013,6 +5045,32 @@ packages:
       react-dom: ^16.8.0
     resolution:
       integrity: sha512-a5k1lNThDxllW3kL2RXOo/r6HgmWZTFBiY4h/HiybHf4Bje4v+d3A2yZ5ykM8b6oM3NIggeaoqXQ1lg4f7U2Ow==
+  /@bentley/ui-core/2.9.7_76e4e496e97950bdfa051796ae023b34:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/icons-generic-webfont': 1.0.15
+      '@bentley/imodeljs-i18n': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/ui-abstract': 2.9.7_cebcfd4da4bcd5d6463c7e836ddbe1ba
+      classnames: 2.2.6
+      dompurify: 2.2.2
+      lodash: 4.17.20
+      react: 16.13.1
+      react-autosuggest: 10.0.3_react@16.13.1
+      react-compound-slider: 2.5.0_react@16.13.1
+      react-dom: 16.13.1_react@16.13.1
+      react-select: 3.1.0_react-dom@16.13.1+react@16.13.1
+      resize-observer-polyfill: 1.5.1
+      svg-sprite-loader: 4.2.1
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/geometry-core': ^2.9.7
+      '@bentley/imodeljs-i18n': ^2.9.7
+      '@bentley/ui-abstract': ^2.9.7
+      react: ^16.8.0
+      react-dom: ^16.8.0
+    resolution:
+      integrity: sha512-I25R1BUyk/lnGvypRwfcdwgI68gtGHu8nR26vfV0VrVehPQxUUjEIo0c664kkU9ei5gliIaG782bjfojheZ3lg==
   /@bentley/ui-framework/2.2.0_cddb1d8993726f5332d2b2e0b4b39ce8:
     dependencies:
       '@bentley/bentleyjs-core': 2.2.0
@@ -5131,59 +5189,6 @@ packages:
       redux: ^4.0.3
     resolution:
       integrity: sha512-WxLzNsLS0nqbANxdY8pMA0sZzdTvW98sPTSfKcwg+3NoBApR2uxH2zOWP1lA9t/sOkcwd8VGstZUeX5jAqRxQA==
-  /@bentley/ui-framework/2.5.3_043f7ff2425e0a3896cee70cdef9a33e:
-    dependencies:
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/context-registry-client': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/icons-generic': 1.0.15
-      '@bentley/icons-generic-webfont': 1.0.15
-      '@bentley/imodeljs-common': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/imodeljs-frontend': 2.5.3_c789b763165dd0c0b5b3e14525046059
-      '@bentley/imodeljs-i18n': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/imodeljs-markup': 2.5.3_7bf4f33df369b6dd55115ac296e298f4
-      '@bentley/presentation-components': 2.5.3_82ea25d5d106a83f6791243dafb99504
-      '@bentley/presentation-frontend': 2.5.3_7bf4f33df369b6dd55115ac296e298f4
-      '@bentley/ui-abstract': 2.5.3_853d3c701de4fe4d665c2533a5a38af7
-      '@bentley/ui-components': 2.5.3_59987c30db53750015c2da5c0e8613fa
-      '@bentley/ui-core': 2.5.3_4ee9ebb4dffeab45a0539e22ce6b1466
-      classnames: 2.2.6
-      immer: 6.0.9
-      lodash: 4.17.19
-      react: 16.13.1
-      react-dnd: 5.0.0_react@16.13.1
-      react-dnd-html5-backend: 5.0.1
-      react-dom: 16.13.1_react@16.13.1
-      react-redux: 7.2.0_redux@4.0.5
-      react-resize-detector: 4.2.3_react-dom@16.13.1+react@16.13.1
-      react-split-pane: 0.1.77
-      redux: 4.0.5
-      rxjs: 6.6.2
-      svg-sprite-loader: 4.2.1
-    dev: false
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.5.3
-      '@bentley/frontend-authorization-client': ^2.5.3
-      '@bentley/geometry-core': ^2.5.3
-      '@bentley/imodelhub-client': ^2.5.3
-      '@bentley/imodeljs-common': ^2.5.3
-      '@bentley/imodeljs-frontend': ^2.5.3
-      '@bentley/imodeljs-i18n': ^2.5.3
-      '@bentley/imodeljs-markup': ^2.5.3
-      '@bentley/itwin-client': ^2.5.3
-      '@bentley/presentation-common': ^2.5.3
-      '@bentley/presentation-frontend': ^2.5.3
-      '@bentley/product-settings-client': ^2.5.3
-      '@bentley/rbac-client': ^2.5.3
-      '@bentley/ui-abstract': ^2.5.3
-      '@bentley/ui-components': ^2.5.3
-      '@bentley/ui-core': ^2.5.3
-      '@bentley/ui-ninezone': ^2.5.3
-      react: ^16.8.0
-      react-dom: ^16.8.0
-      react-redux: ^7.2.0
-      redux: ^4.0.3
-    resolution:
-      integrity: sha512-4qpzPe5D7u3idLtIED0tSU+GqKXgqo6KySgvSw+qlQLMjIcat3MsjZRxPKiUh9icLOF+jX39cvpFdOf6ihQnOQ==
   /@bentley/ui-framework/2.9.1_39145f292f320f84a9f840fa1ba139d5:
     dependencies:
       '@bentley/bentleyjs-core': 2.9.1
@@ -5297,6 +5302,59 @@ packages:
       redux: ^4.0.3
     resolution:
       integrity: sha512-Ui2AJs8MZzYj5JLFp3kevE5IB6s/k2GXhnZhVh6yyUXR33G9LriKV3/vcNJULvKCevIdO+sHMYW3qsWYofS9iQ==
+  /@bentley/ui-framework/2.9.7_98a6334d061c86cd05338aa0d49a1de6:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/context-registry-client': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/icons-generic': 1.0.15
+      '@bentley/icons-generic-webfont': 1.0.15
+      '@bentley/imodeljs-common': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/imodeljs-frontend': 2.9.7_a46189dcb93b755dc320b71434ca9f00
+      '@bentley/imodeljs-i18n': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/imodeljs-markup': 2.9.7_cd35ddd2b9906470054551dedb184d84
+      '@bentley/presentation-components': 2.9.7_6ac59bca58bd836cca9c5e32039e85ac
+      '@bentley/presentation-frontend': 2.9.7_cd35ddd2b9906470054551dedb184d84
+      '@bentley/ui-abstract': 2.9.7_cebcfd4da4bcd5d6463c7e836ddbe1ba
+      '@bentley/ui-components': 2.9.7_ae27275f41ead9d9467a60608ea7fd69
+      '@bentley/ui-core': 2.9.7_76e4e496e97950bdfa051796ae023b34
+      classnames: 2.2.6
+      immer: 6.0.9
+      lodash: 4.17.20
+      react: 16.13.1
+      react-dnd: 5.0.0_react@16.13.1
+      react-dnd-html5-backend: 5.0.1
+      react-dom: 16.13.1_react@16.13.1
+      react-redux: 7.2.0_redux@4.0.5
+      react-resize-detector: 4.2.3_react-dom@16.13.1+react@16.13.1
+      react-split-pane: 0.1.92_react-dom@16.13.1+react@16.13.1
+      redux: 4.0.5
+      rxjs: 6.6.2
+      svg-sprite-loader: 4.2.1
+    dev: false
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.9.7
+      '@bentley/frontend-authorization-client': ^2.9.7
+      '@bentley/geometry-core': ^2.9.7
+      '@bentley/imodelhub-client': ^2.9.7
+      '@bentley/imodeljs-common': ^2.9.7
+      '@bentley/imodeljs-frontend': ^2.9.7
+      '@bentley/imodeljs-i18n': ^2.9.7
+      '@bentley/imodeljs-markup': ^2.9.7
+      '@bentley/itwin-client': ^2.9.7
+      '@bentley/presentation-common': ^2.9.7
+      '@bentley/presentation-frontend': ^2.9.7
+      '@bentley/product-settings-client': ^2.9.7
+      '@bentley/rbac-client': ^2.9.7
+      '@bentley/ui-abstract': ^2.9.7
+      '@bentley/ui-components': ^2.9.7
+      '@bentley/ui-core': ^2.9.7
+      '@bentley/ui-ninezone': ^2.9.7
+      react: ^16.8.0
+      react-dom: ^16.8.0
+      react-redux: ^7.2.0
+      redux: ^4.0.3
+    resolution:
+      integrity: sha512-l8tA8OlY6yo7cTVtHsecKBcTPX78a//kamqQCCVsZdsyR4Dr96sWQVs1xV/Zz/F4c33nfyEoRSk9/m4vXfa6tg==
   /@bentley/ui-ninezone/2.2.0_aa16546fbe23b7c2f80e5f64001c8aa0:
     dependencies:
       '@bentley/ui-abstract': 2.2.0_060def5449828df3be462ff95bb64a6e
@@ -5404,6 +5462,16 @@ packages:
       '@bentley/telemetry-client': ^2.9.2
     resolution:
       integrity: sha512-Bcj6oDwy86zpmKw56JtSfxSuCKSdnwsxJ2sBgWG7Ru2TtkReWRSdy85LxvBofsRUg5SrLd5CJyGZepbyxSdCpg==
+  /@bentley/usage-logging-client/2.9.7_@bentley+telemetry-client@2.9.1:
+    dependencies:
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/telemetry-client': 2.9.1
+    dev: false
+    peerDependencies:
+      '@bentley/itwin-client': ^2.9.7
+      '@bentley/telemetry-client': ^2.9.7
+    resolution:
+      integrity: sha512-2+wc7b9YaBdHNWs+4KmWmElwrf5rtuUfk1MDt/A68wbFxdh/Sk9RoJNvS2L0YQzRHD8/QkudxT0Ey52Rv/AVgg==
   /@bentley/webgl-compatibility/2.2.0:
     dev: false
     resolution:
@@ -5416,14 +5484,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-qvwf4gmAExtHtLf7qCGWlXfZ9qZayHYTM7fLM29wT7F4oBbhosiED1aE7tGLll/CfMMzU9JTQKGI3jaHrIlr6g==
-  /@bentley/webpack-tools-core/2.3.2_webpack@4.42.0:
+  /@bentley/webpack-tools-core/2.3.2:
     dependencies:
       chalk: 3.0.0
       fs-extra: 8.1.0
       glob: 7.1.6
-      source-map-loader: 1.0.1_webpack@4.42.0
-      webpack: 4.42.0_webpack@4.42.0
-      webpack-filter-warnings-plugin: 1.2.1_webpack@4.42.0
+      source-map-loader: 1.0.1
+      webpack-filter-warnings-plugin: 1.2.1
       webpack-sources: 1.4.3
     dev: false
     peerDependencies:
@@ -6709,6 +6776,25 @@ packages:
         optional: true
     resolution:
       integrity: sha512-4zY3Z88rEE99+CNvTbXSyovv2z9PNOVffTWD2W8QF5s2prBQtwN2zadqERcrHpcR7O/+KMI3fcTAmUUhK/iQcQ==
+  /@typescript-eslint/eslint-plugin/2.34.0_typescript@3.7.5:
+    dependencies:
+      '@typescript-eslint/experimental-utils': 2.34.0_typescript@3.7.5
+      functional-red-black-tree: 1.0.1
+      regexpp: 3.1.0
+      tsutils: 3.17.1_typescript@3.7.5
+      typescript: 3.7.5
+    dev: false
+    engines:
+      node: ^8.10.0 || ^10.13.0 || >=11.10.1
+    peerDependencies:
+      '@typescript-eslint/parser': ^2.0.0
+      eslint: ^5.0.0 || ^6.0.0
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    resolution:
+      integrity: sha512-4zY3Z88rEE99+CNvTbXSyovv2z9PNOVffTWD2W8QF5s2prBQtwN2zadqERcrHpcR7O/+KMI3fcTAmUUhK/iQcQ==
   /@typescript-eslint/experimental-utils/2.25.0_eslint@6.8.0+typescript@3.7.5:
     dependencies:
       '@types/json-schema': 7.0.5
@@ -6731,6 +6817,21 @@ packages:
       eslint: 6.8.0
       eslint-scope: 5.1.0
       eslint-utils: 2.1.0
+    dev: false
+    engines:
+      node: ^8.10.0 || ^10.13.0 || >=11.10.1
+    peerDependencies:
+      eslint: '*'
+      typescript: '*'
+    resolution:
+      integrity: sha512-eS6FTkq+wuMJ+sgtuNTtcqavWXqsflWcfBnlYhg/nS4aZ1leewkXGbvBhaapn1q6qf4M71bsR1tez5JTRMuqwA==
+  /@typescript-eslint/experimental-utils/2.34.0_typescript@3.7.5:
+    dependencies:
+      '@types/json-schema': 7.0.5
+      '@typescript-eslint/typescript-estree': 2.34.0_typescript@3.7.5
+      eslint-scope: 5.1.0
+      eslint-utils: 2.1.0
+      typescript: 3.7.5
     dev: false
     engines:
       node: ^8.10.0 || ^10.13.0 || >=11.10.1
@@ -6764,6 +6865,24 @@ packages:
       '@typescript-eslint/experimental-utils': 2.34.0_eslint@6.8.0+typescript@3.7.5
       '@typescript-eslint/typescript-estree': 2.34.0_typescript@3.7.5
       eslint: 6.8.0
+      eslint-visitor-keys: 1.3.0
+      typescript: 3.7.5
+    dev: false
+    engines:
+      node: ^8.10.0 || ^10.13.0 || >=11.10.1
+    peerDependencies:
+      eslint: ^5.0.0 || ^6.0.0
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    resolution:
+      integrity: sha512-03ilO0ucSD0EPTw2X4PntSIRFtDPWjrVq7C3/Z3VQHRC7+13YB55rcJI3Jt+YgeHbjUdJPcPa7b23rXCBokuyA==
+  /@typescript-eslint/parser/2.34.0_typescript@3.7.5:
+    dependencies:
+      '@types/eslint-visitor-keys': 1.0.0
+      '@typescript-eslint/experimental-utils': 2.34.0_typescript@3.7.5
+      '@typescript-eslint/typescript-estree': 2.34.0_typescript@3.7.5
       eslint-visitor-keys: 1.3.0
       typescript: 3.7.5
     dev: false
@@ -7112,6 +7231,12 @@ packages:
       ajv: '>=5.0.0'
     resolution:
       integrity: sha512-DCRfO/4nQ+89p/RK43i8Ezd41EqdGIU4ld7nGF8OQ14oc/we5rEntLCUa7+jrn3nn83BosfwZA0wb4pon2o8iQ==
+  /ajv-keywords/3.5.1:
+    dev: false
+    peerDependencies:
+      ajv: ^6.9.1
+    resolution:
+      integrity: sha512-KWcq3xN8fDjSB+IMoh2VaXVhRI0BBGxoYp3rx7Pkb6z0cFjYR9Q9l4yZqqals0/zsioCmocC5H6UvsGD4MoIBA==
   /ajv-keywords/3.5.1_ajv@6.12.3:
     dependencies:
       ajv: 6.12.3
@@ -7547,6 +7672,21 @@ packages:
     dev: false
     resolution:
       integrity: sha1-Y/1D99weO7fONZR9uP42mj9Yx0s=
+  /babel-eslint/10.1.0:
+    dependencies:
+      '@babel/code-frame': 7.10.4
+      '@babel/parser': 7.10.5
+      '@babel/traverse': 7.10.5
+      '@babel/types': 7.10.5
+      eslint-visitor-keys: 1.3.0
+      resolve: 1.17.0
+    dev: false
+    engines:
+      node: '>=6'
+    peerDependencies:
+      eslint: '>= 4.12.1'
+    resolution:
+      integrity: sha512-ifWaTHQ0ce+448CYop8AdrQiBsGrnC+bMgfyKFdi6EsPLTAWG+QfyDeM6OH+FmWnKvEq5NnBMLvlBUPKQZoDSg==
   /babel-eslint/10.1.0_eslint@6.8.0:
     dependencies:
       '@babel/code-frame': 7.10.4
@@ -7639,6 +7779,21 @@ packages:
       '@babel/core': ^7.0.0
     resolution:
       integrity: sha512-Nkqgtfe7j6PxLO6TnCQQlkMm8wdTdnIF8xrdpooHCuD5hXRzVEPbPneTJKknH5Dsv3L8ip9unHDAp48YQ54Dkg==
+  /babel-loader/8.1.0:
+    dependencies:
+      find-cache-dir: 2.1.0
+      loader-utils: 1.4.0
+      mkdirp: 0.5.5
+      pify: 4.0.1
+      schema-utils: 2.7.0
+    dev: false
+    engines:
+      node: '>= 6.9'
+    peerDependencies:
+      '@babel/core': ^7.0.0
+      webpack: '>=2'
+    resolution:
+      integrity: sha512-7q7nC1tYOrqvUrN3LQK4GwSk/TQorZSOlO9C+RZDZpODgyN4ZlCqE5q9cDsyWOliN+aU9B4JX01xK9eJXowJLw==
   /babel-loader/8.1.0_@babel+core@7.7.4+webpack@4.42.0:
     dependencies:
       '@babel/core': 7.7.4
@@ -7748,6 +7903,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-SEP5kJpfGYqYKpBrj5XU3ahw5p5GOHJ0U5ssOSQ/WBVdwkD2Dzlce95exQTs3jOVWPPKLBN2rlEWkCK7dSmLvg==
+  /babel-plugin-named-asset-import/0.3.6:
+    dev: false
+    peerDependencies:
+      '@babel/core': ^7.1.0
+    resolution:
+      integrity: sha512-1aGDUfL1qOOIoqk9QKGIo2lANk+C7ko/fqH0uIyC71x3PEGz0uVP8ISgfEsFuG+FKmjHTvFK/nNM8dowpmUxLA==
   /babel-plugin-named-asset-import/0.3.6_@babel+core@7.7.4:
     dependencies:
       '@babel/core': 7.7.4
@@ -9417,6 +9578,27 @@ packages:
     dev: false
     resolution:
       integrity: sha512-PJF0SpJT+WdbVVt0AOYp9C8GnuruRlL/UFW7932nLWmFLQTaWEzTBQEx7/hn4BuV+WON75iAViSUJLiU3PKbpA==
+  /css-loader/3.4.2:
+    dependencies:
+      camelcase: 5.3.1
+      cssesc: 3.0.0
+      icss-utils: 4.1.1
+      loader-utils: 1.4.0
+      normalize-path: 3.0.0
+      postcss: 7.0.32
+      postcss-modules-extract-imports: 2.0.0
+      postcss-modules-local-by-default: 3.0.2
+      postcss-modules-scope: 2.2.0
+      postcss-modules-values: 3.0.0
+      postcss-value-parser: 4.1.0
+      schema-utils: 2.7.0
+    dev: false
+    engines:
+      node: '>= 8.9.0'
+    peerDependencies:
+      webpack: ^4.0.0 || ^5.0.0
+    resolution:
+      integrity: sha512-jYq4zdZT0oS0Iykt+fqnzVLRIeiPWhka+7BqPn+oSIpWJAHak5tmB/WZrJ2a21JhCeFyNnnlroSl8c+MtVndzA==
   /css-loader/3.4.2_webpack@4.42.0:
     dependencies:
       camelcase: 5.3.1
@@ -10511,6 +10693,22 @@ packages:
       source-map: 0.6.1
     resolution:
       integrity: sha512-qFcX0XJkdg+PB3xjZZG/wKSuT1PnQWx57+TVSjIMmILd2yC/6ByYElPwJnslDsuWuSAp4AwJGumarAAmJch5Kw==
+  /eslint-config-react-app/5.2.1:
+    dependencies:
+      confusing-browser-globals: 1.0.9
+    dev: false
+    peerDependencies:
+      '@typescript-eslint/eslint-plugin': 2.x
+      '@typescript-eslint/parser': 2.x
+      babel-eslint: 10.x
+      eslint: 6.x
+      eslint-plugin-flowtype: 3.x || 4.x
+      eslint-plugin-import: 2.x
+      eslint-plugin-jsx-a11y: 6.x
+      eslint-plugin-react: 7.x
+      eslint-plugin-react-hooks: 1.x || 2.x
+    resolution:
+      integrity: sha512-pGIZ8t0mFLcV+6ZirRgYK6RVqUIKRIi9MmgzUEmrIknsn3AdO0I32asO86dJgloHq+9ZPl8UIg8mYrvgP5u2wQ==
   /eslint-config-react-app/5.2.1_f8f91f27f800428497667fb337aaf85d:
     dependencies:
       '@typescript-eslint/eslint-plugin': 2.34.0_b19fc4176cc1ce9aa077ffdbf5f88816
@@ -10560,6 +10758,22 @@ packages:
       eslint-plugin-import: '*'
     resolution:
       integrity: sha512-bT5Frpl8UWoHBtY25vKUOMoVIMlJQOMefHLyQ4Tz3MQpIZ2N6yYKEEIHMo38bszBNUuMBW6M3+5JNYxeiGFH4w==
+  /eslint-loader/3.0.3:
+    dependencies:
+      fs-extra: 8.1.0
+      loader-fs-cache: 1.0.3
+      loader-utils: 1.4.0
+      object-hash: 2.0.3
+      schema-utils: 2.7.0
+    deprecated: This loader has been deprecated. Please use eslint-webpack-plugin
+    dev: false
+    engines:
+      node: '>= 8.9.0'
+    peerDependencies:
+      eslint: ^5.0.0 || ^6.0.0
+      webpack: ^4.0.0 || ^5.0.0
+    resolution:
+      integrity: sha512-+YRqB95PnNvxNp1HEjQmvf9KNvCin5HXYYseOXVC2U0KEcw4IkQ2IQEBG46j7+gW39bMzeu0GsUhVbBY3Votpw==
   /eslint-loader/3.0.3_eslint@6.8.0+webpack@4.42.0:
     dependencies:
       eslint: 6.8.0
@@ -10600,6 +10814,16 @@ packages:
       typescript: ^3.7.5
     resolution:
       integrity: sha512-+oDa6JbdZXyh7Bx2zx7VoDFZvFnV1pZVPVo/bEGVkuXlLih/evX0LQG2/nSuNg83CmwZTcAFZXXpLgsX4ctIDQ==
+  /eslint-plugin-flowtype/4.6.0:
+    dependencies:
+      lodash: 4.17.20
+    dev: false
+    engines:
+      node: '>=4'
+    peerDependencies:
+      eslint: '>=6.1.0'
+    resolution:
+      integrity: sha512-W5hLjpFfZyZsXfo5anlu7HM970JBDqbEshAJUkeczP6BFCIfJXuiIBQXyberLRtOStT0OGPF8efeTbxlHk4LpQ==
   /eslint-plugin-flowtype/4.6.0_eslint@6.8.0:
     dependencies:
       eslint: 6.8.0
@@ -10611,6 +10835,27 @@ packages:
       eslint: '>=6.1.0'
     resolution:
       integrity: sha512-W5hLjpFfZyZsXfo5anlu7HM970JBDqbEshAJUkeczP6BFCIfJXuiIBQXyberLRtOStT0OGPF8efeTbxlHk4LpQ==
+  /eslint-plugin-import/2.20.1:
+    dependencies:
+      array-includes: 3.1.1
+      array.prototype.flat: 1.2.3
+      contains-path: 0.1.0
+      debug: 2.6.9
+      doctrine: 1.5.0
+      eslint-import-resolver-node: 0.3.4
+      eslint-module-utils: 2.6.0
+      has: 1.0.3
+      minimatch: 3.0.4
+      object.values: 1.1.1
+      read-pkg-up: 2.0.0
+      resolve: 1.17.0
+    dev: false
+    engines:
+      node: '>=4'
+    peerDependencies:
+      eslint: 2.x - 6.x
+    resolution:
+      integrity: sha512-qQHgFOTjguR+LnYRoToeZWT62XM55MBVXObHM6SKFd1VzDcX/vqT1kAz8ssqigh5eMj8qXcRoXXGZpPP6RfdCw==
   /eslint-plugin-import/2.20.1_eslint@6.8.0:
     dependencies:
       array-includes: 3.1.1
@@ -10660,6 +10905,24 @@ packages:
       eslint: ^6.0.0 || ^7.0.0
     resolution:
       integrity: sha512-LlRdsSQBSPsI3MvhWoGc+Ev3PfFRBk41wwkmbOgC7KP7WQlbeWPpASF5Vdv17XEZ7J+xvPB3KCMyR//6Dbjnnw==
+  /eslint-plugin-jsx-a11y/6.2.3:
+    dependencies:
+      '@babel/runtime': 7.12.5
+      aria-query: 3.0.0
+      array-includes: 3.1.1
+      ast-types-flow: 0.0.7
+      axobject-query: 2.2.0
+      damerau-levenshtein: 1.0.6
+      emoji-regex: 7.0.3
+      has: 1.0.3
+      jsx-ast-utils: 2.4.1
+    dev: false
+    engines:
+      node: '>=4.0'
+    peerDependencies:
+      eslint: ^3 || ^4 || ^5 || ^6
+    resolution:
+      integrity: sha512-CawzfGt9w83tyuVekn0GDPU9ytYtxyxyFZ3aSWROmnRRFQFT2BiPJd7jvRdzNDi6oLWaS2asMeYSNMjWTV4eNg==
   /eslint-plugin-jsx-a11y/6.2.3_eslint@6.8.0:
     dependencies:
       '@babel/runtime': 7.12.5
@@ -10708,6 +10971,14 @@ packages:
       eslint: '>=2.0.0'
     resolution:
       integrity: sha512-epsA4g804mRovlOHSbeO1xxW7REGeUjULRME9MJTJDOVscNIA01AkR66TP4cmHDfD+w72EQ9cPhf37MbZiFI2w==
+  /eslint-plugin-react-hooks/1.7.0:
+    dev: false
+    engines:
+      node: '>=7'
+    peerDependencies:
+      eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
+    resolution:
+      integrity: sha512-iXTCFcOmlWvw4+TOE8CLWj6yX1GwzT0Y6cUfHHZqWnSk144VmVIRcVGtUAzrLES7C798lmvnt02C7rxaOX1HNA==
   /eslint-plugin-react-hooks/1.7.0_eslint@6.8.0:
     dependencies:
       eslint: 6.8.0
@@ -10728,6 +10999,27 @@ packages:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
     resolution:
       integrity: sha512-EjxTHxjLKIBWFgDJdhKKzLh5q+vjTFrqNZX36uIxWS4OfyXe5DawqPj3U5qeJ1ngLwatjzQnmR0Lz0J0YH3kxw==
+  /eslint-plugin-react/7.19.0:
+    dependencies:
+      array-includes: 3.1.1
+      doctrine: 2.1.0
+      has: 1.0.3
+      jsx-ast-utils: 2.4.1
+      object.entries: 1.1.2
+      object.fromentries: 2.0.2
+      object.values: 1.1.1
+      prop-types: 15.7.2
+      resolve: 1.17.0
+      semver: 6.3.0
+      string.prototype.matchall: 4.0.2
+      xregexp: 4.3.0
+    dev: false
+    engines:
+      node: '>=4'
+    peerDependencies:
+      eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
+    resolution:
+      integrity: sha512-SPT8j72CGuAP+JFbT0sJHOB80TX/pu44gQ4vXH/cq+hQTiY2PuZ6IHkqXJV6x1b28GDdo1lbInjKUrrdUf0LOQ==
   /eslint-plugin-react/7.19.0_eslint@6.8.0:
     dependencies:
       array-includes: 3.1.1
@@ -11185,6 +11477,19 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Utm6CdzT+6xsDk2m8S6uL8VHxNwI6Jub+e9NYTcAms28T84pTa25GJQV9j0CY0N1rM8hK4x6grpF2BQf+2qwVA==
+  /fast-sass-loader/1.5.0:
+    dependencies:
+      async: 2.6.3
+      cli-source-preview: 1.1.0
+      co: 4.6.0
+      fs-extra: 3.0.1
+      loader-utils: 1.4.0
+    dev: false
+    peerDependencies:
+      node-sass: 4.x || 3.x
+      webpack: 1.x || 2.x || 3.x || 4.x
+    resolution:
+      integrity: sha512-3K4/xG/sm0MqdjrOBKZhnOrrQ3TWMsdvqjxI4ZN0FlVwImNqChYHFUChpyQ9ecQsXS0pytOMEa5H+MDfatPqBA==
   /fast-sass-loader/1.5.0_node-sass@4.13.1+webpack@4.42.0:
     dependencies:
       async: 2.6.3
@@ -11274,6 +11579,17 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-bCg29ictuBaKUwwArK4ouCaqDgLZcysCFLmM/Yn/FDoqndh/9vNuQfXRDvTuXKLxfD/JtZQGKFT8MGcJBK644g==
+  /file-loader/4.3.0:
+    dependencies:
+      loader-utils: 1.4.0
+      schema-utils: 2.7.0
+    dev: false
+    engines:
+      node: '>= 8.9.0'
+    peerDependencies:
+      webpack: ^4.0.0
+    resolution:
+      integrity: sha512-aKrYPYjF1yG3oX0kWRrqrSMfgftm7oJW5M+m4owoldH5C51C0RkIwB++JbRvEW3IU6/ZG5n8UvEcdgwOt2UOWA==
   /file-loader/4.3.0_webpack@4.42.0:
     dependencies:
       loader-utils: 1.4.0
@@ -12315,6 +12631,21 @@ packages:
       webpack: ^1.0.0 || ^2.0.0 || ^3.0.0 || ^4.0.0
     resolution:
       integrity: sha1-sBq71yOsqqeze2r0SS69oD2d03s=
+  /html-webpack-plugin/4.0.0-beta.11:
+    dependencies:
+      html-minifier-terser: 5.1.1
+      loader-utils: 1.4.0
+      lodash: 4.17.20
+      pretty-error: 2.1.1
+      tapable: 1.1.3
+      util.promisify: 1.0.0
+    dev: false
+    engines:
+      node: '>=6.9'
+    peerDependencies:
+      webpack: ^4.0.0
+    resolution:
+      integrity: sha512-4Xzepf0qWxf8CGg7/WQM5qBB2Lc/NFI7MhU59eUDTkuQp3skZczH4UA1d6oQyDEIoMDgERVhRyTdtUPZ5s5HBg==
   /html-webpack-plugin/4.0.0-beta.11_webpack@4.42.0:
     dependencies:
       html-minifier-terser: 5.1.1
@@ -13905,6 +14236,17 @@ packages:
       node: '>= 10.14.2'
     resolution:
       integrity: sha512-1Rm8EIJ3ZFA8yCIie92UbxZWj9SuVmUGcyhLHyAhY6WI3NIct38nVcfOPWhJteqSn8V8e3xOMha9Ojfazfpovw==
+  /jest-pnp-resolver/1.2.2:
+    dev: false
+    engines:
+      node: '>=6'
+    peerDependencies:
+      jest-resolve: '*'
+    peerDependenciesMeta:
+      jest-resolve:
+        optional: true
+    resolution:
+      integrity: sha512-olV41bKSMm8BdnuMsewT4jqlZ8+3TCARAXjZGT9jcoSnrfUnRCqnMoF9XEeoWjbzObpqF9dRhHQj0Xb9QdF6/w==
   /jest-pnp-resolver/1.2.2_jest-resolve@24.9.0:
     dependencies:
       jest-resolve: 24.9.0_jest-resolve@24.9.0
@@ -13963,6 +14305,20 @@ packages:
       node: '>= 10.14.2'
     resolution:
       integrity: sha512-fQVEPHHQ1JjHRDxzlLU/buuQ9om+hqW6Vo928aa4b4yvq4ZHBtRSDsLdKQLuCqn5CkTVpYZ7ARh2fbA8WkRE6g==
+  /jest-resolve/24.9.0:
+    dependencies:
+      '@jest/types': 24.9.0
+      browser-resolve: 1.11.3
+      chalk: 2.4.2
+      jest-pnp-resolver: 1.2.2
+      realpath-native: 1.1.0
+    dev: false
+    engines:
+      node: '>= 6'
+    peerDependencies:
+      jest-resolve: '*'
+    resolution:
+      integrity: sha512-TaLeLVL1l08YFZAt3zaPtjiVvyy4oSA6CRe+0AFPPVX3Q/VI0giIWWoAvoS5L96vj9Dqxj4fB5p2qrHCmTU/MQ==
   /jest-resolve/24.9.0_jest-resolve@24.9.0:
     dependencies:
       '@jest/types': 24.9.0
@@ -15407,6 +15763,19 @@ packages:
       webpack: ^4.4.0
     resolution:
       integrity: sha512-MNpRGbNA52q6U92i0qbVpQNsgk7LExy41MdAlG84FeytfDOtRIf/mCHdEgG8rpTKOaNKiqUnZdlptF469hxqOw==
+  /mini-css-extract-plugin/0.9.0:
+    dependencies:
+      loader-utils: 1.4.0
+      normalize-url: 1.9.1
+      schema-utils: 1.0.0
+      webpack-sources: 1.4.3
+    dev: false
+    engines:
+      node: '>= 6.9.0'
+    peerDependencies:
+      webpack: ^4.4.0
+    resolution:
+      integrity: sha512-lp3GeY7ygcgAmVIcRPBVhIkf8Us7FZjA+ILpal44qLdSu11wmjKQ3d9k15lfD7pO4esu9eUIAW7qiYIBppv40A==
   /mini-css-extract-plugin/0.9.0_webpack@4.42.0:
     dependencies:
       loader-utils: 1.4.0
@@ -16224,6 +16593,15 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-PqHpggC9bLV0VeWcdKhkpxY+3JTzetLSqTCWL/z/tFIbI6G8JCjondXklT1JinczLz2Xib62sSp0T/gKT4KksA==
+  /optimize-css-assets-webpack-plugin/5.0.3:
+    dependencies:
+      cssnano: 4.1.10
+      last-call-webpack-plugin: 3.0.0
+    dev: false
+    peerDependencies:
+      webpack: ^4.0.0
+    resolution:
+      integrity: sha512-q9fbvCRS6EYtUKKSwI87qm2IxlyJK5b4dygW1rKUBT6mMDhdG5e5bZT63v6tnJR9F9FB/H5a0HTmtw+laUBxKA==
   /optimize-css-assets-webpack-plugin/5.0.3_webpack@4.42.0:
     dependencies:
       cssnano: 4.1.10
@@ -19095,6 +19473,30 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-MKuEYXFSGuRSi8FZ3A7imN1CeVn9Gpw0/SFJKdL1ejXJneI9a5rwlEZrKejhEFAA3O6yr3eIyl/WuvASvlT36g==
+  /sass-loader/8.0.2:
+    dependencies:
+      clone-deep: 4.0.1
+      loader-utils: 1.4.0
+      neo-async: 2.6.2
+      schema-utils: 2.7.0
+      semver: 6.3.0
+    dev: false
+    engines:
+      node: '>= 8.9.0'
+    peerDependencies:
+      fibers: '>= 3.1.0'
+      node-sass: ^4.0.0
+      sass: ^1.3.0
+      webpack: ^4.36.0 || ^5.0.0
+    peerDependenciesMeta:
+      fibers:
+        optional: true
+      node-sass:
+        optional: true
+      sass:
+        optional: true
+    resolution:
+      integrity: sha512-7o4dbSK8/Ol2KflEmSco4jTjQoV988bM82P9CZdmo9hR3RLnvNc0ufMNdMrB0caq38JQ/FgF4/7RcbcfKzxoFQ==
   /sass-loader/8.0.2_webpack@4.42.0:
     dependencies:
       clone-deep: 4.0.1
@@ -19582,6 +19984,20 @@ packages:
       node: '>= 6'
     resolution:
       integrity: sha512-OU6UJUty+i2JDpTItnizPrlpOIBLmQbWMuBg9q5bVtnHACqw1tn9nNwqJLbv0/00JjnJb/Ee5g5WS5vrRv7zIQ==
+  /source-map-loader/1.0.1:
+    dependencies:
+      data-urls: 2.0.0
+      iconv-lite: 0.5.2
+      loader-utils: 2.0.0
+      schema-utils: 2.7.0
+      source-map: 0.6.1
+    dev: false
+    engines:
+      node: '>= 10.13.0'
+    peerDependencies:
+      webpack: ^4.0.0 || ^5.0.0
+    resolution:
+      integrity: sha512-DE4CJyfCVoxFLsHyuVE9Sjcib8cs5qdmOq3wcev1Un/r6F2AfQJDhag4rzpPPA48A2QZyV3CTbc+NGoFMfKIOQ==
   /source-map-loader/1.0.1_webpack@4.42.0:
     dependencies:
       data-urls: 2.0.0
@@ -19704,6 +20120,16 @@ packages:
       node: '>=6.0.0'
     resolution:
       integrity: sha512-r46gZQZQV+Kl9oItvl1JZZqJKGr+oEkB08A6BzkiR7593/7IbtuncXHd2YoYeTsG4157ZssMu9KYvUHLcjcDoA==
+  /speed-measure-webpack-plugin/1.3.3:
+    dependencies:
+      chalk: 2.4.2
+    dev: false
+    engines:
+      node: '>=6.0.0'
+    peerDependencies:
+      webpack: ^1 || ^2 || ^3 || ^4
+    resolution:
+      integrity: sha512-2ljD4Ch/rz2zG3HsLsnPfp23osuPBS0qPuz9sGpkNXTN1Ic4M+W9xB8l8rS8ob2cO4b1L+WTJw/0AJwWYVgcxQ==
   /speed-measure-webpack-plugin/1.3.3_webpack@4.42.0:
     dependencies:
       chalk: 2.4.2
@@ -20369,6 +20795,24 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-un0FmiRUQNr5PJqy9kP7c40F5BOfpGlYTrxonDChEZB7pzZxRNp/bt+ymiy9/npwXya9KH99nJ/GXFIiUkYGFQ==
+  /terser-webpack-plugin/1.4.4:
+    dependencies:
+      cacache: 12.0.4
+      find-cache-dir: 2.1.0
+      is-wsl: 1.1.0
+      schema-utils: 1.0.0
+      serialize-javascript: 3.1.0
+      source-map: 0.6.1
+      terser: 4.8.0
+      webpack-sources: 1.4.3
+      worker-farm: 1.7.0
+    dev: false
+    engines:
+      node: '>= 6.9.0'
+    peerDependencies:
+      webpack: ^4.0.0
+    resolution:
+      integrity: sha512-U4mACBHIegmfoEe5fdongHESNJWqsGU+W0S/9+BmYGVQDw1+c2Ow05TpMhxjPK1sRb7cuYq1BPl1e5YHJMTCqA==
   /terser-webpack-plugin/1.4.4_webpack@4.42.0:
     dependencies:
       cacache: 12.0.4
@@ -20388,7 +20832,7 @@ packages:
       webpack: ^4.0.0
     resolution:
       integrity: sha512-U4mACBHIegmfoEe5fdongHESNJWqsGU+W0S/9+BmYGVQDw1+c2Ow05TpMhxjPK1sRb7cuYq1BPl1e5YHJMTCqA==
-  /terser-webpack-plugin/2.3.5_webpack@4.42.0:
+  /terser-webpack-plugin/2.3.5:
     dependencies:
       cacache: 13.0.1
       find-cache-dir: 3.3.1
@@ -20398,7 +20842,6 @@ packages:
       serialize-javascript: 2.1.2
       source-map: 0.6.1
       terser: 4.8.0
-      webpack: 4.42.0_webpack@4.42.0
       webpack-sources: 1.4.3
     dev: false
     engines:
@@ -20645,6 +21088,26 @@ packages:
     dev: false
     resolution:
       integrity: sha512-m6s2OdQe5wgpFMC+pAJ+q9djG82O2jcHPOI6RNg1yy9rCYR+WD6Nbpl32fDpfC56nirdRy+opFa/Vk7HYhqaew==
+  /ts-jest/24.3.0:
+    dependencies:
+      bs-logger: 0.2.6
+      buffer-from: 1.1.1
+      fast-json-stable-stringify: 2.1.0
+      json5: 2.1.3
+      lodash.memoize: 4.1.2
+      make-error: 1.3.6
+      mkdirp: 0.5.5
+      resolve: 1.17.0
+      semver: 5.7.1
+      yargs-parser: 10.1.0
+    dev: false
+    engines:
+      node: '>= 6'
+    hasBin: true
+    peerDependencies:
+      jest: '>=24 <25'
+    resolution:
+      integrity: sha512-Hb94C/+QRIgjVZlJyiWwouYUF+siNJHJHknyspaOcZ+OQAIdFG/UrdQVXw/0B8Z3No34xkUXZJpOTy9alOWdVQ==
   /ts-jest/24.3.0_jest@24.9.0:
     dependencies:
       bs-logger: 0.2.6
@@ -20973,7 +21436,7 @@ packages:
       integrity: sha512-fiFKlFO6VTqjcno8w6WpTsbCgXmfPHVjnLfYkmByZE7moaz+E2DSpAT+oHtDHv7E0BM5kAhPrHJELP2J2Y2T9A==
   /typedoc-plugin-external-module-name/3.0.0_typedoc@0.16.11:
     dependencies:
-      lodash: 4.17.19
+      lodash: 4.17.20
       semver: 7.3.2
       typedoc: 0.16.11
     dev: false
@@ -21240,6 +21703,22 @@ packages:
       webpack: ^3.0.0 || ^4.0.0
     resolution:
       integrity: sha512-dXHkKmw8FhPqu8asTc1puBfe3TehOCo2+RmOOev5suNCIYBcT626kxiWg1NBVkwc4rO8BGa7gP70W7VXuqHrjg==
+  /url-loader/2.3.0:
+    dependencies:
+      loader-utils: 1.4.0
+      mime: 2.4.6
+      schema-utils: 2.7.0
+    dev: false
+    engines:
+      node: '>= 8.9.0'
+    peerDependencies:
+      file-loader: '*'
+      webpack: ^4.0.0
+    peerDependenciesMeta:
+      file-loader:
+        optional: true
+    resolution:
+      integrity: sha512-goSdg8VY+7nPZKUEChZSEtW5gjbS66USIGCeSJ1OVOJ7Yfuh/36YxCwMi5HVEJh6mqUYOoy3NJ0vlOMrWsSHog==
   /url-loader/2.3.0_file-loader@4.3.0+webpack@4.42.0:
     dependencies:
       file-loader: 4.3.0_webpack@4.42.0
@@ -21491,6 +21970,20 @@ packages:
       node: '>=10.4'
     resolution:
       integrity: sha512-qBIvFLGiBpLjfwmYAaHPXsn+ho5xZnGvyGvsarywGNc8VyQJUMHJ8OBKGGrPER0okBeMDaan4mNBlgBROxuI8w==
+  /webpack-dev-middleware/3.7.2:
+    dependencies:
+      memory-fs: 0.4.1
+      mime: 2.4.6
+      mkdirp: 0.5.5
+      range-parser: 1.2.1
+      webpack-log: 2.0.0
+    dev: false
+    engines:
+      node: '>= 6'
+    peerDependencies:
+      webpack: ^4.0.0
+    resolution:
+      integrity: sha512-1xC42LxbYoqLNAhV6YzTYacicgMZQTqRd27Sim9wn5hJrX3I5nxYy1SxSd4+gjUFsz1dQFj+yEe6zEVmSkeJjw==
   /webpack-dev-middleware/3.7.2_webpack@4.42.0:
     dependencies:
       memory-fs: 0.4.1
@@ -21506,7 +21999,7 @@ packages:
       webpack: ^4.0.0
     resolution:
       integrity: sha512-1xC42LxbYoqLNAhV6YzTYacicgMZQTqRd27Sim9wn5hJrX3I5nxYy1SxSd4+gjUFsz1dQFj+yEe6zEVmSkeJjw==
-  /webpack-dev-server/3.10.3_webpack@4.42.0:
+  /webpack-dev-server/3.10.3:
     dependencies:
       ansi-html: 0.0.7
       bonjour: 3.5.0
@@ -21537,8 +22030,7 @@ packages:
       strip-ansi: 3.0.1
       supports-color: 6.1.0
       url: 0.11.0
-      webpack: 4.42.0_webpack@4.42.0
-      webpack-dev-middleware: 3.7.2_webpack@4.42.0
+      webpack-dev-middleware: 3.7.2
       webpack-log: 2.0.0
       ws: 6.2.1
       yargs: 12.0.5
@@ -21602,6 +22094,14 @@ packages:
         optional: true
     resolution:
       integrity: sha512-PUxZ+oSTxogFQgkTtFndEtJIPNmml7ExwufBZ9L2/Xyyd5PnOL5UreWe5ZT7IU25DSdykL9p1MLQzmLh2ljSeg==
+  /webpack-filter-warnings-plugin/1.2.1:
+    dev: false
+    engines:
+      node: '>= 4.3 < 5.0.0 || >= 5.10'
+    peerDependencies:
+      webpack: ^2.0.0 || ^3.0.0 || ^4.0.0
+    resolution:
+      integrity: sha512-Ez6ytc9IseDMLPo0qCuNNYzgtUl8NovOqjIq4uAU8LTD4uoa1w1KpZyyzFtLTEMZpkkOkLfL9eN+KGYdk1Qtwg==
   /webpack-filter-warnings-plugin/1.2.1_webpack@4.42.0:
     dependencies:
       webpack: 4.42.0_webpack@4.42.0
@@ -21621,6 +22121,19 @@ packages:
       node: '>= 6'
     resolution:
       integrity: sha512-cX8G2vR/85UYG59FgkoMamwHUIkSSlV3bBMRsbxVXVUk2j6NleCKjQ/WE9eYg9WY4w25O9w8wKP4rzNZFmUcUg==
+  /webpack-manifest-plugin/2.2.0:
+    dependencies:
+      fs-extra: 7.0.1
+      lodash: 4.17.20
+      object.entries: 1.1.2
+      tapable: 1.1.3
+    dev: false
+    engines:
+      node: '>=6.11.5'
+    peerDependencies:
+      webpack: 2 || 3 || 4
+    resolution:
+      integrity: sha512-9S6YyKKKh/Oz/eryM1RyLVDVmy3NSPV0JXMRhZ18fJsq+AwGxUY34X54VNwkzYcEmEkDwNxuEOboCZEebJXBAQ==
   /webpack-manifest-plugin/2.2.0_webpack@4.42.0:
     dependencies:
       fs-extra: 7.0.1
@@ -21642,6 +22155,39 @@ packages:
     dev: false
     resolution:
       integrity: sha512-lgTS3Xhv1lCOKo7SA5TjKXMjpSM4sBjNV5+q2bqesbSPs5FjGmU6jjtBSkX9b4qW87vDIsCIlUPOEhbZrMdjeQ==
+  /webpack/4.42.0:
+    dependencies:
+      '@webassemblyjs/ast': 1.8.5
+      '@webassemblyjs/helper-module-context': 1.8.5
+      '@webassemblyjs/wasm-edit': 1.8.5
+      '@webassemblyjs/wasm-parser': 1.8.5
+      acorn: 6.4.1
+      ajv: 6.12.3
+      ajv-keywords: 3.5.1
+      chrome-trace-event: 1.0.2
+      enhanced-resolve: 4.3.0
+      eslint-scope: 4.0.3
+      json-parse-better-errors: 1.0.2
+      loader-runner: 2.4.0
+      loader-utils: 1.4.0
+      memory-fs: 0.4.1
+      micromatch: 3.1.10
+      mkdirp: 0.5.5
+      neo-async: 2.6.2
+      node-libs-browser: 2.2.1
+      schema-utils: 1.0.0
+      tapable: 1.1.3
+      terser-webpack-plugin: 1.4.4
+      watchpack: 1.7.2
+      webpack-sources: 1.4.3
+    dev: false
+    engines:
+      node: '>=6.11.5'
+    hasBin: true
+    peerDependencies:
+      webpack: '*'
+    resolution:
+      integrity: sha512-EzJRHvwQyBiYrYqhyjW9AqM90dE4+s1/XtCfn7uWg6cS72zH+2VPFAlsnW0+W0cDi0XRjNKUMoJtpSi50+Ph6w==
   /webpack/4.42.0_webpack@4.42.0:
     dependencies:
       '@webassemblyjs/ast': 1.8.5
@@ -21909,6 +22455,18 @@ packages:
     dev: false
     resolution:
       integrity: sha512-0jXdusCL2uC5gM3yYFT6QMBzKfBr2XTk0g5TPAV4y8IZDyVNDyj1a8uSXy3/XrvkVTmQvLN4O5k3JawGReXr9w==
+  /workbox-webpack-plugin/4.3.1:
+    dependencies:
+      '@babel/runtime': 7.12.5
+      json-stable-stringify: 1.0.1
+      workbox-build: 4.3.1
+    dev: false
+    engines:
+      node: '>=4.0.0'
+    peerDependencies:
+      webpack: ^2.0.0 || ^3.0.0 || ^4.0.0
+    resolution:
+      integrity: sha512-gJ9jd8Mb8wHLbRz9ZvGN57IAmknOipD3W4XNE/Lk/4lqs5Htw4WOQgakQy/o/4CoXQlMCYldaqUg+EJ35l9MEQ==
   /workbox-webpack-plugin/4.3.1_webpack@4.42.0:
     dependencies:
       '@babel/runtime': 7.12.5
@@ -22432,24 +22990,24 @@ packages:
       integrity: sha512-MuAWgyAmfRDPrWLAtCQTdJf9FVq14AlgR2i5thTfdFSuYDf/71K3vEBua837Td1Gz+mMWFUK/yTAstl6qL873A==
       tarball: 'file:projects/imodel-select-react.tgz'
     version: 0.0.0
-  'file:projects/markup-frontstage-react.tgz_react-redux@7.2.0+redux@4.0.5':
+  'file:projects/markup-frontstage-react.tgz_224c658dd7c110ddb24a8bb4e3576ecf':
     dependencies:
       '@babel/plugin-proposal-class-properties': 7.10.4
       '@babel/plugin-transform-runtime': 7.10.5
       '@babel/preset-env': 7.10.4
       '@babel/preset-react': 7.10.4
       '@babel/preset-typescript': 7.9.0
-      '@bentley/bentleyjs-core': 2.5.3
-      '@bentley/build-tools': 2.5.3
-      '@bentley/imodeljs-common': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/imodeljs-frontend': 2.5.3_c789b763165dd0c0b5b3e14525046059
-      '@bentley/imodeljs-i18n': 2.5.3_@bentley+bentleyjs-core@2.5.3
-      '@bentley/imodeljs-markup': 2.5.3_7bf4f33df369b6dd55115ac296e298f4
-      '@bentley/presentation-frontend': 2.5.3_7bf4f33df369b6dd55115ac296e298f4
-      '@bentley/ui-abstract': 2.5.3_853d3c701de4fe4d665c2533a5a38af7
-      '@bentley/ui-components': 2.5.3_59987c30db53750015c2da5c0e8613fa
-      '@bentley/ui-core': 2.5.3_4ee9ebb4dffeab45a0539e22ce6b1466
-      '@bentley/ui-framework': 2.5.3_043f7ff2425e0a3896cee70cdef9a33e
+      '@bentley/bentleyjs-core': 2.9.7
+      '@bentley/build-tools': 2.9.7_eslint@6.8.0
+      '@bentley/imodeljs-common': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/imodeljs-frontend': 2.9.7_a46189dcb93b755dc320b71434ca9f00
+      '@bentley/imodeljs-i18n': 2.9.7_@bentley+bentleyjs-core@2.9.7
+      '@bentley/imodeljs-markup': 2.9.7_cd35ddd2b9906470054551dedb184d84
+      '@bentley/presentation-frontend': 2.9.7_cd35ddd2b9906470054551dedb184d84
+      '@bentley/ui-abstract': 2.9.7_cebcfd4da4bcd5d6463c7e836ddbe1ba
+      '@bentley/ui-components': 2.9.7_ae27275f41ead9d9467a60608ea7fd69
+      '@bentley/ui-core': 2.9.7_76e4e496e97950bdfa051796ae023b34
+      '@bentley/ui-framework': 2.9.7_98a6334d061c86cd05338aa0d49a1de6
       '@svgdotjs/svg.js': 3.0.13
       '@testing-library/jest-dom': 4.2.4
       '@testing-library/react': 10.4.9_react-dom@16.13.1+react@16.13.1
@@ -22481,10 +23039,12 @@ packages:
     id: 'file:projects/markup-frontstage-react.tgz'
     name: '@rush-temp/markup-frontstage-react'
     peerDependencies:
+      '@bentley/telemetry-client': '*'
+      eslint: '*'
       react-redux: '*'
       redux: '*'
     resolution:
-      integrity: sha512-PkXCYPTz3OXg8JSwRe5coMtFjsHGy6Ghuba2oV5hjEbTwchuhes/PmIMIuPfxThrT4wyJH6jSH4AiOyOS3thiQ==
+      integrity: sha512-GTCEPlwls/IJu4nY87ezfaLInJAXFrugXHMIrQTyfkoiVP91gwAbycps4VLjVf9/7UrYlOIzt9p0jJ6YieIHBg==
       tarball: 'file:projects/markup-frontstage-react.tgz'
     version: 0.0.0
   'file:projects/property-grid-react.tgz_0db41527a8babababd1d0c485ed9d35a':

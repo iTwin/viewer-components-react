@@ -3,8 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 /**
  * Color overrides for element ids
+ * @deprecated Use MarkupSavedView instead
  */
 export interface OverrideData {
   /** Transparency value (not alpha) (transparent 0-255 not transparent) */
@@ -15,7 +17,9 @@ export interface OverrideData {
   ids: string[];
 }
 
-/** store model/category overrides */
+/** store model/category overrides
+ * @deprecated Use MarkupSavedView instead
+ */
 export interface PerModelCategoryVisibilityProps {
   modelId: string;
   categoryId: string;
@@ -24,6 +28,7 @@ export interface PerModelCategoryVisibilityProps {
 
 /**
  * View data for generating the view state from a saved view
+ * @deprecated Use MarkupSavedView instead
  */
 export interface SavedViewState {
   cameraAngle: number;
@@ -38,6 +43,7 @@ export interface SavedViewState {
 
 /**
  * Format for the Blob data in the BIM Review Share
+ * @deprecated Use MarkupViewStateProps instead of the cannonical view state props defined below.
  */
 export interface SavedViewData {
   /** List of elements that are isolated */

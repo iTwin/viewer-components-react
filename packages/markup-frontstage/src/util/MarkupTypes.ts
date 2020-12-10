@@ -2,8 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import { MarkupUiEvent } from "./MarkupUiEvents";
 import { SavedViewData } from "./SavedViewTypes";
+import { MarkupViewStateProps } from "./MarkupViewState";
 
 /**
  * Markup frontstage constants.
@@ -51,8 +53,12 @@ export interface StatusBarItem {
  * Add markup event arguments.
  */
 export interface AddMarkupEventArgs {
+  /**
+   * @deprecated Use markupViewStateProps instead.
+   */
   savedView: SavedViewData;
   thumbImage: string;
+  markupViewStateProps: MarkupViewStateProps;
 }
 
 /** Add Markup Event class.

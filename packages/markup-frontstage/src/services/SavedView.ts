@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import {
   Code,
   ColorDef,
@@ -28,7 +27,9 @@ import {
   SavedViewData,
 } from "../util/SavedViewTypes";
 
-/** Parses all the emphasize elements props and data from the viewport and puts it into the SavedViewData */
+/** Parses all the emphasize elements props and data from the viewport and puts it into the SavedViewData
+ * @deprecated Use EmphasizeElements.toJSON from @bentley/imodeljs-frontend instead
+*/
 export const parseFromEmphasizeElements = (
   vp: Viewport,
   data: SavedViewData
@@ -92,6 +93,7 @@ const jsonStringify = <T>(args: T): string | undefined => {
 /**
  * Creates 2D view props that is common to both sheet and drawings.
  * @param vp the name of the view port.
+ * @deprecated Use createViewStateProps instead.
  */
 const create2dViewProps = (vp: Viewport): SavedViewData => {
   const viewState = vp.view as ViewState2d;
@@ -113,6 +115,7 @@ const create2dViewProps = (vp: Viewport): SavedViewData => {
  * Created 2D saved view data either sheet or drawing on the basis of view state type.
  * @param vp name of the view port.
  * @param viewStateType name fo the view state type.
+ * @deprecated Use createViewStateProps instead
  */
 export const create2DSavedView = (
   vp: Viewport,
@@ -145,6 +148,7 @@ export const create2DSavedView = (
 /**
  * Creates 3d saved view data
  * @param vp View port from which view definition to be made
+ * @deprecated Use createViewStateProps instead
  */
 export const createSavedViewData = (vp: Viewport): SavedViewData => {
   const viewState = vp.view as SpatialViewState;
@@ -243,6 +247,7 @@ export const createSavedViewData = (vp: Viewport): SavedViewData => {
 /**
  * Determines whether or not given saved view is spatial.
  * @param view name of the Saved View.
+ * @deprecated Use isSpatialViewProps instead
  */
 export const isSpatialSavedView = (view: SavedViewData) => {
   // view.is2d can be undefined for spatialSavedView that are added before 2D saved view feature is added.
@@ -252,6 +257,7 @@ export const isSpatialSavedView = (view: SavedViewData) => {
 /**
  * Determines whether or not given view is Drawing.
  * @param view name fo the Saved View.
+ * @deprecated Use isSheetViewProps and isSpatialViewProps instead
  */
 export const isDrawingSavedView = (view: SavedViewData) => {
   return view.is2d && !("sheetProps" in view);
@@ -260,6 +266,7 @@ export const isDrawingSavedView = (view: SavedViewData) => {
 /**
  * Determines whether or not given view is Sheet.
  * @param view name of the Saved View.
+ * @deprecated Use isSheetViewProps instead
  */
 export const isSheetSavedView = (view: SavedViewData) => {
   return view.is2d && "sheetProps" in view;
@@ -270,6 +277,7 @@ export const isSheetSavedView = (view: SavedViewData) => {
  * @param iModelConnection name of the iModelConnection.
  * @param savedView name of the saved view data to create view state props.
  * @param viewStateType name fo the view state type to distinguish between sheet and drawing.
+ * @deprecated Use createViewStateAsync instead.
  */
 export const create2dViewState = async (
   iModelConnection: IModelConnection,
@@ -303,6 +311,7 @@ export const create2dViewState = async (
  * Creates a markup saved view data from the viewport, it could return a
  * View2d(Sheet or Drawings) or a View3d(Spatial views) object
  * @param vp the name of the view port.
+ * @deprecated Use createViewStateProps instead
  */
 export const createMarkupSavedViewData = (vp: Viewport): SavedViewData => {
   if (vp.view.isSpatialView()) {
