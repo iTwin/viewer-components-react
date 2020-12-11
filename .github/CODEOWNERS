@@ -13,13 +13,13 @@
 # Assigning everyone who owns a package to the common/changes review
 /common/changes @wilmaier @calebmshafer @JoeZman @archana-maharjan @aruniverse @diegopinate @JValiunas @michaalx @grigasp @michaelbelousov
 
-/packages/imodel-select  @wilmaier @calebmshafer
+/packages/imodel-select  @wilmaier @calebmshafer @imodeljs/viewer-components-reviewers
 
-/packages/markup-frontstage  @JoeZman @archana-maharjan
+/packages/markup-frontstage  @JoeZman @archana-maharjan @imodeljs/viewer-components-reviewers
 
-/packages/property-grid  @JoeZman @aruniverse @diegopinate
+/packages/property-grid  @JoeZman @aruniverse @diegopinate @imodeljs/viewer-components-reviewers
 
-/packages/tree-widget  @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
+/packages/tree-widget  @JoeZman @diegopinate @aruniverse @JValiunas @michaalx @imodeljs/viewer-components-reviewers
 
 /packages/imodel-content-tree  @grigasp @imodeljs/viewer-components-reviewers
 
