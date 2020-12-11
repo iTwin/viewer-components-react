@@ -23,7 +23,7 @@
 /common/changes/@bentley/tree-widget-react  @imodeljs/viewer-components-reviewers @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
 
 /packages/imodel-content-tree  @imodeljs/viewer-components-reviewers @grigasp
-/common/changes/@bentley/imodel-content-treet-react  @imodeljs/viewer-components-reviewers @grigasp
+/common/changes/@bentley/imodel-content-tree-react  @imodeljs/viewer-components-reviewers @grigasp
 
 /packages/imodel-react-hooks  @imodeljs/viewer-components-reviewers @michaelbelousov
 /common/changes/@bentley/imodel-react-hooks  @imodeljs/viewer-components-reviewers @michaelbelousov
