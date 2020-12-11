@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "packageName": "@bentley/geo-tools-react",
+      "packageName": "@bentley/markup-frontstage-react",
       "comment": "",
       "type": "none"
     }
   ],
-  "packageName": "@bentley/geo-tools-react",
+  "packageName": "@bentley/markup-frontstage-react",
   "email": "31107829+calebmshafer@users.noreply.github.com"
 }

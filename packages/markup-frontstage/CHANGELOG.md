@@ -1,6 +1,6 @@
 # Change Log - @bentley/markup-frontstage-react
 
-This log was last generated on Fri, 16 Oct 2020 19:19:15 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Dec 2020 19:04:29 GMT and should not be manually modified.
 
 ## 1.2.1
 Fri, 16 Oct 2020 19:19:15 GMT

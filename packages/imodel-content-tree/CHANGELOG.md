@@ -1,6 +1,6 @@
 # Change Log - @bentley/imodel-content-tree-react
 
-This log was last generated on Fri, 16 Oct 2020 19:19:15 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Dec 2020 19:04:29 GMT and should not be manually modified.
 
 ## 0.0.4
 Fri, 16 Oct 2020 19:19:15 GMT
