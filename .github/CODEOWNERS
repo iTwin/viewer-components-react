@@ -10,19 +10,23 @@
 # review when someone opens a pull request.
 *  @imodeljs/viewer-components-reviewers
 
-# Assigning everyone who owns a package to the common/changes review
-/common/changes @wilmaier @calebmshafer @JoeZman @archana-maharjan @aruniverse @diegopinate @JValiunas @michaalx @grigasp @michaelbelousov
+/packages/imodel-select  @imodeljs/viewer-components-reviewers @wilmaier @calebmshafer
+/common/changes/@bentley/imodel-select-react  @imodeljs/viewer-components-reviewers @wilmaier @calebmshafer
 
-/packages/imodel-select  @wilmaier @calebmshafer @imodeljs/viewer-components-reviewers
+/packages/markup-frontstage  @imodeljs/viewer-components-reviewers @JoeZman @archana-maharjan
+/common/changes/@bentley/markup-frontstage-react  @imodeljs/viewer-components-reviewers @JoeZman @archana-maharjan
 
-/packages/markup-frontstage  @JoeZman @archana-maharjan @imodeljs/viewer-components-reviewers
+/packages/property-grid  @imodeljs/viewer-components-reviewers @JoeZman @aruniverse @diegopinate
+/common/changes/@bentley/property-grid-react  @imodeljs/viewer-components-reviewers @JoeZman @aruniverse @diegopinate
 
-/packages/property-grid  @JoeZman @aruniverse @diegopinate @imodeljs/viewer-components-reviewers
+/packages/tree-widget  @imodeljs/viewer-components-reviewers @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
+/common/changes/@bentley/tree-widget-react  @imodeljs/viewer-components-reviewers @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
 
-/packages/tree-widget  @JoeZman @diegopinate @aruniverse @JValiunas @michaalx @imodeljs/viewer-components-reviewers
+/packages/imodel-content-tree  @imodeljs/viewer-components-reviewers @grigasp
+/common/changes/@bentley/imodel-content-treet-react  @imodeljs/viewer-components-reviewers @grigasp
 
-/packages/imodel-content-tree  @grigasp @imodeljs/viewer-components-reviewers
+/packages/imodel-react-hooks  @imodeljs/viewer-components-reviewers @michaelbelousov
+/common/changes/@bentley/imodel-react-hooks  @imodeljs/viewer-components-reviewers @michaelbelousov
 
-/packages/imodel-react-hooks @michaelbelousov @imodeljs/viewer-components-reviewers
-
-/packages/geo-tools @mdastous-bentley @imodeljs/viewer-components-reviewers
+/packages/geo-tools  @imodeljs/viewer-components-reviewers @mdastous-bentley
+/common/changes/@bentley/geo-tools-react  @imodeljs/viewer-components-reviewers @mdastous-bentley
