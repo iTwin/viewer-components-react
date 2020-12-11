@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 
+
 /**
  * Color overrides for element ids
  * @deprecated Use MarkupSavedView instead
@@ -43,6 +44,7 @@ export interface SavedViewState {
 
 /**
  * Format for the Blob data in the BIM Review Share
+ * Please update SavedViewData to ViewStateProps instead.
  * @deprecated Use MarkupViewStateProps instead of the cannonical view state props defined below.
  */
 export interface SavedViewData {
