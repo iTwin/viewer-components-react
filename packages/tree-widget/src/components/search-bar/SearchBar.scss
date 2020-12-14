@@ -12,6 +12,7 @@
   // "..." group button
   .search-bar-group-button2 {
     opacity: 0;
+    display: none;
     animation: hide ease-in 0.1s;
     animation-fill-mode: forwards;
 
@@ -25,9 +26,6 @@
 
   // button container
   .search-bar-button-container {
-    position: absolute;
-    left: 0;
-    right: 30px;
     display: flex;
     align-items: center;
 
@@ -36,6 +34,7 @@
     }
 
     &.hide {
+      display: none;
       animation: hide ease-in 0.25s;
       animation-delay: 0.3s;
       animation-fill-mode: forwards;
@@ -74,7 +73,7 @@
       visibility: hidden;
       opacity: 0;
       overflow: hidden;
-      transition: all 0.5s ease;
+      transition: all 0.25s ease;
 
       &.show {
         visibility: visible;
