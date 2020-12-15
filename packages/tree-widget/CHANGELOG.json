@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.2.5",
+      "tag": "@bentley/tree-widget-react_v1.2.5",
+      "date": "Tue, 15 Dec 2020 13:51:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix styling issues in search bar"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.4",
       "tag": "@bentley/tree-widget-react_v1.2.4",
       "date": "Wed, 09 Dec 2020 19:09:13 GMT",

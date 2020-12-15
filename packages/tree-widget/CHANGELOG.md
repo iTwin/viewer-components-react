@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Fri, 11 Dec 2020 19:04:29 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Dec 2020 13:51:37 GMT and should not be manually modified.
+
+## 1.2.5
+Tue, 15 Dec 2020 13:51:37 GMT
+
+### Patches
+
+- Fix styling issues in search bar
 
 ## 1.2.4
 Wed, 09 Dec 2020 19:09:13 GMT
