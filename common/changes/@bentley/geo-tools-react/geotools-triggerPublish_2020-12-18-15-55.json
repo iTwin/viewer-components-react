@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/geo-tools-react",
+      "comment": "Made change to Readme to trigger publish of previous version.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/geo-tools-react",
+  "email": "mdastous-bentley@users.noreply.github.com"
+}
