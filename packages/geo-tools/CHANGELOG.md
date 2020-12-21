@@ -1,6 +1,13 @@
 # Change Log - @bentley/geo-tools-react
 
-This log was last generated on Mon, 21 Dec 2020 16:29:36 GMT and should not be manually modified.
+This log was last generated on Mon, 21 Dec 2020 20:07:13 GMT and should not be manually modified.
+
+## 0.1.3
+Mon, 21 Dec 2020 20:07:13 GMT
+
+### Patches
+
+- Updated GeoAddressSearch label
 
 ## 0.1.2
 Mon, 21 Dec 2020 16:29:36 GMT
