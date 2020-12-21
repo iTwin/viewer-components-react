@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "drop min ver of core required to be 2.6.0",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react",
+  "email": "aruniverse@users.noreply.github.com"
+}
