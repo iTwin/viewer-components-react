@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/geo-tools-react",
+      "comment": "alphabetize deps to fix pipeline",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/geo-tools-react",
+  "email": "aruniverse@users.noreply.github.com"
+}
