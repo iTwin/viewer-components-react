@@ -2,6 +2,33 @@
   "name": "@bentley/geo-tools-react",
   "entries": [
     {
+      "version": "0.1.3",
+      "tag": "@bentley/geo-tools-react_v0.1.3",
+      "date": "Mon, 21 Dec 2020 20:07:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated GeoAddressSearch label"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@bentley/geo-tools-react_v0.1.2",
+      "date": "Mon, 21 Dec 2020 16:29:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Made change to Readme to trigger publish of previous version."
+          },
+          {
+            "comment": "alphabetize deps to fix pipeline"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@bentley/geo-tools-react_v0.1.1",
       "date": "Wed, 09 Dec 2020 19:09:13 GMT",
