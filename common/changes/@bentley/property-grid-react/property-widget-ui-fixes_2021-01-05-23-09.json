@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "fixed duplicate scrollbars via CSS",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react",
+  "email": "cortneysmithbentley@users.noreply.github.com"
+}
