@@ -20,7 +20,7 @@
   "typings": "lib/tree-widget-react",
   "scripts": {
     "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
-    "clean": "rimraf lib",
+    "clean": "rimraf lib .rush/temp/package-deps*.json",
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "cover": "",
     "lint": "tslint -p . 1>&2",
