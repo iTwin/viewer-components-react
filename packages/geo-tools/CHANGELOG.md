@@ -1,6 +1,13 @@
 # Change Log - @bentley/geo-tools-react
 
-This log was last generated on Mon, 21 Dec 2020 20:07:13 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Jan 2021 16:58:53 GMT and should not be manually modified.
+
+## 0.1.4
+Thu, 07 Jan 2021 16:58:53 GMT
+
+### Patches
+
+- Added support for UK postal code by querying places.
 
 ## 0.1.3
 Mon, 21 Dec 2020 20:07:13 GMT
