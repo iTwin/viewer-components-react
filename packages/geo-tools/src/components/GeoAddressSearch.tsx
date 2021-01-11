@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 
+
 import "./GeoAddressSearch.scss";
 
 import { AutoSuggest, AutoSuggestData, CommonProps, WebFontIcon } from "@bentley/ui-core";
@@ -14,7 +15,10 @@ import { IModelGeoView } from "../IModelGeoView";
 import { GeoTools } from "../GeoTools";
 
 export interface GeoAddressSearchProps extends CommonProps {
+  /** Address provider object */
   provider?: AddressProvider;
+  /** Indicates whether to set focus to the input element (default to true)*/
+  setFocus?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -90,6 +94,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
           onPressEnter={onPressEnter}
           onPressEscape={onPressEscape}
           renderInputComponent={renderInput}
+          setFocus={props.setFocus ?? true}
         />
       </div>
 
