@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { ClientRequestContext } from "@bentley/bentleyjs-core";
 import { Angle, Range2d } from "@bentley/geometry-core";
 import { request, RequestOptions, Response } from "@bentley/itwin-client";
@@ -20,12 +21,24 @@ export interface AddressProvider {
 export class BingAddressProvider implements AddressProvider {
   private _radius = 5000;
   private _maxResults = 10;
-  private _entityTypes = ["Address"];
+  private _entityTypes = ["Address,Place"];
   private _bingKey: string;
 
   protected _requestContext = new ClientRequestContext("");
 
-  constructor() {
+  constructor(radius?: number, maxResults?: number, entityTypes?: string[]) {
+    if (radius !== undefined) {
+      this._radius = radius;
+    }
+
+    if (maxResults !== undefined) {
+      this._maxResults = maxResults;
+    }
+
+    if (entityTypes && entityTypes.length > 0) {
+      this._entityTypes = entityTypes;
+    }
+
     this._bingKey = "";
     if (IModelApp.mapLayerFormatRegistry?.configOptions?.BingMaps) {
       this._bingKey = IModelApp.mapLayerFormatRegistry.configOptions.BingMaps.value;
