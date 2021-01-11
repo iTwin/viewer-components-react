@@ -2,6 +2,18 @@
   "name": "@bentley/geo-tools-react",
   "entries": [
     {
+      "version": "0.1.5",
+      "tag": "@bentley/geo-tools-react_v0.1.5",
+      "date": "Mon, 11 Jan 2021 17:44:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added new setFocus prop (defaults to true)."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.4",
       "tag": "@bentley/geo-tools-react_v0.1.4",
       "date": "Thu, 07 Jan 2021 16:58:53 GMT",

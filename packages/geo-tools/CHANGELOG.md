@@ -1,6 +1,13 @@
 # Change Log - @bentley/geo-tools-react
 
-This log was last generated on Thu, 07 Jan 2021 16:58:53 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Jan 2021 17:44:04 GMT and should not be manually modified.
+
+## 0.1.5
+Mon, 11 Jan 2021 17:44:04 GMT
+
+### Patches
+
+- Added new setFocus prop (defaults to true).
 
 ## 0.1.4
 Thu, 07 Jan 2021 16:58:53 GMT
