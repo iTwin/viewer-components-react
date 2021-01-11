@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-
 import "./GeoAddressSearch.scss";
 
 import { AutoSuggest, AutoSuggestData, CommonProps, WebFontIcon } from "@bentley/ui-core";
