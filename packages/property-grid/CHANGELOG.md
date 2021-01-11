@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Mon, 21 Dec 2020 16:29:36 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Jan 2021 21:36:07 GMT and should not be manually modified.
+
+## 1.3.3
+Mon, 11 Jan 2021 21:36:07 GMT
+
+### Patches
+
+- fixed duplicate scrollbars via CSS
 
 ## 1.3.2
 Mon, 21 Dec 2020 16:29:36 GMT

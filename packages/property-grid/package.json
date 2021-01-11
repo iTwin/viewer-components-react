@@ -1,6 +1,6 @@
 {
   "name": "@bentley/property-grid-react",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "This package offers a React widget which provides access to the property grid within an iModel. Designed for use in an iModeljs 9-zone application",
   "keywords": [
     "Bentley",
