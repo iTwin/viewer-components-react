@@ -1,13 +1,12 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { Point2d, Range1dProps, WritableXAndY } from "@bentley/geometry-core";
 import { ColorDef } from "@bentley/imodeljs-common";
 import { Marker, MarkerImage } from "@bentley/imodeljs-frontend";
-import { useContext, useEffect, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import ReactDOM from "react-dom";
 
 import { MarkerDecorationContext } from "../IModelJsViewProvider";
@@ -201,11 +200,10 @@ export const useMarker = <T extends {} = {}>(options: UseMarkerOptions<T>) => {
     }
   }, [marker, options.scaleFactor]);
 
-  const htmlElementRef = useRef<HTMLDivElement>();
+  const htmlElementRef = useRef(document.createElement("div"));
 
   useEffect(() => {
     if (options.jsxElement) {
-      htmlElementRef.current = document.createElement("div");
       ReactDOM.render(options.jsxElement, htmlElementRef.current);
       marker.htmlElement = htmlElementRef.current;
     } else {
