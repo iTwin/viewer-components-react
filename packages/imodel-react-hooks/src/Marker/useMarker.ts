@@ -100,6 +100,7 @@ export const useMarker = <T extends {} = {}>(options: UseMarkerOptions<T>) => {
     size: _size,
     imageSize: _imageSize,
     imageOffset: _imageOffset,
+    jsxElement,
     ...normallyMemoizedOptionValues
   } = options;
 
