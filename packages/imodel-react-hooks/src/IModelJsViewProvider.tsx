@@ -1,8 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import {
   DecorateContext,
@@ -27,9 +26,9 @@ export interface MarkerDecorationContext {
   enqueueViewInvalidation: () => void;
 }
 
-export const MarkerDecorationContext = makeContextWithProviderRequired<
-  MarkerDecorationContext
->("MarkerDecorationContext");
+export const MarkerDecorationContext = makeContextWithProviderRequired<MarkerDecorationContext>(
+  "MarkerDecorationContext"
+);
 
 const isViewportValidForDecorations = (v: Viewport) =>
   "invalidateDecorations" in v;
@@ -83,7 +82,11 @@ export const IModelJsViewProvider = ({
 
   const enqueueViewInvalidation = useCallback(
     () =>
-      setTimeout(() => IModelApp.viewManager.invalidateDecorationsAllViews()),
+      setTimeout(() =>
+        IModelApp.viewManager.forEachViewport((vp) => {
+          if (viewFilter?.(vp) ?? true) vp.invalidateDecorations();
+        })
+      ),
     []
   );
 
