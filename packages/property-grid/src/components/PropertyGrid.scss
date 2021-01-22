@@ -10,6 +10,10 @@
   overflow: hidden !important;
 }
 
+.virtualized-grid-node-content > .components--hoverable:hover {
+  background: $buic-row-hover !important;
+}
+
 .property-grid-react-panel-label-and-class {
   display: block;
 }
