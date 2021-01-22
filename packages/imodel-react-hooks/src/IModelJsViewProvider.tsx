@@ -82,11 +82,11 @@ export const IModelJsViewProvider = ({
 
   const enqueueViewInvalidation = useCallback(
     () =>
-      setTimeout(() =>
+      setTimeout(() => {
         IModelApp.viewManager.forEachViewport((vp) => {
           if (viewFilter?.(vp) ?? true) vp.invalidateDecorations();
         })
-      ),
+      }),
     []
   );
 
