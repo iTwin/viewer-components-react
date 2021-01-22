@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-react-hooks",
+      "comment": "fixed jsxElement resetting on updates",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/imodel-react-hooks",
+  "email": "16315257+MichaelBelousov@users.noreply.github.com"
+}
