@@ -14,7 +14,7 @@
                             ]
                         }
                     ],
-                    "arePolymorphic": false,
+                    "arePolymorphic": true,
                     "groupByClass": false,
                     "groupByLabel": false
                 }
@@ -103,6 +103,54 @@
                     "relationships": {
                         "schemaName": "ClassificationSystems",
                         "classNames": [
+                            "ClassificationOwnsSubClassifications"
+                        ]
+                    },
+                    "relatedClasses": {
+                        "schemaName": "ClassificationSystems",
+                        "classNames": [
+                            "Classification"
+                        ]
+                    },
+                    "requiredDirection": "Forward",
+                    "groupByClass": false,
+                    "groupByLabel": false
+                }
+            ]
+        },
+        {
+            "ruleType": "ChildNodes",
+            "condition": "ParentNode.IsOfClass(\"TypeDefinitionElement\", \"BisCore\")",
+            "specifications": [
+                {
+                    "specType": "RelatedInstanceNodes",
+                    "relationships": {
+                        "schemaName": "BisCore",
+                        "classNames": [
+                            "GeometricElement3dHasTypeDefinition"
+                        ]
+                    },
+                    "relatedClasses": {
+                        "schemaName": "BisCore",
+                        "classNames": [
+                            "PhysicalElement"
+                        ]
+                    },
+                    "requiredDirection": "Backward",
+                    "groupByClass": false,
+                    "groupByLabel": false
+                }
+            ]
+        },
+        {
+            "ruleType": "ChildNodes",
+            "condition": "ParentNode.IsOfClass(\"Classification\", \"ClassificationSystems\")",
+            "specifications": [
+                {
+                    "specType": "RelatedInstanceNodes",
+                    "relationships": {
+                        "schemaName": "ClassificationSystems",
+                        "classNames": [
                             "ElementHasClassifications"
                         ]
                     },
@@ -115,6 +163,27 @@
                     "requiredDirection": "Backward",
                     "groupByClass": false,
                     "groupByLabel": false
+                }
+            ]
+        },
+        {
+            "ruleType": "Content",
+            "condition": "ContentDisplayType = \"RelatedElementsRequest\"",
+            "specifications": [
+                {
+                    "specType": "ContentRelatedInstances",
+                    "relationshipPaths": [
+                        [
+                            {
+                                "relationship": {
+                                    "schemaName": "ClassificationSystems",
+                                    "className": "ClassificationSystemOwnsClassificationTable"
+                                },
+                                "direction": "Forward",
+                                "count": "*"
+                            }
+                        ]
+                    ]
                 }
             ]
         }

@@ -8,5 +8,28 @@
   "toggle3DViews": "Toggle 3D Views",
   "label2D": "2D",
   "label3D": "3D",
-  "learnMore": "Learn more"
+  "learnMore": "Learn more",
+  "contextMenu": {
+    "selectRelatedLabel": "Select related",
+    "createSectionPlanes": "Create section planes",
+    "clearSectionPlanes": "Clear section planes",
+    "zoomSelectedLabel": "Zoom to selected elements",
+    "createSpaceSectionPlanes": "Create space clip planes",
+    "moreOptions": "More Options",
+    "topDownView": "Top Down View",
+    "toggleSpaceLabels": "Show Space Labels",
+    "clipAtSpaces": "Clip At Spaces",
+    "showGuids": "Show IDs",
+    "displayByType": "Group By Type"
+  },
+  "searchTool": {
+    "placeHolder": "Search",
+    "title": "Search for something",
+    "noData": "No Match Found",
+    "noMatchingItem": "There is no item matching your search."
+  },
+  "clipSection": {
+    "briefTimeoutMessage": "Story has no elements",
+    "detailedTimeoutMessage": "Story has no elements associated. Cannot create section planes."
+  }
 }
