@@ -2,6 +2,18 @@
   "name": "@bentley/imodel-react-hooks",
   "entries": [
     {
+      "version": "0.1.3",
+      "tag": "@bentley/imodel-react-hooks_v0.1.3",
+      "date": "Thu, 28 Jan 2021 22:45:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fixed jsxElement resetting on updates"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@bentley/imodel-react-hooks_v0.1.2",
       "date": "Wed, 09 Dec 2020 19:09:13 GMT",
