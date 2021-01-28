@@ -6,37 +6,40 @@
 import * as React from "react";
 import { Ruleset } from "@bentley/presentation-common";
 import { ControlledTreeWrapper, populateMapWithCommonMenuItems } from "./TreeWithRuleset";
-import { TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders"
+import { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders";
+import { IPresentationTreeDataProvider, PresentationTreeDataProvider } from "@bentley/presentation-components";
 import { IModelConnection } from "@bentley/imodeljs-frontend";
-import { PresentationTreeDataProvider } from "@bentley/presentation-components";
-import classificationRules from "../rulesets/ClassificationSystems.json";
+import componentIndex from "../rulesets/ComponentIndex.json";
 import { TreeWidget as BuildingUIComponents } from "../../TreeWidget";
 import { GenericOptionItemHandler, OptionItemHandler } from "./OptionItemHandlers";
 import { LoadableRuleSetComponent } from "./LoadableRuleSetComponent";
 
-export interface ClassificationsTreeProps {
+export interface ComponentIndexProps {
   iModel: IModelConnection;
   displayGuids: boolean;
   setIsDisplayGuids: (displayGuids: boolean) => void;
   enableVisibility?: boolean;
 }
-const CLASSIFICATIONS_TREE_NAME = "ClassificationsTree";
+const COMPONENT_INDEX_NAME = "ComponentIndex";
 
-export const ClassificationsTree: React.FC<ClassificationsTreeProps> = (props: ClassificationsTreeProps) => {
+export const ComponentIndex: React.FC<ComponentIndexProps> = (props: ComponentIndexProps) => {
+  const treeName = "ComponentIndexTree";
   const dataProvider = React.useMemo(() => {
     const provider = new PresentationTreeDataProvider({
       imodel: props.iModel,
-      ruleset: classificationRules.id,
+      ruleset: componentIndex.id,
     });
     provider.pagingSize = 20; // paging size is now needed for the controlled tree.
     return provider;
-  }, [props.iModel]
+  }, [props.iModel],
   );
 
   const { functionIconMapper, optionItems, displayGuidHandler } = React.useMemo(() => {
     const functionIconMapper = new TreeNodeFunctionIconInfoMapper(dataProvider);
     const optionItems: OptionItemHandler[] = [];
-    populateMapWithCommonMenuItems(CLASSIFICATIONS_TREE_NAME, functionIconMapper, dataProvider, classificationRules.id);
+
+    populateContextMenuItems(treeName, functionIconMapper, dataProvider);
+
     const displayGuidHandler = new GenericOptionItemHandler("Show Guids", BuildingUIComponents.translate("contextMenu.showGuids"), "icon-label", () => { return props.displayGuids; }, props.setIsDisplayGuids);
     optionItems.push(displayGuidHandler);
     return { functionIconMapper, optionItems, displayGuidHandler };
@@ -44,19 +47,24 @@ export const ClassificationsTree: React.FC<ClassificationsTreeProps> = (props: C
 
   displayGuidHandler._getItemState = () => props.displayGuids;
 
-  const classificationsTree = React.useMemo(() => (<ControlledTreeWrapper
+  const componentIndexTree = React.useMemo(() => (<ControlledTreeWrapper
     iModel={props.iModel}
-    loadedRuleset={classificationRules as Ruleset}
+    loadedRuleset={componentIndex as Ruleset}
     dataProvider={dataProvider}
-    treeName={CLASSIFICATIONS_TREE_NAME} treeNodeIconMapper={functionIconMapper} optionItems={optionItems}
+    treeName={COMPONENT_INDEX_NAME} treeNodeIconMapper={functionIconMapper} optionItems={optionItems}
     searchTools={false}
     displayGuids={props.displayGuids}
-    setIsDisplayGuids={props.setIsDisplayGuids} enableVisibility={props.enableVisibility ? props.enableVisibility : false}
+    setIsDisplayGuids={props.setIsDisplayGuids}
+    enableVisibility={props.enableVisibility ? props.enableVisibility : false}
   />), [props.iModel, props.displayGuids, props.setIsDisplayGuids]);
 
   return (
-    <LoadableRuleSetComponent ruleSet={classificationRules as Ruleset} >
-      {classificationsTree}
+    <LoadableRuleSetComponent ruleSet={componentIndex as Ruleset} >
+      {componentIndexTree}
     </LoadableRuleSetComponent>
   );
+}
+
+function populateContextMenuItems(treeName: string, mapper: TreeNodeFunctionIconInfoMapper, dataProvider: IPresentationTreeDataProvider) {
+  populateMapWithCommonMenuItems(treeName, mapper, dataProvider, componentIndex.id);
 }

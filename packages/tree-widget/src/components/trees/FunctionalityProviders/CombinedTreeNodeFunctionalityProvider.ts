@@ -1,0 +1,52 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+import { NodeKey } from "@bentley/presentation-common";
+import { TreeModel, TreeModelNode } from "@bentley/ui-components";
+import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
+import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
+import { IModelReadRpcInterface } from "@bentley/imodeljs-common";
+
+export class CombinedTreeNodeFunctionalityProvider extends TreeNodeFunctionalityProvider {
+  private _groupNodeFunctionalityProvider: TreeNodeFunctionalityProvider | undefined;
+  private _classFunctionalityMap: Map<string, TreeNodeFunctionalityProvider>;
+
+  constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider, groupNodeFunctionalityProvider?: TreeNodeFunctionalityProvider, classFunctionalityMap?: Map<string, TreeNodeFunctionalityProvider>){
+    super (functionalitySourceName, treeDataProvider);
+    this._groupNodeFunctionalityProvider = groupNodeFunctionalityProvider;
+    if (classFunctionalityMap)
+      this._classFunctionalityMap = classFunctionalityMap;
+    else
+      this._classFunctionalityMap = new Map<string, TreeNodeFunctionalityProvider>();
+  }
+
+  public setFunctionalityProviderForClass(className: string, functionalityProvider: TreeNodeFunctionalityProvider){
+    this._classFunctionalityMap.set(className, functionalityProvider);
+  }
+
+  public setFunctionalityProviderForGroupNodes(functionalityProvider: TreeNodeFunctionalityProvider){
+    this._groupNodeFunctionalityProvider = functionalityProvider;
+  }
+
+  private async delegateToAppropriateProvider(node: TreeModelNode, treeModel: TreeModel) {
+    const elementKey = this._treeDataProvider.getNodeKey(node.item);
+    if (NodeKey.isGroupingNodeKey(elementKey)){
+      if (this._groupNodeFunctionalityProvider)
+        return this._groupNodeFunctionalityProvider.performAction(node, treeModel);
+    } else if (NodeKey.isInstancesNodeKey(elementKey)){
+      const classHierarchyArray = await IModelReadRpcInterface.getClient().getClassHierarchy(this._treeDataProvider.imodel.getRpcProps(), elementKey.instanceKeys[0].className);
+      for (let className of classHierarchyArray){
+        const mappedFunctionalityProvider = this._classFunctionalityMap.get(className);
+        if (mappedFunctionalityProvider)
+          return mappedFunctionalityProvider.performAction(node, treeModel);
+      }
+    }
+  }
+
+  public async performAction(node: TreeModelNode, treeModel: TreeModel) {
+    return this.delegateToAppropriateProvider(node, treeModel);
+  }
+
+}
