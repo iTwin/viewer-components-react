@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import * as React from "react";
 import { Ruleset, NodeKey } from "@bentley/presentation-common";
 import { IPresentationTreeDataProvider, usePresentationTreeNodeLoader } from "@bentley/presentation-components";
@@ -234,18 +235,3 @@ export function populateMapWithCommonMenuItems(treeName: string, treeFunctionali
     toolbarIcon: "icon-re-center",
   });
 }
-
-const mapStateToProps = (state: any, ownProps: ControlledTreeProps) => {
-  const props = {
-    ...ownProps,
-    displayGuids: state.BuildingUIComponentsReducer.displayGuids
-  };
-
-  return props;
-};
-
-// const mapDispatchToProps = {
-//   setIsDisplayGuids: (typeof BuildingUIComponentsActions.setIsDisplayGuids)
-// };
-
-export const ConnectedControlledTreeWrapper = connectIModelConnection(mapStateToProps, /* mapDispatchToProps */ null)(ControlledTreeWrapper); // tslint:disable-line
