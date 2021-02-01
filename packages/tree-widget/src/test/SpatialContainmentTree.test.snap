@@ -1,0 +1,689 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TreeWithRuleset Component tests. SpatialContainmentTree renders correctly with children 1`] = `
+<Provider
+  store={
+    Object {
+      "@@observable": [Function],
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+    }
+  }
+>
+  <Component
+    displayByType={false}
+    displayGuids={true}
+    enableVisibility={false}
+    iModel={null}
+    setDisplayByType={[Function]}
+    setIsDisplayGuids={[Function]}
+  >
+    <Component
+      ruleSet={
+        Object {
+          "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+          "id": "ui-framework/SpatialBreakdown",
+          "rules": Array [
+            Object {
+              "ruleType": "RootNodes",
+              "specifications": Array [
+                Object {
+                  "arePolymorphic": true,
+                  "classes": Array [
+                    Object {
+                      "classNames": Array [
+                        "CompositeElement",
+                      ],
+                      "schemaName": "SpatialComposition",
+                    },
+                  ],
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "instanceFilter": "NOT model.IsPrivate AND this.ComposingElement = NULL",
+                  "relatedInstances": Array [
+                    Object {
+                      "alias": "model",
+                      "class": Object {
+                        "className": "Model",
+                        "schemaName": "BisCore",
+                      },
+                      "isRequired": true,
+                      "relationship": Object {
+                        "className": "ModelContainsElements",
+                        "schemaName": "BisCore",
+                      },
+                      "requiredDirection": "Backward",
+                    },
+                  ],
+                  "specType": "InstanceNodesOfSpecificClasses",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"CompositeElement\\", \\"SpatialComposition\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "doNotSort": true,
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "DistributionSystem",
+                    ],
+                    "schemaName": "DistributionSystems",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "PhysicalSystemServicesSpatialElements",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "requiredDirection": "Backward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"DistributionSystem\\", \\"DistributionSystems\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "doNotSort": true,
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "SpatialElement",
+                    ],
+                    "schemaName": "Biscore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "DistributionSystemGroupsDistributionElements",
+                    ],
+                    "schemaName": "DistributionSystems",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"CompositeElement\\", \\"SpatialComposition\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "doNotSort": true,
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "CompositeElement",
+                    ],
+                    "schemaName": "SpatialComposition",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "CompositeComposesSubComposites",
+                    ],
+                    "schemaName": "SpatialComposition",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"CompositeElement\\", \\"SpatialComposition\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": true,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "SpatialElement",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "CompositeOverlapsSpatialElements",
+                    ],
+                    "schemaName": "SpatialComposition",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"CompositeElement\\", \\"SpatialComposition\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": true,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "SpatialElement",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "SpatialOrganizerReferencesSpatialElements",
+                    ],
+                    "schemaName": "SpatialComposition",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"CompositeElement\\", \\"SpatialComposition\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": true,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "SpatialElement",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "SpatialOrganizerHoldsSpatialElements",
+                    ],
+                    "schemaName": "SpatialComposition",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ContentDisplayType = \\"RelatedElementsRequest\\"",
+              "ruleType": "Content",
+              "specifications": Array [
+                Object {
+                  "relationshipPaths": Array [
+                    Array [
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "CompositeComposesSubComposites",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "CompositeOverlapsSpatialElements",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "ElementOwnsChildElements",
+                          "schemaName": "BisCore",
+                        },
+                      },
+                    ],
+                  ],
+                  "specType": "ContentRelatedInstances",
+                },
+                Object {
+                  "relationshipPaths": Array [
+                    Array [
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "CompositeComposesSubComposites",
+                          "schemaName": "SpatialComposition",
+                        },
+                        "targetClass": Object {
+                          "className": "ISpatialOrganizer",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "SpatialOrganizerHoldsSpatialElements",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "ElementOwnsChildElements",
+                          "schemaName": "BisCore",
+                        },
+                      },
+                    ],
+                  ],
+                  "specType": "ContentRelatedInstances",
+                },
+                Object {
+                  "relationshipPaths": Array [
+                    Array [
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "CompositeComposesSubComposites",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "SpatialOrganizerReferencesSpatialElements",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "ElementOwnsChildElements",
+                          "schemaName": "BisCore",
+                        },
+                      },
+                    ],
+                  ],
+                  "specType": "ContentRelatedInstances",
+                },
+                Object {
+                  "relationshipPaths": Array [
+                    Array [
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "DistributionSystemGroupsDistributionElements",
+                          "schemaName": "DistributionSystems",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "ElementOwnsChildElements",
+                          "schemaName": "BisCore",
+                        },
+                      },
+                    ],
+                  ],
+                  "specType": "ContentRelatedInstances",
+                },
+              ],
+            },
+          ],
+        }
+      }
+    >
+      <div />
+    </Component>
+  </Component>
+</Provider>
+`;
+
+exports[`TreeWithRuleset Component tests. SpatialContainmentTree renders correctly with visibility 1`] = `
+<Provider
+  store={
+    Object {
+      "@@observable": [Function],
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+    }
+  }
+>
+  <Component
+    displayByType={false}
+    displayGuids={true}
+    enableVisibility={true}
+    iModel={null}
+    setDisplayByType={[Function]}
+    setIsDisplayGuids={[Function]}
+  >
+    <Component
+      ruleSet={
+        Object {
+          "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+          "id": "ui-framework/SpatialBreakdown",
+          "rules": Array [
+            Object {
+              "ruleType": "RootNodes",
+              "specifications": Array [
+                Object {
+                  "arePolymorphic": true,
+                  "classes": Array [
+                    Object {
+                      "classNames": Array [
+                        "CompositeElement",
+                      ],
+                      "schemaName": "SpatialComposition",
+                    },
+                  ],
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "instanceFilter": "NOT model.IsPrivate AND this.ComposingElement = NULL",
+                  "relatedInstances": Array [
+                    Object {
+                      "alias": "model",
+                      "class": Object {
+                        "className": "Model",
+                        "schemaName": "BisCore",
+                      },
+                      "isRequired": true,
+                      "relationship": Object {
+                        "className": "ModelContainsElements",
+                        "schemaName": "BisCore",
+                      },
+                      "requiredDirection": "Backward",
+                    },
+                  ],
+                  "specType": "InstanceNodesOfSpecificClasses",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"CompositeElement\\", \\"SpatialComposition\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "doNotSort": true,
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "DistributionSystem",
+                    ],
+                    "schemaName": "DistributionSystems",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "PhysicalSystemServicesSpatialElements",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "requiredDirection": "Backward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"DistributionSystem\\", \\"DistributionSystems\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "doNotSort": true,
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "SpatialElement",
+                    ],
+                    "schemaName": "Biscore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "DistributionSystemGroupsDistributionElements",
+                    ],
+                    "schemaName": "DistributionSystems",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"CompositeElement\\", \\"SpatialComposition\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "doNotSort": true,
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "CompositeElement",
+                    ],
+                    "schemaName": "SpatialComposition",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "CompositeComposesSubComposites",
+                    ],
+                    "schemaName": "SpatialComposition",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"CompositeElement\\", \\"SpatialComposition\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": true,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "SpatialElement",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "CompositeOverlapsSpatialElements",
+                    ],
+                    "schemaName": "SpatialComposition",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"CompositeElement\\", \\"SpatialComposition\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": true,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "SpatialElement",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "SpatialOrganizerReferencesSpatialElements",
+                    ],
+                    "schemaName": "SpatialComposition",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"CompositeElement\\", \\"SpatialComposition\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": true,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "SpatialElement",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "SpatialOrganizerHoldsSpatialElements",
+                    ],
+                    "schemaName": "SpatialComposition",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ContentDisplayType = \\"RelatedElementsRequest\\"",
+              "ruleType": "Content",
+              "specifications": Array [
+                Object {
+                  "relationshipPaths": Array [
+                    Array [
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "CompositeComposesSubComposites",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "CompositeOverlapsSpatialElements",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "ElementOwnsChildElements",
+                          "schemaName": "BisCore",
+                        },
+                      },
+                    ],
+                  ],
+                  "specType": "ContentRelatedInstances",
+                },
+                Object {
+                  "relationshipPaths": Array [
+                    Array [
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "CompositeComposesSubComposites",
+                          "schemaName": "SpatialComposition",
+                        },
+                        "targetClass": Object {
+                          "className": "ISpatialOrganizer",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "SpatialOrganizerHoldsSpatialElements",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "ElementOwnsChildElements",
+                          "schemaName": "BisCore",
+                        },
+                      },
+                    ],
+                  ],
+                  "specType": "ContentRelatedInstances",
+                },
+                Object {
+                  "relationshipPaths": Array [
+                    Array [
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "CompositeComposesSubComposites",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "SpatialOrganizerReferencesSpatialElements",
+                          "schemaName": "SpatialComposition",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "ElementOwnsChildElements",
+                          "schemaName": "BisCore",
+                        },
+                      },
+                    ],
+                  ],
+                  "specType": "ContentRelatedInstances",
+                },
+                Object {
+                  "relationshipPaths": Array [
+                    Array [
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "DistributionSystemGroupsDistributionElements",
+                          "schemaName": "DistributionSystems",
+                        },
+                      },
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "ElementOwnsChildElements",
+                          "schemaName": "BisCore",
+                        },
+                      },
+                    ],
+                  ],
+                  "specType": "ContentRelatedInstances",
+                },
+              ],
+            },
+          ],
+        }
+      }
+    >
+      <div />
+    </Component>
+  </Component>
+</Provider>
+`;

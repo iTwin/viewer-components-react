@@ -4,27 +4,23 @@
 *--------------------------------------------------------------------------------------------*/
 
 
+
 import * as React from "react";
 import { TreeWidget } from "../TreeWidget";
 import { I18N } from "@bentley/imodeljs-i18n";
-// import { RuleEditorControllerBase, RuleParameterDetails } from "../Controllers/RuleEditorControllerBase";
 import * as moq from "typemoq";
 import {
   UiFramework, ToolSettingsManager, SyncUiEventDispatcher,
-  ConfigurableUiManager, ContentControl, ConfigurableCreateInfo,
-  ContentLayoutProps,
-  ContentGroupProps,
+  ContentControl, ConfigurableCreateInfo,
   FrameworkReducer,
 } from "@bentley/ui-framework";
 import { UiComponents, TreeNodeItem } from "@bentley/ui-components";
 import { UiCore } from "@bentley/ui-core";
 import { Id64 } from "@bentley/bentleyjs-core";
-// import { BuildingUIComponentsReducer, BuildingUIComponentsActions } from "../Views/redux/buildingUIComponents-redux";
 import { createStore, combineReducers, Store, AnyAction } from "redux";
 import { IModelConnection } from "@bentley/imodeljs-frontend";
-import { Ruleset, ECInstancesNodeKey, InstanceKey, StandardNodeTypes, Node } from "@bentley/presentation-common";
+import { ECInstancesNodeKey, InstanceKey, StandardNodeTypes } from "@bentley/presentation-common";
 import ruleList from "./assets/RulesList.json";
-// import { TreeWithRulesetControllerBase } from "../Controllers/TreeWithRulesetControllerBase";
 import faker from "faker";
 import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
 import { PropertyRecord } from "@bentley/ui-abstract";
@@ -72,8 +68,6 @@ export class TestUtils {
         await UiFramework.initialize(this.store, TestUtils.i18n, "testDifferentFrameworkKey");
       else
         await UiFramework.initialize(this.store, TestUtils.i18n);
-      TestUtils.defineContentGroups();
-      TestUtils.defineContentLayouts();
       await UiComponents.initialize(TestUtils.i18n);
       await UiCore.initialize(TestUtils.i18n);
       await TreeWidget.initialize(TestUtils.i18n);
@@ -95,119 +89,13 @@ export class TestUtils {
     TestUtils._uiFrameworkInitialized = false;
   }
 
-  /** Define Content Layouts referenced by Frontstages.
-   */
-  public static defineContentLayouts() {
-    const contentLayouts: ContentLayoutProps[] = TestUtils.getContentLayouts();
-    ConfigurableUiManager.loadContentLayouts(contentLayouts);
-  }
-
-  private static getContentLayouts(): ContentLayoutProps[] {
-    const fourQuadrants: ContentLayoutProps = {
-      id: "FourQuadrants",
-      descriptionKey: "SampleApp:ContentLayoutDef.FourQuadrants",
-      priority: 1000,
-      horizontalSplit: {
-        id: "FourQuadrants.MainHorizontal",
-        percentage: 0.50,
-        top: { verticalSplit: { id: "FourQuadrants.TopVert", percentage: 0.50, left: 0, right: 1 } },
-        bottom: { verticalSplit: { id: "FourQuadrants.BottomVert", percentage: 0.50, left: 2, right: 3 } },
-      },
-    };
-
-    const singleContent: ContentLayoutProps = {
-      id: "SingleContent",
-      descriptionKey: "SampleApp:ContentLayoutDef.SingleContent",
-      priority: 100,
-    };
-
-    const contentLayouts: ContentLayoutProps[] = [];
-    // in order to pick out by number of views for convenience.
-    contentLayouts.push(singleContent, fourQuadrants);
-    return contentLayouts;
-  }
-
-  /** Define Content Groups referenced by Frontstages.
-   */
-  private static defineContentGroups() {
-
-    const testContentGroup1: ContentGroupProps = {
-      id: "TestContentGroup1",
-      contents: [
-        {
-          classId: TestContentControl,
-          applicationData: { label: "Content 1a", bgColor: "black" },
-        },
-        {
-          classId: TestContentControl,
-          applicationData: { label: "Content 2a", bgColor: "black" },
-        },
-        {
-          classId: TestContentControl,
-          applicationData: { label: "Content 3a", bgColor: "black" },
-        },
-        {
-          classId: TestContentControl,
-          applicationData: { label: "Content 4a", bgColor: "black" },
-        },
-      ],
-    };
-
-    const contentGroups: ContentGroupProps[] = [];
-    contentGroups.push(testContentGroup1);
-    ConfigurableUiManager.loadContentGroups(contentGroups);
-  }
 
   /** Waits until all async operations finish */
   public static async flushAsyncOperations() {
     return new Promise((resolve) => setTimeout(resolve));
   }
 
-  /** Sleeps a specified number of milliseconds */
-  public static sleep(milliseconds: number) {
-    const start = new Date().getTime();
-    for (let i = 0; i < 1e7; i++) {
-      if ((new Date().getTime() - start) > milliseconds) {
-        break;
-      }
-    }
-  }
-
-  /** Sleeps a specified number of milliseconds then flushes async operations */
-  public static async tick(milliseconds: number) {
-    TestUtils.sleep(milliseconds);
-    await TestUtils.flushAsyncOperations();
-  }
-
-  public static createBubbledEvent(type: string, props = {}) {
-    const event = new Event(type, { bubbles: true });
-    Object.assign(event, props);
-    return event;
-  }
-
 }
-
-export const storageMock = () => {
-  const storage: { [key: string]: any } = {};
-  return {
-    setItem: (key: string, value: string) => {
-      storage[key] = value || "";
-    },
-    getItem: (key: string) => {
-      return key in storage ? storage[key] : null;
-    },
-    removeItem: (key: string) => {
-      delete storage[key];
-    },
-    get length() {
-      return Object.keys(storage).length;
-    },
-    key: (i: number) => {
-      const keys = Object.keys(storage);
-      return keys[i] || null;
-    },
-  };
-};
 
 /** mocks a tree with ruleset controller */
 export class TreeWithRuleSetController {
@@ -227,7 +115,7 @@ export const createRandomECInstancesNodeKey = (pathFromRoot?: string[], classNam
   };
 };
 
-/** mocks a functional Instance key */
+// /** mocks a functional Instance key */
 export const createRandomECInstanceKey = (className: string = "RulesEngine:RuleElement"): InstanceKey => {
   return {
     className,
@@ -235,7 +123,7 @@ export const createRandomECInstanceKey = (className: string = "RulesEngine:RuleE
   };
 };
 
-/** mocks a random but functional Node */
+// /** mocks a random but functional Node */
 export const createRandomECInstanceNode = (label?: string, key?: ECInstancesNodeKey, hasChildren?: boolean) => {
   if (!key)
     key = createRandomECInstancesNodeKey();
@@ -297,82 +185,4 @@ export const setupDataProvider = (imodel: IModelConnection, nodes = [createRando
 /** @internal */
 export const PRESENTATION_TREE_NODE_KEY = "__presentation-components/key";
 
-/** create node items in the same level and with the same parent. */
-export const createTreeNodeItems = (nodes: ReadonlyArray<Readonly<Node>>, parentId?: string): any[] => {
-  const list = new Array<any>();
-  for (const node of nodes)
-    list.push(createTreeNodeItem(node, parentId));
-  return list;
-};
 
-/** Node to TreeNodeItem */
-export const createTreeNodeItem = (node: Readonly<Node>, parentId?: string): any => {
-  const item: any = {
-    id: [...node.key.pathFromRoot].reverse().join("/"),
-    label: PropertyRecord.fromString(node.label.displayValue),
-  };
-  (item as any)[PRESENTATION_TREE_NODE_KEY] = node.key;
-  if (parentId)
-    item.parentId = parentId;
-  if (node.description)
-    item.description = node.description;
-  if (node.hasChildren)
-    item.hasChildren = true;
-  item.autoExpand = true;
-  if (node.imageId)
-    item.icon = node.imageId;
-  if (node.isCheckboxVisible) {
-    item.isCheckboxVisible = true;
-    if (!node.isCheckboxEnabled)
-      item.isCheckboxDisabled = true;
-  }
-  if (node.extendedData)
-    item.extendedData = node.extendedData;
-  return item;
-};
-
-// export class MockRuleTreeController extends RuleTreeControllerBase {
-//   private _nodes?: any[];
-//   private _testParentChildPair?: boolean;
-//   private _customRuleResults?: boolean[];
-//   private _numOfChildren?: number;
-//   constructor(nodes?: any[], testParentChildPair?: boolean, customRuleResults?: boolean[], numOfChildren?: number) {
-//     super();
-//     this._nodes = nodes;
-//     this._testParentChildPair = testParentChildPair;
-//     this._customRuleResults = customRuleResults;
-//     this._numOfChildren = numOfChildren;
-//   }
-
-//   public createDataProvider(imodel: IModelConnection) {
-//     return setupDataProvider(imodel, this._nodes, this._testParentChildPair, this._numOfChildren)!;
-//   }
-
-//   public editRules() { }
-
-//   public executeRules(rules: string[]) {
-//     const results: any = [];
-//     if (this._customRuleResults && this._customRuleResults.length === rules.length) {
-//       for (let i = 0; i < this._customRuleResults.length; i++)
-//         results.push({ result: this._customRuleResults[i], ruleId: rules[i] });
-//       return results;
-//     }
-//     rules.forEach((rule) => {
-//       results.push({ result: true, ruleId: rule });
-//     });
-//     return results;
-//   }
-
-//   public async selectRelatedElementsForMultipleNodes() { }
-//   public async selectRelatedElementsForSingleNode() { }
-// }
-/** Helper function to parse hex to rbg for mathing colors in tests. */
-export function hexToRgb(hex: string) {
-  hex = hex.slice(1); // remove #
-  const bigint = parseInt(hex, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-
-  return r + ", " + g + ", " + b;
-}
