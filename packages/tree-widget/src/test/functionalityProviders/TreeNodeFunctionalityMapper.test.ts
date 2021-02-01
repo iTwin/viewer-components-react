@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 
+
 import { IModelApp, NoRenderApp, IModelConnection } from "@bentley/imodeljs-frontend";
 import { TestUtils } from "../Utils";
 import { Presentation } from "@bentley/presentation-frontend";
@@ -26,8 +27,6 @@ describe("TreeNodeFunctionalityMapper", () => {
   let iModelReadRpcInterfaceStub: sinon.SinonStub;
 
   before(async () => {
-    // This is required by our I18n module (specifically the i18next package).
-    // (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // tslint:disable-line:no-var-requires
     if (IModelApp.initialized)
       IModelApp.shutdown();
     NoRenderApp.startup();
@@ -57,13 +56,16 @@ describe("TreeNodeFunctionalityMapper", () => {
     iModelReadRPCInterfaceMock.setup((x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.Door)).returns(() => Promise.resolve([MockClassNames.Door, MockClassNames.BaseDoor, MockClassNames.PhysicalElement]));
     iModelReadRPCInterfaceMock.setup((x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.Window)).returns(() => Promise.resolve([MockClassNames.Window, MockClassNames.BaseWindow, MockClassNames.PhysicalElement]));
     iModelReadRPCInterfaceMock.setup((x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.UnrelatedClass)).returns(() => Promise.resolve([MockClassNames.UnrelatedClass]));
-
-    iModelReadRpcInterfaceStub = sinon.stub(IModelReadRpcInterface, "getClient" as any);
-    iModelReadRpcInterfaceStub.returns(iModelReadRPCInterfaceMock.object);
+  });
+  beforeEach(async () => {
+    iModelReadRpcInterfaceStub = sinon.stub(IModelReadRpcInterface, "getClient" as any).returns(iModelReadRPCInterfaceMock.object);
+  });
+  afterEach(() => {
+    iModelReadRpcInterfaceStub.restore();
   });
 
   after(() => {
-    iModelReadRpcInterfaceStub.restore();
+
     TestUtils.terminateUiFramework();
     IModelApp.shutdown();
   });

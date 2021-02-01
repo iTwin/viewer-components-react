@@ -1,0 +1,439 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TreeWithRuleset Component tests. ClassificationsTree renders correctly with children 1`] = `
+<Provider
+  store={
+    Object {
+      "@@observable": [Function],
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+    }
+  }
+>
+  <Component
+    displayGuids={true}
+    enableVisibility={false}
+    iModel={null}
+    setIsDisplayGuids={[Function]}
+  >
+    <Component
+      ruleSet={
+        Object {
+          "id": "ui-framework/ClassificationSystems",
+          "rules": Array [
+            Object {
+              "ruleType": "RootNodes",
+              "specifications": Array [
+                Object {
+                  "arePolymorphic": true,
+                  "classes": Array [
+                    Object {
+                      "classNames": Array [
+                        "ClassificationSystem",
+                      ],
+                      "schemaName": "ClassificationSystems",
+                    },
+                  ],
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "specType": "InstanceNodesOfSpecificClasses",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"ClassificationSystem\\", \\"ClassificationSystems\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "doNotSort": true,
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "ClassificationTable",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "ClassificationSystemOwnsClassificationTable",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"ClassificationTable\\", \\"ClassificationSystems\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "hideNodesInHierarchy": true,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "Model",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "ModelModelsElement",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "requiredDirection": "Backward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"Model\\", \\"BisCore\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "Classification",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "ModelContainsElements",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"Classification\\", \\"ClassificationSystems\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "Classification",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "ClassificationOwnsSubClassifications",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"TypeDefinitionElement\\", \\"BisCore\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "PhysicalElement",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "GeometricElement3dHasTypeDefinition",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "requiredDirection": "Backward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"Classification\\", \\"ClassificationSystems\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "Element",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "ElementHasClassifications",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "requiredDirection": "Backward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ContentDisplayType = \\"RelatedElementsRequest\\"",
+              "ruleType": "Content",
+              "specifications": Array [
+                Object {
+                  "relationshipPaths": Array [
+                    Array [
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "ClassificationSystemOwnsClassificationTable",
+                          "schemaName": "ClassificationSystems",
+                        },
+                      },
+                    ],
+                  ],
+                  "specType": "ContentRelatedInstances",
+                },
+              ],
+            },
+          ],
+        }
+      }
+    >
+      <div />
+    </Component>
+  </Component>
+</Provider>
+`;
+
+exports[`TreeWithRuleset Component tests. ClassificationsTree renders correctly with visibility 1`] = `
+<Provider
+  store={
+    Object {
+      "@@observable": [Function],
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+    }
+  }
+>
+  <Component
+    displayGuids={true}
+    enableVisibility={true}
+    iModel={null}
+    setIsDisplayGuids={[Function]}
+  >
+    <Component
+      ruleSet={
+        Object {
+          "id": "ui-framework/ClassificationSystems",
+          "rules": Array [
+            Object {
+              "ruleType": "RootNodes",
+              "specifications": Array [
+                Object {
+                  "arePolymorphic": true,
+                  "classes": Array [
+                    Object {
+                      "classNames": Array [
+                        "ClassificationSystem",
+                      ],
+                      "schemaName": "ClassificationSystems",
+                    },
+                  ],
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "specType": "InstanceNodesOfSpecificClasses",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"ClassificationSystem\\", \\"ClassificationSystems\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "doNotSort": true,
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "ClassificationTable",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "ClassificationSystemOwnsClassificationTable",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"ClassificationTable\\", \\"ClassificationSystems\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "hideNodesInHierarchy": true,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "Model",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "ModelModelsElement",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "requiredDirection": "Backward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"Model\\", \\"BisCore\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "Classification",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "ModelContainsElements",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"Classification\\", \\"ClassificationSystems\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "Classification",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "ClassificationOwnsSubClassifications",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "requiredDirection": "Forward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"TypeDefinitionElement\\", \\"BisCore\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "PhysicalElement",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "GeometricElement3dHasTypeDefinition",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "requiredDirection": "Backward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ParentNode.IsOfClass(\\"Classification\\", \\"ClassificationSystems\\")",
+              "ruleType": "ChildNodes",
+              "specifications": Array [
+                Object {
+                  "groupByClass": false,
+                  "groupByLabel": false,
+                  "relatedClasses": Object {
+                    "classNames": Array [
+                      "Element",
+                    ],
+                    "schemaName": "BisCore",
+                  },
+                  "relationships": Object {
+                    "classNames": Array [
+                      "ElementHasClassifications",
+                    ],
+                    "schemaName": "ClassificationSystems",
+                  },
+                  "requiredDirection": "Backward",
+                  "specType": "RelatedInstanceNodes",
+                },
+              ],
+            },
+            Object {
+              "condition": "ContentDisplayType = \\"RelatedElementsRequest\\"",
+              "ruleType": "Content",
+              "specifications": Array [
+                Object {
+                  "relationshipPaths": Array [
+                    Array [
+                      Object {
+                        "count": "*",
+                        "direction": "Forward",
+                        "relationship": Object {
+                          "className": "ClassificationSystemOwnsClassificationTable",
+                          "schemaName": "ClassificationSystems",
+                        },
+                      },
+                    ],
+                  ],
+                  "specType": "ContentRelatedInstances",
+                },
+              ],
+            },
+          ],
+        }
+      }
+    >
+      <div />
+    </Component>
+  </Component>
+</Provider>
+`;

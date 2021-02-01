@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 
+
 import * as React from "react";
 import { Provider } from "react-redux";
 import { mount, shallow } from "enzyme";
@@ -18,9 +19,9 @@ import { Ruleset, HierarchyUpdateInfo } from "@bentley/presentation-common";
 import { PresentationManager, RulesetManager, RulesetVariablesManager } from "@bentley/presentation-frontend";
 import { TreeNodeFunctionIconInfoMapper } from "../components/trees/FunctionalityProviders";
 import { assert } from "chai";
-// import { TreeNodeWrapper } from "../components/trees/NodeRenderers/FunctionalTreeNodeRenderer";
-// import { PropertyValueRendererManager, TreeActions, TreeModel, TreeModelNode } from "@bentley/ui-components";
-// import sinon from "sinon";
+import { TreeNodeWrapper } from "../components/trees/NodeRenderers/FunctionalTreeNodeRenderer";
+import sinon from "sinon";
+import { PropertyValueRendererManager, TreeModelNode, TreeModel, TreeActions } from "@bentley/ui-components";
 
 describe("TreeWithRuleset Component tests.", () => {
 
@@ -163,5 +164,25 @@ describe("TreeWithRuleset Component tests.", () => {
     assert(mountedWrapper.exists("SearchBox"), "should contain the SearchBox component");
     assert(mountedWrapper.exists("ControlledTree"), "should contain the ControlledTree component");
   });
+
+  it("TreeNodeWrapper renders correctly", () => {
+    const node = moq.Mock.ofType<TreeModelNode>();
+    const treeModel = moq.Mock.ofType<TreeModel>();
+    const treeAction = moq.Mock.ofType<TreeActions>();
+    const dataProvider = setupDataProvider(connection.object);
+    const functionIconMapper = new TreeNodeFunctionIconInfoMapper(dataProvider);
+    const reactNode = moq.Mock.ofType<React.ReactNode>();
+    const propertyValueRenderStub = sinon.stub(PropertyValueRendererManager.defaultManager, "render").returns(reactNode.object);
+
+    const wrapper = (
+      <Provider store={TestUtils.store}>
+        <TreeNodeWrapper node={node.object} treeActions={treeAction.object} itemsMapper={functionIconMapper} visibilityHandler={undefined} treeModel={treeModel.object} />
+      </Provider>
+    );
+    mount(wrapper).should.matchSnapshot();
+    reactNode.reset();
+    propertyValueRenderStub.restore();
+  });
+
 
 });

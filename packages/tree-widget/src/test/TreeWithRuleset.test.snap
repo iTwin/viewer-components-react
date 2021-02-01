@@ -1,5 +1,128 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`TreeWithRuleset Component tests. TreeNodeWrapper renders correctly 1`] = `
+<Provider
+  store={
+    Object {
+      "@@observable": [Function],
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+    }
+  }
+>
+  <TreeNodeWrapper
+    itemsMapper={
+      TreeNodeFunctionIconInfoMapper {
+        "_TreeNodeClassFunctionIconInfoMap": Map {},
+        "_functionIconInfos": Array [],
+        "_globalFunctionIconInfos": Array [],
+        "_groupNodeFunctionIconInfos": Array [],
+        "_treeDataProvider": Object {
+          "dispose": [Function],
+          "getFilteredNodePaths": [Function],
+          "getNodeKey": [Function],
+          "getNodes": [Function],
+          "getNodesCount": [Function],
+          "imodel": null,
+          "loadHierarchy": [Function],
+          "rulesetId": "ui-framework/RulesList",
+        },
+      }
+    }
+    node={null}
+    treeActions={null}
+    treeModel={null}
+  >
+    <div
+      className="tree-item-wrapper"
+      data-testid="nodeLoaded"
+      onContextMenu={[Function]}
+    >
+      <div
+        className="tree-item"
+      >
+        <TreeNode
+          isExpanded={[Function]}
+          isLeaf={false}
+          isLoading={[Function]}
+          isSelected={[Function]}
+          key="function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    _this._interceptor.removeInvocation(invocation_1);
+                    var method = new MethodInfo(target, p);
+                    var methodInvocation = new MethodInvocation(target, method, args, ProxyType.DYNAMIC);
+                    _this._interceptor.intercept(methodInvocation);
+                    return methodInvocation.returnValue;
+                }"
+          label={
+            <div
+              className="components-tree-node-content"
+            >
+              null
+            </div>
+          }
+          level={[Function]}
+          onClick={[Function]}
+          onClickExpansionToggle={[Function]}
+          onMouseDown={[Function]}
+          onMouseMove={[Function]}
+          renderOverrides={
+            Object {
+              "renderCheckbox": undefined,
+            }
+          }
+        >
+          <div
+            className="core-tree-node is-selected"
+            onClick={[Function]}
+            onMouseDown={[Function]}
+            onMouseMove={[Function]}
+            role="treeitem"
+            tabIndex={-1}
+          >
+            <div
+              className="contents"
+              style={
+                Object {
+                  "marginLeft": NaN,
+                }
+              }
+            >
+              <div
+                className="loader"
+              >
+                <Spinner
+                  size={0}
+                >
+                  <div
+                    className="core-spinner-small"
+                  />
+                </Spinner>
+              </div>
+              <div
+                className="components-tree-node-content"
+              >
+                <Component
+                  key={[Function]}
+                >
+                  <Component />
+                </Component>
+              </div>
+            </div>
+          </div>
+        </TreeNode>
+      </div>
+      <div />
+    </div>
+  </TreeNodeWrapper>
+</Provider>
+`;
+
 exports[`TreeWithRuleset Component tests. TreeWithRuleset renders correctly 1`] = `
 <ContextProvider
   value={
