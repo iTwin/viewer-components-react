@@ -181,7 +181,10 @@ export class PropertyGrid extends React.Component<
       });
       propertyData.records.Favorite = [];
     }
-    const dataFavs = propertyData.records.Favorite;
+    const favoritesCategoryName = await this.getFavoritesCategoryName(
+      propertyData.records
+    );
+    const dataFavs = propertyData.records[favoritesCategoryName];
 
     for (const cat of propertyData.categories) {
       if (cat.name !== "Favorite") {
@@ -214,6 +217,37 @@ export class PropertyGrid extends React.Component<
       }
     }
     return this._dataProvider.getData();
+  }
+
+  /**
+   * Finds the name of the Favorites category
+   * @param propertyRecords
+   */
+  private async getFavoritesCategoryName(categories: {
+    [categoryName: string]: PropertyRecord[];
+  }): Promise<string> {
+    const keys = Object.keys(categories);
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const category = categories[key];
+
+      for (let j = 0; j < category.length; j++) {
+        const record = category[j];
+        const field = await this._dataProvider.getFieldByPropertyRecord(record);
+        if (
+          field !== undefined &&
+          Presentation.favoriteProperties.has(
+            field,
+            this.props.projectId,
+            this.props.iModelConnection.iModelId
+          )
+        ) {
+          return key;
+        }
+      }
+    }
+    return "Favorite";
   }
 
   private async _onDataChanged() {
