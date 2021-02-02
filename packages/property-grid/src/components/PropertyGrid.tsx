@@ -228,10 +228,10 @@ export class PropertyGrid extends React.Component<
   }): Promise<string> {
     const keys = Object.keys(categories);
 
-    for (let key of keys) {
+    for (const key of keys) {
       const category = categories[key];
 
-      for (let record of category) {
+      for (const record of category) {
         const field = await this._dataProvider.getFieldByPropertyRecord(record);
         if (
           field !== undefined &&
