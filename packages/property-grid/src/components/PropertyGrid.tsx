@@ -182,7 +182,7 @@ export class PropertyGrid extends React.Component<
       propertyData.records.Favorite = [];
     }
     const favoritesCategoryName = await this.getFavoritesCategoryName(
-      propertyData.records
+      propertyData.records,
     );
     const dataFavs = propertyData.records[favoritesCategoryName];
 
@@ -228,19 +228,17 @@ export class PropertyGrid extends React.Component<
   }): Promise<string> {
     const keys = Object.keys(categories);
 
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
+    for (let key of keys) {
       const category = categories[key];
 
-      for (let j = 0; j < category.length; j++) {
-        const record = category[j];
+      for (let record of category) {
         const field = await this._dataProvider.getFieldByPropertyRecord(record);
         if (
           field !== undefined &&
           Presentation.favoriteProperties.has(
             field,
             this.props.projectId,
-            this.props.iModelConnection.iModelId
+            this.props.iModelConnection.iModelId,
           )
         ) {
           return key;
