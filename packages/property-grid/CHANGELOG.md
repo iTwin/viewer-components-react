@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Thu, 28 Jan 2021 22:45:16 GMT and should not be manually modified.
+This log was last generated on Thu, 04 Feb 2021 21:41:55 GMT and should not be manually modified.
+
+## 1.3.5
+Thu, 04 Feb 2021 21:41:55 GMT
+
+### Patches
+
+- update to property favoriting to work with nested props
 
 ## 1.3.4
 Thu, 28 Jan 2021 22:45:16 GMT
