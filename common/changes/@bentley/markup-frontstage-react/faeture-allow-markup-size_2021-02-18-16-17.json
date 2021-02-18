@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/markup-frontstage-react",
+      "comment": "Added thumbnailSize to allow users to provide desired thumbnail size, default is 350 if not provided\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/markup-frontstage-react",
+  "email": "52217155+archana-maharjan@users.noreply.github.com"
+}
