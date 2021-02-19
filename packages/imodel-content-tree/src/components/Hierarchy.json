@@ -290,6 +290,69 @@
     },
     {
       "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"GroupInformationElement\", \"BisCore\")",
+      "onlyIfNotHandled": true,
+      "specifications": [
+        {
+          "specType": "CustomNode",
+          "type": "T_CHILDREN",
+          "label": "Children",
+          "imageId": "icon-hierarchy-tree",
+          "hideIfNoChildren": true,
+          "nestedRules": [
+            {
+              "ruleType": "ChildNodes",
+              "specifications": [
+                {
+                  "specType": "RelatedInstanceNodes",
+                  "relationshipPaths": [
+                    {
+                      "relationship": {
+                        "schemaName": "BisCore",
+                        "className": "ElementOwnsChildElements"
+                      },
+                      "direction": "Forward"
+                    }
+                  ],
+                  "groupByClass": true,
+                  "groupByLabel": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "specType": "CustomNode",
+          "type": "T_GROUPED_MEMBERS",
+          "label": "Members",
+          "imageId": "icon-group",
+          "hideIfNoChildren": true,
+          "nestedRules": [
+            {
+              "ruleType": "ChildNodes",
+              "specifications": [
+                {
+                  "specType": "RelatedInstanceNodes",
+                  "relationshipPaths": [
+                    {
+                      "relationship": {
+                        "schemaName": "BisCore",
+                        "className": "ElementGroupsMembers"
+                      },
+                      "direction": "Forward"
+                    }
+                  ],
+                  "groupByClass": true,
+                  "groupByLabel": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
       "condition": "ParentNode.IsOfClass(\"Element\", \"BisCore\")",
       "onlyIfNotHandled": true,
       "specifications": [
