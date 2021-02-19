@@ -1,6 +1,13 @@
 # Change Log - @bentley/markup-frontstage-react
 
-This log was last generated on Fri, 11 Dec 2020 19:53:21 GMT and should not be manually modified.
+This log was last generated on Fri, 19 Feb 2021 15:47:25 GMT and should not be manually modified.
+
+## 2.0.1
+Fri, 19 Feb 2021 15:47:25 GMT
+
+### Patches
+
+- Added thumbnailSize to allow users to provide desired thumbnail size, default is 350 if not provided"
 
 ## 2.0.0
 Fri, 11 Dec 2020 19:53:21 GMT

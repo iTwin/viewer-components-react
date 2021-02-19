@@ -1,6 +1,6 @@
 {
   "name": "@bentley/imodel-content-tree-react",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "React tree component that shows iModel content",
   "keywords": [
     "Bentley",
