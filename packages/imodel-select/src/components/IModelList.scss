@@ -37,9 +37,9 @@ $imodel-select-cards-border-color: $buic-foreground-disabled;
     border: 1px solid #ccc;
     font-size: 18px;
     cursor: pointer;
-    -webkit-transition: color background-color.2s ease;
-    -moz-transition: color background-color.2s ease;
-    -o-transition: color background-color.2s ease;
+    -webkit-transition: color background-color .2s ease;
+    -moz-transition: color background-color .2s ease;
+    -o-transition: color background-color .2s ease;
     transition: color background-color 0.2s ease;
   }
 
