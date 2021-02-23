@@ -20,15 +20,16 @@ dependencies:
   '@testing-library/jest-dom': 4.2.4
   '@testing-library/react-hooks': 3.7.0
   '@types/chai': 4.2.14
+  '@types/chai-as-promised': 7.1.3
+  '@types/chai-jest-snapshot': 1.3.6
+  '@types/chai-spies': 1.0.3
   '@types/classnames': 2.2.11
-  '@types/enzyme': 3.9.3
+  '@types/faker': 4.1.12
   '@types/i18next': 8.4.6
-  '@types/mocha': 5.2.7
   '@types/node': 10.14.1
   '@types/react-autosuggest': 10.0.1
   '@types/react-redux': 7.1.15
   '@types/redux-mock-store': 1.0.2
-  '@types/sinon': 9.0.10
   '@types/sinon-chai': 3.2.5
   '@types/testing-library__react': 9.1.3
   babel-jest: 24.9.0
@@ -39,10 +40,12 @@ dependencies:
   chai-spies: 1.0.0_chai@4.2.0
   concurrently: 4.1.2
   cpx: 1.5.0
+  css-loader: 2.1.1
   enzyme: 3.11.0
   enzyme-adapter-react-16: 1.15.5_enzyme@3.11.0
   enzyme-to-json: 3.6.1_enzyme@3.11.0
   eslint: 6.8.0
+  faker: 4.1.0
   i18next: 10.6.0
   i18next-browser-languagedetector: 4.3.1
   identity-obj-proxy: 3.0.0
@@ -53,6 +56,7 @@ dependencies:
   jsdom-global: 3.0.2_jsdom@11.12.0
   lint-staged: 10.5.3
   mocha: 5.2.0
+  mock-local-storage: 1.1.17
   nodemon: 1.19.4
   nyc: 14.1.1
   raf: 3.4.1
@@ -62,14 +66,14 @@ dependencies:
   redux: 4.0.5
   redux-mock-store: 1.5.4
   rimraf: 3.0.2
-  sinon: 9.2.3
-  sinon-chai: 3.5.0_chai@4.2.0+sinon@9.2.3
+  sinon-chai: 3.5.0_chai@4.2.0
   source-map-support: 0.5.19
   svg-sprite-loader: 4.2.1
   ts-jest: 26.4.4_jest@26.1.0+typescript@3.7.5
   ts-node: 7.0.1
   ts-sinon: 2.0.1
   tslint: 5.20.1_typescript@3.7.5
+  typemoq: 2.1.0
   typescript: 3.7.5
   xmlhttprequest: 1.8.0
 lockfileVersion: 5.1
@@ -4405,6 +4409,21 @@ packages:
     dev: false
     resolution:
       integrity: sha512-MZPUxrmFubI36XS1DI3qmI0YdN1gks62JtFZvxR67ljjSNCeK6U08Zx4msEWOXuofgqUt6zPHSi1H9fbjR/NRA==
+  /@sinonjs/formatio/3.2.2:
+    dependencies:
+      '@sinonjs/commons': 1.8.1
+      '@sinonjs/samsam': 3.3.3
+    dev: false
+    resolution:
+      integrity: sha512-B8SEsgd8gArBLMD6zpRw3juQ2FVSsmdd7qlevyDqzS9WTCtvF55/gAL+h6gue8ZvPYcdiPdvueM/qm//9XzyTQ==
+  /@sinonjs/samsam/3.3.3:
+    dependencies:
+      '@sinonjs/commons': 1.8.1
+      array-from: 2.1.1
+      lodash: 4.17.20
+    dev: false
+    resolution:
+      integrity: sha512-bKCMKZvWIjYD0BLGnNrxVuw4dkWCYsLqFOUWw8VgKF/+5Y+mE7LfHWPIYoDXowH+3a9LsWDMo0uAP8YDosPvHQ==
   /@sinonjs/samsam/5.3.0:
     dependencies:
       '@sinonjs/commons': 1.8.1
@@ -4709,6 +4728,25 @@ packages:
     dev: false
     resolution:
       integrity: sha512-kSjgDMZONiIfSH1Nxcr5JIRMwUetDki63FSQfpTCz8ogF3Ulqm8+mr5f78dUYs6vMiB6gBusQqfQmBvHZj/lwg==
+  /@types/chai-as-promised/7.1.3:
+    dependencies:
+      '@types/chai': 4.2.14
+    dev: false
+    resolution:
+      integrity: sha512-FQnh1ohPXJELpKhzjuDkPLR2BZCAqed+a6xV4MI/T3XzHfd2FlarfUGUdZYgqYe8oxkYn0fchHEeHfHqdZ96sg==
+  /@types/chai-jest-snapshot/1.3.6:
+    dependencies:
+      '@types/chai': 4.2.14
+      '@types/mocha': 5.2.7
+    dev: false
+    resolution:
+      integrity: sha512-S/VXP6JKgoJVHafH4Z1FWyCXxaHVYNPj7EMYdW1go8hXVeQkmwY0mqyTCN/nL/Zu2tuRb9MkDaLqST7suVnbjw==
+  /@types/chai-spies/1.0.3:
+    dependencies:
+      '@types/chai': 4.2.14
+    dev: false
+    resolution:
+      integrity: sha512-RBZjhVuK7vrg4rWMt04UF5zHYwfHnpk5mIWu3nQvU3AKGDixXzSjZ6v0zke6pBcaJqMv3IBZ5ibLWPMRDL0sLw==
   /@types/chai/4.2.14:
     dev: false
     resolution:
@@ -4734,6 +4772,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-OCutwjDZ4aFS6PB1UZ988C4YgwlBHJd6wCeQqaLdmadZ/7e+w79+hbMUFC1QXDNCmdyoRfAFdm0RypzwR+Qpag==
+  /@types/faker/4.1.12:
+    dev: false
+    resolution:
+      integrity: sha512-0MEyzJrLLs1WaOCx9ULK6FzdCSj2EuxdSP9kvuxxdBEGujZYUOZ4vkPXdgu3dhyg/pOdn7VCatelYX7k0YShlA==
   /@types/glob/7.1.3:
     dependencies:
       '@types/minimatch': 3.0.3
@@ -4917,6 +4959,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-bKQqIpew7mmIGNRlxW6Zli/QVyc3zikpGzCa797B/tRnD9OtHvZ/ts8sYXV+Ilj9u3QRaUEM8xrjgd1gwm1BpQ==
+  /@types/sinon/7.5.2:
+    dev: false
+    resolution:
+      integrity: sha512-T+m89VdXj/eidZyejvmoP9jivXgBDdkOSBVQjU9kF349NEx10QdPNGxHeZUaj1IlJ32/ewdyXJjnJxyxJroYwg==
   /@types/sinon/9.0.10:
     dependencies:
       '@types/sinonjs__fake-timers': 6.0.2
@@ -5708,6 +5754,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-hNfzcOV8W4NdualtqBFPyVO+54DSJuZGY9qT4pRroB6S9e3iiido2ISIC5h9R2sPJ8H3FHCIiEnsv1lPXO3KtQ==
+  /array-from/2.1.1:
+    dev: false
+    resolution:
+      integrity: sha1-z+nYwmYoudxa7MYqn12PHzUsEZU=
   /array-includes/3.1.2:
     dependencies:
       call-bind: 1.0.0
@@ -7026,6 +7076,11 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Kkht5ye6ZGmwv40uUDZztayT2ThLQGfnj/T71N/XzeZeo3nf8foyW7zGTsPYkEya3m5f3cAypH+qe7YOrM1U2Q==
+  /circular-json/0.3.3:
+    deprecated: 'CircularJSON is in maintenance only, flatted is its successor.'
+    dev: false
+    resolution:
+      integrity: sha512-UZK3NBx2Mca+b5LsG7bY183pHWt5Y1xts4P3Pz7ENTwGVnJOUWbRb3ocjvX7hx9tq/yTAdclXm9sZ38gNuem4A==
   /cjs-module-lexer/0.6.0:
     dev: false
     resolution:
@@ -7518,6 +7573,11 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha512-v6zfIQqL/pzTVAbZvYUozsxNfxcFb6Ks3ZfEbuneJl3FW9Jb8F6vLWB6f+qTmAu72msUdyb84V8d/yBFf7FNnw==
+  /core-js/0.8.4:
+    deprecated: 'core-js@<3 is no longer maintained and not recommended for usage due to the number of issues. Please, upgrade your dependencies to the actual version of core-js@3.'
+    dev: false
+    resolution:
+      integrity: sha1-wiZl8eDRucPF4bCNq9HxCGleT88=
   /core-js/1.2.7:
     deprecated: 'core-js@<3 is no longer maintained and not recommended for usage due to the number of issues. Please, upgrade your dependencies to the actual version of core-js@3.'
     dev: false
@@ -7760,6 +7820,26 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-Z8hnfsZu4o/kt+AuFzeGpLVhFOGO9mluyHBaA2bA8aCGTwah5sT3WV/fTHH8UNZUytOIImuGPrl/prlb4oX4qQ==
+  /css-loader/2.1.1:
+    dependencies:
+      camelcase: 5.3.1
+      icss-utils: 4.1.1
+      loader-utils: 1.4.0
+      normalize-path: 3.0.0
+      postcss: 7.0.35
+      postcss-modules-extract-imports: 2.0.0
+      postcss-modules-local-by-default: 2.0.6
+      postcss-modules-scope: 2.2.0
+      postcss-modules-values: 2.0.0
+      postcss-value-parser: 3.3.1
+      schema-utils: 1.0.0
+    dev: false
+    engines:
+      node: '>= 6.9.0'
+    peerDependencies:
+      webpack: ^4.0.0
+    resolution:
+      integrity: sha512-OcKJU/lt232vl1P9EEDamhoO9iKY3tIjY5GU+XDLblAykTdgs6Ux9P1hTHve8nFKy5KPpOXOsVI/hIwi3841+w==
   /css-loader/3.4.2_webpack@4.42.0:
     dependencies:
       camelcase: 5.3.1
@@ -8436,6 +8516,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-n6kZFH/KlCrqs/1GHMOd5i2fd/beQHuehKdWvNNffbGHTr/almdhuVvTVFb3V7fglz+nC50fFusu3lY33h12pA==
+  /dom-walk/0.1.2:
+    dev: false
+    resolution:
+      integrity: sha512-6QvTW9mrGeIegrFXdtQi9pk7O/nSK6lSdXW2eqUspN5LWD7UTji2Fqw5V2YLjBpHEoU9Xl/eUWNpDeZvoyOv2w==
   /domain-browser/1.2.0:
     dev: false
     engines:
@@ -9537,6 +9621,10 @@ packages:
       '0': node >=0.6.0
     resolution:
       integrity: sha1-lpGEQOMEGnpBT4xS48V06zw+HgU=
+  /faker/4.1.0:
+    dev: false
+    resolution:
+      integrity: sha1-HkW7vsxndLPBlfrSg1EJxtdIzD8=
   /fast-deep-equal/2.0.1:
     dev: false
     resolution:
@@ -10293,6 +10381,13 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-awConJSVCHVGND6x3tmMaKcQvwXLhjdkmomy2W+Goaui8YPgYgXJZewhg3fWC+DlfqqQuWg8AwqjGTD2nAPVWg==
+  /global/4.4.0:
+    dependencies:
+      min-document: 2.19.0
+      process: 0.11.10
+    dev: false
+    resolution:
+      integrity: sha512-wv/LAoHdRE3BeTGz53FAamhGlPLhlssK45usmGFThIi4XqnBmjKQ16u+RNbP7WvigRZDxUsM0J3gcQ5yicaL0w==
   /globals/11.12.0:
     dev: false
     engines:
@@ -10885,6 +10980,10 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-2y91h5OpQlolefMPmUlivelittSWy0rP+oYVpn6A7GwVHNE8AWzoYOBNmlwks3LobaJxgHCYZAnyNo2GgpNRNQ==
+  /icss-replace-symbols/1.1.0:
+    dev: false
+    resolution:
+      integrity: sha1-Bupvg2ead0njhs/h/oEq5dsiPe0=
   /icss-utils/4.1.1:
     dependencies:
       postcss: 7.0.35
@@ -13395,6 +13494,16 @@ packages:
       node: '>= 0.6.0'
     resolution:
       integrity: sha512-Hesni4s5UkWkwCGJMQGAh71PaLUmKFM60dHvq0zi/vDhhrzuk+4GgNbTXJ12YYQJn6ZKBDNIjYcuQGKudvqrIw==
+  /lolex/4.2.0:
+    dev: false
+    resolution:
+      integrity: sha512-gKO5uExCXvSm6zbF562EvM+rd1kQDnB9AZBbiQVzf1ZmdDpxUSvpnAaVOP83N/31mRK8Ml8/VE8DMvsAZQ+7wg==
+  /lolex/5.1.2:
+    dependencies:
+      '@sinonjs/commons': 1.8.1
+    dev: false
+    resolution:
+      integrity: sha512-h4hmjAvHTmd+25JSwrtTIuwbKdwg5NzZVRMLn9saij4SZaepCrTCxPr35H/3bjwfMJtN+t3CX8672UIkglz28A==
   /loose-envify/1.4.0:
     dependencies:
       js-tokens: 4.0.0
@@ -13791,6 +13900,12 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-j5EctnkH7amfV/q5Hgmoal1g2QHFJRraOtmx0JpIqkxhBhI/lJSl1nMpQ45hVarwNETOoWEimndZ4QK0RHxuxQ==
+  /min-document/2.19.0:
+    dependencies:
+      dom-walk: 0.1.2
+    dev: false
+    resolution:
+      integrity: sha1-e9KC4/WELtKVu3SM3Z8f+iyCRoU=
   /min-indent/1.0.1:
     dev: false
     engines:
@@ -13981,6 +14096,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-2IUgKDhc3J7Uug+FxMXuqIyYzH7gJjXECKe/w43IGgQHTSj3InJi+yAA7T24L9bQMRKiUEHxEX37G5JpVUGLcQ==
+  /mock-local-storage/1.1.17:
+    dependencies:
+      core-js: 0.8.4
+      global: 4.4.0
+    dev: false
+    resolution:
+      integrity: sha512-vF5571cY3N/XFw8Oxr+0HmY6PedvO6i2IZrpnDV35sh7alhrh1RYYFZzItuh5OhJrQoulNSruiw1KHk5QB/EQg==
   /moo/0.5.1:
     dev: false
     resolution:
@@ -14090,6 +14212,16 @@ packages:
     dev: false
     resolution:
       integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
+  /nise/1.5.3:
+    dependencies:
+      '@sinonjs/formatio': 3.2.2
+      '@sinonjs/text-encoding': 0.7.1
+      just-extend: 4.1.1
+      lolex: 5.1.2
+      path-to-regexp: 1.8.0
+    dev: false
+    resolution:
+      integrity: sha512-Ymbac/94xeIrMf59REBPOv0thr+CJVFMhrlAkW/gjCIE58BGQdCj0x7KRCb3yz+Ga2Rz3E9XXSvUyyxqqhjQAQ==
   /nise/4.0.4:
     dependencies:
       '@sinonjs/commons': 1.8.1
@@ -15579,6 +15711,16 @@ packages:
       node: '>= 6'
     resolution:
       integrity: sha512-LaYLDNS4SG8Q5WAWqIJgdHPJrDDr/Lv775rMBFUbgjTz6j34lUznACHcdRWroPvXANP2Vj7yNK57vp9eFqzLWQ==
+  /postcss-modules-local-by-default/2.0.6:
+    dependencies:
+      postcss: 7.0.35
+      postcss-selector-parser: 6.0.4
+      postcss-value-parser: 3.3.1
+    dev: false
+    engines:
+      node: '>= 6'
+    resolution:
+      integrity: sha512-oLUV5YNkeIBa0yQl7EYnxMgy4N6noxmiwZStaEJUSe2xPMcdNc8WmBQuQCx18H5psYbVxz8zoHk0RAAYZXP9gA==
   /postcss-modules-local-by-default/3.0.3:
     dependencies:
       icss-utils: 4.1.1
@@ -15599,6 +15741,13 @@ packages:
       node: '>= 6'
     resolution:
       integrity: sha512-YyEgsTMRpNd+HmyC7H/mh3y+MeFWevy7V1evVhJWewmMbjDHIbZbOXICC2y+m1xI1UVfIT1HMW/O04Hxyu9oXQ==
+  /postcss-modules-values/2.0.0:
+    dependencies:
+      icss-replace-symbols: 1.1.0
+      postcss: 7.0.35
+    dev: false
+    resolution:
+      integrity: sha512-Ki7JZa7ff1N3EIMlPnGTZfUMe69FFwiQPnVSXC9mnn3jozCRBYIxiZd44yJOV2AmabOo4qFf8s0dC/+lweG7+w==
   /postcss-modules-values/3.0.0:
     dependencies:
       icss-utils: 4.1.1
@@ -15996,6 +16145,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-9MBtufZ7Yf0XxOJW5+PZUVv3Jv0=
+  /postinstall-build/5.0.3:
+    deprecated: postinstall-build's behavior is now built into npm! You should migrate off of postinstall-build and use the new `prepare` lifecycle script with npm 5.0.0 or greater.
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha512-vPvPe8TKgp4FLgY3+DfxCE5PIfoXBK2lyLfNCxsRbDsV6vS4oU5RG/IWxrblMn6heagbnMED3MemUQllQ2bQUg==
   /prelude-ls/1.1.2:
     dev: false
     engines:
@@ -17799,6 +17954,25 @@ packages:
     dev: false
     resolution:
       integrity: sha1-pNprY1/8zMoz9w0Xy5JZLeleVXo=
+  /sinon-chai/3.5.0_chai@4.2.0:
+    dependencies:
+      chai: 4.2.0
+    dev: false
+    peerDependencies:
+      chai: ^4.0.0
+      sinon: '>=4.0.0 <10.0.0'
+    resolution:
+      integrity: sha512-IifbusYiQBpUxxFJkR3wTU68xzBN0+bxCScEaKMjBvAQERg6FnTTc1F17rseLb1tjmkJ23730AXpFI0c47FgAg==
+  /sinon-chai/3.5.0_chai@4.2.0+sinon@7.5.0:
+    dependencies:
+      chai: 4.2.0
+      sinon: 7.5.0
+    dev: false
+    peerDependencies:
+      chai: ^4.0.0
+      sinon: '>=4.0.0 <10.0.0'
+    resolution:
+      integrity: sha512-IifbusYiQBpUxxFJkR3wTU68xzBN0+bxCScEaKMjBvAQERg6FnTTc1F17rseLb1tjmkJ23730AXpFI0c47FgAg==
   /sinon-chai/3.5.0_chai@4.2.0+sinon@9.2.3:
     dependencies:
       chai: 4.2.0
@@ -17809,6 +17983,18 @@ packages:
       sinon: '>=4.0.0 <10.0.0'
     resolution:
       integrity: sha512-IifbusYiQBpUxxFJkR3wTU68xzBN0+bxCScEaKMjBvAQERg6FnTTc1F17rseLb1tjmkJ23730AXpFI0c47FgAg==
+  /sinon/7.5.0:
+    dependencies:
+      '@sinonjs/commons': 1.8.1
+      '@sinonjs/formatio': 3.2.2
+      '@sinonjs/samsam': 3.3.3
+      diff: 3.5.0
+      lolex: 4.2.0
+      nise: 1.5.3
+      supports-color: 5.5.0
+    dev: false
+    resolution:
+      integrity: sha512-AoD0oJWerp0/rY9czP/D6hDTTUYGpObhZjMpd7Cl/A6+j0xBE+ayL/ldfggkBXUs0IkvIiM1ljM8+WkOc5k78Q==
   /sinon/9.2.3:
     dependencies:
       '@sinonjs/commons': 1.8.1
@@ -19332,6 +19518,17 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-YEa5i0/n0yYmLJISJ5+po6seYfJQJ5lQYcHCPF9ffTF92DB/TAZO/QrazX5skPHNPtmlIht5FdTXCM2kC7jQFQ==
+  /typemoq/2.1.0:
+    dependencies:
+      circular-json: 0.3.3
+      lodash: 4.17.20
+      postinstall-build: 5.0.3
+    dev: false
+    engines:
+      node: '>=6.0.0'
+    requiresBuild: true
+    resolution:
+      integrity: sha512-DtRNLb7x8yCTv/KHlwes+NI+aGb4Vl1iPC63Hhtcvk1DpxSAZzKWQv0RQFY0jX2Uqj0SDBNl8Na4e6MV6TNDgw==
   /typescript/3.7.5:
     dev: false
     engines:
@@ -20663,7 +20860,7 @@ packages:
       '@bentley/rbac-client': '*'
       '@bentley/telemetry-client': '*'
     resolution:
-      integrity: sha512-qs5q+vyRy0F9gFJ7DrmEqbqOjOy+Ktp4LKCDZkYN4DnsaYmhrkDLWgtQOdDFu+bjNl+nh0XF9jInBHrkIUE5sw==
+      integrity: sha512-PaKjORmCDdqBeKrdqqnOFokGH0i92lsSbzkIBUIK3Y49NdVJ5ldOCJUscWsCcAswH/EzQiaqYpX0tzVZTYqn8w==
       tarball: 'file:projects/imodel-content-tree-react.tgz'
     version: 0.0.0
   'file:projects/imodel-react-hooks.tgz_690d947aa75b0a0345bcee8c7f5c5af2':
@@ -20883,20 +21080,40 @@ packages:
       '@bentley/ui-framework': 2.10.1_0d0721649386989c034efee7f17b5085
       '@bentley/ui-ninezone': 2.10.1_20968c1eb8b87464ece3db3ce776500f
       '@bentley/webgl-compatibility': 2.10.1
+      '@types/chai': 4.2.14
+      '@types/chai-as-promised': 7.1.3
+      '@types/chai-jest-snapshot': 1.3.6
+      '@types/chai-spies': 1.0.3
       '@types/classnames': 2.2.11
+      '@types/enzyme': 3.9.3
+      '@types/faker': 4.1.12
       '@types/i18next': 8.4.6
+      '@types/mocha': 5.2.7
+      '@types/node': 10.14.1
       '@types/react': 16.9.56
       '@types/react-dom': 16.9.10
       '@types/react-redux': 7.1.15
+      '@types/sinon': 7.5.2
+      chai: 4.2.0
+      chai-as-promised: 7.1.1_chai@4.2.0
+      chai-jest-snapshot: 2.0.0_chai@4.2.0
+      chai-spies: 1.0.0_chai@4.2.0
       classnames: 2.2.6
       cpx: 1.5.0
+      css-loader: 2.1.1
+      faker: 4.1.0
       i18next: 10.6.0
+      mocha: 5.2.0
+      mock-local-storage: 1.1.17
       react: 16.14.0
       react-dom: 16.14.0_react@16.14.0
       react-redux: 7.2.2_bbabd8c34ea235719dc50e75b43f85a4
       redux: 4.0.5
       rimraf: 3.0.2
+      sinon: 7.5.0
+      sinon-chai: 3.5.0_chai@4.2.0+sinon@7.5.0
       tslint: 5.20.1_typescript@3.7.5
+      typemoq: 2.1.0
       typescript: 3.7.5
     dev: false
     id: 'file:projects/tree-widget-react.tgz'
@@ -20906,7 +21123,7 @@ packages:
       '@bentley/telemetry-client': '*'
       eslint: '*'
     resolution:
-      integrity: sha512-OvBLLaEGc1iBNlH6quumh8bwqF7yGJ1oyPM/713gwAZMisFJcUDDFw+6hyMl0mA+OFk1hOXNGPnjbZG1DUzQzw==
+      integrity: sha512-e33CTjcQAKU3Ga2YQV9kHhJmkhAT5Az4VhNcapRmQZT0VW+ADGekfa9Ei1dU3thQ6y5fVgby+1z1EaTnEE6OjQ==
       tarball: 'file:projects/tree-widget-react.tgz'
     version: 0.0.0
 registry: ''
@@ -20932,15 +21149,16 @@ specifiers:
   '@testing-library/jest-dom': ^4.2.4
   '@testing-library/react-hooks': ^3.2.1
   '@types/chai': ^4.1.4
+  '@types/chai-as-promised': ^7
+  '@types/chai-jest-snapshot': ^1.3.0
+  '@types/chai-spies': ^1.0.0
   '@types/classnames': ^2.2.3
-  '@types/enzyme': 3.9.3
+  '@types/faker': ^4.1.0
   '@types/i18next': ^8.4.2
-  '@types/mocha': ^5.2.5
   '@types/node': 10.14.1
   '@types/react-autosuggest': ^10.0.0
   '@types/react-redux': ^7.0.1
   '@types/redux-mock-store': ^1.0.2
-  '@types/sinon': ^9.0.0
   '@types/sinon-chai': ^3.2.0
   '@types/testing-library__react': ^9.1.3
   babel-jest: ^24.9.0
@@ -20951,10 +21169,12 @@ specifiers:
   chai-spies: 1.0.0
   concurrently: ^4.1.0
   cpx: ^1.5.0
+  css-loader: ^2.1.1
   enzyme: ^3.4.0
   enzyme-adapter-react-16: ^1.15.5
   enzyme-to-json: ^3.3.4
   eslint: ^6.8.0
+  faker: ^4.1.0
   i18next: ^10.2.2
   i18next-browser-languagedetector: ^4.0.2
   identity-obj-proxy: ^3.0.0
@@ -20965,6 +21185,7 @@ specifiers:
   jsdom-global: 3.0.2
   lint-staged: ^10.2.11
   mocha: ^5.2.0
+  mock-local-storage: ^1.1.8
   nodemon: ^1.19.1
   nyc: ^14.0.0
   raf: ^3.4.0
@@ -20974,7 +21195,6 @@ specifiers:
   redux: ^4.0.3
   redux-mock-store: ^1.5.4
   rimraf: ^3.0.2
-  sinon: ^9.0.2
   sinon-chai: ^3.2.0
   source-map-support: ^0.5.6
   svg-sprite-loader: 4.2.1
@@ -20982,5 +21202,6 @@ specifiers:
   ts-node: ^7.0.1
   ts-sinon: ^2.0.1
   tslint: ^5.11.0
+  typemoq: ^2.1.0
   typescript: ~3.7.4
   xmlhttprequest: ^1.8.0
