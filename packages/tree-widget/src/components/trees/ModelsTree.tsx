@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import React, { useEffect, useState } from "react";
 import {
   IModelApp,
@@ -124,7 +125,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     return null;
   }
 
-  const invert = () => {
+  const invert = async () => {
     if (availableModels.length === 0) return;
     const notViewedModels: string[] = [];
     const models: string[] = [];
@@ -132,7 +133,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
       if (viewport.viewsModel(id)) models.push(id);
       else notViewedModels.push(id);
     });
-    viewport.changeModelDisplay(notViewedModels, true);
+    await viewport.addViewedModels(notViewedModels);
     viewport.changeModelDisplay(models, false);
     viewport.invalidateScene();
   };
@@ -142,31 +143,31 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     viewport.invalidateScene();
   };
 
-  const showAll = () => {
-    viewport.changeModelDisplay(availableModels, true);
+  const showAll = async () => {
+    await viewport.addViewedModels(availableModels);
     viewport.invalidateScene();
   };
 
-  const viewToggle2D = () => {
+  const viewToggle2D = async () => {
     if (is2dToggleActive) {
       viewport.changeModelDisplay(available2dModels, false);
       setIs2dToggleActive(false);
       setIcon2dToggle("icon-visibility-hide-2");
     } else {
-      viewport.changeModelDisplay(available2dModels, true);
+      await viewport.addViewedModels(available2dModels);
       setIs2dToggleActive(true);
       setIcon2dToggle("icon-visibility");
     }
     viewport.invalidateScene();
   };
 
-  const viewToggle3D = () => {
+  const viewToggle3D = async () => {
     if (is3dToggleActive) {
       viewport.changeModelDisplay(available3dModels, false);
       setIs3dToggleActive(false);
       setIcon3dToggle("icon-visibility-hide-2");
     } else {
-      viewport.changeModelDisplay(available3dModels, true);
+      await viewport.addViewedModels(available3dModels);
       setIs3dToggleActive(true);
       setIcon3dToggle("icon-visibility");
     }
