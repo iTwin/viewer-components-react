@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Fixes for models tree not loading models when using show all, invert and other toggles",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "4107657+diegopinate@users.noreply.github.com"
+}
