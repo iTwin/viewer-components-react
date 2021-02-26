@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.2.6",
+      "tag": "@bentley/tree-widget-react_v1.2.6",
+      "date": "Fri, 26 Feb 2021 18:43:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixes for models tree not loading models when using show all, invert and other toggles"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.5",
       "tag": "@bentley/tree-widget-react_v1.2.5",
       "date": "Tue, 15 Dec 2020 13:51:37 GMT",

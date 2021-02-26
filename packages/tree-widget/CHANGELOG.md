@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Tue, 15 Dec 2020 13:51:37 GMT and should not be manually modified.
+This log was last generated on Fri, 26 Feb 2021 18:43:33 GMT and should not be manually modified.
+
+## 1.2.6
+Fri, 26 Feb 2021 18:43:33 GMT
+
+### Patches
+
+- Fixes for models tree not loading models when using show all, invert and other toggles
 
 ## 1.2.5
 Tue, 15 Dec 2020 13:51:37 GMT
