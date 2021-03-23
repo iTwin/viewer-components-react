@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Fri, 26 Feb 2021 18:43:33 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Mar 2021 16:17:57 GMT and should not be manually modified.
+
+## 1.2.7
+Tue, 23 Mar 2021 16:17:57 GMT
+
+### Patches
+
+- Change .component-selectable-content to block to display to fix resize flicker.
 
 ## 1.2.6
 Fri, 26 Feb 2021 18:43:33 GMT

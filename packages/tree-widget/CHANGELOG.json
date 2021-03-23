@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.2.7",
+      "tag": "@bentley/tree-widget-react_v1.2.7",
+      "date": "Tue, 23 Mar 2021 16:17:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Change .component-selectable-content to block to display to fix resize flicker."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.6",
       "tag": "@bentley/tree-widget-react_v1.2.6",
       "date": "Fri, 26 Feb 2021 18:43:33 GMT",
