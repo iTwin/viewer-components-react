@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.2.8",
+      "tag": "@bentley/tree-widget-react_v1.2.8",
+      "date": "Wed, 24 Mar 2021 21:09:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Avoid Nested ScrollBars in Tree View widget"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.7",
       "tag": "@bentley/tree-widget-react_v1.2.7",
       "date": "Tue, 23 Mar 2021 16:17:57 GMT",
