@@ -14,9 +14,9 @@
 
   .components-selectable-content {
     display: block;
-    flex-direction: column;
     height: 100%;
     width: 100%;
+    overflow: hidden;
   }
 
   .components-selectable-content-header {
