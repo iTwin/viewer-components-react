@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Avoid Nested ScrollBars in Tree View widget",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "65047615+bsteinbk@users.noreply.github.com"
+}
