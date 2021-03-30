@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-select-react",
+      "comment": "Move react and react-dom to peerDependencies",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/imodel-select-react",
+  "email": "6283674+kckst8@users.noreply.github.com"
+}
