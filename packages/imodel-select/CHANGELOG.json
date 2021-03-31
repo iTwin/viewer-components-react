@@ -2,6 +2,18 @@
   "name": "@bentley/imodel-select-react",
   "entries": [
     {
+      "version": "2.0.8",
+      "tag": "@bentley/imodel-select-react_v2.0.8",
+      "date": "Wed, 31 Mar 2021 12:42:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Move react and react-dom to peerDependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.7",
       "tag": "@bentley/imodel-select-react_v2.0.7",
       "date": "Tue, 23 Feb 2021 21:04:32 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @bentley/imodel-select-react
 
-This log was last generated on Tue, 23 Feb 2021 21:04:32 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Mar 2021 12:42:01 GMT and should not be manually modified.
+
+## 2.0.8
+Wed, 31 Mar 2021 12:42:01 GMT
+
+### Patches
+
+- Move react and react-dom to peerDependencies
 
 ## 2.0.7
 Tue, 23 Feb 2021 21:04:32 GMT
