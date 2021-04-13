@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-select-react",
+      "comment": "Prevent infinite spinner when getProjects fails.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/imodel-select-react",
+  "email": "10091419+GerardasB@users.noreply.github.com"
+}
