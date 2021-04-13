@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import * as React from "react";
 import classnames from "classnames";
 import { IModelApp } from "@bentley/imodeljs-frontend";
@@ -90,6 +91,13 @@ export class IModelSelector extends React.Component<IModelSelectorProps, IModelS
             })
           );
         if (projectInfos.length > 0) this._selectProject(projectInfos[0]);
+      })
+      .catch(() => {
+        if (!this._isMounted)
+          return;
+        this.setState({
+          isLoadingProjects: false,
+        });
       });
   }
 
