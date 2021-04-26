@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Thu, 04 Feb 2021 21:41:55 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Apr 2021 15:52:28 GMT and should not be manually modified.
+
+## 1.3.6
+Mon, 26 Apr 2021 15:52:28 GMT
+
+### Patches
+
+- Added property grid manager to multi element select for property group nesting flag.
 
 ## 1.3.5
 Thu, 04 Feb 2021 21:41:55 GMT
