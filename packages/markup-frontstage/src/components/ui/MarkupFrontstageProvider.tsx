@@ -95,6 +95,7 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
             viewState: this._viewState,
             iModelConnection: this._iModelConnection,
             rulesetId: this._rulesetId,
+            disableDefaultViewOverlay: true,
           },
         },
       ],
