@@ -1,6 +1,13 @@
 # Change Log - @bentley/markup-frontstage-react
 
-This log was last generated on Fri, 19 Feb 2021 15:47:25 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Apr 2021 22:03:19 GMT and should not be manually modified.
+
+## 2.0.2
+Tue, 27 Apr 2021 22:03:19 GMT
+
+### Patches
+
+- Hide the solar timeline for the markup frontstage.
 
 ## 2.0.1
 Fri, 19 Feb 2021 15:47:25 GMT
