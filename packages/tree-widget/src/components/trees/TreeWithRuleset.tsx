@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import * as React from "react";
 import { RegisteredRuleset, Ruleset } from "@bentley/presentation-common";
 import {
@@ -79,7 +80,7 @@ export abstract class TreeWithRuleset<
 export class SimpleTreeWithRuleset extends TreeWithRuleset<
   TreeProps,
   TreeState
-  > {
+> {
   constructor(props: TreeProps) {
     super(props);
     this.state = {
@@ -110,7 +111,7 @@ export class SimpleTreeWithRuleset extends TreeWithRuleset<
 export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (
   props: ControlledTreeProps
 ) => {
-  const nodeLoader = usePresentationTreeNodeLoader({
+  const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
     ruleset: props.rulesetId,
     preloadingEnabled: false,
