@@ -1,6 +1,13 @@
 # Change Log - @bentley/imodel-content-tree-react
 
-This log was last generated on Fri, 26 Feb 2021 18:43:33 GMT and should not be manually modified.
+This log was last generated on Thu, 13 May 2021 16:38:52 GMT and should not be manually modified.
+
+## 0.3.0
+Thu, 13 May 2021 16:38:52 GMT
+
+### Minor changes
+
+- update to imjs 2.15.2 to resolve breaking change to usePresentationTreeNodeLoader
 
 ## 0.2.0
 Fri, 26 Feb 2021 18:43:33 GMT

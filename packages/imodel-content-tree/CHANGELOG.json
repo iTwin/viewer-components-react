@@ -2,6 +2,18 @@
   "name": "@bentley/imodel-content-tree-react",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@bentley/imodel-content-tree-react_v0.3.0",
+      "date": "Thu, 13 May 2021 16:38:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "update to imjs 2.15.2 to resolve breaking change to usePresentationTreeNodeLoader"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@bentley/imodel-content-tree-react_v0.2.0",
       "date": "Fri, 26 Feb 2021 18:43:33 GMT",
