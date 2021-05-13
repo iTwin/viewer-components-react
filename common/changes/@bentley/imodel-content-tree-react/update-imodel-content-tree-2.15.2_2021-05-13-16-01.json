@@ -3,7 +3,7 @@
     {
       "packageName": "@bentley/imodel-content-tree-react",
       "comment": "update to imjs 2.15.2 to resolve breaking change to usePresentationTreeNodeLoader",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@bentley/imodel-content-tree-react",
