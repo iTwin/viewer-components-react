@@ -1,6 +1,34 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Fri, 11 Dec 2020 19:04:29 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Mar 2021 21:09:25 GMT and should not be manually modified.
+
+## 1.2.8
+Wed, 24 Mar 2021 21:09:25 GMT
+
+### Patches
+
+- Avoid Nested ScrollBars in Tree View widget
+
+## 1.2.7
+Tue, 23 Mar 2021 16:17:57 GMT
+
+### Patches
+
+- Change .component-selectable-content to block to display to fix resize flicker.
+
+## 1.2.6
+Fri, 26 Feb 2021 18:43:33 GMT
+
+### Patches
+
+- Fixes for models tree not loading models when using show all, invert and other toggles
+
+## 1.2.5
+Tue, 15 Dec 2020 13:51:37 GMT
+
+### Patches
+
+- Fix styling issues in search bar
 
 ## 1.2.4
 Wed, 09 Dec 2020 19:09:13 GMT

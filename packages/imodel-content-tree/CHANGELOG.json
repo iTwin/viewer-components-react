@@ -2,6 +2,41 @@
   "name": "@bentley/imodel-content-tree-react",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@bentley/imodel-content-tree-react_v0.2.0",
+      "date": "Fri, 26 Feb 2021 18:43:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Directly under non-geometric models node show only elements that have no parent"
+          },
+          {
+            "comment": "Group elements under non-geometric models by class"
+          },
+          {
+            "comment": "For every element node under non-geometric model load its child elements as child nodes"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@bentley/imodel-content-tree-react_v0.1.0",
+      "date": "Fri, 19 Feb 2021 15:47:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Load member elements for GroupInformationElement nodes"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Update imodeljs dependencies to ^2.7"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.0.4",
       "tag": "@bentley/imodel-content-tree-react_v0.0.4",
       "date": "Fri, 16 Oct 2020 19:19:15 GMT",

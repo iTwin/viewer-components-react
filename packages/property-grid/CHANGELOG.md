@@ -1,6 +1,42 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Fri, 11 Dec 2020 19:04:29 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Apr 2021 15:52:28 GMT and should not be manually modified.
+
+## 1.3.6
+Mon, 26 Apr 2021 15:52:28 GMT
+
+### Patches
+
+- Added property grid manager to multi element select for property group nesting flag.
+
+## 1.3.5
+Thu, 04 Feb 2021 21:41:55 GMT
+
+### Patches
+
+- update to property favoriting to work with nested props
+
+## 1.3.4
+Thu, 28 Jan 2021 22:45:16 GMT
+
+### Patches
+
+- added highlight color when hovering over property in grid
+
+## 1.3.3
+Mon, 11 Jan 2021 21:36:07 GMT
+
+### Patches
+
+- fixed duplicate scrollbars via CSS
+
+## 1.3.2
+Mon, 21 Dec 2020 16:29:36 GMT
+
+### Patches
+
+- update deps
+- drop min ver of core required to be 2.6.0
 
 ## 1.3.1
 Wed, 09 Dec 2020 19:09:13 GMT

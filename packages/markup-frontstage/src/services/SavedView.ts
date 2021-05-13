@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import {
   Code,
   ColorDef,
@@ -202,7 +203,6 @@ export const createSavedViewData = (vp: Viewport): SavedViewData => {
     extents: viewState.extents?.toJSON(),
     flags: viewState.viewFlags,
     isCameraOn: viewState.isCameraOn,
-    is2d: false,
     origin: viewState.origin?.toJSON(),
     rotation: viewState.rotation?.toJSON(),
   };

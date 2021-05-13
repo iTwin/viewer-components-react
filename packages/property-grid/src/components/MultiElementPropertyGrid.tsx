@@ -7,6 +7,7 @@ import "./MultiElementPropertyGrid.scss";
 import { Presentation } from "@bentley/presentation-frontend";
 
 import { PropertyGrid, PropertyGridProps } from "./PropertyGrid";
+import { PropertyGridManager } from "../PropertyGridManager";
 import * as React from "react";
 import { animated, Transition } from "react-spring/renderprops.cjs";
 import { ElementList } from "./ElementList";
@@ -144,6 +145,9 @@ export class MultiElementPropertyGrid extends React.Component<
       this.props.rulesetId,
       this.props.enableFavoriteProperties,
     );
+    if (PropertyGridManager.flags.enablePropertyGroupNesting) {
+      dataProvider.isNestedPropertyCategoryGroupingEnabled = true;
+    }
     // Set inspected instance as the key
     dataProvider.keys = new KeySet([instanceKey]);
     return (

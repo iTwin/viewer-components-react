@@ -1,6 +1,6 @@
 {
   "name": "@bentley/imodel-select-react",
-  "version": "2.0.6",
+  "version": "2.0.9",
   "description": "iModel Select React",
   "keywords": [
     "Bentley",
@@ -21,7 +21,7 @@
   "scripts": {
     "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
-    "clean": "rimraf lib build",
+    "clean": "rimraf lib build .rush/temp/package-deps*.json",
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "cover": "",
     "lint": "tslint -p . 1>&2",
@@ -31,8 +31,6 @@
   "dependencies": {
     "classnames": "^2.2.5",
     "i18next": "^10.2.2",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0",
     "react-redux": "^7.2.0",
     "redux": "^4.0.3"
   },
@@ -65,6 +63,8 @@
     "@types/react-dom": "^16.8.0",
     "@types/react-redux": "^7.0.1",
     "cpx": "^1.5.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
     "rimraf": "^3.0.2",
     "tslint": "^5.11.0",
     "typescript": "~3.7.4"
@@ -90,6 +90,8 @@
     "@bentley/ui-core": "^2.0.0",
     "@bentley/ui-framework": "^2.0.0",
     "@bentley/ui-ninezone": "^2.0.0",
-    "@bentley/webgl-compatibility": "^2.0.0"
+    "@bentley/webgl-compatibility": "^2.0.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
   }
 }

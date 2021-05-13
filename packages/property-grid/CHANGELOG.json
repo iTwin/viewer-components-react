@@ -2,6 +2,69 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "1.3.6",
+      "tag": "@bentley/property-grid-react_v1.3.6",
+      "date": "Mon, 26 Apr 2021 15:52:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added property grid manager to multi element select for property group nesting flag."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.5",
+      "tag": "@bentley/property-grid-react_v1.3.5",
+      "date": "Thu, 04 Feb 2021 21:41:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "update to property favoriting to work with nested props"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.4",
+      "tag": "@bentley/property-grid-react_v1.3.4",
+      "date": "Thu, 28 Jan 2021 22:45:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "added highlight color when hovering over property in grid"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.3",
+      "tag": "@bentley/property-grid-react_v1.3.3",
+      "date": "Mon, 11 Jan 2021 21:36:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fixed duplicate scrollbars via CSS"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.2",
+      "tag": "@bentley/property-grid-react_v1.3.2",
+      "date": "Mon, 21 Dec 2020 16:29:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "update deps"
+          },
+          {
+            "comment": "drop min ver of core required to be 2.6.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.1",
       "tag": "@bentley/property-grid-react_v1.3.1",
       "date": "Wed, 09 Dec 2020 19:09:13 GMT",

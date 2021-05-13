@@ -2,6 +2,42 @@
   "name": "@bentley/imodel-select-react",
   "entries": [
     {
+      "version": "2.0.9",
+      "tag": "@bentley/imodel-select-react_v2.0.9",
+      "date": "Mon, 26 Apr 2021 10:38:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Prevent infinite spinner when getProjects fails."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.8",
+      "tag": "@bentley/imodel-select-react_v2.0.8",
+      "date": "Wed, 31 Mar 2021 12:42:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Move react and react-dom to peerDependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.7",
+      "tag": "@bentley/imodel-select-react_v2.0.7",
+      "date": "Tue, 23 Feb 2021 21:04:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix IModelList.scss compatibility with Dart Sass"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.6",
       "tag": "@bentley/imodel-select-react_v2.0.6",
       "date": "Tue, 25 Aug 2020 16:57:36 GMT",

@@ -2,6 +2,54 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.2.8",
+      "tag": "@bentley/tree-widget-react_v1.2.8",
+      "date": "Wed, 24 Mar 2021 21:09:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Avoid Nested ScrollBars in Tree View widget"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.7",
+      "tag": "@bentley/tree-widget-react_v1.2.7",
+      "date": "Tue, 23 Mar 2021 16:17:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Change .component-selectable-content to block to display to fix resize flicker."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.6",
+      "tag": "@bentley/tree-widget-react_v1.2.6",
+      "date": "Fri, 26 Feb 2021 18:43:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixes for models tree not loading models when using show all, invert and other toggles"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.5",
+      "tag": "@bentley/tree-widget-react_v1.2.5",
+      "date": "Tue, 15 Dec 2020 13:51:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix styling issues in search bar"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.4",
       "tag": "@bentley/tree-widget-react_v1.2.4",
       "date": "Wed, 09 Dec 2020 19:09:13 GMT",

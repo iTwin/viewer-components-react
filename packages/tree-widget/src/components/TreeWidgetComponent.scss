@@ -13,10 +13,10 @@
   flex-direction: column;
 
   .components-selectable-content {
-    display: flex;
-    flex-direction: column;
+    display: block;
     height: 100%;
     width: 100%;
+    overflow: hidden;
   }
 
   .components-selectable-content-header {

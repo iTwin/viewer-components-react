@@ -1,6 +1,27 @@
 # Change Log - @bentley/imodel-select-react
 
-This log was last generated on Fri, 11 Dec 2020 19:04:29 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Apr 2021 10:38:57 GMT and should not be manually modified.
+
+## 2.0.9
+Mon, 26 Apr 2021 10:38:57 GMT
+
+### Patches
+
+- Prevent infinite spinner when getProjects fails.
+
+## 2.0.8
+Wed, 31 Mar 2021 12:42:01 GMT
+
+### Patches
+
+- Move react and react-dom to peerDependencies
+
+## 2.0.7
+Tue, 23 Feb 2021 21:04:32 GMT
+
+### Patches
+
+- Fix IModelList.scss compatibility with Dart Sass
 
 ## 2.0.6
 Tue, 25 Aug 2020 16:57:36 GMT

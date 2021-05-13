@@ -6,6 +6,14 @@
 @import "~@bentley/ui-core/lib/ui-core/style/index";
 @import "~@bentley/ui-core/lib/ui-core/text/index";
 
+.pcomponents-property-grid-with-unified-selection {
+  overflow: hidden !important;
+}
+
+.virtualized-grid-node-content > .components--hoverable:hover {
+  background: $buic-row-hover !important;
+}
+
 .property-grid-react-panel-label-and-class {
   display: block;
 }

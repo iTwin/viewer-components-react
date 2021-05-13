@@ -48,14 +48,15 @@ import { createViewStateProps } from "../../util/MarkupViewStateAdapter";
 export class MarkupFrontstageProvider extends FrontstageProvider {
   private readonly _contentGroup: ContentGroup;
   private readonly _rulesetId = "Default";
-  private _markupLayout: ContentLayoutDef;
-  private _isMarkupActive = false;
-  private _viewState: ViewState | undefined;
+  private _emphasizedElementsProps?: EmphasizeElementsProps;
   private _iModelConnection: IModelConnection;
   private _isEditable: boolean;
+  private _isMarkupActive = false;
+  private _markupLayout: ContentLayoutDef;
   private _svg?: string;
   private _viewElements?: ViewElementDictionary;
-  private _emphasizedElementsProps?: EmphasizeElementsProps;
+  private _viewState: ViewState | undefined;
+  private _thumbnailSize: number;
 
   constructor(
     viewState: ViewState | undefined,
@@ -64,7 +65,8 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
     contentControlClassId: string | ConfigurableUiControlConstructor,
     svg?: string,
     viewElements?: ViewElementDictionary,
-    emphasizedElementsProps?: EmphasizeElementsProps
+    emphasizedElementsProps?: EmphasizeElementsProps,
+    thumbnailSize?: number
   ) {
     super();
 
@@ -75,6 +77,8 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
     this._svg = svg;
     this._viewElements = viewElements;
     this._emphasizedElementsProps = emphasizedElementsProps;
+    // this width is set for a thumbnail. If full size is needed, this should be updated.
+    this._thumbnailSize = thumbnailSize ?? 350;
 
     this._markupLayout = new ContentLayoutDef({
       descriptionKey: MarkupFrontstage.translate("contentLayoutDefDescription"),
@@ -91,6 +95,7 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
             viewState: this._viewState,
             iModelConnection: this._iModelConnection,
             rulesetId: this._rulesetId,
+            disableDefaultViewOverlay: true,
           },
         },
       ],
@@ -197,11 +202,13 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
           : this._emphasizedElementsProps
           ? JSON.stringify(this._emphasizedElementsProps)
           : undefined;
-        this.onAddMarkupEvent.raiseEvent({
-          savedView,
-          thumbImage: markupData.image,
-          markupViewStateProps,
-        });
+        if (markupData.image) {
+          this.onAddMarkupEvent.raiseEvent({
+            savedView,
+            thumbImage: markupData.image,
+            markupViewStateProps,
+          });
+        }
       }
     } catch (error) {
       throw new UiError(
@@ -259,8 +266,7 @@ export class MarkupFrontstageProvider extends FrontstageProvider {
       if (this._emphasizedElementsProps) {
         this._createEmphasizedElements(this._emphasizedElementsProps, view);
       }
-      // this width is set for a thumbnail. If full size is needed, this should be updated.
-      MarkupApp.props.result.maxWidth = 350;
+      MarkupApp.props.result.maxWidth = this._thumbnailSize;
       await MarkupApp.start(view, markupData);
 
       if (markupData) {
