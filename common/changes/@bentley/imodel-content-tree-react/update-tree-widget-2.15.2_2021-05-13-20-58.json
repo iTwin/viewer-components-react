@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-content-tree-react",
+      "comment": "induce version bump",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/imodel-content-tree-react",
+  "email": "25822334+jason-crow@users.noreply.github.com"
+}
