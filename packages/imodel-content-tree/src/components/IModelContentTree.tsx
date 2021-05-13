@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import "./IModelContentTree.scss";
 import classNames from "classnames";
 import * as React from "react";
@@ -21,7 +22,7 @@ export interface IModelContentTreeProps extends Omit<React.AllHTMLAttributes<HTM
  */
 export function IModelContentTree(props: IModelContentTreeProps) {
   const { iModel, className, ...divProps } = props;
-  const nodeLoader = usePresentationTreeNodeLoader({
+  const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: iModel,
     ruleset: RULESET_TREE_HIERARCHY as Ruleset,
     pagingSize: 20,
