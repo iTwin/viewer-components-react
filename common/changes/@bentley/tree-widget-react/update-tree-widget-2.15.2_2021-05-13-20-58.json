@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "update imjs to 2.15.2 to resolve breaking change in usePResentationTreeNodeLoader",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "25822334+jason-crow@users.noreply.github.com"
+}
