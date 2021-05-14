@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.3.0",
+      "tag": "@bentley/tree-widget-react_v1.3.0",
+      "date": "Thu, 13 May 2021 21:15:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "update imjs to 2.15.2 to resolve breaking change in usePResentationTreeNodeLoader"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.8",
       "tag": "@bentley/tree-widget-react_v1.2.8",
       "date": "Wed, 24 Mar 2021 21:09:25 GMT",
