@@ -3,9 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { ViewState, Viewport, SpatialViewState, DrawingViewState, IModelApp, ScreenViewport, SheetViewState } from "@bentley/imodeljs-frontend";
-import { MeasurementViewTargetProps } from "./MeasurementProps";
+import { DrawingViewState, IModelApp, ScreenViewport, SheetViewState, SpatialViewState, Viewport, ViewState } from "@bentley/imodeljs-frontend";
 import { WellKnownViewType } from "./MeasurementEnums";
+import { MeasurementViewTargetProps } from "./MeasurementProps";
 
 /** Base class for view type classifiers. This returns either a well-known type or an app-defined one that measurements use identify what viewports they are compatible with (e.g. to draw in). */
 export abstract class MeasurementViewTypeClassifier {
@@ -50,7 +50,7 @@ export class ClassNameMeasurementViewTypeClassifier extends MeasurementViewTypeC
   public readonly className: string;
 
   /**
-   * Constructos a new ClassNameMeasurementViewClassifier
+   * Constructs a new ClassNameMeasurementViewClassifier
    * @param typeName Name of the view that is used to identify it.
    * @param isSpatial If the view type is within the AnySpatial hierarchy.
    * @param isDrawing If the view type is within the AnyDrawing hierarchy.

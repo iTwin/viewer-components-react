@@ -36,7 +36,7 @@ module.exports = {
       },
       {
         test: /\.(css|scss)$/,
-        use: ["null-loader"]
+        use: "null-loader"
       },
       {
         test: /\.(png|woff|woff2|eot|ttf|svg)$/,
