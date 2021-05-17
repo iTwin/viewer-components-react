@@ -1,6 +1,6 @@
 {
   "name": "@bentley/measure-tools-react",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "description": "Frontend framework and tools for measurements",
   "main": "lib/measure-tools.js",
