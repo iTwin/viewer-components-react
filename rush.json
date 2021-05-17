@@ -52,7 +52,7 @@
       "versionPolicyName": "geo-tools"
     },
     {
-      "packageName": "@bentley/measure-tools",
+      "packageName": "@bentley/measure-tools-react",
       "projectFolder": "packages/measure-tools",
       "versionPolicyName": "measure-tools"
     }
