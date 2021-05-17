@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Wed, 24 Mar 2021 21:09:25 GMT and should not be manually modified.
+This log was last generated on Thu, 13 May 2021 21:15:14 GMT and should not be manually modified.
+
+## 1.3.0
+Thu, 13 May 2021 21:15:14 GMT
+
+### Minor changes
+
+- update imjs to 2.15.2 to resolve breaking change in usePResentationTreeNodeLoader
 
 ## 1.2.8
 Wed, 24 Mar 2021 21:09:25 GMT
