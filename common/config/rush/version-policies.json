@@ -33,5 +33,10 @@
     "policyName": "geo-tools",
     "definitionName": "individualVersion",
     "lockedMajor": 0
+  },
+  {
+    "policyName": "measure-tools",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   }
 ]
