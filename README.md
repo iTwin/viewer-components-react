@@ -17,6 +17,7 @@ List of packages within this repository:
 | @bentley/imodel-content-tree-react | [packages/imodel-content-tree](./packages/imodel-content-tree) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-content-tree-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-content-tree-react) |
 | @bentley/imodel-react-hooks | [packages/imodel-react-hooks](./packages/imodel-react-hooks) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-react-hooks.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-react-hooks) |
 | @bentley/geo-tools-react | [packages/geo-tools](./packages/geo-tools) | [![npm version](https://badge.fury.io/js/%40bentley%2Fgeo-tools-react.svg)](https://badge.fury.io/js/%40bentley%2Fgeo-tools-react) |
+| @bentley/measure-tools-react | [packages/measure-tools](./packages/measure-tools) | [![npm version](https://badge.fury.io/js/%40bentley%2Fmeasure-tools-react.svg)](https://badge.fury.io/js/%40bentley%2Fmeasure-tools-react) |
 
 ## Adding a new "project"
 
