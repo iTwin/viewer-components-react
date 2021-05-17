@@ -1,9 +1,10 @@
-# Getting Started
+# @bentley/measure-tools-react
 
-If you are a new developer to the measure-tools library, this quickstart guide will get your application up and running with our measurement tools. This library is a Frontend-only package and is intended to work with any sort of application iModel.js supports (SPA web app or desktop electron app), so the integration should be relatively painless
-as you won't have to worry about custom backends.
+Copyright © Bentley Systems, Incorporated. All rights reserved.
 
-Every iModel.js application has initialization code where they must call ```IModelApp.startup()```. The library has a similar initialization entrypoint that must be called to configure localization and register tools.
+The measure-tools-react package provides measurement tools and React components to access within an iTwin Viewer.
+
+Every iModel.js application has initialization code where they must call ```IModelApp.startup()```. This library has a similar initialization entrypoint that must be called to configure localization and register tools.
 Call the  ```MeasureTools.startup() ``` **AFTER** the IModelApp one.
 
 ```typescript
@@ -14,6 +15,26 @@ Call the  ```MeasureTools.startup() ``` **AFTER** the IModelApp one.
 After that, most of your code changes will be setting up your frontstage to consume the default measurement tools (such as measure distance, polygon, location, etc).
 
 **Note:** Startup can be called any number of times but will only startup once. Some other libraries that use measure-tools may have already initialized it for you!
+
+# What to add in your iTwin-Viewer based app (UI 2.0)
+
+With a few short lines, you can add the measurement tools and widgets to your app. The iTwin Viewer accepts a callback, which you can use to initialize the MeasureTools. Afterwards, all you need to do is pass in the MeasureToolsUiItemsProvider to the list of UiProviders for your viewer to register. This will add both the toolbar with all the measure tools and the measurement property widget to your app for you.
+
+```typescript
+  const handleOnIModelAppInit = async () => {
+    await MeasureTools.startup();
+  };
+
+  return (
+    <Viewer
+      ...
+      onIModelAppInit={handleOnIModelAppInit}
+      uiProviders={[
+        new MeasureToolsUiItemsProvider(),
+      ]}
+    />
+  );
+```
 
 # What to add in your frontstage (UI 1.0)
 
@@ -40,7 +61,7 @@ const verticalToolbar =
 
 ### Measurement Property Widget
 
-Most applications will have a proprty grid widget in the lower right corner of the 9-zone UI. Our measurements do not display properties in the element property grid, instead there is a separate widget that will
+Most applications will have a property grid widget in the lower right corner of the 9-zone UI. Our measurements do not display properties in the element property grid, instead there is a separate widget that will
 display properties of any selected measurements. It normally is added as a separate tab to the same zone as the property grid. Below is example code from the 9-zone sample application with the measurement widget defined.
 
 In this code, the measurement widget is hidden until a measurement has been selected. With this code you can have measurements and elements selected and have two tabs to switch between properties of either.
@@ -51,7 +72,7 @@ bottomRight={
     widgets={[
 
         <Widget id="Properties" control={PropertyGridWidget} defaultState={WidgetState.Closed} fillZone={true}
-        iconSpec="icon-properties-list" labelKey="ConceptStation:components.properties"
+        iconSpec="icon-properties-list" labelKey="MyApp:components.properties"
         applicationData={{
             iModelConnection: UiFramework.getIModelConnection(),
             rulesetId: this._rulesetId,
@@ -139,23 +160,3 @@ An application can further customize UI event behavior by registering override h
 
 A concrete example of this customization is an application that has measurements organized into multiple groups. One group may be "frozen" due to some application state (state that the measure-tools library may be unaware of) and should not be cleared by the clear measurements tool.
 So the application would register a custom UI event handler that would cause those measurements to be ignored when the clear measurement tool is invoked.
-
-# What to add in your iTwin-Viewer based app (UI 2.0)
-
-```typescript
-  const handleOnIModelAppInit = async () => {
-    await MeasureTools.startup();
-  };
-
-  return (
-    <Viewer
-      ...
-      onIModelAppInit={handleOnIModelAppInit}
-      uiProviders={[
-        new MeasureToolsUiItemsProvider(),
-      ]}
-    />
-  );
-```
-
-With a few short lines, you can add the measurement tools toolbar to your app. The iTwin Viewer accepts a callback, which you can use to initialize the MeasureTools. Afterwards all you need to do is pass in the MeasureToolsUiItemsProvider to the list of UiProviders for your viewer to register. This will add both the toolbar with all the measure tools and the measurement property widget to your app for you.

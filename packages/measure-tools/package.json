@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "license": "MIT",
   "description": "Frontend framework and tools for measurements",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/measure-tools"
+  },
   "main": "lib/measure-tools.js",
   "typings": "lib/measure-tools",
   "scripts": {
