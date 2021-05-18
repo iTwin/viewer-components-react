@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { IModelApp } from "@bentley/imodeljs-frontend";
 import { MeasureDistanceTool } from "./tools/MeasureDistanceTool";
 import { MeasureAreaTool } from "./tools/MeasureAreaTool";

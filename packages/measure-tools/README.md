@@ -4,21 +4,21 @@ Copyright © Bentley Systems, Incorporated. All rights reserved.
 
 The measure-tools-react package provides measurement tools and React components to access within an iTwin Viewer.
 
-Every iModel.js application has initialization code where they must call ```IModelApp.startup()```. This library has a similar initialization entrypoint that must be called to configure localization and register tools.
+Every iTwin.js application has initialization code where they must call ```IModelApp.startup()```. This library has a similar initialization entrypoint that must be called to configure localization and register tools.
 Call the  ```MeasureTools.startup() ``` **AFTER** the IModelApp one.
 
 ```typescript
     await IModelApp.startup(opts);
-    await MeasureTools.startup();
+    await MeasureTools.startup(opts);
 ```
 
-After that, most of your code changes will be setting up your frontstage to consume the default measurement tools (such as measure distance, polygon, location, etc).
+After that, most of your code changes will be to consume the default measurement tools (such as measure distance, polygon, location, etc).
 
 **Note:** Startup can be called any number of times but will only startup once. Some other libraries that use measure-tools may have already initialized it for you!
 
-# What to add in your iTwin-Viewer based app (UI 2.0)
+## What to add in your iTwin-Viewer based app (iTwin App UI)
 
-With a few short lines, you can add the measurement tools and widgets to your app. The iTwin Viewer accepts a callback, which you can use to initialize the MeasureTools. Afterwards, all you need to do is pass in the MeasureToolsUiItemsProvider to the list of UiProviders for your viewer to register. This will add both the toolbar with all the measure tools and the measurement property widget to your app for you.
+With a few short lines, you can add the measurement tools and widgets to your app. The iTwin Viewer accepts a callback, `onIModelAppInit`, which you can use to initialize the MeasureTools. Afterwards, all you need to do is pass in the `MeasureToolsUiItemsProvider` to the list of UiProviders for your viewer to register. This will add both the toolbar with all the measure tools and the measurement property widget to your app for you.
 
 ```typescript
   const handleOnIModelAppInit = async () => {
@@ -36,11 +36,13 @@ With a few short lines, you can add the measurement tools and widgets to your ap
   );
 ```
 
-# What to add in your frontstage (UI 1.0)
+## What to add in your frontstage
+
+If you are not using the iTwin-Viewer or iTwin App UI, you can add the measurement tools and measurement property widget to your frontstage like so:
 
 ### Tools
 
-Similar to  ```CoreTools``` in iModel.js, measure-tools has a collection of item definitions organized under the ```MeasureToolDefinitions``` singleton. The application can arrange or group the default tool buttons any way it wants.
+Similar to  ```CoreTools``` in iTwin.js, measure-tools has a collection of item definitions organized under the ```MeasureToolDefinitions``` singleton. The application can arrange or group the default tool buttons any way it wants.
 Below is an example of creating a vertical toolbar filled with the default measurement tools.
 
  ```typescript
