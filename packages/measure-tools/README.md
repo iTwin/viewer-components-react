@@ -36,79 +36,6 @@ With a few short lines, you can add the measurement tools and widgets to your ap
   );
 ```
 
-## What to add in your frontstage
-
-If you are not using the iTwin-Viewer or iTwin App UI, you can add the measurement tools and measurement property widget to your frontstage like so:
-
-### Tools
-
-Similar to `CoreTools` in iTwin.js, measure-tools has a collection of item definitions organized under the `MeasureToolDefinitions` singleton. The application can arrange or group the default tool buttons any way it wants.
-Below is an example of creating a vertical toolbar filled with the default measurement tools.
-
-```typescript
-const verticalToolbar = (
-  <Toolbar
-    expandsTo={Direction.Right}
-    items={
-      <>
-        <ActionItemButton
-          actionItem={MeasureToolDefinitions.measureDistanceToolCommand}
-        />
-        <ActionItemButton
-          actionItem={MeasureToolDefinitions.measureAreaToolCommand}
-        />
-        <ActionItemButton
-          actionItem={MeasureToolDefinitions.measureLocationToolCommand}
-        />
-        <ActionItemButton
-          actionItem={MeasureToolDefinitions.measureRadiusToolCommand}
-        />
-        <ActionItemButton
-          actionItem={MeasureToolDefinitions.measureAngleToolCommand}
-        />
-      </>
-    }
-  />
-);
-```
-
-### Measurement Property Widget
-
-Most applications will have a property grid widget in the lower right corner of the 9-zone UI. Our measurements do not display properties in the element property grid, instead there is a separate widget that will
-display properties of any selected measurements. It normally is added as a separate tab to the same zone as the property grid. Below is example code from the 9-zone sample application with the measurement widget defined.
-
-In this code, the measurement widget is hidden until a measurement has been selected. With this code you can have measurements and elements selected and have two tabs to switch between properties of either.
-
-```typescript
-bottomRight={
-   <Zone defaultState={ZoneState.Open} allowsMerging={true}
-   widgets={[
-
-       <Widget id="Properties" control={PropertyGridWidget} defaultState={WidgetState.Closed} fillZone={true}
-       iconSpec="icon-properties-list" labelKey="MyApp:components.properties"
-       applicationData={{
-           iModelConnection: UiFramework.getIModelConnection(),
-           rulesetId: this._rulesetId,
-       }}
-       syncEventIds={[SyncUiEventId.SelectionSetChanged]}
-       stateFunc={PropertyGridWidget.generateWidgetStateFuncWithMemory()}
-       />,
-
-       <Widget id="Measurements" control={MeasurementWidget} defaultState={WidgetState.Hidden} fillZone={true}
-       iconSpec="icon-measure" labelKey="TestMeasurementApp:components.measurements"
-       applicationData={{
-           iModelConnection: UiFramework.getIModelConnection(),
-       }}
-       syncEventIds={[MeasurementSyncUiEventId.MeasurementSelectionSetChanged]}
-       stateFunc={MeasurementWidget.generateWidgetStateFuncWithMemory()}
-       />,
-   ]}
-   />
-}
-```
-
-![Measurement Widget](./docs/images/MTDocs-Widget.gif)
-
 # Advanced Topics
 
 ## Action Toolbar
@@ -131,7 +58,7 @@ Below is an example to enable the toolbar with a default action provider. Action
 MeasurementActionToolbar.setDefaultActionProvider();
 ```
 
-![Measurement Action Toolbar](./docs/images/MTDocs-ActionToolbar.gif)
+![Measurement Action Toolbar](https://github.com/imodeljs/viewer-components-react/tree/master/packages/measure-tools/docs/images/MTDocs-ActionToolbar.gif?raw=true)
 
 Below is an example of registering a custom action, it toggles the display style of a measurement so that it renders semi-transparently like if it were "ghosted".
 
@@ -167,7 +94,7 @@ MeasurementActionToolbar.addActionProvider(
 );
 ```
 
-![Measurement Action Toolbar](./docs/images/MTDocs-ActionToolbar_CustomAction.gif)
+![Measurement Action Toolbar](https://github.com/imodeljs/viewer-components-react/tree/master/packages/measure-tools/docs/images/MTDocs-ActionToolbar_CustomAction.gif?raw=true)
 
 ## Measurement UI Events
 
