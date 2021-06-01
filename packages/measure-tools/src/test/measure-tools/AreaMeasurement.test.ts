@@ -3,12 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
-import { assert } from "chai";
-import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/AreaMeasurement";
-import { WellKnownViewType } from "../../api/MeasurementEnums";
-import { Measurement, MeasurementPickContext } from "../../api/Measurement";
 import { Point3d } from "@bentley/geometry-core";
+import { assert } from "chai";
+import { Measurement, MeasurementPickContext } from "../../api/Measurement";
+import { WellKnownViewType } from "../../api/MeasurementEnums";
+import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/AreaMeasurement";
 import { MeasureAreaToolModel } from "../../toolmodels/MeasureAreaToolModel";
 
 describe("AreaMeasurement tests", () => {

@@ -3,13 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { assert } from "chai";
-import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
+import { Measurement } from "../../api/Measurement";
 import { MeasurementManager } from "../../api/MeasurementManager";
 import { MeasurementUIEvents } from "../../api/MeasurementUIEvents";
 import { AreaMeasurement } from "../../measurements/AreaMeasurement";
-import { Measurement } from "../../api/Measurement";
+import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
 
 describe("MeasurementUIEvents tests", () => {
   it("Test isToggleMeasurementAxesButtonVisible", () => {

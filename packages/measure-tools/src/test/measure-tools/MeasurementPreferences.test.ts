@@ -3,11 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { assert } from "chai";
-import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
-import { MeasurementPreferences } from "../../api/MeasurementPreferences";
 import { MeasurementManager } from "../../api/MeasurementManager";
+import { MeasurementPreferences } from "../../api/MeasurementPreferences";
+import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
 
 describe("MeasurementPreferences tests", () => {
   it("Test showAxes", () => {

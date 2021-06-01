@@ -3,10 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { assert } from "chai";
-import { MeasurementViewTarget } from "../../api/MeasurementViewTarget";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
+import { MeasurementViewTarget } from "../../api/MeasurementViewTarget";
 
 describe("MeasurementViewTarget tests", () => {
   it("Test add/remove", () => {

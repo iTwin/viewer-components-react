@@ -3,14 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { assert } from "chai";
+import { Measurement } from "../../api/Measurement";
+import { WellKnownMeasurementStyle, WellKnownViewType } from "../../api/MeasurementEnums";
+import { MeasurementManager } from "../../api/MeasurementManager";
+import { MeasurementPreferences } from "../../api/MeasurementPreferences";
 import { DistanceMeasurement, DistanceMeasurementProps } from "../../measurements/DistanceMeasurement";
 import { DistanceMeasurementSubClass } from "./MeasurementSerialization.test";
-import { WellKnownViewType, WellKnownMeasurementStyle } from "../../api/MeasurementEnums";
-import { MeasurementManager } from "../../api/MeasurementManager";
-import { Measurement } from "../../api/Measurement";
-import { MeasurementPreferences } from "../../api/MeasurementPreferences";
 
 describe("Measurement tests", () => {
   it("Test equality, type mismatch", () => {

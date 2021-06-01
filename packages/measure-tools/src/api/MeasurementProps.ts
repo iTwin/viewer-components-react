@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 /** Properties for a Measurement that can be serialized. */
 export interface MeasurementProps {
   /** Whether or not the measurement is in a locked state. Locked measurements cannot be cleared or edited. */

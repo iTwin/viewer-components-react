@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { NoRenderApp } from "@bentley/imodeljs-frontend";
 
 // Before all tests, initialize any global services

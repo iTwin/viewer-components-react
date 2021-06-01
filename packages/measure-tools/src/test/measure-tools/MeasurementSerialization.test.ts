@@ -3,15 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
+import { Geometry, Point3d } from "@bentley/geometry-core";
 import { assert } from "chai";
-import { DistanceMeasurement, DistanceMeasurementSerializer, DistanceMeasurementProps } from "../../measurements/DistanceMeasurement";
-import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/AreaMeasurement";
-import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement";
 import { Measurement, MeasurementEqualityOptions } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
-import { Point3d, Geometry } from "@bentley/geometry-core";
 import { MeasurementProps } from "../../api/MeasurementProps";
+import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/AreaMeasurement";
+import { DistanceMeasurement, DistanceMeasurementProps, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement";
+import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement";
 
 function assertIsArrayWithCount(json: any, ofLength: number) {
   assert.isArray(json);

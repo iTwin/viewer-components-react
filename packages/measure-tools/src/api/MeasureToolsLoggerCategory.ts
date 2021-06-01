@@ -3,8 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
-import { LogLevel, Logger } from "@bentley/bentleyjs-core";
+import { Logger, LogLevel } from "@bentley/bentleyjs-core";
 
 /** Enumerates log categories used by the **measure-tools** package. */
 export enum MeasureToolsLoggerCategory {

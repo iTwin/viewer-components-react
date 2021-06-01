@@ -3,14 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
-import { assert } from "chai";
-import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement";
-import { WellKnownViewType } from "../../api/MeasurementEnums";
-import { Measurement, MeasurementPickContext } from "../../api/Measurement";
 import { Point3d } from "@bentley/geometry-core";
-import { MeasureLocationToolModel } from "../../toolmodels/MeasureLocationToolModel";
 import { Cartographic } from "@bentley/imodeljs-common";
+import { assert } from "chai";
+import { Measurement, MeasurementPickContext } from "../../api/Measurement";
+import { WellKnownViewType } from "../../api/MeasurementEnums";
+import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement";
+import { MeasureLocationToolModel } from "../../toolmodels/MeasureLocationToolModel";
 
 describe("LocationMeasurement tests", () => {
   it("Test serialization/clone/equals", async () => {

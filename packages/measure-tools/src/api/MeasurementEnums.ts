@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 /** List of well-known measurement style sets. */
 export enum WellKnownMeasurementStyle {
   Default = "default",

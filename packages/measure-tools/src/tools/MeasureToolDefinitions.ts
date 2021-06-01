@@ -3,19 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { IModelApp } from "@bentley/imodeljs-frontend";
 import { ToolItemDef } from "@bentley/ui-framework";
+import { MeasurementPreferences } from "../api/MeasurementPreferences";
+import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
+import { ClearMeasurementsTool } from "./ClearMeasurementsTool";
+import { MeasureAngleTool } from "./MeasureAngleTool";
+import { MeasureAreaTool } from "./MeasureAreaTool";
 import { MeasureDistanceTool } from "./MeasureDistanceTool";
 import { MeasureLocationTool } from "./MeasureLocationTool";
-import { ClearMeasurementsTool } from "./ClearMeasurementsTool";
-import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
-import { ToggleDisplayMeasurementAxesTool } from "./ToggleDisplayMeasurementAxesTool";
-import { MeasurementPreferences } from "../api/MeasurementPreferences";
-import { MeasureAreaTool } from "./MeasureAreaTool";
-import { MeasureRadiusTool } from "./MeasureRadiusTool";
-import { MeasureAngleTool } from "./MeasureAngleTool";
 import { MeasurePerpendicularTool } from "./MeasurePerpendicularTool";
+import { MeasureRadiusTool } from "./MeasureRadiusTool";
+import { ToggleDisplayMeasurementAxesTool } from "./ToggleDisplayMeasurementAxesTool";
 
 export class MeasureToolDefinitions {
   public static get measureDistanceToolCommand() {
