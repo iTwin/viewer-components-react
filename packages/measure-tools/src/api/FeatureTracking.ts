@@ -3,11 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { BeUiEvent, GuidString, Logger } from "@bentley/bentleyjs-core";
-import { IModelApp, IModelConnection, AuthorizedFrontendRequestContext } from "@bentley/imodeljs-frontend";
-import { UiFramework } from "@bentley/ui-framework";
+import { AuthorizedFrontendRequestContext, IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
 import { TelemetryEvent } from "@bentley/telemetry-client";
+import { UiFramework } from "@bentley/ui-framework";
 import { MeasureToolsLoggerCategory } from "./MeasureToolsLoggerCategory";
 
 /** Each feature has a human-readable name that should be unique, but also a GUID. */
