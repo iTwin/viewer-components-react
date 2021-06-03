@@ -23,7 +23,7 @@
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "cover": "",
-    "lint": "tslint -p . 1>&2",
+    "lint": "",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test": ""
   },

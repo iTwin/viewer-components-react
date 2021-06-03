@@ -96,7 +96,7 @@
     "react-dom": "^16.8.0",
     "rimraf": "^2.7.1",
     "source-map-loader": "^0.2.3",
-    "tslint": "^5.20.0",
+    "tslint": "^5.11.0",
     "typescript": "3.7.4",
     "url-loader": "2.1.0",
     "webpack": "4.42.0",
