@@ -4,13 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-import "./App.scss";
-
 import { BrowserAuthorizationClientConfiguration } from "@bentley/frontend-authorization-client";
 import { IModelApp } from "@bentley/imodeljs-frontend";
 import { Viewer } from "@itwin/web-viewer-react";
 import React, { useEffect, useState } from "react";
-
+import "./App.scss";
 import { Header } from "./Header";
 import { history } from "./history";
 
@@ -22,6 +20,7 @@ const App: React.FC = () => {
   );
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [iModelId, setIModelId] = useState(process.env.IMJS_IMODEL_ID);
+  const [buddiRegion, ] = useState(process.env.IMJS_BUDDI_REGION ? Number(process.env.IMJS_BUDDI_REGION) : 102);
   const [contextId, setContextId] = useState(process.env.IMJS_CONTEXT_ID);
 
   if (!process.env.IMJS_AUTH_CLIENT_CLIENT_ID) {
@@ -44,6 +43,7 @@ const App: React.FC = () => {
     scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
     clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
     redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
+    authority: process.env.IMJS_AUTH_AUTHORITY ?? "https://qa-imsoidc.bentley.com", // if not defined will point to prod
     postSignoutRedirectUri: process.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
     responseType: "code",
   };
@@ -121,6 +121,19 @@ const App: React.FC = () => {
           contextId={contextId}
           iModelId={iModelId}
           authConfig={{ config: authConfig }}
+          backend={{ buddiRegion }}
+          defaultUiConfig={{
+            contentManipulationTools: {
+              verticalItems: {
+                measureTools: false,
+                sectionTools: false,
+              },
+              hideDefaultHorizontalItems: true,
+            },
+            hideTreeView: true,
+            hidePropertyGrid: true
+          }
+        }
           onIModelAppInit={onIModelAppInit}
         />
       )}
