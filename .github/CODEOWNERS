@@ -30,3 +30,6 @@
 
 /packages/geo-tools  @imodeljs/viewer-components-reviewers @mdastous-bentley
 /common/changes/@bentley/geo-tools-react  @imodeljs/viewer-components-reviewers @mdastous-bentley
+
+/packages/measure-tools  @imodeljs/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
+/common/changes/@bentley/measure-tools-react  @imodeljs/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
