@@ -653,7 +653,7 @@ importers:
       '@bentley/presentation-frontend': ^2.14.0
       '@bentley/product-settings-client': ^2.14.0
       '@bentley/rbac-client': ^2.14.0
-      '@bentley/react-scripts': ^3.4.1
+      '@bentley/react-scripts': ^3.4.11
       '@bentley/telemetry-client': ^2.14.0
       '@bentley/ui-abstract': ^2.14.0
       '@bentley/ui-components': ^2.14.0
@@ -661,7 +661,7 @@ importers:
       '@bentley/ui-framework': ^2.14.0
       '@bentley/ui-ninezone': ^2.14.0
       '@bentley/webgl-compatibility': ^2.14.0
-      '@itwin/web-viewer-react': ^0.1.0
+      '@itwin/web-viewer-react': ^1.0.0
       '@svgr/webpack': 4.3.3
       '@types/history': ^4.7.6
       '@types/jest': ^26.0.4
@@ -697,12 +697,12 @@ importers:
       '@bentley/ui-framework': 2.16.2_c0c0ac67ae0daa794e57466265bdf318
       '@bentley/ui-ninezone': 2.16.2_aa6278b34629050459068f16dfb14ca6
       '@bentley/webgl-compatibility': 2.16.2_@bentley+bentleyjs-core@2.16.2
-      '@itwin/web-viewer-react': 0.1.3_517b7cf869a44f37a946ce9df23114b5
+      '@itwin/web-viewer-react': 1.0.0_517b7cf869a44f37a946ce9df23114b5
       history: 4.10.1
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
     devDependencies:
-      '@bentley/react-scripts': 3.4.10_typescript@3.7.7
+      '@bentley/react-scripts': 3.4.11_typescript@3.7.7
       '@svgr/webpack': 4.3.3
       '@types/history': 4.7.8
       '@types/jest': 26.0.23
@@ -796,7 +796,7 @@ packages:
       gensync: 1.0.0-beta.2
       json5: 2.2.0
       lodash: 4.17.21
-      resolve: 1.15.0
+      resolve: 1.20.0
       semver: 5.7.1
       source-map: 0.5.7
     transitivePeerDependencies:
@@ -4540,8 +4540,8 @@ packages:
       '@bentley/bentleyjs-core': 2.16.2
       '@bentley/itwin-client': 2.16.2_@bentley+bentleyjs-core@2.16.2
 
-  /@bentley/react-scripts/3.4.10_typescript@3.7.7:
-    resolution: {integrity: sha512-JxRCu/qXaZFz6SwHxzEiWetAynWzOUYTx+D/LhWxVqmqptcMmZfSVUWewai5wExIqTvUEdNVaBwXE6V4n/xYYw==}
+  /@bentley/react-scripts/3.4.11_typescript@3.7.7:
+    resolution: {integrity: sha512-cVMPBhO5qPg2thmZFRBXfM5j4YCNbdOtP/1U0PoluPSAk3FgAps5ZIp52OsMQJGJMTpz+rsnCJiYUKgwLEihNQ==}
     engines: {node: '>=8.10'}
     hasBin: true
     peerDependencies:
@@ -5761,10 +5761,10 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /@itwin/error-handling-react/0.1.3_9e18809d2542c91b7ae943737ba854f0:
-    resolution: {integrity: sha512-2/QX80itgvGUw+07PVYygSqbEqjdRDGSDUjTHXR7RMKs/rsKViF4h/iAW34r7BUnFnwu46d+9VBIm86Fi0Rz0g==}
+  /@itwin/error-handling-react/1.0.0_9e18809d2542c91b7ae943737ba854f0:
+    resolution: {integrity: sha512-TVcQ/HySlXuFAeetloFIWb3+PRm6CAYB2gnbgt20xGz4BIB3Qiohm6UzVsCoEQdbVKFkTSD8fU3U+RFw3+8REA==}
     peerDependencies:
-      '@bentley/ui-core': ^2.13.0
+      '@bentley/ui-core': ^2.14.0
       react: ^16.13.0
       react-dom: ^16.13.0
     dependencies:
@@ -5782,8 +5782,8 @@ packages:
       sanitize-html: 2.4.0
     dev: false
 
-  /@itwin/viewer-react/0.1.6_517b7cf869a44f37a946ce9df23114b5:
-    resolution: {integrity: sha512-qQ/tetVe4hb/X2QE86TjP1irn58dIRE9fnfKbdxTIr8HCjMQUjBwXToRPoKTQw7HI7mglitlwt0UikJxwg/K5w==}
+  /@itwin/viewer-react/1.0.0_517b7cf869a44f37a946ce9df23114b5:
+    resolution: {integrity: sha512-11O85gpfh0wVH5Qy0wHKGROEjbLFUmRQfrua3KajC5rxLjA93STYNPqI2mu0lfoJcFvSJfvmFSJ7ez8Xuy4pqQ==}
     peerDependencies:
       '@bentley/bentleyjs-core': ^2.14.0
       '@bentley/frontend-application-insights-client': ^2.14.0
@@ -5841,7 +5841,7 @@ packages:
       '@bentley/ui-framework': 2.16.2_c0c0ac67ae0daa794e57466265bdf318
       '@bentley/ui-ninezone': 2.16.2_aa6278b34629050459068f16dfb14ca6
       '@bentley/webgl-compatibility': 2.16.2_@bentley+bentleyjs-core@2.16.2
-      '@itwin/error-handling-react': 0.1.3_9e18809d2542c91b7ae943737ba854f0
+      '@itwin/error-handling-react': 1.0.0_9e18809d2542c91b7ae943737ba854f0
       '@microsoft/applicationinsights-react-js': 2.3.1
       '@microsoft/applicationinsights-web': 2.3.1
       history: 4.10.1
@@ -5854,8 +5854,8 @@ packages:
       - tslib
     dev: false
 
-  /@itwin/web-viewer-react/0.1.3_517b7cf869a44f37a946ce9df23114b5:
-    resolution: {integrity: sha512-etn5oCLgkFh1G4AhJR9k66dFWXqP8SEUvZXQFeuDxGa+scj2avrTq8tvmY25A4y0e3dtFNOlC0KYvex0FdPQ3Q==}
+  /@itwin/web-viewer-react/1.0.0_517b7cf869a44f37a946ce9df23114b5:
+    resolution: {integrity: sha512-dln/c7J1+FZ8XLbguOsCXtENipNCQxlOwd4RqW2p/N41Kv8hpNxu0GRZDXzwfYYx+eod0opL4keKMPEBAqWzUA==}
     peerDependencies:
       '@bentley/bentleyjs-core': ^2.14.0
       '@bentley/frontend-application-insights-client': ^2.14.0
@@ -5909,7 +5909,7 @@ packages:
       '@bentley/ui-framework': 2.16.2_c0c0ac67ae0daa794e57466265bdf318
       '@bentley/ui-ninezone': 2.16.2_aa6278b34629050459068f16dfb14ca6
       '@bentley/webgl-compatibility': 2.16.2_@bentley+bentleyjs-core@2.16.2
-      '@itwin/viewer-react': 0.1.6_517b7cf869a44f37a946ce9df23114b5
+      '@itwin/viewer-react': 1.0.0_517b7cf869a44f37a946ce9df23114b5
       oidc-client: 1.11.5
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
@@ -6399,7 +6399,7 @@ packages:
       '@microsoft/applicationinsights-common': 2.3.1
       '@microsoft/applicationinsights-core-js': 2.3.1
       history: 4.10.1
-      react: 16.13.1
+      react: 16.14.0
       tslib: 1.14.1
     dev: false
 
@@ -8213,7 +8213,7 @@ packages:
       '@babel/types': 7.14.4
       eslint: 6.8.0
       eslint-visitor-keys: 1.3.0
-      resolve: 1.15.0
+      resolve: 1.20.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8236,6 +8236,24 @@ packages:
       '@types/babel__core': 7.1.14
       babel-plugin-istanbul: 5.2.0
       babel-preset-jest: 24.9.0
+      chalk: 2.4.2
+      slash: 2.0.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /babel-jest/24.9.0_@babel+core@7.14.3:
+    resolution: {integrity: sha512-ntuddfyiN+EhMw58PTNL1ph4C9rECiQXjI4nMMBKBaNjXvqLdkXpPRcMSr4iyBrJg/+wz9brFUD6RhOAT6r4Iw==}
+    engines: {node: '>= 6'}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+    dependencies:
+      '@babel/core': 7.14.3
+      '@jest/transform': 24.9.0
+      '@jest/types': 24.9.0
+      '@types/babel__core': 7.1.14
+      babel-plugin-istanbul: 5.2.0
+      babel-preset-jest: 24.9.0_@babel+core@7.14.3
       chalk: 2.4.2
       slash: 2.0.0
     transitivePeerDependencies:
@@ -8518,6 +8536,17 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/plugin-syntax-object-rest-spread': 7.8.3
+      babel-plugin-jest-hoist: 24.9.0
+    dev: true
+
+  /babel-preset-jest/24.9.0_@babel+core@7.14.3:
+    resolution: {integrity: sha512-izTUuhE4TMfTRPF92fFwD2QfdXaZW08qvWTFCI51V8rW5x00UuPgc3ajRoWofXOuxjfcOM5zzSYsQS3H8KGCAg==}
+    engines: {node: '>= 6'}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+    dependencies:
+      '@babel/core': 7.14.3
+      '@babel/plugin-syntax-object-rest-spread': 7.8.3_@babel+core@7.14.3
       babel-plugin-jest-hoist: 24.9.0
     dev: true
 
@@ -11352,7 +11381,7 @@ packages:
       minimatch: 3.0.4
       object.values: 1.1.4
       read-pkg-up: 2.0.0
-      resolve: 1.19.0
+      resolve: 1.20.0
     dev: true
 
   /eslint-plugin-jam3/0.2.3:
@@ -11461,7 +11490,7 @@ packages:
       object.fromentries: 2.0.4
       object.values: 1.1.4
       prop-types: 15.7.2
-      resolve: 1.19.0
+      resolve: 1.20.0
       semver: 6.3.0
       string.prototype.matchall: 4.0.5
       xregexp: 4.4.1
@@ -12285,7 +12314,7 @@ packages:
     resolution: {integrity: sha512-DUxuQaKoqfNne8iikd14SAkh5uw4+8vNifp6gmA73yYNS6ywLIWSLD/n/mBzHQRpW3J7rbATEakmiA8JvkTyZw==}
     engines: {node: '>=6.11.5', yarn: '>=1.0.0'}
     dependencies:
-      '@babel/code-frame': 7.10.4
+      '@babel/code-frame': 7.12.13
       chalk: 2.4.2
       micromatch: 3.1.10
       minimatch: 3.0.4
@@ -14252,10 +14281,10 @@ packages:
     resolution: {integrity: sha512-RATtQJtVYQrp7fvWg6f5y3pEFj9I+H8sWw4aKxnDZ96mob5i5SD6ZEGWgMLXQ4LE8UurrjbdlLWdUeo+28QpfQ==}
     engines: {node: '>= 6'}
     dependencies:
-      '@babel/core': 7.9.0
+      '@babel/core': 7.14.3
       '@jest/test-sequencer': 24.9.0
       '@jest/types': 24.9.0
-      babel-jest: 24.9.0_@babel+core@7.9.0
+      babel-jest: 24.9.0_@babel+core@7.14.3
       chalk: 2.4.2
       glob: 7.1.7
       jest-environment-jsdom: 24.9.0
@@ -19100,7 +19129,6 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       prop-types: 15.7.2
-    dev: true
 
   /read-pkg-up/2.0.0:
     resolution: {integrity: sha1-a3KoBImE4MQeeVEP1en6mbO1Sb4=}
