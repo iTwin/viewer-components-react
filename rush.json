@@ -56,6 +56,11 @@
       "projectFolder": "packages/measure-tools",
       "versionPolicyName": "measure-tools",
       "shouldPublish": false
+    },
+    {
+      "packageName": "vcr-test-viewer",
+      "projectFolder": "packages/vcr-test-viewer",
+      "shouldPublish": false
     }
   ]
 }
