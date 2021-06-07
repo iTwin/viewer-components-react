@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { BrowserAuthorizationClientConfiguration } from "@bentley/frontend-authorization-client";
 import { IModelApp } from "@bentley/imodeljs-frontend";
 import { Viewer } from "@itwin/web-viewer-react";
@@ -19,9 +18,10 @@ const App: React.FC = () => {
       false
   );
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [iModelId, setIModelId] = useState(process.env.IMJS_IMODEL_ID);
   const [buddiRegion, ] = useState(process.env.IMJS_BUDDI_REGION ? Number(process.env.IMJS_BUDDI_REGION) : 102);
-  const [contextId, setContextId] = useState(process.env.IMJS_CONTEXT_ID);
+  const [contextId, setContextId] = useState(process.env.IMJS_CONTEXT_ID ?? "5e396acd-e9ae-4118-9c35-72eb26725446");
+  const [iModelId, setIModelId] = useState(process.env.IMJS_IMODEL_ID ?? "0000f4dc-de8d-438b-ae8a-40db2622ebfd");
+  const [changeSetId, setChangeSetId] = useState(process.env.IMJS_CHANGESET_ID)
 
   if (!process.env.IMJS_AUTH_CLIENT_CLIENT_ID) {
     throw new Error(
@@ -54,7 +54,7 @@ const App: React.FC = () => {
       if (urlParams.has("contextId")) {
         setContextId(urlParams.get("contextId") as string);
       } else {
-        if (!process.env.IMJS_CONTEXT_ID) {
+        if (!contextId) {
           throw new Error(
             "Please add a valid context ID in the .env file and restart the application or add it to the contextId query parameter in the url and refresh the page. See the README for more information."
           );
@@ -64,20 +64,28 @@ const App: React.FC = () => {
       if (urlParams.has("iModelId")) {
         setIModelId(urlParams.get("iModelId") as string);
       } else {
-        if (!process.env.IMJS_IMODEL_ID) {
+        if (!iModelId) {
           throw new Error(
             "Please add a valid iModel ID in the .env file and restart the application or add it to the iModelId query parameter in the url and refresh the page. See the README for more information."
           );
         }
       }
+
+      if (urlParams.has("changeSetId")) {
+        setChangeSetId(urlParams.get("changeSetId") as string);
+      }
     }
   }, [isAuthorized]);
 
   useEffect(() => {
-    if (contextId && iModelId && isAuthorized) {
-      history.push(`?contextId=${contextId}&iModelId=${iModelId}`);
+    if (isAuthorized && contextId && iModelId) {
+      const url = `?contextId=${contextId}&iModelId=${iModelId}`
+      if (changeSetId) {
+        url.concat(`&changeSetId=${changeSetId}`)
+      }
+      history.push(url);
     }
-  }, [contextId, iModelId, isAuthorized]);
+  }, [isAuthorized, contextId, iModelId, changeSetId]);
 
   useEffect(() => {
     if (isLoggingIn && isAuthorized) {
@@ -120,6 +128,7 @@ const App: React.FC = () => {
         <Viewer
           contextId={contextId}
           iModelId={iModelId}
+          changeSetId={changeSetId}
           authConfig={{ config: authConfig }}
           backend={{ buddiRegion }}
           defaultUiConfig={{
@@ -132,8 +141,7 @@ const App: React.FC = () => {
             },
             hideTreeView: true,
             hidePropertyGrid: true
-          }
-        }
+          }}
           onIModelAppInit={onIModelAppInit}
         />
       )}
