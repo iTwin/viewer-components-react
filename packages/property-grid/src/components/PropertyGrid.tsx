@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import "./PropertyGrid.scss";
 
 import * as React from "react";
@@ -16,22 +17,27 @@ import { Field } from "@bentley/presentation-common";
 import {
   IPresentationPropertyDataProvider,
   PresentationPropertyDataProvider,
-  propertyGridWithUnifiedSelection,
+  //propertyGridWithUnifiedSelection,
+  usePropertyDataProviderWithUnifiedSelection,
 } from "@bentley/presentation-components";
 import { Presentation } from "@bentley/presentation-frontend";
 import { SettingsStatus } from "@bentley/product-settings-client";
-import { PropertyRecord } from "@bentley/ui-abstract";
+import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
 import {
   ActionButtonRenderer,
   ActionButtonRendererProps,
+  FilteringPropertyDataProvider,
   PropertyData,
   PropertyGridContextMenuArgs,
+  PropertyRecordDataFiltererBase,
   PropertyValueRendererManager,
   VirtualizedPropertyGridWithDataProvider,
+  PropertyDataFilterResult,
 } from "@bentley/ui-components";
 import {
   ContextMenuItem,
   ContextMenuItemProps,
+  FillCentered,
   GlobalContextMenu,
   Icon,
   Orientation,
@@ -55,6 +61,7 @@ export interface OnSelectEventArgs {
   dataProvider: IPresentationPropertyDataProvider;
   field?: Field;
   contextMenuArgs: PropertyGridContextMenuArgs;
+  propertyGrid: PropertyGrid;
 }
 
 export interface PropertyGridProps {
@@ -83,15 +90,19 @@ interface PropertyGridState {
   sharedFavorites: string[];
 }
 
+class PlaceholderPropertyDataFilterer extends PropertyRecordDataFiltererBase {
+  public get isActive() { return false; }
+  public async recordMatchesFilter(): Promise<PropertyDataFilterResult> {
+    return { matchesFilter: true }
+  }
+}
+
 export class PropertyGrid extends React.Component<
   PropertyGridProps,
   PropertyGridState
-  > {
-  private static _unifiedSelectionPropertyGrid = propertyGridWithUnifiedSelection(
-    VirtualizedPropertyGridWithDataProvider,
-  );
-
+> {
   private _dataProvider: PresentationPropertyDataProvider;
+  private _filterer: PropertyRecordDataFiltererBase;
   private _dataChangedHandler: () => void;
   private _unmounted = false;
   constructor(props: PropertyGridProps) {
@@ -110,8 +121,15 @@ export class PropertyGrid extends React.Component<
       }
     }
 
+    this._filterer = new PlaceholderPropertyDataFilterer;
     this._dataChangedHandler = this._onDataChanged.bind(this);
     this.state = { className: "", sharedFavorites: [] };
+  }
+
+  public setFilter(filterer: PropertyRecordDataFiltererBase) {
+    this._filterer = filterer;
+    //re-render the component
+    this._onDataChanged();
   }
 
   public async componentDidMount() {
@@ -473,6 +491,7 @@ export class PropertyGrid extends React.Component<
                 contextMenuArgs: args,
                 field,
                 dataProvider: this._dataProvider,
+                propertyGrid: this
               });
             }
 
@@ -558,33 +577,58 @@ export class PropertyGrid extends React.Component<
     );
   }
 
+  private _renderPropertyGrid() {
+    if (this.props.disableUnifiedSelection) {
+      return (
+        <VirtualizedPropertyGridWithDataProvider
+          orientation={this.props.orientation ?? Orientation.Horizontal}
+          isOrientationFixed={this.props.isOrientationFixed ?? true}
+          dataProvider={this._dataProvider}
+          isPropertyHoverEnabled={true}
+          isPropertySelectionEnabled={true}
+          onPropertyContextMenu={this._onPropertyContextMenu}
+          actionButtonRenderers={[this._shareActionButtonRenderer]}
+        />
+      );
+    } else {
+      //newest release: numSelected Elements in addition to isOverLimit
+      const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: this._dataProvider });
+      const filteringDataProvider = new FilteringPropertyDataProvider(this._dataProvider, this._filterer);
+      /*if (numSelectedElements === 0) {
+        return (
+          <FillCentered>
+            {IModelApp.i18n.translate("Sample:property-grid.no-elements-selected")}
+          </FillCentered>
+        );
+      }*/
+      if (isOverLimit) {
+        return (
+          <FillCentered>
+            {IModelApp.i18n.translate("Sample:property-grid.too-many-elements-selected")}
+          </FillCentered>
+        );
+      }
+      return (
+        <VirtualizedPropertyGridWithDataProvider
+          orientation={this.props.orientation ?? Orientation.Horizontal}
+          isOrientationFixed={this.props.isOrientationFixed ?? true}
+          dataProvider={filteringDataProvider}
+          isPropertyHoverEnabled={true}
+          isPropertySelectionEnabled={true}
+          onPropertyContextMenu={this._onPropertyContextMenu}
+          actionButtonRenderers={[this._shareActionButtonRenderer]}
+        />
+      );
+    }
+  }
+
   public render() {
     return (
       <div className={this.props.rootClassName}>
         {this._renderHeader()}
-        {this.props.disableUnifiedSelection ? (
-          <VirtualizedPropertyGridWithDataProvider
-            orientation={this.props.orientation ?? Orientation.Horizontal}
-            isOrientationFixed={this.props.isOrientationFixed ?? true}
-            dataProvider={this._dataProvider}
-            isPropertyHoverEnabled={true}
-            isPropertySelectionEnabled={true}
-            onPropertyContextMenu={this._onPropertyContextMenu}
-            actionButtonRenderers={[this._shareActionButtonRenderer]}
-          />
-        ) : (
-            <PropertyGrid._unifiedSelectionPropertyGrid
-              orientation={this.props.orientation ?? Orientation.Horizontal}
-              isOrientationFixed={this.props.isOrientationFixed ?? true}
-              dataProvider={this._dataProvider}
-              isPropertyHoverEnabled={true}
-              isPropertySelectionEnabled={true}
-              onPropertyContextMenu={this._onPropertyContextMenu}
-              actionButtonRenderers={[this._shareActionButtonRenderer]}
-            />
-          )}
+        {this._renderPropertyGrid()}
         {this._renderContextMenu()}
-      </div>
+      </div >
     );
   }
 }
