@@ -8,7 +8,6 @@ import "@testing-library/jest-dom/extend-expect";
 import { render } from "@testing-library/react";
 import React from "react";
 import configureMockStore from "redux-mock-store";
-
 import { MarkupToolWidget } from "../../../components/toolbar/MarkupToolWidget";
 import { MarkupFrontstage } from "../../../MarkupFrontstage";
 
@@ -33,7 +32,6 @@ jest.mock("@bentley/imodeljs-i18n", () => ({
   }),
 }));
 jest.mock("@bentley/ui-components");
-jest.mock("@bentley/ui-core");
 jest.mock("../../../MarkupFrontstage");
 
 const mockStore = configureMockStore([]);
