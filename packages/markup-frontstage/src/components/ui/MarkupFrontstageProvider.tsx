@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import {
   EmphasizeElements,
   EmphasizeElementsProps,
@@ -43,7 +42,6 @@ import {
 import { createViewStateProps } from "../../util/MarkupViewStateAdapter";
 import MarkupSettingsPanel from "../toolbar/MarkupSettingsPanel";
 import { MarkupToolWidget } from "../toolbar/MarkupToolWidget";
-
 
 export class MarkupFrontstageProvider extends FrontstageProvider {
   private readonly _contentGroup: ContentGroup;

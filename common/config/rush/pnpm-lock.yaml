@@ -25,7 +25,6 @@ importers:
       '@testing-library/react': ^8.0.1
       '@testing-library/react-hooks': ^3.2.1
       '@types/chai': ^4.1.4
-      '@types/classnames': ^2.2.3
       '@types/enzyme': 3.9.3
       '@types/i18next': ^8.4.2
       '@types/mocha': ^5.2.5
@@ -39,7 +38,7 @@ importers:
       chai-as-promised: ^7
       chai-jest-snapshot: ^2.0.0
       chai-spies: 1.0.0
-      classnames: ^2.2.5
+      classnames: ^2.3.1
       cpx: ^1.5.0
       enzyme: ^3.4.0
       enzyme-adapter-react-16: ^1.15.5
@@ -88,7 +87,6 @@ importers:
       '@testing-library/react': 8.0.9_react-dom@16.14.0+react@16.14.0
       '@testing-library/react-hooks': 3.7.0_react@16.14.0
       '@types/chai': 4.2.18
-      '@types/classnames': 2.3.1
       '@types/enzyme': 3.9.3
       '@types/i18next': 8.4.6
       '@types/mocha': 5.2.7
@@ -136,10 +134,9 @@ importers:
       '@bentley/ui-abstract': ^2.15.2
       '@bentley/ui-components': ^2.15.2
       '@bentley/ui-core': ^2.15.2
-      '@types/classnames': ^2.2.3
       '@types/react': ~16.9.35
       '@types/react-dom': ^16.8.0
-      classnames: ^2.2.5
+      classnames: ^2.3.1
       cpx: ^1.5.0
       eslint: ^6.8.0
       react: ^16.8.0
@@ -160,7 +157,6 @@ importers:
       '@bentley/ui-abstract': 2.16.2_@bentley+bentleyjs-core@2.16.2
       '@bentley/ui-components': 2.16.2_681d1c198fac2dc40d94fcd69846ab60
       '@bentley/ui-core': 2.16.2_498fa8caeaf973bda4c780b7b09de3f1
-      '@types/classnames': 2.3.1
       '@types/react': 16.9.56
       '@types/react-dom': 16.9.13
       cpx: 1.5.0
@@ -233,12 +229,11 @@ importers:
       '@bentley/ui-framework': ^2.0.0
       '@bentley/ui-ninezone': ^2.0.0
       '@bentley/webgl-compatibility': ^2.0.0
-      '@types/classnames': ^2.2.3
       '@types/i18next': ^8.4.2
       '@types/react': ~16.9.35
       '@types/react-dom': ^16.8.0
       '@types/react-redux': ^7.0.1
-      classnames: ^2.2.5
+      classnames: ^2.3.1
       cpx: ^1.5.0
       i18next: ^10.2.2
       react: ^16.8.0
@@ -276,7 +271,6 @@ importers:
       '@bentley/ui-framework': 2.16.2_14fd1b32f4213c27c0f7a43af0b84bf3
       '@bentley/ui-ninezone': 2.16.2_6e257377dd57ba56de8eed9862fbf243
       '@bentley/webgl-compatibility': 2.16.2_@bentley+bentleyjs-core@2.16.2
-      '@types/classnames': 2.3.1
       '@types/i18next': 8.4.6
       '@types/react': 16.9.56
       '@types/react-dom': 16.9.13
@@ -308,7 +302,6 @@ importers:
       '@bentley/ui-framework': ^2.16.0
       '@testing-library/jest-dom': ^4.2.4
       '@testing-library/react': ^10.4.5
-      '@types/classnames': ^2.2.3
       '@types/i18next': ^8.4.2
       '@types/jest': ^24.0.15
       '@types/react': ~16.9.23
@@ -316,7 +309,7 @@ importers:
       '@types/redux-mock-store': ^1.0.2
       babel-jest: ^24.9.0
       babel-plugin-import-remove-resource-query: ^1.0.0
-      classnames: ^2.2.6
+      classnames: ^2.3.1
       concurrently: ^4.1.0
       cpx: ^1.5.0
       i18next: ^10.2.2
@@ -355,7 +348,6 @@ importers:
       '@bentley/ui-framework': 2.16.2_bb3171e04ef324749c083f228b1a170c
       '@testing-library/jest-dom': 4.2.4
       '@testing-library/react': 10.4.9_react-dom@16.14.0+react@16.14.0
-      '@types/classnames': 2.3.1
       '@types/i18next': 8.4.6
       '@types/jest': 24.9.1
       '@types/react': 16.9.56
@@ -494,12 +486,11 @@ importers:
       '@bentley/ui-framework': ^2.6.0
       '@bentley/ui-ninezone': ^2.6.0
       '@bentley/webgl-compatibility': ^2.6.0
-      '@types/classnames': ^2.2.3
       '@types/i18next': ^8.4.2
       '@types/react': ~16.9.35
       '@types/react-dom': ^16.8.0
       '@types/react-redux': ^7.0.1
-      classnames: ^2.2.5
+      classnames: ^2.3.1
       cpx: ^1.5.0
       i18next: ^10.2.2
       react: ^16.8.0
@@ -540,7 +531,6 @@ importers:
       '@bentley/ui-framework': 2.16.2_14fd1b32f4213c27c0f7a43af0b84bf3
       '@bentley/ui-ninezone': 2.16.2_6e257377dd57ba56de8eed9862fbf243
       '@bentley/webgl-compatibility': 2.16.2_@bentley+bentleyjs-core@2.16.2
-      '@types/classnames': 2.3.1
       '@types/i18next': 8.4.6
       '@types/react': 16.9.56
       '@types/react-dom': 16.9.13
@@ -578,12 +568,11 @@ importers:
       '@bentley/ui-framework': ^2.15.2
       '@bentley/ui-ninezone': ^2.15.2
       '@bentley/webgl-compatibility': ^2.15.2
-      '@types/classnames': ^2.2.3
       '@types/i18next': ^8.4.2
       '@types/react': ~16.9.35
       '@types/react-dom': ^16.8.0
       '@types/react-redux': ^7.0.1
-      classnames: ^2.2.5
+      classnames: ^2.3.1
       cpx: ^1.5.0
       i18next: ^10.2.2
       react: ^16.8.0
@@ -622,7 +611,6 @@ importers:
       '@bentley/ui-framework': 2.16.2_14fd1b32f4213c27c0f7a43af0b84bf3
       '@bentley/ui-ninezone': 2.16.2_6e257377dd57ba56de8eed9862fbf243
       '@bentley/webgl-compatibility': 2.16.2_@bentley+bentleyjs-core@2.16.2
-      '@types/classnames': 2.3.1
       '@types/i18next': 8.4.6
       '@types/react': 16.9.56
       '@types/react-dom': 16.9.13
@@ -6833,13 +6821,6 @@ packages:
     resolution: {integrity: sha512-rNX1PsrDPxiNiyLnRKiW2NXHJFHqx0Fl3J2WsZq0MTBspa/FgwlqhXJE2crIcc+/2IglLHtSWw7g053oUR8fOg==}
     dependencies:
       '@types/node': 14.17.2
-    dev: true
-
-  /@types/classnames/2.3.1:
-    resolution: {integrity: sha512-zeOWb0JGBoVmlQoznvqXbE0tEC/HONsnoUNH19Hc96NFsTAwTXbTqb8FMYkru1F/iqp7a18Ws3nWJvtA1sHD1A==}
-    deprecated: This is a stub types definition. classnames provides its own type definitions, so you do not need this installed.
-    dependencies:
-      classnames: 2.3.1
     dev: true
 
   /@types/enzyme/3.9.3:

@@ -50,7 +50,7 @@
     "verbose": true
   },
   "dependencies": {
-    "classnames": "^2.2.6",
+    "classnames": "^2.3.1",
     "i18next": "^10.2.2",
     "i18next-browser-languagedetector": "^4.0.2"
   },
@@ -73,7 +73,6 @@
     "@bentley/ui-framework": "^2.16.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^10.4.5",
-    "@types/classnames": "^2.2.3",
     "@types/i18next": "^8.4.2",
     "@types/jest": "^24.0.15",
     "@types/react": "~16.9.23",
