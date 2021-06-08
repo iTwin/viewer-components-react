@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/geo-tools-react",
+      "comment": "bump classnames dep",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/geo-tools-react",
+  "email": "aruniverse@users.noreply.github.com"
+}
