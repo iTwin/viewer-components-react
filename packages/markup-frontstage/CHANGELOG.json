@@ -2,6 +2,18 @@
   "name": "@bentley/markup-frontstage-react",
   "entries": [
     {
+      "version": "2.1.0",
+      "tag": "@bentley/markup-frontstage-react_v2.1.0",
+      "date": "Tue, 08 Jun 2021 21:23:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "React to breaking change in core with respect to parentDocument for popups"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.2",
       "tag": "@bentley/markup-frontstage-react_v2.0.2",
       "date": "Tue, 27 Apr 2021 22:03:19 GMT",

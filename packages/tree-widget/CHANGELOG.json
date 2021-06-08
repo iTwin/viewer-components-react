@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.3.1",
+      "tag": "@bentley/tree-widget-react_v1.3.1",
+      "date": "Tue, 08 Jun 2021 21:23:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "bump classnames dep"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.0",
       "tag": "@bentley/tree-widget-react_v1.3.0",
       "date": "Thu, 13 May 2021 21:15:14 GMT",

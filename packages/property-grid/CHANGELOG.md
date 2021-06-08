@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Mon, 26 Apr 2021 15:52:28 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Jun 2021 21:23:59 GMT and should not be manually modified.
+
+## 1.3.7
+Tue, 08 Jun 2021 21:23:59 GMT
+
+### Patches
+
+- fix classnames import
 
 ## 1.3.6
 Mon, 26 Apr 2021 15:52:28 GMT
