@@ -1,6 +1,13 @@
 # Change Log - @bentley/markup-frontstage-react
 
-This log was last generated on Tue, 27 Apr 2021 22:03:19 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Jun 2021 21:23:59 GMT and should not be manually modified.
+
+## 2.1.0
+Tue, 08 Jun 2021 21:23:59 GMT
+
+### Minor changes
+
+- React to breaking change in core with respect to parentDocument for popups
 
 ## 2.0.2
 Tue, 27 Apr 2021 22:03:19 GMT

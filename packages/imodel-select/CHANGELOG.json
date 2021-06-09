@@ -2,6 +2,18 @@
   "name": "@bentley/imodel-select-react",
   "entries": [
     {
+      "version": "2.0.10",
+      "tag": "@bentley/imodel-select-react_v2.0.10",
+      "date": "Tue, 08 Jun 2021 21:23:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "bump classnames dep"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.9",
       "tag": "@bentley/imodel-select-react_v2.0.9",
       "date": "Mon, 26 Apr 2021 10:38:57 GMT",

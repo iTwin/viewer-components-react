@@ -1,6 +1,6 @@
 {
   "name": "@bentley/imodel-select-react",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "iModel Select React",
   "keywords": [
     "Bentley",
@@ -29,7 +29,7 @@
     "test": ""
   },
   "dependencies": {
-    "classnames": "^2.2.5",
+    "classnames": "^2.3.1",
     "i18next": "^10.2.2",
     "react-redux": "^7.2.0",
     "redux": "^4.0.3"
@@ -57,7 +57,6 @@
     "@bentley/ui-framework": "^2.0.0",
     "@bentley/ui-ninezone": "^2.0.0",
     "@bentley/webgl-compatibility": "^2.0.0",
-    "@types/classnames": "^2.2.3",
     "@types/i18next": "^8.4.2",
     "@types/react": "~16.9.35",
     "@types/react-dom": "^16.8.0",

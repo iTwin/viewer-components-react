@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Thu, 13 May 2021 21:15:14 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Jun 2021 21:23:59 GMT and should not be manually modified.
+
+## 1.3.1
+Tue, 08 Jun 2021 21:23:59 GMT
+
+### Patches
+
+- bump classnames dep
 
 ## 1.3.0
 Thu, 13 May 2021 21:15:14 GMT

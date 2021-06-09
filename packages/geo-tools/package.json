@@ -1,6 +1,6 @@
 {
   "name": "@bentley/geo-tools-react",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "React Geospatial Tools",
   "keywords": [
     "Bentley",
@@ -33,7 +33,7 @@
     "test": "mocha --opts ./mocha.opts \"./lib/test/**/*.test.js\""
   },
   "dependencies": {
-    "classnames": "^2.2.5",
+    "classnames": "^2.3.1",
     "i18next": "^10.2.2",
     "react-autosuggest": "^10.0.2",
     "svg-sprite-loader": "4.2.1"
@@ -57,7 +57,6 @@
     "@testing-library/react": "^8.0.1",
     "@testing-library/react-hooks": "^3.2.1",
     "@types/chai": "^4.1.4",
-    "@types/classnames": "^2.2.3",
     "@types/enzyme": "3.9.3",
     "@types/i18next": "^8.4.2",
     "@types/mocha": "^5.2.5",
