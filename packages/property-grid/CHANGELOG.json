@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "1.3.7",
+      "tag": "@bentley/property-grid-react_v1.3.7",
+      "date": "Tue, 08 Jun 2021 21:23:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix classnames import"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.6",
       "tag": "@bentley/property-grid-react_v1.3.6",
       "date": "Mon, 26 Apr 2021 15:52:28 GMT",

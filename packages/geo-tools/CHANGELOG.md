@@ -1,6 +1,13 @@
 # Change Log - @bentley/geo-tools-react
 
-This log was last generated on Mon, 11 Jan 2021 17:44:04 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Jun 2021 21:23:59 GMT and should not be manually modified.
+
+## 0.1.6
+Tue, 08 Jun 2021 21:23:59 GMT
+
+### Patches
+
+- bump classnames dep
 
 ## 0.1.5
 Mon, 11 Jan 2021 17:44:04 GMT
