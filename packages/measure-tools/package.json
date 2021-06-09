@@ -1,0 +1,116 @@
+{
+  "name": "@bentley/measure-tools-react",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Frontend framework and tools for measurements",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/measure-tools"
+  },
+  "main": "lib/measure-tools.js",
+  "typings": "lib/measure-tools",
+  "scripts": {
+    "build": "npm run copy:assets && npm run pseudolocalize && tsc 1>&2 && npm run webpack:tests",
+    "copy:assets": "cpx \"./src/**/*.*css\" \"./lib\" && cpx \"./public/**/*\" ./lib/public",
+    "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
+    "watch": "tsc --w",
+    "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "lint": "tslint --project . 1>&2",
+    "test": "node ./node_modules/@bentley/certa/bin/certa.js -c certa.json -r chrome",
+    "cover": "nyc npm test",
+    "madge": "madge --circular --extensions ts,tsx src",
+    "webpack:tests": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --config webpack.config.js 1>&2"
+  },
+  "keywords": [
+    "Bentley",
+    "BIM",
+    "iModel",
+    "iTwin",
+    "Measurement",
+    "Measure"
+  ],
+  "author": {
+    "name": "Bentley Systems, Inc.",
+    "url": "http://www.bentley.com"
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "peerDependencies": {
+    "@bentley/bentleyjs-core": "^2.15.0",
+    "@bentley/geometry-core": "^2.15.0",
+    "@bentley/imodeljs-common": "^2.15.0",
+    "@bentley/imodeljs-frontend": "^2.15.0",
+    "@bentley/imodeljs-i18n": "^2.15.0",
+    "@bentley/imodeljs-quantity": "^2.15.0",
+    "@bentley/itwin-client": "^2.15.0",
+    "@bentley/presentation-components": "^2.15.0",
+    "@bentley/telemetry-client": "^2.15.0",
+    "@bentley/ui-abstract": "^2.15.0",
+    "@bentley/ui-components": "^2.15.0",
+    "@bentley/ui-core": "^2.15.0",
+    "@bentley/ui-framework": "^2.15.0",
+    "@bentley/ui-ninezone": "^2.15.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "//devDependencies": [
+    "NOTE: All peerDependencies should also be listed as devDependencies since peerDependencies are not considered by npm install",
+    "NOTE: All tools used by scripts in this package must be listed as devDependencies"
+  ],
+  "devDependencies": {
+    "@bentley/bentleyjs-core": "^2.15.0",
+    "@bentley/build-tools": "^2.15.0",
+    "@bentley/certa": "^2.15.0",
+    "@bentley/extension-client": "^2.15.0",
+    "@bentley/geometry-core": "^2.15.0",
+    "@bentley/imodeljs-common": "^2.15.0",
+    "@bentley/imodeljs-frontend": "^2.15.0",
+    "@bentley/imodeljs-i18n": "^2.15.0",
+    "@bentley/imodeljs-quantity": "^2.15.0",
+    "@bentley/itwin-client": "^2.15.0",
+    "@bentley/presentation-components": "^2.15.0",
+    "@bentley/telemetry-client": "^2.15.0",
+    "@bentley/ui-abstract": "^2.15.0",
+    "@bentley/ui-components": "^2.15.0",
+    "@bentley/ui-core": "^2.15.0",
+    "@bentley/ui-framework": "^2.15.0",
+    "@bentley/ui-ninezone": "^2.15.0",
+    "@bentley/webgl-compatibility": "^2.15.0",
+    "@types/chai": "^4.2.0",
+    "@types/chai-as-promised": "^7.1.1",
+    "@types/mocha": "^7.0.2",
+    "@types/react": "^16.9.2",
+    "@types/react-dom": "^16.9.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "cpx": "^1.5.0",
+    "cross-env": "7.0.3",
+    "file-loader": "^4.2.0",
+    "glob": "^7.1.2",
+    "madge": "4.0.2",
+    "mocha": "^7.1.0",
+    "null-loader": "3.0.0",
+    "nyc": "^15.0.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
+    "rimraf": "^2.7.1",
+    "source-map-loader": "^0.2.3",
+    "tslint": "^5.11.0",
+    "typescript": "3.7.4",
+    "url-loader": "2.1.0",
+    "webpack": "4.42.0",
+    "webpack-cli": "^3.3.8"
+  },
+  "dependencies": {
+    "@bentley/icons-generic-webfont": "^1.0.29"
+  },
+  "nyc": {
+    "nycrc-path": "./node_modules/@bentley/build-tools/.nycrc",
+    "check-coverage": true,
+    "statements": 20,
+    "branches": 20,
+    "functions": 20,
+    "lines": 20
+  }
+}

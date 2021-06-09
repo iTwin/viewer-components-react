@@ -1,0 +1,21 @@
+{
+  "extends": "./node_modules/@bentley/build-tools/tsconfig-base.json",
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "outDir": "./lib",
+    "skipLibCheck": true,
+    "jsx": "react",
+    "types": [
+      "chai-as-promised",
+      "mocha"
+    ]
+  },
+  "include": [
+    "./src/**/*.ts*"
+  ],
+  "exclude": [
+    "lib",
+    "node_modules"
+  ]
+}

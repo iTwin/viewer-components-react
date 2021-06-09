@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/measure-tools-react",
+      "comment": "Initial release of bentley/measure-tools-react!",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@bentley/measure-tools-react",
+  "email": "aruniverse@users.noreply.github.com"
+}

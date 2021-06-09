@@ -26,7 +26,7 @@
     "build": "tsc -p tsconfig.json 1>&2",
     "clean": "rimraf lib build .rush/temp/package-deps*.json",
     "cover": "",
-    "lint": "tslint -p . 1>&2",
+    "lint": "",
     "start": "tsc -p tsconfig.json -w",
     "test": "jest"
   },
