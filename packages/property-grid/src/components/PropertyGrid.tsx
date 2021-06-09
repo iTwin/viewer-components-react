@@ -17,27 +17,24 @@ import { Field } from "@bentley/presentation-common";
 import {
   IPresentationPropertyDataProvider,
   PresentationPropertyDataProvider,
-  //propertyGridWithUnifiedSelection,
-  usePropertyDataProviderWithUnifiedSelection,
 } from "@bentley/presentation-components";
 import { Presentation } from "@bentley/presentation-frontend";
 import { SettingsStatus } from "@bentley/product-settings-client";
-import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
+import { PropertyRecord } from "@bentley/ui-abstract";
 import {
   ActionButtonRenderer,
   ActionButtonRendererProps,
-  FilteringPropertyDataProvider,
   PropertyData,
   PropertyGridContextMenuArgs,
   PropertyRecordDataFiltererBase,
   PropertyValueRendererManager,
   VirtualizedPropertyGridWithDataProvider,
   PropertyDataFilterResult,
+  PropertyDataFiltererBase,
 } from "@bentley/ui-components";
 import {
   ContextMenuItem,
   ContextMenuItemProps,
-  FillCentered,
   GlobalContextMenu,
   Icon,
   Orientation,
@@ -47,6 +44,7 @@ import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
 import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
+import { PropertyGridWithUnifiedSelection } from "./PropertyGridWithUnifiedSelection";
 
 const sharedNamespace = "favoriteProperties";
 const sharedName = "sharedProps";
@@ -91,6 +89,7 @@ interface PropertyGridState {
 }
 
 class PlaceholderPropertyDataFilterer extends PropertyRecordDataFiltererBase {
+  //Placeholder filter
   public get isActive() { return false; }
   public async recordMatchesFilter(): Promise<PropertyDataFilterResult> {
     return { matchesFilter: true }
@@ -102,7 +101,7 @@ export class PropertyGrid extends React.Component<
   PropertyGridState
 > {
   private _dataProvider: PresentationPropertyDataProvider;
-  private _filterer: PropertyRecordDataFiltererBase;
+  private _filterer: PropertyDataFiltererBase;
   private _dataChangedHandler: () => void;
   private _unmounted = false;
   constructor(props: PropertyGridProps) {
@@ -127,9 +126,11 @@ export class PropertyGrid extends React.Component<
   }
 
   public setFilter(filterer: PropertyRecordDataFiltererBase) {
-    this._filterer = filterer;
-    //re-render the component
-    this._onDataChanged();
+    if (filterer) {
+      this._filterer = filterer;
+    } else {
+      this._filterer = new PlaceholderPropertyDataFilterer;
+    }
   }
 
   public async componentDidMount() {
@@ -591,28 +592,12 @@ export class PropertyGrid extends React.Component<
         />
       );
     } else {
-      //newest release: numSelected Elements in addition to isOverLimit
-      const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: this._dataProvider });
-      const filteringDataProvider = new FilteringPropertyDataProvider(this._dataProvider, this._filterer);
-      /*if (numSelectedElements === 0) {
-        return (
-          <FillCentered>
-            {IModelApp.i18n.translate("Sample:property-grid.no-elements-selected")}
-          </FillCentered>
-        );
-      }*/
-      if (isOverLimit) {
-        return (
-          <FillCentered>
-            {IModelApp.i18n.translate("Sample:property-grid.too-many-elements-selected")}
-          </FillCentered>
-        );
-      }
       return (
-        <VirtualizedPropertyGridWithDataProvider
+        <PropertyGridWithUnifiedSelection
           orientation={this.props.orientation ?? Orientation.Horizontal}
           isOrientationFixed={this.props.isOrientationFixed ?? true}
-          dataProvider={filteringDataProvider}
+          dataProvider={this._dataProvider}
+          filterer={this._filterer}
           isPropertyHoverEnabled={true}
           isPropertySelectionEnabled={true}
           onPropertyContextMenu={this._onPropertyContextMenu}
@@ -654,3 +639,4 @@ export class PropertyGridWidgetControl extends WidgetControl {
     );
   }
 }
+
