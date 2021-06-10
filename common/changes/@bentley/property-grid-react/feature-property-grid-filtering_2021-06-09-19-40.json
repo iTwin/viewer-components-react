@@ -3,7 +3,7 @@
     {
       "packageName": "@bentley/property-grid-react",
       "comment": "Added support for FilteringPropertyDataProvider in PropertyGrid",
-      "type": "minor"
+      "type": "major"
     }
   ],
   "packageName": "@bentley/property-grid-react",

@@ -46,6 +46,7 @@ interface PropertyGridWithUnifiedSelectionProps extends VirtualizedPropertyGridW
 }
 
 export function PropertyGridWithUnifiedSelection(props: PropertyGridWithUnifiedSelectionProps): JSX.Element {
+  // numSelectedElements will return undefined until presentation-components 2.17.x
   const { isOverLimit , numSelectedElements } = (usePropertyDataProviderWithUnifiedSelection as any) (
     { dataProvider: props.dataProvider as IPresentationPropertyDataProvider },
   );
@@ -54,14 +55,14 @@ export function PropertyGridWithUnifiedSelection(props: PropertyGridWithUnifiedS
   if (isOverLimit) {
     return (
       <FillCentered>
-        {IModelApp.i18n.translate("Sample:property-grid.too-many-elements-selected")}
+        {IModelApp.i18n.translate("PropertyGrid:selection.too-many-elements-selected")}
       </FillCentered>
     );
   }
   if (numSelectedElements !== undefined && numSelectedElements === 0) {
     return (
       <FillCentered>
-        {IModelApp.i18n.translate("Sample:property-grid.no-elements-selected")}
+        {IModelApp.i18n.translate("PropertyGrid:selection.no-elements-selected")}
       </FillCentered>
     );
   }
