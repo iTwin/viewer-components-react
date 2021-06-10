@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import * as React from "react";
 
 import {
@@ -45,11 +46,11 @@ interface PropertyGridWithUnifiedSelectionProps extends VirtualizedPropertyGridW
 }
 
 export function PropertyGridWithUnifiedSelection(props: PropertyGridWithUnifiedSelectionProps): JSX.Element {
-  const { isOverLimit /*, numSelectedElements*/ } = usePropertyDataProviderWithUnifiedSelection(
+  const { isOverLimit , numSelectedElements } = (usePropertyDataProviderWithUnifiedSelection as any) (
     { dataProvider: props.dataProvider as IPresentationPropertyDataProvider }
   );
-  const filteringDataProvider = new FilteringPropertyDataProvider(props.dataProvider, props.filterer)
-  const autoExpandingFilteringDataProvider = new AutoExpandingPropertyDataProvider(filteringDataProvider)
+  const filteringDataProvider = new FilteringPropertyDataProvider(props.dataProvider, props.filterer);
+  const autoExpandingFilteringDataProvider = new AutoExpandingPropertyDataProvider(filteringDataProvider);
   if (isOverLimit) {
     return (
       <FillCentered>
@@ -57,12 +58,13 @@ export function PropertyGridWithUnifiedSelection(props: PropertyGridWithUnifiedS
       </FillCentered>
     );
   }
-  /*if (numSelectedElements === 0) {
+  console.log(isOverLimit, numSelectedElements)
+  if (numSelectedElements !== undefined && numSelectedElements === 0) {
     return (
       <FillCentered>
         {IModelApp.i18n.translate("Sample:property-grid.no-elements-selected")}
       </FillCentered>
     );
-  }*/
+  }
   return <VirtualizedPropertyGridWithDataProvider {...props} dataProvider={autoExpandingFilteringDataProvider} />;
 }
