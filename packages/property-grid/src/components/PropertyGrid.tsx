@@ -25,12 +25,12 @@ import {
   ActionButtonRenderer,
   ActionButtonRendererProps,
   PropertyData,
+  PropertyDataFiltererBase,
+  PropertyDataFilterResult,
   PropertyGridContextMenuArgs,
   PropertyRecordDataFiltererBase,
   PropertyValueRendererManager,
   VirtualizedPropertyGridWithDataProvider,
-  PropertyDataFilterResult,
-  PropertyDataFiltererBase,
 } from "@bentley/ui-components";
 import {
   ContextMenuItem,
@@ -89,10 +89,10 @@ interface PropertyGridState {
 }
 
 class PlaceholderPropertyDataFilterer extends PropertyRecordDataFiltererBase {
-  //Placeholder filter
+  // Placeholder filter
   public get isActive() { return false; }
   public async recordMatchesFilter(): Promise<PropertyDataFilterResult> {
-    return { matchesFilter: true }
+    return { matchesFilter: true };
   }
 }
 
@@ -120,7 +120,7 @@ export class PropertyGrid extends React.Component<
       }
     }
 
-    this._filterer = new PlaceholderPropertyDataFilterer;
+    this._filterer = new PlaceholderPropertyDataFilterer();
     this._dataChangedHandler = this._onDataChanged.bind(this);
     this.state = { className: "", sharedFavorites: [] };
   }
@@ -129,7 +129,7 @@ export class PropertyGrid extends React.Component<
     if (filterer) {
       this._filterer = filterer;
     } else {
-      this._filterer = new PlaceholderPropertyDataFilterer;
+      this._filterer = new PlaceholderPropertyDataFilterer();
     }
   }
 
@@ -492,7 +492,7 @@ export class PropertyGrid extends React.Component<
                 contextMenuArgs: args,
                 field,
                 dataProvider: this._dataProvider,
-                propertyGrid: this
+                propertyGrid: this,
               });
             }
 
@@ -639,4 +639,3 @@ export class PropertyGridWidgetControl extends WidgetControl {
     );
   }
 }
-

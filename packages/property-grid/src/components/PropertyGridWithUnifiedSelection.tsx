@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import * as React from "react";
 
 import {
@@ -13,7 +14,7 @@ import {
   PropertyDataChangeEvent,
   PropertyDataFiltererBase,
   VirtualizedPropertyGridWithDataProvider,
-  VirtualizedPropertyGridWithDataProviderProps
+  VirtualizedPropertyGridWithDataProviderProps,
 } from "@bentley/ui-components";
 import { IPresentationPropertyDataProvider, usePropertyDataProviderWithUnifiedSelection } from "@bentley/presentation-components";
 import { FillCentered } from "@bentley/ui-core";
@@ -47,7 +48,7 @@ interface PropertyGridWithUnifiedSelectionProps extends VirtualizedPropertyGridW
 
 export function PropertyGridWithUnifiedSelection(props: PropertyGridWithUnifiedSelectionProps): JSX.Element {
   const { isOverLimit , numSelectedElements } = (usePropertyDataProviderWithUnifiedSelection as any) (
-    { dataProvider: props.dataProvider as IPresentationPropertyDataProvider }
+    { dataProvider: props.dataProvider as IPresentationPropertyDataProvider },
   );
   const filteringDataProvider = new FilteringPropertyDataProvider(props.dataProvider, props.filterer);
   const autoExpandingFilteringDataProvider = new AutoExpandingPropertyDataProvider(filteringDataProvider);
@@ -58,7 +59,6 @@ export function PropertyGridWithUnifiedSelection(props: PropertyGridWithUnifiedS
       </FillCentered>
     );
   }
-  console.log(isOverLimit, numSelectedElements)
   if (numSelectedElements !== undefined && numSelectedElements === 0) {
     return (
       <FillCentered>
