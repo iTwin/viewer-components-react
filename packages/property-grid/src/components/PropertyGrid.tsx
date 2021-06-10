@@ -124,7 +124,7 @@ export class PropertyGrid extends React.Component<
     this.state = { className: "", sharedFavorites: [] };
   }
 
-  public setFilter(filterer: PropertyRecordDataFiltererBase) {
+  public setFilter(filterer?: PropertyRecordDataFiltererBase) {
     if (filterer) {
       this._filterer = filterer;
     } else {
