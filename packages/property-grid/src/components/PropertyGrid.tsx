@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import "./PropertyGrid.scss";
 
 import * as React from "react";
@@ -610,7 +611,9 @@ export class PropertyGrid extends React.Component<
     return (
       <div className={this.props.rootClassName}>
         {this._renderHeader()}
-        {this._renderPropertyGrid()}
+        <div className="property-grid-with-unified-selection">
+          {this._renderPropertyGrid()}
+        </div>
         {this._renderContextMenu()}
       </div >
     );
