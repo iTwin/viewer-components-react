@@ -207,6 +207,7 @@ export class MultiElementPropertyGridWidgetControl extends WidgetControl {
         isOrientationFixed={options.isOrientationFixed}
         enableCopyingPropertyText={options.enableCopyingPropertyText}
         enableFavoriteProperties={options.enableFavoriteProperties}
+        enableNullValueToggle={options.enableNullValueToggle}
         iModelConnection={options.iModelConnection}
         projectId={options.projectId}
         debugLog={options.debugLog}

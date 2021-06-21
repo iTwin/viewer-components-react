@@ -6,12 +6,15 @@
 import * as React from "react";
 
 import {
+  FilteredType,
   FilteringPropertyDataProvider,
   IPropertyDataProvider,
   PropertyCategory,
   PropertyData,
   PropertyDataChangeEvent,
   PropertyDataFiltererBase,
+  PropertyDataFilterResult,
+  PropertyRecordDataFiltererBase,
   VirtualizedPropertyGridWithDataProvider,
   VirtualizedPropertyGridWithDataProviderProps,
 } from "@bentley/ui-components";
@@ -19,6 +22,43 @@ import { IPresentationPropertyDataProvider, usePropertyDataProviderWithUnifiedSe
 import { FillCentered } from "@bentley/ui-core";
 import { IModelApp } from "@bentley/imodeljs-frontend";
 import { IDisposable } from "@bentley/bentleyjs-core";
+import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
+
+export class PlaceholderPropertyDataFilterer extends PropertyRecordDataFiltererBase {
+  public get isActive() { return false; }
+  public async recordMatchesFilter(): Promise<PropertyDataFilterResult> {
+    return { matchesFilter: true };
+  }
+}
+
+export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFiltererBase {
+  public get isActive() {
+    return true;
+  }
+  public async recordMatchesFilter(
+    node: PropertyRecord,
+  ): Promise<PropertyDataFilterResult> {
+    if (node.value.valueFormat === PropertyValueFormat.Primitive) {
+      return {
+        filteredTypes: [FilteredType.Value],
+        matchesFilter: !!node.value.displayValue,
+      };
+    }
+    if (node.value.valueFormat === PropertyValueFormat.Array) {
+      return {
+        filteredTypes: [FilteredType.Value],
+        matchesFilter: node.value.items.length > 0,
+      };
+    }
+    if (node.value.valueFormat === PropertyValueFormat.Struct) {
+      return {
+        filteredTypes: [FilteredType.Value],
+        matchesFilter: Object.keys(node.value.members).length > 0,
+      };
+    }
+    return { matchesFilter: false };
+  }
+}
 
 type CustomPropertyDataProvider<TPropertyData> = IDisposable & Omit<IPropertyDataProvider, "getData"> & { getData: () => Promise<TPropertyData> };
 class AutoExpandingPropertyDataProvider<TPropertyData extends PropertyData> implements IPropertyDataProvider, IDisposable {
@@ -41,13 +81,13 @@ class AutoExpandingPropertyDataProvider<TPropertyData extends PropertyData> impl
   }
 }
 
-interface PropertyGridWithUnifiedSelectionProps extends VirtualizedPropertyGridWithDataProviderProps {
+interface FilteringPropertyGrid extends VirtualizedPropertyGridWithDataProviderProps {
   filterer: PropertyDataFiltererBase;
 }
 
-export function PropertyGridWithUnifiedSelection(props: PropertyGridWithUnifiedSelectionProps): JSX.Element {
+export function FilteringPropertyGridWithUnifiedSelection(props: FilteringPropertyGrid): JSX.Element {
   // numSelectedElements will return undefined until presentation-components 2.17.x
-  const { isOverLimit , numSelectedElements } = (usePropertyDataProviderWithUnifiedSelection as any) (
+  const { isOverLimit, numSelectedElements } = (usePropertyDataProviderWithUnifiedSelection as any)(
     { dataProvider: props.dataProvider as IPresentationPropertyDataProvider },
   );
   const filteringDataProvider = new FilteringPropertyDataProvider(props.dataProvider, props.filterer);

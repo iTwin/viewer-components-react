@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import "./PropertyGrid.scss";
 
 import * as React from "react";
@@ -26,9 +25,7 @@ import {
   ActionButtonRendererProps,
   PropertyData,
   PropertyDataFiltererBase,
-  PropertyDataFilterResult,
   PropertyGridContextMenuArgs,
-  PropertyRecordDataFiltererBase,
   PropertyValueRendererManager,
   VirtualizedPropertyGridWithDataProvider,
 } from "@bentley/ui-components";
@@ -44,7 +41,11 @@ import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
 import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
-import { PropertyGridWithUnifiedSelection } from "./PropertyGridWithUnifiedSelection";
+import {
+  FilteringPropertyGridWithUnifiedSelection,
+  NonEmptyValuesPropertyDataFilterer,
+  PlaceholderPropertyDataFilterer,
+} from "./FilteringPropertyGrid";
 
 const sharedNamespace = "favoriteProperties";
 const sharedName = "sharedProps";
@@ -59,7 +60,6 @@ export interface OnSelectEventArgs {
   dataProvider: IPresentationPropertyDataProvider;
   field?: Field;
   contextMenuArgs: PropertyGridContextMenuArgs;
-  propertyGrid: PropertyGrid;
 }
 
 export interface PropertyGridProps {
@@ -69,6 +69,7 @@ export interface PropertyGridProps {
   isOrientationFixed?: boolean;
   enableFavoriteProperties?: boolean;
   enableCopyingPropertyText?: boolean;
+  enableNullValueToggle?: boolean;
   additionalContextMenuOptions?: ContextMenuItemInfo[];
   debugLog?: (message: string) => void;
   featureTracking?: PropertyGridFeatureTracking;
@@ -86,20 +87,14 @@ interface PropertyGridState {
   contextMenu?: PropertyGridContextMenuArgs;
   contextMenuItemInfos?: ContextMenuItemInfo[];
   sharedFavorites: string[];
-}
-
-class PlaceholderPropertyDataFilterer extends PropertyRecordDataFiltererBase {
-  // Placeholder filter
-  public get isActive() { return false; }
-  public async recordMatchesFilter(): Promise<PropertyDataFilterResult> {
-    return { matchesFilter: true };
-  }
+  showNullValues?: boolean;
 }
 
 export class PropertyGrid extends React.Component<
   PropertyGridProps,
   PropertyGridState
 > {
+
   private _dataProvider: PresentationPropertyDataProvider;
   private _filterer: PropertyDataFiltererBase;
   private _dataChangedHandler: () => void;
@@ -122,15 +117,7 @@ export class PropertyGrid extends React.Component<
 
     this._filterer = new PlaceholderPropertyDataFilterer();
     this._dataChangedHandler = this._onDataChanged.bind(this);
-    this.state = { className: "", sharedFavorites: [] };
-  }
-
-  public setFilter(filterer?: PropertyRecordDataFiltererBase) {
-    if (filterer) {
-      this._filterer = filterer;
-    } else {
-      this._filterer = new PlaceholderPropertyDataFilterer();
-    }
+    this.state = { className: "", sharedFavorites: [], showNullValues: true };
   }
 
   public async componentDidMount() {
@@ -387,6 +374,16 @@ export class PropertyGrid extends React.Component<
     this.setState({ contextMenu: undefined });
   }
 
+  private _onHideNull = () => {
+    this._filterer = new NonEmptyValuesPropertyDataFilterer();
+    this.setState({ contextMenu: undefined, showNullValues: false });
+  }
+
+  private _onShowNull = () => {
+    this._filterer = new PlaceholderPropertyDataFilterer();
+    this.setState({ contextMenu: undefined, showNullValues: true });
+  }
+
   private _onPropertyContextMenu = (args: PropertyGridContextMenuArgs) => {
     args.event.persist();
     this.setState({
@@ -479,6 +476,36 @@ export class PropertyGrid extends React.Component<
       });
     }
 
+    if (this.props.enableNullValueToggle) {
+      if (this.state.showNullValues) {
+        items.push({
+          key: "hide-null",
+          onSelect: () => {
+            this._onHideNull();
+          },
+          title: PropertyGridManager.translate(
+            "context-menu.hide-null.description",
+          ),
+          label: PropertyGridManager.translate(
+            "context-menu.hide-null.label",
+          ),
+        });
+      } else {
+        items.push({
+          key: "show-null",
+          onSelect: () => {
+            this._onShowNull();
+          },
+          title: PropertyGridManager.translate(
+            "context-menu.show-null.description",
+          ),
+          label: PropertyGridManager.translate(
+            "context-menu.show-null.label",
+          ),
+        });
+      }
+    }
+
     if (
       this.props.additionalContextMenuOptions &&
       this.props.additionalContextMenuOptions.length > 0
@@ -492,7 +519,6 @@ export class PropertyGrid extends React.Component<
                 contextMenuArgs: args,
                 field,
                 dataProvider: this._dataProvider,
-                propertyGrid: this,
               });
             }
 
@@ -593,16 +619,18 @@ export class PropertyGrid extends React.Component<
       );
     } else {
       return (
-        <PropertyGridWithUnifiedSelection
-          orientation={this.props.orientation ?? Orientation.Horizontal}
-          isOrientationFixed={this.props.isOrientationFixed ?? true}
-          dataProvider={this._dataProvider}
-          filterer={this._filterer}
-          isPropertyHoverEnabled={true}
-          isPropertySelectionEnabled={true}
-          onPropertyContextMenu={this._onPropertyContextMenu}
-          actionButtonRenderers={[this._shareActionButtonRenderer]}
-        />
+        <div className="filtering-property-grid-with-unified-selection">
+          <FilteringPropertyGridWithUnifiedSelection
+            orientation={this.props.orientation ?? Orientation.Horizontal}
+            isOrientationFixed={this.props.isOrientationFixed ?? true}
+            dataProvider={this._dataProvider}
+            filterer={this._filterer}
+            isPropertyHoverEnabled={true}
+            isPropertySelectionEnabled={true}
+            onPropertyContextMenu={this._onPropertyContextMenu}
+            actionButtonRenderers={[this._shareActionButtonRenderer]}
+          />
+        </div>
       );
     }
   }
@@ -611,11 +639,9 @@ export class PropertyGrid extends React.Component<
     return (
       <div className={this.props.rootClassName}>
         {this._renderHeader()}
-        <div className="property-grid-with-unified-selection">
-          {this._renderPropertyGrid()}
-        </div>
+        {this._renderPropertyGrid()}
         {this._renderContextMenu()}
-      </div >
+      </div>
     );
   }
 }
@@ -630,6 +656,7 @@ export class PropertyGridWidgetControl extends WidgetControl {
         isOrientationFixed={options.isOrientationFixed}
         enableCopyingPropertyText={options.enableCopyingPropertyText}
         enableFavoriteProperties={options.enableFavoriteProperties}
+        enableNullValueToggle={options.enableNullValueToggle}
         iModelConnection={options.iModelConnection}
         projectId={options.projectId}
         debugLog={options.debugLog}
