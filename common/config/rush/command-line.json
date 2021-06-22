@@ -56,7 +56,8 @@
       "summary": "Run copyright linter using lintstaged",
       "autoinstallerName": "rush-lintstaged",
       // This will invoke common/autoinstall/rush-prettier/node_modules/.bin/pretty-quick
-      "shellCommand": "lint-staged --quiet --config common/scripts/.lintstagedrc.json"
+      "shellCommand": "lint-staged --quiet --config common/scripts/.lintstagedrc.json",
+      "safeForSimultaneousRushProcesses": true
     }
   ]
 }
