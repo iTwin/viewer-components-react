@@ -1,8 +1,7 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
 
 import {
   Code,
@@ -214,12 +213,8 @@ export const createSavedViewData = (vp: Viewport): SavedViewData => {
   }
 
   const perModelCategoryVisibility: PerModelCategoryVisibilityProps[] = [];
-  vp.perModelCategoryVisibility.forEachOverride(
-    (modelId: string, categoryId: string, visible: boolean) => {
-      perModelCategoryVisibility.push({ modelId, categoryId, visible });
-      return true;
-    }
-  );
+  for (const overrideEntry of vp.perModelCategoryVisibility)
+    perModelCategoryVisibility.push(overrideEntry);
 
   const data: SavedViewData = {
     alwaysDrawn,

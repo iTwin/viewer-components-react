@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { CanvasDecoration, Viewport, BeButtonEvent, DecorateContext, IModelApp, SelectionTool, SelectionMode, BeButton } from "@bentley/imodeljs-frontend";
@@ -134,7 +134,7 @@ export class TextMarker implements CanvasDecoration {
   public static createHoverBox(textLines: string[] | TextEntry[], worldLocation: XYAndZ, styleSet?: StyleSet): TextMarker {
     const marker = new TextMarker(textLines, worldLocation);
     const styleTheme = styleSet || StyleSet.default;
-    const style =  styleTheme.getTextStyle(WellKnownTextStyleType.HoverBox);
+    const style = styleTheme.getTextStyle(WellKnownTextStyleType.HoverBox);
     marker.applyStyle(style);
     marker.offset = { x: 0.0, y: -0.8, type: TextOffsetType.Percentage };
     return marker;
@@ -454,9 +454,9 @@ export class TextMarker implements CanvasDecoration {
         let shadowBlur = 0;
 
         // If ID is being flashed, draw with the original fill color lerped with the hilite color based on current flash intensity
-        if (this._currViewport.lastFlashedElem === this.transientHiliteId) {
+        if (this._currViewport.lastFlashedElementId === this.transientHiliteId) {
           const startColor = this._boxFillColor ?? this._currViewport.hilite.color;
-          fillColorStyle = startColor.lerp(this._currViewport.hilite.color, this._currViewport.flashIntensity).toHexString();
+          fillColorStyle = startColor.lerp(this._currViewport.hilite.color, this._currViewport.flashSettings.maxIntensity).toHexString();
           shadowColorStyle = fillColorStyle;
           shadowBlur = (this._currViewport.hilite.silhouette === Hilite.Silhouette.Thick) ? 2 : 1;
           // If ID is selected, draw with hilite color silhoutte and blended fill hilite based on visible ratio.
