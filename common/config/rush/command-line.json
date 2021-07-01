@@ -49,6 +49,17 @@
       "ignoreMissingScript": true,
       "ignoreDependencyOrder": true,
       "allowWarningsInSuccessfulBuild": true
+    },
+    {
+      "name": "build",
+      "commandKind": "bulk",
+      "summary": "Run build for each package",
+      "description": "Iterates through each package in the monorepo and runs the 'build' script",
+      "safeForSimultaneousRushProcesses": false,
+      "enableParallelism": true,
+      "ignoreDependencyOrder": false,
+      "ignoreMissingScript": false,
+      "allowWarningsInSuccessfulBuild": true
     }
   ]
 }
