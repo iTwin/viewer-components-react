@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-content-tree-react",
+      "comment": "add rebuild script",
+      "type": "none"
+    }
+  ],
+  "packageName": "@bentley/imodel-content-tree-react",
+  "email": "aruniverse@users.noreply.github.com"
+}

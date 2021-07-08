@@ -26,6 +26,7 @@
     "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "rebuild": "npm run clean && npm run build",
     "copy:assets": "cpx \"./src/**/*.{*css,json,svg}\" \"./lib\" && cpx \"./public/**/*\" \"./lib/public\"",
     "cover": "nyc npm test",
     "lint": "eslint ./src/**/*.{ts,tsx} 1>&2",

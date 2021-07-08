@@ -15,6 +15,7 @@
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "watch": "tsc --w",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "rebuild": "npm run clean && npm run build",
     "lint": "tslint --project . 1>&2",
     "test": "node ./node_modules/@bentley/certa/bin/certa.js -c certa.json -r chrome",
     "cover": "nyc npm test",

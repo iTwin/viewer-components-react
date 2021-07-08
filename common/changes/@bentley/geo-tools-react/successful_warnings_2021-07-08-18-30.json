@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/geo-tools-react",
+      "comment": "add rebuild script",
+      "type": "none"
+    }
+  ],
+  "packageName": "@bentley/geo-tools-react",
+  "email": "aruniverse@users.noreply.github.com"
+}
