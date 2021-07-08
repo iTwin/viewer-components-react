@@ -21,6 +21,7 @@
   "scripts": {
     "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
+    "rebuild": "npm run clean && npm run build",
     "clean": "rimraf lib build .rush/temp/package-deps*.json",
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "cover": "",
