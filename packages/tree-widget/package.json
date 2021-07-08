@@ -62,8 +62,8 @@
     "@types/react-dom": "^16.8.0",
     "@types/react-redux": "^7.0.1",
     "cpx": "^1.5.0",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
     "rimraf": "^3.0.2",
     "tslint": "^5.11.0",
     "typescript": "~3.7.4"
@@ -91,7 +91,7 @@
     "@bentley/ui-framework": "^2.15.2",
     "@bentley/ui-ninezone": "^2.15.2",
     "@bentley/webgl-compatibility": "^2.15.2",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0"
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0"
   }
 }
