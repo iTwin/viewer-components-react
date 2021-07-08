@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "add rebuild script",
+      "type": "none"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "aruniverse@users.noreply.github.com"
+}
