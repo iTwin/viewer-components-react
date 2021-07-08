@@ -23,6 +23,7 @@
     "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize && npm run build:extension",
     "build:extension": "extension-webpack-tools build -s ./src/property-grid-react.ts -o ./lib/extension --sourceMap && npm run copy:assets:extension",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "rebuild": "npm run clean && npm run build",
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "copy:assets:extension": "cpx \"./src/**/*.scss\" ./lib/extension && cpx \"./public/locales/**/*\" ./lib/extension/locales",
     "cover": "",

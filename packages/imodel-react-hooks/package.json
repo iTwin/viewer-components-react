@@ -25,6 +25,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json 1>&2",
     "clean": "rimraf lib build .rush/temp/package-deps*.json",
+    "rebuild": "npm run clean && npm run build",
     "cover": "",
     "lint": "",
     "start": "tsc -p tsconfig.json -w",
