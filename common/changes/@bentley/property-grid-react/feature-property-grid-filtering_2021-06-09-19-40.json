@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "Added support for FilteringPropertyDataProvider in PropertyGrid",
+      "type": "major"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react",
+  "email": "65671230+usjpin@users.noreply.github.com"
+}
