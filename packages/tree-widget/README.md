@@ -183,8 +183,7 @@ export class TreeWidgetControl extends WidgetControl {
 
 ### Using the TreeWidgetUiItemsProvider
 
-The `TreeWidgetUiItemsProvider` functions like the `TreeWidgetControl` but is instead passed through the `uiProviders` prop
-of the `<Viewer>` component.
+The `TreeWidgetUiItemsProvider` functions like the `TreeWidgetControl` but is instead passed through the `uiProviders` prop of the `<Viewer>` component.
 
 ```ts
 <Viewer
@@ -197,5 +196,4 @@ of the `<Viewer>` component.
 />
 ```
 
-`props` is typed as `TreeWidgetControlOptions` so the only necessary prop to pass
-is an `IModelConnection`. All other props are optional.
+`props` is typed as `TreeWidgetControlOptions` so the only necessary prop to pass is an `IModelConnection`. All other props are optional.
