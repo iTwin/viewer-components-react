@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Added a UiProvider that implements the existing tree widget",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "48142512+spap975@users.noreply.github.com"
+}
