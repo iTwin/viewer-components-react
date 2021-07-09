@@ -1,35 +1,35 @@
-import { I18N } from "@bentley/imodeljs-i18n";
 import {
   AbstractWidgetProps,
   StagePanelLocation,
   StagePanelSection,
+  StageUsage,
   UiItemsProvider,
 } from "@bentley/ui-abstract";
 import {
-  UiFramework,
   SpatialContainmentTree,
   ClassGroupingOption
 } from "@bentley/ui-framework";
 import React from "react";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
-import { CategoriesTreeComponent, ModelsTreeComponent, TreeWidgetControlOptions } from "../tree-widget-react";
+import { CategoriesTreeComponent } from "./trees/CategoriesTree";
+import { ModelsTreeComponent } from "./trees/ModelsTree";
+import { TreeWidgetControlOptions } from "./TreeWidgetControl";
 import { IModelConnection, Viewport } from "@bentley/imodeljs-frontend";
 import { SelectableContentDefinition } from "@bentley/ui-components";
+import { TreeWidget } from "../TreeWidget";
 
-/** Provides the property grid widget to zone 9 */
-export class TreeUiItemsProvider implements UiItemsProvider {
+export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   public readonly id = "TreeUiitemsProvider";
-  public static i18n: I18N;
 
   private _imodel: IModelConnection;
   private _activeView?: Viewport;
-  private _modelsTreeProps?: {};
-  private _categoriesTreeProps?: {};
-  private _spatialTreeProps?: {};
   private _enablePreloading?: boolean;
   private _enableElementsClassGrouping?: boolean;
   private _allViewports?: boolean;
   private _additionalTrees?: SelectableContentDefinition[];
+  private _modelsTreeProps?: {};
+  private _categoriesTreeProps?: {};
+  private _spatialTreeProps?: {};
   private _modelsTreeReplacement?: () => React.ReactNode;
   private _categoriesTreeReplacement?: () => React.ReactNode;
   private _spatialTreeReplacement?: () => React.ReactNode;
@@ -37,13 +37,13 @@ export class TreeUiItemsProvider implements UiItemsProvider {
   constructor(props: TreeWidgetControlOptions) {
     this._imodel = props.iModelConnection;
     this._activeView = props.activeView;
-    this._modelsTreeProps = props.additionalProps?.modelsTree;
-    this._categoriesTreeProps = props.additionalProps?.categoriesTree;
-    this._spatialTreeProps = props.additionalProps?.spatialTree;
     this._enablePreloading = props.enablePreloading;
     this._enableElementsClassGrouping = props.enableElementsClassGrouping;
     this._allViewports = props.allViewports;
     this._additionalTrees = props.additionalTrees;
+    this._modelsTreeProps = props.additionalProps?.modelsTree;
+    this._categoriesTreeProps = props.additionalProps?.categoriesTree;
+    this._spatialTreeProps = props.additionalProps?.spatialTree;
     this._modelsTreeReplacement = props.treeReplacements?.modelsTree;
     this._categoriesTreeReplacement = props.treeReplacements?.categoriesTree;
     this._spatialTreeReplacement = props.treeReplacements?.spatialTree;
@@ -51,13 +51,15 @@ export class TreeUiItemsProvider implements UiItemsProvider {
 
   public provideWidgets(
     _stageId: string,
-    _stageUsage: string,
+    stageUsage: string,
     location: StagePanelLocation,
     _section: StagePanelSection | undefined,
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
-
-    if (location === StagePanelLocation.Right) {
+    if (
+      stageUsage === StageUsage.General &&
+      location === StagePanelLocation.Right
+    ) {
 
       const modelsTreeComponent = (
         <ModelsTreeComponent
@@ -95,23 +97,25 @@ export class TreeUiItemsProvider implements UiItemsProvider {
 
       const trees: SelectableContentDefinition[] = [
         {
-          label: UiFramework.translate("visibilityWidget.modeltree"),
+          label: TreeWidget.translate("visibilityWidget.modeltree"),
           id: "model-tree",
           render: this._modelsTreeReplacement ? this._modelsTreeReplacement : () => modelsTreeComponent,
         },
         {
-          label: UiFramework.translate("visibilityWidget.categories"),
+          label: TreeWidget.translate("visibilityWidget.categories"),
           id: "categories-tree",
           render: this._categoriesTreeReplacement ? this._categoriesTreeReplacement : () => categoriesTreeComponent,
         },
         {
-          label: UiFramework.translate("visibilityWidget.containment"),
+          label: TreeWidget.translate("visibilityWidget.containment"),
           id: "spatial-containment-tree",
           render: this._spatialTreeReplacement ? this._spatialTreeReplacement : () => spatialContainmentComponent,
         },
       ];
 
-      if (this._additionalTrees) trees.push(...this._additionalTrees);
+      if (this._additionalTrees) {
+        trees.push(...this._additionalTrees);
+      }
 
       widgets.push({
         id: "tree",
