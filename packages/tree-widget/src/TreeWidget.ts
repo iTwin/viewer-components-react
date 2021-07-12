@@ -13,12 +13,17 @@ import { UiError, getClassName } from "@bentley/ui-abstract";
  */
 export class TreeWidget {
   private static _i18n?: I18N;
+  private static _initialized: boolean;
 
   /**
    * Called by IModelApp to initialize the Tree Widget
    * @param i18n - The internationalization service created by the IModelApp.
    */
   public static async initialize(i18n: I18N): Promise<void> {
+    if (this._initialized)
+      return;
+
+    this._initialized = true;
     TreeWidget._i18n = i18n;
 
     return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace)

@@ -8,5 +8,8 @@
   "toggle3DViews": "Toggle 3D Views",
   "label2D": "2D",
   "label3D": "3D",
-  "learnMore": "Learn more"
+  "learnMore": "Learn more",
+  "modeltree": "Model Tree",
+  "categories": "Categories",
+  "containment": "Spatial Containment"
 }

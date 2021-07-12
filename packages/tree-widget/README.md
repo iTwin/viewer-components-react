@@ -183,17 +183,12 @@ export class TreeWidgetControl extends WidgetControl {
 
 ### Using the TreeWidgetUiItemsProvider
 
-The `TreeWidgetUiItemsProvider` functions like the `TreeWidgetControl` but is instead passed through the `uiProviders` prop of the `<Viewer>` component.
+The `TreeWidgetUiItemsProvider` functions like the `TreeWidgetControl` but is instead passed through the `uiProviders` prop of the `<Viewer>` component. `TreeWidget` must be initialized before use.
 
 ```ts
 <Viewer
-  authConfig={{ oidcClient: AuthorizationClient.oidcClient }}
-  contextId={process.env.IMJS_AUTH_CLIENT_CONTEXT_ID as string}
-  iModelId={process.env.IMJS_AUTH_CLIENT_IMODEL_ID as string}
-  appInsightsKey={process.env.IMJS_APPLICATION_INSIGHTS_KEY}
-  theme={ColorTheme.Dark}
+  ...
+  onIModelAppInit={()=>{TreeWidget.initialize(IModelApp.i18n)}}
   uiProviders={[new TreeWidgetUiItemsProvider(props)]}
 />
 ```
-
-`props` is typed as `TreeWidgetControlOptions` so the only necessary prop to pass is an `IModelConnection`. All other props are optional.
