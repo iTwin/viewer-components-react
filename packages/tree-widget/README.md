@@ -183,12 +183,16 @@ export class TreeWidgetControl extends WidgetControl {
 
 ### Using the TreeWidgetUiItemsProvider
 
-The `TreeWidgetUiItemsProvider` functions like the `TreeWidgetControl` but is instead passed through the `uiProviders` prop of the `<Viewer>` component. `TreeWidget` must be initialized before use.
+The `TreeWidgetUiItemsProvider` functions like the `TreeWidgetControl` but is instead passed through the `uiProviders` prop of the `<Viewer />` component. `TreeWidget` must be initialized before use.
 
 ```ts
+const handleOnIModelAppInit = async () => {
+    await TreeWidget.initialize(IModelApp.i18n);
+  };
+
 <Viewer
   ...
-  onIModelAppInit={()=>{TreeWidget.initialize(IModelApp.i18n)}}
+  onIModelAppInit={handleOnIModelAppInit}
   uiProviders={[new TreeWidgetUiItemsProvider(props)]}
 />
 ```

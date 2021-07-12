@@ -140,7 +140,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
 
       widgets.push({
         id: "tree",
-        label: "Tree View",
+        label: TreeWidget.translate("treeview"),
         getWidgetContent: () =>
           <TreeWidgetComponent trees={trees} />
         ,

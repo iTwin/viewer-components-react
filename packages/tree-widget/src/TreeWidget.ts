@@ -6,6 +6,7 @@
 import * as i18next from "i18next";
 import { I18N } from "@bentley/imodeljs-i18n";
 import { UiError, getClassName } from "@bentley/ui-abstract";
+import { IModelApp } from "@bentley/imodeljs-frontend";
 
 /**
  * Entry point for static initialization required by various components used in the package.
@@ -13,7 +14,7 @@ import { UiError, getClassName } from "@bentley/ui-abstract";
  */
 export class TreeWidget {
   private static _i18n?: I18N;
-  private static _initialized: boolean;
+  private static _initialized?: boolean;
 
   /**
    * Called by IModelApp to initialize the Tree Widget
@@ -24,7 +25,7 @@ export class TreeWidget {
       return;
 
     this._initialized = true;
-    TreeWidget._i18n = i18n;
+    TreeWidget._i18n = i18n ?? IModelApp.i18n;
 
     return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace)
       .readFinished;
