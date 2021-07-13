@@ -19,10 +19,6 @@ import { SelectableContentDefinition } from "@bentley/ui-components";
 import { TreeWidget } from "../TreeWidget";
 import { TreeWidgetControlOptions } from "./TreeWidgetControl";
 
-export interface TreeWidgetUiItemsProviderProps extends Partial<TreeWidgetControlOptions> {
-  iModelConnection?: IModelConnection;
-}
-
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   public readonly id = "TreeUiitemsProvider";
 
@@ -39,7 +35,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   private _categoriesTreeReplacement?: () => React.ReactNode;
   private _spatialTreeReplacement?: () => React.ReactNode;
 
-  constructor(props?: TreeWidgetUiItemsProviderProps) {
+  constructor(props?: Partial<TreeWidgetControlOptions>) {
     this._imodel = props?.iModelConnection;
     this._activeView = props?.activeView;
     this._enablePreloading = props?.enablePreloading;
