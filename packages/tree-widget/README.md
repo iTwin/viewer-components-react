@@ -10,7 +10,7 @@ The tree-widget-react package provides a UiProvider class - `TreeWidgetUiItemsPr
 
 - Categories Tree
 
-The package also provides the widget controller class - `TreeWidgetControl` - as well as the underlying component - `TreeWidgetComponent` - which you can wrap within your own custom UiProvider and pass in your own custom trees to display.
+The package also provides the underlying component - `TreeWidgetComponent` - which you can wrap within your own custom UiProvider and pass in your own custom trees to display.
 
 ## Sample usage
 
