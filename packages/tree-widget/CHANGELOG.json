@@ -2,6 +2,23 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.4.0",
+      "tag": "@bentley/tree-widget-react_v1.4.0",
+      "date": "Tue, 13 Jul 2021 17:43:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "add rebuild script"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Added a UiProvider that implements the existing tree widget"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.1",
       "tag": "@bentley/tree-widget-react_v1.3.1",
       "date": "Tue, 08 Jun 2021 21:23:59 GMT",
