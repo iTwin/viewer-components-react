@@ -17,24 +17,10 @@ import { ModelsTreeComponent } from "./trees/ModelsTree";
 import { IModelConnection, Viewport } from "@bentley/imodeljs-frontend";
 import { SelectableContentDefinition } from "@bentley/ui-components";
 import { TreeWidget } from "../TreeWidget";
+import { TreeWidgetControlOptions } from "./TreeWidgetControl";
 
-export interface TreeWidgetUiItemsProviderProps {
+export interface TreeWidgetUiItemsProviderProps extends Partial<TreeWidgetControlOptions> {
   iModelConnection?: IModelConnection;
-  activeView?: Viewport;
-  enablePreloading?: boolean;
-  enableElementsClassGrouping?: boolean;
-  allViewports?: boolean;
-  additionalTrees?: SelectableContentDefinition[];
-  additionalProps?: {
-    modelsTree?: {};
-    categoriesTree?: {};
-    spatialTree?: {};
-  };
-  treeReplacements?: {
-    modelsTree?: () => React.ReactNode;
-    categoriesTree?: () => React.ReactNode;
-    spatialTree?: () => React.ReactNode;
-  }
 }
 
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
