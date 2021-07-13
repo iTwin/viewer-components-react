@@ -20,7 +20,7 @@ export class TreeWidget {
    * Called by IModelApp to initialize the Tree Widget
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n: I18N): Promise<void> {
+  public static async initialize(i18n?: I18N): Promise<void> {
     if (this._initialized)
       return;
 
