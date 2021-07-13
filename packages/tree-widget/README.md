@@ -14,9 +14,7 @@ The package also provides the widget controller class - `TreeWidgetControl` - as
 
 ## Sample usage
 
-### Using the TreeWidgetUiItemsProvider
-
-Initilizing `TreeWidget` before using the `TreeWidgetUiItemsProvider` is ### REQUIRED ###
+Initializing `TreeWidget` before using the `TreeWidgetUiItemsProvider` is **required**
 
 ```ts
 const handleOnIModelAppInit = async () => {
