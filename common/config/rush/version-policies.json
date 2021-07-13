@@ -6,8 +6,7 @@
   },
   {
     "policyName": "markup-frontstage",
-    "definitionName": "individualVersion",
-    "lockedMajor": 2
+    "definitionName": "individualVersion"
   },
   {
     "policyName": "tree-widget",

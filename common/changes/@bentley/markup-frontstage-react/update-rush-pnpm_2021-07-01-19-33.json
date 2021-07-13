@@ -3,7 +3,7 @@
     {
       "packageName": "@bentley/markup-frontstage-react",
       "comment": "Update iTwin.js minimum dependencies to ^2.17.0",
-      "type": "minor"
+      "type": "major"
     }
   ],
   "packageName": "@bentley/markup-frontstage-react",
