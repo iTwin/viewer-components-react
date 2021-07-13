@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { CanvasDecoration, Viewport, BeButtonEvent, DecorateContext, IModelApp, SelectionTool, SelectionMode, BeButton } from "@bentley/imodeljs-frontend";
-import { Point3d, Angle, XAndY, PolygonOps, LineString3d, Transform, Matrix3d, AxisIndex, XYAndZ, Vector3d, Point2d } from "@bentley/geometry-core";
-import { ColorDef, Hilite } from "@bentley/imodeljs-common";
-import { TextStyleProps, TextOffsetProps, TextOffsetType, IconStyleProps, IconAlignment, StyleSet, WellKnownTextStyleType } from "./GraphicStyle";
 import { Id64String } from "@bentley/bentleyjs-core";
+import { Angle, AxisIndex, LineString3d, Matrix3d, Point2d, Point3d, PolygonOps, Transform, Vector3d, XAndY, XYAndZ } from "@bentley/geometry-core";
+import { ColorDef, Hilite } from "@bentley/imodeljs-common";
+import { BeButton, BeButtonEvent, CanvasDecoration, DecorateContext, IModelApp, SelectionMode, SelectionTool, Viewport } from "@bentley/imodeljs-frontend";
+import { IconAlignment, IconStyleProps, StyleSet, TextOffsetProps, TextOffsetType, TextStyleProps, WellKnownTextStyleType } from "./GraphicStyle";
 
 /**
  * TextEntry for the TextMarker
@@ -134,7 +134,7 @@ export class TextMarker implements CanvasDecoration {
   public static createHoverBox(textLines: string[] | TextEntry[], worldLocation: XYAndZ, styleSet?: StyleSet): TextMarker {
     const marker = new TextMarker(textLines, worldLocation);
     const styleTheme = styleSet || StyleSet.default;
-    const style =  styleTheme.getTextStyle(WellKnownTextStyleType.HoverBox);
+    const style = styleTheme.getTextStyle(WellKnownTextStyleType.HoverBox);
     marker.applyStyle(style);
     marker.offset = { x: 0.0, y: -0.8, type: TextOffsetType.Percentage };
     return marker;
@@ -454,9 +454,9 @@ export class TextMarker implements CanvasDecoration {
         let shadowBlur = 0;
 
         // If ID is being flashed, draw with the original fill color lerped with the hilite color based on current flash intensity
-        if (this._currViewport.lastFlashedElem === this.transientHiliteId) {
+        if (this._currViewport.lastFlashedElementId === this.transientHiliteId) {
           const startColor = this._boxFillColor ?? this._currViewport.hilite.color;
-          fillColorStyle = startColor.lerp(this._currViewport.hilite.color, this._currViewport.flashIntensity).toHexString();
+          fillColorStyle = startColor.lerp(this._currViewport.hilite.color, this._currViewport.flashSettings.maxIntensity).toHexString();
           shadowColorStyle = fillColorStyle;
           shadowBlur = (this._currViewport.hilite.silhouette === Hilite.Silhouette.Thick) ? 2 : 1;
           // If ID is selected, draw with hilite color silhoutte and blended fill hilite based on visible ratio.
