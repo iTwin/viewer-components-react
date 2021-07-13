@@ -7,8 +7,7 @@ import {
   WidgetControl,
   ConfigurableCreateInfo,
   SpatialContainmentTree,
-  ClassGroupingOption,
-  UiFramework,
+  ClassGroupingOption
 } from "@bentley/ui-framework";
 import React from "react";
 import { ModelsTreeComponent } from "./trees/ModelsTree";
@@ -16,6 +15,7 @@ import { CategoriesTreeComponent } from "./trees/CategoriesTree";
 import { IModelConnection, Viewport } from "@bentley/imodeljs-frontend";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
 import { SelectableContentDefinition } from "@bentley/ui-components";
+import { TreeWidget } from "../TreeWidget";
 
 export interface TreeWidgetControlOptions {
   iModelConnection: IModelConnection;
@@ -87,17 +87,17 @@ export class TreeWidgetControl extends WidgetControl {
 
     const trees: SelectableContentDefinition[] = [
       {
-        label: UiFramework.translate("visibilityWidget.modeltree"),
+        label: TreeWidget.translate("modeltree"),
         id: "model-tree",
         render: modelsTreeReplacement ? modelsTreeReplacement : () => modelsTreeComponent,
       },
       {
-        label: UiFramework.translate("visibilityWidget.categories"),
+        label: TreeWidget.translate("categories"),
         id: "categories-tree",
         render: categoriesTreeReplacement ? categoriesTreeReplacement : () => categoriesTreeComponent,
       },
       {
-        label: UiFramework.translate("visibilityWidget.containment"),
+        label: TreeWidget.translate("containment"),
         id: "spatial-containment-tree",
         render: spatialTreeReplacement ? spatialTreeReplacement : () => spatialContainmentComponent,
       },
