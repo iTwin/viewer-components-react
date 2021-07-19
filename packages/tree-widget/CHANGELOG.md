@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Tue, 13 Jul 2021 17:43:28 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Jul 2021 18:07:24 GMT and should not be manually modified.
+
+## 1.4.1
+Mon, 19 Jul 2021 18:07:24 GMT
+
+### Patches
+
+- Model/Category tree was not resizing properly, missing flex=1.
 
 ## 1.4.0
 Tue, 13 Jul 2021 17:43:28 GMT

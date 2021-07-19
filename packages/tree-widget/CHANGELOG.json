@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.4.1",
+      "tag": "@bentley/tree-widget-react_v1.4.1",
+      "date": "Mon, 19 Jul 2021 18:07:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Model/Category tree was not resizing properly, missing flex=1."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.0",
       "tag": "@bentley/tree-widget-react_v1.4.0",
       "date": "Tue, 13 Jul 2021 17:43:28 GMT",
