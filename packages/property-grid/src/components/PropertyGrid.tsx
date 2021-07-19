@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 
+
 import "./PropertyGrid.scss";
 
 import * as React from "react";
@@ -25,7 +26,6 @@ import {
   ActionButtonRenderer,
   ActionButtonRendererProps,
   PropertyData,
-  PropertyDataFiltererBase,
   PropertyGridContextMenuArgs,
   PropertyValueRendererManager,
   VirtualizedPropertyGridWithDataProvider,
@@ -133,7 +133,7 @@ export class PropertyGrid extends React.Component<
     currentData = await this._addSharedFavsToData(currentData);
     const title = currentData.label;
 
-    let savedNullValueSetting = false;
+    let savedNullValueSetting = true;
     if (this.props.enableNullValueToggle) {
       savedNullValueSetting = await this._readNullValuesVisibilitySetting();
     }
@@ -399,7 +399,7 @@ export class PropertyGrid extends React.Component<
     if (result.status === SettingsStatus.Success) {
       return (result.setting as boolean)
     }
-    return false;
+    return true;
   }
 
   private _setNullValuesVisibilitySetting = async (showNullValueVisibility: boolean) => {
