@@ -693,6 +693,7 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
         );
       }
     }
+    return undefined;
   };
 
   const renderContextMenu = () => {
