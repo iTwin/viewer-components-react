@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-
 import "./PropertyGrid.scss";
 
 import * as React from "react";
@@ -50,12 +49,12 @@ import {
 
 const sharedNamespace = {
   favorites: "favoriteProperties",
-  nullValue: "nullValueProperties"
+  nullValue: "nullValueProperties",
 };
 const sharedName = {
   favorites: "sharedProps",
   nullValue: "nullValues",
-}
+};
 type ContextMenuItemInfo = ContextMenuItemProps &
   React.Attributes & { label: string };
 
@@ -397,7 +396,7 @@ export class PropertyGrid extends React.Component<
       this.props.iModelConnection.iModelId,
     );
     if (result.status === SettingsStatus.Success) {
-      return (result.setting as boolean)
+      return (result.setting as boolean);
     }
     return true;
   }
@@ -415,7 +414,7 @@ export class PropertyGrid extends React.Component<
     );
     if (result.status !== SettingsStatus.Success) {
       throw new Error(
-        "Could not save Null Value Visibility Setting"
+        "Could not save Null Value Visibility Setting",
       );
     }
   }
@@ -427,13 +426,13 @@ export class PropertyGrid extends React.Component<
     return new PlaceholderPropertyDataFilterer();
   }
 
-  private _onHideNull = () => {
-    this._setNullValuesVisibilitySetting(false)
+  private _onHideNull = async () => {
+    await this._setNullValuesVisibilitySetting(false);
     this.setState({ contextMenu: undefined, showNullValues: false });
   }
 
-  private _onShowNull = () => {
-    this._setNullValuesVisibilitySetting(true)
+  private _onShowNull = async () => {
+    await this._setNullValuesVisibilitySetting(true);
     this.setState({ contextMenu: undefined, showNullValues: true });
   }
 
@@ -533,9 +532,7 @@ export class PropertyGrid extends React.Component<
       if (this.state.showNullValues) {
         items.push({
           key: "hide-null",
-          onSelect: () => {
-            this._onHideNull();
-          },
+          onSelect: () => this._onHideNull(),
           title: PropertyGridManager.translate(
             "context-menu.hide-null.description",
           ),
@@ -546,9 +543,7 @@ export class PropertyGrid extends React.Component<
       } else {
         items.push({
           key: "show-null",
-          onSelect: () => {
-            this._onShowNull();
-          },
+          onSelect: () => this._onShowNull(),
           title: PropertyGridManager.translate(
             "context-menu.show-null.description",
           ),
