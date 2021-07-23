@@ -11,7 +11,6 @@ import {
   StageUsage,
   UiItemsProvider,
 } from "@bentley/ui-abstract";
-import { UiFramework } from "@bentley/ui-framework";
 import { PropertyGridProps } from "../property-grid-react";
 import * as React from "react";
 import { PresentationPropertyGridWidget } from "./PresentationPropertyGridWidget2";
@@ -21,9 +20,9 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiitemsProvider";
   public static i18n: I18N;
 
-  private _props?: PropertyGridProps;
+  private _props?: Partial<PropertyGridProps>;
 
-  constructor(props?: PropertyGridProps) {
+  constructor(props?: Partial<PropertyGridProps>) {
     this._props = props;
   }
 
@@ -38,15 +37,11 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
       stageUsage === StageUsage.General &&
       location === StagePanelLocation.Right
     ) {
-      // this._props
-
       widgets.push({
         id: "propertyGrid",
         label: "Properties",
         getWidgetContent: () => (
-          <PresentationPropertyGridWidget
-            projectId={UiFramework.getIModelConnection()?.contextId ?? ""}
-          />
+          <PresentationPropertyGridWidget {...this._props} />
         ),
       });
     }

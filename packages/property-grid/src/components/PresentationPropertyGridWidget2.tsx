@@ -36,10 +36,7 @@ import {
   Icon,
   Orientation,
 } from "@bentley/ui-core";
-import {
-  useActiveIModelConnection,
-  useFrameworkVersion,
-} from "@bentley/ui-framework";
+import { UiFramework } from "@bentley/ui-framework";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { SettingsStatus } from "@bentley/product-settings-client";
 import { PropertyRecord } from "@bentley/ui-abstract";
@@ -49,32 +46,13 @@ import {
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 import { copyToClipboard } from "../api/WebUtilities";
-import { PropertyGridFeatureTracking } from "../property-grid-react";
+import { PropertyGridProps } from "../property-grid-react";
 
 export type ContextMenuItemInfo = ContextMenuItemProps &
   React.Attributes & { label: string };
 
 const sharedNamespace = "favoriteProperties";
 const sharedName = "sharedProps";
-
-export interface PropertyGridProps {
-  iModelConnection?: IModelConnection;
-  projectId: string;
-  orientation?: Orientation;
-  isOrientationFixed?: boolean;
-  enableFavoriteProperties?: boolean;
-  enableCopyingPropertyText?: boolean;
-  enableNullValueToggle?: boolean;
-  additionalContextMenuOptions?: ContextMenuItemInfo[];
-  debugLog?: (message: string) => void;
-  featureTracking?: PropertyGridFeatureTracking;
-  rulesetId?: string;
-  rootClassName?: string;
-  dataProvider?: PresentationPropertyDataProvider;
-  onInfoButton?: () => void;
-  onBackButton?: () => void;
-  disableUnifiedSelection?: boolean;
-}
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 function FavoriteActionButton({
@@ -160,8 +138,12 @@ function useDataProvider(
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function PresentationPropertyGridWidget(props: PropertyGridProps) {
-  const iModelConnection = useActiveIModelConnection();
+export function PresentationPropertyGridWidget(
+  props: Partial<PropertyGridProps>
+) {
+  const iModelConnection =
+    props.iModelConnection ?? UiFramework.getIModelConnection();
+  const projectId = props.projectId ?? iModelConnection?.contextId;
   const dataProvider = useDataProvider(iModelConnection);
 
   const [title, setTitle] = React.useState<PropertyRecord>();
@@ -174,16 +156,168 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
   >(undefined);
   const [sharedFavorites, setSharedFavorites] = React.useState<string[]>([]);
   const [showNullValues, setShowNullValues] = React.useState<boolean>(true);
-  let filterer: PropertyDataFiltererBase =
-    new PlaceholderPropertyDataFilterer();
+  const [filterer, setFilterer] = React.useState<PropertyDataFiltererBase>(
+    new PlaceholderPropertyDataFilterer()
+  );
 
-  const version = useFrameworkVersion();
-  const componentId =
-    "2" === version ? "uifw-v2-container" : "uifw-v1-container";
-  const style: React.CSSProperties =
-    "2" === version
-      ? { height: "100%", width: "100%", position: "absolute" }
-      : { height: "100%" };
+  const componentId = "uifw-v2-container";
+  const style: React.CSSProperties = {
+    height: "100%",
+    width: "100%",
+    position: "absolute",
+  };
+
+  const localizations = React.useMemo(() => {
+    return {
+      unshareFavorite: {
+        title: PropertyGridManager.translate(
+          "context-menu.unshare-favorite.description"
+        ),
+        label: PropertyGridManager.translate(
+          "context-menu.unshare-favorite.label"
+        ),
+      },
+      shareFavorite: {
+        title: PropertyGridManager.translate(
+          "context-menu.share-favorite.description"
+        ),
+        label: PropertyGridManager.translate(
+          "context-menu.share-favorite.label"
+        ),
+      },
+      removeFavorite: {
+        title: PropertyGridManager.translate(
+          "context-menu.remove-favorite.description"
+        ),
+        label: PropertyGridManager.translate(
+          "context-menu.remove-favorite.label"
+        ),
+      },
+      addFavorite: {
+        title: PropertyGridManager.translate(
+          "context-menu.add-favorite.description"
+        ),
+        label: PropertyGridManager.translate("context-menu.add-favorite.label"),
+      },
+      copyText: {
+        title: PropertyGridManager.translate(
+          "context-menu.copy-text.description"
+        ),
+        label: PropertyGridManager.translate("context-menu.copy-text.label"),
+      },
+      hideNull: {
+        title: PropertyGridManager.translate(
+          "context-menu.hide-null.description"
+        ),
+        label: PropertyGridManager.translate("context-menu.hide-null.label"),
+      },
+      showNull: {
+        title: PropertyGridManager.translate(
+          "context-menu.show-null.description"
+        ),
+        label: PropertyGridManager.translate("context-menu.show-null.label"),
+      },
+    };
+  }, []);
+
+  /**
+   * Finds the name of the Favorites category
+   * @param propertyRecords
+   */
+  const getFavoritesCategoryName = React.useCallback(
+    async (categories: { [categoryName: string]: PropertyRecord[] }) => {
+      const keys = Object.keys(categories);
+
+      for (const key of keys) {
+        const category = categories[key];
+        for (const record of category) {
+          const field = await dataProvider?.getFieldByPropertyRecord(record);
+          if (
+            field !== undefined &&
+            Presentation.favoriteProperties.has(
+              field,
+              projectId,
+              iModelConnection?.iModelId
+            )
+          ) {
+            return key;
+          }
+        }
+      }
+      return "Favorite";
+    },
+    [dataProvider, iModelConnection?.iModelId, projectId]
+  );
+
+  const addSharedFavsToData = React.useCallback(
+    async (propertyData: PropertyData) => {
+      let newSharedFavs: string[] = [];
+      if (projectId) {
+        const requestContext = await AuthorizedFrontendRequestContext.create();
+        const result = await IModelApp.settings.getSharedSetting(
+          requestContext,
+          sharedNamespace,
+          sharedName,
+          false,
+          projectId,
+          iModelConnection?.iModelId
+        );
+        if (result.setting?.slice) {
+          newSharedFavs = (result.setting as string[]).slice();
+        }
+        setSharedFavorites(newSharedFavs);
+      }
+      if (propertyData.categories[0]?.name !== "Favorite") {
+        propertyData.categories.unshift({
+          name: "Favorite",
+          label: "Favorite",
+          expand: true,
+        });
+        propertyData.records.Favorite = [];
+      }
+      const favoritesCategoryName = await getFavoritesCategoryName(
+        propertyData.records
+      );
+      const dataFavs = propertyData.records[favoritesCategoryName];
+
+      for (const cat of propertyData.categories) {
+        if (cat.name !== "Favorite") {
+          for (const rec of propertyData.records[cat.name]) {
+            const propName = rec.property.name;
+            const shared =
+              newSharedFavs &&
+              newSharedFavs?.findIndex(
+                (fav: string) => rec.property.name === fav
+              ) >= 0;
+            if (
+              shared &&
+              !dataFavs.find(
+                (favRec: PropertyRecord) => favRec.property.name === propName
+              )
+            ) {
+              // if shared & not already in favorites
+              dataFavs.push(rec);
+              const propertyField =
+                await dataProvider?.getFieldByPropertyRecord(rec);
+              if (propertyField) {
+                await Presentation.favoriteProperties.add(
+                  propertyField,
+                  projectId
+                );
+              }
+            }
+          }
+        }
+      }
+      return dataProvider?.getData();
+    },
+    [
+      dataProvider,
+      getFavoritesCategoryName,
+      iModelConnection?.iModelId,
+      projectId,
+    ]
+  );
 
   const onDataChanged = React.useCallback(async () => {
     let propertyData: PropertyData | undefined = await dataProvider?.getData();
@@ -192,7 +326,7 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
       setTitle(propertyData?.label);
       setClassName(propertyData?.description ?? "");
     }
-  }, [dataProvider]);
+  }, [dataProvider, addSharedFavsToData]);
 
   React.useEffect(() => {
     const mount = async () => {
@@ -212,101 +346,11 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
 
       dataProvider?.onDataChanged.removeListener(onDataChanged);
     };
+
     void mount();
 
     return unmount;
-  }, [onDataChanged, dataProvider]);
-
-  /**
-   * Finds the name of the Favorites category
-   * @param propertyRecords
-   */
-  const getFavoritesCategoryName = async (categories: {
-    [categoryName: string]: PropertyRecord[];
-  }) => {
-    const keys = Object.keys(categories);
-
-    for (const key of keys) {
-      const category = categories[key];
-      for (const record of category) {
-        const field = await dataProvider?.getFieldByPropertyRecord(record);
-        if (
-          field !== undefined &&
-          Presentation.favoriteProperties.has(
-            field,
-            props.projectId,
-            iModelConnection?.iModelId
-          )
-        ) {
-          return key;
-        }
-      }
-    }
-    return "Favorite";
-  };
-
-  const addSharedFavsToData = async (propertyData: PropertyData) => {
-    let newSharedFavs: string[] = [];
-    if (props.projectId) {
-      const requestContext = await AuthorizedFrontendRequestContext.create();
-      const result = await IModelApp.settings.getSharedSetting(
-        requestContext,
-        sharedNamespace,
-        sharedName,
-        false,
-        props.projectId,
-        iModelConnection?.iModelId
-      );
-      if (result.setting?.slice) {
-        newSharedFavs = (result.setting as string[]).slice();
-      }
-      setSharedFavorites(newSharedFavs);
-    }
-    if (propertyData.categories[0]?.name !== "Favorite") {
-      propertyData.categories.unshift({
-        name: "Favorite",
-        label: "Favorite",
-        expand: true,
-      });
-      propertyData.records.Favorite = [];
-    }
-    const favoritesCategoryName = await getFavoritesCategoryName(
-      propertyData.records
-    );
-    const dataFavs = propertyData.records[favoritesCategoryName];
-
-    for (const cat of propertyData.categories) {
-      if (cat.name !== "Favorite") {
-        for (const rec of propertyData.records[cat.name]) {
-          const propName = rec.property.name;
-          const shared =
-            newSharedFavs &&
-            newSharedFavs?.findIndex(
-              (fav: string) => rec.property.name === fav
-            ) >= 0;
-          if (
-            shared &&
-            !dataFavs.find(
-              (favRec: PropertyRecord) => favRec.property.name === propName
-            )
-          ) {
-            // if shared & not already in favorites
-            dataFavs.push(rec);
-            const propertyField = await dataProvider?.getFieldByPropertyRecord(
-              rec
-            );
-            if (propertyField) {
-              await Presentation.favoriteProperties.add(
-                propertyField,
-                props.projectId
-              );
-            }
-          }
-        }
-      }
-    }
-    return dataProvider?.getData();
-  };
+  }, [onDataChanged, dataProvider, props, addSharedFavsToData]);
 
   const onAddFavorite = React.useCallback(
     async (propertyField: Field) => {
@@ -334,70 +378,76 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
     [iModelConnection]
   );
 
-  const onShareFavorite = async (propName: string) => {
-    if (!props.projectId || !sharedFavorites) {
-      setContextMenu(undefined);
-      return;
-    }
-    sharedFavorites.push(propName);
+  const onShareFavorite = React.useCallback(
+    async (propName: string) => {
+      if (!projectId || !sharedFavorites) {
+        setContextMenu(undefined);
+        return;
+      }
+      sharedFavorites.push(propName);
 
-    const requestContext = await AuthorizedFrontendRequestContext.create();
-    const result = await IModelApp.settings.saveSharedSetting(
-      requestContext,
-      sharedFavorites,
-      sharedNamespace,
-      sharedName,
-      false,
-      props.projectId,
-      iModelConnection?.iModelId
-    );
-    if (result.status !== SettingsStatus.Success) {
-      throw new Error(
-        "Could not share favoriteProperties: " + result.errorMessage
+      const requestContext = await AuthorizedFrontendRequestContext.create();
+      const result = await IModelApp.settings.saveSharedSetting(
+        requestContext,
+        sharedFavorites,
+        sharedNamespace,
+        sharedName,
+        false,
+        projectId,
+        iModelConnection?.iModelId
       );
-    }
-    const result2 = await IModelApp.settings.getSharedSetting(
-      requestContext,
-      sharedNamespace,
-      sharedName,
-      false,
-      props.projectId,
-      iModelConnection?.iModelId
-    );
-    if (result2.status !== SettingsStatus.Success) {
-      throw new Error(
-        "Could not share favoriteProperties: " + result2.errorMessage
+      if (result.status !== SettingsStatus.Success) {
+        throw new Error(
+          "Could not share favoriteProperties: " + result.errorMessage
+        );
+      }
+      const result2 = await IModelApp.settings.getSharedSetting(
+        requestContext,
+        sharedNamespace,
+        sharedName,
+        false,
+        projectId,
+        iModelConnection?.iModelId
       );
-    }
-    setContextMenu(undefined);
-  };
-
-  const onUnshareFavorite = async (propName: string) => {
-    if (!props.projectId || !sharedFavorites) {
+      if (result2.status !== SettingsStatus.Success) {
+        throw new Error(
+          "Could not share favoriteProperties: " + result2.errorMessage
+        );
+      }
       setContextMenu(undefined);
-      return;
-    }
-    const index = sharedFavorites.indexOf(propName);
-    if (index > -1) {
-      sharedFavorites.splice(index, 1);
-    }
-    const requestContext = await AuthorizedFrontendRequestContext.create();
-    const result = await IModelApp.settings.saveSharedSetting(
-      requestContext,
-      sharedFavorites,
-      sharedNamespace,
-      sharedName,
-      false,
-      props.projectId,
-      iModelConnection?.iModelId
-    );
-    if (result.status !== SettingsStatus.Success) {
-      throw new Error(
-        "Could not unshare favoriteProperties: " + result.errorMessage
+    },
+    [iModelConnection?.iModelId, projectId, sharedFavorites]
+  );
+
+  const onUnshareFavorite = React.useCallback(
+    async (propName: string) => {
+      if (!projectId || !sharedFavorites) {
+        setContextMenu(undefined);
+        return;
+      }
+      const index = sharedFavorites.indexOf(propName);
+      if (index > -1) {
+        sharedFavorites.splice(index, 1);
+      }
+      const requestContext = await AuthorizedFrontendRequestContext.create();
+      const result = await IModelApp.settings.saveSharedSetting(
+        requestContext,
+        sharedFavorites,
+        sharedNamespace,
+        sharedName,
+        false,
+        projectId,
+        iModelConnection?.iModelId
       );
-    }
-    setContextMenu(undefined);
-  };
+      if (result.status !== SettingsStatus.Success) {
+        throw new Error(
+          "Could not unshare favoriteProperties: " + result.errorMessage
+        );
+      }
+      setContextMenu(undefined);
+    },
+    [iModelConnection?.iModelId, projectId, sharedFavorites]
+  );
 
   const shareActionButtonRenderer: ActionButtonRenderer = (
     props: ActionButtonRendererProps
@@ -419,26 +469,29 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
     );
   };
 
-  const onCopyText = async (property: PropertyRecord) => {
-    if (property.description) copyToClipboard(property.description);
-    else if (props.debugLog)
-      props.debugLog(
-        "PROPERTIES COPY TEXT FAILED TO RUN DUE TO UNDEFINED PROPERTY RECORD DESCRIPTION"
-      );
-    setContextMenu(undefined);
-  };
+  const onCopyText = React.useCallback(
+    async (property: PropertyRecord) => {
+      if (property.description) copyToClipboard(property.description);
+      else if (props.debugLog)
+        props.debugLog(
+          "PROPERTIES COPY TEXT FAILED TO RUN DUE TO UNDEFINED PROPERTY RECORD DESCRIPTION"
+        );
+      setContextMenu(undefined);
+    },
+    [props]
+  );
 
-  const onHideNull = () => {
-    filterer = new NonEmptyValuesPropertyDataFilterer();
+  const onHideNull = React.useCallback(() => {
+    setFilterer(new NonEmptyValuesPropertyDataFilterer());
     setContextMenu(undefined);
     setShowNullValues(false);
-  };
+  }, []);
 
-  const onShowNull = () => {
-    filterer = new PlaceholderPropertyDataFilterer();
+  const onShowNull = React.useCallback(() => {
+    setFilterer(new PlaceholderPropertyDataFilterer());
     setContextMenu(undefined);
     setShowNullValues(true);
-  };
+  }, []);
 
   const setupContextMenu = React.useCallback(
     (args: PropertyGridContextMenuArgs) => {
@@ -458,12 +511,8 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
                 key: "unshare-favorite",
                 onSelect: () =>
                   onUnshareFavorite(args.propertyRecord.property.name),
-                title: PropertyGridManager.translate(
-                  "context-menu.unshare-favorite.description"
-                ),
-                label: PropertyGridManager.translate(
-                  "context-menu.unshare-favorite.label"
-                ),
+                title: localizations.unshareFavorite.title,
+                label: localizations.unshareFavorite.label,
               });
             } else if (field !== undefined) {
               if (
@@ -477,35 +526,23 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
                   key: "share-favorite",
                   onSelect: () =>
                     onShareFavorite(args.propertyRecord.property.name),
-                  title: PropertyGridManager.translate(
-                    "context-menu.share-favorite.description"
-                  ),
-                  label: PropertyGridManager.translate(
-                    "context-menu.share-favorite.label"
-                  ),
+                  title: localizations.shareFavorite.title,
+                  label: localizations.shareFavorite.label,
                 });
                 items.push({
                   key: "remove-favorite",
                   icon: "icon-remove-2",
                   onSelect: async () => onRemoveFavorite(field),
-                  title: IModelApp.i18n.translate(
-                    "uiTestExtension:properties.context-menu.remove-favorite.description"
-                  ),
-                  label: IModelApp.i18n.translate(
-                    "uiTestExtension:properties.context-menu.remove-favorite.label"
-                  ),
+                  title: localizations.removeFavorite.title,
+                  label: localizations.removeFavorite.label,
                 });
               } else {
                 items.push({
                   key: "add-favorite",
                   icon: "icon-add",
                   onSelect: async () => onAddFavorite(field),
-                  title: IModelApp.i18n.translate(
-                    "uiTestExtension:properties.context-menu.add-favorite.description"
-                  ),
-                  label: IModelApp.i18n.translate(
-                    "uiTestExtension:properties.context-menu.add-favorite.label"
-                  ),
+                  title: localizations.addFavorite.title,
+                  label: localizations.addFavorite.label,
                 });
               }
             }
@@ -518,12 +555,8 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
                     props.featureTracking.trackCopyPropertyText();
                   await onCopyText(args.propertyRecord);
                 },
-                title: PropertyGridManager.translate(
-                  "context-menu.copy-text.description"
-                ),
-                label: PropertyGridManager.translate(
-                  "context-menu.copy-text.label"
-                ),
+                title: localizations.copyText.title,
+                label: localizations.copyText.label,
               });
             }
 
@@ -534,12 +567,8 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
                   onSelect: () => {
                     onHideNull();
                   },
-                  title: PropertyGridManager.translate(
-                    "context-menu.hide-null.description"
-                  ),
-                  label: PropertyGridManager.translate(
-                    "context-menu.hide-null.label"
-                  ),
+                  title: localizations.hideNull.title,
+                  label: localizations.hideNull.label,
                 });
               } else {
                 items.push({
@@ -547,12 +576,8 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
                   onSelect: () => {
                     onShowNull();
                   },
-                  title: PropertyGridManager.translate(
-                    "context-menu.show-null.description"
-                  ),
-                  label: PropertyGridManager.translate(
-                    "context-menu.show-null.label"
-                  ),
+                  title: localizations.showNull.title,
+                  label: localizations.showNull.label,
                 });
               }
             }
@@ -561,7 +586,21 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
           });
       }
     },
-    [iModelConnection, dataProvider, onRemoveFavorite, onAddFavorite]
+    [
+      iModelConnection,
+      dataProvider,
+      localizations,
+      sharedFavorites,
+      showNullValues,
+      props,
+      onAddFavorite,
+      onRemoveFavorite,
+      onShareFavorite,
+      onUnshareFavorite,
+      onCopyText,
+      onHideNull,
+      onShowNull,
+    ]
   );
 
   const onPropertyContextMenu = React.useCallback(
@@ -727,7 +766,11 @@ export function PresentationPropertyGridWidget(props: PropertyGridProps) {
   };
 
   return (
-    <div data-component-id={componentId} style={style}>
+    <div
+      className={props.rootClassName}
+      data-component-id={componentId}
+      style={style}
+    >
       {renderHeader()}
       {renderPropertyGrid()}
       {renderContextMenu()}
