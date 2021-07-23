@@ -30,12 +30,13 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     _stageId: string,
     stageUsage: string,
     location: StagePanelLocation,
-    _section: StagePanelSection | undefined
+    section?: StagePanelSection | undefined
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
     if (
       stageUsage === StageUsage.General &&
-      location === StagePanelLocation.Right
+      location === StagePanelLocation.Right &&
+      section === StagePanelSection.Start
     ) {
       widgets.push({
         id: "propertyGrid",
