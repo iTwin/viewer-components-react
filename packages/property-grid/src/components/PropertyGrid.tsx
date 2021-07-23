@@ -24,7 +24,6 @@ import {
   ActionButtonRenderer,
   ActionButtonRendererProps,
   PropertyData,
-  PropertyDataFiltererBase,
   PropertyGridContextMenuArgs,
   PropertyValueRendererManager,
   VirtualizedPropertyGridWithDataProvider,
@@ -47,8 +46,14 @@ import {
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 
-const sharedNamespace = "favoriteProperties";
-const sharedName = "sharedProps";
+const sharedNamespace = {
+  favorites: "favoriteProperties",
+  nullValue: "nullValueProperties",
+};
+const sharedName = {
+  favorites: "sharedProps",
+  nullValue: "nullValues",
+};
 type ContextMenuItemInfo = ContextMenuItemProps &
   React.Attributes & { label: string };
 
@@ -96,7 +101,6 @@ export class PropertyGrid extends React.Component<
 > {
 
   private _dataProvider: PresentationPropertyDataProvider;
-  private _filterer: PropertyDataFiltererBase;
   private _dataChangedHandler: () => void;
   private _unmounted = false;
   constructor(props: PropertyGridProps) {
@@ -115,7 +119,6 @@ export class PropertyGrid extends React.Component<
       }
     }
 
-    this._filterer = new PlaceholderPropertyDataFilterer();
     this._dataChangedHandler = this._onDataChanged.bind(this);
     this.state = { className: "", sharedFavorites: [], showNullValues: true };
   }
@@ -127,10 +130,17 @@ export class PropertyGrid extends React.Component<
     let currentData = await this._dataProvider.getData();
     currentData = await this._addSharedFavsToData(currentData);
     const title = currentData.label;
+
+    let savedNullValueSetting = true;
+    if (this.props.enableNullValueToggle) {
+      savedNullValueSetting = await this._readNullValuesVisibilitySetting();
+    }
+
     if (currentData && !this._unmounted) {
       this.setState({
         title,
         className: currentData.description ? currentData.description : "",
+        showNullValues: savedNullValueSetting,
       });
     }
   }
@@ -168,8 +178,8 @@ export class PropertyGrid extends React.Component<
       const requestContext = await AuthorizedFrontendRequestContext.create();
       const result = await IModelApp.settings.getSharedSetting(
         requestContext,
-        sharedNamespace,
-        sharedName,
+        sharedNamespace.favorites,
+        sharedName.favorites,
         false,
         this.props.projectId,
         this.props.iModelConnection.iModelId,
@@ -291,8 +301,8 @@ export class PropertyGrid extends React.Component<
     const result = await IModelApp.settings.saveSharedSetting(
       requestContext,
       this.state.sharedFavorites,
-      sharedNamespace,
-      sharedName,
+      sharedNamespace.favorites,
+      sharedName.favorites,
       false,
       this.props.projectId,
       this.props.iModelConnection.iModelId,
@@ -304,8 +314,8 @@ export class PropertyGrid extends React.Component<
     }
     const result2 = await IModelApp.settings.getSharedSetting(
       requestContext,
-      sharedNamespace,
-      sharedName,
+      sharedNamespace.favorites,
+      sharedName.favorites,
       false,
       this.props.projectId,
       this.props.iModelConnection.iModelId,
@@ -331,8 +341,8 @@ export class PropertyGrid extends React.Component<
     const result = await IModelApp.settings.saveSharedSetting(
       requestContext,
       this.state.sharedFavorites,
-      sharedNamespace,
-      sharedName,
+      sharedNamespace.favorites,
+      sharedName.favorites,
       false,
       this.props.projectId,
       this.props.iModelConnection.iModelId,
@@ -374,13 +384,54 @@ export class PropertyGrid extends React.Component<
     this.setState({ contextMenu: undefined });
   }
 
-  private _onHideNull = () => {
-    this._filterer = new NonEmptyValuesPropertyDataFilterer();
+  private _readNullValuesVisibilitySetting = async () => {
+    const requestContext = await AuthorizedFrontendRequestContext.create();
+    const result = await IModelApp.settings.getSharedSetting(
+      requestContext,
+      sharedNamespace.nullValue,
+      sharedName.nullValue,
+      false,
+      this.props.projectId,
+      this.props.iModelConnection.iModelId,
+    );
+    if (result.status === SettingsStatus.Success) {
+      return (result.setting as boolean);
+    }
+    return true;
+  }
+
+  private _setNullValuesVisibilitySetting = async (showNullValueVisibility: boolean) => {
+    const requestContext = await AuthorizedFrontendRequestContext.create();
+    const result = await IModelApp.settings.saveSharedSetting(
+      requestContext,
+      showNullValueVisibility,
+      sharedNamespace.nullValue,
+      sharedName.nullValue,
+      false,
+      this.props.projectId,
+      this.props.iModelConnection.iModelId,
+    );
+    if (result.status !== SettingsStatus.Success) {
+      throw new Error(
+        "Could not save Null Value Visibility Setting",
+      );
+    }
+  }
+
+  private _getPropertyGridFilterer = () => {
+    if (!this.state.showNullValues) {
+      return new NonEmptyValuesPropertyDataFilterer();
+    }
+    return new PlaceholderPropertyDataFilterer();
+  }
+
+  private _onHideNull = async () => {
+    await this._setNullValuesVisibilitySetting(false);
     this.setState({ contextMenu: undefined, showNullValues: false });
   }
 
-  private _onShowNull = () => {
-    this._filterer = new PlaceholderPropertyDataFilterer();
+  private _onShowNull = async () => {
+    await this._setNullValuesVisibilitySetting(true);
     this.setState({ contextMenu: undefined, showNullValues: true });
   }
 
@@ -480,9 +531,7 @@ export class PropertyGrid extends React.Component<
       if (this.state.showNullValues) {
         items.push({
           key: "hide-null",
-          onSelect: () => {
-            this._onHideNull();
-          },
+          onSelect: () => this._onHideNull(),
           title: PropertyGridManager.translate(
             "context-menu.hide-null.description",
           ),
@@ -493,9 +542,7 @@ export class PropertyGrid extends React.Component<
       } else {
         items.push({
           key: "show-null",
-          onSelect: () => {
-            this._onShowNull();
-          },
+          onSelect: () => this._onShowNull(),
           title: PropertyGridManager.translate(
             "context-menu.show-null.description",
           ),
@@ -624,7 +671,7 @@ export class PropertyGrid extends React.Component<
             orientation={this.props.orientation ?? Orientation.Horizontal}
             isOrientationFixed={this.props.isOrientationFixed ?? true}
             dataProvider={this._dataProvider}
-            filterer={this._filterer}
+            filterer={this._getPropertyGridFilterer()}
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
             onPropertyContextMenu={this._onPropertyContextMenu}
