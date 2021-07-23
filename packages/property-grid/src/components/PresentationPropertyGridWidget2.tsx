@@ -47,6 +47,7 @@ import {
 } from "./FilteringPropertyGrid";
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridProps } from "../property-grid-react";
+import "./PresentationPropertyGridWidget2.scss";
 
 export type ContextMenuItemInfo = ContextMenuItemProps &
   React.Attributes & { label: string };
@@ -165,6 +166,8 @@ export function PresentationPropertyGridWidget(
     height: "100%",
     width: "100%",
     position: "absolute",
+    display: "flex",
+    flexDirection: "column",
   };
 
   const localizations = React.useMemo(() => {
@@ -666,10 +669,8 @@ export function PresentationPropertyGridWidget(
           </div>
         )}
         <div className="property-grid-react-panel-label-and-class">
-          <div className="property-grid-react-panel-label">
-            {title && PropertyValueRendererManager.defaultManager.render(title)}
-          </div>
-          <div className="property-grid-react-panel-class">{className}</div>
+          {title && PropertyValueRendererManager.defaultManager.render(title)}
+          <span className="property-grid-react-panel-class">{className}</span>
         </div>
         {props.onInfoButton !== undefined && (
           <div
@@ -772,7 +773,7 @@ export function PresentationPropertyGridWidget(
       style={style}
     >
       {renderHeader()}
-      {renderPropertyGrid()}
+      <div className="property-grid-container">{renderPropertyGrid()}</div>
       {renderContextMenu()}
     </div>
   );
