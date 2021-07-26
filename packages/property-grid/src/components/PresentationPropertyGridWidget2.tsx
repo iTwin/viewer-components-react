@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import * as React from "react";
 import {
   AuthorizedFrontendRequestContext,
@@ -202,25 +201,29 @@ export function PresentationPropertyGridWidget(
         title: PropertyGridManager.translate(
           "context-menu.add-favorite.description",
         ),
-        label: PropertyGridManager.translate("context-menu.add-favorite.label",),
+        label: PropertyGridManager.translate("context-menu.add-favorite.label",
+        )
       },
       copyText: {
         title: PropertyGridManager.translate(
           "context-menu.copy-text.description",
         ),
-        label: PropertyGridManager.translate("context-menu.copy-text.label",),
+        label: PropertyGridManager.translate("context-menu.copy-text.label",
+        )
       },
       hideNull: {
         title: PropertyGridManager.translate(
           "context-menu.hide-null.description",
         ),
-        label: PropertyGridManager.translate("context-menu.hide-null.label",),
+        label: PropertyGridManager.translate("context-menu.hide-null.label",
+        )
       },
       showNull: {
         title: PropertyGridManager.translate(
           "context-menu.show-null.description",
         ),
-        label: PropertyGridManager.translate("context-menu.show-null.label",),
+        label: PropertyGridManager.translate("context-menu.show-null.label",
+        )
       },
       tooManySelected: PropertyGridManager.translate(
         "context-menu.selection.too-many-elements-selected",
@@ -461,12 +464,12 @@ export function PresentationPropertyGridWidget(
   );
 
   const shareActionButtonRenderer: ActionButtonRenderer = (
-    props: ActionButtonRendererProps,
+    _props: ActionButtonRendererProps,
   ) => {
     const shared =
       sharedFavorites !== undefined &&
       sharedFavorites?.findIndex(
-        (fav: string) => props.property.property.name === fav,
+        (fav: string) => _props.property.property.name === fav,
       ) >= 0;
     return (
       <div>
