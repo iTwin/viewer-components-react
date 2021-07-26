@@ -202,28 +202,28 @@ export function PresentationPropertyGridWidget(
           "context-menu.add-favorite.description",
         ),
         label: PropertyGridManager.translate("context-menu.add-favorite.label",
-        )
+        ),
       },
       copyText: {
         title: PropertyGridManager.translate(
           "context-menu.copy-text.description",
         ),
         label: PropertyGridManager.translate("context-menu.copy-text.label",
-        )
+        ),
       },
       hideNull: {
         title: PropertyGridManager.translate(
           "context-menu.hide-null.description",
         ),
         label: PropertyGridManager.translate("context-menu.hide-null.label",
-        )
+        ),
       },
       showNull: {
         title: PropertyGridManager.translate(
           "context-menu.show-null.description",
         ),
         label: PropertyGridManager.translate("context-menu.show-null.label",
-        )
+        ),
       },
       tooManySelected: PropertyGridManager.translate(
         "context-menu.selection.too-many-elements-selected",
