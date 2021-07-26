@@ -1,7 +1,8 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
 import * as React from "react";
 import {
   AuthorizedFrontendRequestContext,
@@ -220,6 +221,12 @@ export function PresentationPropertyGridWidget(
         ),
         label: PropertyGridManager.translate("context-menu.show-null.label"),
       },
+      tooManySelected: PropertyGridManager.translate(
+        "context-menu.selection.too-many-elements-selected"
+      ),
+      noneSelected: PropertyGridManager.translate(
+        "context-menu.selection.no-elements-selected"
+      ),
     };
   }, []);
 
@@ -688,19 +695,14 @@ export function PresentationPropertyGridWidget(
   };
 
   const renderPropertyGrid = () => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({
-      dataProvider: dataProvider as IPresentationPropertyDataProvider,
-    });
+    const { isOverLimit } =
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      usePropertyDataProviderWithUnifiedSelection({
+        dataProvider: dataProvider as IPresentationPropertyDataProvider,
+      });
 
     if (isOverLimit) {
-      return (
-        <FillCentered>
-          {IModelApp.i18n.translate(
-            "uiTestExtension:properties.too-many-elements-selected"
-          )}
-        </FillCentered>
-      );
+      return <FillCentered>{localizations.tooManySelected}</FillCentered>;
     }
     if (dataProvider) {
       if (props.disableUnifiedSelection) {
