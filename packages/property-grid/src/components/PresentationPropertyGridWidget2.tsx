@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import * as React from "react";
 import {
   AuthorizedFrontendRequestContext,
@@ -630,9 +631,9 @@ export function PresentationPropertyGridWidget(
   }, []);
 
   const favoriteActionButtonRenderer = React.useCallback(
-    (props: ActionButtonRendererProps) => {
+    (_props: ActionButtonRendererProps) => {
       if (iModelConnection && dataProvider) {
-        const { property } = props;
+        const { property } = _props;
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const field = useAsyncValue(
           // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -650,7 +651,7 @@ export function PresentationPropertyGridWidget(
                 iModelConnection,
                 FavoritePropertiesScope.IModel
               ) ||
-                props.isPropertyHovered) && (
+                _props.isPropertyHovered) && (
                 <FavoriteActionButton field={field} imodel={iModelConnection} />
               )}
           </div>
