@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { I18N } from "@bentley/imodeljs-i18n";
 import {
   AbstractWidgetProps,
@@ -30,13 +31,13 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     _stageId: string,
     stageUsage: string,
     location: StagePanelLocation,
-    section?: StagePanelSection | undefined,
+    section?: StagePanelSection | undefined
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
     if (
       stageUsage === StageUsage.General &&
       location === StagePanelLocation.Right &&
-      section === StagePanelSection.Start
+      section === StagePanelSection.End
     ) {
       widgets.push({
         id: "propertyGrid",
