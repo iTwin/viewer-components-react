@@ -1,0 +1,36 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+@import "~@bentley/ui-core/lib/ui-core/index";
+.treeNodeLabel {
+  height: $uicore-l;
+  line-height: $uicore-font-size-small;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.treeNodeWrapper{
+  display: flex;
+  flex: $uicore-xxs;
+  flex-direction: row;
+  // .tree-item-left-border {
+  //   display: flex;
+  //   width: $uicore-xs;
+  //   position: sticky;
+  //   left: 0px; top: 0px;
+  //   height: inherit;
+  // }
+  .treeNode {
+    display: flex;
+    flex: 1$uicore-xxs;
+    flex-direction: column;
+  }
+}
+
+.withCheckbox {
+  > .contents {
+    padding-left: 31px;
+  }
+}
