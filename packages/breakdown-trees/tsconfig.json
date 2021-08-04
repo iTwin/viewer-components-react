@@ -1,0 +1,20 @@
+{
+  "extends": "./node_modules/@bentley/build-tools/tsconfig-base.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "outDir": "./lib",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "types": [
+      "@bentley/webpack-tools"
+    ]
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx"
+  ],
+  "exclude": [
+    "lib",
+    "node_modules"
+  ]
+}
