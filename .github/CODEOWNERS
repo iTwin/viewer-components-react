@@ -33,3 +33,6 @@
 
 /packages/measure-tools  @imodeljs/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
 /common/changes/@bentley/measure-tools-react  @imodeljs/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
+
+/packages/breakdown-trees  @imodeljs/viewer-components-reviewers @JValiunas @MeghaCBorty
+/common/changes/@bentley/breakdown-trees-react  @imodeljs/viewer-components-reviewers @JValiunas @MeghaCBorty

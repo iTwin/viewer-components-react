@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/breakdown-trees-react",
+      "comment": "Added new package for breakdown trees",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/breakdown-trees-react",
+  "email": "88436360+MeghaCBorty@users.noreply.github.com"
+}
