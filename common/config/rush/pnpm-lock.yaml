@@ -26,14 +26,15 @@ dependencies:
   '@svgdotjs/svg.js': 3.0.16
   '@testing-library/jest-dom': 4.2.4
   '@testing-library/react-hooks': 3.7.0
-  '@types/chai-as-promised': 7.1.4
+  '@types/chai-jest-snapshot': 1.3.6
+  '@types/chai-spies': 1.0.3
   '@types/enzyme': 3.9.3
+  '@types/faker': 4.1.12
   '@types/i18next': 8.4.6
   '@types/node': 10.14.1
   '@types/react-autosuggest': 10.0.1
   '@types/react-redux': 7.1.15
   '@types/redux-mock-store': 1.0.2
-  '@types/sinon': 9.0.10
   '@types/sinon-chai': 3.2.5
   '@types/testing-library__react': 9.1.3
   babel-jest: 24.9.0
@@ -45,9 +46,9 @@ dependencies:
   cpx: 1.5.0
   cross-env: 7.0.3
   enzyme: 3.11.0
-  enzyme-adapter-react-16: 1.15.5_enzyme@3.11.0
   enzyme-to-json: 3.6.1_enzyme@3.11.0
   eslint: 6.8.0
+  faker: 4.1.0
   file-loader: 4.3.0_webpack@4.42.0
   glob: 7.1.6
   i18next: 10.6.0
@@ -60,6 +61,7 @@ dependencies:
   jsdom-global: 3.0.2_jsdom@11.12.0
   lint-staged: 10.5.3
   madge: 4.0.2
+  mock-local-storage: 1.1.17
   nodemon: 1.19.4
   null-loader: 3.0.0_webpack@4.42.0
   raf: 3.4.1
@@ -68,8 +70,7 @@ dependencies:
   react-spring: 8.0.27
   redux: 4.0.5
   redux-mock-store: 1.5.4
-  sinon: 9.2.3
-  sinon-chai: 3.5.0_sinon@9.2.3
+  sinon-chai: 3.5.0
   source-map-loader: 0.2.4
   source-map-support: 0.5.19
   svg-sprite-loader: 4.2.1_webpack@4.42.0
@@ -77,6 +78,7 @@ dependencies:
   ts-node: 7.0.1
   ts-sinon: 2.0.1
   tslint: 5.20.1_typescript@3.7.5
+  typemoq: 2.1.0
   typescript: 3.7.5
   url-loader: 2.1.0_webpack@4.42.0
   webpack: 4.42.0_webpack@4.42.0
@@ -7049,6 +7051,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-S/VXP6JKgoJVHafH4Z1FWyCXxaHVYNPj7EMYdW1go8hXVeQkmwY0mqyTCN/nL/Zu2tuRb9MkDaLqST7suVnbjw==
+  /@types/chai-spies/1.0.3:
+    dependencies:
+      '@types/chai': 4.2.14
+    dev: false
+    resolution:
+      integrity: sha512-RBZjhVuK7vrg4rWMt04UF5zHYwfHnpk5mIWu3nQvU3AKGDixXzSjZ6v0zke6pBcaJqMv3IBZ5ibLWPMRDL0sLw==
   /@types/chai/4.2.14:
     dev: false
     resolution:
@@ -7301,6 +7309,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-bKQqIpew7mmIGNRlxW6Zli/QVyc3zikpGzCa797B/tRnD9OtHvZ/ts8sYXV+Ilj9u3QRaUEM8xrjgd1gwm1BpQ==
+  /@types/sinon/5.0.7:
+    dev: false
+    resolution:
+      integrity: sha512-opwMHufhUwkn/UUDk35LDbKJpA2VBsZT8WLU8NjayvRLGPxQkN+8XmfC2Xl35MAscBE8469koLLBjaI3XLEIww==
   /@types/sinon/7.5.2:
     dev: false
     resolution:
@@ -9684,6 +9696,14 @@ packages:
     dev: false
     resolution:
       integrity: sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
+  /chai-as-promised/7.1.1:
+    dependencies:
+      check-error: 1.0.2
+    dev: false
+    peerDependencies:
+      chai: '>= 2.1.2 < 5'
+    resolution:
+      integrity: sha512-azL6xMoi+uxu6z4rhWQ1jbdUhOMhis2PvscD/xjLqNMkv3BPPp2JyyuTHOrf9BOosGpNQ11v6BKv/g57RXbiaA==
   /chai-as-promised/7.1.1_chai@4.2.0:
     dependencies:
       chai: 4.2.0
@@ -10517,6 +10537,11 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha512-v6zfIQqL/pzTVAbZvYUozsxNfxcFb6Ks3ZfEbuneJl3FW9Jb8F6vLWB6f+qTmAu72msUdyb84V8d/yBFf7FNnw==
+  /core-js/0.8.4:
+    deprecated: 'core-js@<3.3 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Please, upgrade your dependencies to the actual version of core-js.'
+    dev: false
+    resolution:
+      integrity: sha1-wiZl8eDRucPF4bCNq9HxCGleT88=
   /core-js/2.6.12:
     deprecated: 'core-js@<3.3 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Please, upgrade your dependencies to the actual version of core-js.'
     dev: false
@@ -11712,6 +11737,10 @@ packages:
       node: '>=0.8.0'
     resolution:
       integrity: sha1-AB3fgWKM0ecGElxxdvU8zsVdkY4=
+  /dom-walk/0.1.2:
+    dev: false
+    resolution:
+      integrity: sha512-6QvTW9mrGeIegrFXdtQi9pk7O/nSK6lSdXW2eqUspN5LWD7UTji2Fqw5V2YLjBpHEoU9Xl/eUWNpDeZvoyOv2w==
   /domain-browser/1.2.0:
     dev: false
     engines:
@@ -11993,25 +12022,6 @@ packages:
       react-dom: 16.14.0_react@16.14.0
       react-is: 16.13.1
       react-test-renderer: 16.14.0_react@16.14.0
-      semver: 5.7.1
-    dev: false
-    peerDependencies:
-      enzyme: ^3.0.0
-      react: ^16.0.0-0
-      react-dom: ^16.0.0-0
-    resolution:
-      integrity: sha512-33yUJGT1nHFQlbVI5qdo5Pfqvu/h4qPwi1o0a6ZZsjpiqq92a3HjynDhwd1IeED+Su60HDWV8mxJqkTnLYdGkw==
-  /enzyme-adapter-react-16/1.15.5_enzyme@3.11.0:
-    dependencies:
-      enzyme: 3.11.0
-      enzyme-adapter-utils: 1.14.0
-      enzyme-shallow-equal: 1.0.4
-      has: 1.0.3
-      object.assign: 4.1.2
-      object.values: 1.1.2
-      prop-types: 15.7.2
-      react-is: 16.13.1
-      react-test-renderer: 16.14.0
       semver: 5.7.1
     dev: false
     peerDependencies:
@@ -14165,6 +14175,13 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-awConJSVCHVGND6x3tmMaKcQvwXLhjdkmomy2W+Goaui8YPgYgXJZewhg3fWC+DlfqqQuWg8AwqjGTD2nAPVWg==
+  /global/4.4.0:
+    dependencies:
+      min-document: 2.19.0
+      process: 0.11.10
+    dev: false
+    resolution:
+      integrity: sha512-wv/LAoHdRE3BeTGz53FAamhGlPLhlssK45usmGFThIi4XqnBmjKQ16u+RNbP7WvigRZDxUsM0J3gcQ5yicaL0w==
   /globals/11.12.0:
     dev: false
     engines:
@@ -18257,6 +18274,12 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-z0yWI+4FDrrweS8Zmt4Ej5HdJmky15+L2e6Wgn3+iK5fWzb6T3fhNFq2+MeTRb064c6Wr4N/wv0DzQTjNzHNGQ==
+  /min-document/2.19.0:
+    dependencies:
+      dom-walk: 0.1.2
+    dev: false
+    resolution:
+      integrity: sha1-e9KC4/WELtKVu3SM3Z8f+iyCRoU=
   /min-indent/1.0.1:
     dev: false
     engines:
@@ -18601,6 +18624,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-hJaO0mwDXmZS4ghXsvPVriOhsxQ7ofcpQdm8dE+jISUOKopitvnXFQmpRR7jd2K6VBG6E26gU3IAbXXGIbu4sQ==
+  /mock-local-storage/1.1.17:
+    dependencies:
+      core-js: 0.8.4
+      global: 4.4.0
+    dev: false
+    resolution:
+      integrity: sha512-vF5571cY3N/XFw8Oxr+0HmY6PedvO6i2IZrpnDV35sh7alhrh1RYYFZzItuh5OhJrQoulNSruiw1KHk5QB/EQg==
   /module-definition/3.3.1:
     dependencies:
       ast-module-types: 2.7.1
@@ -23178,6 +23208,13 @@ packages:
     dev: false
     resolution:
       integrity: sha1-pNprY1/8zMoz9w0Xy5JZLeleVXo=
+  /sinon-chai/3.5.0:
+    dev: false
+    peerDependencies:
+      chai: ^4.0.0
+      sinon: '>=4.0.0 <10.0.0'
+    resolution:
+      integrity: sha512-IifbusYiQBpUxxFJkR3wTU68xzBN0+bxCScEaKMjBvAQERg6FnTTc1F17rseLb1tjmkJ23730AXpFI0c47FgAg==
   /sinon-chai/3.5.0_chai@4.2.0+sinon@9.2.3:
     dependencies:
       chai: 4.2.0
@@ -23188,9 +23225,9 @@ packages:
       sinon: '>=4.0.0 <10.0.0'
     resolution:
       integrity: sha512-IifbusYiQBpUxxFJkR3wTU68xzBN0+bxCScEaKMjBvAQERg6FnTTc1F17rseLb1tjmkJ23730AXpFI0c47FgAg==
-  /sinon-chai/3.5.0_sinon@9.2.3:
+  /sinon-chai/3.5.0_sinon@7.5.0:
     dependencies:
-      sinon: 9.2.3
+      sinon: 7.5.0
     dev: false
     peerDependencies:
       chai: ^4.0.0
@@ -26785,19 +26822,38 @@ packages:
       '@bentley/ui-ninezone': 2.18.0_41fd87fdcbf3201bc75efea67ae3fa14
       '@bentley/webgl-compatibility': 2.18.0_@bentley+bentleyjs-core@2.18.0
       '@bentley/webpack-tools': 1.14.1_86462e12149b1ca860c0bacdda174fbf
+      '@types/chai-as-promised': 7.1.4
+      '@types/chai-jest-snapshot': 1.3.6
+      '@types/chai-spies': 1.0.3
+      '@types/enzyme': 3.9.3
+      '@types/faker': 4.1.12
       '@types/i18next': 8.4.6
+      '@types/mocha': 5.2.7
       '@types/react': 16.9.56
       '@types/react-dom': 16.9.10
       '@types/react-redux': 7.1.15
+      '@types/sinon': 5.0.7
+      chai-as-promised: 7.1.1
+      chai-jest-snapshot: 2.0.0
+      chai-spies: 1.0.0
       classnames: 2.3.1
       cpx: 1.5.0
+      enzyme: 3.11.0
+      enzyme-adapter-react-16: 1.12.1_4f82faf5e8cab057bc46d4d95079ec42
+      enzyme-to-json: 3.6.1_enzyme@3.11.0
+      faker: 4.1.0
       i18next: 10.6.0
+      mocha: 5.2.0
+      mock-local-storage: 1.1.17
       react: 16.14.0
       react-dom: 16.14.0_react@16.14.0
       react-redux: 7.2.2_bbabd8c34ea235719dc50e75b43f85a4
       redux: 4.0.5
       rimraf: 3.0.2
+      sinon: 7.5.0
+      sinon-chai: 3.5.0_sinon@7.5.0
       tslint: 5.20.1_typescript@3.7.5
+      typemoq: 2.1.0
       typescript: 3.7.5
     dev: false
     id: 'file:projects/breakdown-trees-react.tgz'
@@ -26808,7 +26864,7 @@ packages:
       webpack: '*'
       webpack-cli: '*'
     resolution:
-      integrity: sha512-63rQcvSKZ9HxfANcgnIeUg7TnJgccDdC8mYAy6K/gCM6v06om9dFNnqi5csVr6BGyrAns36WRKTvCU2sbtMB0g==
+      integrity: sha512-CfGa1PJnhEPxHQJYv+R95jB5Yy4j3WZJtV765R0256rJ3MI0IDTueD7OA0qjnM3oQGh0ly36uOzGShIDYlOcEQ==
       tarball: 'file:projects/breakdown-trees-react.tgz'
     version: 0.0.0
   'file:projects/geo-tools-react.tgz_032af3497bb6ee28aabf93b49a6c011d':
@@ -27233,14 +27289,15 @@ specifiers:
   '@svgdotjs/svg.js': ^3.0.13
   '@testing-library/jest-dom': ^4.2.4
   '@testing-library/react-hooks': ^3.2.1
-  '@types/chai-as-promised': ^7.1.1
+  '@types/chai-jest-snapshot': ^1.3.0
+  '@types/chai-spies': ^1.0.0
   '@types/enzyme': 3.9.3
+  '@types/faker': ^4.1.0
   '@types/i18next': ^8.4.2
   '@types/node': 10.14.1
   '@types/react-autosuggest': ^10.0.0
   '@types/react-redux': ^7.0.1
   '@types/redux-mock-store': ^1.0.2
-  '@types/sinon': ^9.0.0
   '@types/sinon-chai': ^3.2.0
   '@types/testing-library__react': ^9.1.3
   babel-jest: ^24.9.0
@@ -27252,9 +27309,9 @@ specifiers:
   cpx: ^1.5.0
   cross-env: 7.0.3
   enzyme: ^3.4.0
-  enzyme-adapter-react-16: ^1.15.5
   enzyme-to-json: ^3.3.4
   eslint: ^6.8.0
+  faker: ^4.1.0
   file-loader: ^4.2.0
   glob: ^7.1.2
   i18next: ^10.2.2
@@ -27267,6 +27324,7 @@ specifiers:
   jsdom-global: 3.0.2
   lint-staged: ^10.2.11
   madge: 4.0.2
+  mock-local-storage: ^1.1.8
   nodemon: ^1.19.1
   null-loader: 3.0.0
   raf: ^3.4.0
@@ -27275,7 +27333,6 @@ specifiers:
   react-spring: ^8.0.27
   redux: ^4.0.3
   redux-mock-store: ^1.5.4
-  sinon: ^9.0.2
   sinon-chai: ^3.2.0
   source-map-loader: ^0.2.3
   source-map-support: ^0.5.6
@@ -27284,6 +27341,7 @@ specifiers:
   ts-node: ^7.0.1
   ts-sinon: ^2.0.1
   tslint: ^5.11.0
+  typemoq: ^2.1.0
   typescript: ~3.7.4
   url-loader: 2.1.0
   webpack: 4.42.0
