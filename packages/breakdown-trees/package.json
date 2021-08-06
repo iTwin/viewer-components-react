@@ -25,8 +25,8 @@
     "copy:assets": "cpx \"./src/assets/**/*\" ./lib/assets && cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "build:watch": "tsc -w",
     "clean": "rimraf lib",
-    "cover": "nyc npm test",
-    "test": "mocha --opts mocha.opts \"./lib/test/**/*.test.js\"",
+    "cover": "",
+    "test": "",
     "test:watch": "npm test -- --reporter min --watch-extensions ts,tsx --watch",
     "lint": "tslint --project . 1>&2",
     "lintfix": "tslint --fix --project . 1>&2"
