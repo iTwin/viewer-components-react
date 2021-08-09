@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Updated tree widget barrel file to include UiProvider",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react",
+  "email": "48142512+spap975@users.noreply.github.com"
+}
