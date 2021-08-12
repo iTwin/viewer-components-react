@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import * as React from "react";
 import {
   AuthorizedFrontendRequestContext,
@@ -96,12 +97,8 @@ const FavoriteActionButton = ({
     }
   }, [field, getIsFavoriteField, imodel]);
 
-  const onActionButtonClicked = React.useCallback(async () => {
-    void toggleFavoriteProperty();
-  }, [toggleFavoriteProperty]);
-
   return (
-    <div onClick={onActionButtonClicked}>
+    <div onClick={void toggleFavoriteProperty()}>
       {isFavorite ? (
         <Icon iconSpec="icon-star" />
       ) : (
