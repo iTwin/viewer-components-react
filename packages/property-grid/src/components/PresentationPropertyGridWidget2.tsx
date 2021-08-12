@@ -27,7 +27,6 @@ import {
   PropertyDataFiltererBase,
   PropertyGridContextMenuArgs,
   PropertyValueRendererManager,
-  useAsyncValue,
   VirtualizedPropertyGridWithDataProvider,
 } from "@bentley/ui-components";
 import {
@@ -52,61 +51,6 @@ import "./PresentationPropertyGridWidget2.scss";
 
 const sharedNamespace = "favoriteProperties";
 const sharedName = "sharedProps";
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const FavoriteActionButton = ({
-  field,
-  imodel,
-}: {
-  field: Field;
-  imodel: IModelConnection;
-}) => {
-  const isMountedRef = React.useRef(false);
-  React.useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  const getIsFavoriteField = React.useCallback(() => {
-    return Presentation.favoriteProperties.has(
-      field,
-      imodel,
-      FavoritePropertiesScope.IModel
-    );
-  }, [field, imodel]);
-
-  const [isFavorite, setIsFavorite] = React.useState(false);
-
-  const toggleFavoriteProperty = React.useCallback(async () => {
-    if (getIsFavoriteField()) {
-      await Presentation.favoriteProperties.remove(
-        field,
-        imodel,
-        FavoritePropertiesScope.IModel
-      );
-      isMountedRef.current && setIsFavorite(false);
-    } else {
-      await Presentation.favoriteProperties.add(
-        field,
-        imodel,
-        FavoritePropertiesScope.IModel
-      );
-      isMountedRef.current && setIsFavorite(true);
-    }
-  }, [field, getIsFavoriteField, imodel]);
-
-  return (
-    <div onClick={void toggleFavoriteProperty()}>
-      {isFavorite ? (
-        <Icon iconSpec="icon-star" />
-      ) : (
-        <Icon iconSpec="icon-star" />
-      )}
-    </div>
-  );
-};
 
 const createDataProvider = (
   imodel: IModelConnection | undefined
@@ -612,38 +556,6 @@ export const PresentationPropertyGridWidget = (
     setContextMenu(undefined);
   }, []);
 
-  const favoriteActionButtonRenderer = React.useCallback(
-    (props: ActionButtonRendererProps) => {
-      if (iModelConnection && dataProvider) {
-        const { property } = props;
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const field = useAsyncValue(
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          React.useMemo(
-            async () => dataProvider.getFieldByPropertyRecord(property),
-            [property]
-          )
-        );
-
-        return (
-          <div>
-            {field &&
-              (Presentation.favoriteProperties.has(
-                field,
-                iModelConnection,
-                FavoritePropertiesScope.IModel
-              ) ||
-                props.isPropertyHovered) && (
-                <FavoriteActionButton field={field} imodel={iModelConnection} />
-              )}
-          </div>
-        );
-      }
-      return null;
-    },
-    [dataProvider, iModelConnection]
-  );
-
   const renderHeader = () => {
     return (
       <div className="property-grid-react-panel-header">
@@ -696,10 +608,7 @@ export const PresentationPropertyGridWidget = (
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
             onPropertyContextMenu={onPropertyContextMenu}
-            actionButtonRenderers={[
-              shareActionButtonRenderer,
-              favoriteActionButtonRenderer,
-            ]}
+            actionButtonRenderers={[shareActionButtonRenderer]}
           />
         );
       } else {
