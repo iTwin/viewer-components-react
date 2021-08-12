@@ -490,94 +490,93 @@ export const PresentationPropertyGridWidget = (
   const setupContextMenu = React.useCallback(
     async (args: PropertyGridContextMenuArgs) => {
       if (iModelConnection && dataProvider) {
-        void dataProvider
-          .getFieldByPropertyRecord(args.propertyRecord)
-          .then((field) => {
-            const items: ContextMenuItemInfo[] = [];
-            if (
-              sharedFavorites &&
-              sharedFavorites?.findIndex(
-                (fav: string) => args.propertyRecord.property.name === fav
-              ) >= 0
-            ) {
-              // i.e. if shared
-              items.push({
-                key: "unshare-favorite",
-                onSelect: () =>
-                  onUnshareFavorite(args.propertyRecord.property.name),
-                title: localizations.unshareFavorite.title,
-                label: localizations.unshareFavorite.label,
-              });
-            } else if (field !== undefined) {
-              if (
-                Presentation.favoriteProperties.has(
-                  field,
-                  iModelConnection,
-                  FavoritePropertiesScope.IModel
-                )
-              ) {
-                items.push({
-                  key: "share-favorite",
-                  onSelect: () =>
-                    onShareFavorite(args.propertyRecord.property.name),
-                  title: localizations.shareFavorite.title,
-                  label: localizations.shareFavorite.label,
-                });
-                items.push({
-                  key: "remove-favorite",
-                  icon: "icon-remove-2",
-                  onSelect: async () => onRemoveFavorite(field),
-                  title: localizations.removeFavorite.title,
-                  label: localizations.removeFavorite.label,
-                });
-              } else {
-                items.push({
-                  key: "add-favorite",
-                  icon: "icon-add",
-                  onSelect: async () => onAddFavorite(field),
-                  title: localizations.addFavorite.title,
-                  label: localizations.addFavorite.label,
-                });
-              }
-            }
-
-            if (props.enableCopyingPropertyText) {
-              items.push({
-                key: "copy-text",
-                onSelect: async () => {
-                  if (props.featureTracking)
-                    props.featureTracking.trackCopyPropertyText();
-                  await onCopyText(args.propertyRecord);
-                },
-                title: localizations.copyText.title,
-                label: localizations.copyText.label,
-              });
-            }
-
-            if (props.enableNullValueToggle || true) {
-              if (showNullValues) {
-                items.push({
-                  key: "hide-null",
-                  onSelect: () => {
-                    onHideNull();
-                  },
-                  title: localizations.hideNull.title,
-                  label: localizations.hideNull.label,
-                });
-              } else {
-                items.push({
-                  key: "show-null",
-                  onSelect: () => {
-                    onShowNull();
-                  },
-                  title: localizations.showNull.title,
-                  label: localizations.showNull.label,
-                });
-              }
-            }
-            setContextMenu(args);
-            setContextMenuItemInfos(items.length > 0 ? items : undefined);
+        const field = await dataProvider.getFieldByPropertyRecord(
+          args.propertyRecord
+        );
+        const items: ContextMenuItemInfo[] = [];
+        if (
+          sharedFavorites &&
+          sharedFavorites?.findIndex(
+            (fav: string) => args.propertyRecord.property.name === fav
+          ) >= 0
+        ) {
+          // i.e. if shared
+          items.push({
+            key: "unshare-favorite",
+            onSelect: () =>
+              onUnshareFavorite(args.propertyRecord.property.name),
+            title: localizations.unshareFavorite.title,
+            label: localizations.unshareFavorite.label,
           });
+        } else if (field !== undefined) {
+          if (
+            Presentation.favoriteProperties.has(
+              field,
+              iModelConnection,
+              FavoritePropertiesScope.IModel
+            )
+          ) {
+            items.push({
+              key: "share-favorite",
+              onSelect: () =>
+                onShareFavorite(args.propertyRecord.property.name),
+              title: localizations.shareFavorite.title,
+              label: localizations.shareFavorite.label,
+            });
+            items.push({
+              key: "remove-favorite",
+              icon: "icon-remove-2",
+              onSelect: async () => onRemoveFavorite(field),
+              title: localizations.removeFavorite.title,
+              label: localizations.removeFavorite.label,
+            });
+          } else {
+            items.push({
+              key: "add-favorite",
+              icon: "icon-add",
+              onSelect: async () => onAddFavorite(field),
+              title: localizations.addFavorite.title,
+              label: localizations.addFavorite.label,
+            });
+          }
+        }
+
+        if (props.enableCopyingPropertyText) {
+          items.push({
+            key: "copy-text",
+            onSelect: async () => {
+              if (props.featureTracking)
+                props.featureTracking.trackCopyPropertyText();
+              await onCopyText(args.propertyRecord);
+            },
+            title: localizations.copyText.title,
+            label: localizations.copyText.label,
+          });
+        }
+
+        if (props.enableNullValueToggle || true) {
+          if (showNullValues) {
+            items.push({
+              key: "hide-null",
+              onSelect: () => {
+                onHideNull();
+              },
+              title: localizations.hideNull.title,
+              label: localizations.hideNull.label,
+            });
+          } else {
+            items.push({
+              key: "show-null",
+              onSelect: () => {
+                onShowNull();
+              },
+              title: localizations.showNull.title,
+              label: localizations.showNull.label,
+            });
+          }
+        }
+        setContextMenu(args);
+        setContextMenuItemInfos(items.length > 0 ? items : undefined);
       }
     },
     [
