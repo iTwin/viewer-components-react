@@ -18,7 +18,7 @@ import { PresentationPropertyGridWidget } from "./PresentationPropertyGridWidget
 
 /** Provides the property grid widget to zone 9 */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
-  public readonly id = "PropertyGridUiitemsProvider";
+  public readonly id = "PropertyGridUiItemsProvider";
   public static i18n: I18N;
 
   private _props?: Partial<PropertyGridProps>;
