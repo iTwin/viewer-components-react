@@ -548,13 +548,13 @@ export const PresentationPropertyGridWidget = (
     [setupContextMenu]
   );
 
-  const onContextMenuOutsideClick = React.useCallback(() => {
+  const onContextMenuOutsideClick = () => {
     setContextMenu(undefined);
-  }, []);
+  };
 
-  const onContextMenuEsc = React.useCallback(() => {
+  const onContextMenuEsc = () => {
     setContextMenu(undefined);
-  }, []);
+  };
 
   const renderHeader = () => {
     return (
