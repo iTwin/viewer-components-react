@@ -36,7 +36,7 @@ import {
   Icon,
   Orientation,
 } from "@bentley/ui-core";
-import { UiFramework } from "@bentley/ui-framework";
+import { useActiveIModelConnection } from "@bentley/ui-framework";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { SettingsStatus } from "@bentley/product-settings-client";
 import { PropertyRecord } from "@bentley/ui-abstract";
@@ -56,13 +56,13 @@ const sharedNamespace = "favoriteProperties";
 const sharedName = "sharedProps";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-function FavoriteActionButton({
+const FavoriteActionButton = ({
   field,
   imodel,
 }: {
   field: Field;
   imodel: IModelConnection;
-}) {
+}) => {
   const isMountedRef = React.useRef(false);
   React.useEffect(() => {
     isMountedRef.current = true;
@@ -112,22 +112,22 @@ function FavoriteActionButton({
       )}
     </div>
   );
-}
+};
 
-function createDataProvider(
+const createDataProvider = (
   imodel: IModelConnection | undefined
-): PresentationPropertyDataProvider | undefined {
+): PresentationPropertyDataProvider | undefined => {
   if (imodel) {
     const provider = new PresentationPropertyDataProvider({ imodel });
     provider.isNestedPropertyCategoryGroupingEnabled = true;
     return provider;
   }
   return undefined;
-}
+};
 
-function useDataProvider(
+const useDataProvider = (
   iModelConnection: IModelConnection | undefined
-): PresentationPropertyDataProvider | undefined {
+): PresentationPropertyDataProvider | undefined => {
   const [dataProvider, setDataProvider] = React.useState(
     createDataProvider(iModelConnection)
   );
@@ -136,14 +136,13 @@ function useDataProvider(
   }, [iModelConnection]);
 
   return dataProvider;
-}
+};
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function PresentationPropertyGridWidget(
+export const PresentationPropertyGridWidget = (
   props: Partial<PropertyGridProps>
-) {
-  const iModelConnection =
-    props.iModelConnection ?? UiFramework.getIModelConnection();
+) => {
+  const iModelConnection = useActiveIModelConnection();
   const projectId = props.projectId ?? iModelConnection?.contextId;
   const dataProvider = useDataProvider(iModelConnection);
 
@@ -160,15 +159,6 @@ export function PresentationPropertyGridWidget(
   const [filterer, setFilterer] = React.useState<PropertyDataFiltererBase>(
     new PlaceholderPropertyDataFilterer()
   );
-
-  const componentId = "uifw-v2-container";
-  const style: React.CSSProperties = {
-    height: "100%",
-    width: "100%",
-    position: "absolute",
-    display: "flex",
-    flexDirection: "column",
-  };
 
   const localizations = React.useMemo(() => {
     return {
@@ -459,12 +449,12 @@ export function PresentationPropertyGridWidget(
   );
 
   const shareActionButtonRenderer: ActionButtonRenderer = (
-    _props: ActionButtonRendererProps
+    props: ActionButtonRendererProps
   ) => {
     const shared =
       sharedFavorites !== undefined &&
       sharedFavorites?.findIndex(
-        (fav: string) => _props.property.property.name === fav
+        (fav: string) => props.property.property.name === fav
       ) >= 0;
     return (
       <div>
@@ -629,9 +619,9 @@ export function PresentationPropertyGridWidget(
   }, []);
 
   const favoriteActionButtonRenderer = React.useCallback(
-    (_props: ActionButtonRendererProps) => {
+    (props: ActionButtonRendererProps) => {
       if (iModelConnection && dataProvider) {
-        const { property } = _props;
+        const { property } = props;
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const field = useAsyncValue(
           // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -649,7 +639,7 @@ export function PresentationPropertyGridWidget(
                 iModelConnection,
                 FavoritePropertiesScope.IModel
               ) ||
-                _props.isPropertyHovered) && (
+                props.isPropertyHovered) && (
                 <FavoriteActionButton field={field} imodel={iModelConnection} />
               )}
           </div>
@@ -694,6 +684,14 @@ export function PresentationPropertyGridWidget(
   };
 
   const renderPropertyGrid = () => {
+    const { isOverLimit } =
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      usePropertyDataProviderWithUnifiedSelection({
+        dataProvider: dataProvider as IPresentationPropertyDataProvider,
+      });
+    if (isOverLimit) {
+      return <FillCentered>{localizations.tooManySelected}</FillCentered>;
+    }
     if (dataProvider) {
       if (props.disableUnifiedSelection) {
         return (
@@ -759,14 +757,10 @@ export function PresentationPropertyGridWidget(
   };
 
   return (
-    <div
-      className={props.rootClassName}
-      data-component-id={componentId}
-      style={style}
-    >
+    <div className="property-grid-widget-container">
       {renderHeader()}
       <div className="property-grid-container">{renderPropertyGrid()}</div>
       {renderContextMenu()}
     </div>
   );
-}
+};
