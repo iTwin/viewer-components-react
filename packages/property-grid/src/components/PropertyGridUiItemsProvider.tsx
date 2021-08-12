@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import {
   AbstractWidgetProps,
   StagePanelLocation,
@@ -15,7 +16,7 @@ import { PresentationPropertyGridWidget } from "./PresentationPropertyGridWidget
 
 /** Provides the property grid widget to zone 9 */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
-  public readonly id = "PropertyGridUiitemsProvider";
+  public readonly id = "PropertyGridUiItemsProvider";
 
   private _props?: Partial<PropertyGridProps>;
 
