@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import * as React from "react";
 import {
   AuthorizedFrontendRequestContext,
@@ -30,7 +31,6 @@ import {
 } from "@bentley/ui-components";
 import {
   ContextMenuItem,
-  ContextMenuItemProps,
   FillCentered,
   GlobalContextMenu,
   Icon,
@@ -40,17 +40,14 @@ import { useActiveIModelConnection } from "@bentley/ui-framework";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { SettingsStatus } from "@bentley/product-settings-client";
 import { PropertyRecord } from "@bentley/ui-abstract";
+import { ContextMenuItemInfo, PropertyGridProps } from "./PropertyGrid";
 import {
   FilteringPropertyGridWithUnifiedSelection,
   NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 import { copyToClipboard } from "../api/WebUtilities";
-import { PropertyGridProps } from "../property-grid-react";
 import "./PresentationPropertyGridWidget2.scss";
-
-export type ContextMenuItemInfo = ContextMenuItemProps &
-  React.Attributes & { label: string };
 
 const sharedNamespace = "favoriteProperties";
 const sharedName = "sharedProps";
@@ -126,10 +123,11 @@ const createDataProvider = (
 };
 
 const useDataProvider = (
-  iModelConnection: IModelConnection | undefined
+  iModelConnection: IModelConnection | undefined,
+  propDataProvider?: PresentationPropertyDataProvider | undefined
 ): PresentationPropertyDataProvider | undefined => {
   const [dataProvider, setDataProvider] = React.useState(
-    createDataProvider(iModelConnection)
+    propDataProvider ?? createDataProvider(iModelConnection)
   );
   React.useEffect(() => {
     setDataProvider(createDataProvider(iModelConnection));
@@ -144,7 +142,7 @@ export const PresentationPropertyGridWidget = (
 ) => {
   const iModelConnection = useActiveIModelConnection();
   const projectId = props.projectId ?? iModelConnection?.contextId;
-  const dataProvider = useDataProvider(iModelConnection);
+  const dataProvider = useDataProvider(iModelConnection, props.dataProvider);
 
   const [title, setTitle] = React.useState<PropertyRecord>();
   const [className, setClassName] = React.useState<string>("");
@@ -493,7 +491,7 @@ export const PresentationPropertyGridWidget = (
   }, []);
 
   const setupContextMenu = React.useCallback(
-    (args: PropertyGridContextMenuArgs) => {
+    async (args: PropertyGridContextMenuArgs) => {
       if (iModelConnection && dataProvider) {
         void dataProvider
           .getFieldByPropertyRecord(args.propertyRecord)
@@ -605,7 +603,7 @@ export const PresentationPropertyGridWidget = (
   const onPropertyContextMenu = React.useCallback(
     (args: PropertyGridContextMenuArgs) => {
       args.event.persist();
-      setupContextMenu(args);
+      void setupContextMenu(args);
     },
     [setupContextMenu]
   );
