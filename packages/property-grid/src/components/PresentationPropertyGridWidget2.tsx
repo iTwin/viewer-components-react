@@ -78,12 +78,22 @@ const useDataProvider = (
 };
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const PresentationPropertyGridWidget = (
-  props: Partial<PropertyGridProps>
-) => {
+export const PresentationPropertyGridWidget = ({
+  projectId,
+  orientation,
+  isOrientationFixed,
+  enableCopyingPropertyText,
+  enableNullValueToggle,
+  debugLog,
+  featureTracking,
+  dataProvider,
+  onInfoButton,
+  onBackButton,
+  disableUnifiedSelection,
+}: Partial<PropertyGridProps>) => {
   const iModelConnection = useActiveIModelConnection();
-  const projectId = props.projectId ?? iModelConnection?.contextId;
-  const dataProvider = useDataProvider(iModelConnection, props.dataProvider);
+  const projectID = projectId ?? iModelConnection?.contextId;
+  const projectDataProvider = useDataProvider(iModelConnection, dataProvider);
 
   const [title, setTitle] = React.useState<PropertyRecord>();
   const [className, setClassName] = React.useState<string>("");
@@ -169,12 +179,14 @@ export const PresentationPropertyGridWidget = (
       for (const key of keys) {
         const category = categories[key];
         for (const record of category) {
-          const field = await dataProvider?.getFieldByPropertyRecord(record);
+          const field = await projectDataProvider?.getFieldByPropertyRecord(
+            record
+          );
           if (
             field !== undefined &&
             Presentation.favoriteProperties.has(
               field,
-              projectId,
+              projectID,
               iModelConnection?.iModelId
             )
           ) {
@@ -184,20 +196,20 @@ export const PresentationPropertyGridWidget = (
       }
       return "Favorite";
     },
-    [dataProvider, iModelConnection?.iModelId, projectId]
+    [projectDataProvider, iModelConnection?.iModelId, projectID]
   );
 
   const addSharedFavsToData = React.useCallback(
     async (propertyData: PropertyData) => {
       let newSharedFavs: string[] = [];
-      if (projectId) {
+      if (projectID) {
         const requestContext = await AuthorizedFrontendRequestContext.create();
         const result = await IModelApp.settings.getSharedSetting(
           requestContext,
           sharedNamespace,
           sharedName,
           false,
-          projectId,
+          projectID,
           iModelConnection?.iModelId
         );
         if (result.setting?.slice) {
@@ -236,41 +248,43 @@ export const PresentationPropertyGridWidget = (
               // if shared & not already in favorites
               dataFavs.push(rec);
               const propertyField =
-                await dataProvider?.getFieldByPropertyRecord(rec);
+                await projectDataProvider?.getFieldByPropertyRecord(rec);
               if (propertyField) {
                 await Presentation.favoriteProperties.add(
                   propertyField,
-                  projectId
+                  projectID
                 );
               }
             }
           }
         }
       }
-      return dataProvider?.getData();
+      return projectDataProvider?.getData();
     },
     [
-      dataProvider,
+      projectDataProvider,
       getFavoritesCategoryName,
       iModelConnection?.iModelId,
-      projectId,
+      projectID,
     ]
   );
 
   const onDataChanged = React.useCallback(async () => {
-    let propertyData: PropertyData | undefined = await dataProvider?.getData();
+    let propertyData: PropertyData | undefined =
+      await projectDataProvider?.getData();
     if (propertyData) {
       propertyData = await addSharedFavsToData(propertyData);
       setTitle(propertyData?.label);
       setClassName(propertyData?.description ?? "");
     }
-  }, [dataProvider, addSharedFavsToData]);
+  }, [projectDataProvider, addSharedFavsToData]);
 
   React.useEffect(() => {
     const mount = async () => {
-      dataProvider?.onDataChanged.addListener(onDataChanged);
+      projectDataProvider?.onDataChanged.addListener(onDataChanged);
 
-      let currentData: PropertyData | undefined = await dataProvider?.getData();
+      let currentData: PropertyData | undefined =
+        await projectDataProvider?.getData();
       currentData = await addSharedFavsToData(currentData as PropertyData);
 
       if (currentData) {
@@ -280,15 +294,15 @@ export const PresentationPropertyGridWidget = (
     };
 
     const unmount = () => {
-      if (props.debugLog) props.debugLog(`Unmounting Properties Grid`);
+      if (debugLog) debugLog(`Unmounting Properties Grid`);
 
-      dataProvider?.onDataChanged.removeListener(onDataChanged);
+      projectDataProvider?.onDataChanged.removeListener(onDataChanged);
     };
 
     void mount();
 
     return unmount;
-  }, [onDataChanged, dataProvider, props, addSharedFavsToData]);
+  }, [onDataChanged, projectDataProvider, debugLog, addSharedFavsToData]);
 
   const onAddFavorite = React.useCallback(
     async (propertyField: Field) => {
@@ -318,7 +332,7 @@ export const PresentationPropertyGridWidget = (
 
   const onShareFavorite = React.useCallback(
     async (propName: string) => {
-      if (!projectId || !sharedFavorites) {
+      if (!projectID || !sharedFavorites) {
         setContextMenu(undefined);
         return;
       }
@@ -331,7 +345,7 @@ export const PresentationPropertyGridWidget = (
         sharedNamespace,
         sharedName,
         false,
-        projectId,
+        projectID,
         iModelConnection?.iModelId
       );
       if (result.status !== SettingsStatus.Success) {
@@ -344,7 +358,7 @@ export const PresentationPropertyGridWidget = (
         sharedNamespace,
         sharedName,
         false,
-        projectId,
+        projectID,
         iModelConnection?.iModelId
       );
       if (result2.status !== SettingsStatus.Success) {
@@ -354,12 +368,12 @@ export const PresentationPropertyGridWidget = (
       }
       setContextMenu(undefined);
     },
-    [iModelConnection?.iModelId, projectId, sharedFavorites]
+    [iModelConnection?.iModelId, projectID, sharedFavorites]
   );
 
   const onUnshareFavorite = React.useCallback(
     async (propName: string) => {
-      if (!projectId || !sharedFavorites) {
+      if (!projectID || !sharedFavorites) {
         setContextMenu(undefined);
         return;
       }
@@ -374,7 +388,7 @@ export const PresentationPropertyGridWidget = (
         sharedNamespace,
         sharedName,
         false,
-        projectId,
+        projectID,
         iModelConnection?.iModelId
       );
       if (result.status !== SettingsStatus.Success) {
@@ -384,7 +398,7 @@ export const PresentationPropertyGridWidget = (
       }
       setContextMenu(undefined);
     },
-    [iModelConnection?.iModelId, projectId, sharedFavorites]
+    [iModelConnection?.iModelId, projectID, sharedFavorites]
   );
 
   const shareActionButtonRenderer: ActionButtonRenderer = (
@@ -410,13 +424,13 @@ export const PresentationPropertyGridWidget = (
   const onCopyText = React.useCallback(
     async (property: PropertyRecord) => {
       if (property.description) copyToClipboard(property.description);
-      else if (props.debugLog)
-        props.debugLog(
+      else if (debugLog)
+        debugLog(
           "PROPERTIES COPY TEXT FAILED TO RUN DUE TO UNDEFINED PROPERTY RECORD DESCRIPTION"
         );
       setContextMenu(undefined);
     },
-    [props]
+    [debugLog]
   );
 
   const onHideNull = React.useCallback(() => {
@@ -433,8 +447,8 @@ export const PresentationPropertyGridWidget = (
 
   const setupContextMenu = React.useCallback(
     async (args: PropertyGridContextMenuArgs) => {
-      if (iModelConnection && dataProvider) {
-        const field = await dataProvider.getFieldByPropertyRecord(
+      if (iModelConnection && projectDataProvider) {
+        const field = await projectDataProvider.getFieldByPropertyRecord(
           args.propertyRecord
         );
         const items: ContextMenuItemInfo[] = [];
@@ -485,12 +499,11 @@ export const PresentationPropertyGridWidget = (
           }
         }
 
-        if (props.enableCopyingPropertyText) {
+        if (enableCopyingPropertyText) {
           items.push({
             key: "copy-text",
             onSelect: async () => {
-              if (props.featureTracking)
-                props.featureTracking.trackCopyPropertyText();
+              if (featureTracking) featureTracking.trackCopyPropertyText();
               await onCopyText(args.propertyRecord);
             },
             title: localizations.copyText.title,
@@ -498,7 +511,7 @@ export const PresentationPropertyGridWidget = (
           });
         }
 
-        if (props.enableNullValueToggle || true) {
+        if (enableNullValueToggle || true) {
           if (showNullValues) {
             items.push({
               key: "hide-null",
@@ -525,11 +538,13 @@ export const PresentationPropertyGridWidget = (
     },
     [
       iModelConnection,
-      dataProvider,
+      projectDataProvider,
       localizations,
       sharedFavorites,
       showNullValues,
-      props,
+      enableCopyingPropertyText,
+      featureTracking,
+      enableNullValueToggle,
       onAddFavorite,
       onRemoveFavorite,
       onShareFavorite,
@@ -559,10 +574,10 @@ export const PresentationPropertyGridWidget = (
   const renderHeader = () => {
     return (
       <div className="property-grid-react-panel-header">
-        {props.onBackButton !== undefined && (
+        {onBackButton !== undefined && (
           <div
             className="property-grid-react-panel-back-btn"
-            onClick={props.onBackButton}
+            onClick={onBackButton}
           >
             <Icon
               className="property-grid-react-panel-icon"
@@ -574,10 +589,10 @@ export const PresentationPropertyGridWidget = (
           {title && PropertyValueRendererManager.defaultManager.render(title)}
           <span className="property-grid-react-panel-class">{className}</span>
         </div>
-        {props.onInfoButton !== undefined && (
+        {onInfoButton !== undefined && (
           <div
             className="property-grid-react-panel-info-btn"
-            onClick={props.onInfoButton}
+            onClick={onInfoButton}
           >
             <Icon
               className="property-grid-react-panel-icon"
@@ -593,18 +608,18 @@ export const PresentationPropertyGridWidget = (
     const { isOverLimit } =
       // eslint-disable-next-line react-hooks/rules-of-hooks
       usePropertyDataProviderWithUnifiedSelection({
-        dataProvider: dataProvider as IPresentationPropertyDataProvider,
+        dataProvider: projectDataProvider as IPresentationPropertyDataProvider,
       });
     if (isOverLimit) {
       return <FillCentered>{localizations.tooManySelected}</FillCentered>;
     }
-    if (dataProvider) {
-      if (props.disableUnifiedSelection) {
+    if (projectDataProvider) {
+      if (disableUnifiedSelection) {
         return (
           <VirtualizedPropertyGridWithDataProvider
-            orientation={props.orientation ?? Orientation.Horizontal}
-            isOrientationFixed={props.isOrientationFixed ?? true}
-            dataProvider={dataProvider}
+            orientation={orientation ?? Orientation.Horizontal}
+            isOrientationFixed={isOrientationFixed ?? true}
+            dataProvider={projectDataProvider}
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
             onPropertyContextMenu={onPropertyContextMenu}
@@ -614,9 +629,9 @@ export const PresentationPropertyGridWidget = (
       } else {
         return (
           <FilteringPropertyGridWithUnifiedSelection
-            orientation={props.orientation ?? Orientation.Horizontal}
-            isOrientationFixed={props.isOrientationFixed ?? true}
-            dataProvider={dataProvider}
+            orientation={orientation ?? Orientation.Horizontal}
+            isOrientationFixed={isOrientationFixed ?? true}
+            dataProvider={projectDataProvider}
             filterer={filterer}
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
