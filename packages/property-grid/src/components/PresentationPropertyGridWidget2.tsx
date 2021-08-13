@@ -111,6 +111,7 @@ export const PresentationPropertyGridWidget = ({
 
   const localizations = React.useMemo(() => {
     return {
+      favorite: PropertyGridManager.translate("context-menu.favorite"),
       unshareFavorite: {
         title: PropertyGridManager.translate(
           "context-menu.unshare-favorite.description"
@@ -194,7 +195,7 @@ export const PresentationPropertyGridWidget = ({
           }
         }
       }
-      return "Favorite";
+      return localizations.favorite;
     },
     [projectDataProvider, iModelConnection?.iModelId, projectID]
   );
