@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Mon, 19 Jul 2021 18:07:24 GMT and should not be manually modified.
+This log was last generated on Mon, 09 Aug 2021 20:24:55 GMT and should not be manually modified.
+
+## 1.4.2
+Mon, 09 Aug 2021 20:24:55 GMT
+
+### Patches
+
+- Updated tree widget barrel file to include UiProvider
 
 ## 1.4.1
 Mon, 19 Jul 2021 18:07:24 GMT
