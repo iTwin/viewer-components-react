@@ -4,7 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 
 
+import "./PropertyGrid.scss";
+
 import * as React from "react";
+
 import {
   AuthorizedFrontendRequestContext,
   IModelApp,
@@ -40,17 +43,18 @@ import { useActiveIModelConnection } from "@bentley/ui-framework";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { SettingsStatus } from "@bentley/product-settings-client";
 import { PropertyRecord } from "@bentley/ui-abstract";
-import { ContextMenuItemInfo, PropertyGridProps } from "./PropertyGrid";
+import {
+  ContextMenuItemInfo,
+  PropertyGridProps,
+  sharedName,
+  sharedNamespace,
+} from "./PropertyGrid";
 import {
   FilteringPropertyGridWithUnifiedSelection,
   NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 import { copyToClipboard } from "../api/WebUtilities";
-import "./PresentationPropertyGridWidget2.scss";
-
-const sharedNamespace = "favoriteProperties";
-const sharedName = "sharedProps";
 
 const createDataProvider = (
   imodel: IModelConnection | undefined
@@ -78,7 +82,7 @@ const useDataProvider = (
 };
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const PresentationPropertyGridWidget = ({
+export const FunctionalPropertyGridWidget = ({
   projectId,
   orientation,
   isOrientationFixed,

@@ -48,8 +48,8 @@ import {
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 
-const sharedNamespace = "favoriteProperties";
-const sharedName = "sharedProps";
+export const sharedNamespace = "favoriteProperties";
+export const sharedName = "sharedProps";
 export type ContextMenuItemInfo = ContextMenuItemProps &
   React.Attributes & { label: string };
 
