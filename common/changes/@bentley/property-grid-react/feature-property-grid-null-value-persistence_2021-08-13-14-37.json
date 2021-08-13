@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "Added persistence to null value visibility state of property grid",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react",
+  "email": "65671230+usjpin@users.noreply.github.com"
+}
