@@ -43,18 +43,19 @@ import { useActiveIModelConnection } from "@bentley/ui-framework";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { SettingsStatus } from "@bentley/product-settings-client";
 import { PropertyRecord } from "@bentley/ui-abstract";
-import {
-  ContextMenuItemInfo,
-  PropertyGridProps,
-  sharedName,
-  sharedNamespace,
-} from "./PropertyGrid";
+
 import {
   FilteringPropertyGridWithUnifiedSelection,
   NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 import { copyToClipboard } from "../api/WebUtilities";
+import {
+  ContextMenuItemInfo,
+  PropertyGridProps,
+  SharedName,
+  SharedNamespace,
+} from "../types";
 
 const createDataProvider = (
   imodel: IModelConnection | undefined
@@ -211,8 +212,8 @@ export const FunctionalPropertyGridWidget = ({
         const requestContext = await AuthorizedFrontendRequestContext.create();
         const result = await IModelApp.settings.getSharedSetting(
           requestContext,
-          sharedNamespace,
-          sharedName,
+          SharedNamespace,
+          SharedName,
           false,
           projectID,
           iModelConnection?.iModelId
@@ -347,8 +348,8 @@ export const FunctionalPropertyGridWidget = ({
       const result = await IModelApp.settings.saveSharedSetting(
         requestContext,
         sharedFavorites,
-        sharedNamespace,
-        sharedName,
+        SharedNamespace,
+        SharedName,
         false,
         projectID,
         iModelConnection?.iModelId
@@ -360,8 +361,8 @@ export const FunctionalPropertyGridWidget = ({
       }
       const result2 = await IModelApp.settings.getSharedSetting(
         requestContext,
-        sharedNamespace,
-        sharedName,
+        SharedNamespace,
+        SharedName,
         false,
         projectID,
         iModelConnection?.iModelId
@@ -390,8 +391,8 @@ export const FunctionalPropertyGridWidget = ({
       const result = await IModelApp.settings.saveSharedSetting(
         requestContext,
         sharedFavorites,
-        sharedNamespace,
-        sharedName,
+        SharedNamespace,
+        SharedName,
         false,
         projectID,
         iModelConnection?.iModelId

@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import "./PropertyGrid.scss";
 
 import * as React from "react";
@@ -11,13 +10,9 @@ import * as React from "react";
 import {
   AuthorizedFrontendRequestContext,
   IModelApp,
-  IModelConnection,
 } from "@bentley/imodeljs-frontend";
 import { Field } from "@bentley/presentation-common";
-import {
-  IPresentationPropertyDataProvider,
-  PresentationPropertyDataProvider,
-} from "@bentley/presentation-components";
+import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
 import { Presentation } from "@bentley/presentation-frontend";
 import { SettingsStatus } from "@bentley/product-settings-client";
 import { PropertyRecord } from "@bentley/ui-abstract";
@@ -32,7 +27,6 @@ import {
 } from "@bentley/ui-components";
 import {
   ContextMenuItem,
-  ContextMenuItemProps,
   GlobalContextMenu,
   Icon,
   Orientation,
@@ -48,39 +42,13 @@ import {
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 
-export const sharedNamespace = "favoriteProperties";
-export const sharedName = "sharedProps";
-export type ContextMenuItemInfo = ContextMenuItemProps &
-  React.Attributes & { label: string };
-
-export interface PropertyGridFeatureTracking {
-  trackCopyPropertyText: () => void;
-}
-
-export interface OnSelectEventArgs {
-  dataProvider: IPresentationPropertyDataProvider;
-  field?: Field;
-  contextMenuArgs: PropertyGridContextMenuArgs;
-}
-
-export interface PropertyGridProps {
-  iModelConnection: IModelConnection;
-  projectId: string;
-  orientation?: Orientation;
-  isOrientationFixed?: boolean;
-  enableFavoriteProperties?: boolean;
-  enableCopyingPropertyText?: boolean;
-  enableNullValueToggle?: boolean;
-  additionalContextMenuOptions?: ContextMenuItemInfo[];
-  debugLog?: (message: string) => void;
-  featureTracking?: PropertyGridFeatureTracking;
-  rulesetId?: string;
-  rootClassName?: string;
-  dataProvider?: PresentationPropertyDataProvider;
-  onInfoButton?: () => void;
-  onBackButton?: () => void;
-  disableUnifiedSelection?: boolean;
-}
+import {
+  ContextMenuItemInfo,
+  OnSelectEventArgs,
+  PropertyGridProps,
+  SharedName,
+  SharedNamespace,
+} from "../types";
 
 interface PropertyGridState {
   title?: PropertyRecord;
@@ -170,8 +138,8 @@ export class PropertyGrid extends React.Component<
       const requestContext = await AuthorizedFrontendRequestContext.create();
       const result = await IModelApp.settings.getSharedSetting(
         requestContext,
-        sharedNamespace,
-        sharedName,
+        SharedNamespace,
+        SharedName,
         false,
         this.props.projectId,
         this.props.iModelConnection.iModelId
@@ -292,8 +260,8 @@ export class PropertyGrid extends React.Component<
     const result = await IModelApp.settings.saveSharedSetting(
       requestContext,
       this.state.sharedFavorites,
-      sharedNamespace,
-      sharedName,
+      SharedNamespace,
+      SharedName,
       false,
       this.props.projectId,
       this.props.iModelConnection.iModelId
@@ -305,8 +273,8 @@ export class PropertyGrid extends React.Component<
     }
     const result2 = await IModelApp.settings.getSharedSetting(
       requestContext,
-      sharedNamespace,
-      sharedName,
+      SharedNamespace,
+      SharedName,
       false,
       this.props.projectId,
       this.props.iModelConnection.iModelId
@@ -332,8 +300,8 @@ export class PropertyGrid extends React.Component<
     const result = await IModelApp.settings.saveSharedSetting(
       requestContext,
       this.state.sharedFavorites,
-      sharedNamespace,
-      sharedName,
+      SharedNamespace,
+      SharedName,
       false,
       this.props.projectId,
       this.props.iModelConnection.iModelId
@@ -357,10 +325,7 @@ export class PropertyGrid extends React.Component<
     return (
       <div>
         {shared && (
-          <span
-            className="icon icon-share"
-            style={{ paddingRight: "5px" }}
-          ></span>
+          <span className="icon icon-share" style={{ paddingRight: "5px" }} />
         )}
       </div>
     );
