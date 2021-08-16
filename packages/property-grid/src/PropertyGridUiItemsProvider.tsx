@@ -11,9 +11,9 @@ import {
   StageUsage,
   UiItemsProvider,
 } from "@bentley/ui-abstract";
-import { PropertyGridProps } from "./PropertyGrid";
+import { PropertyGridProps } from "./types";
 import * as React from "react";
-import { FunctionalPropertyGridWidget } from "./FunctionalPropertyGridWidget";
+import { FunctionalPropertyGridWidget } from "./components/FunctionalPropertyGridWidget";
 
 /** Provides the property grid widget to zone 9 */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {

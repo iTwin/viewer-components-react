@@ -3,10 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import "./MultiElementPropertyGrid.scss";
 import { Presentation } from "@bentley/presentation-frontend";
 
-import { PropertyGrid, PropertyGridProps } from "./PropertyGrid";
+import { PropertyGrid } from "./PropertyGrid";
+import { PropertyGridProps } from "../types";
 import { PropertyGridManager } from "../PropertyGridManager";
 import * as React from "react";
 import { animated, Transition } from "react-spring/renderprops.cjs";

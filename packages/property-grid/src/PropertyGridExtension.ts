@@ -3,11 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { Extension, IModelApp } from "@bentley/imodeljs-frontend";
 import { PropertyGridManager } from "./PropertyGridManager";
 import { UiItemsManager } from "@bentley/ui-abstract";
 import { I18NNamespace } from "@bentley/imodeljs-i18n";
-import { PropertyGridUiItemsProvider } from "./components/PropertyGridUiItemsProvider";
+import { PropertyGridUiItemsProvider } from "./PropertyGridUiItemsProvider";
 
 /** Extension object for loading on runtime */
 class PropertyGridExtension extends Extension {
