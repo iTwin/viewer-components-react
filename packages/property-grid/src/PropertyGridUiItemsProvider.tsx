@@ -10,8 +10,9 @@ import {
   StagePanelSection,
   StageUsage,
   UiItemsProvider,
+  WidgetState,
 } from "@bentley/ui-abstract";
-import { PropertyGridProps } from "./types";
+import { PropertyGridWidgetBaseProps } from "./types";
 import * as React from "react";
 import { FunctionalPropertyGridWidget } from "./components/FunctionalPropertyGridWidget";
 
@@ -19,9 +20,9 @@ import { FunctionalPropertyGridWidget } from "./components/FunctionalPropertyGri
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
 
-  private _props?: Partial<PropertyGridProps>;
+  private _props?: Partial<PropertyGridWidgetBaseProps>;
 
-  constructor(props?: Partial<PropertyGridProps>) {
+  constructor(props?: Partial<PropertyGridWidgetBaseProps>) {
     this._props = props;
   }
 
@@ -39,10 +40,11 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     ) {
       widgets.push({
         id: "propertyGrid",
-        label: "Properties",
+        label: "widget-label",
         getWidgetContent: () => (
           <FunctionalPropertyGridWidget {...this._props} />
         ),
+        defaultState: WidgetState.Closed,
       });
     }
 
