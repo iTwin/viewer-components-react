@@ -64,12 +64,8 @@ export const FunctionalPropertyGridWidget = ({
   disableUnifiedSelection,
 }: PropertyGridWidgetBaseProps) => {
   const iModelConnection = useActiveIModelConnection();
-  if (!iModelConnection) {
-    return null;
-  }
-
-  const projectId = iModelConnection.contextId;
-  const iModelId = iModelConnection.iModelId;
+  const projectId = iModelConnection?.contextId;
+  const iModelId = iModelConnection?.iModelId;
 
   const dataProvider = React.useMemo(() => {
     let dp;
@@ -90,9 +86,6 @@ export const FunctionalPropertyGridWidget = ({
     }
     return dp;
   }, [propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties]);
-  // if (!dataProvider) {
-  //   return null;
-  // }
 
   const [title, setTitle] = React.useState<PropertyRecord>();
   const [className, setClassName] = React.useState<string>("");
@@ -279,6 +272,7 @@ export const FunctionalPropertyGridWidget = ({
       setClassName(propertyData?.description ?? "");
     }
     console.log("some change");
+    console.log(propertyData);
   }, [dataProvider, addSharedFavsToData]);
 
   React.useEffect(() => {
