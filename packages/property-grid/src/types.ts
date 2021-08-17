@@ -9,7 +9,6 @@ import { Field } from "@bentley/presentation-common";
 import {
   IPresentationPropertyDataProvider,
   PresentationPropertyDataProvider,
-  PresentationPropertyDataProviderProps,
 } from "@bentley/presentation-components";
 import { PropertyGridContextMenuArgs } from "@bentley/ui-components";
 import { ContextMenuItemProps, Orientation } from "@bentley/ui-core";
@@ -56,9 +55,4 @@ export interface PropertyGridProps extends PropertyGridWidgetBaseProps {
 export interface PropertyGridManagerFeatureFlags {
   /** If true, enables property category group nesting  */
   enablePropertyGroupNesting?: boolean;
-}
-
-export interface UseDataProviderProps {
-  dataProvider?: PresentationPropertyDataProvider;
-  dataProviderProps?: PresentationPropertyDataProviderProps;
 }

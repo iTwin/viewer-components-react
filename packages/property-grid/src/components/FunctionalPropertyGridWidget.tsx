@@ -14,10 +14,7 @@ import {
 } from "@bentley/imodeljs-frontend";
 import { Field } from "@bentley/presentation-common";
 import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
-import {
-  FavoritePropertiesScope,
-  Presentation,
-} from "@bentley/presentation-frontend";
+import { Presentation } from "@bentley/presentation-frontend";
 import {
   ActionButtonRenderer,
   ActionButtonRendererProps,
@@ -50,48 +47,7 @@ import {
   PropertyGridWidgetBaseProps,
   SharedName,
   SharedNamespace,
-  UseDataProviderProps,
 } from "../types";
-
-const useDataProvider = (
-  props: UseDataProviderProps
-): PresentationPropertyDataProvider | undefined => {
-  // const [dataProvider, setDataProvider] = React.useState(props.dataProvider);
-
-  // React.useEffect(() => {
-  //   if (!dataProvider && props.dataProviderProps?.imodel) {
-  //     setDataProvider(
-  //       new PresentationPropertyDataProvider(props.dataProviderProps)
-  //     );
-  //   }
-  // }, [props.dataProviderProps]);
-
-  // React.useEffect(() => {
-  //   if (dataProvider) {
-  //     dataProvider.pagingSize = 50;
-  //     dataProvider.isNestedPropertyCategoryGroupingEnabled =
-  //       !!PropertyGridManager.flags.enablePropertyGroupNesting;
-  //   }
-  // }, [dataProvider]);
-
-  const dataProvider = React.useMemo(() => {
-    let dp;
-    if (props.dataProvider) {
-      dp = props.dataProvider;
-    } else if (props.dataProviderProps?.imodel) {
-      dp = new PresentationPropertyDataProvider(props.dataProviderProps);
-    }
-
-    if (dp) {
-      dp.pagingSize = 50;
-      dp.isNestedPropertyCategoryGroupingEnabled =
-        !!PropertyGridManager.flags.enablePropertyGroupNesting;
-    }
-    return dp;
-  }, [props.dataProviderProps]);
-
-  return dataProvider;
-};
 
 export const FunctionalPropertyGridWidget = ({
   orientation,
@@ -115,14 +71,25 @@ export const FunctionalPropertyGridWidget = ({
   const projectId = iModelConnection.contextId;
   const iModelId = iModelConnection.iModelId;
 
-  const dataProvider = useDataProvider({
-    dataProvider: propDataProvider,
-    dataProviderProps: {
-      imodel: iModelConnection,
-      ruleset: rulesetId,
-      disableFavoritesCategory: !enableFavoriteProperties,
-    },
-  });
+  const dataProvider = React.useMemo(() => {
+    let dp;
+    if (propDataProvider) {
+      dp = propDataProvider;
+    } else if (iModelConnection) {
+      dp = new PresentationPropertyDataProvider({
+        imodel: iModelConnection,
+        ruleset: rulesetId,
+        disableFavoritesCategory: !enableFavoriteProperties,
+      });
+    }
+
+    if (dp) {
+      dp.pagingSize = 50;
+      dp.isNestedPropertyCategoryGroupingEnabled =
+        !!PropertyGridManager.flags.enablePropertyGroupNesting;
+    }
+    return dp;
+  }, [propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties]);
   // if (!dataProvider) {
   //   return null;
   // }
@@ -315,17 +282,6 @@ export const FunctionalPropertyGridWidget = ({
   }, [dataProvider, addSharedFavsToData]);
 
   React.useEffect(() => {
-    // const onDataChanged = async () => {
-    //   let propertyData: PropertyData | undefined =
-    //     await dataProvider?.getData();
-    //   if (propertyData) {
-    //     propertyData = await addSharedFavsToData(propertyData);
-    //     setTitle(propertyData?.label);
-    //     setClassName(propertyData?.description ?? "");
-    //   }
-    //   console.log("some change");
-    // };
-
     dataProvider?.onDataChanged.addListener(onDataChanged);
 
     return () => {

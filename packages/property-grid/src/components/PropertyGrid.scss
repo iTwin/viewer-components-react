@@ -34,13 +34,13 @@
   width: 100%;
   margin-top: $uicore-xs;
 
-  > span:first-child {
+  > div:first-child {
     @include uicore-text(leading);
     font-size: $uicore-font-size-leading;
     margin-bottom: $uicore-xs;
   }
 
-  > span {
+  > div {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
