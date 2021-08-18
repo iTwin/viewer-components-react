@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@bentley/bentleyjs-core": "^2.15.2",
-    "@bentley/build-tools": "^2.15.2",
+    "@bentley/build-tools": "~2.16.0",
     "@bentley/context-registry-client": "^2.15.2",
     "@bentley/frontend-authorization-client": "^2.15.2",
     "@bentley/geometry-core": "^2.15.2",
