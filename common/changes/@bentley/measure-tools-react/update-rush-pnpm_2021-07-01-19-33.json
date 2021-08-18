@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/measure-tools-react",
+      "comment": "Update iTwin.js minimum dependencies to ^2.17.0",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@bentley/measure-tools-react",
+  "email": "31107829+calebmshafer@users.noreply.github.com"
+}
