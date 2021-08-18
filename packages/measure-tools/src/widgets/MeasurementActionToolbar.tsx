@@ -137,6 +137,46 @@ export class MeasurementActionDefinitions {
     });
   }
 
+  public static get hideMeasurements() {
+    return new MeasurementActionItemDef({
+      id: "hide-measurements",
+      iconSpec: "icon-visibility-hide",
+      label: () => IModelApp.i18n.translate("MeasureTools:Generic.hideMeasurements"),
+      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.hideMeaurements"),
+      execute: (args: Measurement[]) => {
+
+        args.forEach((m) => {
+          if (m.isVisible) {
+            m.isVisible = false;
+            m.viewTarget.invalidateViewportDecorations();
+          }
+        });
+
+        FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.MeasurementActions_ToggleDisplayMeasurements, false);
+      },
+    });
+  }
+
+  public static get displayMeasurements() {
+    return new MeasurementActionItemDef({
+      id: "display-measurements",
+      iconSpec: "icon-visibility",
+      label: () => IModelApp.i18n.translate("MeasureTools:Generic.displayMeasurements"),
+      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.displayMeasurements"),
+      execute: (args: Measurement[]) => {
+
+        args.forEach((m) => {
+          if (!m.isVisible) {
+            m.isVisible = true;
+            m.viewTarget.invalidateViewportDecorations();
+          }
+        });
+
+        FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.MeasurementActions_ToggleDisplayMeasurements, true);
+      },
+    });
+  }
+
   public static get displayMeasurementLabels() {
     return new MeasurementActionItemDef({
       id: "display-labels",

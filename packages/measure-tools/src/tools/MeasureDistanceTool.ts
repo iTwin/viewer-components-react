@@ -59,7 +59,7 @@ export class MeasureDistanceTool extends MeasurementToolBase<DistanceMeasurement
     const hints = new AccuDrawHintBuilder();
     hints.setOrigin(ev.point);
     hints.setModeRectangular();
-    hints.sendHints(true);
+    hints.sendHints(false);
     IModelApp.toolAdmin.setCursor(IModelApp.viewManager.crossHairCursor);
   }
 

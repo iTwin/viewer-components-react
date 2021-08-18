@@ -154,4 +154,5 @@ export class MeasureToolsFeatures {
   public static get MeasurementActions_Lock(): Feature { return { name: "CRT_MeasurementActions_Lock", guid: "e03e9d2a-e63b-4ea8-805d-59c1dbf94f86" }; }
   public static get MeasurementActions_ToggleDisplayAxes(): Feature { return { name: "CRT_MeasurementActions_ToggleDisplayAxes", guid: "ee61e68f-14d5-4d47-9fba-e8334d9b9097" }; }
   public static get MeasurementActions_ToggleDisplayLabels(): Feature { return { name: "CRT_MeasurementActions_ToggleDisplayLabels", guid: "3ee3fcd7-c158-481f-96e7-2f0907551357" }; }
+  public static get MeasurementActions_ToggleDisplayMeasurements(): Feature { return { name: "MST_MeasurementActions_ToggleDisplayMeasurements", guid: "ef4bba9e-69f1-4f73-9db9-e176dd9335a4" }; }
 }

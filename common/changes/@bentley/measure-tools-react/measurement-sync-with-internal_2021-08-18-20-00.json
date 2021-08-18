@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/measure-tools-react",
+      "comment": "Add an isVisible property to the measurement base class",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@bentley/measure-tools-react"
+}

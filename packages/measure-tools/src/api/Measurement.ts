@@ -248,6 +248,7 @@ export abstract class Measurement {
   private _viewTarget: MeasurementViewTarget;
   private _displayLabels: boolean;
   private _transientId?: Id64String; // Not serialized
+  private _isVisible: boolean; // Not serialized
 
   /** Default drawing style name. */
   public static readonly defaultStyle: string = WellKnownMeasurementStyle.Default;
@@ -275,6 +276,15 @@ export abstract class Measurement {
     const prevId = this._transientId;
     this._transientId = newId;
     this.onTransientIdChanged(prevId);
+  }
+
+  /** Gets or sets if the measurement should be drawn. */
+  public get isVisible(): boolean {
+    return this._isVisible;
+  }
+
+  public set isVisible(v: boolean) {
+    this._isVisible = v;
   }
 
   /** Gets or sets if the measurement is locked. Locked measurements have a different styling, cannot be edited, and cannot be cleared by the clear measurement tool. */
@@ -374,6 +384,7 @@ export abstract class Measurement {
   /** Protected constructor */
   protected constructor() {
     this._isLocked = false;
+    this._isVisible = true;
     this._displayLabels = MeasurementPreferences.current.displayMeasurementLabels;
     this._viewTarget = new MeasurementViewTarget();
   }
@@ -457,8 +468,7 @@ export abstract class Measurement {
   /** Draw the measurement.
    * @param context Decorate context for drawing to a viewport.
    */
-  public decorate(_context: DecorateContext): void {
-  }
+  public decorate(_context: DecorateContext): void { }
 
   /** Test if the measurement was picked.
    * @param _pickContext Picking context to test against.

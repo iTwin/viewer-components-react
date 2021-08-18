@@ -105,7 +105,7 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
           hints.setRotation(mat.inverse()!);
       }
     }
-    hints.sendHints(true);
+    hints.sendHints(false);
     IModelApp.toolAdmin.setCursor(IModelApp.viewManager.crossHairCursor);
   }
 

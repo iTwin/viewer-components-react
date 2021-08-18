@@ -6,7 +6,7 @@
 import { BeDuration, BeUiEvent, Id64String } from "@bentley/bentleyjs-core";
 import { GeometryStreamProps } from "@bentley/imodeljs-common";
 import {
-  AccuDrawShortcuts, BeButtonEvent, DecorateContext, EventHandled, HitDetail, IModelApp, IModelConnection, NotifyMessageDetails, OutputMessageAlert,
+  BeButtonEvent, DecorateContext, EventHandled, HitDetail, IModelApp, IModelConnection, NotifyMessageDetails, OutputMessageAlert,
   OutputMessagePriority, OutputMessageType, PrimitiveTool, ToolAssistance, ToolAssistanceInputMethod, ToolAssistanceInstruction,
 } from "@bentley/imodeljs-frontend";
 import { Feature, FeatureTracking } from "./FeatureTracking";
@@ -254,9 +254,6 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
       this.exitTool();
       return EventHandled.Yes;
     }
-
-    if (wentDown && AccuDrawShortcuts.processShortcutKey(keyEvent))
-      return EventHandled.Yes;
 
     return EventHandled.No;
   }
