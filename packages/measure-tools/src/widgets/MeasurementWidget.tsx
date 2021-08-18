@@ -3,6 +3,7 @@
 * See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import * as React from "react";
 import "./MeasurementWidget.scss";
 
 import { Id64String } from "@bentley/bentleyjs-core";
@@ -39,7 +40,7 @@ export class MeasurementWidget extends WidgetControl {
     if (options.iModelConnection) {
       MeasurementSelectionSet.global.onChanged.addListener(this._onSelectionChanged);
       MeasurementUIEvents.onMeasurementPropertiesChanged.addListener(this._onSelectionChanged);
-      this.reactNode = <PropertyGrid dataProvider={this._dataProvider} orientation={Orientation.Vertical} className={"measurement-widget"} />;
+      this.reactNode = <PropertyGrid dataProvider={this._dataProvider} orientation={Orientation.Vertical} className={"measurement-widget"} />; // eslint-disable-line react/react-in-jsx-scope
       this._getData(this._lastSelectedCount >= 2).catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
 

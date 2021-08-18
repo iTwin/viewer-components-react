@@ -136,8 +136,6 @@ export function createToggledFeature(featureName: string, featureGuid: GuidStrin
   return { name: featureName, guid: featureGuid, metaData };
 }
 
-// tslint:disable:variable-name
-
 // Note: CRT_ prefix is legacy since these features were originally from the Civil-ReviewTools packages. Newly defined features do not need to use this prefix, and can use MST_ for MeaSure-Tools
 export class MeasureToolsFeatures {
   // Tools

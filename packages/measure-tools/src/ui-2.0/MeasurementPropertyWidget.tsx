@@ -12,7 +12,6 @@ import { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 
-// tslint:disable-next-line:variable-name
 export const MeasurementPropertyWidget = () => {
   const [dataProvider] = React.useState(new SimplePropertyDataProvider());
   const [lastSelectedCount, setLastSelectedCount] = React.useState(MeasurementSelectionSet.global.measurements.length);
@@ -125,7 +124,7 @@ export const MeasurementPropertyWidget = () => {
     getData(lastSelectedCount >= 2).catch(() => {
       /* no op */
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <PropertyGrid dataProvider={dataProvider} orientation={Orientation.Vertical} />;
 };
