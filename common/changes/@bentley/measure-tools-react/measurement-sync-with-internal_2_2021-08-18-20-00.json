@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@bentley/measure-tools-react",
-      "comment": "Update minimum iModel.js version to 2.17.0",
-      "type": "minor"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@bentley/measure-tools-react"
