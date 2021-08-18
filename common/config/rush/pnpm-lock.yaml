@@ -371,26 +371,26 @@ importers:
 
   ../../packages/measure-tools:
     specifiers:
-      '@bentley/bentleyjs-core': ^2.17.0
+      '@bentley/bentleyjs-core': ^2.19.0
       '@bentley/build-tools': ~2.16.0
-      '@bentley/certa': ^2.17.0
-      '@bentley/eslint-plugin': ^2.17.0
-      '@bentley/extension-client': ^2.17.0
-      '@bentley/geometry-core': ^2.17.0
+      '@bentley/certa': ^2.19.0
+      '@bentley/eslint-plugin': ^2.19.0
+      '@bentley/extension-client': ^2.19.0
+      '@bentley/geometry-core': ^2.19.0
       '@bentley/icons-generic-webfont': ^1.0.29
-      '@bentley/imodeljs-common': ^2.17.0
-      '@bentley/imodeljs-frontend': ^2.17.0
-      '@bentley/imodeljs-i18n': ^2.17.0
-      '@bentley/imodeljs-quantity': ^2.17.0
-      '@bentley/itwin-client': ^2.17.0
-      '@bentley/presentation-components': ^2.17.0
-      '@bentley/telemetry-client': ^2.17.0
-      '@bentley/ui-abstract': ^2.17.0
-      '@bentley/ui-components': ^2.17.0
-      '@bentley/ui-core': ^2.17.0
-      '@bentley/ui-framework': ^2.17.0
-      '@bentley/ui-ninezone': ^2.17.0
-      '@bentley/webgl-compatibility': ^2.17.0
+      '@bentley/imodeljs-common': ^2.19.0
+      '@bentley/imodeljs-frontend': ^2.19.0
+      '@bentley/imodeljs-i18n': ^2.19.0
+      '@bentley/imodeljs-quantity': ^2.19.0
+      '@bentley/itwin-client': ^2.19.0
+      '@bentley/presentation-components': ^2.19.0
+      '@bentley/telemetry-client': ^2.19.0
+      '@bentley/ui-abstract': ^2.19.0
+      '@bentley/ui-components': ^2.19.0
+      '@bentley/ui-core': ^2.19.0
+      '@bentley/ui-framework': ^2.19.0
+      '@bentley/ui-ninezone': ^2.19.0
+      '@bentley/webgl-compatibility': ^2.19.0
       '@types/chai': ^4.2.0
       '@types/chai-as-promised': ^7.1.1
       '@types/mocha': ^7.0.2
