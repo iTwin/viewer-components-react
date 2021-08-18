@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Tue, 08 Jun 2021 21:23:59 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jul 2021 20:22:14 GMT and should not be manually modified.
+
+## 2.0.0
+Thu, 08 Jul 2021 20:22:14 GMT
+
+### Breaking changes
+
+- Added support for FilteringPropertyDataProvider in PropertyGrid
 
 ## 1.3.7
 Tue, 08 Jun 2021 21:23:59 GMT

@@ -213,8 +213,9 @@ export const createSavedViewData = (vp: Viewport): SavedViewData => {
   }
 
   const perModelCategoryVisibility: PerModelCategoryVisibilityProps[] = [];
-  for (const overrideEntry of vp.perModelCategoryVisibility)
+  for (const overrideEntry of vp.perModelCategoryVisibility) {
     perModelCategoryVisibility.push(overrideEntry);
+  }
 
   const data: SavedViewData = {
     alwaysDrawn,

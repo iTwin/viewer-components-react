@@ -1,13 +1,20 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 
 @import "~@bentley/ui-core/lib/ui-core/style/index";
 @import "~@bentley/ui-core/lib/ui-core/text/index";
 
 .pcomponents-property-grid-with-unified-selection {
   overflow: hidden !important;
+}
+
+.filtering-property-grid-with-unified-selection {
+  flex: 1;
+  margin-top: 6px;
+  margin-bottom: 6px;
 }
 
 .virtualized-grid-node-content > .components--hoverable:hover {

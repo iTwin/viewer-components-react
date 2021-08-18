@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import "./MultiElementPropertyGrid.scss";
@@ -207,6 +207,7 @@ export class MultiElementPropertyGridWidgetControl extends WidgetControl {
         isOrientationFixed={options.isOrientationFixed}
         enableCopyingPropertyText={options.enableCopyingPropertyText}
         enableFavoriteProperties={options.enableFavoriteProperties}
+        enableNullValueToggle={options.enableNullValueToggle}
         iModelConnection={options.iModelConnection}
         projectId={options.projectId}
         debugLog={options.debugLog}

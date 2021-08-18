@@ -2,6 +2,23 @@
   "name": "@bentley/markup-frontstage-react",
   "entries": [
     {
+      "version": "3.0.0",
+      "tag": "@bentley/markup-frontstage-react_v3.0.0",
+      "date": "Tue, 13 Jul 2021 17:43:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "add rebuild script"
+          }
+        ],
+        "major": [
+          {
+            "comment": "Update iTwin.js minimum dependencies to ^2.17.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.0",
       "tag": "@bentley/markup-frontstage-react_v2.1.0",
       "date": "Tue, 08 Jun 2021 21:23:59 GMT",

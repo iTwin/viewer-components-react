@@ -3,11 +3,11 @@
 * See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { CanvasDecoration, Viewport, BeButtonEvent, DecorateContext, IModelApp, SelectionTool, SelectionMode, BeButton } from "@bentley/imodeljs-frontend";
-import { Point3d, Angle, XAndY, PolygonOps, LineString3d, Transform, Matrix3d, AxisIndex, XYAndZ, Vector3d, Point2d } from "@bentley/geometry-core";
-import { ColorDef, Hilite } from "@bentley/imodeljs-common";
-import { TextStyleProps, TextOffsetProps, TextOffsetType, IconStyleProps, IconAlignment, StyleSet, WellKnownTextStyleType } from "./GraphicStyle";
 import { Id64String } from "@bentley/bentleyjs-core";
+import { Angle, AxisIndex, LineString3d, Matrix3d, Point2d, Point3d, PolygonOps, Transform, Vector3d, XAndY, XYAndZ } from "@bentley/geometry-core";
+import { ColorDef, Hilite } from "@bentley/imodeljs-common";
+import { BeButton, BeButtonEvent, CanvasDecoration, DecorateContext, IModelApp, SelectionMode, SelectionTool, Viewport } from "@bentley/imodeljs-frontend";
+import { IconAlignment, IconStyleProps, StyleSet, TextOffsetProps, TextOffsetType, TextStyleProps, WellKnownTextStyleType } from "./GraphicStyle";
 
 /**
  * TextEntry for the TextMarker
