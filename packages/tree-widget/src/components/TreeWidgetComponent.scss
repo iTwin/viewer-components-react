@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 @import "~@bentley/ui-core/lib/ui-core/index";
 
@@ -13,10 +13,7 @@
   flex-direction: column;
 
   .components-selectable-content {
-    display: block;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
+    flex: 1;
   }
 
   .components-selectable-content-header {

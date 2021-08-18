@@ -6,8 +6,7 @@
   },
   {
     "policyName": "markup-frontstage",
-    "definitionName": "individualVersion",
-    "lockedMajor": 2
+    "definitionName": "individualVersion"
   },
   {
     "policyName": "tree-widget",
@@ -16,8 +15,7 @@
   },
   {
     "policyName": "property-grid",
-    "definitionName": "individualVersion",
-    "lockedMajor": 1
+    "definitionName": "individualVersion"
   },
   {
     "policyName": "imodel-content-tree",

@@ -1,6 +1,13 @@
 # Change Log - @bentley/imodel-content-tree-react
 
-This log was last generated on Thu, 13 May 2021 21:15:14 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Jun 2021 21:23:59 GMT and should not be manually modified.
+
+## 0.3.2
+Tue, 08 Jun 2021 21:23:59 GMT
+
+### Patches
+
+- bump classnames dep
 
 ## 0.3.1
 Thu, 13 May 2021 21:15:14 GMT

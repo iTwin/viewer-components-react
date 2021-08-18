@@ -1,6 +1,6 @@
 {
   "name": "@bentley/geo-tools-react",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "React Geospatial Tools",
   "keywords": [
     "Bentley",
@@ -26,6 +26,7 @@
     "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "rebuild": "npm run clean && npm run build",
     "copy:assets": "cpx \"./src/**/*.{*css,json,svg}\" \"./lib\" && cpx \"./public/**/*\" \"./lib/public\"",
     "cover": "nyc npm test",
     "lint": "eslint ./src/**/*.{ts,tsx} 1>&2",
@@ -40,7 +41,7 @@
   },
   "devDependencies": {
     "@bentley/bentleyjs-core": "^2.9.1",
-    "@bentley/build-tools": "^2.9.1",
+    "@bentley/build-tools": "~2.16.0",
     "@bentley/eslint-plugin": "^2.9.1",
     "@bentley/geometry-core": "^2.9.1",
     "@bentley/imodeljs-common": "^2.9.1",

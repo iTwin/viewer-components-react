@@ -1,6 +1,34 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Thu, 13 May 2021 21:15:14 GMT and should not be manually modified.
+This log was last generated on Mon, 09 Aug 2021 20:24:55 GMT and should not be manually modified.
+
+## 1.4.2
+Mon, 09 Aug 2021 20:24:55 GMT
+
+### Patches
+
+- Updated tree widget barrel file to include UiProvider
+
+## 1.4.1
+Mon, 19 Jul 2021 18:07:24 GMT
+
+### Patches
+
+- Model/Category tree was not resizing properly, missing flex=1.
+
+## 1.4.0
+Tue, 13 Jul 2021 17:43:28 GMT
+
+### Minor changes
+
+- Added a UiProvider that implements the existing tree widget
+
+## 1.3.1
+Tue, 08 Jun 2021 21:23:59 GMT
+
+### Patches
+
+- bump classnames dep
 
 ## 1.3.0
 Thu, 13 May 2021 21:15:14 GMT

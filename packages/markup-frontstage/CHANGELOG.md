@@ -1,6 +1,20 @@
 # Change Log - @bentley/markup-frontstage-react
 
-This log was last generated on Tue, 27 Apr 2021 22:03:19 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Jul 2021 17:43:28 GMT and should not be manually modified.
+
+## 3.0.0
+Tue, 13 Jul 2021 17:43:28 GMT
+
+### Breaking changes
+
+- Update iTwin.js minimum dependencies to ^2.17.0
+
+## 2.1.0
+Tue, 08 Jun 2021 21:23:59 GMT
+
+### Minor changes
+
+- React to breaking change in core with respect to parentDocument for popups
 
 ## 2.0.2
 Tue, 27 Apr 2021 22:03:19 GMT

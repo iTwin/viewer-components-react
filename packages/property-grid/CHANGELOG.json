@@ -2,6 +2,35 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "2.0.0",
+      "tag": "@bentley/property-grid-react_v2.0.0",
+      "date": "Thu, 08 Jul 2021 20:22:14 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Added support for FilteringPropertyDataProvider in PropertyGrid"
+          }
+        ],
+        "none": [
+          {
+            "comment": "add rebuild script"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.7",
+      "tag": "@bentley/property-grid-react_v1.3.7",
+      "date": "Tue, 08 Jun 2021 21:23:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix classnames import"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.6",
       "tag": "@bentley/property-grid-react_v1.3.6",
       "date": "Mon, 26 Apr 2021 15:52:28 GMT",

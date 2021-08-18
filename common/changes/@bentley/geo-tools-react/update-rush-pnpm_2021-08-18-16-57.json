@@ -6,6 +6,5 @@
       "type": "none"
     }
   ],
-  "packageName": "@bentley/geo-tools-react",
-  "email": "31107829+calebmshafer@users.noreply.github.com"
+  "packageName": "@bentley/geo-tools-react"
 }

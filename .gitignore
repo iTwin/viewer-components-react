@@ -29,6 +29,7 @@ package-lock.json
 
 # rush specific
 common/temp/**
+common/autoinstallers/*/.npmrc
 .rush/temp/**
 /**/.rush
 package-deps.json

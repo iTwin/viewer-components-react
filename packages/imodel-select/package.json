@@ -1,6 +1,6 @@
 {
   "name": "@bentley/imodel-select-react",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "iModel Select React",
   "keywords": [
     "Bentley",
@@ -21,6 +21,7 @@
   "scripts": {
     "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
+    "rebuild": "npm run clean && npm run build",
     "clean": "rimraf lib build .rush/temp/package-deps*.json",
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "cover": "",
@@ -36,7 +37,7 @@
   },
   "devDependencies": {
     "@bentley/bentleyjs-core": "^2.0.0",
-    "@bentley/build-tools": "^2.0.0",
+    "@bentley/build-tools": "~2.16.0",
     "@bentley/context-registry-client": "^2.0.0",
     "@bentley/frontend-authorization-client": "^2.0.0",
     "@bentley/geometry-core": "^2.0.0",

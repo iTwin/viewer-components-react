@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@bentley/imodel-select-react",
-      "comment": "bump classnames dep",
-      "type": "patch"
+      "comment": "add rebuild script",
+      "type": "none"
     }
   ],
   "packageName": "@bentley/imodel-select-react",

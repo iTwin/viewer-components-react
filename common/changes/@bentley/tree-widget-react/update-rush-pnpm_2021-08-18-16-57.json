@@ -6,6 +6,5 @@
       "type": "none"
     }
   ],
-  "packageName": "@bentley/tree-widget-react",
-  "email": "aruniverse@users.noreply.github.com"
+  "packageName": "@bentley/tree-widget-react"
 }

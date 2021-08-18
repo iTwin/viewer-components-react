@@ -1,0 +1,34 @@
+{
+  "name": "@bentley/measure-tools-react",
+  "entries": [
+    {
+      "version": "0.3.0",
+      "tag": "@bentley/measure-tools-react_v0.3.0",
+      "date": "Tue, 13 Jul 2021 17:43:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "add rebuild script"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Update iTwin.js minimum dependencies to ^2.17.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@bentley/measure-tools-react_v0.2.0",
+      "date": "Tue, 08 Jun 2021 21:23:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release of bentley/measure-tools-react!"
+          }
+        ]
+      }
+    }
+  ]
+}

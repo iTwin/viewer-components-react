@@ -1,18 +1,16 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
-  "rushVersion": "5.47.0",
-  "pnpmVersion": "6.4.0",
+  "rushVersion": "5.51.1",
+  "pnpmVersion": "6.13.0",
+  "pnpmOptions": {
+    "useWorkspaces": true
+  },
   "nodeSupportedVersionRange": ">=12.17.0 <15.0.0",
   "projectFolderMinDepth": 2,
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
-  "pnpmOptions": {
-    "useWorkspaces": true
-  },
   "gitPolicy": {
-    "allowedEmailRegExps": [
-      "[^@]+@users\\.noreply\\.github\\.com"
-    ],
+    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
   "repository": {

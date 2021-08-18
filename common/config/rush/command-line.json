@@ -1,4 +1,3 @@
-
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
   "commands": [
@@ -20,7 +19,8 @@
       "ignoreMissingScript": false,
       "ignoreDependencyOrder": true,
       "allowWarningsInSuccessfulBuild": true
-    },{
+    },
+    {
       "name": "lint",
       "commandKind": "bulk",
       "summary": "Run lint rules on each package",
@@ -51,11 +51,24 @@
       "allowWarningsInSuccessfulBuild": true
     },
     {
+      "name": "rebuild",
+      "commandKind": "bulk",
+      "summary": "Run build for each package",
+      "description": "Iterates through each package in the monorepo and runs the 'rebuild' script",
+      "safeForSimultaneousRushProcesses": false,
+      "enableParallelism": true,
+      "ignoreDependencyOrder": false,
+      "ignoreMissingScript": false,
+      "allowWarningsInSuccessfulBuild": true
+    },
+    {
       "name": "copyright:linter",
       "commandKind": "global",
       "summary": "Run copyright linter using lintstaged",
       "autoinstallerName": "rush-lintstaged",
-      "shellCommand": "lint-staged --quiet --config common/scripts/.lintstagedrc.json"
+      // This will invoke common/autoinstall/rush-prettier/node_modules/.bin/pretty-quick
+      "shellCommand": "lint-staged --quiet --config common/scripts/.lintstagedrc.json",
+      "safeForSimultaneousRushProcesses": true
     }
   ]
 }
