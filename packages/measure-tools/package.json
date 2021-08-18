@@ -17,7 +17,7 @@
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
-    "test": "node ./node_modules/@bentley/certa/bin/certa.js -c certa.json -r chrome",
+    "test": "certa -c certa.json -r chrome",
     "cover": "nyc npm test",
     "madge": "madge --circular --extensions ts,tsx src",
     "webpack:tests": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --config webpack.config.js 1>&2"
@@ -28,7 +28,8 @@
     "iModel",
     "iTwin",
     "Measurement",
-    "Measure"
+    "Measure",
+    "iTwin.js"
   ],
   "author": {
     "name": "Bentley Systems, Inc.",
@@ -55,10 +56,6 @@
     "react": "^16.8.0",
     "react-dom": "^16.8.0"
   },
-  "//devDependencies": [
-    "NOTE: All peerDependencies should also be listed as devDependencies since peerDependencies are not considered by npm install",
-    "NOTE: All tools used by scripts in this package must be listed as devDependencies"
-  ],
   "devDependencies": {
     "@bentley/bentleyjs-core": "^2.17.0",
     "@bentley/build-tools": "~2.16.0",
