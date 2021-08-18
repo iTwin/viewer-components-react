@@ -1,8 +1,7 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
 
 import { Range2d, Range3d } from "@bentley/geometry-core";
 import { CartographicRange } from "@bentley/imodeljs-common";
