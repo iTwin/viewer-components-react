@@ -1,13 +1,13 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import * as React from "react";
 import { Id64String } from "@bentley/bentleyjs-core";
 import { IModelApp } from "@bentley/imodeljs-frontend";
 import { PropertyDescription, PropertyRecord, PropertyValue, PropertyValueFormat } from "@bentley/ui-abstract";
 import { PropertyGrid, SimplePropertyDataProvider } from "@bentley/ui-components";
 import { Orientation } from "@bentley/ui-core";
-import * as React from "react";
 import { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
@@ -28,7 +28,7 @@ export const MeasurementPropertyWidget = () => {
   };
 
   const addAggregateProperties = (data: MeasurementWidgetData[]): boolean => {
-    const orderedAggrPropEntries = new Array<{ label: string; prop: AggregatableValue }>();
+    const orderedAggrPropEntries = new Array<{ label: string, prop: AggregatableValue }>();
     const aggregateIndices = new Map<string, number>();
     let hasAtLeastTwoInstances = false;
 

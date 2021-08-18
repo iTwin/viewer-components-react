@@ -1,23 +1,15 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import { IModelApp } from "@bentley/imodeljs-frontend";
 import { I18N } from "@bentley/imodeljs-i18n";
 import {
-  AbstractWidgetProps,
-  CommonToolbarItem,
-  StagePanelLocation,
-  StagePanelSection,
-  StageUsage,
-  ToolbarItemUtilities,
-  ToolbarOrientation,
-  ToolbarUsage,
-  UiItemsProvider,
-  ConditionalBooleanValue,
+  AbstractWidgetProps, CommonToolbarItem, ConditionalBooleanValue, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
+  ToolbarOrientation, ToolbarUsage, UiItemsProvider,
 } from "@bentley/ui-abstract";
 import { ToolbarHelper, ToolItemDef } from "@bentley/ui-framework";
-import * as React from "react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";

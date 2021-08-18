@@ -1,28 +1,19 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import {
-  BeButtonEvent,
-  IModelApp,
-  EventHandled,
-  ToolAssistance,
-  ToolAssistanceImage,
-  ToolAssistanceInputMethod,
-  ToolAssistanceInstruction,
+  BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod, ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@bentley/imodeljs-frontend";
-import { RadiusMeasurement } from "../measurements/RadiusMeasurement";
+import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
+import { RadiusMeasurement } from "../measurements/RadiusMeasurement";
 import { MeasureRadiusToolModel } from "../toolmodels/MeasureRadiusToolModel";
-import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 
 /** Tool for measuring radius using 3-points */
-export class MeasureRadiusTool extends MeasurementToolBase<
-  RadiusMeasurement,
-  MeasureRadiusToolModel
-> {
+export class MeasureRadiusTool extends MeasurementToolBase<RadiusMeasurement, MeasureRadiusToolModel> {
   protected createToolModel(): MeasureRadiusToolModel {
     return new MeasureRadiusToolModel();
   }
@@ -62,7 +53,7 @@ export class MeasureRadiusTool extends MeasurementToolBase<
     let currentMsg = "";
     if (
       this.toolModel.currentState ===
-        MeasureRadiusToolModel.State.SetMeasurementViewport ||
+      MeasureRadiusToolModel.State.SetMeasurementViewport ||
       this.toolModel.currentState === MeasureRadiusToolModel.State.SetStartPoint
     ) {
       currentMsg = identifyStartMessage;

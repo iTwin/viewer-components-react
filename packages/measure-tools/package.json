@@ -16,7 +16,7 @@
     "watch": "tsc --w",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build",
-    "lint": "tslint --project . 1>&2",
+    "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "test": "node ./node_modules/@bentley/certa/bin/certa.js -c certa.json -r chrome",
     "cover": "nyc npm test",
     "madge": "madge --circular --extensions ts,tsx src",
@@ -63,6 +63,7 @@
     "@bentley/bentleyjs-core": "^2.17.0",
     "@bentley/build-tools": "~2.16.0",
     "@bentley/certa": "^2.17.0",
+    "@bentley/eslint-plugin": "^2.17.0",
     "@bentley/extension-client": "^2.17.0",
     "@bentley/geometry-core": "^2.17.0",
     "@bentley/imodeljs-common": "^2.17.0",
@@ -87,6 +88,7 @@
     "chai-as-promised": "^7.1.1",
     "cpx": "^1.5.0",
     "cross-env": "7.0.3",
+    "eslint": "^7.11.0",
     "file-loader": "^4.2.0",
     "glob": "^7.1.2",
     "madge": "4.0.2",
@@ -97,7 +99,6 @@
     "react-dom": "^16.8.0",
     "rimraf": "^2.7.1",
     "source-map-loader": "^0.2.3",
-    "tslint": "^5.11.0",
     "typescript": "3.7.4",
     "url-loader": "2.1.0",
     "webpack": "4.42.0",
@@ -113,5 +114,13 @@
     "branches": 20,
     "functions": 20,
     "lines": 20
+  },
+  "eslintConfig": {
+    "plugins": [
+      "@bentley"
+    ],
+    "extends": [
+      "plugin:@bentley/ui"
+    ]
   }
 }

@@ -1,14 +1,16 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String, Id64Arg, Id64, BeUiEvent } from "@bentley/bentleyjs-core";
-import { IModelConnection, SelectionSetEvent, SelectionSetEventType, SelectAddEvent, SelectRemoveEvent, SelectReplaceEvent } from "@bentley/imodeljs-frontend";
-import { UiFramework, SyncUiEventDispatcher, SyncUiEventArgs, SessionStateActionId } from "@bentley/ui-framework";
+import { BeUiEvent, Id64, Id64Arg, Id64String } from "@bentley/bentleyjs-core";
+import {
+  IModelConnection, SelectAddEvent, SelectionSetEvent, SelectionSetEventType, SelectRemoveEvent, SelectReplaceEvent,
+} from "@bentley/imodeljs-frontend";
+import { SessionStateActionId, SyncUiEventArgs, SyncUiEventDispatcher, UiFramework } from "@bentley/ui-framework";
 import { Measurement } from "./Measurement";
-import { ShimFunctions } from "./ShimFunctions";
 import { MeasurementSyncUiEventId } from "./MeasurementEnums";
+import { ShimFunctions } from "./ShimFunctions";
 
 export interface MeasurementSelectAddEvent {
   type: SelectionSetEventType.Add;
@@ -106,13 +108,11 @@ export class MeasurementSelectionSet {
   public getArray(idArg: Id64Arg): Measurement[] {
     const measurements = new Array<Measurement>();
 
-    Id64.iterate(idArg, (id: Id64String) => {
+    for (const id of idArg) {
       const index = this._idToIndexMap.get(id);
       if (index !== undefined)
         measurements.push(this._selectedMeasurements[index]);
-
-      return true;
-    });
+    }
 
     return measurements;
   }
@@ -347,16 +347,16 @@ export class MeasurementSelectionSet {
     try {
       switch (ev.type) {
         case SelectionSetEventType.Add:
-          this.handleSelectionAdd(ev as SelectAddEvent);
+          this.handleSelectionAdd(ev);
           break;
         case SelectionSetEventType.Remove:
-          this.handleSelectionRemoved(ev as SelectRemoveEvent);
+          this.handleSelectionRemoved(ev);
           break;
         case SelectionSetEventType.Clear:
           this.clear();
           break;
         case SelectionSetEventType.Replace:
-          this.handleSelectionReplaced(ev as SelectReplaceEvent);
+          this.handleSelectionReplaced(ev);
           break;
       }
     } finally {

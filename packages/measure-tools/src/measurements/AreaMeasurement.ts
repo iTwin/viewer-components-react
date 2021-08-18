@@ -1,15 +1,15 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d, XYZProps, IModelJson, PointString3d, PolygonOps, Geometry} from "@bentley/geometry-core";
-import { DecorateContext, GraphicType, IModelApp, QuantityType, BeButtonEvent, GraphicBuilder, RenderGraphicOwner } from "@bentley/imodeljs-frontend";
 import { Id64String } from "@bentley/bentleyjs-core";
+import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, XYZProps } from "@bentley/geometry-core";
 import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { Measurement, MeasurementSerializer, MeasurementPickContext, MeasurementWidgetData, MeasurementEqualityOptions } from "../api/Measurement";
-import { MeasurementProps } from "../api/MeasurementProps";
+import { BeButtonEvent, DecorateContext, GraphicBuilder, GraphicType, IModelApp, QuantityType, RenderGraphicOwner } from "@bentley/imodeljs-frontend";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle";
+import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
+import { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { Polygon } from "../api/Polygon";
 import { DistanceMeasurement } from "./DistanceMeasurement";
@@ -106,7 +106,7 @@ export class AreaMeasurement extends Measurement {
     if (this.isDynamic)
       return false;
 
-    this.onDecorationButtonEvent(MeasurementPickContext.createFromSourceId("Invalid", ev)).catch();
+    this.onDecorationButtonEvent(MeasurementPickContext.createFromSourceId("Invalid", ev)).catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
 
     return true;
   }
@@ -320,14 +320,18 @@ export class AreaMeasurement extends Measurement {
     const fEdgeCount = (this._polygon.points.length - 1).toFixed();
 
     let title = IModelApp.i18n.translate("MeasureTools:Measurements.areaMeasurement");
-    title += " [" + fArea + "]";
+    title += ` [${fArea}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     data.properties.push(
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupArea"), name: "AreaMeasurement_Area", value: fArea,
-        aggregatableValue: (areaSpec !== undefined) ? { value: this._polygon.area, formatSpec: areaSpec } : undefined },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupAreaXY"), name: "AreaMeasurement_AreaXY", value: fAreaXY,
-        aggregatableValue: (areaSpec !== undefined) ? { value: this._polygon.areaXY, formatSpec: areaSpec } : undefined },
+      {
+        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupArea"), name: "AreaMeasurement_Area", value: fArea,
+        aggregatableValue: (areaSpec !== undefined) ? { value: this._polygon.area, formatSpec: areaSpec } : undefined,
+      },
+      {
+        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupAreaXY"), name: "AreaMeasurement_AreaXY", value: fAreaXY,
+        aggregatableValue: (areaSpec !== undefined) ? { value: this._polygon.areaXY, formatSpec: areaSpec } : undefined,
+      },
       { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupPerimeter"), name: "AreaMeasurement_Perimeter", value: fPerimeter },
       { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupEdgeCount"), name: "AreaMeasurement_EdgeCount", value: fEdgeCount },
     );
@@ -447,7 +451,7 @@ export class AreaMeasurement extends Measurement {
 
   public static create(pts: Point3d[], viewType?: string): AreaMeasurement {
     // Don't ned to serialize the points, will just work as is
-    const measurement = new AreaMeasurement( { polygonPoints: pts });
+    const measurement = new AreaMeasurement({ polygonPoints: pts });
     if (viewType)
       measurement.viewTarget.include(viewType);
 

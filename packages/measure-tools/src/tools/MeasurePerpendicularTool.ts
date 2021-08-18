@@ -1,15 +1,18 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeButtonEvent, EventHandled, IModelApp, OutputMessagePriority, TentativeOrAccuSnap, ToolAssistance, ToolAssistanceInstruction, ToolAssistanceImage, ToolAssistanceSection, ToolAssistanceInputMethod } from "@bentley/imodeljs-frontend";
 import { Plane3dByOriginAndUnitNormal, Point3d, Ray3d, Vector3d } from "@bentley/geometry-core";
-import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
+import {
+  BeButtonEvent, EventHandled, IModelApp, OutputMessagePriority, TentativeOrAccuSnap, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
+  ToolAssistanceInstruction, ToolAssistanceSection,
+} from "@bentley/imodeljs-frontend";
+import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
-import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
+import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 
 export class MeasurePerpendicularTool extends MeasurementToolBase<DistanceMeasurement, MeasureDistanceToolModel> {
   public static toolId = "MeasurePerpendicular";

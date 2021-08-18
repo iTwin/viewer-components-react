@@ -1,31 +1,18 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { TextMarker } from "../api/TextMarker";
-import { ViewHelper } from "../api/ViewHelper";
-import { WellKnownGraphicStyleType, WellKnownTextStyleType, GraphicStyle, StyleSet } from "../api/GraphicStyle";
-import { Measurement, MeasurementWidgetData, MeasurementPickContext, MeasurementSerializer, MeasurementEqualityOptions } from "../api/Measurement";
+
+import { Id64String } from "@bentley/bentleyjs-core";
+import { Arc3d, IModelJson, Point3d, Ray3d, Vector3d, XYZProps } from "@bentley/geometry-core";
+import { GeometryStreamProps } from "@bentley/imodeljs-common";
+import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType, Viewport } from "@bentley/imodeljs-frontend";
+import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
+import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
-import {
-  Arc3d,
-  IModelJson,
-  Point3d,
-  Ray3d,
-  Vector3d,
-  XYZProps,
-} from "@bentley/geometry-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import {
-  DecorateContext,
-  GraphicType,
-  QuantityType,
-  IModelApp,
-  BeButtonEvent,
-  Viewport,
-} from "@bentley/imodeljs-frontend";
-import { Id64String } from "@bentley/bentleyjs-core";
+import { TextMarker } from "../api/TextMarker";
+import { ViewHelper } from "../api/ViewHelper";
 
 export interface RadiusMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
@@ -78,7 +65,7 @@ export class RadiusMeasurement extends Measurement {
     this._isDynamic = false;
     if (props) this.readFromJSON(props);
 
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   public get startPointRef(): Point3d | undefined { return this._startPoint; }
@@ -112,7 +99,7 @@ export class RadiusMeasurement extends Measurement {
 
       if (arc !== undefined && arc instanceof Arc3d) {
         this._arc = arc;
-        this.createTextMarker().catch();
+        this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
       }
     }
   }
@@ -405,7 +392,7 @@ export class RadiusMeasurement extends Measurement {
     );
 
     let title = IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.measurement");
-    title += " [" + fRadius + "]";
+    title += ` [${fRadius}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     data.properties.push({
@@ -462,17 +449,17 @@ export class RadiusMeasurement extends Measurement {
       const lengthSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
         QuantityType.LengthEngineering,
       );
-      const radius = this._arc!.circularRadius()!;
+      const radius = this._arc.circularRadius()!;
       const fRadius = IModelApp.quantityFormatter.formatQuantity(
         radius,
         lengthSpec,
       );
-      const point = this._arc!.center;
+      const point = this._arc.center;
       const styleTheme = StyleSet.getOrDefault(this.activeStyle);
 
       const tStyle = styleTheme.getTextStyle(WellKnownTextStyleType.DistanceMeasurement)!;
       this._textMarker = TextMarker.createStyled(
-        ["R: " + fRadius],
+        [`R: ${fRadius}`],
         point,
         tStyle,
       );
@@ -503,11 +490,12 @@ export class RadiusMeasurement extends Measurement {
   }
 
   public onDisplayUnitsChanged(): void {
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   private _handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
     if (!this.isDynamic)
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.onDecorationButtonEvent(
         MeasurementPickContext.createFromSourceId("Invalid", ev),
       ).catch();

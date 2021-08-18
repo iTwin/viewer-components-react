@@ -1,20 +1,20 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d, XYZProps, IModelJson, PointString3d, Geometry } from "@bentley/geometry-core";
-import { DecorateContext, GraphicType, IModelApp, BeButtonEvent } from "@bentley/imodeljs-frontend";
 import { Id64String } from "@bentley/bentleyjs-core";
-import { GeometryStreamProps, LatLongAndHeight, Cartographic } from "@bentley/imodeljs-common";
-import { Measurement, MeasurementSerializer, MeasurementPickContext, MeasurementWidgetData, MeasurementEqualityOptions } from "../api/Measurement";
-import { MeasurementProps } from "../api/MeasurementProps";
-import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
-import { TextMarker } from "../api/TextMarker";
+import { Geometry, IModelJson, Point3d, PointString3d, XYZProps } from "@bentley/geometry-core";
+import { Cartographic, GeometryStreamProps, LatLongAndHeight } from "@bentley/imodeljs-common";
+import { BeButtonEvent, DecorateContext, GraphicType, IModelApp } from "@bentley/imodeljs-frontend";
 import { FormatterUtils } from "../api/FormatterUtils";
-import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
+import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
+import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { WellKnownViewType } from "../api/MeasurementEnums";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
+import { MeasurementProps } from "../api/MeasurementProps";
+import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
+import { TextMarker } from "../api/TextMarker";
 
 /**
  * Props for serializing a [[LocationMeasurement]].
@@ -70,7 +70,7 @@ export class LocationMeasurement extends Measurement {
   private _isDynamic: boolean; // No serialize
 
   public get location(): Point3d { return this._location; }
-  public set location(pt: Point3d) { this._location.setFrom(pt); this.createTextMarker().catch(); }
+  public set location(pt: Point3d) { this._location.setFrom(pt); this.createTextMarker().catch(); } // eslint-disable-line @typescript-eslint/no-floating-promises
 
   public get geoLocation(): Cartographic | undefined { return this._geoLocation; }
   public set geoLocation(geoLoc: Cartographic | undefined) { this._geoLocation = geoLoc; }
@@ -100,12 +100,12 @@ export class LocationMeasurement extends Measurement {
 
     this._location = Point3d.createZero();
     this._isDynamic = false;
-    this.getSnapId(); // Preload transient ID's since we normally dont have these as dynamic
+    this.getSnapId(); // Preload transient ID"s since we normally don not have these as dynamic
 
     if (props) {
       this.readFromJSON(props);
     } else {
-      this.createTextMarker().catch();
+      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
   }
 
@@ -183,12 +183,12 @@ export class LocationMeasurement extends Measurement {
   }
 
   protected async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData | undefined> {
-    const fCoordinates = await FormatterUtils.formatCoordinates(this._location!);
+    const fCoordinates = await FormatterUtils.formatCoordinates(this._location);
 
     let title = IModelApp.i18n.translate("MeasureTools:Measurements.locationMeasurement");
-    title += " [" + fCoordinates + "]";
+    title += ` [${fCoordinates}]`;
 
-    const data: MeasurementWidgetData = {title, properties: []};
+    const data: MeasurementWidgetData = { title, properties: [] };
 
     data.properties.push({
       label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.coordinates"),
@@ -246,7 +246,7 @@ export class LocationMeasurement extends Measurement {
     if (this._isDynamic)
       return false;
 
-    this.onDecorationButtonEvent(MeasurementPickContext.createFromSourceId("Invalid", ev)).catch();
+    this.onDecorationButtonEvent(MeasurementPickContext.createFromSourceId("Invalid", ev)).catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     return true;
   }
 
@@ -259,7 +259,7 @@ export class LocationMeasurement extends Measurement {
   }
 
   public onDisplayUnitsChanged(): void {
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   private updateMarkerStyle() {
@@ -312,7 +312,7 @@ export class LocationMeasurement extends Measurement {
       this._slope = other._slope;
       this._offset = other._offset;
       this._station = other._station;
-      this.createTextMarker().catch();
+      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
   }
 
@@ -335,7 +335,7 @@ export class LocationMeasurement extends Measurement {
     this._slope = jsonLoc.slope;
     this._station = jsonLoc.station;
     this._offset = jsonLoc.offset;
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   /**
@@ -361,7 +361,7 @@ export class LocationMeasurement extends Measurement {
   }
 
   public static create(location: Point3d, viewType?: string) {
-    // Don't ned to serialize the points, will just work as is
+    // Don"t ned to serialize the points, will just work as is
     const measurement = new LocationMeasurement({ location });
     if (viewType)
       measurement.viewTarget.include(viewType);
@@ -373,7 +373,7 @@ export class LocationMeasurement extends Measurement {
     const locMeasurement = new LocationMeasurement(props);
 
     // LEGACY - Originally location measurements were hardcoded for "MainOnly", so if no viewTarget/viewportType default to "Spatial". So reading this from old JSON
-    // we don't want location measurement's set to Any...but we want new measurements created to be set to Any if no view types are given!
+    // we don"t want location measurement"s set to Any...but we want new measurements created to be set to Any if no view types are given!
     if (props.viewTarget === undefined && (props as any).viewportType === undefined)
       locMeasurement.viewTarget.include(WellKnownViewType.Spatial);
 

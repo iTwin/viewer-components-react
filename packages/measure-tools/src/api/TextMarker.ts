@@ -6,7 +6,9 @@
 import { Id64String } from "@bentley/bentleyjs-core";
 import { Angle, AxisIndex, LineString3d, Matrix3d, Point2d, Point3d, PolygonOps, Transform, Vector3d, XAndY, XYAndZ } from "@bentley/geometry-core";
 import { ColorDef, Hilite } from "@bentley/imodeljs-common";
-import { BeButton, BeButtonEvent, CanvasDecoration, DecorateContext, IModelApp, SelectionMode, SelectionTool, Viewport } from "@bentley/imodeljs-frontend";
+import {
+  BeButton, BeButtonEvent, CanvasDecoration, DecorateContext, IModelApp, SelectionMode, SelectionTool, Viewport,
+} from "@bentley/imodeljs-frontend";
 import { IconAlignment, IconStyleProps, StyleSet, TextOffsetProps, TextOffsetType, TextStyleProps, WellKnownTextStyleType } from "./GraphicStyle";
 
 /**
@@ -166,7 +168,7 @@ export class TextMarker implements CanvasDecoration {
     }
 
     const elem = document.createElement("i");
-    elem.className = "icon " + style.iconSpec;
+    elem.className = `icon ${style.iconSpec}`;
 
     this._iconPosition = (style.position !== undefined) ? style.position : IconAlignment.Center;
 
@@ -178,23 +180,23 @@ export class TextMarker implements CanvasDecoration {
     this._iconHtmlElement = elem;
 
     if (style.size !== undefined)
-      elem.style.fontSize = style.size.toString() + "px";
+      elem.style.fontSize = `${style.size.toString()}px`;
 
     if (style.iconColor !== undefined)
       elem.style.color = ColorDef.fromTbgr(style.iconColor).toHexString();
 
     if (style.padding !== undefined)
-      elem.style.padding = style.padding.toString() + "px";
+      elem.style.padding = `${style.padding.toString()}px`;
 
     if (style.bgColor !== undefined) {
       elem.style.backgroundColor = ColorDef.fromTbgr(style.bgColor).toHexString();
 
       if (style.bgCornerRadius !== undefined)
-        elem.style.borderRadius = style.bgCornerRadius.toString() + "px";
+        elem.style.borderRadius = `${style.bgCornerRadius.toString()}px`;
     }
 
     if (style.borderWidth !== undefined) {
-      elem.style.borderWidth = style.borderWidth.toString() + "px";
+      elem.style.borderWidth = `${style.borderWidth.toString()}px`;
       elem.style.borderStyle = "solid";
 
       if (style.borderColor !== undefined)
@@ -211,8 +213,8 @@ export class TextMarker implements CanvasDecoration {
     style.position = "absolute";
     const size = html.getBoundingClientRect(); // Note: only call this *after* setting position = absolute
     const markerPos = this.position;
-    style.left = markerPos.x - (size.width / 2) + "px";
-    style.top = markerPos.y - (size.height / 2) + "px";
+    style.left = `${markerPos.x - (size.width / 2)}px`;
+    style.top = `${markerPos.y - (size.height / 2)}px`;
   }
 
   private moveIconHtml(boxWidth: number, boxHeight: number) {
@@ -280,8 +282,8 @@ export class TextMarker implements CanvasDecoration {
     /// Note: only call this *after* setting position = absolute
     const size = this._iconHtmlElement.getBoundingClientRect();
 
-    this._iconHtmlElement.style.left = x - (size.width / 2) + "px";
-    this._iconHtmlElement.style.top = y - (size.height / 2) + "px";
+    this._iconHtmlElement.style.left = `${x - (size.width / 2)}px`;
+    this._iconHtmlElement.style.top = `${y - (size.height / 2)}px`;
   }
 
   /**
@@ -492,7 +494,7 @@ export class TextMarker implements CanvasDecoration {
         ctx.fillText(text, dx + this.boxPadding, dy + this.boxPadding + (index * lineHeight));
       });
     } else {
-      const boldFont = "bold " + this.textFont;
+      const boldFont = `bold ${this.textFont}`;
       this.textLines.forEach((entry: TextEntry, index: number) => {
         ctx.font = boldFont;
         const w = ctx.measureText(entry.label).width + TextMarker._titleTextSpacing;
@@ -523,7 +525,7 @@ export class TextMarker implements CanvasDecoration {
       this._onMouseEnterHandler(ev);
 
     if (this.transientHiliteId && ev.viewport) {
-      ev.viewport.setFlashed(this.transientHiliteId, .25);
+      ev.viewport.setFlashed(this.transientHiliteId, .25); // eslint-disable-line deprecation/deprecation
       this._flashViewports.add(ev.viewport);
     }
   }
@@ -532,7 +534,7 @@ export class TextMarker implements CanvasDecoration {
     if (this._onMouseLeaveHandler)
       this._onMouseLeaveHandler();
 
-    this._flashViewports.forEach((vp) => vp.setFlashed(undefined, 0.0));
+    this._flashViewports.forEach((vp) => vp.setFlashed(undefined, 0.0)); // eslint-disable-line deprecation/deprecation
     this._flashViewports.clear();
   }
 
@@ -594,7 +596,7 @@ export class TextMarker implements CanvasDecoration {
     if (this.isStringArray(this.textLines)) {
       widths = this.textLines.map((v: string) => ctx.measureText(v).width);
     } else {
-      const boldFont = "bold " + this.textFont;
+      const boldFont = `bold ${this.textFont}`;
       widths = this.textLines.map((entry: TextEntry) => {
         ctx.font = boldFont;
         const titleWidth = ctx.measureText(entry.label).width;

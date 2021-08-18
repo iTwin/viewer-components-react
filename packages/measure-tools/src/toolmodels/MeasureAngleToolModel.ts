@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Point3d } from "@bentley/geometry-core";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
@@ -14,9 +14,7 @@ enum State {
 }
 
 /** Tool model for measuring radius using 3-points */
-export class MeasureAngleToolModel extends MeasurementToolModel<
-  AngleMeasurement
-> {
+export class MeasureAngleToolModel extends MeasurementToolModel<AngleMeasurement> {
   public static State = State;
 
   private _currentMeasurement?: AngleMeasurement;

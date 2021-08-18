@@ -1,28 +1,19 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import {
-  BeButtonEvent,
-  IModelApp,
-  EventHandled,
-  ToolAssistance,
-  ToolAssistanceImage,
-  ToolAssistanceInputMethod,
-  ToolAssistanceInstruction,
+  BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod, ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@bentley/imodeljs-frontend";
-import { AngleMeasurement } from "../measurements/AngleMeasurement";
+import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
+import { AngleMeasurement } from "../measurements/AngleMeasurement";
 import { MeasureAngleToolModel } from "../toolmodels/MeasureAngleToolModel";
-import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 
 /** Tool for measuring angles using start, center and end point */
-export class MeasureAngleTool extends MeasurementToolBase<
-  AngleMeasurement,
-  MeasureAngleToolModel
-> {
+export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, MeasureAngleToolModel> {
   protected createToolModel(): MeasureAngleToolModel {
     return new MeasureAngleToolModel();
   }
@@ -62,7 +53,7 @@ export class MeasureAngleTool extends MeasurementToolBase<
     let currentMsg = "";
     if (
       this.toolModel.currentState ===
-        MeasureAngleToolModel.State.SetMeasurementViewport ||
+      MeasureAngleToolModel.State.SetMeasurementViewport ||
       this.toolModel.currentState === MeasureAngleToolModel.State.SetStartPoint
     ) {
       currentMsg = identifyStartMessage;

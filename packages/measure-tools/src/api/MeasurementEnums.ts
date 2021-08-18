@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 /** List of well-known measurement style sets. */
@@ -12,14 +12,14 @@ export enum WellKnownMeasurementStyle {
 
 /** Enumeration for different scenarios where a measurement handles a button event. */
 export enum MeasurementButtonHandledEvent {
-    /** Measurement did not respond to button event. */
-    No = 0,
+  /** Measurement did not respond to button event. */
+  No = 0,
 
-    /** Measurement did respond to button event. */
-    Yes = 1,
+  /** Measurement did respond to button event. */
+  Yes = 1,
 
-    /** Measurement did respond to button event, and consume the event so the system does not further processs it. */
-    YesConsumeEvent = 2,
+  /** Measurement did respond to button event, and consume the event so the system does not further processs it. */
+  YesConsumeEvent = 2,
 }
 
 /**

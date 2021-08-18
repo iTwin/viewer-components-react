@@ -1,12 +1,12 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { Viewport } from "@bentley/imodeljs-frontend";
+import { Feature, FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
-import { PrimitiveToolBase} from "../api/MeasurementTool";
-import { Feature, MeasureToolsFeatures, FeatureTracking } from "../api/FeatureTracking";
+import { PrimitiveToolBase } from "../api/MeasurementTool";
 
 export class ToggleDisplayMeasurementAxesTool extends PrimitiveToolBase {
   public static toolId = "ToggleDisplayMeasurementAxes";
@@ -18,7 +18,7 @@ export class ToggleDisplayMeasurementAxesTool extends PrimitiveToolBase {
     return "icon-measure-2d-show";
   }
 
-  // Ignore built-in feature tracking on the tool, since we want to add a toggle state to the tracking so we'll call it ourselves
+  // Ignore built-in feature tracking on the tool, since we want to add a toggle state to the tracking so we will call it ourselves
   protected get feature(): Feature | undefined { return undefined; }
 
   constructor() {

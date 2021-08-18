@@ -1,15 +1,18 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceInstruction, ToolAssistanceImage, ToolAssistanceSection, ToolAssistanceInputMethod, AccuDrawHintBuilder } from "@bentley/imodeljs-frontend";
+import { AxisOrder, Matrix3d, Vector3d } from "@bentley/geometry-core";
+import {
+  AccuDrawHintBuilder, BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
+  ToolAssistanceInstruction, ToolAssistanceSection,
+} from "@bentley/imodeljs-frontend";
+import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import { AreaMeasurement } from "../measurements/AreaMeasurement";
 import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
-import { MeasureToolsFeatures, Feature } from "../api/FeatureTracking";
-import { Vector3d, Matrix3d, AxisOrder } from "@bentley/geometry-core";
 
 export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, MeasureAreaToolModel> {
 

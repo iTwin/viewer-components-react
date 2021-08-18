@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { BeUiEvent, GuidString, Logger } from "@bentley/bentleyjs-core";
@@ -58,7 +58,7 @@ export class FeatureTracking {
 
     const iModelConnection = this.getUiFameworkIModel();
 
-    // tslint:disable-next-line:no-floating-promises
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     FeatureTracking.postTelemetry(feature, iModelConnection);
   }
 
@@ -71,7 +71,7 @@ export class FeatureTracking {
       let imodelId, changesetId, contextId;
       if (iModelConnection) {
         imodelId = iModelConnection.iModelId;
-        changesetId = iModelConnection.changeSetId;
+        changesetId = iModelConnection.changeset.id;
         contextId = iModelConnection.contextId;
       }
 
@@ -87,7 +87,7 @@ export class FeatureTracking {
    * @param feature Feature that was activated.
    * @param isOn current toggle state of the feature. This is added as metadata.
    */
-  public static notifyToggledFeature( feature: Feature, isOn: boolean) {
+  public static notifyToggledFeature(feature: Feature, isOn: boolean) {
     this.notifyFeature(createToggledFeature(feature.name, feature.guid, isOn, feature.metaData, true));
   }
 
@@ -98,7 +98,7 @@ export class FeatureTracking {
    * @param metaData optional metadata for the feature.
    */
   public static notifyFeatureByName(featureName: string, featureGuid: GuidString, metaData?: Map<string, any>) {
-    this.notifyFeature( { name: featureName, guid: featureGuid, metaData });
+    this.notifyFeature({ name: featureName, guid: featureGuid, metaData });
   }
 
   /**
@@ -108,7 +108,7 @@ export class FeatureTracking {
    * @param isOn current toggle state of the feature. This is added as metadata.
    * @param metaData optional additional metadata for the feature.
    */
-  public static notifyToggledFeatureByName(featureName: string, featureGuid: GuidString, isOn: boolean,  metaData?: Map<string, any>) {
+  public static notifyToggledFeatureByName(featureName: string, featureGuid: GuidString, isOn: boolean, metaData?: Map<string, any>) {
     this.notifyFeature(createToggledFeature(featureName, featureGuid, isOn, metaData, true));
   }
 
@@ -146,8 +146,8 @@ export class MeasureToolsFeatures {
   public static get Tools_MeasureArea(): Feature { return { name: "CRT_Tools_MeasureArea", guid: "7000640d-c362-4533-9f60-3fc4e72af81f" }; }
   public static get Tools_MeasureDistance(): Feature { return { name: "CRT_Tools_MeasureDistance", guid: "10e474ee-9af8-4262-a505-77c9d896b065" }; }
   public static get Tools_MeasureLocation(): Feature { return { name: "CRT_Tools_MeasureLocation", guid: "6230e620-ffc2-4f7f-88d7-8652ae8cf91f" }; }
-  public static get Tools_MeasureAngle(): Feature { return { name: "MST_Tools_MeasureAngle", guid: "19febcb9-24e7-49ee-980b-c2bb6a5dedef"}; }
-  public static get Tools_MeasureRadius(): Feature { return { name: "MST_Tools_MeasureRadius", guid: "0ab34c10-2ab9-4982-9ed9-2760e6e455bd"}; }
+  public static get Tools_MeasureAngle(): Feature { return { name: "MST_Tools_MeasureAngle", guid: "19febcb9-24e7-49ee-980b-c2bb6a5dedef" }; }
+  public static get Tools_MeasureRadius(): Feature { return { name: "MST_Tools_MeasureRadius", guid: "0ab34c10-2ab9-4982-9ed9-2760e6e455bd" }; }
   public static get Tools_MeasurePerpendicular(): Feature { return { name: "MST_Tools_MeasurePerpendicular", guid: "014ad558-3ad3-4c4d-bdb7-004783fdc149" }; }
 
   // Action toolbar

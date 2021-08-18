@@ -1,11 +1,11 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Decorator, DecorateContext, IModelApp, HitDetail, EventHandled, BeButtonEvent, Viewport } from "@bentley/imodeljs-frontend";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
 import { BeUiEvent } from "@bentley/bentleyjs-core";
+import { GeometryStreamProps } from "@bentley/imodeljs-common";
+import { BeButtonEvent, DecorateContext, Decorator, EventHandled, HitDetail, IModelApp, Viewport } from "@bentley/imodeljs-frontend";
 import { Measurement, MeasurementPickContext } from "./Measurement";
 import { MeasurementButtonHandledEvent, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementSelectionSet } from "./MeasurementSelectionSet";
@@ -401,7 +401,7 @@ export class MeasurementManager implements Decorator {
     this._dropCallback = IModelApp.viewManager.addDecorator(this);
 
     if (undefined === this._dropUnitCallback) {
-      this._dropUnitCallback = IModelApp.quantityFormatter.onActiveUnitSystemChanged.addListener(this.onActiveUnitSystemChanged.bind(this));
+      this._dropUnitCallback = IModelApp.quantityFormatter.onActiveUnitSystemChanged.addListener(this.onActiveUnitSystemChanged.bind(this)); // eslint-disable-line deprecation/deprecation
     } else {
       this.onActiveUnitSystemChanged();
     }

@@ -1,11 +1,11 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { ColorDef, LinePixels, ColorByName, ColorDefProps } from "@bentley/imodeljs-common";
+import { Arc3d, LineSegment3d, Path, Point3d, XYProps } from "@bentley/geometry-core";
+import { ColorByName, ColorDef, ColorDefProps, LinePixels } from "@bentley/imodeljs-common";
 import { GraphicBuilder } from "@bentley/imodeljs-frontend";
-import { Path, Point3d, LineSegment3d, XYProps, Arc3d } from "@bentley/geometry-core";
 
 /** List of well-known graphic styles. */
 export enum WellKnownGraphicStyleType {
@@ -272,7 +272,7 @@ export class StyleSet {
       copy._graphicStyles.set(kv[0], kv[1].clone());
 
     for (const kv of this._textStyles)
-      copy._textStyles.set(kv[0], {...kv[1]});
+      copy._textStyles.set(kv[0], { ...kv[1] });
 
     copy.fallbackStyleSetName = this.fallbackStyleSetName;
 
@@ -403,7 +403,7 @@ function createStyleSets(): void {
 
   // Debatable if we should clone or set the fallback. I feel like default styles should be fully populated
 
-  const lockIconStyle = { iconSpec: "icon-lock", position: IconAlignment.Bottom, offset: {x: 0, y: 16}, padding: 5, bgColor: setAlphaToJson(ColorByName.lightGrey, MEASURE_ALPHA), bgCornerRadius: 16, borderWidth: 1 };
+  const lockIconStyle = { iconSpec: "icon-lock", position: IconAlignment.Bottom, offset: { x: 0, y: 16 }, padding: 5, bgColor: setAlphaToJson(ColorByName.lightGrey, MEASURE_ALPHA), bgCornerRadius: 16, borderWidth: 1 };
 
   // Locked distance
   const defaultLocked = s.clone("default-locked");
@@ -478,7 +478,7 @@ function createStyleSets(): void {
   fadedLocationTextStyle!.boxBorderWidth = undefined;
 
   // Faded hover box
-  const fadedHoverBoxStyle = faded.getTextStyle(WellKnownTextStyleType.HoverBox)!;
+  const fadedHoverBoxStyle = faded.getTextStyle(WellKnownTextStyleType.HoverBox);
   fadedHoverBoxStyle!.boxColor = setAlphaToJson(ColorByName.lightGrey, FADED_ALPHA * 2);
   fadedHoverBoxStyle!.boxBorderWidth = undefined;
 

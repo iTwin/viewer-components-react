@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { Logger, LogLevel } from "@bentley/bentleyjs-core";
@@ -11,6 +11,7 @@ export enum MeasureToolsLoggerCategory {
   Root = "Measure-Tools",
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace MeasureToolsLoggerCategory {
   /** Gets all the categories used in the packages as an array. */
   export function getCategories(): string[] { return [MeasureToolsLoggerCategory.Root]; }

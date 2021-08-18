@@ -1,33 +1,17 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { TextMarker } from "../api/TextMarker";
-import { WellKnownGraphicStyleType, WellKnownTextStyleType, StyleSet } from "../api/GraphicStyle";
-import { Measurement, MeasurementWidgetData, MeasurementPickContext, MeasurementSerializer, MeasurementEqualityOptions } from "../api/Measurement";
+
+import { Id64String } from "@bentley/bentleyjs-core";
+import { Angle, AngleSweep, Arc3d, AxisOrder, IModelJson, Matrix3d, Point3d, PointString3d, Vector3d, XYZProps } from "@bentley/geometry-core";
+import { GeometryStreamProps } from "@bentley/imodeljs-common";
+import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
+import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
+import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
-import {
-  Arc3d,
-  IModelJson,
-  Point3d,
-  Vector3d,
-  XYZProps,
-  PointString3d,
-  AngleSweep,
-  Matrix3d,
-  AxisOrder,
-  Angle,
-} from "@bentley/geometry-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import {
-  DecorateContext,
-  GraphicType,
-  QuantityType,
-  IModelApp,
-  BeButtonEvent,
-} from "@bentley/imodeljs-frontend";
-import { Id64String } from "@bentley/bentleyjs-core";
+import { TextMarker } from "../api/TextMarker";
 
 export interface AngleMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
@@ -79,7 +63,7 @@ export class AngleMeasurement extends Measurement {
     this._isDynamic = false;
     if (props) this.readFromJSON(props);
 
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   public get startPointRef(): Point3d | undefined { return this._startPoint; }
@@ -109,7 +93,7 @@ export class AngleMeasurement extends Measurement {
     if (props.endPoint)
       this._endPoint = Point3d.fromJSON(props.endPoint);
 
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   /**
@@ -174,23 +158,23 @@ export class AngleMeasurement extends Measurement {
       this._startPoint = other._startPoint ? other._startPoint.clone() : undefined;
       this._center = other._center ? other._center.clone() : undefined;
       this._endPoint = other._endPoint ? other._endPoint.clone() : undefined;
-      this.createTextMarker().catch();
+      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
   }
 
   public setStartPoint(point: Point3d) {
     this._startPoint = point;
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   public setCenter(point: Point3d) {
     this._center = point;
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   public setEndPoint(point: Point3d) {
     this._endPoint = point;
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   public testDecorationHit(pickContext: MeasurementPickContext) {
@@ -268,12 +252,12 @@ export class AngleMeasurement extends Measurement {
     );
 
     if (this._startPoint !== undefined &&
-        this._center === undefined &&
-        this._endPoint === undefined) {
+      this._center === undefined &&
+      this._endPoint === undefined) {
       style.addStyledPointString(builder, [this._startPoint], true);
     } else if (this._startPoint !== undefined &&
-        this._center !== undefined &&
-        this._endPoint === undefined) {
+      this._center !== undefined &&
+      this._endPoint === undefined) {
       style.addStyledLineString(builder, [this._startPoint, this._center], true);
     } else if (this._startPoint !== undefined &&
       this._center !== undefined &&
@@ -308,7 +292,7 @@ export class AngleMeasurement extends Measurement {
     );
 
     let title = IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.measurement");
-    title += " [" + fAngle + "]";
+    title += ` [${fAngle}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     data.properties.push({
@@ -367,6 +351,7 @@ export class AngleMeasurement extends Measurement {
 
   private _handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
     if (!this.isDynamic)
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.onDecorationButtonEvent(
         MeasurementPickContext.createFromSourceId("Invalid", ev),
       ).catch();

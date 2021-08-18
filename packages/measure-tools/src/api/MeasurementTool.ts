@@ -1,14 +1,17 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Measurement } from "./Measurement";
-import { AccuDrawShortcuts, IModelApp, IModelConnection, PrimitiveTool, OutputMessagePriority, NotifyMessageDetails, OutputMessageType, OutputMessageAlert, DecorateContext, BeButtonEvent, EventHandled, HitDetail, ToolAssistance, ToolAssistanceInputMethod, ToolAssistanceInstruction } from "@bentley/imodeljs-frontend";
-import { Id64String, BeDuration, BeUiEvent } from "@bentley/bentleyjs-core";
-import { MeasurementToolModel } from "./MeasurementToolModel";
+import { BeDuration, BeUiEvent, Id64String } from "@bentley/bentleyjs-core";
 import { GeometryStreamProps } from "@bentley/imodeljs-common";
+import {
+  AccuDrawShortcuts, BeButtonEvent, DecorateContext, EventHandled, HitDetail, IModelApp, IModelConnection, NotifyMessageDetails, OutputMessageAlert,
+  OutputMessagePriority, OutputMessageType, PrimitiveTool, ToolAssistance, ToolAssistanceInputMethod, ToolAssistanceInstruction,
+} from "@bentley/imodeljs-frontend";
 import { Feature, FeatureTracking } from "./FeatureTracking";
+import { Measurement } from "./Measurement";
+import { MeasurementToolModel } from "./MeasurementToolModel";
 
 /** Interface for any interactive tool that creates measurements. */
 export interface MeasurementTool {
@@ -104,7 +107,7 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
 
   protected async showException(err: Error) {
     const priority = OutputMessagePriority.Error;
-    const msg = err.message || err.name || typeof(err);
+    const msg = err.message || err.name || typeof (err);
 
     this.showMessage(priority, msg);
   }
