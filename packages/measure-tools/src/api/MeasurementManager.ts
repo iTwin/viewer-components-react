@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { Decorator, DecorateContext, IModelApp, HitDetail, EventHandled, BeButtonEvent, Viewport } from "@bentley/imodeljs-frontend";
@@ -310,12 +310,12 @@ export class MeasurementManager implements Decorator {
     const pickContext = MeasurementPickContext.createFromSourceId(id);
     if (this._overrideHitHandler) {
       for (const measurement of this._measurements) {
-        if (this._overrideHitHandler(measurement, pickContext))
+        if (measurement.isVisible && this._overrideHitHandler(measurement, pickContext))
           return true;
       }
     } else {
       for (const measurement of this._measurements) {
-        if (measurement.testDecorationHit(pickContext))
+        if (measurement.isVisible && measurement.testDecorationHit(pickContext))
           return true;
       }
     }
@@ -330,7 +330,7 @@ export class MeasurementManager implements Decorator {
   public getDecorationGeometry(hit: HitDetail): GeometryStreamProps | undefined {
     const pickContext = MeasurementPickContext.create(hit);
     for (const measurement of this._measurements) {
-      if (measurement.testDecorationHit(pickContext))
+      if (measurement.isVisible && measurement.testDecorationHit(pickContext))
         return (this._overrideGeometryHandler) ? this._overrideGeometryHandler(measurement, pickContext) : measurement.getDecorationGeometry(pickContext);
     }
 
@@ -344,7 +344,7 @@ export class MeasurementManager implements Decorator {
   public async getDecorationToolTip(hit: HitDetail): Promise<HTMLElement | string> {
     const pickContext = MeasurementPickContext.create(hit);
     for (const measurement of this._measurements) {
-      if (measurement.testDecorationHit(pickContext))
+      if (measurement.isVisible && measurement.testDecorationHit(pickContext))
         return (this._overrideToolTipHandler) ? this._overrideToolTipHandler(measurement, pickContext) : measurement.getDecorationToolTip(pickContext);
     }
 
@@ -360,6 +360,9 @@ export class MeasurementManager implements Decorator {
     const pickContext = MeasurementPickContext.create(hit, ev);
 
     for (const measurement of this._measurements) {
+      if (!measurement.isVisible)
+        continue;
+
       const handled = await measurement.onDecorationButtonEvent(pickContext);
 
       // Early out if event was handled. Potentially check if we want to consume the event or not.
@@ -388,7 +391,7 @@ export class MeasurementManager implements Decorator {
    */
   public decorate(context: DecorateContext): void {
     for (const measurement of this._measurements) {
-      if (measurement.viewTarget.isViewportCompatible(context.viewport))
+      if (measurement.isVisible && measurement.viewTarget.isViewportCompatible(context.viewport))
         measurement.decorate(context);
     }
   }
