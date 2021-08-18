@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceInstruction, ToolAssistanceImage, ToolAssistanceSection, ToolAssistanceInputMethod, AccuDrawHintBuilder } from "@bentley/imodeljs-frontend";
@@ -56,7 +56,7 @@ export class MeasureDistanceTool extends MeasurementToolBase<DistanceMeasurement
     const hints = new AccuDrawHintBuilder();
     hints.setOrigin(ev.point);
     hints.setModeRectangular();
-    hints.sendHints(true);
+    hints.sendHints(false);
     IModelApp.toolAdmin.setCursor(IModelApp.viewManager.crossHairCursor);
   }
 

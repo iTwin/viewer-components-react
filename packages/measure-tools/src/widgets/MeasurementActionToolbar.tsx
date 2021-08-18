@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { ActionButtonItemDef, ItemProps, ActionItemButton, CursorPopupManager, CursorInformation } from "@bentley/ui-framework";
@@ -133,6 +133,46 @@ export class MeasurementActionDefinitions {
 
         MeasurementUIEvents.notifyMeasurementsChanged(); // By default locking influences visibility of the UI buttons
         FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.MeasurementActions_Lock, true);
+      },
+    });
+  }
+
+  public static get hideMeasurements() {
+    return new MeasurementActionItemDef({
+      id: "hide-measurements",
+      iconSpec: "icon-visibility-hide",
+      label: () => IModelApp.i18n.translate("MeasureTools:Generic.hideMeasurements"),
+      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.hideMeaurements"),
+      execute: (args: Measurement[]) => {
+
+        args.forEach((m) => {
+          if (m.isVisible) {
+            m.isVisible = false;
+            m.viewTarget.invalidateViewportDecorations();
+          }
+        });
+
+        FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.MeasurementActions_ToggleDisplayMeasurements, false);
+      },
+    });
+  }
+
+  public static get displayMeasurements() {
+    return new MeasurementActionItemDef({
+      id: "display-measurements",
+      iconSpec: "icon-visibility",
+      label: () => IModelApp.i18n.translate("MeasureTools:Generic.displayMeasurements"),
+      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.displayMeasurements"),
+      execute: (args: Measurement[]) => {
+
+        args.forEach((m) => {
+          if (!m.isVisible) {
+            m.isVisible = true;
+            m.viewTarget.invalidateViewportDecorations();
+          }
+        });
+
+        FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.MeasurementActions_ToggleDisplayMeasurements, true);
       },
     });
   }

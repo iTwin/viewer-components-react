@@ -1,10 +1,10 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { Measurement } from "./Measurement";
-import { AccuDrawShortcuts, IModelApp, IModelConnection, PrimitiveTool, OutputMessagePriority, NotifyMessageDetails, OutputMessageType, OutputMessageAlert, DecorateContext, BeButtonEvent, EventHandled, HitDetail, ToolAssistance, ToolAssistanceInputMethod, ToolAssistanceInstruction } from "@bentley/imodeljs-frontend";
+import { IModelApp, IModelConnection, PrimitiveTool, OutputMessagePriority, NotifyMessageDetails, OutputMessageType, OutputMessageAlert, DecorateContext, BeButtonEvent, EventHandled, HitDetail, ToolAssistance, ToolAssistanceInputMethod, ToolAssistanceInstruction } from "@bentley/imodeljs-frontend";
 import { Id64String, BeDuration, BeUiEvent } from "@bentley/bentleyjs-core";
 import { MeasurementToolModel } from "./MeasurementToolModel";
 import { GeometryStreamProps } from "@bentley/imodeljs-common";
@@ -104,7 +104,7 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
 
   protected async showException(err: Error) {
     const priority = OutputMessagePriority.Error;
-    const msg = err.message || err.name || typeof(err);
+    const msg = err.message || err.name || typeof (err);
 
     this.showMessage(priority, msg);
   }
@@ -251,9 +251,6 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
       this.exitTool();
       return EventHandled.Yes;
     }
-
-    if (wentDown && AccuDrawShortcuts.processShortcutKey(keyEvent))
-      return EventHandled.Yes;
 
     return EventHandled.No;
   }
