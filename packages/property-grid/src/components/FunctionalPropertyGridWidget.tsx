@@ -263,25 +263,24 @@ export const FunctionalPropertyGridWidget = ({
     ]
   );
 
-  const onDataChanged = React.useCallback(async () => {
-    let propertyData: PropertyData | undefined = await dataProvider?.getData();
-    if (propertyData) {
-      propertyData = await addSharedFavsToData(propertyData);
-      setTitle(propertyData?.label);
-      setClassName(propertyData?.description ?? "");
-    }
-    console.log("some change");
-    console.log(propertyData);
-  }, [dataProvider, addSharedFavsToData]);
-
   React.useEffect(() => {
+    const onDataChanged = async () => {
+      let propertyData: PropertyData | undefined =
+        await dataProvider?.getData();
+      if (propertyData) {
+        propertyData = await addSharedFavsToData(propertyData);
+        setTitle(propertyData?.label);
+        setClassName(propertyData?.description ?? "");
+      }
+    };
+
     dataProvider?.onDataChanged.addListener(onDataChanged);
 
     return () => {
       dataProvider?.onDataChanged.removeListener(onDataChanged);
       dataProvider?.dispose();
     };
-  }, [dataProvider, onDataChanged]);
+  }, [dataProvider, addSharedFavsToData]);
 
   const onAddFavorite = React.useCallback(
     async (propertyField: Field) => {
@@ -606,7 +605,6 @@ export const FunctionalPropertyGridWidget = ({
     if (!dataProvider) {
       return undefined;
     }
-    console.count("renderPropertyGrid");
     if (disableUnifiedSelection) {
       return (
         <VirtualizedPropertyGridWithDataProvider
@@ -621,26 +619,24 @@ export const FunctionalPropertyGridWidget = ({
       );
     } else {
       return (
-        <div className="filtering-property-grid-with-unified-selection">
-          <FilteringPropertyGridWithUnifiedSelection
-            orientation={orientation ?? Orientation.Horizontal}
-            isOrientationFixed={isOrientationFixed ?? true}
-            dataProvider={dataProvider}
-            filterer={filterer}
-            isPropertyHoverEnabled={true}
-            isPropertySelectionEnabled={true}
-            onPropertyContextMenu={onPropertyContextMenu}
-            actionButtonRenderers={[shareActionButtonRenderer]}
-          />
-        </div>
+        <FilteringPropertyGridWithUnifiedSelection
+          orientation={orientation ?? Orientation.Horizontal}
+          isOrientationFixed={isOrientationFixed ?? true}
+          dataProvider={dataProvider}
+          filterer={filterer}
+          isPropertyHoverEnabled={true}
+          isPropertySelectionEnabled={true}
+          onPropertyContextMenu={onPropertyContextMenu}
+          actionButtonRenderers={[shareActionButtonRenderer]}
+        />
       );
     }
   };
 
   return (
-    <div className={rootClassName}>
+    <div className={rootClassName ?? "property-grid-widget-container"}>
       {renderHeader()}
-      {renderPropertyGrid()}
+      <div className={"property-grid-container"}>{renderPropertyGrid()}</div>
       {renderContextMenu()}
     </div>
   );

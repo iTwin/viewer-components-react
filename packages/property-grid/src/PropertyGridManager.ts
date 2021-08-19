@@ -4,11 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-import * as i18next from "i18next";
-
 import { I18N } from "@bentley/imodeljs-i18n";
 import { getClassName, UiError } from "@bentley/ui-abstract";
-import { StateManager } from "@bentley/ui-framework";
+import * as i18next from "i18next";
+
 import { PropertyGridManagerFeatureFlags } from "./types";
 
 /**
@@ -26,39 +25,38 @@ export class PropertyGridManager {
    * Called by IModelApp to initialize PropertyGridManager
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n: I18N, featureFlags?: PropertyGridManagerFeatureFlags): Promise<void> {
-    if (!StateManager.isInitialized()) {
-      throw new Error(
-        "UiFramework's StateManager must be initialized for Property Grid to work properly as an extension",
-      );
-    }
-
+  public static async initialize(
+    i18n: I18N,
+    featureFlags?: PropertyGridManagerFeatureFlags
+  ): Promise<void> {
     if (featureFlags) {
       PropertyGridManager.changeFlags(featureFlags);
     }
 
     PropertyGridManager._i18n = i18n;
     return PropertyGridManager._i18n.registerNamespace(
-      PropertyGridManager.i18nNamespace,
+      PropertyGridManager.i18nNamespace
     ).readFinished;
   }
 
   /** Unregisters the PropertyGridManager internationalization service namespace */
   public static terminate() {
-    if (PropertyGridManager._i18n)
+    if (PropertyGridManager._i18n) {
       PropertyGridManager._i18n.unregisterNamespace(
-        PropertyGridManager.i18nNamespace,
+        PropertyGridManager.i18nNamespace
       );
+    }
     PropertyGridManager._i18n = undefined;
   }
 
   /** The internationalization service created by the IModelApp. */
   public static get i18n(): I18N {
-    if (!PropertyGridManager._i18n)
+    if (!PropertyGridManager._i18n) {
       throw new UiError(
         PropertyGridManager.loggerCategory(this),
-        "PropertyGridManager not initialized",
+        "PropertyGridManager not initialized"
       );
+    }
     return PropertyGridManager._i18n;
   }
 
@@ -75,12 +73,12 @@ export class PropertyGridManager {
    */
   public static translate(
     key: string | string[],
-    options?: i18next.TranslationOptions,
+    options?: i18next.TranslationOptions
   ): string {
     return PropertyGridManager.i18n.translateWithNamespace(
       PropertyGridManager.i18nNamespace,
       key,
-      options,
+      options
     );
   }
 

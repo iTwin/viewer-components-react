@@ -18,7 +18,7 @@
   overflow: hidden !important;
 }
 
-.filtering-property-grid-with-unified-selection {
+.property-grid-container {
   flex: 1;
   margin-top: 6px;
   margin-bottom: 6px;
@@ -29,22 +29,7 @@
 }
 
 .property-grid-react-panel-label-and-class {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-top: $uicore-xs;
-
-  > div:first-child {
-    @include uicore-text(leading);
-    font-size: $uicore-font-size-leading;
-    margin-bottom: $uicore-xs;
-  }
-
-  > div {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  display: block;
 }
 
 .property-grid-react-panel-label {
@@ -76,17 +61,11 @@
 
 .property-grid-react-panel-header {
   display: flex;
-  margin: 0 4px;
   padding-top: $uicore-xs;
+  margin-left: 6px;
 }
 
 .property-grid-react-panel-class {
   @include uicore-text;
   font-size: $uicore-font-size;
-}
-
-.property-grid-container {
-  flex: 1;
-  margin-top: 8px;
-  margin-bottom: 4px;
 }
