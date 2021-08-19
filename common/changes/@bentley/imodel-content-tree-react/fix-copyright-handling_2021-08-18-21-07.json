@@ -6,6 +6,5 @@
       "type": "none"
     }
   ],
-  "packageName": "@bentley/imodel-content-tree-react",
-  "email": "aruniverse@users.noreply.github.com"
+  "packageName": "@bentley/imodel-content-tree-react"
 }

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react"
+}
