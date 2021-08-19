@@ -6,8 +6,6 @@
 
 import "./PropertyGrid.scss";
 
-import * as React from "react";
-
 import {
   AuthorizedFrontendRequestContext,
   IModelApp,
@@ -15,6 +13,8 @@ import {
 import { Field } from "@bentley/presentation-common";
 import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
 import { Presentation } from "@bentley/presentation-frontend";
+import { SettingsStatus } from "@bentley/product-settings-client";
+import { PropertyRecord } from "@bentley/ui-abstract";
 import {
   ActionButtonRenderer,
   ActionButtonRendererProps,
@@ -31,23 +31,22 @@ import {
   Orientation,
 } from "@bentley/ui-core";
 import { useActiveIModelConnection } from "@bentley/ui-framework";
-import { PropertyGridManager } from "../PropertyGridManager";
-import { SettingsStatus } from "@bentley/product-settings-client";
-import { PropertyRecord } from "@bentley/ui-abstract";
+import * as React from "react";
 
+import { copyToClipboard } from "../api/WebUtilities";
+import { PropertyGridManager } from "../PropertyGridManager";
+import {
+  ContextMenuItemInfo,
+  OnSelectEventArgs,
+  PropertyGridWidgetBaseProps,
+  SHARED_NAME,
+  SHARED_NAMESPACE,
+} from "../types";
 import {
   FilteringPropertyGridWithUnifiedSelection,
   NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
-import { copyToClipboard } from "../api/WebUtilities";
-import {
-  ContextMenuItemInfo,
-  OnSelectEventArgs,
-  PropertyGridWidgetBaseProps,
-  SharedName,
-  SharedNamespace,
-} from "../types";
 
 export const FunctionalPropertyGridWidget = ({
   orientation,
@@ -200,8 +199,8 @@ export const FunctionalPropertyGridWidget = ({
         const requestContext = await AuthorizedFrontendRequestContext.create();
         const result = await IModelApp.settings.getSharedSetting(
           requestContext,
-          SharedNamespace,
-          SharedName,
+          SHARED_NAMESPACE,
+          SHARED_NAME,
           false,
           projectId,
           iModelId
@@ -312,8 +311,8 @@ export const FunctionalPropertyGridWidget = ({
       const result = await IModelApp.settings.saveSharedSetting(
         requestContext,
         sharedFavorites,
-        SharedNamespace,
-        SharedName,
+        SHARED_NAMESPACE,
+        SHARED_NAME,
         false,
         projectId,
         iModelId
@@ -325,8 +324,8 @@ export const FunctionalPropertyGridWidget = ({
       }
       const result2 = await IModelApp.settings.getSharedSetting(
         requestContext,
-        SharedNamespace,
-        SharedName,
+        SHARED_NAMESPACE,
+        SHARED_NAME,
         false,
         projectId,
         iModelId
@@ -355,8 +354,8 @@ export const FunctionalPropertyGridWidget = ({
       const result = await IModelApp.settings.saveSharedSetting(
         requestContext,
         sharedFavorites,
-        SharedNamespace,
-        SharedName,
+        SHARED_NAMESPACE,
+        SHARED_NAME,
         false,
         projectId,
         iModelId
@@ -513,6 +512,7 @@ export const FunctionalPropertyGridWidget = ({
       enableFavoriteProperties,
       enableCopyingPropertyText,
       enableNullValueToggle,
+      additionalContextMenuOptions,
       onAddFavorite,
       onRemoveFavorite,
       onShareFavorite,
@@ -523,10 +523,10 @@ export const FunctionalPropertyGridWidget = ({
   );
 
   const onPropertyContextMenu = React.useCallback(
-    (args: PropertyGridContextMenuArgs) => {
+    async (args: PropertyGridContextMenuArgs) => {
       args.event.persist();
       setContextMenu(args.propertyRecord.isMerged ? undefined : args);
-      buildContextMenu(args);
+      await buildContextMenu(args);
     },
     [buildContextMenu]
   );
@@ -638,12 +638,9 @@ export const FunctionalPropertyGridWidget = ({
   };
 
   return (
-    // <div className="property-grid-widget-container">
     <div className={rootClassName}>
       {renderHeader()}
-      {/* <div className="property-grid-container"> */}
       {renderPropertyGrid()}
-      {/* </div> */}
       {renderContextMenu()}
     </div>
   );

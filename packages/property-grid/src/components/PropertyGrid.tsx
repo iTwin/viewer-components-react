@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import "./PropertyGrid.scss";
 
 import * as React from "react";
@@ -46,8 +47,8 @@ import {
   ContextMenuItemInfo,
   OnSelectEventArgs,
   PropertyGridProps,
-  SharedName,
-  SharedNamespace,
+  SHARED_NAME,
+  SHARED_NAMESPACE,
 } from "../types";
 
 interface PropertyGridState {
@@ -138,8 +139,8 @@ export class PropertyGrid extends React.Component<
       const requestContext = await AuthorizedFrontendRequestContext.create();
       const result = await IModelApp.settings.getSharedSetting(
         requestContext,
-        SharedNamespace,
-        SharedName,
+        SHARED_NAMESPACE,
+        SHARED_NAME,
         false,
         this.props.projectId,
         this.props.iModelConnection.iModelId
@@ -238,14 +239,18 @@ export class PropertyGrid extends React.Component<
   }
 
   private _onAddFavorite = async (propertyField: Field) => {
-    // tslint:disable-next-line: no-floating-promises
-    Presentation.favoriteProperties.add(propertyField, this.props.projectId);
+    await Presentation.favoriteProperties.add(
+      propertyField,
+      this.props.projectId
+    );
     this.setState({ contextMenu: undefined });
   };
 
   private _onRemoveFavorite = async (propertyField: Field) => {
-    // tslint:disable-next-line: no-floating-promises
-    Presentation.favoriteProperties.remove(propertyField, this.props.projectId);
+    await Presentation.favoriteProperties.remove(
+      propertyField,
+      this.props.projectId
+    );
     this.setState({ contextMenu: undefined });
   };
 
@@ -260,8 +265,8 @@ export class PropertyGrid extends React.Component<
     const result = await IModelApp.settings.saveSharedSetting(
       requestContext,
       this.state.sharedFavorites,
-      SharedNamespace,
-      SharedName,
+      SHARED_NAMESPACE,
+      SHARED_NAME,
       false,
       this.props.projectId,
       this.props.iModelConnection.iModelId
@@ -273,8 +278,8 @@ export class PropertyGrid extends React.Component<
     }
     const result2 = await IModelApp.settings.getSharedSetting(
       requestContext,
-      SharedNamespace,
-      SharedName,
+      SHARED_NAMESPACE,
+      SHARED_NAME,
       false,
       this.props.projectId,
       this.props.iModelConnection.iModelId
@@ -300,8 +305,8 @@ export class PropertyGrid extends React.Component<
     const result = await IModelApp.settings.saveSharedSetting(
       requestContext,
       this.state.sharedFavorites,
-      SharedNamespace,
-      SharedName,
+      SHARED_NAMESPACE,
+      SHARED_NAME,
       false,
       this.props.projectId,
       this.props.iModelConnection.iModelId
@@ -350,13 +355,14 @@ export class PropertyGrid extends React.Component<
     this.setState({ contextMenu: undefined, showNullValues: true });
   };
 
-  private _onPropertyContextMenu = (args: PropertyGridContextMenuArgs) => {
+  private _onPropertyContextMenu = async (
+    args: PropertyGridContextMenuArgs
+  ) => {
     args.event.persist();
     this.setState({
       contextMenu: args.propertyRecord.isMerged ? undefined : args,
     });
-    // tslint:disable-next-line: no-floating-promises
-    this._buildContextMenu(args);
+    await this._buildContextMenu(args);
   };
   private _onContextMenuOutsideClick = () => {
     this.setState({ contextMenu: undefined });
@@ -394,7 +400,7 @@ export class PropertyGrid extends React.Component<
       ) {
         items.push({
           key: "share-favorite",
-          onSelect: () =>
+          onSelect: async () =>
             this._onShareFavorite(args.propertyRecord.property.name),
           title: PropertyGridManager.translate(
             "context-menu.share-favorite.description"
@@ -405,7 +411,7 @@ export class PropertyGrid extends React.Component<
         });
         items.push({
           key: "remove-favorite",
-          onSelect: () => this._onRemoveFavorite(field),
+          onSelect: async () => this._onRemoveFavorite(field),
           title: PropertyGridManager.translate(
             "context-menu.remove-favorite.description"
           ),
@@ -416,7 +422,7 @@ export class PropertyGrid extends React.Component<
       } else {
         items.push({
           key: "add-favorite",
-          onSelect: () => this._onAddFavorite(field),
+          onSelect: async () => this._onAddFavorite(field),
           title: PropertyGridManager.translate(
             "context-menu.add-favorite.description"
           ),

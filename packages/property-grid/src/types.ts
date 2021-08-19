@@ -13,8 +13,8 @@ import {
 import { PropertyGridContextMenuArgs } from "@bentley/ui-components";
 import { ContextMenuItemProps, Orientation } from "@bentley/ui-core";
 
-export const SharedNamespace = "favoriteProperties";
-export const SharedName = "sharedProps";
+export const SHARED_NAMESPACE = "favoriteProperties";
+export const SHARED_NAME = "sharedProps";
 export type ContextMenuItemInfo = ContextMenuItemProps &
   React.Attributes & { label: string };
 
