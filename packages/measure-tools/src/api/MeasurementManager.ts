@@ -404,7 +404,7 @@ export class MeasurementManager implements Decorator {
     this._dropCallback = IModelApp.viewManager.addDecorator(this);
 
     if (undefined === this._dropUnitCallback) {
-      this._dropUnitCallback = IModelApp.quantityFormatter.onActiveUnitSystemChanged.addListener(this.onActiveUnitSystemChanged.bind(this)); // eslint-disable-line deprecation/deprecation
+      this._dropUnitCallback = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener(this.onActiveUnitSystemChanged.bind(this));
     } else {
       this.onActiveUnitSystemChanged();
     }

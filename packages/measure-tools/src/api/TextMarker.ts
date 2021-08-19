@@ -525,7 +525,7 @@ export class TextMarker implements CanvasDecoration {
       this._onMouseEnterHandler(ev);
 
     if (this.transientHiliteId && ev.viewport) {
-      ev.viewport.setFlashed(this.transientHiliteId, .25); // eslint-disable-line deprecation/deprecation
+      ev.viewport.flashedId = this.transientHiliteId;
       this._flashViewports.add(ev.viewport);
     }
   }
@@ -534,7 +534,7 @@ export class TextMarker implements CanvasDecoration {
     if (this._onMouseLeaveHandler)
       this._onMouseLeaveHandler();
 
-    this._flashViewports.forEach((vp) => vp.setFlashed(undefined, 0.0)); // eslint-disable-line deprecation/deprecation
+    this._flashViewports.forEach((vp) => vp.flashedId = undefined);
     this._flashViewports.clear();
   }
 
