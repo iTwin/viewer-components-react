@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { BrowserAuthorizationClientConfiguration } from "@bentley/frontend-authorization-client";
@@ -18,19 +18,16 @@ const App: React.FC = () => {
       false
   );
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [buddiRegion, ] = useState(process.env.IMJS_BUDDI_REGION ? Number(process.env.IMJS_BUDDI_REGION) : 102);
-  const [contextId, setContextId] = useState(process.env.IMJS_CONTEXT_ID ?? "5e396acd-e9ae-4118-9c35-72eb26725446");
-  const [iModelId, setIModelId] = useState(process.env.IMJS_IMODEL_ID ?? "0000f4dc-de8d-438b-ae8a-40db2622ebfd");
-  const [changeSetId, setChangeSetId] = useState(process.env.IMJS_CHANGESET_ID)
+  const [buddiRegion] = useState(
+    process.env.IMJS_BUDDI_REGION ? Number(process.env.IMJS_BUDDI_REGION) : 102
+  );
+  const [contextId, setContextId] = useState(process.env.IMJS_CONTEXT_ID);
+  const [iModelId, setIModelId] = useState(process.env.IMJS_IMODEL_ID);
+  const [changeSetId, setChangeSetId] = useState(process.env.IMJS_CHANGESET_ID);
 
   if (!process.env.IMJS_AUTH_CLIENT_CLIENT_ID) {
     throw new Error(
       "Please add a valid OIDC client id to the .env file and restart the application. See the README for more information."
-    );
-  }
-  if (!process.env.IMJS_AUTH_CLIENT_SCOPES) {
-    throw new Error(
-      "Please add valid scopes for your OIDC client to the .env file and restart the application. See the README for more information."
     );
   }
   if (!process.env.IMJS_AUTH_CLIENT_REDIRECT_URI) {
@@ -43,7 +40,7 @@ const App: React.FC = () => {
     scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
     clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
     redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
-    authority: process.env.IMJS_AUTH_AUTHORITY ?? "https://qa-imsoidc.bentley.com", // if not defined will point to prod
+    authority: process.env.IMJS_AUTH_AUTHORITY,
     postSignoutRedirectUri: process.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
     responseType: "code",
   };
@@ -79,9 +76,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (isAuthorized && contextId && iModelId) {
-      const url = `?contextId=${contextId}&iModelId=${iModelId}`
+      const url = `?contextId=${contextId}&iModelId=${iModelId}`;
       if (changeSetId) {
-        url.concat(`&changeSetId=${changeSetId}`)
+        url.concat(`&changeSetId=${changeSetId}`);
       }
       history.push(url);
     }
@@ -140,7 +137,7 @@ const App: React.FC = () => {
               hideDefaultHorizontalItems: true,
             },
             hideTreeView: true,
-            hidePropertyGrid: true
+            hidePropertyGrid: true,
           }}
           onIModelAppInit={onIModelAppInit}
         />
