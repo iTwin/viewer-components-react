@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See COPYRIGHT.md in the repository root for full copyright notice.
+* See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { DrawingViewState, IModelApp, SheetViewState, SpatialViewState, Viewport, ViewState } from "@bentley/imodeljs-frontend";

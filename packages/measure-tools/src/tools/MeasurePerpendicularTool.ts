@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See COPYRIGHT.md in the repository root for full copyright notice.
+* See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { Plane3dByOriginAndUnitNormal, Point3d, Ray3d, Vector3d } from "@bentley/geometry-core";

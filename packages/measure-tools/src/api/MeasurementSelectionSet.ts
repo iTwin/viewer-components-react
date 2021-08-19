@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See COPYRIGHT.md in the repository root for full copyright notice.
+* See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { BeUiEvent, Id64, Id64Arg, Id64String } from "@bentley/bentleyjs-core";

@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See COPYRIGHT.md in the repository root for full copyright notice.
+* See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
 import { Arc3d, LineSegment3d, Path, Point3d, XYProps } from "@bentley/geometry-core";
