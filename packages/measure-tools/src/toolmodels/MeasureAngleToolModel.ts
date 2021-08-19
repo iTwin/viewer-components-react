@@ -14,9 +14,7 @@ enum State {
 }
 
 /** Tool model for measuring radius using 3-points */
-export class MeasureAngleToolModel extends MeasurementToolModel<
-  AngleMeasurement
-> {
+export class MeasureAngleToolModel extends MeasurementToolModel<AngleMeasurement> {
   public static State = State;
 
   private _currentMeasurement?: AngleMeasurement;

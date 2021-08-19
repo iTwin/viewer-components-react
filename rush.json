@@ -57,8 +57,7 @@
     {
       "packageName": "@bentley/measure-tools-react",
       "projectFolder": "packages/measure-tools",
-      "versionPolicyName": "measure-tools",
-      "shouldPublish": false
+      "versionPolicyName": "measure-tools"
     }
   ]
 }

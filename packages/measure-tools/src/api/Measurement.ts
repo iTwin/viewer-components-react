@@ -3,15 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { DecorateContext, IModelApp, HitDetail, BeButtonEvent, BeButton } from "@bentley/imodeljs-frontend";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
 import { Id64String } from "@bentley/bentleyjs-core";
-import { MeasurementViewTarget } from "./MeasurementViewTarget";
-import { MeasurementProps } from "./MeasurementProps";
-import { WellKnownMeasurementStyle, MeasurementButtonHandledEvent, WellKnownViewType } from "./MeasurementEnums";
-import { ShimFunctions } from "./ShimFunctions";
+import { GeometryStreamProps } from "@bentley/imodeljs-common";
+import { BeButton, BeButtonEvent, DecorateContext, HitDetail, IModelApp } from "@bentley/imodeljs-frontend";
 import { FormatterSpec } from "@bentley/imodeljs-quantity";
+import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementPreferences } from "./MeasurementPreferences";
+import { MeasurementProps } from "./MeasurementProps";
+import { MeasurementViewTarget } from "./MeasurementViewTarget";
+import { ShimFunctions } from "./ShimFunctions";
 
 /** A property value on a measurement that can be aggregated with other similarly-named properties from other measurements so aggregate totals can be displayed in the UI. */
 export interface AggregatableValue {
@@ -229,7 +229,7 @@ export interface MeasurementEqualityOptions {
 /** Handler function that modifies the data sent to the widget for display. */
 export type MeasurementDataWidgetHandlerFunction = (m: Measurement, currentData: MeasurementWidgetData) => Promise<void>;
 /** Handler for modifying the data sent to the widget for display. The highest priority will execute last. */
-export interface MeasurementDataWidgetHandler { priority: number; handlerFunction: MeasurementDataWidgetHandlerFunction; }
+export interface MeasurementDataWidgetHandler { priority: number, handlerFunction: MeasurementDataWidgetHandlerFunction }
 /**
  * Abstract class representing a Measurement. Measurements are semi-persistent annotation objects that can be drawn to a viewport. They are not stored
  * in the imodel database, but can be serialized to a JSON string for storage.
@@ -781,7 +781,7 @@ export abstract class Measurement {
    */
   public static registerSerializer(serializer: MeasurementSerializer): MeasurementSerializer | undefined {
     if (Measurement._serializers.has(serializer.measurementName))
-      throw new Error("Measurement serializer names MUST be unique. Duplicate: " + serializer.measurementName);
+      throw new Error(`Measurement serializer names MUST be unique. Duplicate: ${serializer.measurementName}`);
 
     this._serializers.set(serializer.measurementName, serializer);
     return serializer;

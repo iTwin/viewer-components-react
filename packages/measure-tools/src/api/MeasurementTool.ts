@@ -3,12 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Measurement } from "./Measurement";
-import { IModelApp, IModelConnection, PrimitiveTool, OutputMessagePriority, NotifyMessageDetails, OutputMessageType, OutputMessageAlert, DecorateContext, BeButtonEvent, EventHandled, HitDetail, ToolAssistance, ToolAssistanceInputMethod, ToolAssistanceInstruction } from "@bentley/imodeljs-frontend";
-import { Id64String, BeDuration, BeUiEvent } from "@bentley/bentleyjs-core";
-import { MeasurementToolModel } from "./MeasurementToolModel";
+import { BeDuration, BeUiEvent, Id64String } from "@bentley/bentleyjs-core";
 import { GeometryStreamProps } from "@bentley/imodeljs-common";
+import {
+  BeButtonEvent, DecorateContext, EventHandled, HitDetail, IModelApp, IModelConnection, NotifyMessageDetails, OutputMessageAlert,
+  OutputMessagePriority, OutputMessageType, PrimitiveTool, ToolAssistance, ToolAssistanceInputMethod, ToolAssistanceInstruction,
+} from "@bentley/imodeljs-frontend";
 import { Feature, FeatureTracking } from "./FeatureTracking";
+import { Measurement } from "./Measurement";
+import { MeasurementToolModel } from "./MeasurementToolModel";
 
 /** Interface for any interactive tool that creates measurements. */
 export interface MeasurementTool {

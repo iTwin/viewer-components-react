@@ -3,15 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeButtonEvent, EventHandled, IModelApp, SnapDetail, SnapMode, SnapStatus, LocateResponse, ToolAssistance, ToolAssistanceInstruction, ToolAssistanceImage, ToolAssistanceInputMethod, ToolAssistanceSection, OutputMessagePriority } from "@bentley/imodeljs-frontend";
 import { GeoServiceStatus } from "@bentley/bentleyjs-core";
-import { SnapRequestProps, IModelError } from "@bentley/imodeljs-common";
-import { MeasureLocationToolModel, AddLocationProps } from "../toolmodels/MeasureLocationToolModel";
-import { CurvePrimitive, IModelJson, GeometryQuery, Vector3d } from "@bentley/geometry-core";
+import { CurvePrimitive, GeometryQuery, IModelJson, Vector3d } from "@bentley/geometry-core";
+import { IModelError, SnapRequestProps } from "@bentley/imodeljs-common";
+import {
+  BeButtonEvent, EventHandled, IModelApp, LocateResponse, OutputMessagePriority, SnapDetail, SnapMode, SnapStatus, ToolAssistance,
+  ToolAssistanceImage, ToolAssistanceInputMethod, ToolAssistanceInstruction, ToolAssistanceSection,
+} from "@bentley/imodeljs-frontend";
+import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import { LocationMeasurement } from "../measurements/LocationMeasurement";
-import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
+import { AddLocationProps, MeasureLocationToolModel } from "../toolmodels/MeasureLocationToolModel";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<LocationMeasurement, MeasureLocationToolModel> {

@@ -3,12 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceInstruction, ToolAssistanceImage, ToolAssistanceSection, ToolAssistanceInputMethod, AccuDrawHintBuilder } from "@bentley/imodeljs-frontend";
-import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
+import {
+  AccuDrawHintBuilder, BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
+  ToolAssistanceInstruction, ToolAssistanceSection,
+} from "@bentley/imodeljs-frontend";
+import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
-import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
+import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 
 export class MeasureDistanceTool extends MeasurementToolBase<DistanceMeasurement, MeasureDistanceToolModel> {
 

@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { DrawingViewState, IModelApp, ScreenViewport, SheetViewState, SpatialViewState, Viewport, ViewState } from "@bentley/imodeljs-frontend";
+import { DrawingViewState, IModelApp, SheetViewState, SpatialViewState, Viewport, ViewState } from "@bentley/imodeljs-frontend";
 import { WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementViewTargetProps } from "./MeasurementProps";
 
@@ -19,7 +19,7 @@ export abstract class MeasurementViewTypeClassifier {
   public readonly isDrawing: boolean;
 
   /**
-   * Constructos a new MeasurementViewClassifier
+   * Constructs a new MeasurementViewClassifier
    * @param typeName Name of the view that is used to identify it.
    * @param isSpatial If the view type is within the AnySpatial hierarchy.
    * @param isDrawing If the view type is within the AnyDrawing hierarchy.
@@ -342,10 +342,10 @@ export class MeasurementViewTarget {
     }
 
     // Go through each viewport, check if it's compatible and if so invalidate
-    IModelApp.viewManager.forEachViewport((vp: ScreenViewport) => {
+    for (const vp of IModelApp.viewManager) {
       if (this.isViewportCompatible(vp))
         vp.invalidateDecorations();
-    });
+    }
   }
 
   /**
@@ -390,16 +390,15 @@ export class MeasurementViewTarget {
       return;
     }
 
-    IModelApp.viewManager.forEachViewport((vp: ScreenViewport) => {
+    for (const vp of IModelApp.viewManager) {
       if ((viewType === WellKnownViewType.AnySpatial && vp.view instanceof SpatialViewState) ||
         (viewType === WellKnownViewType.AnyDrawing && vp.view instanceof DrawingViewState)) {
         vp.invalidateDecorations();
-        return;
       }
 
       if (MeasurementViewTarget.classifyViewport(vp) === viewType)
         vp.invalidateDecorations();
-    });
+    }
   }
 
   /**
@@ -431,7 +430,7 @@ export class MeasurementViewTarget {
    */
   public static registerClassifier(classifier: MeasurementViewTypeClassifier) {
     if (classifier.typeName === WellKnownViewType.Any || classifier.typeName === WellKnownViewType.AnySpatial || classifier.typeName === WellKnownViewType.AnyDrawing)
-      throw new Error(classifier.typeName + " is a reserved view type.");
+      throw new Error(`${classifier.typeName} is a reserved view type.`);
 
     MeasurementViewTarget._classifiers.set(classifier.typeName, classifier);
   }

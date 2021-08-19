@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Toolbar, ToolbarProps } from "@bentley/ui-ninezone";
 import * as React from "react";
+import { Toolbar, ToolbarProps } from "@bentley/ui-ninezone";
 
 /** Popup toolbar properties. */
 export interface PopupToolbarProps extends ToolbarProps {
@@ -61,10 +61,8 @@ export class PopupToolbar extends React.PureComponent<PopupToolbarProps> {
   }
 
   public render() {
-    return (
-            <div ref={this.setWrapperRef}>
-                {this._toolbar.render()}
-            </div>
-    );
+    return (<div ref={this.setWrapperRef}>
+      {this._toolbar.render()}
+    </div>);
   }
 }
