@@ -98,7 +98,7 @@
     "source-map-loader": "^0.2.3",
     "typescript": "3.7.4",
     "url-loader": "2.1.0",
-    "webpack": "4.42.0",
+    "webpack": "4.44.2",
     "webpack-cli": "^3.3.8"
   },
   "dependencies": {
