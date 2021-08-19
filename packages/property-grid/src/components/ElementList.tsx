@@ -1,11 +1,12 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
+* See COPYRIGHT.md in the repository root for full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelConnection } from "@bentley/imodeljs-frontend";
-import { InstanceKey } from "@bentley/presentation-common";
-import { PresentationLabelsProvider } from "@bentley/presentation-components";
+import * as React from "react";
+import classnames from "classnames";
+import "./ElementList.scss";
+
 import {
   PropertyDescription,
   PropertyEditorInfo,
@@ -20,11 +21,12 @@ import {
   SimpleTableDataProvider,
   Table,
 } from "@bentley/ui-components";
-import { Icon } from "@bentley/ui-core";
-import classnames from "classnames";
-import * as React from "react";
+
 import { PropertyGridManager } from "../PropertyGridManager";
-import "./ElementList.scss";
+import { Icon } from "@bentley/ui-core";
+import { InstanceKey } from "@bentley/presentation-common";
+import { PresentationLabelsProvider } from "@bentley/presentation-components";
+import { IModelConnection } from "@bentley/imodeljs-frontend";
 
 export interface ElementListProps {
   iModelConnection: IModelConnection;
