@@ -67,7 +67,7 @@
       "summary": "Run copyright linter using lintstaged",
       "autoinstallerName": "rush-lintstaged",
       "shellCommand": "lint-staged --quiet --config common/scripts/.lintstagedrc.json",
-      "safeForSimultaneousRushProcesses": false
+      "safeForSimultaneousRushProcesses": true
     }
   ]
 }
