@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@bentley/imodel-content-tree-react",
-      "comment": "add rebuild script",
+      "comment": "",
       "type": "none"
     }
   ],
