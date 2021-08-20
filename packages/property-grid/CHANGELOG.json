@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "2.1.0",
+      "tag": "@bentley/property-grid-react_v2.1.0",
+      "date": "Fri, 20 Aug 2021 18:32:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Changes the PropertyGrid UiProvider to use a new PropertyGrid functional component"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.0",
       "tag": "@bentley/property-grid-react_v2.0.0",
       "date": "Thu, 08 Jul 2021 20:22:14 GMT",
