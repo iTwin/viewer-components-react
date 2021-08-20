@@ -1,3 +1,5 @@
 {
-  "*.{js,jsx,ts,tsx,scss,css}": ["node ./common/scripts/copyright-linter.js --"]
+  "!(install-run*).{js,ts,tsx,scss,css}": [
+    "node ./common/scripts/copyright-linter.js --"
+  ]
 }

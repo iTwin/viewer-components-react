@@ -3,20 +3,20 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { ActionButtonItemDef, ItemProps, ActionItemButton, CursorPopupManager, CursorInformation } from "@bentley/ui-framework";
-import { IModelApp } from "@bentley/imodeljs-frontend";
-import { RelativePosition } from "@bentley/ui-abstract";
-import { Direction } from "@bentley/ui-ninezone";
 import * as React from "react";
 import { Point2d, XAndY } from "@bentley/geometry-core";
+import { IModelApp } from "@bentley/imodeljs-frontend";
+import { RelativePosition } from "@bentley/ui-abstract";
+import { ActionButtonItemDef, ActionItemButton, CursorInformation, CursorPopupManager, ItemProps } from "@bentley/ui-framework";
+import { Direction } from "@bentley/ui-ninezone";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { Measurement, MeasurementPickContext } from "../api/Measurement";
 import { MeasurementManager } from "../api/MeasurementManager";
-import { PopupToolbar } from "./PopupToolbar";
-import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
-import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
-import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
+import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { ShimFunctions } from "../api/ShimFunctions";
+import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
+import { PopupToolbar } from "./PopupToolbar";
 
 /** Props for MeasurementActionItemDef, when the toolbar button is clicked, it passes the measurement that your execute function will handle. */
 export interface MeasurementActionItemProps extends ItemProps {
@@ -133,6 +133,46 @@ export class MeasurementActionDefinitions {
 
         MeasurementUIEvents.notifyMeasurementsChanged(); // By default locking influences visibility of the UI buttons
         FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.MeasurementActions_Lock, true);
+      },
+    });
+  }
+
+  public static get hideMeasurements() {
+    return new MeasurementActionItemDef({
+      id: "hide-measurements",
+      iconSpec: "icon-visibility-hide",
+      label: () => IModelApp.i18n.translate("MeasureTools:Generic.hideMeasurements"),
+      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.hideMeaurements"),
+      execute: (args: Measurement[]) => {
+
+        args.forEach((m) => {
+          if (m.isVisible) {
+            m.isVisible = false;
+            m.viewTarget.invalidateViewportDecorations();
+          }
+        });
+
+        FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.MeasurementActions_ToggleDisplayMeasurements, false);
+      },
+    });
+  }
+
+  public static get displayMeasurements() {
+    return new MeasurementActionItemDef({
+      id: "display-measurements",
+      iconSpec: "icon-visibility",
+      label: () => IModelApp.i18n.translate("MeasureTools:Generic.displayMeasurements"),
+      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.displayMeasurements"),
+      execute: (args: Measurement[]) => {
+
+        args.forEach((m) => {
+          if (!m.isVisible) {
+            m.isVisible = true;
+            m.viewTarget.invalidateViewportDecorations();
+          }
+        });
+
+        FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.MeasurementActions_ToggleDisplayMeasurements, true);
       },
     });
   }
@@ -287,7 +327,7 @@ export class MeasurementActionToolbar {
       return false;
 
     // Build toolbar ID, making it unique so we can fade out a previous toolbar and not have that interfere with a new toolbar
-    this._lastPopupId = "measurement-action-toolbar-" + this._counter.toString();
+    this._lastPopupId = `measurement-action-toolbar-${this._counter.toString()}`;
     this._counter++;
 
     // Show toolbar

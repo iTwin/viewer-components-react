@@ -4,8 +4,8 @@ Copyright © Bentley Systems, Incorporated. All rights reserved.
 
 The measure-tools-react package provides measurement tools and React components to access within an iTwin Viewer.
 
-Every iTwin.js application has initialization code where they must call `IModelApp.startup()`. This library has a similar initialization entrypoint that must be called to configure localization and register tools.
-Call the `MeasureTools.startup() ` **AFTER** the IModelApp one.
+Every iTwin.js application has initialization code where they must call `IModelApp.startup()`. This library has a similar initialization entry-point that must be called to configure localization and register tools.
+Call the `MeasureTools.startup()` **AFTER** the IModelApp one.
 
 ```typescript
 await IModelApp.startup(opts);
@@ -36,13 +36,13 @@ With a few short lines, you can add the measurement tools and widgets to your ap
   );
 ```
 
-# Advanced Topics
+## Advanced Topics
 
-## Action Toolbar
+### Action Toolbar
 
 Measurements support a right click context menu called the "Action Toolbar". By default it is not enabled, however it is completely customizable by the application. Similar to how tools are constructed by creating item definitions,
 the action toolbar constructs a list of "action items" that can be applied to a selected measurement. Applications can register action providers to add to or modify the list of actions. The application can also set a filter to the toolbar
-to control what measuremnts the toolbar is shown for.
+to control what measurements the toolbar is shown for.
 
 If multiple measurements are selected, the actions apply to all the measurements.
 
@@ -96,7 +96,7 @@ MeasurementActionToolbar.addActionProvider(
 
 ![Measurement Action Toolbar](https://github.com/imodeljs/viewer-components-react/blob/master/packages/measure-tools/docs/images/MTDocs-ActionToolbar_CustomAction.gif?raw=true)
 
-## Measurement UI Events
+### Measurement UI Events
 
 There are a number of global UI events that are triggered when measurements are modified (e.g. added or removed). Some applications can create contextual UI buttons that will be turn visible or invisible based on these state changes.
 

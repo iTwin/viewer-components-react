@@ -2,6 +2,26 @@
   "name": "@bentley/measure-tools-react",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@bentley/measure-tools-react_v0.4.0",
+      "date": "Thu, 19 Aug 2021 20:11:48 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an isVisible property to the measurement base class"
+          },
+          {
+            "comment": "Update iTwin.js minimum dependencies to ^2.19.0"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Do not activate Accudraw by default in the measure tools, but setup the hints so if it is activated or get activated it will be setup correctly"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@bentley/measure-tools-react_v0.3.0",
       "date": "Tue, 13 Jul 2021 17:43:28 GMT",

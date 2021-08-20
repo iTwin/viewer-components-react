@@ -3,22 +3,23 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { ConfigurableCreateInfo, WidgetControl, WidgetState } from "@bentley/ui-framework";
-import { PropertyRecord, PropertyValueFormat, PropertyDescription, PropertyValue } from "@bentley/ui-abstract";
-import { PropertyGrid, SimplePropertyDataProvider } from "@bentley/ui-components";
-import { IModelConnection, IModelApp } from "@bentley/imodeljs-frontend";
-import { Id64String } from "@bentley/bentleyjs-core";
-import { Orientation } from "@bentley/ui-core";
 import * as React from "react";
+import "./MeasurementWidget.scss";
+
+import { Id64String } from "@bentley/bentleyjs-core";
+import { IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
+import { PropertyDescription, PropertyRecord, PropertyValue, PropertyValueFormat, WidgetState } from "@bentley/ui-abstract";
+import { PropertyGrid, SimplePropertyDataProvider } from "@bentley/ui-components";
+import { Orientation } from "@bentley/ui-core";
+import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
+import { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
-import { MeasurementWidgetData, AggregatableValue, WidgetValue } from "../api/Measurement";
-import "./MeasurementWidget.scss";
 
 export interface MeasurementWidgetOptions {
   iModelConnection?: IModelConnection;
 
-  /** If a measurement has an "aggretable" property, it will show in a total's group at the top, if there are more than one type of property or more than one instance of a single type. */
+  /** If a measurement has an "aggregatable" property, it will show in a total's group at the top, if there are more than one type of property or more than one instance of a single type. */
   showPropertyAggregates?: boolean;
 }
 
@@ -39,8 +40,8 @@ export class MeasurementWidget extends WidgetControl {
     if (options.iModelConnection) {
       MeasurementSelectionSet.global.onChanged.addListener(this._onSelectionChanged);
       MeasurementUIEvents.onMeasurementPropertiesChanged.addListener(this._onSelectionChanged);
-      this.reactNode = <PropertyGrid dataProvider={this._dataProvider} orientation={Orientation.Vertical} className={"measurement-widget"} />;
-      this._getData(this._lastSelectedCount >= 2).catch();
+      this.reactNode = <PropertyGrid dataProvider={this._dataProvider} orientation={Orientation.Vertical} className={"measurement-widget"} />; // eslint-disable-line react/react-in-jsx-scope
+      this._getData(this._lastSelectedCount >= 2).catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
 
     if (options.showPropertyAggregates)
@@ -94,7 +95,7 @@ export class MeasurementWidget extends WidgetControl {
     if (!this._showPropertyAggregates)
       return false;
 
-    const orderedAggrPropEntries = new Array<{label: string, prop: AggregatableValue}>();
+    const orderedAggrPropEntries = new Array<{ label: string, prop: AggregatableValue }>();
     const aggregateIndices = new Map<string, number>();
     let hasAtLeastTwoInstances = false;
 
@@ -107,7 +108,7 @@ export class MeasurementWidget extends WidgetControl {
         const aggrIndex = aggregateIndices.get(prop.name);
         if (aggrIndex === undefined) {
           aggregateIndices.set(prop.name, orderedAggrPropEntries.length);
-          orderedAggrPropEntries.push({label: prop.label, prop: {...prop.aggregatableValue}});
+          orderedAggrPropEntries.push({ label: prop.label, prop: { ...prop.aggregatableValue } });
         } else {
           const aggrProp = orderedAggrPropEntries[aggrIndex];
           if (aggrProp.prop.formatSpec === prop.aggregatableValue.formatSpec) {
@@ -120,7 +121,7 @@ export class MeasurementWidget extends WidgetControl {
 
     // Want to show if either: two types or one type with at least two instances
     if (data.length > 1 && (orderedAggrPropEntries.length >= 2 || (orderedAggrPropEntries.length === 1 && hasAtLeastTwoInstances))) {
-      const catIndex = this._dataProvider.addCategory({ expand: true, label: IModelApp.i18n.translate("MeasureTools:Generic.cumulativeTotals"), name: "cumulativeTotals"});
+      const catIndex = this._dataProvider.addCategory({ expand: true, label: IModelApp.i18n.translate("MeasureTools:Generic.cumulativeTotals"), name: "cumulativeTotals" });
       for (const entry of orderedAggrPropEntries) {
         const label = entry.label;
         const aggrProp = entry.prop;

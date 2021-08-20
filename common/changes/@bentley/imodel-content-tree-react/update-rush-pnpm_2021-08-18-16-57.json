@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-content-tree-react",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@bentley/imodel-content-tree-react"
+}

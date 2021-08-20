@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Point3d } from "@bentley/geometry-core";
-import { RadiusMeasurement } from "../measurements/RadiusMeasurement";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
+import { RadiusMeasurement } from "../measurements/RadiusMeasurement";
 
 enum State {
   SetMeasurementViewport,
@@ -14,9 +14,7 @@ enum State {
 }
 
 /** Tool model for measuring radius using 3-points */
-export class MeasureRadiusToolModel extends MeasurementToolModel<
-  RadiusMeasurement
-> {
+export class MeasureRadiusToolModel extends MeasurementToolModel<RadiusMeasurement> {
   public static State = State;
 
   private _currentMeasurement?: RadiusMeasurement;

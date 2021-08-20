@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.4.2",
+      "tag": "@bentley/tree-widget-react_v1.4.2",
+      "date": "Mon, 09 Aug 2021 20:24:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated tree widget barrel file to include UiProvider"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.1",
       "tag": "@bentley/tree-widget-react_v1.4.1",
       "date": "Mon, 19 Jul 2021 18:07:24 GMT",

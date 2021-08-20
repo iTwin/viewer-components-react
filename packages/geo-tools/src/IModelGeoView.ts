@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { Range2d, Range3d } from "@bentley/geometry-core";
 import { CartographicRange } from "@bentley/imodeljs-common";
 import { IModelApp, ViewGlobeLocationTool } from "@bentley/imodeljs-frontend";

@@ -11,6 +11,7 @@ export enum MeasureToolsLoggerCategory {
   Root = "Measure-Tools",
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace MeasureToolsLoggerCategory {
   /** Gets all the categories used in the packages as an array. */
   export function getCategories(): string[] { return [MeasureToolsLoggerCategory.Root]; }

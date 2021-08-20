@@ -3,15 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { DecorateContext, IModelApp, HitDetail, BeButtonEvent, BeButton } from "@bentley/imodeljs-frontend";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
 import { Id64String } from "@bentley/bentleyjs-core";
-import { MeasurementViewTarget } from "./MeasurementViewTarget";
-import { MeasurementProps } from "./MeasurementProps";
-import { WellKnownMeasurementStyle, MeasurementButtonHandledEvent, WellKnownViewType } from "./MeasurementEnums";
-import { ShimFunctions } from "./ShimFunctions";
+import { GeometryStreamProps } from "@bentley/imodeljs-common";
+import { BeButton, BeButtonEvent, DecorateContext, HitDetail, IModelApp } from "@bentley/imodeljs-frontend";
 import { FormatterSpec } from "@bentley/imodeljs-quantity";
+import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementPreferences } from "./MeasurementPreferences";
+import { MeasurementProps } from "./MeasurementProps";
+import { MeasurementViewTarget } from "./MeasurementViewTarget";
+import { ShimFunctions } from "./ShimFunctions";
 
 /** A property value on a measurement that can be aggregated with other similarly-named properties from other measurements so aggregate totals can be displayed in the UI. */
 export interface AggregatableValue {
@@ -229,7 +229,7 @@ export interface MeasurementEqualityOptions {
 /** Handler function that modifies the data sent to the widget for display. */
 export type MeasurementDataWidgetHandlerFunction = (m: Measurement, currentData: MeasurementWidgetData) => Promise<void>;
 /** Handler for modifying the data sent to the widget for display. The highest priority will execute last. */
-export interface MeasurementDataWidgetHandler { priority: number; handlerFunction: MeasurementDataWidgetHandlerFunction; }
+export interface MeasurementDataWidgetHandler { priority: number, handlerFunction: MeasurementDataWidgetHandlerFunction }
 /**
  * Abstract class representing a Measurement. Measurements are semi-persistent annotation objects that can be drawn to a viewport. They are not stored
  * in the imodel database, but can be serialized to a JSON string for storage.
@@ -248,6 +248,7 @@ export abstract class Measurement {
   private _viewTarget: MeasurementViewTarget;
   private _displayLabels: boolean;
   private _transientId?: Id64String; // Not serialized
+  private _isVisible: boolean; // Not serialized
 
   /** Default drawing style name. */
   public static readonly defaultStyle: string = WellKnownMeasurementStyle.Default;
@@ -275,6 +276,15 @@ export abstract class Measurement {
     const prevId = this._transientId;
     this._transientId = newId;
     this.onTransientIdChanged(prevId);
+  }
+
+  /** Gets or sets if the measurement should be drawn. */
+  public get isVisible(): boolean {
+    return this._isVisible;
+  }
+
+  public set isVisible(v: boolean) {
+    this._isVisible = v;
   }
 
   /** Gets or sets if the measurement is locked. Locked measurements have a different styling, cannot be edited, and cannot be cleared by the clear measurement tool. */
@@ -374,6 +384,7 @@ export abstract class Measurement {
   /** Protected constructor */
   protected constructor() {
     this._isLocked = false;
+    this._isVisible = true;
     this._displayLabels = MeasurementPreferences.current.displayMeasurementLabels;
     this._viewTarget = new MeasurementViewTarget();
   }
@@ -392,7 +403,7 @@ export abstract class Measurement {
    * @returns prop object containing the values of the measurement.
    */
   public toJSON<T extends MeasurementProps>(): T {
-    const json: MeasurementProps = { };
+    const json: MeasurementProps = {};
     this.writeToJSON(json);
 
     return json as T;
@@ -457,8 +468,7 @@ export abstract class Measurement {
   /** Draw the measurement.
    * @param context Decorate context for drawing to a viewport.
    */
-  public decorate(_context: DecorateContext): void {
-  }
+  public decorate(_context: DecorateContext): void { }
 
   /** Test if the measurement was picked.
    * @param _pickContext Picking context to test against.
@@ -485,7 +495,7 @@ export abstract class Measurement {
    */
   public static registerDataForMeasurementWidgetHandler(handler: MeasurementDataWidgetHandlerFunction, priority = 0) {
     if (undefined === Measurement._dataForMeasurementWidgetHandlers.find((value) => value.handlerFunction === handler)) {
-      Measurement._dataForMeasurementWidgetHandlers.push({ priority,  handlerFunction : handler});
+      Measurement._dataForMeasurementWidgetHandlers.push({ priority, handlerFunction: handler });
       return true;
     } else
       throw new Error("This MeasurementDataWidgetHandlerFunction is already registered.");
@@ -771,7 +781,7 @@ export abstract class Measurement {
    */
   public static registerSerializer(serializer: MeasurementSerializer): MeasurementSerializer | undefined {
     if (Measurement._serializers.has(serializer.measurementName))
-      throw new Error("Measurement serializer names MUST be unique. Duplicate: " + serializer.measurementName);
+      throw new Error(`Measurement serializer names MUST be unique. Duplicate: ${serializer.measurementName}`);
 
     this._serializers.set(serializer.measurementName, serializer);
     return serializer;
