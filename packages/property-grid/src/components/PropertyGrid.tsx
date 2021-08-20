@@ -10,13 +10,9 @@ import * as React from "react";
 import {
   AuthorizedFrontendRequestContext,
   IModelApp,
-  IModelConnection,
 } from "@bentley/imodeljs-frontend";
 import { Field } from "@bentley/presentation-common";
-import {
-  IPresentationPropertyDataProvider,
-  PresentationPropertyDataProvider,
-} from "@bentley/presentation-components";
+import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
 import { Presentation } from "@bentley/presentation-frontend";
 import { SettingsStatus } from "@bentley/product-settings-client";
 import { PropertyRecord } from "@bentley/ui-abstract";
@@ -31,7 +27,6 @@ import {
 } from "@bentley/ui-components";
 import {
   ContextMenuItem,
-  ContextMenuItemProps,
   GlobalContextMenu,
   Icon,
   Orientation,
@@ -47,39 +42,13 @@ import {
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 
-const sharedNamespace = "favoriteProperties";
-const sharedName = "sharedProps";
-type ContextMenuItemInfo = ContextMenuItemProps &
-  React.Attributes & { label: string };
-
-export interface PropertyGridFeatureTracking {
-  trackCopyPropertyText: () => void;
-}
-
-export interface OnSelectEventArgs {
-  dataProvider: IPresentationPropertyDataProvider;
-  field?: Field;
-  contextMenuArgs: PropertyGridContextMenuArgs;
-}
-
-export interface PropertyGridProps {
-  iModelConnection: IModelConnection;
-  projectId: string;
-  orientation?: Orientation;
-  isOrientationFixed?: boolean;
-  enableFavoriteProperties?: boolean;
-  enableCopyingPropertyText?: boolean;
-  enableNullValueToggle?: boolean;
-  additionalContextMenuOptions?: ContextMenuItemInfo[];
-  debugLog?: (message: string) => void;
-  featureTracking?: PropertyGridFeatureTracking;
-  rulesetId?: string;
-  rootClassName?: string;
-  dataProvider?: PresentationPropertyDataProvider;
-  onInfoButton?: () => void;
-  onBackButton?: () => void;
-  disableUnifiedSelection?: boolean;
-}
+import {
+  ContextMenuItemInfo,
+  OnSelectEventArgs,
+  PropertyGridProps,
+  SHARED_NAME,
+  SHARED_NAMESPACE,
+} from "../types";
 
 interface PropertyGridState {
   title?: PropertyRecord;
@@ -94,7 +63,6 @@ export class PropertyGrid extends React.Component<
   PropertyGridProps,
   PropertyGridState
 > {
-
   private _dataProvider: PresentationPropertyDataProvider;
   private _filterer: PropertyDataFiltererBase;
   private _dataChangedHandler: () => void;
@@ -108,7 +76,7 @@ export class PropertyGrid extends React.Component<
       this._dataProvider = new PropertyDataProvider(
         props.iModelConnection,
         props.rulesetId,
-        props.enableFavoriteProperties,
+        props.enableFavoriteProperties
       );
       if (PropertyGridManager.flags.enablePropertyGroupNesting) {
         this._dataProvider.isNestedPropertyCategoryGroupingEnabled = true;
@@ -146,15 +114,17 @@ export class PropertyGrid extends React.Component<
   public componentWillReceiveProps(nextProps: PropertyGridProps) {
     if (this.props.iModelConnection) {
       // Remove old listener, create a new data provider, and re-add the listener
-      if (nextProps.iModelConnection &&
-        nextProps.iModelConnection !== this.props.iModelConnection) {
+      if (
+        nextProps.iModelConnection &&
+        nextProps.iModelConnection !== this.props.iModelConnection
+      ) {
         this._dataProvider.onDataChanged.removeListener(
-          this._dataChangedHandler,
+          this._dataChangedHandler
         );
         this._dataProvider = new PropertyDataProvider(
           this.props.iModelConnection!,
           nextProps.rulesetId,
-          nextProps.enableFavoriteProperties,
+          nextProps.enableFavoriteProperties
         );
         this._dataProvider.onDataChanged.addListener(this._dataChangedHandler);
       }
@@ -168,11 +138,11 @@ export class PropertyGrid extends React.Component<
       const requestContext = await AuthorizedFrontendRequestContext.create();
       const result = await IModelApp.settings.getSharedSetting(
         requestContext,
-        sharedNamespace,
-        sharedName,
+        SHARED_NAMESPACE,
+        SHARED_NAME,
         false,
         this.props.projectId,
-        this.props.iModelConnection.iModelId,
+        this.props.iModelConnection.iModelId
       );
       if (result.setting?.slice) {
         newSharedFavs = (result.setting as string[]).slice();
@@ -188,7 +158,7 @@ export class PropertyGrid extends React.Component<
       propertyData.records.Favorite = [];
     }
     const favoritesCategoryName = await this.getFavoritesCategoryName(
-      propertyData.records,
+      propertyData.records
     );
     const dataFavs = propertyData.records[favoritesCategoryName];
 
@@ -199,23 +169,22 @@ export class PropertyGrid extends React.Component<
           const shared =
             newSharedFavs &&
             newSharedFavs?.findIndex(
-              (fav: string) => rec.property.name === fav,
+              (fav: string) => rec.property.name === fav
             ) >= 0;
           if (
             shared &&
             !dataFavs.find(
-              (favRec: PropertyRecord) => favRec.property.name === propName,
+              (favRec: PropertyRecord) => favRec.property.name === propName
             )
           ) {
             // if shared & not already in favorites
             dataFavs.push(rec);
-            const propertyField = await this._dataProvider?.getFieldByPropertyRecord(
-              rec,
-            );
+            const propertyField =
+              await this._dataProvider?.getFieldByPropertyRecord(rec);
             if (propertyField) {
               await Presentation.favoriteProperties.add(
                 propertyField,
-                this.props.projectId,
+                this.props.projectId
               );
             }
           }
@@ -244,7 +213,7 @@ export class PropertyGrid extends React.Component<
           Presentation.favoriteProperties.has(
             field,
             this.props.projectId,
-            this.props.iModelConnection.iModelId,
+            this.props.iModelConnection.iModelId
           )
         ) {
           return key;
@@ -269,16 +238,20 @@ export class PropertyGrid extends React.Component<
   }
 
   private _onAddFavorite = async (propertyField: Field) => {
-    // tslint:disable-next-line: no-floating-promises
-    Presentation.favoriteProperties.add(propertyField, this.props.projectId);
+    await Presentation.favoriteProperties.add(
+      propertyField,
+      this.props.projectId
+    );
     this.setState({ contextMenu: undefined });
-  }
+  };
 
   private _onRemoveFavorite = async (propertyField: Field) => {
-    // tslint:disable-next-line: no-floating-promises
-    Presentation.favoriteProperties.remove(propertyField, this.props.projectId);
+    await Presentation.favoriteProperties.remove(
+      propertyField,
+      this.props.projectId
+    );
     this.setState({ contextMenu: undefined });
-  }
+  };
 
   private _onShareFavorite = async (propName: string) => {
     if (!this.props.projectId || !this.state.sharedFavorites) {
@@ -291,32 +264,32 @@ export class PropertyGrid extends React.Component<
     const result = await IModelApp.settings.saveSharedSetting(
       requestContext,
       this.state.sharedFavorites,
-      sharedNamespace,
-      sharedName,
+      SHARED_NAMESPACE,
+      SHARED_NAME,
       false,
       this.props.projectId,
-      this.props.iModelConnection.iModelId,
+      this.props.iModelConnection.iModelId
     );
     if (result.status !== SettingsStatus.Success) {
       throw new Error(
-        "Could not share favoriteProperties: " + result.errorMessage,
+        "Could not share favoriteProperties: " + result.errorMessage
       );
     }
     const result2 = await IModelApp.settings.getSharedSetting(
       requestContext,
-      sharedNamespace,
-      sharedName,
+      SHARED_NAMESPACE,
+      SHARED_NAME,
       false,
       this.props.projectId,
-      this.props.iModelConnection.iModelId,
+      this.props.iModelConnection.iModelId
     );
     if (result2.status !== SettingsStatus.Success) {
       throw new Error(
-        "Could not share favoriteProperties: " + result2.errorMessage,
+        "Could not share favoriteProperties: " + result2.errorMessage
       );
     }
     this.setState({ contextMenu: undefined });
-  }
+  };
 
   private _onUnshareFavorite = async (propName: string) => {
     if (!this.props.projectId || !this.state.sharedFavorites) {
@@ -331,84 +304,82 @@ export class PropertyGrid extends React.Component<
     const result = await IModelApp.settings.saveSharedSetting(
       requestContext,
       this.state.sharedFavorites,
-      sharedNamespace,
-      sharedName,
+      SHARED_NAMESPACE,
+      SHARED_NAME,
       false,
       this.props.projectId,
-      this.props.iModelConnection.iModelId,
+      this.props.iModelConnection.iModelId
     );
     if (result.status !== SettingsStatus.Success) {
       throw new Error(
-        "Could not unshare favoriteProperties: " + result.errorMessage,
+        "Could not unshare favoriteProperties: " + result.errorMessage
       );
     }
     this.setState({ contextMenu: undefined });
-  }
+  };
 
   private _shareActionButtonRenderer: ActionButtonRenderer = (
-    props: ActionButtonRendererProps,
+    props: ActionButtonRendererProps
   ) => {
     const shared =
       this.state.sharedFavorites !== undefined &&
       this.state.sharedFavorites?.findIndex(
-        (fav: string) => props.property.property.name === fav,
+        (fav: string) => props.property.property.name === fav
       ) >= 0;
     return (
       <div>
         {shared && (
-          <span
-            className="icon icon-share"
-            style={{ paddingRight: "5px" }}
-          ></span>
+          <span className="icon icon-share" style={{ paddingRight: "5px" }} />
         )}
       </div>
     );
-  }
+  };
 
   private _onCopyText = async (property: PropertyRecord) => {
     if (property.description) copyToClipboard(property.description);
     else if (this.props.debugLog)
       this.props.debugLog(
-        "PROPERTIES COPY TEXT FAILED TO RUN DUE TO UNDEFINED PROPERTY RECORD DESCRIPTION",
+        "PROPERTIES COPY TEXT FAILED TO RUN DUE TO UNDEFINED PROPERTY RECORD DESCRIPTION"
       );
     this.setState({ contextMenu: undefined });
-  }
+  };
 
   private _onHideNull = () => {
     this._filterer = new NonEmptyValuesPropertyDataFilterer();
     this.setState({ contextMenu: undefined, showNullValues: false });
-  }
+  };
 
   private _onShowNull = () => {
     this._filterer = new PlaceholderPropertyDataFilterer();
     this.setState({ contextMenu: undefined, showNullValues: true });
-  }
+  };
 
-  private _onPropertyContextMenu = (args: PropertyGridContextMenuArgs) => {
+  private _onPropertyContextMenu = async (
+    args: PropertyGridContextMenuArgs
+  ) => {
     args.event.persist();
     this.setState({
       contextMenu: args.propertyRecord.isMerged ? undefined : args,
     });
-    // tslint:disable-next-line: no-floating-promises
-    this._buildContextMenu(args);
-  }
+    await this._buildContextMenu(args);
+  };
   private _onContextMenuOutsideClick = () => {
     this.setState({ contextMenu: undefined });
-  }
+  };
   private _onContextMenuEsc = () => {
     this.setState({ contextMenu: undefined });
-  }
+  };
 
   private async _buildContextMenu(args: PropertyGridContextMenuArgs) {
     const field = await this._dataProvider.getFieldByPropertyRecord(
-      args.propertyRecord,
+      args.propertyRecord
     );
     const items: ContextMenuItemInfo[] = [];
     if (field !== undefined && this.props.enableFavoriteProperties) {
       if (
         this.state.sharedFavorites &&
         this.state.sharedFavorites?.findIndex(
-          (fav: string) => args.propertyRecord.property.name === fav,
+          (fav: string) => args.propertyRecord.property.name === fav
         ) >= 0
       ) {
         // i.e. if shared
@@ -417,10 +388,10 @@ export class PropertyGrid extends React.Component<
           onSelect: () =>
             this._onUnshareFavorite(args.propertyRecord.property.name),
           title: PropertyGridManager.translate(
-            "context-menu.unshare-favorite.description",
+            "context-menu.unshare-favorite.description"
           ),
           label: PropertyGridManager.translate(
-            "context-menu.unshare-favorite.label",
+            "context-menu.unshare-favorite.label"
           ),
         });
       } else if (
@@ -428,34 +399,34 @@ export class PropertyGrid extends React.Component<
       ) {
         items.push({
           key: "share-favorite",
-          onSelect: () =>
+          onSelect: async () =>
             this._onShareFavorite(args.propertyRecord.property.name),
           title: PropertyGridManager.translate(
-            "context-menu.share-favorite.description",
+            "context-menu.share-favorite.description"
           ),
           label: PropertyGridManager.translate(
-            "context-menu.share-favorite.label",
+            "context-menu.share-favorite.label"
           ),
         });
         items.push({
           key: "remove-favorite",
-          onSelect: () => this._onRemoveFavorite(field),
+          onSelect: async () => this._onRemoveFavorite(field),
           title: PropertyGridManager.translate(
-            "context-menu.remove-favorite.description",
+            "context-menu.remove-favorite.description"
           ),
           label: PropertyGridManager.translate(
-            "context-menu.remove-favorite.label",
+            "context-menu.remove-favorite.label"
           ),
         });
       } else {
         items.push({
           key: "add-favorite",
-          onSelect: () => this._onAddFavorite(field),
+          onSelect: async () => this._onAddFavorite(field),
           title: PropertyGridManager.translate(
-            "context-menu.add-favorite.description",
+            "context-menu.add-favorite.description"
           ),
           label: PropertyGridManager.translate(
-            "context-menu.add-favorite.label",
+            "context-menu.add-favorite.label"
           ),
         });
       }
@@ -470,7 +441,7 @@ export class PropertyGrid extends React.Component<
           await this._onCopyText(args.propertyRecord);
         },
         title: PropertyGridManager.translate(
-          "context-menu.copy-text.description",
+          "context-menu.copy-text.description"
         ),
         label: PropertyGridManager.translate("context-menu.copy-text.label"),
       });
@@ -484,11 +455,9 @@ export class PropertyGrid extends React.Component<
             this._onHideNull();
           },
           title: PropertyGridManager.translate(
-            "context-menu.hide-null.description",
+            "context-menu.hide-null.description"
           ),
-          label: PropertyGridManager.translate(
-            "context-menu.hide-null.label",
-          ),
+          label: PropertyGridManager.translate("context-menu.hide-null.label"),
         });
       } else {
         items.push({
@@ -497,11 +466,9 @@ export class PropertyGrid extends React.Component<
             this._onShowNull();
           },
           title: PropertyGridManager.translate(
-            "context-menu.show-null.description",
+            "context-menu.show-null.description"
           ),
-          label: PropertyGridManager.translate(
-            "context-menu.show-null.label",
-          ),
+          label: PropertyGridManager.translate("context-menu.show-null.label"),
         });
       }
     }
@@ -546,8 +513,8 @@ export class PropertyGrid extends React.Component<
           title={info.title}
         >
           {info.label}
-        </ContextMenuItem>,
-      ),
+        </ContextMenuItem>
+      )
     );
 
     return (
@@ -582,7 +549,7 @@ export class PropertyGrid extends React.Component<
           <div className="property-grid-react-panel-label">
             {this.state.title &&
               PropertyValueRendererManager.defaultManager.render(
-                this.state.title,
+                this.state.title
               )}
           </div>
           <div className="property-grid-react-panel-class">

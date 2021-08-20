@@ -18,14 +18,19 @@ import {
   VirtualizedPropertyGridWithDataProvider,
   VirtualizedPropertyGridWithDataProviderProps,
 } from "@bentley/ui-components";
-import { IPresentationPropertyDataProvider, usePropertyDataProviderWithUnifiedSelection } from "@bentley/presentation-components";
+import {
+  IPresentationPropertyDataProvider,
+  usePropertyDataProviderWithUnifiedSelection,
+} from "@bentley/presentation-components";
 import { FillCentered } from "@bentley/ui-core";
 import { IModelApp } from "@bentley/imodeljs-frontend";
 import { IDisposable } from "@bentley/bentleyjs-core";
 import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
 
 export class PlaceholderPropertyDataFilterer extends PropertyRecordDataFiltererBase {
-  public get isActive() { return false; }
+  public get isActive() {
+    return false;
+  }
   public async recordMatchesFilter(): Promise<PropertyDataFilterResult> {
     return { matchesFilter: true };
   }
@@ -36,7 +41,7 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
     return true;
   }
   public async recordMatchesFilter(
-    node: PropertyRecord,
+    node: PropertyRecord
   ): Promise<PropertyDataFilterResult> {
     if (node.value.valueFormat === PropertyValueFormat.Primitive) {
       return {
@@ -60,13 +65,24 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
   }
 }
 
-type CustomPropertyDataProvider<TPropertyData> = IDisposable & Omit<IPropertyDataProvider, "getData"> & { getData: () => Promise<TPropertyData> };
-class AutoExpandingPropertyDataProvider<TPropertyData extends PropertyData> implements IPropertyDataProvider, IDisposable {
+type CustomPropertyDataProvider<TPropertyData> = IDisposable &
+  Omit<IPropertyDataProvider, "getData"> & {
+    getData: () => Promise<TPropertyData>;
+  };
+class AutoExpandingPropertyDataProvider<TPropertyData extends PropertyData>
+  implements IPropertyDataProvider, IDisposable
+{
   public onDataChanged = new PropertyDataChangeEvent();
-  public constructor(private _wrapped: CustomPropertyDataProvider<TPropertyData>) {
-    this._wrapped.onDataChanged.addListener(() => this.onDataChanged.raiseEvent());
+  public constructor(
+    private _wrapped: CustomPropertyDataProvider<TPropertyData>
+  ) {
+    this._wrapped.onDataChanged.addListener(() =>
+      this.onDataChanged.raiseEvent()
+    );
   }
-  public dispose() { this._wrapped.dispose(); }
+  public dispose() {
+    this._wrapped.dispose();
+  }
   public async getData(): Promise<TPropertyData> {
     function expandCategories(categories: PropertyCategory[]) {
       categories.forEach((category: PropertyCategory) => {
@@ -81,30 +97,52 @@ class AutoExpandingPropertyDataProvider<TPropertyData extends PropertyData> impl
   }
 }
 
-interface FilteringPropertyGrid extends VirtualizedPropertyGridWithDataProviderProps {
+interface FilteringPropertyGrid
+  extends VirtualizedPropertyGridWithDataProviderProps {
   filterer: PropertyDataFiltererBase;
 }
 
-export function FilteringPropertyGridWithUnifiedSelection(props: FilteringPropertyGrid): JSX.Element {
+export function FilteringPropertyGridWithUnifiedSelection(
+  props: FilteringPropertyGrid
+): JSX.Element {
   // numSelectedElements will return undefined until presentation-components 2.17.x
-  const { isOverLimit, numSelectedElements } = (usePropertyDataProviderWithUnifiedSelection as any)(
-    { dataProvider: props.dataProvider as IPresentationPropertyDataProvider },
-  );
-  const filteringDataProvider = new FilteringPropertyDataProvider(props.dataProvider, props.filterer);
-  const autoExpandingFilteringDataProvider = new AutoExpandingPropertyDataProvider(filteringDataProvider);
+  const { isOverLimit, numSelectedElements } = (
+    usePropertyDataProviderWithUnifiedSelection as any
+  )({ dataProvider: props.dataProvider as IPresentationPropertyDataProvider });
+
+  const filteringDataProvider = React.useMemo(() => {
+    return new FilteringPropertyDataProvider(
+      props.dataProvider,
+      props.filterer
+    );
+  }, [props.dataProvider, props.filterer]);
+
+  const autoExpandingFilteringDataProvider = React.useMemo(() => {
+    return new AutoExpandingPropertyDataProvider(filteringDataProvider);
+  }, [filteringDataProvider]);
+
   if (isOverLimit) {
     return (
       <FillCentered>
-        {IModelApp.i18n.translate("PropertyGrid:selection.too-many-elements-selected")}
+        {IModelApp.i18n.translate(
+          "PropertyGrid:selection.too-many-elements-selected"
+        )}
       </FillCentered>
     );
   }
   if (numSelectedElements !== undefined && numSelectedElements === 0) {
     return (
       <FillCentered>
-        {IModelApp.i18n.translate("PropertyGrid:selection.no-elements-selected")}
+        {IModelApp.i18n.translate(
+          "PropertyGrid:selection.no-elements-selected"
+        )}
       </FillCentered>
     );
   }
-  return <VirtualizedPropertyGridWithDataProvider {...props} dataProvider={autoExpandingFilteringDataProvider} />;
+  return (
+    <VirtualizedPropertyGridWithDataProvider
+      {...props}
+      dataProvider={autoExpandingFilteringDataProvider}
+    />
+  );
 }

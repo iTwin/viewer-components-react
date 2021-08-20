@@ -1,10 +1,11 @@
 {
-  "widget-label": "Properties Widget",
+  "widget-label": "Properties",
   "element-list": {
     "title": "Selected Elements",
     "results": "results"
   },
   "context-menu": {
+    "favorite": "Favorite",
     "add-favorite": {
       "label": "Add to Favorite",
       "description": "Add this property to Favorite category"
