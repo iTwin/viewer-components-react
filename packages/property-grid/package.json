@@ -27,7 +27,7 @@
     "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "copy:assets:extension": "cpx \"./src/**/*.scss\" ./lib/extension && cpx \"./public/locales/**/*\" ./lib/extension/locales",
     "cover": "",
-    "lint": "tslint -p . 1>&2",
+    "lint": "",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test": ""
   },
