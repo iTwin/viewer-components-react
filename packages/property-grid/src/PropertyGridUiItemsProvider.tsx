@@ -9,11 +9,12 @@ import {
   StagePanelSection,
   StageUsage,
   UiItemsProvider,
-  WidgetState,
+  WidgetState
 } from "@bentley/ui-abstract";
-import { PropertyGridWidgetBaseProps } from "./types";
 import * as React from "react";
 import { FunctionalPropertyGridWidget } from "./components/FunctionalPropertyGridWidget";
+import { PropertyGridManager } from "./PropertyGridManager";
+import { PropertyGridWidgetBaseProps } from "./types";
 
 /** Provides the property grid widget to zone 9 */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
@@ -38,8 +39,8 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
       section === StagePanelSection.End
     ) {
       widgets.push({
-        id: "propertyGrid",
-        label: "widget-label",
+        id: "vcr:PropertyGrid",
+        label: PropertyGridManager.translate("widget-label"),
         getWidgetContent: () => (
           <FunctionalPropertyGridWidget {...this._props} />
         ),
