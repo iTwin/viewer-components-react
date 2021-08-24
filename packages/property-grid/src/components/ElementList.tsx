@@ -3,10 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import classnames from "classnames";
 import "./ElementList.scss";
 
+import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { InstanceKey } from "@bentley/presentation-common";
+import { PresentationLabelsProvider } from "@bentley/presentation-components";
 import {
   PropertyDescription,
   PropertyEditorInfo,
@@ -21,12 +22,11 @@ import {
   SimpleTableDataProvider,
   Table,
 } from "@bentley/ui-components";
+import { Icon } from "@bentley/ui-core";
+import classnames from "classnames";
+import * as React from "react";
 
 import { PropertyGridManager } from "../PropertyGridManager";
-import { Icon } from "@bentley/ui-core";
-import { InstanceKey } from "@bentley/presentation-common";
-import { PresentationLabelsProvider } from "@bentley/presentation-components";
-import { IModelConnection } from "@bentley/imodeljs-frontend";
 
 export interface ElementListProps {
   iModelConnection: IModelConnection;
@@ -41,13 +41,13 @@ interface ElementListState {
 }
 
 /** Create simple property record */
-const createPropertyRecord = (
+export const createPropertyRecord = (
   name: string,
   displayLabel: string,
   value: number | string,
   displayValue: string,
   editor?: PropertyEditorInfo,
-  description?: PropertyDescription,
+  description?: PropertyDescription
 ): PropertyRecord => {
   const propValue: PropertyValue = {
     valueFormat: PropertyValueFormat.Primitive,
@@ -59,20 +59,18 @@ const createPropertyRecord = (
     name,
     typename: "string",
   };
-  if (editor) {
-    propDescription.editor = editor;
-  }
+  propDescription.editor = editor;
 
   const record = new PropertyRecord(propValue, propDescription);
   record.isDisabled = false;
-  record.isReadonly = editor === undefined;
+  record.isReadonly = !editor;
   return record;
 };
 
 /** Map element ids and requests labels */
-const instanceKeysToRowItems = (
+export const instanceKeysToRowItems = (
   instanceKeys: InstanceKey[],
-  labels: string[],
+  labels: string[]
 ) => {
   const rows = new Array<RowItem>();
   for (let i = 0; i < instanceKeys.length; ++i) {
@@ -92,9 +90,9 @@ const instanceKeysToRowItems = (
 };
 
 /** Gets labels from presentation layer, chunks up requests if necessary */
-const getLabels = async (
+export const getLabels = async (
   labelsProvider: PresentationLabelsProvider,
-  instanceKeys: InstanceKey[],
+  instanceKeys: InstanceKey[]
 ): Promise<string[]> => {
   const chunkSize = 1000;
   if (instanceKeys.length < chunkSize) {
@@ -112,9 +110,9 @@ const getLabels = async (
 };
 
 /** Creates a data provider with the labels */
-const createDataProvider = async (
+export const createDataProvider = async (
   labelsProvider: PresentationLabelsProvider,
-  instanceKeys: InstanceKey[],
+  instanceKeys: InstanceKey[]
 ) => {
   const columns: ColumnDescription[] = [
     {
@@ -133,9 +131,9 @@ const createDataProvider = async (
 export class ElementList extends React.Component<
   ElementListProps,
   ElementListState
-  > {
+> {
   private _labelsProvider: PresentationLabelsProvider;
-  private _unmounted: boolean = false;
+  private _unmounted = false;
 
   constructor(props: ElementListProps) {
     super(props);
@@ -150,7 +148,7 @@ export class ElementList extends React.Component<
   public async componentDidMount() {
     const dataProvider = await createDataProvider(
       this._labelsProvider,
-      this.props.instanceKeys,
+      this.props.instanceKeys
     );
 
     if (!this._unmounted) {
@@ -165,7 +163,7 @@ export class ElementList extends React.Component<
   /** On element selected in table, call the onSelect prop */
   private _onRowsSelected = async (
     rowIterator: AsyncIterableIterator<RowItem>,
-    _replace: boolean,
+    _replace: boolean
   ) => {
     for await (const row of rowIterator) {
       if (
@@ -177,14 +175,14 @@ export class ElementList extends React.Component<
       }
     }
     return false;
-  }
+  };
 
   public render() {
     return (
       <div
         className={classnames(
           "property-grid-react-element-list",
-          this.props.rootClassName,
+          this.props.rootClassName
         )}
       >
         <div className="property-grid-react-element-list-header">

@@ -9,10 +9,11 @@ import {
   StagePanelSection,
   StageUsage,
   UiItemsProvider,
-  WidgetState
+  WidgetState,
 } from "@bentley/ui-abstract";
 import * as React from "react";
-import { FunctionalPropertyGridWidget } from "./components/FunctionalPropertyGridWidget";
+
+import { FunctionalMultiElementPropertyGrid } from "./components/functional";
 import { PropertyGridManager } from "./PropertyGridManager";
 import { PropertyGridWidgetBaseProps } from "./types";
 
@@ -42,7 +43,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
         id: "vcr:PropertyGrid",
         label: PropertyGridManager.translate("widget-label"),
         getWidgetContent: () => (
-          <FunctionalPropertyGridWidget {...this._props} />
+          <FunctionalMultiElementPropertyGrid {...this._props} />
         ),
         defaultState: WidgetState.Closed,
       });

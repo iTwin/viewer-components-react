@@ -4,19 +4,20 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./MultiElementPropertyGrid.scss";
-import { Presentation } from "@bentley/presentation-frontend";
 
-import { PropertyGrid } from "./PropertyGrid";
-import { PropertyGridProps } from "../types";
-import { PropertyGridManager } from "../PropertyGridManager";
+import { InstanceKey, KeySet } from "@bentley/presentation-common";
+import { Presentation } from "@bentley/presentation-frontend";
+import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
 import * as React from "react";
 import { animated, Transition } from "react-spring/renderprops.cjs";
-import { ElementList } from "./ElementList";
-import { InstanceKey, KeySet } from "@bentley/presentation-common";
-import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
-import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
 
-enum MultiElementPropertyContent {
+import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
+import { PropertyGridManager } from "../PropertyGridManager";
+import { PropertyGridProps } from "../types";
+import { ElementList } from "./ElementList";
+import { PropertyGrid } from "./PropertyGrid";
+
+export enum MultiElementPropertyContent {
   PropertyGrid = 0,
   ElementList = 1,
   SingleElementPropertyGrid = 2,

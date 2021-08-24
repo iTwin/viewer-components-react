@@ -8,6 +8,6 @@ export * from "./PropertyGridExtension";
 export * from "./PropertyGridUiItemsProvider";
 export * from "./components/PropertyGrid";
 export * from "./components/FilteringPropertyGrid";
-export * from "./components/FunctionalPropertyGridWidget";
+export * from "./components/functional";
 export * from "./components/MultiElementPropertyGrid";
 export * from "./types";

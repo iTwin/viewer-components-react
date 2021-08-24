@@ -3,14 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./PropertyGrid.scss";
+import "../PropertyGrid.scss";
 
 import {
   AuthorizedFrontendRequestContext,
   IModelApp,
 } from "@bentley/imodeljs-frontend";
 import { Field } from "@bentley/presentation-common";
-import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
 import { Presentation } from "@bentley/presentation-frontend";
 import { SettingsStatus } from "@bentley/product-settings-client";
 import { PropertyRecord } from "@bentley/ui-abstract";
@@ -32,20 +31,21 @@ import {
 import { useActiveIModelConnection } from "@bentley/ui-framework";
 import * as React from "react";
 
-import { copyToClipboard } from "../api/WebUtilities";
-import { PropertyGridManager } from "../PropertyGridManager";
+import { AutoExpandingPropertyDataProvider } from "../../api/AutoExpandingPropertyDataProvider";
+import { copyToClipboard } from "../../api/WebUtilities";
+import { PropertyGridManager } from "../../PropertyGridManager";
 import {
   ContextMenuItemInfo,
   OnSelectEventArgs,
   PropertyGridWidgetBaseProps,
   SHARED_NAME,
   SHARED_NAMESPACE,
-} from "../types";
+} from "../../types";
 import {
   FilteringPropertyGridWithUnifiedSelection,
   NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
-} from "./FilteringPropertyGrid";
+} from "../FilteringPropertyGrid";
 
 export const FunctionalPropertyGridWidget = ({
   orientation,
@@ -70,7 +70,7 @@ export const FunctionalPropertyGridWidget = ({
     if (propDataProvider) {
       dp = propDataProvider;
     } else if (iModelConnection) {
-      dp = new PresentationPropertyDataProvider({
+      dp = new AutoExpandingPropertyDataProvider({
         imodel: iModelConnection,
         ruleset: rulesetId,
         disableFavoritesCategory: !enableFavoriteProperties,
@@ -484,6 +484,7 @@ export const FunctionalPropertyGridWidget = ({
           for (const option of additionalContextMenuOptions) {
             items.push({
               ...option,
+              key: `additionalContextMenuOption_${option.label}`,
               onSelect: () => {
                 if (option.onSelect) {
                   (option.onSelect as (args: OnSelectEventArgs) => void)({

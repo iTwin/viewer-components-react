@@ -1,25 +1,25 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+* See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { IModelConnection } from "@bentley/imodeljs-frontend";
 import { Field } from "@bentley/presentation-common";
-import { PropertyCategory, PropertyData } from "@bentley/ui-components";
 import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
+import { PropertyCategory, PropertyData } from "@bentley/ui-components";
 export class PropertyDataProvider extends PresentationPropertyDataProvider {
   // tslint:disable-next-line:naming-convention
   private _parentIsFieldFavorite = this.isFieldFavorite;
 
   // tslint:disable-next-line:naming-convention
   protected isFieldFavorite = (field: Field): boolean =>
-    this._enableFavoriteProperties ? this._parentIsFieldFavorite(field) : false
+    this._enableFavoriteProperties ? this._parentIsFieldFavorite(field) : false;
 
   private _enableFavoriteProperties: boolean;
 
   constructor(
     iModelConnection: IModelConnection,
     rulesetId?: string,
-    enableFavoriteProperties?: boolean,
+    enableFavoriteProperties?: boolean
   ) {
     super({ imodel: iModelConnection, ruleset: rulesetId });
     this.pagingSize = 50;

@@ -5,8 +5,6 @@
 
 import "./PropertyGrid.scss";
 
-import * as React from "react";
-
 import {
   AuthorizedFrontendRequestContext,
   IModelApp,
@@ -32,16 +30,11 @@ import {
   Orientation,
 } from "@bentley/ui-core";
 import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
+import * as React from "react";
 
 import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
-import {
-  FilteringPropertyGridWithUnifiedSelection,
-  NonEmptyValuesPropertyDataFilterer,
-  PlaceholderPropertyDataFilterer,
-} from "./FilteringPropertyGrid";
-
 import {
   ContextMenuItemInfo,
   OnSelectEventArgs,
@@ -49,6 +42,11 @@ import {
   SHARED_NAME,
   SHARED_NAMESPACE,
 } from "../types";
+import {
+  FilteringPropertyGridWithUnifiedSelection,
+  NonEmptyValuesPropertyDataFilterer,
+  PlaceholderPropertyDataFilterer,
+} from "./FilteringPropertyGrid";
 
 interface PropertyGridState {
   title?: PropertyRecord;
@@ -89,8 +87,9 @@ export class PropertyGrid extends React.Component<
   }
 
   public async componentDidMount() {
-    if (this.props.iModelConnection)
+    if (this.props.iModelConnection) {
       this._dataProvider.onDataChanged.addListener(this._dataChangedHandler);
+    }
 
     let currentData = await this._dataProvider.getData();
     currentData = await this._addSharedFavsToData(currentData);
@@ -104,9 +103,12 @@ export class PropertyGrid extends React.Component<
   }
 
   public componentWillUnmount() {
-    if (this.props.debugLog) this.props.debugLog(`Unmounting Properties Grid`);
-    if (this.props.iModelConnection)
+    if (this.props.debugLog) {
+      this.props.debugLog(`Unmounting Properties Grid`);
+    }
+    if (this.props.iModelConnection) {
       this._dataProvider.onDataChanged.removeListener(this._dataChangedHandler);
+    }
 
     this._unmounted = true;
   }
@@ -230,11 +232,12 @@ export class PropertyGrid extends React.Component<
     // This causes the _onDataChanged to get called, but it may take time for the await to come through and we end up
     // Setting the state of this component after it has been unmounted
     const title = propertyData.label;
-    if (!this._unmounted)
+    if (!this._unmounted) {
       this.setState({
         title,
         className: propertyData.description ? propertyData.description : "",
       });
+    }
   }
 
   private _onAddFavorite = async (propertyField: Field) => {
@@ -336,11 +339,13 @@ export class PropertyGrid extends React.Component<
   };
 
   private _onCopyText = async (property: PropertyRecord) => {
-    if (property.description) copyToClipboard(property.description);
-    else if (this.props.debugLog)
+    if (property.description) {
+      copyToClipboard(property.description);
+    } else if (this.props.debugLog) {
       this.props.debugLog(
         "PROPERTIES COPY TEXT FAILED TO RUN DUE TO UNDEFINED PROPERTY RECORD DESCRIPTION"
       );
+    }
     this.setState({ contextMenu: undefined });
   };
 
@@ -436,8 +441,9 @@ export class PropertyGrid extends React.Component<
       items.push({
         key: "copy-text",
         onSelect: async () => {
-          if (this.props.featureTracking)
+          if (this.props.featureTracking) {
             this.props.featureTracking.trackCopyPropertyText();
+          }
           await this._onCopyText(args.propertyRecord);
         },
         title: PropertyGridManager.translate(
@@ -501,8 +507,9 @@ export class PropertyGrid extends React.Component<
   }
 
   private _renderContextMenu() {
-    if (!this.state.contextMenu || !this.state.contextMenuItemInfos)
+    if (!this.state.contextMenu || !this.state.contextMenuItemInfos) {
       return undefined;
+    }
 
     const items: React.ReactNode[] = [];
     this.state.contextMenuItemInfos.forEach((info: ContextMenuItemInfo) =>
