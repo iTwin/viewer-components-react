@@ -13,7 +13,7 @@ import {
 } from "@bentley/ui-abstract";
 import * as React from "react";
 
-import { FunctionalMultiElementPropertyGrid } from "./components/functional";
+import { BasicMultiElementPropertyGrid } from "./components/functional";
 import { PropertyGridManager } from "./PropertyGridManager";
 import { PropertyGridWidgetBaseProps } from "./types";
 
@@ -43,7 +43,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
         id: "vcr:PropertyGrid",
         label: PropertyGridManager.translate("widget-label"),
         getWidgetContent: () => (
-          <FunctionalMultiElementPropertyGrid {...this._props} />
+          <BasicMultiElementPropertyGrid {...this._props} />
         ),
         defaultState: WidgetState.Closed,
       });

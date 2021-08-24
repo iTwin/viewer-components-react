@@ -46,8 +46,9 @@ import {
   NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
 } from "../FilteringPropertyGrid";
+import classnames from "classnames";
 
-export const FunctionalPropertyGridWidget = ({
+export const BasicPropertyGridWidget = ({
   orientation,
   isOrientationFixed,
   enableFavoriteProperties,
@@ -634,7 +635,9 @@ export const FunctionalPropertyGridWidget = ({
   };
 
   return (
-    <div className={rootClassName ?? "property-grid-widget-container"}>
+    <div
+      className={classnames("property-grid-widget-container", rootClassName)}
+    >
       {renderHeader()}
       <div className={"property-grid-container"}>{renderPropertyGrid()}</div>
       {renderContextMenu()}

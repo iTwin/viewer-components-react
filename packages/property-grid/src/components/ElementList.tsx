@@ -32,12 +32,9 @@ export interface ElementListProps {
   iModelConnection: IModelConnection;
   instanceKeys: InstanceKey[];
   onBack: () => void;
+  /** should be memoized to prevent unnecessary updates */
   onSelect: (instanceKey: InstanceKey) => void;
   rootClassName?: string;
-}
-
-interface ElementListState {
-  dataProvider?: SimpleTableDataProvider;
 }
 
 /** Create simple property record */
@@ -128,93 +125,78 @@ export const createDataProvider = async (
 };
 
 /** Shows a list of elements to inspect properties for */
-export class ElementList extends React.Component<
-  ElementListProps,
-  ElementListState
-> {
-  private _labelsProvider: PresentationLabelsProvider;
-  private _unmounted = false;
+export const ElementList = ({
+  iModelConnection,
+  instanceKeys,
+  onBack,
+  onSelect,
+  rootClassName,
+}: ElementListProps) => {
+  const [dataProvider, setDataProvider] =
+    React.useState<SimpleTableDataProvider>();
 
-  constructor(props: ElementListProps) {
-    super(props);
-
-    this._labelsProvider = new PresentationLabelsProvider({
-      imodel: this.props.iModelConnection,
+  const labelsProvider: PresentationLabelsProvider = React.useMemo(() => {
+    return new PresentationLabelsProvider({
+      imodel: iModelConnection,
     });
+  }, [iModelConnection]);
 
-    this.state = {};
-  }
+  React.useEffect(() => {
+    const createAndSetDp = async () => {
+      const dp = await createDataProvider(labelsProvider, instanceKeys);
+      setDataProvider(dp);
+    };
 
-  public async componentDidMount() {
-    const dataProvider = await createDataProvider(
-      this._labelsProvider,
-      this.props.instanceKeys
-    );
-
-    if (!this._unmounted) {
-      this.setState({ dataProvider });
-    }
-  }
-
-  public componentWillUnmount() {
-    this._unmounted = true;
-  }
+    createAndSetDp().catch(console.log);
+  }, [labelsProvider, instanceKeys]);
 
   /** On element selected in table, call the onSelect prop */
-  private _onRowsSelected = async (
-    rowIterator: AsyncIterableIterator<RowItem>,
-    _replace: boolean
-  ) => {
-    for await (const row of rowIterator) {
-      if (
-        row.extendedData !== undefined &&
-        row.extendedData.key !== undefined
-      ) {
-        this.props.onSelect(row.extendedData.key);
-        return false;
+  const onRowsSelected = React.useCallback(
+    async (rowIterator: AsyncIterableIterator<RowItem>, _replace: boolean) => {
+      for await (const row of rowIterator) {
+        if (row.extendedData?.key) {
+          onSelect(row.extendedData.key);
+          return false;
+        }
       }
-    }
-    return false;
-  };
+      return false;
+    },
+    [onSelect]
+  );
 
-  public render() {
-    return (
-      <div
-        className={classnames(
-          "property-grid-react-element-list",
-          this.props.rootClassName
-        )}
-      >
-        <div className="property-grid-react-element-list-header">
-          <div
-            className="property-grid-react-element-list-back-btn"
-            onClick={this.props.onBack}
-          >
-            <Icon
-              className="property-grid-react-element-list-icon"
-              iconSpec="icon-progress-backward"
-            />
-          </div>
-          <div className="property-grid-react-element-list-title">
-            {PropertyGridManager.translate("element-list.title")}
-          </div>
+  return (
+    <div
+      className={classnames("property-grid-react-element-list", rootClassName)}
+    >
+      <div className="property-grid-react-element-list-header">
+        <div
+          className="property-grid-react-element-list-back-btn"
+          onClick={onBack}
+        >
+          <Icon
+            className="property-grid-react-element-list-icon"
+            iconSpec="icon-progress-backward"
+          />
         </div>
-        <div className="property-grid-react-element-list-container">
-          {this.state.dataProvider !== undefined && (
-            <Table
-              dataProvider={this.state.dataProvider}
-              onRowsSelected={this._onRowsSelected}
-              selectionMode={SelectionMode.Single}
-              hideHeader={true}
-            />
-          )}
-        </div>
-        <div className="property-grid-react-element-list-results-label">
-          {this.props.instanceKeys.length +
-            " " +
-            PropertyGridManager.translate("element-list.results")}
+        <div className="property-grid-react-element-list-title">
+          {PropertyGridManager.translate("element-list.title")}
         </div>
       </div>
-    );
-  }
-}
+      <div className="property-grid-react-element-list-container">
+        {dataProvider && (
+          <Table
+            dataProvider={dataProvider}
+            onRowsSelected={onRowsSelected}
+            selectionMode={SelectionMode.Single}
+            hideHeader={true}
+          />
+        )}
+      </div>
+      <div className="property-grid-react-element-list-results-label">
+        {`${instanceKeys.length} ${PropertyGridManager.translate(
+          "element-list.results"
+        )}`}
+      </div>
+    </div>
+  );
+};

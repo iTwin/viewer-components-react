@@ -15,17 +15,17 @@ import { AutoExpandingPropertyDataProvider } from "../../api/AutoExpandingProper
 import { PropertyGridManager } from "../../PropertyGridManager";
 import { PropertyGridWidgetBaseProps } from "../../types";
 import { MultiElementPropertyContent } from "../MultiElementPropertyGrid";
-import { FunctionalElementList } from "./FunctionalElementList";
-import { FunctionalPropertyGridWidget } from "./FunctionalPropertyGridWidget";
+import { ElementList } from "../ElementList";
+import { BasicPropertyGridWidget } from "./BasicPropertyGridWidget";
 
-interface SinglePropertyGridProps extends PropertyGridWidgetBaseProps {
+interface SingleElementPropertyGridProps extends PropertyGridWidgetBaseProps {
   instanceKey: InstanceKey;
 }
 
 const SingleElementPropertyGrid = ({
   instanceKey,
   ...props
-}: SinglePropertyGridProps) => {
+}: SingleElementPropertyGridProps) => {
   const iModelConnection = useActiveIModelConnection();
   const dataProvider = React.useMemo(() => {
     let dp;
@@ -55,7 +55,7 @@ const SingleElementPropertyGrid = ({
   ]);
 
   return (
-    <FunctionalPropertyGridWidget
+    <BasicPropertyGridWidget
       {...props}
       dataProvider={dataProvider}
       disableUnifiedSelection={true}
@@ -63,7 +63,7 @@ const SingleElementPropertyGrid = ({
   );
 };
 
-export const FunctionalMultiElementPropertyGrid = (
+export const BasicMultiElementPropertyGrid = (
   props: PropertyGridWidgetBaseProps
 ) => {
   const iModelConnection = useActiveIModelConnection();
@@ -106,37 +106,37 @@ export const FunctionalMultiElementPropertyGrid = (
     };
   }, [iModelConnection]);
 
-  const onOpenList = () => {
+  const onOpenList = React.useCallback(() => {
     setContent(MultiElementPropertyContent.ElementList);
     setAnimationForward(true);
-  };
+  }, []);
 
-  const onCloseList = () => {
+  const onCloseList = React.useCallback(() => {
     setContent(MultiElementPropertyContent.PropertyGrid);
     setAnimationForward(false);
-  };
+  }, []);
 
-  const onSelectElement = (instanceKey: InstanceKey) => {
+  const onSelectElement = React.useCallback((instanceKey: InstanceKey) => {
     setContent(MultiElementPropertyContent.SingleElementPropertyGrid);
     setAnimationForward(true);
     setSelectedInstanceKey(instanceKey);
-  };
+  }, []);
 
-  const onCloseSinglePropertyGrid = () => {
+  const onCloseSinglePropertyGrid = React.useCallback(() => {
     setContent(MultiElementPropertyContent.ElementList);
     setAnimationForward(false);
-  };
+  }, []);
 
   const items = [
-    <FunctionalPropertyGridWidget
+    <BasicPropertyGridWidget
       {...props}
-      key={"PropertyGrid"}
       onInfoButton={moreThanOneElement ? onOpenList : undefined}
+      key={"PropertyGrid"}
     />,
   ];
   if (iModelConnection) {
     items.push(
-      <FunctionalElementList
+      <ElementList
         iModelConnection={iModelConnection}
         instanceKeys={instanceKeys}
         onBack={onCloseList}
