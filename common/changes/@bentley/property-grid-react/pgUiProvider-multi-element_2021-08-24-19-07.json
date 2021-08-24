@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "UiProvider now provides multi element property grid",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react"
+}
