@@ -27,7 +27,6 @@ export interface OnSelectEventArgs {
   contextMenuArgs: PropertyGridContextMenuArgs;
 }
 
-// Should be used for BasicPropertyGridWidget (we get iModelConnection and projectId using hooks)
 export interface PropertyGridWidgetBaseProps {
   orientation?: Orientation;
   isOrientationFixed?: boolean;
