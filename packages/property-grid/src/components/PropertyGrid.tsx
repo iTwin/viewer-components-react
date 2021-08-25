@@ -156,12 +156,6 @@ export const PropertyGrid = ({
         ),
         label: PropertyGridManager.translate("context-menu.show-null.label"),
       },
-      tooManySelected: PropertyGridManager.translate(
-        "context-menu.selection.too-many-elements-selected"
-      ),
-      noneSelected: PropertyGridManager.translate(
-        "context-menu.selection.no-elements-selected"
-      ),
     };
   }, []);
 

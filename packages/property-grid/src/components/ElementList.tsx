@@ -148,7 +148,7 @@ export const ElementList = ({
       setDataProvider(dp);
     };
 
-    createAndSetDp().catch((e) => {
+    createAndSetDp().catch(() => {
       Logger.logError(
         "VCR:PropertyGridReact",
         "ElementList: Failed to create Data Provider"

@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
+import "./PropertyGrid.scss";
 import { IDisposable } from "@bentley/bentleyjs-core";
 import {
   IPresentationPropertyDataProvider,
@@ -134,10 +134,22 @@ export function FilteringPropertyGridWithUnifiedSelection(
   }, [filteringDataProvider]);
 
   if (isOverLimit) {
-    return <FillCentered>{localizations.tooManySelected}</FillCentered>;
+    return (
+      <FillCentered>
+        <div className="property-grid-react-filtering-pg-label">
+          {localizations.tooManySelected}
+        </div>
+      </FillCentered>
+    );
   }
   if (numSelectedElements !== undefined && numSelectedElements === 0) {
-    return <FillCentered>{localizations.noneSelected}</FillCentered>;
+    return (
+      <FillCentered>
+        <div className="property-grid-react-filtering-pg-label">
+          {localizations.noneSelected}
+        </div>
+      </FillCentered>
+    );
   }
   return (
     <VirtualizedPropertyGridWithDataProvider
