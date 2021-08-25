@@ -27,6 +27,7 @@ import classnames from "classnames";
 import * as React from "react";
 
 import { PropertyGridManager } from "../PropertyGridManager";
+import { Logger } from "@bentley/bentleyjs-core";
 
 export interface ElementListProps {
   iModelConnection: IModelConnection;
@@ -147,7 +148,12 @@ export const ElementList = ({
       setDataProvider(dp);
     };
 
-    createAndSetDp().catch(console.log);
+    createAndSetDp().catch((e) => {
+      Logger.logError(
+        "VCR:PropertyGridReact",
+        "ElementList: Failed to create Data Provider"
+      );
+    });
   }, [labelsProvider, instanceKeys]);
 
   /** On element selected in table, call the onSelect prop */
