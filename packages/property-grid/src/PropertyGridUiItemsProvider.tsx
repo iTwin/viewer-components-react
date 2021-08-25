@@ -9,20 +9,21 @@ import {
   StagePanelSection,
   StageUsage,
   UiItemsProvider,
-  WidgetState
+  WidgetState,
 } from "@bentley/ui-abstract";
 import * as React from "react";
-import { FunctionalPropertyGridWidget } from "./components/FunctionalPropertyGridWidget";
+
+import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid";
 import { PropertyGridManager } from "./PropertyGridManager";
-import { PropertyGridWidgetBaseProps } from "./types";
+import { PropertyGridProps } from "./types";
 
 /** Provides the property grid widget to zone 9 */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
 
-  private _props?: Partial<PropertyGridWidgetBaseProps>;
+  private _props?: Partial<PropertyGridProps>;
 
-  constructor(props?: Partial<PropertyGridWidgetBaseProps>) {
+  constructor(props?: Partial<PropertyGridProps>) {
     this._props = props;
   }
 
@@ -41,9 +42,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
       widgets.push({
         id: "vcr:PropertyGrid",
         label: PropertyGridManager.translate("widget-label"),
-        getWidgetContent: () => (
-          <FunctionalPropertyGridWidget {...this._props} />
-        ),
+        getWidgetContent: () => <MultiElementPropertyGrid {...this._props} />,
         defaultState: WidgetState.Closed,
       });
     }

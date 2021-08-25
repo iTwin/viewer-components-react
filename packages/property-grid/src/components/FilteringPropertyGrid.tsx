@@ -2,9 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
-import * as React from "react";
-
+import "./PropertyGrid.scss";
+import { IDisposable } from "@bentley/bentleyjs-core";
+import {
+  IPresentationPropertyDataProvider,
+  usePropertyDataProviderWithUnifiedSelection,
+} from "@bentley/presentation-components";
+import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
 import {
   FilteredType,
   FilteringPropertyDataProvider,
@@ -18,14 +22,10 @@ import {
   VirtualizedPropertyGridWithDataProvider,
   VirtualizedPropertyGridWithDataProviderProps,
 } from "@bentley/ui-components";
-import {
-  IPresentationPropertyDataProvider,
-  usePropertyDataProviderWithUnifiedSelection,
-} from "@bentley/presentation-components";
 import { FillCentered } from "@bentley/ui-core";
-import { IModelApp } from "@bentley/imodeljs-frontend";
-import { IDisposable } from "@bentley/bentleyjs-core";
-import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
+import * as React from "react";
+
+import { PropertyGridManager } from "../PropertyGridManager";
 
 export class PlaceholderPropertyDataFilterer extends PropertyRecordDataFiltererBase {
   public get isActive() {
@@ -87,8 +87,9 @@ class AutoExpandingPropertyDataProvider<TPropertyData extends PropertyData>
     function expandCategories(categories: PropertyCategory[]) {
       categories.forEach((category: PropertyCategory) => {
         category.expand = true;
-        if (category.childCategories)
+        if (category.childCategories) {
           expandCategories(category.childCategories);
+        }
       });
     }
     const result = await this._wrapped.getData();
@@ -105,6 +106,17 @@ interface FilteringPropertyGrid
 export function FilteringPropertyGridWithUnifiedSelection(
   props: FilteringPropertyGrid
 ): JSX.Element {
+  const localizations = React.useMemo(() => {
+    return {
+      tooManySelected: PropertyGridManager.translate(
+        "context-menu.selection.too-many-elements-selected"
+      ),
+      noneSelected: PropertyGridManager.translate(
+        "context-menu.selection.no-elements-selected"
+      ),
+    };
+  }, []);
+
   // numSelectedElements will return undefined until presentation-components 2.17.x
   const { isOverLimit, numSelectedElements } = (
     usePropertyDataProviderWithUnifiedSelection as any
@@ -124,18 +136,18 @@ export function FilteringPropertyGridWithUnifiedSelection(
   if (isOverLimit) {
     return (
       <FillCentered>
-        {IModelApp.i18n.translate(
-          "PropertyGrid:selection.too-many-elements-selected"
-        )}
+        <div className="property-grid-react-filtering-pg-label">
+          {localizations.tooManySelected}
+        </div>
       </FillCentered>
     );
   }
   if (numSelectedElements !== undefined && numSelectedElements === 0) {
     return (
       <FillCentered>
-        {IModelApp.i18n.translate(
-          "PropertyGrid:selection.no-elements-selected"
-        )}
+        <div className="property-grid-react-filtering-pg-label">
+          {localizations.noneSelected}
+        </div>
       </FillCentered>
     );
   }

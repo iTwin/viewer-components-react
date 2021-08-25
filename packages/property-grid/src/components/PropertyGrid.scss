@@ -44,6 +44,11 @@
   padding: $uicore-xs;
   display: flex;
   flex-direction: column;
+  color: $buic-icon-color;
+
+  &:hover {
+    color: $buic-foreground-primary;
+  }
 }
 
 .property-grid-react-panel-back-btn {
@@ -51,6 +56,11 @@
   padding: $uicore-xs;
   display: flex;
   flex-direction: column;
+  color: $buic-icon-color;
+
+  &:hover {
+    color: $buic-foreground-primary;
+  }
 }
 
 .property-grid-react-panel-icon {
@@ -66,6 +76,11 @@
 }
 
 .property-grid-react-panel-class {
+  @include uicore-text;
+  font-size: $uicore-font-size;
+}
+
+.property-grid-react-filtering-pg-label {
   @include uicore-text;
   font-size: $uicore-font-size;
 }

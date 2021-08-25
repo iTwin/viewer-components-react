@@ -27,7 +27,6 @@ export interface OnSelectEventArgs {
   contextMenuArgs: PropertyGridContextMenuArgs;
 }
 
-// Should be used for FunctionalPropertyGridWidget (we get iModelConnection and projectId using hooks)
 export interface PropertyGridWidgetBaseProps {
   orientation?: Orientation;
   isOrientationFixed?: boolean;
@@ -35,8 +34,6 @@ export interface PropertyGridWidgetBaseProps {
   enableCopyingPropertyText?: boolean;
   enableNullValueToggle?: boolean;
   additionalContextMenuOptions?: ContextMenuItemInfo[];
-  debugLog?: (message: string) => void;
-  featureTracking?: PropertyGridFeatureTracking;
   rulesetId?: string;
   rootClassName?: string;
   dataProvider?: PresentationPropertyDataProvider;
@@ -46,8 +43,14 @@ export interface PropertyGridWidgetBaseProps {
 }
 
 export interface PropertyGridProps extends PropertyGridWidgetBaseProps {
+  /** @deprecated will automatically obtain active iModel Connection */
   iModelConnection: IModelConnection;
+  /** @deprecated will automatically obtain project/context id from active iModel Connection */
   projectId: string;
+  /** @deprecated will be removed in next major */
+  debugLog?: (message: string) => void;
+  /** @deprecated will be removed in next major */
+  featureTracking?: PropertyGridFeatureTracking;
 }
 
 /** Supported Feature Flags for PropertyGrid */
