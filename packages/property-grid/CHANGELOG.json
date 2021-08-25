@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "2.2.0",
+      "tag": "@bentley/property-grid-react_v2.2.0",
+      "date": "Wed, 25 Aug 2021 18:17:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Updated class based components to functional. UiProvider now adds the multi element property grid instead of the previous single element property grid. Deprecated a few props which are unused and will be removed in next major."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.0",
       "tag": "@bentley/property-grid-react_v2.1.0",
       "date": "Fri, 20 Aug 2021 18:32:34 GMT",
