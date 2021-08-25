@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Search bar was not sized correctly, and alignment was not centered.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react"
+}
