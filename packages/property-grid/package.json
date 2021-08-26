@@ -19,9 +19,6 @@
   },
   "main": "lib/property-grid-react.js",
   "typings": "lib/property-grid-react",
-  "files": [
-    "lib/**/*"
-  ],
   "scripts": {
     "build": "tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
