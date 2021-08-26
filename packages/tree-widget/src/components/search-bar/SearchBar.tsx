@@ -123,6 +123,10 @@ export class SearchBar extends React.PureComponent<
       showSearch && "hide",
       alignment === Alignment.Right && "right"
     );
+    const searchBarContainerClassName = classnames(
+      "search-bar-search-container",
+      enableGrouping && "search-bar-grouping-enabled",
+    );
 
     return (
       <div className={classes}>
@@ -135,7 +139,7 @@ export class SearchBar extends React.PureComponent<
           <IconButton icon="icon-more-2" onClick={this._onToggleDropdown} />
         </div>
         <div className={contentClassName}>{this.props.children}</div>
-        <div className="search-bar-search-container">
+        <div className={searchBarContainerClassName}>
           <SearchBox
             ref={this._searchBox}
             className={searchBoxClassName}

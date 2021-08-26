@@ -44,7 +44,7 @@ export function TreeHeaderComponent({
       onSelectedChanged={searchOptions.onResultSelectedChanged}
       resultCount={searchOptions.matchedResultCount ?? 0}
     >
-      <div>
+      <div className="tree-widget-search-bar-button-container">
         {showAll && (
           <IconButton
             className={"tree-widget-header-tree-toolbar-icon"}
