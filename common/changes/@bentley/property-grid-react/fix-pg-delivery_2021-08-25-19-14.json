@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "Remove unused PropertyGrid Extension that never worked. Make sure i18n gets delivered\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react"
+}

@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 export * from "./PropertyGridManager";
-export * from "./PropertyGridExtension";
 export * from "./PropertyGridUiItemsProvider";
 export * from "./components/PropertyGrid";
 export * from "./components/FilteringPropertyGrid";
