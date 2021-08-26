@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.4.3",
+      "tag": "@bentley/tree-widget-react_v1.4.3",
+      "date": "Thu, 26 Aug 2021 14:00:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Search bar was not sized correctly, and alignment was not centered."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.2",
       "tag": "@bentley/tree-widget-react_v1.4.2",
       "date": "Mon, 09 Aug 2021 20:24:55 GMT",
