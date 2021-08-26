@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Wed, 25 Aug 2021 18:17:58 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Aug 2021 15:28:08 GMT and should not be manually modified.
+
+## 2.2.1
+Thu, 26 Aug 2021 15:28:08 GMT
+
+### Patches
+
+- Remove unused PropertyGrid Extension that never worked. Make sure i18n gets delivered"
 
 ## 2.2.0
 Wed, 25 Aug 2021 18:17:58 GMT

@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "2.2.1",
+      "tag": "@bentley/property-grid-react_v2.2.1",
+      "date": "Thu, 26 Aug 2021 15:28:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove unused PropertyGrid Extension that never worked. Make sure i18n gets delivered\""
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.0",
       "tag": "@bentley/property-grid-react_v2.2.0",
       "date": "Wed, 25 Aug 2021 18:17:58 GMT",
