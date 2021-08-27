@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "Fix bug where label and classname didnt show in multi element property grid",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react"
+}
