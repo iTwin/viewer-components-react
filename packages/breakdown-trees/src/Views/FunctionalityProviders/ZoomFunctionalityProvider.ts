@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 
+
 import { NodeKey } from "@bentley/presentation-common";
 import { TreeModelNode } from "@bentley/ui-components";
 import { IModelApp, IModelConnection, NotifyMessageDetails, OutputMessagePriority, OutputMessageType } from "@bentley/imodeljs-frontend";
@@ -32,7 +33,7 @@ export class ZoomFunctionalityProvider extends TreeNodeFunctionalityProvider {
     }
   }
 
-  public static async getElementProps(
+  private static async getElementProps(
     iModel: IModelConnection,
     elemIds: string[] | string,
   ) {
