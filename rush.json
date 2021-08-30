@@ -62,8 +62,7 @@
     {
       "packageName": "@bentley/breakdown-trees-react",
       "projectFolder": "packages/breakdown-trees",
-      "versionPolicyName": "breakdown-trees",
-      "shouldPublish": false
+      "versionPolicyName": "breakdown-trees"
     }
   ]
 }
