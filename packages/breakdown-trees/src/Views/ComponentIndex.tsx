@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import * as React from "react";
 import { Ruleset } from "@bentley/presentation-common";
 import { ControlledTreeWrapper, populateMapWithCommonMenuItems } from "./TreeWithRuleset";
@@ -51,7 +52,7 @@ export const ComponentIndex: React.FC<ComponentIndexProps> = (props: ComponentIn
     const displayGuidHandler = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon-label", () => { return props.displayGuids; }, props.setIsDisplayGuids);
     optionItems.push(displayGuidHandler);
     return { functionIconMapper, optionItems, displayGuidHandler };
-  }, [dataProvider]);
+  }, [dataProvider, props.eventHandlers, props.setIsDisplayGuids, props.displayGuids]);
 
   displayGuidHandler._getItemState = () => props.displayGuids;
 
@@ -64,7 +65,7 @@ export const ComponentIndex: React.FC<ComponentIndexProps> = (props: ComponentIn
     displayGuids={props.displayGuids}
     setIsDisplayGuids={props.setIsDisplayGuids}
     enableVisibility={props.enableVisibility ? props.enableVisibility : false}
-  />), [props.iModel, props.displayGuids, props.setIsDisplayGuids]);
+  />), [props.iModel.key, props.displayGuids, props.setIsDisplayGuids, props.enableVisibility]);
 
   return (
     <LoadableRuleSetComponent ruleSet={componentIndex as Ruleset} >

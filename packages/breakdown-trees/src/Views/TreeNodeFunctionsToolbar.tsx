@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import { IconButton } from "./IconButton";
 import * as React from "react";
 import { TreeModel, TreeModelNode } from "@bentley/ui-components";
@@ -25,7 +26,7 @@ export const TreeNodeFunctionsToolbar: React.FC<TreeNodeFunctionsToolbarProps> =
   React.useEffect(() => {
     getToolbarIcons(props.treeNodeIconMapper, props.selectedNodes, props.treeModel)
       .then((icons) => setToolbarIcons(icons))
-  }, [props.selectedNodes]);
+  }, [props.treeNodeIconMapper, props.selectedNodes, props.treeModel]);
 
   return (<div className="custom-tree-toolbar">
     {toolBarIcons}

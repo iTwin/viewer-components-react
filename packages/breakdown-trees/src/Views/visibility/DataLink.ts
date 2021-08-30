@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import { IModelConnection } from "@bentley/imodeljs-frontend";
 import { Range3d } from "@bentley/geometry-core";
 
@@ -71,90 +72,8 @@ export class DataLink {
 
     if (storyId)
       query += ` WHERE story.ECInstanceId = ${storyId}`;
-
-    /*
-  if (parentId) {
-    query = `SELECT room.ECInstanceId as id, room.UserLabel as label, room.CodeValue as code, story.ECInstanceId as composingId
-    FROM BuildingSpatial:Space room
-    JOIN Spatial.Story story ON story.ECInstanceId = room.composingElement.id WHERE story.ECInstanceId = ${parentId}`;
-  } else {
-    query = `SELECT room.ECInstanceId as id, room.UserLabel as label, room.CodeValue as code, story.ECInstanceId as composingId
-    FROM BuildingSpatial:Space room
-    JOIN Spatial.Story story ON story.ECInstanceId = room.composingElement.id`;
-  }
-  */
-
     const rows = await this.executeQuery(iModel, query);
     return rows;
-  }
-
-  public static async queryAllSensors(iModel: IModelConnection) {
-
-    const queries = [];
-    let rows: any[] = [];
-
-    // // IFC sensor queries
-    // queries.push(`SELECT sensor.ECInstanceId as id, sensor.UserLabel as label, sensor.CodeValue as code, sensor.Origin as origin, link.SourceECInstanceId as composingId, aspect.ifcDeviceId as presenceSensorId
-    // FROM Bis.SpatialElement sensor
-    // JOIN Bis.ElementRefersToElements link ON sensor.ECInstanceId = link.TargetECInstanceId
-    // JOIN IfcDynamic.ifcAspect_IfcDistributionControlElement_Text aspect ON aspect.Element.Id = sensor.ECInstanceId
-    // WHERE UserLabel LIKE '%sensor%' OR UserLabel LIKE '%motion%' OR CodeValue LIKE '%device%'`);
-
-    // Revit queries
-    queries.push(`SELECT sensor.ECInstanceId as id, sensor.UserLabel as label, sensor.CodeValue as code, sensor.Origin as origin, link.SourceECInstanceId as composingId, sensor.BACnet_TemperatureSensor as temperatureSensorId, sensor.BACnet_HumiditySensor as humiditySensorId, sensor.AKS_Nummer as aks_number
-    FROM RevitDynamic._300S_Fuhler_Raumbediengerat_QMX sensor
-    JOIN Bis.ElementRefersToElements link ON sensor.ECInstanceId = link.TargetECInstanceId`);
-
-    queries.push(`SELECT sensor.ECInstanceId as id, sensor.UserLabel as label, sensor.CodeValue as code, sensor.Origin as origin, link.SourceECInstanceId as composingId, sensor.BACnet_TemperatureSensor as temperatureSensorId, sensor.AKS_Nummer as aks_number
-    FROM RevitDynamic._300S_Kabeltemperaturfuhler_QAP sensor
-    JOIN Bis.ElementRefersToElements link ON sensor.ECInstanceId = link.TargetECInstanceId`);
-
-    queries.push(`SELECT sensor.ECInstanceId as id, sensor.UserLabel as label, sensor.CodeValue as code, sensor.Origin as origin, link.SourceECInstanceId as composingId, sensor.BACnet_CO2Sensor as airQualitySensorId, sensor.AKS_Nummer as aks_number
-    FROM RevitDynamic._300S_Kanal_Luftqualitatsfuhler_QPM sensor
-    JOIN Bis.ElementRefersToElements link ON sensor.ECInstanceId = link.TargetECInstanceId`);
-
-    for (const query of queries) {
-      try {
-        rows = rows.concat(await this.executeQuery(iModel, query));
-      } catch (e) {
-        // tslint:disable-next-line:no-console
-        console.log(e);
-      }
-    }
-
-    return rows;
-  }
-
-  public static async queryPhysicalView(iModel: IModelConnection) {
-    const query = `SELECT ECInstanceId as id, CodeValue as code FROM Bis.ViewDefinition3d`;
-    const viewDefinitions = await this.executeQuery(iModel, query);
-
-    return viewDefinitions;
-  }
-
-  public static async queryAllDrawingViews(iModel: IModelConnection) {
-    const query = `SELECT ECInstanceId as id, CodeValue as code FROM Bis.DrawingViewDefinition`;
-    const viewDefinitions = await this.executeQuery(iModel, query);
-
-    return viewDefinitions;
-  }
-
-  public static async queryAllDrawingGraphics(iModel: IModelConnection) {
-    const query = `SELECT EcInstanceId as id, UserLabel as label FROM Bis.DrawingGraphic`;
-    const drawingGraphics = await this.executeQuery(iModel, query);
-
-    return drawingGraphics;
-  }
-
-  public static async queryPhysicalOverlapsRooms(iModel: IModelConnection, roomIds: string[]) {
-    const roomIdsString = roomIds.join(", ");
-    const query = `SELECT Distinct(element.ECInstanceId)
-    FROM Bis.PhysicalElement element
-    JOIN SpatialComposition.CompositeOverlapsSpatialElements roomToElement ON element.ECInstanceId = roomToElement.TargetECInstanceId
-    JOIN Spatial.Space room ON room.ECInstanceId = roomToElement.SourceECInstanceId WHERE room.ECInstanceId IN (` + roomIdsString + ")";
-    const rows = await this.executeQuery(iModel, query);
-    const physicalIDs = rows.map((row) => row.id);
-    return physicalIDs;
   }
 
   public static async queryCategoryIds(iModel: IModelConnection, categoryNames: string[]) {

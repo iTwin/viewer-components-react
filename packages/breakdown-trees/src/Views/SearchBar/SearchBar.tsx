@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import * as React from "react";
 import classnames from "classnames";
 import { CommonProps } from "@bentley/ui-core";
@@ -51,7 +52,7 @@ interface SearchBarState {
   showDropdown: boolean;
 }
 
- /** SearchBox with expanding search box capability */
+/** SearchBox with expanding search box capability */
 export class SearchBar extends React.PureComponent<SearchBarProps, SearchBarState> {
   private _target: HTMLElement | null = null;
   private _searchBox = React.createRef<SearchBox>();
@@ -67,14 +68,9 @@ export class SearchBar extends React.PureComponent<SearchBarProps, SearchBarStat
     this.state = { showSearch: props.showSearch, showDropdown: false };
   }
 
-  public async componentDidUpdate(prevProps: SearchBarProps) {
-    if (prevProps.value !== this.props.value) {
-    }
-  }
-
   private _onToggleSearch = (_event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const showSearch = !this.state.showSearch;
-    this.setState ({ showSearch }, () => {
+    this.setState({ showSearch }, () => {
       if (showSearch && this._searchBox.current)
         setTimeout(() => {
           if (this._searchBox.current)
@@ -84,7 +80,7 @@ export class SearchBar extends React.PureComponent<SearchBarProps, SearchBarStat
   }
 
   private _onCloseDropdown = () => {
-      this.setState({ showDropdown: false });
+    this.setState({ showDropdown: false });
   }
 
   private _onToggleDropdown = () => {
@@ -95,7 +91,7 @@ export class SearchBar extends React.PureComponent<SearchBarProps, SearchBarStat
     const { value, alignment, valueChangedDelay, placeholder, enableGrouping, title } = this.props;
     const { showSearch, showDropdown } = this.state;
 
-    const classes = classnames ("search-bar", this.props.className);
+    const classes = classnames("search-bar", this.props.className);
     const searchBoxClassName = classnames("search-bar-search-box", showSearch && "show");
     const groupButtonClassName = classnames("search-bar-group-button2", (showSearch && enableGrouping) && "show");
     const contentClassName = classnames("search-bar-button-container", showSearch && "hide", alignment === Alignment.Right && "right");
@@ -120,7 +116,7 @@ export class SearchBar extends React.PureComponent<SearchBarProps, SearchBarStat
             onFilterClear={this.props.onFilterClear}
             onFilterStart={this.props.onFilterStart}
             resultCount={this.props.resultCount}
-            onSelectedChanged={this.props.onSelectedChanged}/>
+            onSelectedChanged={this.props.onSelectedChanged} />
         </div>
         <IconButton className="search-bar-search-icons show" icon="icon-search" onClick={this._onToggleSearch} title={title} />
         {showSearch &&

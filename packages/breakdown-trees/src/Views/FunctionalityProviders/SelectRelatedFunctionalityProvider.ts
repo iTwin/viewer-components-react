@@ -3,9 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { KeySet, NodeKey } from "@bentley/presentation-common";
 import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { Presentation} from "@bentley/presentation-frontend";
+import { Presentation } from "@bentley/presentation-frontend";
 import { TreeModelNode, TreeNodeItem, DelayLoadedTreeNodeItem } from "@bentley/ui-components";
 import { IModelConnection } from "@bentley/imodeljs-frontend";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
@@ -16,10 +17,10 @@ export class SelectRelatedFunctionalityProvider extends TreeNodeFunctionalityPro
   private _rulesetId: string;
   private _onActionPerformedEvent: BeEvent<() => void>;
 
-  constructor (functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider, rulesetId: string, onActionPerformedEvent?: BeEvent<() => void>) {
-    super (functionalitySourceName, treeDataProvider);
+  constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider, rulesetId: string, onActionPerformedEvent: BeEvent<() => void>) {
+    super(functionalitySourceName, treeDataProvider);
     this._rulesetId = rulesetId;
-    this._onActionPerformedEvent = onActionPerformedEvent!;
+    this._onActionPerformedEvent = onActionPerformedEvent;
   }
 
   public async performAction(nodes: TreeModelNode[]) {
@@ -31,7 +32,7 @@ export class SelectRelatedFunctionalityProvider extends TreeNodeFunctionalityPro
     }
   }
 
-  public async selectRelated (node: TreeModelNode) {
+  public async selectRelated(node: TreeModelNode) {
     const keys = new KeySet();
     const elementKey = this._treeDataProvider.getNodeKey(node.item);
     keys.add(elementKey);

@@ -3,17 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { NodeKey } from "@bentley/presentation-common";
 import { TreeModelNode } from "@bentley/ui-components";
 import { IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
-import {ToggledTopFitViewFunctionalityProvider} from "./ToggledTopFitViewFunctionalityProvider";
+import { ToggledTopFitViewFunctionalityProvider } from "./ToggledTopFitViewFunctionalityProvider";
 import { GeometricElement3dProps, Placement3d } from "@bentley/imodeljs-common";
 import { ClipVector, ClipPrimitive, ConvexClipPlaneSet } from "@bentley/geometry-core";
 import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
 
 export class SpaceClipPlanesProvider extends ToggledTopFitViewFunctionalityProvider {
   public defaultHeight?: number;
-  constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider, setTopView: boolean, defaultHeight?: number ) {
+  constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider, setTopView: boolean, defaultHeight?: number) {
     super(functionalitySourceName, treeDataProvider, setTopView);
     this.defaultHeight = defaultHeight;
   }
@@ -31,8 +32,7 @@ export class SpaceClipPlanesProvider extends ToggledTopFitViewFunctionalityProvi
   }
 
   private async checkIsSpace(iModel: IModelConnection, spaceId: string) {
-    let query = "";
-    query = `SELECT ECInstanceId as id FROM BuildingSpatial.Space WHERE ECInstanceId = ${spaceId}`;
+    const query = `SELECT ECInstanceId as id FROM BuildingSpatial.Space WHERE ECInstanceId = ${spaceId}`;
 
     const rows = await this.executeQuery(iModel, query);
     return rows.length > 0;
@@ -65,8 +65,8 @@ export class SpaceClipPlanesProvider extends ToggledTopFitViewFunctionalityProvi
 
   private async clipViewToSpace(node: TreeModelNode) {
     const elementKey = this._treeDataProvider.getNodeKey(node.item)
-    if (NodeKey.isInstancesNodeKey(elementKey)){
-      const instanceId =  elementKey.instanceKeys[0].id;
+    if (NodeKey.isInstancesNodeKey(elementKey)) {
+      const instanceId = elementKey.instanceKeys[0].id;
       await this.createSectionPlanes(instanceId);
       super.performAction([node]);
     }

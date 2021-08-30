@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { NodeKey } from "@bentley/presentation-common";
 import { TreeModelNode } from "@bentley/ui-components";
 import { IModelApp, IModelConnection, NotifyMessageDetails, OutputMessagePriority, OutputMessageType } from "@bentley/imodeljs-frontend";
@@ -16,9 +17,9 @@ import { IPresentationTreeDataProvider } from "@bentley/presentation-components"
 export class ZoomFunctionalityProvider extends TreeNodeFunctionalityProvider {
   private _onActionPerformedEvent: BeEvent<() => void>;
 
-  constructor(sourceName: string, treeDataProvider: IPresentationTreeDataProvider, onActionPerformedEvent?: BeEvent<() => void>) {
+  constructor(sourceName: string, treeDataProvider: IPresentationTreeDataProvider, onActionPerformedEvent: BeEvent<() => void>) {
     super(sourceName, treeDataProvider);
-    this._onActionPerformedEvent = onActionPerformedEvent!;
+    this._onActionPerformedEvent = onActionPerformedEvent;
   }
 
   public async performAction(nodes: TreeModelNode[]) {

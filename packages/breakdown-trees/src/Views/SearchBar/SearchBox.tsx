@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 /** @module SearchBox */
 
 import * as React from "react";
@@ -87,7 +88,7 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
 
     // istanbul ignore else
     if (this._inputElement)
-    searchText = this._inputElement.value;
+      searchText = this._inputElement.value;
 
     this.setState((_prevState) => {
       return { searchText };
@@ -146,7 +147,7 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
   public async componentDidUpdate(prevProps: SearchBoxProps) {
     if (prevProps.searchText !== this.props.searchText) {
       const searchText = this.props.searchText;
-      this.setState ({ searchText });
+      this.setState({ searchText });
     }
 
     this.focus();
@@ -169,14 +170,14 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
     return null;
   }
 
-  private _onPrevClick = () =>  {
+  private _onPrevClick = () => {
     if (this.state.selectedIndex > 1) {
       this.props.onSelectedChanged(this.state.selectedIndex - 1);
       this.setState((state) => ({ selectedIndex: state.selectedIndex - 1 }));
     }
   }
 
-  private _onNextClick = () =>  {
+  private _onNextClick = () => {
     if (this.state.selectedIndex < this.props.resultCount) {
       this.props.onSelectedChanged(this.state.selectedIndex + 1);
       this.setState((state) => ({ selectedIndex: state.selectedIndex + 1 }));
@@ -186,7 +187,7 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
   public render() {
     const { autoFocus, className, style, resultCount, placeholder } = this.props;
     const { searchText, selectedIndex } = this.state;
-    const searchClassName = classnames ("bldg-uisnip-core-searchbox", className);
+    const searchClassName = classnames("bldg-uisnip-core-searchbox", className);
     const showCount = resultCount > 0;
     const isPrevEnabled = selectedIndex > 1;
     const isNextEnabled = selectedIndex < resultCount;
@@ -209,7 +210,7 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
           <IconButton className="uisnip-core-searchbox-step-button" icon="icon-chevron-up" disabled={!isPrevEnabled} onClick={this._onPrevClick} title="Previous" />
           <IconButton className="uisnip-core-searchbox-step-button" icon="icon-chevron-down" disabled={!isNextEnabled} onClick={this._onNextClick} title="Next" />
         </div>
-        <span className="uisnip-core-searchbox-step-button icon icon-close" onClick={this._handleIconClick}/>
+        <span className="uisnip-core-searchbox-step-button icon icon-close" onClick={this._handleIconClick} />
       </div>
     );
   }

@@ -3,11 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { DecorateContext, Decorator, IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
 import { TextOffsetProps, TextOffsetType, TextStyleProps } from "@bentley/measure-tools-react";
-import { ColorDef, GeometricElement3dProps, MassPropertiesOperation, MassPropertiesResponseProps } from "@bentley/imodeljs-common";
+import { ColorDef, ElementProps, GeometricElement3dProps, MassPropertiesOperation, MassPropertiesResponseProps } from "@bentley/imodeljs-common";
 import { DecorationClickedHandler, SpaceLabelDecoration, SpaceLabelDecorationProps } from "./SpaceLabelDecoration";
-import { assert } from "@bentley/bentleyjs-core";
+import { assert, Id64Arg } from "@bentley/bentleyjs-core";
 import { Point3d, Range3d } from "@bentley/geometry-core";
 
 export interface SpaceDecorationCreationProps {
@@ -15,7 +16,7 @@ export interface SpaceDecorationCreationProps {
   centerX: number;
   centerY: number;
   maxTextWidth: number;
-  spaceId: number;
+  spaceId: Id64Arg;
 }
 
 export class SpaceLabelDecorator implements Decorator {
@@ -46,12 +47,16 @@ export class SpaceLabelDecorator implements Decorator {
     });
   }
 
-  public async addDecorationsForSpaces(imodel: IModelConnection, roomIds: any, onClickHandler: DecorationClickedHandler) {
-    const roomProps: any[] = await imodel.elements.getProps(roomIds[0]);
-    const origin = roomProps[0].placement.origin;
-    let minHeight = roomProps[0].placement.bbox.low[2] + origin[2];
+  public async addDecorationsForSpaces(imodel: IModelConnection, roomIds: string[], onClickHandler: DecorationClickedHandler) {
+    const roomProps = await imodel.elements.getProps(roomIds[0]);
+    const roomProp = roomProps[0] as GeometricElement3dProps;
+    const origin = roomProp.placement?.origin;
+    const low = roomProp.placement?.bbox?.low;
+    const originZ = Array.isArray(origin) ? origin[2] : origin?.z;
+    const lowZ = Array.isArray(low) ? low[2] : low?.z;
+    let minHeight = lowZ + originZ;
 
-    const allRoomsProps: any[] = await imodel.elements.getProps(roomIds);
+    const allRoomsProps: ElementProps[] = await imodel.elements.getProps(roomIds);
 
     // Create the room labels
     const spaceDecorations: any[] = [];
@@ -73,16 +78,18 @@ export class SpaceLabelDecorator implements Decorator {
         return;
       }
 
-      const room = allRoomsProps[i];
+      const room = allRoomsProps[i] as GeometricElement3dProps;
       const roomId = roomIds[i];
       const massProps = massProperties[i];
 
       // Compute the min and max z values of the rooms in the storey.
       // We're using the minHeight property to assign the z value of the decorations, so that they appear on the floor.
-      const roomOrigin = room.placement.origin;
-      const roomMinZ = roomOrigin[2] + room.placement.bbox.low[2];
+      let roomOrigin = room.placement?.origin;
+      roomOrigin = Array.isArray(roomOrigin) ? roomOrigin : [roomOrigin?.x!, roomOrigin?.y!, roomOrigin?.z!];
+      const roomLow = room.placement?.bbox?.low;
+      const roomLowZ = Array.isArray(roomLow) ? roomLow[2] : roomLow?.z;
+      const roomMinZ = roomLowZ + roomOrigin[2];
       minHeight = Math.min(minHeight, roomMinZ);
-
       const decorationData = this.createDecorationData(room, roomId, roomOrigin, massProps);
       spaceDecorations.push(decorationData);
 
@@ -91,7 +98,7 @@ export class SpaceLabelDecorator implements Decorator {
     this.addSpaceDecorations(spaceDecorations, minHeight, onClickHandler);
   }
 
-  private createDecorationData(room: any, roomId: any, roomOrigin: number[], massProps: MassPropertiesResponseProps): SpaceDecorationCreationProps | undefined {
+  private createDecorationData(room: any, roomId: string, roomOrigin: number[], massProps: MassPropertiesResponseProps): SpaceDecorationCreationProps | undefined {
     const userLabel = (room as GeometricElement3dProps).userLabel;
     if (userLabel && userLabel !== "") {
       const roomBBoxLow = room.placement.bbox.low;

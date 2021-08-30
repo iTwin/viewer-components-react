@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import * as React from "react";
 import { Ruleset } from "@bentley/presentation-common";
 import { ControlledTreeWrapper, populateMapWithCommonMenuItems } from "./TreeWithRuleset";
@@ -59,7 +60,7 @@ export const ClassificationsTree: React.FC<ClassificationsTreeProps> = (props: C
     searchTools={true}
     displayGuids={props.displayGuids}
     setIsDisplayGuids={props.setIsDisplayGuids} enableVisibility={props.enableVisibility ? props.enableVisibility : false}
-  />), [props.iModel, props.displayGuids, props.setIsDisplayGuids]);
+  />), [props.iModel.key, props.displayGuids, props.setIsDisplayGuids, props.enableVisibility]);
 
   return (
     <LoadableRuleSetComponent ruleSet={classificationRules as Ruleset} >

@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { useTreeFilteringState } from "./visibility/TreeFilteringState";
 import * as React from "react";
 import { IPresentationTreeDataProvider, usePresentationTreeNodeLoader } from "@bentley/presentation-components";
@@ -72,7 +73,7 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
       }
     }
     return node.label;
-  }, [props.displayGuids]);
+  }, [props.displayGuids, props.dataProvider]);
 
   const expandTree = () => {
     const selectionSet = props.iModel.selectionSet.elements;
@@ -103,7 +104,6 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
       if (parentNode) {
         if (!parentNode.isExpanded) {
           unifiedSelectionEventHandler.onNodeExpanded({ nodeId: parentNode.id });
-
         }
         expandParentNodes(parentNode, model);
       }
@@ -174,7 +174,7 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
 
   const toolBarSection = props.searchTools ? searchBar : functionsToolbar;
   const selectionSet = props.iModel.selectionSet.elements;
-  React.useMemo(() => {
+  React.useEffect(() => {
     if (!isFilteringOn)
       expandTree();
   }, [selectionSet, isFilteringOn]);
@@ -217,7 +217,7 @@ const useVisibilityHandler = (rulesetId: string, treeDataProvider: IPresentation
     const handler = createVisibilityHandler(rulesetId, treeDataProvider, modelSource, activeView);
     previous.current = handler;
     return handler;
-  }, [rulesetId, activeView]);
+  }, [rulesetId, treeDataProvider, modelSource, activeView]);
 };
 
 const createVisibilityHandler = (rulesetId: string, treeDataProvider: IPresentationTreeDataProvider, modelSource: TreeModelSource, activeView?: Viewport): VisibilityHandler | undefined => {
@@ -228,7 +228,7 @@ export function populateMapWithCommonMenuItems(treeName: string, treeFunctionali
   const selectRelatedIcon: FunctionIconInfo = {
     key: ToolbarItemKeys.selectRelated,
     label: BreakdownTrees.translate("contextMenu.selectRelatedLabel"),
-    functionalityProvider: new SelectRelatedFunctionalityProvider(treeName, dataProvider, rulesetId, eventHandlers?.onSelectRelated),
+    functionalityProvider: new SelectRelatedFunctionalityProvider(treeName, dataProvider, rulesetId, eventHandlers?.onSelectRelated!),
     toolbarIcon: "icon-selection",
   };
   treeFunctionalityMapper.registerGlobal(selectRelatedIcon);
@@ -236,7 +236,7 @@ export function populateMapWithCommonMenuItems(treeName: string, treeFunctionali
   treeFunctionalityMapper.registerForNodesOfClasses(["BisCore:GeometricElement3d"], {
     key: ToolbarItemKeys.zoom,
     label: BreakdownTrees.translate("contextMenu.zoomSelectedLabel"),
-    functionalityProvider: new ZoomFunctionalityProvider(treeName, dataProvider, eventHandlers?.onZoomToElement),
+    functionalityProvider: new ZoomFunctionalityProvider(treeName, dataProvider, eventHandlers?.onZoomToElement!),
     toolbarIcon: "icon-re-center",
   });
 }

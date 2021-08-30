@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import * as React from "react";
 import { Presentation } from "@bentley/presentation-frontend";
 import spatialRulesDefault from "../assets/SpatialBreakdown.json";
@@ -52,26 +53,26 @@ const _onModelsChanged = async () => {
 // <ConnectedSimpleTreeWithRuleset ruleSet={spatialRules as Ruleset}  controller={treeWithRulesetController} />
 export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (props: SpatialContainmentTreeProps) => {
   const treeName = "SpatialContainmentTree";
-  let spatialRules: any = spatialRulesDefault;
+  let spatialRules = spatialRulesDefault as Ruleset;
   if (props.groupByType && props.groupByDiscipline) {
-    spatialRules = spatialRulesByTypeAndDiscipline;
+    spatialRules = spatialRulesByTypeAndDiscipline as Ruleset;
   } else {
     if (props.groupByType) {
-      spatialRules = spatialRulesByType;
+      spatialRules = spatialRulesByType as Ruleset;
     }
     if (props.groupByDiscipline) {
-      spatialRules = spatialRulesByDiscipline;
+      spatialRules = spatialRulesByDiscipline as Ruleset;
     }
   }
 
   React.useEffect(() => {
-    if (IModelApp.viewManager.selectedView?.view.isSpatialView) {
+    if (IModelApp.viewManager.selectedView?.view.isSpatialView()) {
       IModelApp.viewManager.selectedView.onViewedModelsChanged.addListener(_onModelsChanged);
       updateModelsInRulesetVars();
     }
 
     return () => {
-      if (IModelApp.viewManager.selectedView?.view.isSpatialView) {
+      if (IModelApp.viewManager.selectedView?.view.isSpatialView()) {
         IModelApp.viewManager.selectedView.onViewedModelsChanged.removeListener(_onModelsChanged);
       }
     }
@@ -81,7 +82,7 @@ export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (pr
     const dataProviderInner = new PresentationTreeDataProvider({ imodel: props.iModel, ruleset: spatialRules.id, appendChildrenCountForGroupingNodes: true });
     dataProviderInner.pagingSize = 20; // paging size is now needed for the controlled tree.
     return dataProviderInner;
-  }, [props.iModel, props.groupByType, props.groupByDiscipline]);
+  }, [props.iModel.key, props.groupByType, props.groupByDiscipline, spatialRules.id]);
 
   const { functionIconMapper, optionItems, displayGuidHandler, groupByTypeHandler, groupByDisciplineHandler } = React.useMemo(() => {
     const functionIconMapper = new TreeNodeFunctionIconInfoMapper(dataProvider);
@@ -97,16 +98,25 @@ export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (pr
     optionItems.push(groupByDisciplineHandler);
 
     return { functionIconMapper, optionItems, displayGuidHandler, groupByTypeHandler, groupByDisciplineHandler };
-  }, [dataProvider]); // the GenericOptionItemHandler uses function to retrieve state - don't need to update
+  }, [dataProvider,
+    props.eventHandlers,
+    props.clipHeight,
+    props.clipAtSpaces,
+    props.displayGuids,
+    props.setIsDisplayGuids,
+    props.groupByType,
+    props.setGroupByType,
+    props.groupByDiscipline,
+    props.setGroupByDiscipline]);
 
   displayGuidHandler._getItemState = () => props.displayGuids;
   groupByTypeHandler._getItemState = () => props.groupByType;
   groupByDisciplineHandler._getItemState = () => props.groupByDiscipline;
-  const containmentTree = React.useMemo(() => <ControlledTreeWrapper iModel={props.iModel} loadedRuleset={spatialRules as Ruleset} dataProvider={dataProvider}
+  const containmentTree = React.useMemo(() => <ControlledTreeWrapper iModel={props.iModel} loadedRuleset={spatialRules} dataProvider={dataProvider}
     treeName={treeName} treeNodeIconMapper={functionIconMapper} optionItems={optionItems} searchTools={true}
     displayGuids={props.displayGuids} setIsDisplayGuids={props.setIsDisplayGuids} enableVisibility={props.enableVisibility ? props.enableVisibility : false} />, [props.iModel, props.displayGuids, props.setIsDisplayGuids, functionIconMapper, props.groupByType]);
 
-  return (<LoadableRuleSetComponent ruleSet={spatialRules as Ruleset}>
+  return (<LoadableRuleSetComponent ruleSet={spatialRules}>
     {containmentTree}
   </LoadableRuleSetComponent>);
 }

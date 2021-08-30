@@ -3,10 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 import { NodeKey } from "@bentley/presentation-common";
 import { TreeModelNode } from "@bentley/ui-components";
 import { IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
-import {ToggledTopFitViewFunctionalityProvider} from "./ToggledTopFitViewFunctionalityProvider";
+import { ToggledTopFitViewFunctionalityProvider } from "./ToggledTopFitViewFunctionalityProvider";
 import { ClipPrimitive, ClipVector, ConvexClipPlaneSet, Range3d } from "@bentley/geometry-core";
 import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
 
@@ -28,14 +29,13 @@ export class BuildingClipPlanesProvider extends ToggledTopFitViewFunctionalityPr
   }
 
   private async checkIsBuilding(iModel: IModelConnection, bldgId: string) {
-    let query = "";
-    query = `SELECT ECInstanceId as id FROM BuildingSpatial.Building WHERE ECInstanceId = ${bldgId}`;
+    const query = `SELECT ECInstanceId as id FROM BuildingSpatial.Building WHERE ECInstanceId = ${bldgId}`;
 
     const rows = await this.executeQuery(iModel, query);
     return rows.length > 0;
   }
 
-  private async queryBuildingRange(iModel: IModelConnection, bldgId: string): Promise<Range3d | undefined>{
+  private async queryBuildingRange(iModel: IModelConnection, bldgId: string): Promise<Range3d | undefined> {
     const queryGetBuildingProps = `select MIN(spel.origin.x + spel.bboxlow.x) as minX, MIN(spel.origin.y + spel.bboxlow.y) as minY, MIN(spel.origin.z + spel.bboxlow.z) as minZ, MAX(spel.origin.x + spel.bboxhigh.x) as maxX, MAX(spel.origin.y + spel.bboxhigh.y) as maxY, MAX(spel.origin.z + spel.bboxhigh.z) as maxZ from spatialcomposition.CompositeOverlapsSpatialElements ovr join biscore.spatialElement spel on spel.ECinstanceId = ovr.targetecinstanceid where sourceECInstanceId in (select sp.ecinstanceid from buildingSpatial.building b join buildingspatial.story s on s.composingelement.id=b.ecinstanceid join buildingspatial.space sp on sp.composingelement.id=s.ecinstanceid where b.ecinstanceid=${bldgId} union select s.ecinstanceid from buildingSpatial.building b join buildingspatial.story s on s.composingelement.id=b.ecinstanceid where b.ecinstanceid=${bldgId})`;
     const rows = await this.executeQuery(iModel, queryGetBuildingProps);
     if (rows.length > 0 && rows[0].minX)
@@ -67,8 +67,8 @@ export class BuildingClipPlanesProvider extends ToggledTopFitViewFunctionalityPr
 
   private async clipViewToBilding(node: TreeModelNode) {
     const elementKey = this._treeDataProvider.getNodeKey(node.item)
-    if (NodeKey.isInstancesNodeKey(elementKey)){
-      const instanceId =  elementKey.instanceKeys[0].id;
+    if (NodeKey.isInstancesNodeKey(elementKey)) {
+      const instanceId = elementKey.instanceKeys[0].id;
       await this.createSectionPlanes(instanceId);
       super.performAction([node]);
     }

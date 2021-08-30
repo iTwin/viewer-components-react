@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import { IconButton } from "./IconButton";
 import * as React from "react";
 import classnames from "classnames";
@@ -19,7 +20,7 @@ export const MoreOptionsButton: React.FC<MoreOptionsButtonProps> = (props: MoreO
   const [displayDropdown, setDisplayDropdown] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
-  const getOptionMenu = (): React.ReactNode[] => {
+  const getOptionMenu = React.useCallback((): React.ReactNode[] => {
     const items: React.ReactNode[] = [];
     props.optionItems.forEach((optionHandler: OptionItemHandler) => {
       items.push(
@@ -35,19 +36,12 @@ export const MoreOptionsButton: React.FC<MoreOptionsButtonProps> = (props: MoreO
           >
             {optionHandler.label}
           </ContextMenuItem>
-          {optionHandler.isActive() ? (
-            <Icon
-              iconSpec="icon-checkmark"
-              className={styles.iconCheckmark}
-            />
-          ) : (
-            ""
-          )}
+          {optionHandler.isActive() && (<Icon iconSpec="icon-checkmark" className={styles.iconCheckmark} />)}
         </div>,
       );
     });
     return items;
-  };
+  }, [props.optionItems]);
 
   return (<div ref={dropdownRef} className={styles.meatballButtonContainer}>
     <IconButton
