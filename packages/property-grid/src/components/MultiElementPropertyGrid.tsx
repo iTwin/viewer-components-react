@@ -15,11 +15,11 @@ import {
 import * as React from "react";
 import { animated, Transition } from "react-spring/renderprops.cjs";
 
+import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { PropertyGridProps } from "../types";
 import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
-import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
 
 export enum MultiElementPropertyContent {
   PropertyGrid = 0,
@@ -28,7 +28,7 @@ export enum MultiElementPropertyContent {
 }
 
 interface SingleElementPropertyGridProps extends Partial<PropertyGridProps> {
-  instanceKey: InstanceKey;
+  instanceKey?: InstanceKey;
 }
 
 const SingleElementPropertyGrid = ({
@@ -52,7 +52,9 @@ const SingleElementPropertyGrid = ({
       dp.isNestedPropertyCategoryGroupingEnabled =
         !!PropertyGridManager.flags.enablePropertyGroupNesting;
       // Set inspected instance as the key
-      dp.keys = new KeySet([instanceKey]);
+      if (instanceKey) {
+        dp.keys = new KeySet([instanceKey]);
+      }
     }
 
     return dp;
@@ -113,62 +115,64 @@ export const MultiElementPropertyGrid = (props: Partial<PropertyGridProps>) => {
     };
   }, [iModelConnection]);
 
-  const onOpenList = React.useCallback(() => {
-    setContent(MultiElementPropertyContent.ElementList);
-    setAnimationForward(true);
-  }, []);
-
-  const onCloseList = React.useCallback(() => {
-    setContent(MultiElementPropertyContent.PropertyGrid);
-    setAnimationForward(false);
-  }, []);
-
-  const onSelectElement = React.useCallback((instanceKey: InstanceKey) => {
-    setContent(MultiElementPropertyContent.SingleElementPropertyGrid);
-    setAnimationForward(true);
-    setSelectedInstanceKey(instanceKey);
-  }, []);
-
-  const onCloseSinglePropertyGrid = React.useCallback(() => {
-    setContent(MultiElementPropertyContent.ElementList);
-    setAnimationForward(false);
-  }, []);
-
   const items = [
-    <PropertyGrid
-      {...props}
-      onInfoButton={moreThanOneElement ? onOpenList : undefined}
-      key={"PropertyGrid"}
-    />,
+    ...React.useMemo(() => {
+      const _items = [
+        <PropertyGrid
+          {...props}
+          onInfoButton={
+            moreThanOneElement
+              ? () => {
+                  setContent(MultiElementPropertyContent.ElementList);
+                  setAnimationForward(true);
+                }
+              : undefined
+          }
+          key={"PropertyGrid"}
+        />,
+      ];
+      if (iModelConnection) {
+        _items.push(
+          <ElementList
+            iModelConnection={iModelConnection}
+            instanceKeys={instanceKeys}
+            onBack={() => {
+              setContent(MultiElementPropertyContent.PropertyGrid);
+              setAnimationForward(false);
+            }}
+            onSelect={(instanceKey: InstanceKey) => {
+              // Need to set animation first, otherwise the animation is incorrect. Theres some issue batching these state changes.
+              setAnimationForward(true);
+              setContent(MultiElementPropertyContent.SingleElementPropertyGrid);
+              setSelectedInstanceKey(instanceKey);
+            }}
+            rootClassName={props.rootClassName}
+            key={"ElementList"}
+          />
+        );
+      }
+
+      return _items;
+    }, [props, moreThanOneElement, iModelConnection, instanceKeys]),
   ];
-  if (iModelConnection) {
-    items.push(
-      <ElementList
-        iModelConnection={iModelConnection}
-        instanceKeys={instanceKeys}
-        onBack={onCloseList}
-        onSelect={onSelectElement}
-        rootClassName={props.rootClassName}
-        key={"ElementList"}
-      />
-    );
-  }
-  if (selectedInstanceKey) {
-    items.push(
-      <SingleElementPropertyGrid
-        {...props}
-        instanceKey={selectedInstanceKey}
-        onBackButton={onCloseSinglePropertyGrid}
-        key={"SingleElementPropertyGrid"}
-      />
-    );
-  }
+
+  items.push(
+    <SingleElementPropertyGrid
+      {...props}
+      instanceKey={selectedInstanceKey}
+      onBackButton={() => {
+        setContent(MultiElementPropertyContent.ElementList);
+        setAnimationForward(false);
+      }}
+      key={"SingleElementPropertyGrid"}
+    />
+  );
 
   return (
     <div className="property-grid-react-transition-container">
       <Transition
         items={content as number}
-        config={{ duration: 200, easing: (t: number) => t * t }}
+        config={{ duration: 250, easing: (t: number) => t * t }}
         from={{
           transform: animationForward
             ? "translate(100%,0)"
