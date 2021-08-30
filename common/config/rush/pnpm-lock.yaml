@@ -8,7 +8,7 @@ importers:
   ../../packages/breakdown-trees:
     specifiers:
       '@bentley/bentleyjs-core': ^2.15.0
-      '@bentley/build-tools': ^2.15.0
+      '@bentley/build-tools': ~2.16.0
       '@bentley/geometry-core': ^2.15.0
       '@bentley/imodeljs-common': ^2.15.0
       '@bentley/imodeljs-frontend': ^2.15.0
@@ -75,7 +75,7 @@ importers:
       redux: 4.1.1
     devDependencies:
       '@bentley/bentleyjs-core': 2.19.9
-      '@bentley/build-tools': 2.19.9
+      '@bentley/build-tools': 2.16.10
       '@bentley/geometry-core': 2.19.9_@bentley+bentleyjs-core@2.19.9
       '@bentley/imodeljs-common': 2.19.9_9ed7cc5f3f6c22eaab6a75b6ab59c22e
       '@bentley/imodeljs-frontend': 2.19.9_4ea51cad76365b16352b05d0bab82471

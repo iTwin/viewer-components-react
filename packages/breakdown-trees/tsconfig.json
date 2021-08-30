@@ -1,12 +1,10 @@
 {
+  "extends": "./node_modules/@bentley/build-tools/tsconfig-base.json",
   "compilerOptions": {
     "skipLibCheck": true,
     "outDir": "./lib",
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "jsx": "react",
-    "downlevelIteration": true,
-    "target": "es5",
     "types": [
       "@bentley/webpack-tools"
     ]
