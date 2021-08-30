@@ -4,9 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { Point3d, PolygonOps, Ray3d } from "@bentley/geometry-core";
-import { GraphicBuilder, IModelApp, QuantityType, DecorateContext } from "@bentley/imodeljs-frontend";
-import { TextMarker, TextEntry } from "./TextMarker";
-import { StyleSet, WellKnownTextStyleType, WellKnownGraphicStyleType } from "./GraphicStyle";
+import { DecorateContext, GraphicBuilder, IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
+import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "./GraphicStyle";
+import { TextEntry, TextMarker } from "./TextMarker";
 
 export class Polygon {
   public isSelected: boolean;
@@ -60,31 +60,31 @@ export class Polygon {
 
   public set styleSet(value: StyleSet) {
     this._styleSet = value;
-    this._textMarker.applyStyle(this._styleSet.getTextStyle(WellKnownTextStyleType.AreaMeasurement)!);
+    this._textMarker.applyStyle(this._styleSet.getTextStyle(WellKnownTextStyleType.AreaMeasurement));
   }
 
   constructor(points: Point3d[], copyPoints: boolean = true, styleSet?: StyleSet) {
     this._styleSet = (styleSet !== undefined) ? styleSet : StyleSet.default;
     this.drawMarker = true;
     this.drawFillArea = true;
-    this._points     = (copyPoints) ? this.copyPoints(points) : points;
-    this._perimeter  = this.calculatePerimeter(this.points);
-    this._area       = Math.abs(PolygonOps.area(this.points));
-    this._areaXY     = Math.abs(PolygonOps.areaXY(this.points));
-    const center     = this.getCenter(this.points);
+    this._points = (copyPoints) ? this.copyPoints(points) : points;
+    this._perimeter = this.calculatePerimeter(this.points);
+    this._area = Math.abs(PolygonOps.area(this.points));
+    this._areaXY = Math.abs(PolygonOps.areaXY(this.points));
+    const center = this.getCenter(this.points);
     this._textMarker = TextMarker.createStyled([], center, this._styleSet.getTextStyle(WellKnownTextStyleType.AreaMeasurement)!);
     this._textMarker.pickable = false;
-    this._textMarker.setMouseEnterHandler( () => { this.isSelected = true; } );
-    this._textMarker.setMouseLeaveHandler( () => { this.isSelected = false; } );
+    this._textMarker.setMouseEnterHandler(() => { this.isSelected = true; });
+    this._textMarker.setMouseLeaveHandler(() => { this.isSelected = false; });
     this.isSelected = false;
     this.recomputeFromPoints();
   }
 
   public recomputeFromPoints() {
-    this._perimeter  = this.calculatePerimeter(this.points);
-    this._area       = Math.abs(PolygonOps.area(this.points));
-    this._areaXY     = Math.abs(PolygonOps.areaXY(this.points));
-    const center     = this.getCenter(this.points);
+    this._perimeter = this.calculatePerimeter(this.points);
+    this._area = Math.abs(PolygonOps.area(this.points));
+    this._areaXY = Math.abs(PolygonOps.areaXY(this.points));
+    const center = this.getCenter(this.points);
 
     this._textMarker.worldLocation = center;
     this.setTextToMarker();
@@ -119,7 +119,7 @@ export class Polygon {
   private copyPoints(points: Point3d[]): Point3d[] {
     const pts = new Array<Point3d>();
     for (const pt of points)
-            pts.push(pt.clone());
+      pts.push(pt.clone());
 
     return pts;
   }

@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { Point3d, XAndY } from "@bentley/geometry-core";
-import { IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
 import { Cartographic } from "@bentley/imodeljs-common";
+import { IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
 import { FormatterSpec } from "@bentley/imodeljs-quantity";
 
 export class FormatterUtils {
@@ -72,9 +72,9 @@ export class FormatterUtils {
     let str = "";
     str += d;
     str += "\xB0";
-    str += ("00" + m).slice(-2);
+    str += (`00${m}`).slice(-2);
     str += "\u2032";
-    str += ("00000" + s.toFixed(2)).slice(-5);
+    str += (`00000${s.toFixed(2)}`).slice(-5);
     str += "\u2033";
     return str;
   }
@@ -106,11 +106,11 @@ export class FormatterUtils {
 
   public static formatSlope(slopeInPercent: number, withSlopeRatio: boolean): string {
     if (!withSlopeRatio || 0.0 === slopeInPercent)
-      return slopeInPercent.toFixed(2) + " %";
+      return `${slopeInPercent.toFixed(2)} %`;
 
     const oneOnSlope = 100.0 / Math.abs(slopeInPercent);
     const sign = slopeInPercent < 0.0 ? "-" : "";
-    return slopeInPercent.toFixed(2)  + "%  (" + sign + "1 : " + oneOnSlope.toFixed(3) + ")";
+    return `${slopeInPercent.toFixed(2)}%  (${sign}1 : ${oneOnSlope.toFixed(3)})`;
   }
 
   public static async formatStation(station: number): Promise<string> {

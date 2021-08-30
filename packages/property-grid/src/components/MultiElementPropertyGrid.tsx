@@ -4,186 +4,185 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./MultiElementPropertyGrid.scss";
-import { Presentation } from "@bentley/presentation-frontend";
 
-import { PropertyGrid, PropertyGridProps } from "./PropertyGrid";
-import { PropertyGridManager } from "../PropertyGridManager";
+import { InstanceKey, KeySet } from "@bentley/presentation-common";
+import { Presentation } from "@bentley/presentation-frontend";
+import {
+  ConfigurableCreateInfo,
+  useActiveIModelConnection,
+  WidgetControl,
+} from "@bentley/ui-framework";
 import * as React from "react";
 import { animated, Transition } from "react-spring/renderprops.cjs";
-import { ElementList } from "./ElementList";
-import { InstanceKey, KeySet } from "@bentley/presentation-common";
-import { PropertyDataProvider } from "../api/PropertyGridDataProvider";
-import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
 
-enum MultiElementPropertyContent {
+import { PropertyGridManager } from "../PropertyGridManager";
+import { PropertyGridProps } from "../types";
+import { ElementList } from "./ElementList";
+import { PropertyGrid } from "./PropertyGrid";
+import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
+
+export enum MultiElementPropertyContent {
   PropertyGrid = 0,
   ElementList = 1,
   SingleElementPropertyGrid = 2,
 }
 
-interface MultiElementPropertyGridState {
-  content: MultiElementPropertyContent;
-  mainPropertyGrid: JSX.Element;
-  list: JSX.Element;
-  singlePropertyGrid?: JSX.Element;
-  animationForward: boolean;
+interface SingleElementPropertyGridProps extends Partial<PropertyGridProps> {
+  instanceKey: InstanceKey;
 }
 
-/**
- * Property grid with the ability to inspect selected elements
- * and let user inspect a single elements properties
- */
-export class MultiElementPropertyGrid extends React.Component<
-  PropertyGridProps,
-  MultiElementPropertyGridState
-> {
-  constructor(props: PropertyGridProps) {
-    super(props);
+const SingleElementPropertyGrid = ({
+  instanceKey,
+  ...props
+}: SingleElementPropertyGridProps) => {
+  const iModelConnection = useActiveIModelConnection();
+  const dataProvider = React.useMemo(() => {
+    let dp;
 
-    this.state = {
-      content: MultiElementPropertyContent.PropertyGrid,
-      mainPropertyGrid: this._renderMainPropertyGrid(),
-      list: this._renderList(),
-      animationForward: true,
-    };
-  }
-
-  private _onSelectionChange = () => {
-    this.setState({
-      content: MultiElementPropertyContent.PropertyGrid,
-      mainPropertyGrid: this._renderMainPropertyGrid(),
-      list: this._renderList(),
-      singlePropertyGrid: undefined,
-      animationForward: false,
-    });
-  }
-
-  public componentDidMount() {
-    Presentation.selection.selectionChange.addListener(this._onSelectionChange);
-  }
-
-  public componentWillUnmount() {
-    Presentation.selection.selectionChange.removeListener(
-      this._onSelectionChange,
-    );
-  }
-
-  /** Set the element list as our current content */
-  private _onOpenList = () => {
-    this.setState({
-      content: MultiElementPropertyContent.ElementList,
-      animationForward: true,
-    });
-  }
-
-  /** Render main property grid with the info button if needed */
-  private _renderMainPropertyGrid = () => {
-    const moreThanOneElement =
-      Presentation.selection.getSelection(this.props.iModelConnection)
-        .instanceKeysCount > 1;
-
-    const onInfoButton = moreThanOneElement ? this._onOpenList : undefined;
-    return <PropertyGrid {...this.props} onInfoButton={onInfoButton} />;
-  }
-
-  /** Go back to property grid as the main content view */
-  private _onCloseList = () => {
-    this.setState({
-      content: MultiElementPropertyContent.PropertyGrid,
-      animationForward: false,
-    });
-  }
-
-  /** Set the single property grid as content and the instance key */
-  private _onSelectElement = (instanceKey: InstanceKey) => {
-    this.setState({
-      content: MultiElementPropertyContent.SingleElementPropertyGrid,
-      singlePropertyGrid: this._renderSinglePropertyGrid(instanceKey),
-      animationForward: true,
-    });
-  }
-
-  /** Renders element selection list to inspect properties */
-  private _renderList = () => {
-    const instanceKeyMap = Presentation.selection.getSelection(
-      this.props.iModelConnection,
-    ).instanceKeys;
-
-    const instanceKeys: InstanceKey[] = [];
-    instanceKeyMap.forEach((ids: Set<string>, className: string) => {
-      ids.forEach((id: string) => {
-        instanceKeys.push({
-          id,
-          className,
-        });
+    if (iModelConnection) {
+      dp = new AutoExpandingPropertyDataProvider({
+        imodel: iModelConnection,
+        ruleset: props.rulesetId,
+        disableFavoritesCategory: !props.enableFavoriteProperties,
       });
-    });
+    }
 
-    return (
+    if (dp) {
+      dp.pagingSize = 50;
+      dp.isNestedPropertyCategoryGroupingEnabled =
+        !!PropertyGridManager.flags.enablePropertyGroupNesting;
+      // Set inspected instance as the key
+      dp.keys = new KeySet([instanceKey]);
+    }
+
+    return dp;
+  }, [
+    iModelConnection,
+    props.rulesetId,
+    props.enableFavoriteProperties,
+    instanceKey,
+  ]);
+
+  return (
+    <PropertyGrid
+      {...props}
+      dataProvider={dataProvider}
+      disableUnifiedSelection={true}
+    />
+  );
+};
+
+export const MultiElementPropertyGrid = (props: Partial<PropertyGridProps>) => {
+  const iModelConnection = useActiveIModelConnection();
+  const [content, setContent] = React.useState<MultiElementPropertyContent>(
+    MultiElementPropertyContent.PropertyGrid
+  );
+  const [animationForward, setAnimationForward] = React.useState(true);
+  const [instanceKeys, setInstanceKeys] = React.useState<InstanceKey[]>([]);
+  const [moreThanOneElement, setMoreThanOneElement] = React.useState(false);
+  const [selectedInstanceKey, setSelectedInstanceKey] =
+    React.useState<InstanceKey>();
+
+  React.useEffect(() => {
+    const onSelectionChange = () => {
+      setContent(MultiElementPropertyContent.PropertyGrid);
+      setAnimationForward(false);
+      if (iModelConnection) {
+        const selectionSet =
+          Presentation.selection.getSelection(iModelConnection);
+        const instanceKeys: InstanceKey[] = [];
+        selectionSet.instanceKeys.forEach(
+          (ids: Set<string>, className: string) => {
+            ids.forEach((id: string) => {
+              instanceKeys.push({
+                id,
+                className,
+              });
+            });
+          }
+        );
+        setInstanceKeys(instanceKeys);
+        setMoreThanOneElement(selectionSet.instanceKeysCount > 1);
+        setSelectedInstanceKey(undefined);
+      }
+    };
+
+    Presentation.selection.selectionChange.addListener(onSelectionChange);
+    return () => {
+      Presentation.selection.selectionChange.removeListener(onSelectionChange);
+    };
+  }, [iModelConnection]);
+
+  const onOpenList = React.useCallback(() => {
+    setContent(MultiElementPropertyContent.ElementList);
+    setAnimationForward(true);
+  }, []);
+
+  const onCloseList = React.useCallback(() => {
+    setContent(MultiElementPropertyContent.PropertyGrid);
+    setAnimationForward(false);
+  }, []);
+
+  const onSelectElement = React.useCallback((instanceKey: InstanceKey) => {
+    setContent(MultiElementPropertyContent.SingleElementPropertyGrid);
+    setAnimationForward(true);
+    setSelectedInstanceKey(instanceKey);
+  }, []);
+
+  const onCloseSinglePropertyGrid = React.useCallback(() => {
+    setContent(MultiElementPropertyContent.ElementList);
+    setAnimationForward(false);
+  }, []);
+
+  const items = [
+    <PropertyGrid
+      {...props}
+      onInfoButton={moreThanOneElement ? onOpenList : undefined}
+      key={"PropertyGrid"}
+    />,
+  ];
+  if (iModelConnection) {
+    items.push(
       <ElementList
-        iModelConnection={this.props.iModelConnection}
+        iModelConnection={iModelConnection}
         instanceKeys={instanceKeys}
-        onBack={this._onCloseList}
-        onSelect={this._onSelectElement}
-        rootClassName={this.props.rootClassName}
+        onBack={onCloseList}
+        onSelect={onSelectElement}
+        rootClassName={props.rootClassName}
+        key={"ElementList"}
+      />
+    );
+  }
+  if (selectedInstanceKey) {
+    items.push(
+      <SingleElementPropertyGrid
+        {...props}
+        instanceKey={selectedInstanceKey}
+        onBackButton={onCloseSinglePropertyGrid}
+        key={"SingleElementPropertyGrid"}
       />
     );
   }
 
-  /** Closes the single element property grid */
-  private _onCloseSinglePropertyGrid = () => {
-    this.setState({
-      content: MultiElementPropertyContent.ElementList,
-      animationForward: false,
-    });
-  }
-
-  /** Render single selection property grid */
-  private _renderSinglePropertyGrid = (instanceKey: InstanceKey) => {
-    const dataProvider = new PropertyDataProvider(
-      this.props.iModelConnection,
-      this.props.rulesetId,
-      this.props.enableFavoriteProperties,
-    );
-    if (PropertyGridManager.flags.enablePropertyGroupNesting) {
-      dataProvider.isNestedPropertyCategoryGroupingEnabled = true;
-    }
-    // Set inspected instance as the key
-    dataProvider.keys = new KeySet([instanceKey]);
-    return (
-      <PropertyGrid
-        {...this.props}
-        dataProvider={dataProvider}
-        onBackButton={this._onCloseSinglePropertyGrid}
-        disableUnifiedSelection={true}
-      />
-    );
-  }
-
-  /** Render component using react-spring transition component */
-  public render() {
-    const items = [this.state.mainPropertyGrid, this.state.list];
-    if (this.state.singlePropertyGrid) {
-      items.push(this.state.singlePropertyGrid);
-    }
-
-    const fromAnim = this.state.animationForward
-      ? "translate(100%,0)"
-      : "translate(-100%,0)";
-    const leaveAnim = !this.state.animationForward
-      ? "translate(100%,0)"
-      : "translate(-100%,0)";
-
-    return (
-      <div className="property-grid-react-transition-container">
-        <Transition
-          items={this.state.content as number}
-          config={{ duration: 200, easing: (t: number) => t * t }}
-          from={{ transform: fromAnim }}
-          enter={{ transform: "translate(0,0)" }}
-          leave={{ transform: leaveAnim }}
-        >
-          {(index) => (style) => (
+  return (
+    <div className="property-grid-react-transition-container">
+      <Transition
+        items={content as number}
+        config={{ duration: 200, easing: (t: number) => t * t }}
+        from={{
+          transform: animationForward
+            ? "translate(100%,0)"
+            : "translate(-100%,0)",
+        }}
+        enter={{ transform: "translate(0,0)" }}
+        leave={{
+          transform: !animationForward
+            ? "translate(100%,0)"
+            : "translate(-100%,0)",
+        }}
+      >
+        {(index) => (style) =>
+          (
             <animated.div
               className="property-grid-react-animated-tab"
               style={style}
@@ -191,31 +190,15 @@ export class MultiElementPropertyGrid extends React.Component<
               {items[index]}
             </animated.div>
           )}
-        </Transition>
-      </div>
-    );
-  }
-}
+      </Transition>
+    </div>
+  );
+};
 
 export class MultiElementPropertyGridWidgetControl extends WidgetControl {
-  constructor(info: ConfigurableCreateInfo, options: any) {
+  constructor(info: ConfigurableCreateInfo, options: PropertyGridProps) {
     super(info, options);
 
-    this.reactNode = (
-      <MultiElementPropertyGrid
-        orientation={options.orientation}
-        isOrientationFixed={options.isOrientationFixed}
-        enableCopyingPropertyText={options.enableCopyingPropertyText}
-        enableFavoriteProperties={options.enableFavoriteProperties}
-        enableNullValueToggle={options.enableNullValueToggle}
-        iModelConnection={options.iModelConnection}
-        projectId={options.projectId}
-        debugLog={options.debugLog}
-        additionalContextMenuOptions={options.additionalContextMenuOptions}
-        rootClassName={options.rootClassName}
-        featureTracking={options.featureTracking}
-        rulesetId={options.rulesetId}
-      />
-    );
+    this.reactNode = <MultiElementPropertyGrid {...options} />;
   }
 }

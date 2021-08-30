@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import "./IModelContentTree.scss";
 import classNames from "classnames";
 import * as React from "react";
@@ -23,7 +22,7 @@ export interface IModelContentTreeProps extends Omit<React.AllHTMLAttributes<HTM
 /**
  * A tree component that shows content of an iModel
  */
-export function IModelContentTree(props: IModelContentTreeProps) {
+export function IModelContentTree(props: IModelContentTreeProps) { // eslint-disable-line @typescript-eslint/naming-convention
   const { iModel, className, ...divProps } = props;
   const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: iModel,

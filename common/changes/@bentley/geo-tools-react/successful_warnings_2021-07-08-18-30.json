@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@bentley/geo-tools-react",
-      "comment": "add rebuild script",
+      "comment": "",
       "type": "none"
     }
   ],

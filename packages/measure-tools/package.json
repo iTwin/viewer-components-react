@@ -1,6 +1,6 @@
 {
   "name": "@bentley/measure-tools-react",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "MIT",
   "description": "Frontend framework and tools for measurements",
   "repository": {
@@ -16,8 +16,8 @@
     "watch": "tsc --w",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build",
-    "lint": "tslint --project . 1>&2",
-    "test": "node ./node_modules/@bentley/certa/bin/certa.js -c certa.json -r chrome",
+    "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "test": "certa -c certa.json -r chrome",
     "cover": "nyc npm test",
     "madge": "madge --circular --extensions ts,tsx src",
     "webpack:tests": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --config webpack.config.js 1>&2"
@@ -28,7 +28,8 @@
     "iModel",
     "iTwin",
     "Measurement",
-    "Measure"
+    "Measure",
+    "iTwin.js"
   ],
   "author": {
     "name": "Bentley Systems, Inc.",
@@ -38,46 +39,43 @@
     "lib/**/*"
   ],
   "peerDependencies": {
-    "@bentley/bentleyjs-core": "^2.17.0",
-    "@bentley/geometry-core": "^2.17.0",
-    "@bentley/imodeljs-common": "^2.17.0",
-    "@bentley/imodeljs-frontend": "^2.17.0",
-    "@bentley/imodeljs-i18n": "^2.17.0",
-    "@bentley/imodeljs-quantity": "^2.17.0",
-    "@bentley/itwin-client": "^2.17.0",
-    "@bentley/presentation-components": "^2.17.0",
-    "@bentley/telemetry-client": "^2.17.0",
-    "@bentley/ui-abstract": "^2.17.0",
-    "@bentley/ui-components": "^2.17.0",
-    "@bentley/ui-core": "^2.17.0",
-    "@bentley/ui-framework": "^2.17.0",
-    "@bentley/ui-ninezone": "^2.17.0",
+    "@bentley/bentleyjs-core": "^2.19.0",
+    "@bentley/geometry-core": "^2.19.0",
+    "@bentley/imodeljs-common": "^2.19.0",
+    "@bentley/imodeljs-frontend": "^2.19.0",
+    "@bentley/imodeljs-i18n": "^2.19.0",
+    "@bentley/imodeljs-quantity": "^2.19.0",
+    "@bentley/itwin-client": "^2.19.0",
+    "@bentley/presentation-components": "^2.19.0",
+    "@bentley/telemetry-client": "^2.19.0",
+    "@bentley/ui-abstract": "^2.19.0",
+    "@bentley/ui-components": "^2.19.0",
+    "@bentley/ui-core": "^2.19.0",
+    "@bentley/ui-framework": "^2.19.0",
+    "@bentley/ui-ninezone": "^2.19.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0"
   },
-  "//devDependencies": [
-    "NOTE: All peerDependencies should also be listed as devDependencies since peerDependencies are not considered by npm install",
-    "NOTE: All tools used by scripts in this package must be listed as devDependencies"
-  ],
   "devDependencies": {
-    "@bentley/bentleyjs-core": "^2.17.0",
-    "@bentley/build-tools": "^2.17.0",
-    "@bentley/certa": "^2.17.0",
-    "@bentley/extension-client": "^2.17.0",
-    "@bentley/geometry-core": "^2.17.0",
-    "@bentley/imodeljs-common": "^2.17.0",
-    "@bentley/imodeljs-frontend": "^2.17.0",
-    "@bentley/imodeljs-i18n": "^2.17.0",
-    "@bentley/imodeljs-quantity": "^2.17.0",
-    "@bentley/itwin-client": "^2.17.0",
-    "@bentley/presentation-components": "^2.17.0",
-    "@bentley/telemetry-client": "^2.17.0",
-    "@bentley/ui-abstract": "^2.17.0",
-    "@bentley/ui-components": "^2.17.0",
-    "@bentley/ui-core": "^2.17.0",
-    "@bentley/ui-framework": "^2.17.0",
-    "@bentley/ui-ninezone": "^2.17.0",
-    "@bentley/webgl-compatibility": "^2.17.0",
+    "@bentley/bentleyjs-core": "^2.19.0",
+    "@bentley/build-tools": "~2.16.0",
+    "@bentley/certa": "^2.19.0",
+    "@bentley/eslint-plugin": "^2.19.0",
+    "@bentley/extension-client": "^2.19.0",
+    "@bentley/geometry-core": "^2.19.0",
+    "@bentley/imodeljs-common": "^2.19.0",
+    "@bentley/imodeljs-frontend": "^2.19.0",
+    "@bentley/imodeljs-i18n": "^2.19.0",
+    "@bentley/imodeljs-quantity": "^2.19.0",
+    "@bentley/itwin-client": "^2.19.0",
+    "@bentley/presentation-components": "^2.19.0",
+    "@bentley/telemetry-client": "^2.19.0",
+    "@bentley/ui-abstract": "^2.19.0",
+    "@bentley/ui-components": "^2.19.0",
+    "@bentley/ui-core": "^2.19.0",
+    "@bentley/ui-framework": "^2.19.0",
+    "@bentley/ui-ninezone": "^2.19.0",
+    "@bentley/webgl-compatibility": "^2.19.0",
     "@types/chai": "^4.2.0",
     "@types/chai-as-promised": "^7.1.1",
     "@types/mocha": "^7.0.2",
@@ -87,6 +85,7 @@
     "chai-as-promised": "^7.1.1",
     "cpx": "^1.5.0",
     "cross-env": "7.0.3",
+    "eslint": "^7.11.0",
     "file-loader": "^4.2.0",
     "glob": "^7.1.2",
     "madge": "4.0.2",
@@ -97,10 +96,9 @@
     "react-dom": "^16.8.0",
     "rimraf": "^2.7.1",
     "source-map-loader": "^0.2.3",
-    "tslint": "^5.11.0",
     "typescript": "3.7.4",
     "url-loader": "2.1.0",
-    "webpack": "4.42.0",
+    "webpack": "4.44.2",
     "webpack-cli": "^3.3.8"
   },
   "dependencies": {
@@ -113,5 +111,13 @@
     "branches": 20,
     "functions": 20,
     "lines": 20
+  },
+  "eslintConfig": {
+    "plugins": [
+      "@bentley"
+    ],
+    "extends": [
+      "plugin:@bentley/ui"
+    ]
   }
 }

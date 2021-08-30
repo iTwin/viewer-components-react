@@ -3,19 +3,19 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d, XYZProps, IModelJson, PointString3d, LineSegment3d, Ray3d, Range3d, XYAndZ, Vector3d } from "@bentley/geometry-core";
-import { DecorateContext, GraphicType, IModelApp, QuantityType, BeButtonEvent } from "@bentley/imodeljs-frontend";
 import { Id64String } from "@bentley/bentleyjs-core";
+import { IModelJson, LineSegment3d, Point3d, PointString3d, Range3d, Ray3d, Vector3d, XYAndZ, XYZProps } from "@bentley/geometry-core";
 import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { Measurement, MeasurementSerializer, MeasurementPickContext, MeasurementWidgetData, MeasurementEqualityOptions } from "../api/Measurement";
-import { MeasurementProps } from "../api/MeasurementProps";
-import { StyleSet, TextOffsetType, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
-import { TextMarker } from "../api/TextMarker";
+import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
 import { FormatterUtils } from "../api/FormatterUtils";
-import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
-import { MeasurementPreferences, MeasurementPreferencesProperty } from "../api/MeasurementPreferences";
-import { ViewHelper } from "../api/ViewHelper";
+import { StyleSet, TextOffsetType, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
+import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementManager } from "../api/MeasurementManager";
+import { MeasurementPreferences, MeasurementPreferencesProperty } from "../api/MeasurementPreferences";
+import { MeasurementProps } from "../api/MeasurementProps";
+import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
+import { TextMarker } from "../api/TextMarker";
+import { ViewHelper } from "../api/ViewHelper";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
@@ -100,25 +100,25 @@ export class DistanceMeasurement extends Measurement {
     if (props)
       this.readFromJSON(props);
 
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   public setStartPoint(point: XYAndZ) {
     this._startPoint.setFrom(point);
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     this.buildRunRiseAxes();
   }
 
   public setEndPoint(point: XYAndZ) {
     this._endPoint.setFrom(point);
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     this.buildRunRiseAxes();
   }
 
   public setStartEndPoints(start: XYAndZ, end: XYAndZ) {
     this._startPoint.setFrom(start);
     this._endPoint.setFrom(end);
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     this.buildRunRiseAxes();
   }
 
@@ -257,7 +257,7 @@ export class DistanceMeasurement extends Measurement {
     const runPoint = this._endPoint.clone();
     runPoint.z = this._startPoint.z;
 
-    // It's irrelevant to draw the axes because we're in 2D already.
+    // It"s irrelevant to draw the axes because we"re in 2D already.
     if (runPoint.isAlmostEqual(this._endPoint))
       return;
 
@@ -286,7 +286,8 @@ export class DistanceMeasurement extends Measurement {
     }
 
     // When all text markers are ready for display, trigger a refresh
-    const promises = this._runRiseAxes.map((value: DistanceMeasurement) => value.createTextMarker());
+    const promises = this._runRiseAxes.map(async (value: DistanceMeasurement) => value.createTextMarker()); // eslint-disable-line @typescript-eslint/no-floating-promises
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     Promise.all(promises).then(() => {
       for (const axis of this._runRiseAxes) {
         if (axis._textMarker) {
@@ -315,7 +316,7 @@ export class DistanceMeasurement extends Measurement {
   }
 
   public onDisplayUnitsChanged(): void {
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     this._runRiseAxes.forEach((axis: DistanceMeasurement) => axis.onDisplayUnitsChanged());
   }
 
@@ -347,7 +348,7 @@ export class DistanceMeasurement extends Measurement {
 
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
     if (!this._isDynamic)
-      this.onDecorationButtonEvent(MeasurementPickContext.createFromSourceId("Invalid", ev)).catch();
+      this.onDecorationButtonEvent(MeasurementPickContext.createFromSourceId("Invalid", ev)).catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
 
     return true;
   }
@@ -373,14 +374,18 @@ export class DistanceMeasurement extends Measurement {
     const fRise = IModelApp.quantityFormatter.formatQuantity(rise, lengthSpec);
 
     let title = IModelApp.i18n.translate("MeasureTools:Measurements.distanceMeasurement");
-    title += " [" + fDistance + "]";
+    title += ` [${fDistance}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     data.properties.push(
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.distance"), name: "DistanceMeasurement_Distance", value: fDistance,
-        aggregatableValue: (lengthSpec !== undefined ) ? { value: distance, formatSpec: lengthSpec} : undefined },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.run"), name: "DistanceMeasurement_Run", value: fRun,
-        aggregatableValue: (lengthSpec !== undefined) ? { value: run, formatSpec: lengthSpec } : undefined },
+      {
+        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.distance"), name: "DistanceMeasurement_Distance", value: fDistance,
+        aggregatableValue: (lengthSpec !== undefined) ? { value: distance, formatSpec: lengthSpec } : undefined,
+      },
+      {
+        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.run"), name: "DistanceMeasurement_Run", value: fRun,
+        aggregatableValue: (lengthSpec !== undefined) ? { value: run, formatSpec: lengthSpec } : undefined,
+      },
       { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.rise"), name: "DistanceMeasurement_Rise", value: fRise },
       { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.slope"), name: "DistanceMeasurement_Slope", value: fSlope },
       { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.delta_x"), name: "DistanceMeasurement_Dx", value: fDeltaX },
@@ -423,7 +428,7 @@ export class DistanceMeasurement extends Measurement {
       this._startPoint.setFrom(other._startPoint);
       this._endPoint.setFrom(other._endPoint);
       this.buildRunRiseAxes();
-      this.createTextMarker().catch();
+      this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
   }
 
@@ -444,7 +449,7 @@ export class DistanceMeasurement extends Measurement {
     this._showAxes = (jsonDist.showAxes !== undefined) ? jsonDist.showAxes : MeasurementPreferences.current.displayMeasurementAxes;
 
     this.buildRunRiseAxes();
-    this.createTextMarker().catch();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   /**
@@ -475,7 +480,7 @@ export class DistanceMeasurement extends Measurement {
 }
 
 // Ensure all distance measurements respond to when show axes is turned on/off in preferences
-function distanceMeasurement_OnDisplayMeasurementAxesHandler(propChanged: MeasurementPreferencesProperty) {
+function onDisplayMeasurementAxesHandler(propChanged: MeasurementPreferencesProperty) {
   if (propChanged !== MeasurementPreferencesProperty.displayMeasurementAxes)
     return;
 
@@ -489,4 +494,4 @@ function distanceMeasurement_OnDisplayMeasurementAxesHandler(propChanged: Measur
   });
 }
 
-MeasurementPreferences.current.onPreferenceChanged.addListener(distanceMeasurement_OnDisplayMeasurementAxesHandler);
+MeasurementPreferences.current.onPreferenceChanged.addListener(onDisplayMeasurementAxesHandler);

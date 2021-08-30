@@ -58,7 +58,7 @@ export class FeatureTracking {
 
     const iModelConnection = this.getUiFameworkIModel();
 
-    // tslint:disable-next-line:no-floating-promises
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     FeatureTracking.postTelemetry(feature, iModelConnection);
   }
 
@@ -71,7 +71,7 @@ export class FeatureTracking {
       let imodelId, changesetId, contextId;
       if (iModelConnection) {
         imodelId = iModelConnection.iModelId;
-        changesetId = iModelConnection.changeSetId;
+        changesetId = iModelConnection.changeset.id;
         contextId = iModelConnection.contextId;
       }
 
@@ -87,7 +87,7 @@ export class FeatureTracking {
    * @param feature Feature that was activated.
    * @param isOn current toggle state of the feature. This is added as metadata.
    */
-  public static notifyToggledFeature( feature: Feature, isOn: boolean) {
+  public static notifyToggledFeature(feature: Feature, isOn: boolean) {
     this.notifyFeature(createToggledFeature(feature.name, feature.guid, isOn, feature.metaData, true));
   }
 
@@ -98,7 +98,7 @@ export class FeatureTracking {
    * @param metaData optional metadata for the feature.
    */
   public static notifyFeatureByName(featureName: string, featureGuid: GuidString, metaData?: Map<string, any>) {
-    this.notifyFeature( { name: featureName, guid: featureGuid, metaData });
+    this.notifyFeature({ name: featureName, guid: featureGuid, metaData });
   }
 
   /**
@@ -108,7 +108,7 @@ export class FeatureTracking {
    * @param isOn current toggle state of the feature. This is added as metadata.
    * @param metaData optional additional metadata for the feature.
    */
-  public static notifyToggledFeatureByName(featureName: string, featureGuid: GuidString, isOn: boolean,  metaData?: Map<string, any>) {
+  public static notifyToggledFeatureByName(featureName: string, featureGuid: GuidString, isOn: boolean, metaData?: Map<string, any>) {
     this.notifyFeature(createToggledFeature(featureName, featureGuid, isOn, metaData, true));
   }
 
@@ -136,8 +136,6 @@ export function createToggledFeature(featureName: string, featureGuid: GuidStrin
   return { name: featureName, guid: featureGuid, metaData };
 }
 
-// tslint:disable:variable-name
-
 // Note: CRT_ prefix is legacy since these features were originally from the Civil-ReviewTools packages. Newly defined features do not need to use this prefix, and can use MST_ for MeaSure-Tools
 export class MeasureToolsFeatures {
   // Tools
@@ -146,8 +144,8 @@ export class MeasureToolsFeatures {
   public static get Tools_MeasureArea(): Feature { return { name: "CRT_Tools_MeasureArea", guid: "7000640d-c362-4533-9f60-3fc4e72af81f" }; }
   public static get Tools_MeasureDistance(): Feature { return { name: "CRT_Tools_MeasureDistance", guid: "10e474ee-9af8-4262-a505-77c9d896b065" }; }
   public static get Tools_MeasureLocation(): Feature { return { name: "CRT_Tools_MeasureLocation", guid: "6230e620-ffc2-4f7f-88d7-8652ae8cf91f" }; }
-  public static get Tools_MeasureAngle(): Feature { return { name: "MST_Tools_MeasureAngle", guid: "19febcb9-24e7-49ee-980b-c2bb6a5dedef"}; }
-  public static get Tools_MeasureRadius(): Feature { return { name: "MST_Tools_MeasureRadius", guid: "0ab34c10-2ab9-4982-9ed9-2760e6e455bd"}; }
+  public static get Tools_MeasureAngle(): Feature { return { name: "MST_Tools_MeasureAngle", guid: "19febcb9-24e7-49ee-980b-c2bb6a5dedef" }; }
+  public static get Tools_MeasureRadius(): Feature { return { name: "MST_Tools_MeasureRadius", guid: "0ab34c10-2ab9-4982-9ed9-2760e6e455bd" }; }
   public static get Tools_MeasurePerpendicular(): Feature { return { name: "MST_Tools_MeasurePerpendicular", guid: "014ad558-3ad3-4c4d-bdb7-004783fdc149" }; }
 
   // Action toolbar
@@ -156,4 +154,5 @@ export class MeasureToolsFeatures {
   public static get MeasurementActions_Lock(): Feature { return { name: "CRT_MeasurementActions_Lock", guid: "e03e9d2a-e63b-4ea8-805d-59c1dbf94f86" }; }
   public static get MeasurementActions_ToggleDisplayAxes(): Feature { return { name: "CRT_MeasurementActions_ToggleDisplayAxes", guid: "ee61e68f-14d5-4d47-9fba-e8334d9b9097" }; }
   public static get MeasurementActions_ToggleDisplayLabels(): Feature { return { name: "CRT_MeasurementActions_ToggleDisplayLabels", guid: "3ee3fcd7-c158-481f-96e7-2f0907551357" }; }
+  public static get MeasurementActions_ToggleDisplayMeasurements(): Feature { return { name: "MST_MeasurementActions_ToggleDisplayMeasurements", guid: "ef4bba9e-69f1-4f73-9db9-e176dd9335a4" }; }
 }

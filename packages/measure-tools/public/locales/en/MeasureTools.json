@@ -18,6 +18,8 @@
     "redoMeasurement": "Redo measurement",
     "displayLabels": "Display Text Labels",
     "hideLabels": "Hide Text Labels",
+    "hideMeasurements": "Hide Measurements",
+    "displayMeasurements": "Display Measurements",
     "measurements": "Measurements"
   },
   "Formatting": {

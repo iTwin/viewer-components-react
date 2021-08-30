@@ -3,15 +3,22 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 @import "~@bentley/ui-core/lib/ui-core/style/index";
 @import "~@bentley/ui-core/lib/ui-core/text/index";
+
+.property-grid-widget-container {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+}
 
 .pcomponents-property-grid-with-unified-selection {
   overflow: hidden !important;
 }
 
-.filtering-property-grid-with-unified-selection {
+.property-grid-container {
   flex: 1;
   margin-top: 6px;
   margin-bottom: 6px;
@@ -37,6 +44,11 @@
   padding: $uicore-xs;
   display: flex;
   flex-direction: column;
+  color: $buic-icon-color;
+
+  &:hover {
+    color: $buic-foreground-primary;
+  }
 }
 
 .property-grid-react-panel-back-btn {
@@ -44,6 +56,11 @@
   padding: $uicore-xs;
   display: flex;
   flex-direction: column;
+  color: $buic-icon-color;
+
+  &:hover {
+    color: $buic-foreground-primary;
+  }
 }
 
 .property-grid-react-panel-icon {
@@ -55,9 +72,15 @@
 .property-grid-react-panel-header {
   display: flex;
   padding-top: $uicore-xs;
+  margin-left: 6px;
 }
 
 .property-grid-react-panel-class {
+  @include uicore-text;
+  font-size: $uicore-font-size;
+}
+
+.property-grid-react-filtering-pg-label {
   @include uicore-text;
   font-size: $uicore-font-size;
 }

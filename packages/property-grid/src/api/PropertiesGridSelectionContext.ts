@@ -1,10 +1,14 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+* See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { BeEvent, Id64 } from "@bentley/bentleyjs-core";
 import { WidgetState } from "@bentley/ui-abstract";
-import { FrontstageDef, FrontstageManager, WidgetDef } from "@bentley/ui-framework";
+import {
+  FrontstageDef,
+  FrontstageManager,
+  WidgetDef,
+} from "@bentley/ui-framework";
 
 /** Used to control properties grid automatic opening based on selection set changes */
 export class PropertiesGridSelectionContext {
@@ -14,7 +18,7 @@ export class PropertiesGridSelectionContext {
   private static _selectionEvent:
     | BeEvent<(ids: Set<string>) => void>
     | undefined;
-  private static _suspended: boolean = false;
+  private static _suspended = false;
 
   /**
    * Initialize the properties grid selection context to provide automatic opening and closing of the property panel
@@ -25,13 +29,13 @@ export class PropertiesGridSelectionContext {
   public static initialize(
     _selectionEvent: BeEvent<(ids: Set<string>) => void>,
     _propertyPanelId: string,
-    widgetIds: string[],
+    widgetIds: string[]
   ) {
     PropertiesGridSelectionContext._priorityWidgetIds = widgetIds;
     PropertiesGridSelectionContext._propertyPanelId = _propertyPanelId;
     PropertiesGridSelectionContext._selectionEvent = _selectionEvent;
     _selectionEvent.addListener(
-      PropertiesGridSelectionContext.selectionChangedHandler,
+      PropertiesGridSelectionContext.selectionChangedHandler
     );
   }
 
@@ -45,23 +49,25 @@ export class PropertiesGridSelectionContext {
 
   /** Clear listeners for selection set */
   public static clear() {
-    if (PropertiesGridSelectionContext._selectionEvent)
+    if (PropertiesGridSelectionContext._selectionEvent) {
       PropertiesGridSelectionContext._selectionEvent.removeListener(
-        PropertiesGridSelectionContext.selectionChangedHandler,
+        PropertiesGridSelectionContext.selectionChangedHandler
       );
+    }
   }
 
   /** Returns the priority widgets that are currently opened */
   private static getOpenedPriorityWidgets(
-    activeStage: FrontstageDef,
+    activeStage: FrontstageDef
   ): WidgetDef[] {
     const priorityWidgets: WidgetDef[] = [];
     PropertiesGridSelectionContext._priorityWidgetIds.forEach(
       (widgetId: string) => {
         const widget = activeStage.findWidgetDef(widgetId);
-        if (widget && widget.activeState === WidgetState.Open)
+        if (widget && widget.activeState === WidgetState.Open) {
           priorityWidgets.push(widget);
-      },
+        }
+      }
     );
 
     return priorityWidgets;
@@ -69,11 +75,15 @@ export class PropertiesGridSelectionContext {
 
   /** Check if we have at least some valid Ids in the set or if it is empty */
   private static emptyOrValidIds(ids?: Set<string>) {
-    if (!ids || ids.size === 0) return true;
+    if (!ids || ids.size === 0) {
+      return true;
+    }
 
     let valid = false;
     ids!.forEach((id: string) => {
-      if (!Id64.isTransient(id)) valid = true;
+      if (!Id64.isTransient(id)) {
+        valid = true;
+      }
     });
 
     return valid;
@@ -85,32 +95,33 @@ export class PropertiesGridSelectionContext {
     const activeStage = FrontstageManager.activeFrontstageDef;
     if (activeStage) {
       const propertyWidget = activeStage.findWidgetDef(
-        PropertiesGridSelectionContext._propertyPanelId,
+        PropertiesGridSelectionContext._propertyPanelId
       );
       if (propertyWidget) {
         // Get widgets that we want to keep in context if they are open
         const priorityWidgets = PropertiesGridSelectionContext._suspended
           ? []
           : PropertiesGridSelectionContext.getOpenedPriorityWidgets(
-            activeStage,
-          );
+              activeStage
+            );
 
         if (PropertiesGridSelectionContext.emptyOrValidIds(ids)) {
           // If we didn't find any widgets that should override the property panel's open/hiding, react based on the selection set
           if (priorityWidgets.length === 0) {
             // Update the last state so that we show the property widget closed or opened
-            if (propertyWidget.state !== WidgetState.Hidden)
+            if (propertyWidget.state !== WidgetState.Hidden) {
               PropertiesGridSelectionContext._propertyWidgetLastState =
                 propertyWidget.state;
+            }
             propertyWidget.setWidgetState(
               !ids || ids.size === 0
                 ? WidgetState.Hidden
-                : PropertiesGridSelectionContext._propertyWidgetLastState,
+                : PropertiesGridSelectionContext._propertyWidgetLastState
             );
           } else {
             // Hide or close so that user can access property panel
             propertyWidget.setWidgetState(
-              !ids || ids.size === 0 ? WidgetState.Hidden : WidgetState.Closed,
+              !ids || ids.size === 0 ? WidgetState.Hidden : WidgetState.Closed
             );
             // Since the call above will cause the other widgets to close, we must go ahead and open them
             priorityWidgets.forEach((widget: WidgetDef) => {

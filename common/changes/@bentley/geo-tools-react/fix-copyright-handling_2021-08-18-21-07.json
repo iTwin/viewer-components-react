@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/geo-tools-react",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@bentley/geo-tools-react"
+}

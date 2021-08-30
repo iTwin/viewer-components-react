@@ -1,6 +1,27 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Thu, 08 Jul 2021 20:22:14 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Aug 2021 15:28:08 GMT and should not be manually modified.
+
+## 2.2.1
+Thu, 26 Aug 2021 15:28:08 GMT
+
+### Patches
+
+- Remove unused PropertyGrid Extension that never worked. Make sure i18n gets delivered"
+
+## 2.2.0
+Wed, 25 Aug 2021 18:17:58 GMT
+
+### Minor changes
+
+- Updated class based components to functional. UiProvider now adds the multi element property grid instead of the previous single element property grid. Deprecated a few props which are unused and will be removed in next major.
+
+## 2.1.0
+Fri, 20 Aug 2021 18:32:34 GMT
+
+### Minor changes
+
+- Changes the PropertyGrid UiProvider to use a new PropertyGrid functional component
 
 ## 2.0.0
 Thu, 08 Jul 2021 20:22:14 GMT

@@ -14,7 +14,6 @@ import { stubObject } from "ts-sinon";
 import { Point2d, Range2d } from "@bentley/geometry-core";
 import { SpecialKey } from "@bentley/ui-abstract";
 
-
 describe("GeoAddressSearch", () => {
 
   const options = [
@@ -26,7 +25,6 @@ describe("GeoAddressSearch", () => {
 
   let getFrustumLonLatBBoxStub: sinon.SinonStub<[], Range2d | undefined>;
   let locateAddressStub: sinon.SinonStub<[string], boolean>;
-
 
   const getInputElement = (wrapper: ReactWrapper): HTMLInputElement => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -142,14 +140,12 @@ describe("GeoAddressSearch", () => {
     const geoAddrSearch = wrapper.find(GeoAddressSearch);
     expect(geoAddrSearch.length).to.eq(1);
 
-
     const input = geoAddrSearch.find("input[type='text']");
     expect(input.length).to.eq(1);
 
     // Enter should do nothing if no input value
     input.simulate("keydown", { key: SpecialKey.Enter });
     locateAddressStub.calledOnce.should.false;
-
 
     input.simulate("change", { target: { value: "addrLine1" } });
     await TestUtils.flushAsyncOperations();

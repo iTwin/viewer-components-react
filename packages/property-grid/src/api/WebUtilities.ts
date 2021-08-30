@@ -14,19 +14,23 @@ export const isiOsDevice = (): boolean => {
   ];
 
   let iOS = false;
-  if (window.navigator.platform !== undefined)
+  if (window.navigator.platform !== undefined) {
     if (
       iDevices.find(
-        (device: string) => device.indexOf(window.navigator.platform) !== -1,
+        (device: string) => device.indexOf(window.navigator.platform) !== -1
       )
-    )
+    ) {
       iOS = true;
+    }
+  }
   return iOS;
 };
 
 const copyToClipboardWin = (info: string) => {
   const listener = (e: ClipboardEvent) => {
-    if (!e.clipboardData) return;
+    if (!e.clipboardData) {
+      return;
+    }
 
     e.clipboardData.setData("text/plain", info);
     e.preventDefault();
@@ -38,7 +42,7 @@ const copyToClipboardWin = (info: string) => {
 
 const copyToClipboardiOS = (info: string) => {
   const el: HTMLTextAreaElement = document.createElement(
-    "textArea",
+    "textArea"
   ) as HTMLTextAreaElement;
   el.value = info;
   document.body.appendChild(el);
@@ -47,7 +51,9 @@ const copyToClipboardiOS = (info: string) => {
   range.selectNodeContents(el);
 
   const s = window.getSelection();
-  if (!s) return;
+  if (!s) {
+    return;
+  }
 
   s.removeAllRanges();
   s.addRange(range);
@@ -60,6 +66,9 @@ const copyToClipboardiOS = (info: string) => {
 
 /** Copies a string to the clipboard. Works in iOS as well */
 export const copyToClipboard = (data: string) => {
-  if (isiOsDevice()) copyToClipboardiOS(data);
-  else copyToClipboardWin(data);
+  if (isiOsDevice()) {
+    copyToClipboardiOS(data);
+  } else {
+    copyToClipboardWin(data);
+  }
 };

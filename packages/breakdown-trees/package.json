@@ -21,6 +21,7 @@
   "scripts": {
     "build": "npm run copy:assets && tsc --sourceMap 1>&2",
     "build-prod": "tsc 1>&2 && npm run copy:assets",
+    "rebuild": "npm run clean && npm run build",
     "makegraph": "depcruise --exclude \"(node_modules|src/test)\" --output-type dot src > graphs/dependencygraph.svg",
     "copy:assets": "cpx \"./src/assets/**/*\" ./lib/assets && cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
     "build:watch": "tsc -w",
@@ -60,7 +61,7 @@
     "@bentley/ui-ninezone": "^2.15.0",
     "@bentley/webgl-compatibility": "^2.15.0",
     "@bentley/webpack-tools": "1.14.1",
-    "@bentley/measure-tools-react": "^0.3.0",
+    "@bentley/measure-tools-react": "workspace:*",
     "@types/i18next": "^8.4.2",
     "@types/react": "~16.9.35",
     "@types/react-dom": "^16.8.0",
@@ -119,7 +120,7 @@
     "@bentley/ui-ninezone": "^2.15.0",
     "@bentley/webgl-compatibility": "^2.15.0",
     "@bentley/webpack-tools": "1.14.1",
-    "@bentley/measure-tools-react": "^0.3.0",
+    "@bentley/measure-tools-react": "0.4.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0"
   },

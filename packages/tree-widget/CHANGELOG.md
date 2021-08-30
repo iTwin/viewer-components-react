@@ -1,6 +1,20 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Mon, 19 Jul 2021 18:07:24 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Aug 2021 14:00:14 GMT and should not be manually modified.
+
+## 1.4.3
+Thu, 26 Aug 2021 14:00:14 GMT
+
+### Patches
+
+- Search bar was not sized correctly, and alignment was not centered.
+
+## 1.4.2
+Mon, 09 Aug 2021 20:24:55 GMT
+
+### Patches
+
+- Updated tree widget barrel file to include UiProvider
 
 ## 1.4.1
 Mon, 19 Jul 2021 18:07:24 GMT
