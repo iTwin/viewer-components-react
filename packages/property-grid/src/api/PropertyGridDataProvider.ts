@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { IModelConnection } from "@bentley/imodeljs-frontend";
 import { Field } from "@bentley/presentation-common";
 import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
@@ -11,7 +11,7 @@ export class PropertyDataProvider extends PresentationPropertyDataProvider {
   private _parentIsFieldFavorite = this.isFieldFavorite;
 
   // tslint:disable-next-line:naming-convention
-  protected isFieldFavorite = (field: Field): boolean =>
+  protected override isFieldFavorite = (field: Field): boolean =>
     this._enableFavoriteProperties ? this._parentIsFieldFavorite(field) : false;
 
   private _enableFavoriteProperties: boolean;
@@ -27,7 +27,7 @@ export class PropertyDataProvider extends PresentationPropertyDataProvider {
   }
 
   /** Expand categories by default */
-  public async getData(): Promise<PropertyData> {
+  public override async getData(): Promise<PropertyData> {
     const data = await super.getData();
     const newCategories = data.categories.map((value: PropertyCategory) => {
       return { ...value, expand: true };
