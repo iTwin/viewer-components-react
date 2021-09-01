@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/breakdown-trees-react",
+      "comment": "Added new package",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/breakdown-trees-react"
+}

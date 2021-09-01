@@ -1,0 +1,54 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+@import "~@bentley/ui-core/lib/ui-core/index";
+
+.customTreeContent {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.customTreeContainer {
+
+  height: 100%;
+
+  .custom-tree-node {
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      background: $buic-row-hover;
+    }
+
+    &.selected {
+      background: $buic-row-selection;
+    }
+
+    .custom-tree-node-label {
+      display: flex;
+      align-items: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex-wrap: nowrap;
+      flex: 1;
+
+      > .custom-tree-node-label-wrapper {
+        height: 24px;
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+}
+
+.customTreeToolbar {
+  display: flex;
+  align-items: center;
+  .right {
+    justify-content: flex-end;
+  }
+}
