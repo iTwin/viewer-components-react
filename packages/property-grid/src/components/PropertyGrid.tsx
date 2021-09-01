@@ -274,6 +274,7 @@ export const PropertyGrid = ({
     };
 
     dataProvider?.onDataChanged.addListener(onDataChanged);
+    void onDataChanged();
 
     return () => {
       dataProvider?.onDataChanged.removeListener(onDataChanged);

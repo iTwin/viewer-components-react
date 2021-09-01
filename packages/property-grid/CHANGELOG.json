@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "2.2.2",
+      "tag": "@bentley/property-grid-react_v2.2.2",
+      "date": "Mon, 30 Aug 2021 17:10:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix bug where label and class name didnt show in multi element property grid, as well as an animation bug"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.1",
       "tag": "@bentley/property-grid-react_v2.2.1",
       "date": "Thu, 26 Aug 2021 15:28:08 GMT",
