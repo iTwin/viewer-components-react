@@ -1,0 +1,400 @@
+{
+  "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+  "id": "ui-framework/SpatialBreakdownByDiscipline",
+  "rules": [
+    {
+      "ruleType": "RootNodes",
+      "specifications": [
+        {
+          "specType": "InstanceNodesOfSpecificClasses",
+          "classes": [
+            {
+              "schemaName": "SpatialComposition",
+              "classNames": [
+                "CompositeElement"
+              ]
+            }
+          ],
+          "arePolymorphic": true,
+          "relatedInstances": [
+            {
+              "relationship": {
+                "schemaName": "BisCore",
+                "className": "ModelContainsElements"
+              },
+              "requiredDirection": "Backward",
+              "class": {
+                "schemaName": "BisCore",
+                "className": "Model"
+              },
+              "isRequired": true,
+              "alias": "model"
+            }
+          ],
+          "instanceFilter": "NOT model.IsPrivate AND this.ComposingElement = NULL",
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"CompositeElement\", \"SpatialComposition\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "BisCore",
+            "classNames": [
+              "PhysicalSystemServicesSpatialElements"
+            ]
+
+          },
+          "relatedClasses": {
+            "schemaName": "DistributionSystems",
+            "classNames": [
+              "DistributionSystem"
+            ]
+          },
+          "doNotSort": true,
+          "requiredDirection": "Backward",
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"DistributionSystem\", \"DistributionSystems\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "DistributionSystems",
+            "classNames": [
+              "DistributionSystemGroupsDistributionElements"
+            ]
+          },
+          "relatedClasses": {
+            "schemaName": "Biscore",
+            "classNames": [
+              "SpatialElement"
+            ]
+          },
+          "doNotSort": true,
+          "requiredDirection": "Forward",
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"CompositeElement\", \"SpatialComposition\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "SpatialComposition",
+            "classNames": [
+              "CompositeComposesSubComposites"
+            ]
+          },
+          "relatedClasses": {
+            "schemaName": "SpatialComposition",
+            "classNames": [
+              "CompositeElement"
+            ]
+          },
+          "doNotSort": true,
+          "requiredDirection": "Forward",
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"CompositeElement\", \"SpatialComposition\")",
+      "onlyIfNotHandled": false,
+      "specifications": [
+        {
+          "specType": "CustomNode",
+          "type": "T_DisciplineClass",
+          "label": "Architectural",
+          "description": "Architectural",
+          "priority": 2000,
+          "hideIfNoChildren": true,
+          "nestedRules": [
+            {
+              "ruleType": "ChildNodes",
+              "specifications": [
+                {
+                  "instanceFilter": "this.IsOfClass(\"Wall\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"Stair\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"Door\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"Window\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"Casework\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"CurtainWall\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"Floor\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"Furniture\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"Railing\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"Ramp\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"Roof\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"Stair\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"TransportationMechanism\", \"ArchitecturalPhysical\") OR this.IsOfClass(\"WallLeaf\", \"ArchitecturalPhysical\")",
+                  "specType": "RelatedInstanceNodes",
+                  "relationships": {
+                    "schemaName": "SpatialComposition",
+                    "classNames": [
+                      "CompositeOverlapsSpatialElements"
+                    ]
+                  },
+                  "relatedClasses": {
+                    "schemaName": "BisCore",
+                    "classNames": [
+                      "SpatialElement"
+                    ]
+                  },
+                  "requiredDirection": "Forward",
+                  "groupByClass": true,
+                  "groupByLabel": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "specType": "CustomNode",
+          "type": "T_DisciplineClass",
+          "label": "Structural",
+          "description": "Structural",
+          "priority": 2000,
+          "hideIfNoChildren": true,
+          "nestedRules": [
+            {
+              "ruleType": "ChildNodes",
+              "specifications": [
+                {
+                  "instanceFilter": "this.IsOfClass(\"StructuralElement\", \"StructuralPhysical\")",
+                  "specType": "RelatedInstanceNodes",
+                  "relationships": {
+                    "schemaName": "SpatialComposition",
+                    "classNames": [
+                      "CompositeOverlapsSpatialElements"
+                    ]
+                  },
+                  "relatedClasses": {
+                    "schemaName": "BisCore",
+                    "classNames": [
+                      "SpatialElement"
+                    ]
+                  },
+                  "requiredDirection": "Forward",
+                  "groupByClass": true,
+                  "groupByLabel": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "specType": "CustomNode",
+          "type": "T_DisciplineClass",
+          "label": "Other",
+          "description": "Elements that are neither Architectural nor Structural",
+          "priority": 2000,
+          "hideIfNoChildren": true,
+          "nestedRules": [
+            {
+              "ruleType": "ChildNodes",
+              "specifications": [
+                {
+                  "instanceFilter": "NOT this.IsOfClass(\"CompositeElement\", \"SpatialComposition\") AND NOT this.IsOfClass(\"StructuralElement\", \"StructuralPhysical\") AND NOT this.IsOfClass(\"Wall\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"Stair\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"Door\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"Window\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"Casework\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"CurtainWall\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"Floor\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"Furniture\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"Railing\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"Ramp\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"Roof\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"Stair\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"TransportationMechanism\", \"ArchitecturalPhysical\") AND NOT this.IsOfClass(\"WallLeaf\", \"ArchitecturalPhysical\")",
+                  "specType": "RelatedInstanceNodes",
+                  "relationships": {
+                    "schemaName": "SpatialComposition",
+                    "classNames": [
+                      "CompositeOverlapsSpatialElements"
+                    ]
+                  },
+                  "relatedClasses": {
+                    "schemaName": "BisCore",
+                    "classNames": [
+                      "SpatialElement"
+                    ]
+                  },
+                  "requiredDirection": "Forward",
+                  "groupByClass": true,
+                  "groupByLabel": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"CompositeElement\", \"SpatialComposition\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "SpatialComposition",
+            "classNames": [
+              "SpatialOrganizerReferencesSpatialElements"
+            ]
+          },
+          "relatedClasses": {
+            "schemaName": "BisCore",
+            "classNames": [
+              "SpatialElement"
+            ]
+          },
+          "requiredDirection": "Forward",
+          "groupByClass": true,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"CompositeElement\", \"SpatialComposition\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "SpatialComposition",
+            "classNames": [
+              "SpatialOrganizerHoldsSpatialElements"
+            ]
+          },
+          "relatedClasses": {
+            "schemaName": "BisCore",
+            "classNames": [
+              "SpatialElement"
+            ]
+          },
+          "requiredDirection": "Forward",
+          "groupByClass": true,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "Content",
+      "condition": "ContentDisplayType = \"RelatedElementsRequest\"",
+      "specifications": [
+        {
+          "specType": "ContentRelatedInstances",
+          "relationshipPaths": [
+            [
+              {
+                "relationship": {
+                  "schemaName": "SpatialComposition",
+                  "className": "CompositeComposesSubComposites"
+                },
+                "direction": "Forward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "SpatialComposition",
+                  "className": "CompositeOverlapsSpatialElements"
+                },
+                "direction": "Forward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "BisCore",
+                  "className": "ElementOwnsChildElements"
+                },
+                "direction": "Forward",
+                "count": "*"
+              }
+            ]
+          ]
+        },
+        {
+          "specType": "ContentRelatedInstances",
+          "relationshipPaths": [
+            [
+              {
+                "relationship": {
+                  "schemaName": "SpatialComposition",
+                  "className": "CompositeComposesSubComposites"
+                },
+                "direction": "Forward",
+                "targetClass": {
+                  "schemaName": "SpatialComposition",
+                  "className": "ISpatialOrganizer"
+                },
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "SpatialComposition",
+                  "className": "SpatialOrganizerHoldsSpatialElements"
+                },
+                "direction": "Forward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "BisCore",
+                  "className": "ElementOwnsChildElements"
+                },
+                "direction": "Forward",
+                "count": "*"
+              }
+            ]
+          ]
+        },
+        {
+          "specType": "ContentRelatedInstances",
+          "relationshipPaths": [
+            [
+              {
+                "relationship": {
+                  "schemaName": "SpatialComposition",
+                  "className": "CompositeComposesSubComposites"
+                },
+                "direction": "Forward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "SpatialComposition",
+                  "className": "SpatialOrganizerReferencesSpatialElements"
+                },
+                "direction": "Forward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "BisCore",
+                  "className": "ElementOwnsChildElements"
+                },
+                "direction": "Forward",
+                "count": "*"
+              }
+            ]
+          ]
+        },
+        {
+          "specType": "ContentRelatedInstances",
+          "relationshipPaths": [
+            [
+              {
+                "relationship": {
+                  "schemaName": "DistributionSystems",
+                  "className": "DistributionSystemGroupsDistributionElements"
+                },
+                "direction": "Forward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "BisCore",
+                  "className": "ElementOwnsChildElements"
+                },
+                "direction": "Forward",
+                "count": "*"
+              }
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}
