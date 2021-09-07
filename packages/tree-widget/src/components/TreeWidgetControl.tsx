@@ -1,17 +1,19 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import {
   WidgetControl,
   ConfigurableCreateInfo,
-  SpatialContainmentTree,
-  ClassGroupingOption
+  ClassGroupingOption,
 } from "@bentley/ui-framework";
 import React from "react";
-import { ModelsTreeComponent } from "./trees/ModelsTree";
-import { CategoriesTreeComponent } from "./trees/CategoriesTree";
+import {
+  ModelsTreeComponent,
+  CategoriesTreeComponent,
+  SpatialTreeComponent,
+} from "./trees";
 import { IModelConnection, Viewport } from "@bentley/imodeljs-frontend";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
 import { SelectableContentDefinition } from "@bentley/ui-components";
@@ -33,7 +35,7 @@ export interface TreeWidgetControlOptions {
     modelsTree?: () => React.ReactNode;
     categoriesTree?: () => React.ReactNode;
     spatialTree?: () => React.ReactNode;
-  }
+  };
 }
 
 export class TreeWidgetControl extends WidgetControl {
@@ -73,7 +75,7 @@ export class TreeWidgetControl extends WidgetControl {
     );
 
     const spatialContainmentComponent = (
-      <SpatialContainmentTree
+      <SpatialTreeComponent
         iModel={imodel}
         enablePreloading={enablePreloading}
         enableElementsClassGrouping={
@@ -89,17 +91,23 @@ export class TreeWidgetControl extends WidgetControl {
       {
         label: TreeWidget.translate("modeltree"),
         id: "model-tree",
-        render: modelsTreeReplacement ? modelsTreeReplacement : () => modelsTreeComponent,
+        render: modelsTreeReplacement
+          ? modelsTreeReplacement
+          : () => modelsTreeComponent,
       },
       {
         label: TreeWidget.translate("categories"),
         id: "categories-tree",
-        render: categoriesTreeReplacement ? categoriesTreeReplacement : () => categoriesTreeComponent,
+        render: categoriesTreeReplacement
+          ? categoriesTreeReplacement
+          : () => categoriesTreeComponent,
       },
       {
         label: TreeWidget.translate("containment"),
         id: "spatial-containment-tree",
-        render: spatialTreeReplacement ? spatialTreeReplacement : () => spatialContainmentComponent,
+        render: spatialTreeReplacement
+          ? spatialTreeReplacement
+          : () => spatialContainmentComponent,
       },
     ];
 

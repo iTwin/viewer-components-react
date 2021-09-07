@@ -12,14 +12,15 @@ import {
   PresentationTreeDataProvider,
 } from "@bentley/presentation-components";
 import {
-  useVisibleTreeNodes,
   SelectionMode,
   ControlledTree,
+  useTreeModel,
 } from "@bentley/ui-components";
 import { Presentation } from "@bentley/presentation-frontend";
 import "./TreeWithRulesetTree.scss";
 import { connectIModelConnection } from "@bentley/ui-framework";
 import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { useResizeDetector } from "react-resize-detector";
 
 export interface ControlledTreeProps {
   iModel: IModelConnection;
@@ -123,16 +124,23 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (
     nodeLoader,
     collapsedChildrenDisposalEnabled: true,
   });
+  const { width, height, ref } = useResizeDetector();
 
-  const visibleNodes = useVisibleTreeNodes(modelSource);
+  const treeModel = useTreeModel(modelSource);
 
   return (
-    <ControlledTree
-      visibleNodes={visibleNodes}
-      nodeLoader={nodeLoader}
-      treeEvents={unifiedSelectionEventHandler}
-      selectionMode={SelectionMode.Extended}
-    />
+    <div ref={ref} style={{ width: "100%", height: "100%" }}>
+      {width && height && (
+        <ControlledTree
+          model={treeModel}
+          nodeLoader={nodeLoader}
+          eventsHandler={unifiedSelectionEventHandler}
+          selectionMode={SelectionMode.Extended}
+          width={width}
+          height={height}
+        />
+      )}
+    </div>
   );
 };
 

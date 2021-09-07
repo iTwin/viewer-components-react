@@ -1,8 +1,9 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
+import { useResizeDetector } from "react-resize-detector";
 import {
   IModelApp,
   IModelConnection,
@@ -33,6 +34,7 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
     onFilterApplied,
     filteredProvider,
   } = useTreeFilteringState();
+  const { width, height, ref } = useResizeDetector();
 
   const showAll = React.useCallback(async () => {
     return toggleAllCategories(
@@ -97,13 +99,19 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
         showAll={showAll}
         hideAll={hideAll}
         invert={invert}
-        />
-      <CategoryTree
-        {...props}
-        enablePreloading={props.enablePreloading}
-        filterInfo={{ filter: filterString, activeMatchIndex }}
-        onFilterApplied={onFilterApplied}
       />
+      <div ref={ref} style={{ width: "100%", height: "100%" }}>
+        {width && height && (
+          <CategoryTree
+            {...props}
+            enablePreloading={props.enablePreloading}
+            filterInfo={{ filter: filterString, activeMatchIndex }}
+            onFilterApplied={onFilterApplied}
+            width={width}
+            height={height}
+          />
+        )}
+      </div>
     </>
   );
 }

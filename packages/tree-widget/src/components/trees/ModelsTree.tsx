@@ -1,10 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import React, { useEffect, useState } from "react";
+import { useResizeDetector } from "react-resize-detector";
 import {
   IModelApp,
   IModelConnection,
@@ -13,15 +13,12 @@ import {
   Viewport,
 } from "@bentley/imodeljs-frontend";
 import { ModelsTree, ClassGroupingOption } from "@bentley/ui-framework";
-import { IconButton } from "../IconButton";
-import { SearchBar } from "../search-bar/SearchBar";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./ModelsTree.scss";
 import {
   GeometricModel3dProps,
   ModelQueryParams,
 } from "@bentley/imodeljs-common";
-import { TreeWidget } from "../../TreeWidget";
 import { TreeHeaderComponent } from "../header/TreeHeader";
 
 export interface ModelTreeProps {
@@ -52,12 +49,9 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     undefined
   );
 
-  const {
-    searchOptions,
-    filterString,
-    activeMatchIndex,
-    onFilterApplied,
-  } = useTreeFilteringState();
+  const { searchOptions, filterString, activeMatchIndex, onFilterApplied } =
+    useTreeFilteringState();
+  const { width, height, ref } = useResizeDetector();
 
   const queryModels = async (
     vp: Viewport | undefined
@@ -187,18 +181,24 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
         toggle3DIcon={icon3dToggle}
       />
       <div className="tree-widget-models-tree-container">
-        <ModelsTree
-          {...props}
-          filterInfo={{ filter: filterString, activeMatchIndex }}
-          onFilterApplied={onFilterApplied}
-          activeView={viewport}
-          enablePreloading={props.enablePreloading}
-          enableElementsClassGrouping={
-            props.enableElementsClassGrouping
-              ? ClassGroupingOption.YesWithCounts
-              : ClassGroupingOption.No
-          }
-        />
+        <div ref={ref} style={{ width: "100%", height: "100%" }}>
+          {width && height && (
+            <ModelsTree
+              {...props}
+              filterInfo={{ filter: filterString, activeMatchIndex }}
+              onFilterApplied={onFilterApplied}
+              activeView={viewport}
+              enablePreloading={props.enablePreloading}
+              enableElementsClassGrouping={
+                props.enableElementsClassGrouping
+                  ? ClassGroupingOption.YesWithCounts
+                  : ClassGroupingOption.No
+              }
+              width={width}
+              height={height}
+            />
+          )}
+        </div>
       </div>
     </>
   );
