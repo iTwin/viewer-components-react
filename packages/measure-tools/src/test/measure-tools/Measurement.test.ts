@@ -195,7 +195,7 @@ describe("Measurement tests", () => {
 class CleanupDistanceMeasurement extends DistanceMeasurement {
   public cleanupCalled = false;
 
-  public onCleanup() {
+  public override onCleanup() {
     this.cleanupCalled = true;
   }
 }

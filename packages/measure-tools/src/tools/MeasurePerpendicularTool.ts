@@ -15,11 +15,11 @@ import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 
 export class MeasurePerpendicularTool extends MeasurementToolBase<DistanceMeasurement, MeasureDistanceToolModel> {
-  public static toolId = "MeasurePerpendicular";
-  public static iconSpec = "icon-measure-perpendicular";
+  public static override toolId = "MeasurePerpendicular";
+  public static override iconSpec = "icon-measure-perpendicular";
 
   protected _firstSurface?: Plane3dByOriginAndUnitNormal;
-  protected get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasurePerpendicular; }
+  protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasurePerpendicular; }
 
   public onRestartTool(): void {
     const tool = new MeasurePerpendicularTool();
@@ -37,7 +37,7 @@ export class MeasurePerpendicularTool extends MeasurementToolBase<DistanceMeasur
     return (undefined !== ray.intersectionWithPlane(this._firstSurface, result) ? result : undefined);
   }
 
-  public async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
+  public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
     if (!ev.viewport)
       return EventHandled.No;
 
@@ -73,7 +73,7 @@ export class MeasurePerpendicularTool extends MeasurementToolBase<DistanceMeasur
     return EventHandled.Yes;
   }
 
-  public async onMouseMotion(ev: BeButtonEvent): Promise<void> {
+  public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
     if (undefined === ev.viewport || MeasureDistanceToolModel.State.SetEndPoint !== this.toolModel.currentState)
       return;
 
@@ -99,7 +99,7 @@ export class MeasurePerpendicularTool extends MeasurementToolBase<DistanceMeasur
     return new MeasureDistanceToolModel();
   }
 
-  protected updateToolAssistance(): void {
+  protected override updateToolAssistance(): void {
     let promptMainInstruction: string;
     if (MeasureDistanceToolModel.State.SetEndPoint !== this.toolModel.currentState)
       promptMainInstruction = IModelApp.i18n.translate("MeasureTools:tools.MeasurePerpendicular.mainInstruction");

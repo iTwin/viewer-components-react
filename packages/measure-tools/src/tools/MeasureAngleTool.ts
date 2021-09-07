@@ -18,17 +18,17 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
     return new MeasureAngleToolModel();
   }
 
-  public static toolId = "MeasureAngle";
+  public static override toolId = "MeasureAngle";
   // TODO: Change icon once UX team provides icon
-  public static iconSpec = "icon-angle-measure";
+  public static override iconSpec = "icon-angle-measure";
   public static get label() {
     return IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.flyover");
   }
-  public static get flyover() {
+  public static override get flyover() {
     return IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.flyover");
   }
 
-  protected get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureAngle; }
+  protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureAngle; }
 
   constructor() {
     super();
@@ -120,13 +120,13 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
   }
 
   /** Setup for next tool step */
-  protected updateToolAssistance(): void {
+  protected override updateToolAssistance(): void {
     IModelApp.accuSnap.enableSnap(true);
 
     this.showPrompt();
   }
 
-  public async onMouseMotion(ev: BeButtonEvent): Promise<void> {
+  public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
     if (
       undefined === ev.viewport ||
       MeasureAngleToolModel.State.SetEndPoint !== this.toolModel.currentState
@@ -139,7 +139,7 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
   }
 
   /** Process mouse presses */
-  public async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
+  public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
     if (!ev.viewport) return EventHandled.No;
 
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);

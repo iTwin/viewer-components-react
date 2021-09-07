@@ -19,10 +19,10 @@ import { AddLocationProps, MeasureLocationToolModel } from "../toolmodels/Measur
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<LocationMeasurement, MeasureLocationToolModel> {
 
-  public static toolId = "MeasureLocation";
-  public static iconSpec = "icon-measure-location";
+  public static override toolId = "MeasureLocation";
+  public static override iconSpec = "icon-measure-location";
 
-  protected get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureLocation; }
+  protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureLocation; }
 
   constructor() {
     super();
@@ -34,7 +34,7 @@ export class MeasureLocationTool extends MeasurementToolBase<LocationMeasurement
       this.exitTool();
   }
 
-  public async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
+  public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
     if (!ev.viewport)
       return EventHandled.No;
 
@@ -147,7 +147,7 @@ export class MeasureLocationTool extends MeasurementToolBase<LocationMeasurement
     return undefined;
   }
 
-  protected updateToolAssistance(): void {
+  protected override updateToolAssistance(): void {
     const promptMainInstruction = IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.mainInstruction");
     const promptClickTap = IModelApp.i18n.translate("MeasureTools:tools.GenericPrompts.acceptPoint");
     const promptRightClick = IModelApp.i18n.translate("MeasureTools:tools.GenericPrompts.restart");

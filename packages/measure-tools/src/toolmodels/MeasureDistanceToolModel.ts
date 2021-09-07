@@ -28,7 +28,7 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
 
   public get currentState(): State { return this._currentState; }
 
-  public get dynamicMeasurement(): DistanceMeasurement | undefined { return this._currentMeasurement; }
+  public override get dynamicMeasurement(): DistanceMeasurement | undefined { return this._currentMeasurement; }
 
   public setMeasurementViewport(viewType: string): boolean {
     if (State.SetMeasurementViewport !== this._currentState)
@@ -85,7 +85,7 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
     }
   }
 
-  public reset(clearMeasurements: boolean): void {
+  public override reset(clearMeasurements: boolean): void {
     super.reset(clearMeasurements);
 
     this._currentMeasurement = undefined;

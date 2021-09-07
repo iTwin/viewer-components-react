@@ -516,7 +516,7 @@ class NullMeasurement extends Measurement {
 
   private constructor() { super(); }
 
-  protected createNewInstance(): Measurement {
+  protected override createNewInstance(): Measurement {
     return this;
   }
 }

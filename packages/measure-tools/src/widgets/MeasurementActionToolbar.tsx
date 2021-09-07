@@ -57,7 +57,7 @@ export class MeasurementActionItemDef extends ActionButtonItemDef {
   }
 
   /** Executes user callback and closes toolbar. */
-  public execute(): void {
+  public override execute(): void {
     super.execute();
 
     MeasurementActionToolbar.closeToolbar(false);

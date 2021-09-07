@@ -21,7 +21,7 @@ export interface AddLocationProps extends Omit<LocationMeasurementPropsOnly, "lo
 export class MeasureLocationToolModel extends MeasurementToolModel<LocationMeasurement> {
   private _currentMeasurement?: LocationMeasurement;
 
-  public get dynamicMeasurement(): LocationMeasurement | undefined { return this._currentMeasurement; }
+  public override get dynamicMeasurement(): LocationMeasurement | undefined { return this._currentMeasurement; }
 
   constructor() {
     super();

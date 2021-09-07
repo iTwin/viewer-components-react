@@ -16,10 +16,10 @@ import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 
 export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, MeasureAreaToolModel> {
 
-  public static toolId = "MeasureArea";
-  public static iconSpec = "icon-measure-2d";
+  public static override toolId = "MeasureArea";
+  public static override iconSpec = "icon-measure-2d";
 
-  protected get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureArea; }
+  protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureArea; }
 
   constructor() {
     super();
@@ -31,12 +31,12 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
       this.exitTool();
   }
 
-  public onReinitialize(): void {
+  public override onReinitialize(): void {
     super.onReinitialize();
     AccuDrawHintBuilder.deactivate();
   }
 
-  public async onUndoPreviousStep(): Promise<boolean> {
+  public override async onUndoPreviousStep(): Promise<boolean> {
     if (this.toolModel.popMeasurementPoint()) {
       const ev = new BeButtonEvent();
       this.getCurrentButtonEvent(ev);
@@ -52,7 +52,7 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
     return super.onUndoPreviousStep();
   }
 
-  public async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
+  public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
     if (!ev.viewport)
       return EventHandled.No;
 
@@ -109,7 +109,7 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
     IModelApp.toolAdmin.setCursor(IModelApp.viewManager.crossHairCursor);
   }
 
-  public async onResetButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
+  public override async onResetButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
     // Attempt to close polygon
     if (this.toolModel.tryCommitMeasurement()) {
       this.onReinitialize();
@@ -119,7 +119,7 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
     return super.onResetButtonDown(ev);
   }
 
-  public async onMouseMotion(ev: BeButtonEvent): Promise<void> {
+  public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
     if (!ev.viewport)
       return;
 
@@ -132,7 +132,7 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
     return new MeasureAreaToolModel();
   }
 
-  protected updateToolAssistance(): void {
+  protected override updateToolAssistance(): void {
     const hasPoints = undefined !== this.toolModel.dynamicMeasurement;
     const hasEnoughPoints = hasPoints && this.toolModel.hasEnoughPoints;
 

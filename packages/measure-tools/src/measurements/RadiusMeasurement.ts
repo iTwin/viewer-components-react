@@ -40,7 +40,7 @@ export class RadiusMeasurementSerializer extends MeasurementSerializer {
 }
 
 export class RadiusMeasurement extends Measurement {
-  public static readonly serializer = Measurement.registerSerializer(
+  public static override readonly serializer = Measurement.registerSerializer(
     new RadiusMeasurementSerializer(),
   );
 
@@ -104,7 +104,7 @@ export class RadiusMeasurement extends Measurement {
     }
   }
 
-  public readFromJSON(props: RadiusMeasurementProps) {
+  public override readFromJSON(props: RadiusMeasurementProps) {
     super.readFromJSON(props);
     if (props.startPoint)
       this._startPoint = Point3d.fromJSON(props.startPoint);
@@ -120,7 +120,7 @@ export class RadiusMeasurement extends Measurement {
    * Serializes properties to a JSON object.
    * @param json JSON object to append data to.
    */
-  protected writeToJSON(json: MeasurementProps) {
+  protected override writeToJSON(json: MeasurementProps) {
     super.writeToJSON(json);
 
     const jsonDist = json as RadiusMeasurementProps;
@@ -138,7 +138,7 @@ export class RadiusMeasurement extends Measurement {
    * @param opts Options for equality testing.
    * @returns true if the other measurement is equal, false if some property is not the same or if the measurement is not of the same type.
    */
-  public equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
+  public override equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
     if (!super.equals(other, opts))
       return false;
 
@@ -170,7 +170,7 @@ export class RadiusMeasurement extends Measurement {
    * Copies data from the other measurement into this instance.
    * @param other Measurement to copy property values from.
    */
-  protected copyFrom(other: Measurement) {
+  protected override copyFrom(other: Measurement) {
     super.copyFrom(other);
 
     if (other instanceof RadiusMeasurement) {
@@ -197,7 +197,7 @@ export class RadiusMeasurement extends Measurement {
     this._updateArc();
   }
 
-  public testDecorationHit(pickContext: MeasurementPickContext) {
+  public override testDecorationHit(pickContext: MeasurementPickContext) {
     if (this.transientId && this.transientId === pickContext.geomId)
       return true;
 
@@ -211,13 +211,13 @@ export class RadiusMeasurement extends Measurement {
     return false;
   }
 
-  public async getDecorationToolTip(
+  public override async getDecorationToolTip(
     _pickContext: MeasurementPickContext,
   ): Promise<HTMLElement | string> {
     return IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.measurement");
   }
 
-  public getDecorationGeometry(
+  public override getDecorationGeometry(
     _pickContext: MeasurementPickContext,
   ): GeometryStreamProps | undefined {
     if (this.isDynamic)
@@ -240,7 +240,7 @@ export class RadiusMeasurement extends Measurement {
     return this.transientId;
   }
 
-  protected onTransientIdChanged(_prevId: Id64String) {
+  protected override onTransientIdChanged(_prevId: Id64String) {
     if (this._textMarker) this._textMarker.transientHiliteId = this.transientId;
   }
 
@@ -304,7 +304,7 @@ export class RadiusMeasurement extends Measurement {
     return undefined;
   }
 
-  public decorate(context: DecorateContext): void {
+  public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -364,7 +364,7 @@ export class RadiusMeasurement extends Measurement {
     context.addDecorationFromBuilder(builder);
   }
 
-  protected async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
+  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
     const lengthSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
       QuantityType.LengthEngineering,
     );
@@ -481,15 +481,15 @@ export class RadiusMeasurement extends Measurement {
     this._textMarker.applyStyle(tStyle);
   }
 
-  protected onStyleChanged(_isLock: boolean, _prevStyle: string) {
+  protected override onStyleChanged(_isLock: boolean, _prevStyle: string) {
     this.updateMarkerStyle();
   }
 
-  protected onLockToggled() {
+  protected override onLockToggled() {
     this.updateMarkerStyle();
   }
 
-  public onDisplayUnitsChanged(): void {
+  public override onDisplayUnitsChanged(): void {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 

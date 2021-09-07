@@ -38,7 +38,7 @@ export class LocationMeasurementSerializer extends MeasurementSerializer {
     return measurement instanceof LocationMeasurement;
   }
 
-  public isValidJSON(json: any): boolean {
+  public override isValidJSON(json: any): boolean {
     if (!super.isValidJSON(json) || !json.hasOwnProperty("location"))
       return false;
 
@@ -58,7 +58,7 @@ export class LocationMeasurementSerializer extends MeasurementSerializer {
  * Location measurement. A point somewhere in the world, optionally with other values (such as slope, station, offset, etc).
  */
 export class LocationMeasurement extends Measurement {
-  public static readonly serializer = Measurement.registerSerializer(new LocationMeasurementSerializer());
+  public static override readonly serializer = Measurement.registerSerializer(new LocationMeasurementSerializer());
 
   private _location: Point3d;
   private _geoLocation?: Cartographic;
@@ -109,7 +109,7 @@ export class LocationMeasurement extends Measurement {
     }
   }
 
-  public testDecorationHit(pickContext: MeasurementPickContext): boolean {
+  public override testDecorationHit(pickContext: MeasurementPickContext): boolean {
     if (this.transientId && this.transientId === pickContext.geomId)
       return true;
 
@@ -119,11 +119,11 @@ export class LocationMeasurement extends Measurement {
     return false;
   }
 
-  public getDecorationGeometry(_pickContext: MeasurementPickContext): GeometryStreamProps | undefined {
+  public override getDecorationGeometry(_pickContext: MeasurementPickContext): GeometryStreamProps | undefined {
     return [IModelJson.Writer.toIModelJson(PointString3d.create(this.location))];
   }
 
-  public async getDecorationToolTip(_pickContext: MeasurementPickContext): Promise<HTMLElement | string> {
+  public override async getDecorationToolTip(_pickContext: MeasurementPickContext): Promise<HTMLElement | string> {
     return IModelApp.i18n.translate("MeasureTools:Measurements.locationMeasurement");
   }
 
@@ -134,12 +134,12 @@ export class LocationMeasurement extends Measurement {
     return this.transientId;
   }
 
-  protected onTransientIdChanged(_prevId: Id64String) {
+  protected override onTransientIdChanged(_prevId: Id64String) {
     if (this._textMarker)
       this._textMarker.transientHiliteId = this.transientId;
   }
 
-  public decorate(context: DecorateContext): void {
+  public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -182,7 +182,7 @@ export class LocationMeasurement extends Measurement {
     }
   }
 
-  protected async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData | undefined> {
+  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData | undefined> {
     const fCoordinates = await FormatterUtils.formatCoordinates(this._location);
 
     let title = IModelApp.i18n.translate("MeasureTools:Measurements.locationMeasurement");
@@ -250,15 +250,15 @@ export class LocationMeasurement extends Measurement {
     return true;
   }
 
-  protected onStyleChanged(_isLock: boolean, _prevStyle: string) {
+  protected override onStyleChanged(_isLock: boolean, _prevStyle: string) {
     this.updateMarkerStyle();
   }
 
-  protected onLockToggled() {
+  protected override onLockToggled() {
     this.updateMarkerStyle();
   }
 
-  public onDisplayUnitsChanged(): void {
+  public override onDisplayUnitsChanged(): void {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -277,7 +277,7 @@ export class LocationMeasurement extends Measurement {
    * @param opts Options for equality testing.
    * @returns true if the other measurement is equal, false if some property is not the same or if the measurement is not of the same type.
    */
-  public equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
+  public override equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
     if (!super.equals(other, opts))
       return false;
 
@@ -302,7 +302,7 @@ export class LocationMeasurement extends Measurement {
    * Copies data from the other measurement into this instance.
    * @param other Measurement to copy property values from.
    */
-  protected copyFrom(other: Measurement) {
+  protected override copyFrom(other: Measurement) {
     super.copyFrom(other);
 
     if (other instanceof LocationMeasurement) {
@@ -320,7 +320,7 @@ export class LocationMeasurement extends Measurement {
    * Deserializes properties (if they exist) from the JSON object.
    * @param json JSON object to read data from.
    */
-  protected readFromJSON(json: MeasurementProps) {
+  protected override readFromJSON(json: MeasurementProps) {
     super.readFromJSON(json);
 
     const jsonLoc = json as LocationMeasurementProps;
@@ -342,7 +342,7 @@ export class LocationMeasurement extends Measurement {
    * Serializes properties to a JSON object.
    * @param json JSON object to append data to.
    */
-  protected writeToJSON(json: MeasurementProps) {
+  protected override writeToJSON(json: MeasurementProps) {
     super.writeToJSON(json);
 
     const jsonLoc = json as LocationMeasurementProps;

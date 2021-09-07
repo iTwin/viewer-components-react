@@ -90,7 +90,7 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
 
   protected get feature(): Feature | undefined { return undefined; }
 
-  public onPostInstall(): void {
+  public override onPostInstall(): void {
     super.onPostInstall();
 
     const feature = this.feature;
@@ -123,7 +123,7 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
   }
 
   // For most of our cases we expect to draw our decorations when suspended also
-  public decorateSuspended(context: DecorateContext): void {
+  public override decorateSuspended(context: DecorateContext): void {
     this.decorate(context);
   }
 }
@@ -165,16 +165,16 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     this.setupEvents();
   }
 
-  public requireWriteableTarget(): boolean {
+  public override requireWriteableTarget(): boolean {
     return false;
   }
 
-  public isValidLocation(_ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+  public override isValidLocation(_ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
     // In most cases, the location will be okay even if outside the model extents
     return true;
   }
 
-  public onPostInstall(): void {
+  public override onPostInstall(): void {
     super.onPostInstall();
 
     if (this.saveRestoreSelection)
@@ -185,7 +185,7 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     this.updateToolAssistance();
   }
 
-  public onCleanup() {
+  public override onCleanup() {
     super.onCleanup();
 
     if (this.saveRestoreSelection)
@@ -196,13 +196,13 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     this._toolModel.cleanup();
   }
 
-  public onReinitialize(): void {
+  public override onReinitialize(): void {
     this.toolModel.reset(false);
     this.updateAccuSnap();
     this.updateToolAssistance();
   }
 
-  public async onUndoPreviousStep(): Promise<boolean> {
+  public override async onUndoPreviousStep(): Promise<boolean> {
     // If we have an active measurement, reset to initial state
     if (undefined !== this._toolModel.dynamicMeasurement) {
       this.onReinitialize();
@@ -221,7 +221,7 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     return false;
   }
 
-  public async onRedoPreviousStep(): Promise<boolean> {
+  public override async onRedoPreviousStep(): Promise<boolean> {
     // Probably not a good idea if there are ongoing measurements
     if (undefined !== this._toolModel.dynamicMeasurement)
       return false;
@@ -237,7 +237,7 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     return false;
   }
 
-  public async onResetButtonDown(_ev: BeButtonEvent): Promise<EventHandled> {
+  public override async onResetButtonDown(_ev: BeButtonEvent): Promise<EventHandled> {
     if (undefined !== this.toolModel.dynamicMeasurement)
       this.onReinitialize();
     else
@@ -246,7 +246,7 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     return EventHandled.Yes;
   }
 
-  public async onKeyTransition(wentDown: boolean, keyEvent: KeyboardEvent): Promise<EventHandled> {
+  public override async onKeyTransition(wentDown: boolean, keyEvent: KeyboardEvent): Promise<EventHandled> {
     if (EventHandled.Yes === await super.onKeyTransition(wentDown, keyEvent))
       return EventHandled.Yes;
 
@@ -258,15 +258,15 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     return EventHandled.No;
   }
 
-  public testDecorationHit(id: string): boolean {
+  public override testDecorationHit(id: string): boolean {
     return this._toolModel.testDecorationHit(id);
   }
 
-  public getDecorationGeometry(hit: HitDetail): GeometryStreamProps | undefined {
+  public override getDecorationGeometry(hit: HitDetail): GeometryStreamProps | undefined {
     return this._toolModel.getDecorationGeometry(hit);
   }
 
-  public async getToolTip(hit: HitDetail): Promise<HTMLElement | string> {
+  public override async getToolTip(hit: HitDetail): Promise<HTMLElement | string> {
     const toolTip = await this._toolModel.getToolTip(hit);
 
     if (toolTip === "")
@@ -275,11 +275,11 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     return toolTip;
   }
 
-  public decorate(context: DecorateContext): void {
+  public override decorate(context: DecorateContext): void {
     this._toolModel.decorate(context);
   }
 
-  public onUnsuspend(): void {
+  public override onUnsuspend(): void {
     this.updateAccuSnap();
     this.updateToolAssistance();
   }

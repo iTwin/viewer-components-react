@@ -30,7 +30,7 @@ export class MeasureRadiusToolModel extends MeasurementToolModel<RadiusMeasureme
     return this._currentState;
   }
 
-  public get dynamicMeasurement(): RadiusMeasurement | undefined {
+  public override get dynamicMeasurement(): RadiusMeasurement | undefined {
     return this._currentMeasurement;
   }
 
@@ -113,7 +113,7 @@ export class MeasureRadiusToolModel extends MeasurementToolModel<RadiusMeasureme
     }
   }
 
-  public reset(clearMeasurements: boolean): void {
+  public override reset(clearMeasurements: boolean): void {
     super.reset(clearMeasurements);
 
     this._currentMeasurement = undefined;

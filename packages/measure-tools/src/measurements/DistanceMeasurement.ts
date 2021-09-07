@@ -36,7 +36,7 @@ export class DistanceMeasurementSerializer extends MeasurementSerializer {
     return measurement instanceof DistanceMeasurement;
   }
 
-  public isValidJSON(json: any): boolean {
+  public override isValidJSON(json: any): boolean {
     if (!super.isValidJSON(json) || !json.hasOwnProperty("startPoint") || !json.hasOwnProperty("endPoint"))
       return false;
 
@@ -56,7 +56,7 @@ export class DistanceMeasurementSerializer extends MeasurementSerializer {
  * Distance measurement. Composed of a line and a formatted distance in a "text pill" in the middle of the line.
  */
 export class DistanceMeasurement extends Measurement {
-  public static readonly serializer = Measurement.registerSerializer(new DistanceMeasurementSerializer());
+  public static override readonly serializer = Measurement.registerSerializer(new DistanceMeasurementSerializer());
 
   private _startPoint: Point3d;
   private _endPoint: Point3d;
@@ -129,7 +129,7 @@ export class DistanceMeasurement extends Measurement {
     this._endPoint.setFrom(end);
   }
 
-  public testDecorationHit(pickContext: MeasurementPickContext): boolean {
+  public override testDecorationHit(pickContext: MeasurementPickContext): boolean {
     if (this.transientId && this.transientId === pickContext.geomId)
       return true;
 
@@ -146,7 +146,7 @@ export class DistanceMeasurement extends Measurement {
     return false;
   }
 
-  public getDecorationGeometry(pickContext: MeasurementPickContext): GeometryStreamProps | undefined {
+  public override getDecorationGeometry(pickContext: MeasurementPickContext): GeometryStreamProps | undefined {
 
     const geometry = [IModelJson.Writer.toIModelJson(PointString3d.create(this._startPoint, this._endPoint))];
 
@@ -161,7 +161,7 @@ export class DistanceMeasurement extends Measurement {
     return geometry;
   }
 
-  public async getDecorationToolTip(_pickContext: MeasurementPickContext): Promise<HTMLElement | string> {
+  public override async getDecorationToolTip(_pickContext: MeasurementPickContext): Promise<HTMLElement | string> {
     return IModelApp.i18n.translate("MeasureTools:Measurements.distanceMeasurement");
   }
 
@@ -175,14 +175,14 @@ export class DistanceMeasurement extends Measurement {
     return this.transientId;
   }
 
-  protected onTransientIdChanged(_prevId: Id64String) {
+  protected override onTransientIdChanged(_prevId: Id64String) {
     this._runRiseAxes.forEach((axis) => axis.transientId = this.transientId);
 
     if (this._textMarker)
       this._textMarker.transientHiliteId = this.transientId;
   }
 
-  public decorate(context: DecorateContext): void {
+  public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -302,20 +302,20 @@ export class DistanceMeasurement extends Measurement {
     }).catch();
   }
 
-  protected onStyleChanged(_isLock: boolean, _prevStyle: string) {
+  protected override onStyleChanged(_isLock: boolean, _prevStyle: string) {
     this.updateMarkerStyle();
   }
 
-  protected onLockToggled() {
+  protected override onLockToggled() {
     this.updateMarkerStyle();
   }
 
-  protected onDisplayLabelsToggled() {
+  protected override onDisplayLabelsToggled() {
     for (const dm of this._runRiseAxes)
       dm.displayLabels = this.displayLabels;
   }
 
-  public onDisplayUnitsChanged(): void {
+  public override onDisplayUnitsChanged(): void {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     this._runRiseAxes.forEach((axis: DistanceMeasurement) => axis.onDisplayUnitsChanged());
   }
@@ -353,7 +353,7 @@ export class DistanceMeasurement extends Measurement {
     return true;
   }
 
-  protected async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
+  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
 
     const lengthSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(QuantityType.LengthEngineering);
 
@@ -402,7 +402,7 @@ export class DistanceMeasurement extends Measurement {
    * @param opts Options for equality testing.
    * @returns true if the other measurement is equal, false if some property is not the same or if the measurement is not of the same type.
    */
-  public equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
+  public override equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
     if (!super.equals(other, opts))
       return false;
 
@@ -419,7 +419,7 @@ export class DistanceMeasurement extends Measurement {
    * Copies data from the other measurement into this instance.
    * @param other Measurement to copy property values from.
    */
-  protected copyFrom(other: Measurement) {
+  protected override copyFrom(other: Measurement) {
     super.copyFrom(other);
 
     if (other instanceof DistanceMeasurement) {
@@ -436,7 +436,7 @@ export class DistanceMeasurement extends Measurement {
    * Deserializes properties (if they exist) from the JSON object.
    * @param json JSON object to read data from.
    */
-  protected readFromJSON(json: MeasurementProps) {
+  protected override readFromJSON(json: MeasurementProps) {
     super.readFromJSON(json);
 
     const jsonDist = json as DistanceMeasurementProps;
@@ -456,7 +456,7 @@ export class DistanceMeasurement extends Measurement {
    * Serializes properties to a JSON object.
    * @param json JSON object to append data to.
    */
-  protected writeToJSON(json: MeasurementProps) {
+  protected override writeToJSON(json: MeasurementProps) {
     super.writeToJSON(json);
 
     const jsonDist = json as DistanceMeasurementProps;

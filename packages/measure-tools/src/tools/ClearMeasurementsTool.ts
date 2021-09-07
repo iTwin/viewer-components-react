@@ -11,24 +11,24 @@ import { PrimitiveToolBase} from "../api/MeasurementTool";
 import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 
 export class ClearMeasurementsTool extends PrimitiveToolBase {
-  public static toolId = "ClearMeasurements";
-  public static iconSpec = "icon-measure-clear";
+  public static override toolId = "ClearMeasurements";
+  public static override iconSpec = "icon-measure-clear";
 
-  protected get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_ClearMeasurements; }
+  protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_ClearMeasurements; }
 
   constructor() {
     super();
   }
 
-  public requireWriteableTarget(): boolean {
+  public override requireWriteableTarget(): boolean {
     return false;
   }
 
-  public isCompatibleViewport(_vp: Viewport | undefined, _isSelectedViewChange: boolean): boolean {
+  public override isCompatibleViewport(_vp: Viewport | undefined, _isSelectedViewChange: boolean): boolean {
     return true;
   }
 
-  public onPostInstall() {
+  public override onPostInstall() {
     super.onPostInstall();
 
     // NOTE: If we were laying out measurements in a tool, by virtue of how tools run, those measurements will have persisted by the time
