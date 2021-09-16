@@ -1,6 +1,13 @@
 # Change Log - @bentley/imodel-select-react
 
-This log was last generated on Tue, 08 Jun 2021 21:23:59 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Sep 2021 17:55:54 GMT and should not be manually modified.
+
+## 2.0.11
+Thu, 16 Sep 2021 17:55:54 GMT
+
+### Patches
+
+- Stop delivering psuedo-localized strings
 
 ## 2.0.10
 Tue, 08 Jun 2021 21:23:59 GMT

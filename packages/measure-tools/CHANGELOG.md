@@ -1,6 +1,13 @@
 # Change Log - @bentley/measure-tools-react
 
-This log was last generated on Thu, 19 Aug 2021 20:11:48 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Sep 2021 17:55:54 GMT and should not be manually modified.
+
+## 0.4.1
+Thu, 16 Sep 2021 17:55:54 GMT
+
+### Patches
+
+- Stop delivering psuedo-localized strings
 
 ## 0.4.0
 Thu, 19 Aug 2021 20:11:48 GMT

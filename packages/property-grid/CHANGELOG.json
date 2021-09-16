@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "2.2.3",
+      "tag": "@bentley/property-grid-react_v2.2.3",
+      "date": "Thu, 16 Sep 2021 17:55:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Stop delivering psuedo-localized strings"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.2",
       "tag": "@bentley/property-grid-react_v2.2.2",
       "date": "Mon, 30 Aug 2021 17:10:22 GMT",

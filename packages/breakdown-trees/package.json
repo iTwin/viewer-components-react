@@ -1,6 +1,6 @@
 {
   "name": "@bentley/breakdown-trees-react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Package for breakdown trees",
   "keywords": [
     "Bentley",
@@ -116,7 +116,7 @@
     "@bentley/ui-ninezone": "^2.15.0",
     "@bentley/webgl-compatibility": "^2.15.0",
     "@bentley/webpack-tools": "1.14.1",
-    "@bentley/measure-tools-react": "^0.4.0",
+    "@bentley/measure-tools-react": "^0.4.1",
     "react": "^16.8.0",
     "react-dom": "^16.8.0"
   },

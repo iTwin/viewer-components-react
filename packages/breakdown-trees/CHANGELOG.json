@@ -1,0 +1,25 @@
+{
+  "name": "@bentley/breakdown-trees-react",
+  "entries": [
+    {
+      "version": "0.1.1",
+      "tag": "@bentley/breakdown-trees-react_v0.1.1",
+      "date": "Thu, 16 Sep 2021 17:55:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added new package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@bentley/measure-tools-react\" to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@bentley/measure-tools-react\" from `^0.4.0` to `^0.4.1`"
+          }
+        ]
+      }
+    }
+  ]
+}
