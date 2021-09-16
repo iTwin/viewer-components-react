@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/measure-tools-react",
+      "comment": "Stop delivering psuedo-localized strings",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/measure-tools-react"
+}

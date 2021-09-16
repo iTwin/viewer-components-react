@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/geo-tools-react",
+      "comment": "Stop delivering psuedo-localized strings",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/geo-tools-react"
+}
