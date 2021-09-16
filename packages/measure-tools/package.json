@@ -10,7 +10,7 @@
   "main": "lib/measure-tools.js",
   "typings": "lib/measure-tools",
   "scripts": {
-    "build": "npm run copy:assets && npm run pseudolocalize && tsc 1>&2 && npm run webpack:tests",
+    "build": "npm run copy:assets && tsc 1>&2 && npm run webpack:tests",
     "copy:assets": "cpx \"./src/**/*.*css\" \"./lib\" && cpx \"./public/**/*\" ./lib/public",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "watch": "tsc --w",

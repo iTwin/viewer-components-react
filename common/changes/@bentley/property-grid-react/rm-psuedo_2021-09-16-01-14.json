@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "Stop delivering psuedo-localized strings",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react"
+}

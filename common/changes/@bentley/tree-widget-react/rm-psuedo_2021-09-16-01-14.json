@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Stop delivering psuedo-localized strings",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react"
+}
