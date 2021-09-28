@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/property-grid-react",
+      "comment": "Styling updates to include displaying an ellipsis for header labels, consistent header size (50px) and consistent back button lozation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/property-grid-react"
+}
