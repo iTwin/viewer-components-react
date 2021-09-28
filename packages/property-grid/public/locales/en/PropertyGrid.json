@@ -1,8 +1,7 @@
 {
   "widget-label": "Properties",
   "element-list": {
-    "title": "Selected Elements",
-    "results": "results"
+    "title": "Selected Elements"
   },
   "context-menu": {
     "favorite": "Favorite",
