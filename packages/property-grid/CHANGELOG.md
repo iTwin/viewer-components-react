@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Thu, 16 Sep 2021 17:55:54 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Sep 2021 19:32:32 GMT and should not be manually modified.
+
+## 2.2.4
+Thu, 30 Sep 2021 19:32:32 GMT
+
+### Patches
+
+- Styling updates to include displaying an ellipsis for header labels, consistent header size (50px) and consistent back button lozation.
 
 ## 2.2.3
 Thu, 16 Sep 2021 17:55:54 GMT

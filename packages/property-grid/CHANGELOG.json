@@ -2,6 +2,18 @@
   "name": "@bentley/property-grid-react",
   "entries": [
     {
+      "version": "2.2.4",
+      "tag": "@bentley/property-grid-react_v2.2.4",
+      "date": "Thu, 30 Sep 2021 19:32:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Styling updates to include displaying an ellipsis for header labels, consistent header size (50px) and consistent back button lozation."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.3",
       "tag": "@bentley/property-grid-react_v2.2.3",
       "date": "Thu, 16 Sep 2021 17:55:54 GMT",
