@@ -6,6 +6,8 @@
 @import "~@bentley/ui-core/lib/ui-core/style/index";
 @import "~@bentley/ui-core/lib/ui-core/text/index";
 
+$header-height: 50px;
+
 .property-grid-widget-container {
   height: 100%;
   width: 100%;
@@ -20,8 +22,7 @@
 
 .property-grid-container {
   flex: 1;
-  margin-top: 6px;
-  margin-bottom: 6px;
+  margin-top: $uicore-s;
 }
 
 .virtualized-grid-node-content > .components--hoverable:hover {
@@ -30,21 +31,25 @@
 
 .property-grid-react-panel-label-and-class {
   display: block;
+  overflow: hidden;
 }
 
 .property-grid-react-panel-label {
   @include uicore-text(leading);
   font-size: $uicore-font-size-leading;
   padding: $uicore-xs 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .property-grid-react-panel-info-btn {
   cursor: pointer;
   margin-left: auto;
-  padding: $uicore-xs;
   display: flex;
-  flex-direction: column;
   color: $buic-icon-color;
+  padding: 4px;
+  height: 100%;
 
   &:hover {
     color: $buic-foreground-primary;
@@ -55,8 +60,8 @@
   cursor: pointer;
   padding: $uicore-xs;
   display: flex;
-  flex-direction: column;
   color: $buic-icon-color;
+  margin-right: 2px;
 
   &:hover {
     color: $buic-foreground-primary;
@@ -66,18 +71,22 @@
 .property-grid-react-panel-icon {
   font-size: 24px;
   margin: auto;
-  padding: $uicore-s;
 }
 
 .property-grid-react-panel-header {
   display: flex;
-  padding-top: $uicore-xs;
   margin-left: 6px;
+  margin-right: 6px;
+  height: $header-height;
+  box-sizing: border-box;
 }
 
 .property-grid-react-panel-class {
   @include uicore-text;
   font-size: $uicore-font-size;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .property-grid-react-filtering-pg-label {
