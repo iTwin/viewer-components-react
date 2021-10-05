@@ -323,6 +323,9 @@ export class AreaMeasurement extends Measurement {
     title += ` [${fArea}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
+    if (this.label)
+      data.properties.push({ label: IModelApp.i18n.translate("MeasureTools:Generic.name"), name: "Measurement_Label", value: this.label });
+
     data.properties.push(
       {
         label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupArea"), name: "AreaMeasurement_Area", value: fArea,

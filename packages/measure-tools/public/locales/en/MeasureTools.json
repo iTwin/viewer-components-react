@@ -20,7 +20,8 @@
     "hideLabels": "Hide Text Labels",
     "hideMeasurements": "Hide Measurements",
     "displayMeasurements": "Display Measurements",
-    "measurements": "Measurements"
+    "measurements": "Measurements",
+    "name": "Name"
   },
   "Formatting": {
     "xyzPoint": "{{- x}}, {{- y}}, {{- z}}",

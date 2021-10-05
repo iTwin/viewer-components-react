@@ -17,6 +17,9 @@ export interface MeasurementProps {
   /** ID to identify the measurement within a group. Application specific meaning. */
   id?: string;
 
+  /** Optional display label for the measurement. If none, the type of measurement will be displayed appropriately in the UI. */
+  label?: string;
+
   /** Name of the drawing Style to apply when drawing this measurement. If undefined, the default style is used. */
   style?: string;
 

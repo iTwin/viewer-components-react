@@ -295,6 +295,9 @@ export class AngleMeasurement extends Measurement {
     title += ` [${fAngle}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
+    if (this.label)
+      data.properties.push({ label: IModelApp.i18n.translate("MeasureTools:Generic.name"), name: "Measurement_Label", value: this.label });
+
     data.properties.push({
       label: IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.angle"),
       name: "AngleMeasurement_Angle",

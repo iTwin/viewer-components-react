@@ -395,6 +395,9 @@ export class RadiusMeasurement extends Measurement {
     title += ` [${fRadius}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
+    if (this.label)
+      data.properties.push({ label: IModelApp.i18n.translate("MeasureTools:Generic.name"), name: "Measurement_Label", value: this.label });
+
     data.properties.push({
       label: IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.radius"),
       name: "RadiusMeasurement_Radius",

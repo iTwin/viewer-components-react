@@ -189,6 +189,8 @@ export class LocationMeasurement extends Measurement {
     title += ` [${fCoordinates}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
+    if (this.label)
+      data.properties.push({ label: IModelApp.i18n.translate("MeasureTools:Generic.name"), name: "Measurement_Label", value: this.label });
 
     data.properties.push({
       label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.coordinates"),
