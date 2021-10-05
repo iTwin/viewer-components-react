@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { DecorateContext, Decorator, IModelApp, ScreenViewport } from "@bentley/imodeljs-frontend";
 
-/** Handles forwarding a cached graphics decorate call for measurements. */
+/** Handles forwarding a cached graphics decorate call for measurements. Note this is package internal and not meant to be exposed as public API. */
 export class MeasurementCachedGraphicsHandler implements Decorator {
   private static _instance?: MeasurementCachedGraphicsHandler;
 
