@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Decorator, DecorateContext, IModelApp, ScreenViewport } from "@bentley/imodeljs-frontend";
+import { DecorateContext, Decorator, IModelApp, ScreenViewport } from "@bentley/imodeljs-frontend";
 
 /** Handles forwarding a cached graphics decorate call for measurements. */
 export class MeasurementCachedGraphicsHandler implements Decorator {

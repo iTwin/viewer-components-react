@@ -5,7 +5,7 @@
 
 import { BeUiEvent } from "@bentley/bentleyjs-core";
 import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, Decorator, EventHandled, HitDetail, IModelApp, Viewport, ScreenViewport } from "@bentley/imodeljs-frontend";
+import { BeButtonEvent, DecorateContext, Decorator, EventHandled, HitDetail, IModelApp, ScreenViewport, Viewport } from "@bentley/imodeljs-frontend";
 import { Measurement, MeasurementPickContext } from "./Measurement";
 import { MeasurementCachedGraphicsHandler } from "./MeasurementCachedGraphicsHandler";
 import { MeasurementButtonHandledEvent, WellKnownViewType } from "./MeasurementEnums";

@@ -346,7 +346,7 @@ export abstract class Measurement {
   public set label(value: string | undefined) {
     const prevLabel = this._label;
     this._label = value;
-    this.onLabelChanged(prevLabel);  
+    this.onLabelChanged(prevLabel);
   }
 
   /** Gets or sets the mame of the StyleSet to apply when drawing this measurement. If undefined, the default style is used. */
@@ -495,7 +495,7 @@ export abstract class Measurement {
    */
   public decorate(_context: DecorateContext): void { }
 
-  /** Draw any graphics that need to be cached. This is called when the scene changes, e.g. zoom or rotate. 
+  /** Draw any graphics that need to be cached. This is called when the scene changes, e.g. zoom or rotate.
     * @param context Decorate context for drawing to a viewport.
   */
   public decorateCached(_context: DecorateContext): void { }
