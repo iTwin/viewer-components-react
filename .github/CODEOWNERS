@@ -8,31 +8,31 @@
 # the repo. Unless a later match takes precedence,
 # @global-owner1 and @global-owner2 will be requested for
 # review when someone opens a pull request.
-*  @imodeljs/viewer-components-reviewers
+*  @itwin/viewer-components-reviewers
 
-/packages/imodel-select  @imodeljs/viewer-components-reviewers @wilmaier @calebmshafer
-/common/changes/@bentley/imodel-select-react  @imodeljs/viewer-components-reviewers @wilmaier @calebmshafer
+/packages/imodel-select  @itwin/viewer-components-reviewers @wilmaier @calebmshafer
+/common/changes/@bentley/imodel-select-react  @itwin/viewer-components-reviewers @wilmaier @calebmshafer
 
-/packages/markup-frontstage  @imodeljs/viewer-components-reviewers @JoeZman @archana-maharjan
-/common/changes/@bentley/markup-frontstage-react  @imodeljs/viewer-components-reviewers @JoeZman @archana-maharjan
+/packages/markup-frontstage  @itwin/viewer-components-reviewers @JoeZman @archana-maharjan
+/common/changes/@bentley/markup-frontstage-react  @itwin/viewer-components-reviewers @JoeZman @archana-maharjan
 
-/packages/property-grid  @imodeljs/viewer-components-reviewers @JoeZman @aruniverse @diegopinate
-/common/changes/@bentley/property-grid-react  @imodeljs/viewer-components-reviewers @JoeZman @aruniverse @diegopinate
+/packages/property-grid  @itwin/viewer-components-reviewers @JoeZman @aruniverse @diegopinate
+/common/changes/@bentley/property-grid-react  @itwin/viewer-components-reviewers @JoeZman @aruniverse @diegopinate
 
-/packages/tree-widget  @imodeljs/viewer-components-reviewers @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
-/common/changes/@bentley/tree-widget-react  @imodeljs/viewer-components-reviewers @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
+/packages/tree-widget  @itwin/viewer-components-reviewers @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
+/common/changes/@bentley/tree-widget-react  @itwin/viewer-components-reviewers @JoeZman @diegopinate @aruniverse @JValiunas @michaalx
 
-/packages/imodel-content-tree  @imodeljs/viewer-components-reviewers @grigasp
-/common/changes/@bentley/imodel-content-tree-react  @imodeljs/viewer-components-reviewers @grigasp
+/packages/imodel-content-tree  @itwin/viewer-components-reviewers @grigasp
+/common/changes/@bentley/imodel-content-tree-react  @itwin/viewer-components-reviewers @grigasp
 
-/packages/imodel-react-hooks  @imodeljs/viewer-components-reviewers @michaelbelousov
-/common/changes/@bentley/imodel-react-hooks  @imodeljs/viewer-components-reviewers @michaelbelousov
+/packages/imodel-react-hooks  @itwin/viewer-components-reviewers @michaelbelousov
+/common/changes/@bentley/imodel-react-hooks  @itwin/viewer-components-reviewers @michaelbelousov
 
-/packages/geo-tools  @imodeljs/viewer-components-reviewers @mdastous-bentley
-/common/changes/@bentley/geo-tools-react  @imodeljs/viewer-components-reviewers @mdastous-bentley
+/packages/geo-tools  @itwin/viewer-components-reviewers @mdastous-bentley
+/common/changes/@bentley/geo-tools-react  @itwin/viewer-components-reviewers @mdastous-bentley
 
-/packages/measure-tools  @imodeljs/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
-/common/changes/@bentley/measure-tools-react  @imodeljs/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
+/packages/measure-tools  @itwin/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
+/common/changes/@bentley/measure-tools-react  @itwin/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
 
-/packages/breakdown-trees  @imodeljs/viewer-components-reviewers @JValiunas @MeghaCBorty
-/common/changes/@bentley/breakdown-trees-react  @imodeljs/viewer-components-reviewers @JValiunas @MeghaCBorty
+/packages/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty
+/common/changes/@bentley/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty
