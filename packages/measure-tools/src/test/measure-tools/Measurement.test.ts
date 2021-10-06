@@ -99,6 +99,7 @@ describe("Measurement tests", () => {
     const test2 = Measurement.parseSingle(jsonProps);
     assert.isDefined(test2);
     assert.isTrue(test2 instanceof DistanceMeasurementSubClass);
+    assert.isDefined(test2?.label);
     assert.isTrue(test2!.equals(test));
   });
 
