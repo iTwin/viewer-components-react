@@ -94,7 +94,7 @@ describe("Measurement tests", () => {
     const test = new DistanceMeasurementSubClass();
     test.extraProp = 42;
     test.label = "Solution 42";
-    
+
     const jsonProps = Measurement.serialize(test);
     const test2 = Measurement.parseSingle(jsonProps);
     assert.isDefined(test2);

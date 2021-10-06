@@ -12,6 +12,7 @@ import { StyleSet, TextOffsetType, WellKnownGraphicStyleType, WellKnownTextStyle
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementManager } from "../api/MeasurementManager";
 import { MeasurementPreferences, MeasurementPreferencesProperty } from "../api/MeasurementPreferences";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
 import { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
@@ -377,8 +378,7 @@ export class DistanceMeasurement extends Measurement {
     title += ` [${fDistance}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
-    if (this.label)
-      data.properties.push({ label: IModelApp.i18n.translate("MeasureTools:Generic.name"), name: "Measurement_Label", value: this.label });
+    MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push(
       {

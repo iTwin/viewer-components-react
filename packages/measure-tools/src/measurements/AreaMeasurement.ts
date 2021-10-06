@@ -9,6 +9,7 @@ import { GeometryStreamProps } from "@bentley/imodeljs-common";
 import { BeButtonEvent, DecorateContext, GraphicBuilder, GraphicType, IModelApp, QuantityType, RenderGraphicOwner } from "@bentley/imodeljs-frontend";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
 import { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { Polygon } from "../api/Polygon";
@@ -323,8 +324,7 @@ export class AreaMeasurement extends Measurement {
     title += ` [${fArea}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
-    if (this.label)
-      data.properties.push({ label: IModelApp.i18n.translate("MeasureTools:Generic.name"), name: "Measurement_Label", value: this.label });
+    MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push(
       {

@@ -10,6 +10,7 @@ export * from "./api/Measurement";
 export * from "./api/MeasurementEnums";
 export * from "./api/MeasurementManager";
 export * from "./api/MeasurementPreferences";
+export * from "./api/MeasurementPropertyHelper";
 export * from "./api/MeasurementProps";
 export * from "./api/MeasurementSelectionSet";
 export * from "./api/MeasurementTool";

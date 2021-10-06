@@ -9,6 +9,7 @@ import { GeometryStreamProps } from "@bentley/imodeljs-common";
 import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType, Viewport } from "@bentley/imodeljs-frontend";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
 import { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
@@ -395,8 +396,7 @@ export class RadiusMeasurement extends Measurement {
     title += ` [${fRadius}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
-    if (this.label)
-      data.properties.push({ label: IModelApp.i18n.translate("MeasureTools:Generic.name"), name: "Measurement_Label", value: this.label });
+    MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push({
       label: IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.radius"),
