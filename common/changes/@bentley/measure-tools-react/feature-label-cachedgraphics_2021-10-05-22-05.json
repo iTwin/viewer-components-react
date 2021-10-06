@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/measure-tools-react",
+      "comment": "Added label property to base measurements so they can be named, standard measurements will display this in the property widget if defined.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@bentley/measure-tools-react"
+}

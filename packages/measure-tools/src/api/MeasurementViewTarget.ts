@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { DrawingViewState, IModelApp, SheetViewState, SpatialViewState, Viewport, ViewState } from "@bentley/imodeljs-frontend";
+import { MeasurementCachedGraphicsHandler } from "./MeasurementCachedGraphicsHandler";
 import { WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementViewTargetProps } from "./MeasurementProps";
 
@@ -338,13 +339,16 @@ export class MeasurementViewTarget {
     // If empty, then "Any" so invalidate every viewport
     if (this.included.size === 0 && this.excluded.size === 0) {
       IModelApp.viewManager.invalidateDecorationsAllViews();
+      MeasurementCachedGraphicsHandler.instance.invalidateDecorations();
       return;
     }
 
     // Go through each viewport, check if it's compatible and if so invalidate
     for (const vp of IModelApp.viewManager) {
-      if (this.isViewportCompatible(vp))
+      if (this.isViewportCompatible(vp)) {
         vp.invalidateDecorations();
+        MeasurementCachedGraphicsHandler.instance.invalidateDecorations(vp);
+      }
     }
   }
 
@@ -387,17 +391,25 @@ export class MeasurementViewTarget {
   public static invalidateDecorationsForViewType(viewType: string) {
     if (viewType === WellKnownViewType.Any) {
       IModelApp.viewManager.invalidateDecorationsAllViews();
+      MeasurementCachedGraphicsHandler.instance.invalidateDecorations();
       return;
     }
 
     for (const vp of IModelApp.viewManager) {
+      let invalidate = false;
+
       if ((viewType === WellKnownViewType.AnySpatial && vp.view instanceof SpatialViewState) ||
         (viewType === WellKnownViewType.AnyDrawing && vp.view instanceof DrawingViewState)) {
-        vp.invalidateDecorations();
+        invalidate = true;
       }
 
       if (MeasurementViewTarget.classifyViewport(vp) === viewType)
+        invalidate = true;
+
+      if (invalidate) {
         vp.invalidateDecorations();
+        MeasurementCachedGraphicsHandler.instance.invalidateDecorations(vp);
+      }
     }
   }
 

@@ -251,8 +251,10 @@ export abstract class MeasurementToolModel<T extends Measurement> {
   /** Decorate the measurements in the provided viewport. */
   public decorate(context: DecorateContext): void {
     const dynamic = this.dynamicMeasurement;
-    if (dynamic && dynamic.viewTarget.isViewportCompatible(context.viewport))
+    if (dynamic && dynamic.viewTarget.isViewportCompatible(context.viewport)) {
+      dynamic.decorateCached(context); // Not yet added to the manager, so this has to be called explicitly
       dynamic.decorate(context);
+    }
   }
 
   private removeMeasurementsFromManager(measurements: Measurement | Measurement[]) {

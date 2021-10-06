@@ -54,6 +54,12 @@ describe("Measurement tests", () => {
     assert.isFalse(other.equals(other2));
     assert.isTrue(other.equals(other2, { ignoreViewTarget: true }));
 
+    // Test label equality
+    other2.label = "Solution 42";
+    assert.isFalse(other.equals(other2, { ignoreViewTarget: true }));
+    assert.isTrue(other.equals(other2, { ignoreViewTarget: true, ignoreLabel: true }));
+    other2.label = undefined;
+
     other.id = "5";
     other2.id = "6";
     assert.isFalse(other.equals(other2, { ignoreViewTarget: true }));
@@ -76,10 +82,25 @@ describe("Measurement tests", () => {
   it("Test clone", () => {
     const test = new DistanceMeasurementSubClass();
     test.extraProp = 42;
+    test.label = "Solution 42";
 
     const test2 = test.clone();
     assert.isTrue(test2 instanceof DistanceMeasurementSubClass);
     assert.isTrue((test2 as DistanceMeasurementSubClass).extraProp === test.extraProp);
+    assert.isTrue(test2.label === test.label);
+  });
+
+  it ("Test roundtrip json", () => {
+    const test = new DistanceMeasurementSubClass();
+    test.extraProp = 42;
+    test.label = "Solution 42";
+
+    const jsonProps = Measurement.serialize(test);
+    const test2 = Measurement.parseSingle(jsonProps);
+    assert.isDefined(test2);
+    assert.isTrue(test2 instanceof DistanceMeasurementSubClass);
+    assert.isDefined(test2?.label);
+    assert.isTrue(test2!.equals(test));
   });
 
   it ("Test styles/locking", () => {
