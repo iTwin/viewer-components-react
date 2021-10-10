@@ -1,6 +1,14 @@
 # Change Log - @bentley/measure-tools-react
 
-This log was last generated on Thu, 16 Sep 2021 17:55:54 GMT and should not be manually modified.
+This log was last generated on Sun, 10 Oct 2021 03:39:20 GMT and should not be manually modified.
+
+## 0.5.0
+Sun, 10 Oct 2021 03:39:20 GMT
+
+### Minor changes
+
+- Added label property to base measurements so they can be named, standard measurements will display this in the property widget if defined.
+- Added decorateCached to measurement base class, allowing for subclasses to participate in cached graphics drawing (rather than having to manage their own cached graphics like AreaMeasurement had to do for performance reasons). Added methods to invalidate both regular decorations and cached decorations.
 
 ## 0.4.1
 Thu, 16 Sep 2021 17:55:54 GMT
