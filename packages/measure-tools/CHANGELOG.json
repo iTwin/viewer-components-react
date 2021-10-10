@@ -2,6 +2,21 @@
   "name": "@bentley/measure-tools-react",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@bentley/measure-tools-react_v0.5.0",
+      "date": "Sun, 10 Oct 2021 03:39:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added label property to base measurements so they can be named, standard measurements will display this in the property widget if defined."
+          },
+          {
+            "comment": "Added decorateCached to measurement base class, allowing for subclasses to participate in cached graphics drawing (rather than having to manage their own cached graphics like AreaMeasurement had to do for performance reasons). Added methods to invalidate both regular decorations and cached decorations."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.1",
       "tag": "@bentley/measure-tools-react_v0.4.1",
       "date": "Thu, 16 Sep 2021 17:55:54 GMT",

@@ -2,6 +2,21 @@
   "name": "@bentley/breakdown-trees-react",
   "entries": [
     {
+      "version": "0.1.2",
+      "tag": "@bentley/breakdown-trees-react_v0.1.2",
+      "date": "Sun, 10 Oct 2021 03:39:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@bentley/measure-tools-react\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@bentley/measure-tools-react\" from `^0.4.1` to `^0.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@bentley/breakdown-trees-react_v0.1.1",
       "date": "Thu, 16 Sep 2021 17:55:54 GMT",
