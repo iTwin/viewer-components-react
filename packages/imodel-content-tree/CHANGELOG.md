@@ -1,6 +1,13 @@
 # Change Log - @bentley/imodel-content-tree-react
 
-This log was last generated on Tue, 08 Jun 2021 21:23:59 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Oct 2021 14:08:20 GMT and should not be manually modified.
+
+## 0.3.3
+Wed, 20 Oct 2021 14:08:20 GMT
+
+### Patches
+
+- Load InformationContentElement nodes under geometric models
 
 ## 0.3.2
 Tue, 08 Jun 2021 21:23:59 GMT
