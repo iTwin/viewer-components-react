@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/breakdown-trees-react",
+      "comment": "Export Data Trees",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/breakdown-trees-react"
+}
