@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@bentley/geometry-core";
-import { Cartographic } from "@bentley/imodeljs-common";
+import { Point3d } from "@itwin/core-geometry";
+import { Cartographic } from "@itwin/core-common";
 import { assert } from "chai";
 import { Measurement, MeasurementPickContext } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
@@ -21,7 +21,7 @@ describe("LocationMeasurement tests", () => {
     measure1.slope = 1;
     measure1.offset = 50;
     measure1.station = 500;
-    measure1.geoLocation = Cartographic.fromDegrees(25, 25, 100);
+    measure1.geoLocation = Cartographic.fromDegrees({ latitude: 25, longitude: 25, height: 100 });
     measure1.isLocked = true;
     measure1.groupId = "inactive";
     measure1.subgroupId = "ghosted";

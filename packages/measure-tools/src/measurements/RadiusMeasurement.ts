@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { Arc3d, IModelJson, Point3d, Ray3d, Vector3d, XYZProps } from "@bentley/geometry-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType, Viewport } from "@bentley/imodeljs-frontend";
+import { Id64String } from "@itwin/core-bentley";
+import { Arc3d, IModelJson, Point3d, Ray3d, Vector3d, XYZProps } from "@itwin/core-geometry";
+import { GeometryStreamProps } from "@itwin/core-common";
+import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType, Viewport } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
@@ -41,7 +41,7 @@ export class RadiusMeasurementSerializer extends MeasurementSerializer {
 }
 
 export class RadiusMeasurement extends Measurement {
-  public static readonly serializer = Measurement.registerSerializer(
+  public static override readonly serializer = Measurement.registerSerializer(
     new RadiusMeasurementSerializer(),
   );
 
@@ -105,7 +105,7 @@ export class RadiusMeasurement extends Measurement {
     }
   }
 
-  public readFromJSON(props: RadiusMeasurementProps) {
+  public override readFromJSON(props: RadiusMeasurementProps) {
     super.readFromJSON(props);
     if (props.startPoint)
       this._startPoint = Point3d.fromJSON(props.startPoint);
@@ -121,7 +121,7 @@ export class RadiusMeasurement extends Measurement {
    * Serializes properties to a JSON object.
    * @param json JSON object to append data to.
    */
-  protected writeToJSON(json: MeasurementProps) {
+  protected override writeToJSON(json: MeasurementProps) {
     super.writeToJSON(json);
 
     const jsonDist = json as RadiusMeasurementProps;
@@ -139,7 +139,7 @@ export class RadiusMeasurement extends Measurement {
    * @param opts Options for equality testing.
    * @returns true if the other measurement is equal, false if some property is not the same or if the measurement is not of the same type.
    */
-  public equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
+  public override equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
     if (!super.equals(other, opts))
       return false;
 
@@ -171,7 +171,7 @@ export class RadiusMeasurement extends Measurement {
    * Copies data from the other measurement into this instance.
    * @param other Measurement to copy property values from.
    */
-  protected copyFrom(other: Measurement) {
+  protected override copyFrom(other: Measurement) {
     super.copyFrom(other);
 
     if (other instanceof RadiusMeasurement) {
@@ -198,7 +198,7 @@ export class RadiusMeasurement extends Measurement {
     this._updateArc();
   }
 
-  public testDecorationHit(pickContext: MeasurementPickContext) {
+  public override testDecorationHit(pickContext: MeasurementPickContext) {
     if (this.transientId && this.transientId === pickContext.geomId)
       return true;
 
@@ -212,13 +212,13 @@ export class RadiusMeasurement extends Measurement {
     return false;
   }
 
-  public async getDecorationToolTip(
+  public override async getDecorationToolTip(
     _pickContext: MeasurementPickContext,
   ): Promise<HTMLElement | string> {
-    return IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.measurement");
+    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.measurement");
   }
 
-  public getDecorationGeometry(
+  public override getDecorationGeometry(
     _pickContext: MeasurementPickContext,
   ): GeometryStreamProps | undefined {
     if (this.isDynamic)
@@ -241,7 +241,7 @@ export class RadiusMeasurement extends Measurement {
     return this.transientId;
   }
 
-  protected onTransientIdChanged(_prevId: Id64String) {
+  protected override onTransientIdChanged(_prevId: Id64String) {
     if (this._textMarker) this._textMarker.transientHiliteId = this.transientId;
   }
 
@@ -305,7 +305,7 @@ export class RadiusMeasurement extends Measurement {
     return undefined;
   }
 
-  public decorate(context: DecorateContext): void {
+  public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -365,14 +365,14 @@ export class RadiusMeasurement extends Measurement {
     context.addDecorationFromBuilder(builder);
   }
 
-  protected async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
+  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
     const lengthSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
       QuantityType.LengthEngineering,
     );
 
-    const radius = this._arc!.circularRadius()!;
+    const radius = this._arc?.circularRadius() ?? 0.0;
     const diameter = radius * 2;
-    const length = this._arc!.curveLength();
+    const length = this._arc?.curveLength() ?? 0.0;
     const circumference = 2 * Math.PI * radius;
 
     const fRadius = IModelApp.quantityFormatter.formatQuantity(
@@ -392,32 +392,32 @@ export class RadiusMeasurement extends Measurement {
       lengthSpec,
     );
 
-    let title = IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.measurement");
+    let title = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.measurement");
     title += ` [${fRadius}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push({
-      label: IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.radius"),
+      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.radius"),
       name: "RadiusMeasurement_Radius",
       value: fRadius,
       aggregatableValue: (lengthSpec !== undefined) ? { value: radius, formatSpec: lengthSpec } : undefined,
     });
     data.properties.push({
-      label: IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.diameter"),
+      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.diameter"),
       name: "RadiusMeasurement_Diameter",
       value: fDiameter,
       aggregatableValue: (lengthSpec !== undefined) ? { value: length, formatSpec: lengthSpec } : undefined,
     });
     data.properties.push({
-      label: IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.arcLength"),
+      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.arcLength"),
       name: "RadiusMeasurement_ArcLength",
       value: fArcLength,
       aggregatableValue: (lengthSpec !== undefined) ? { value: length, formatSpec: lengthSpec } : undefined,
     });
     data.properties.push({
-      label: IModelApp.i18n.translate(
+      label: IModelApp.localization.getLocalizedString(
         "MeasureTools:tools.MeasureRadius.circleCircumference",
       ),
       name: "RadiusMeasurement_CircleCircumference",
@@ -484,15 +484,15 @@ export class RadiusMeasurement extends Measurement {
     this._textMarker.applyStyle(tStyle);
   }
 
-  protected onStyleChanged(_isLock: boolean, _prevStyle: string) {
+  protected override onStyleChanged(_isLock: boolean, _prevStyle: string) {
     this.updateMarkerStyle();
   }
 
-  protected onLockToggled() {
+  protected override onLockToggled() {
     this.updateMarkerStyle();
   }
 
-  public onDisplayUnitsChanged(): void {
+  public override onDisplayUnitsChanged(): void {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 

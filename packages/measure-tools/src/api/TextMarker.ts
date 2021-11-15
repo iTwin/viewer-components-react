@@ -3,12 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { Angle, AxisIndex, LineString3d, Matrix3d, Point2d, Point3d, PolygonOps, Transform, Vector3d, XAndY, XYAndZ } from "@bentley/geometry-core";
-import { ColorDef, Hilite } from "@bentley/imodeljs-common";
+import { Id64String } from "@itwin/core-bentley";
+import { Angle, AxisIndex, LineString3d, Matrix3d, Point2d, Point3d, PolygonOps, Transform, Vector3d, XAndY, XYAndZ } from "@itwin/core-geometry";
+import { ColorDef, Hilite } from "@itwin/core-common";
 import {
   BeButton, BeButtonEvent, CanvasDecoration, DecorateContext, IModelApp, SelectionMode, SelectionTool, Viewport,
-} from "@bentley/imodeljs-frontend";
+} from "@itwin/core-frontend";
 import { IconAlignment, IconStyleProps, StyleSet, TextOffsetProps, TextOffsetType, TextStyleProps, WellKnownTextStyleType } from "./GraphicStyle";
 
 /**

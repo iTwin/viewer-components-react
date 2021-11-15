@@ -13,9 +13,9 @@
     "**/.rush": true,
     "**/*.build.log": true,
     "**/*.build.error.log": true,
-    "**/node_modules": true,
-    "**/out": true,
-    "**/lib": true,
+    "**/node_modules": false,
+    "**/out": false,
+    "**/lib": false,
     "common/temp": true
   },
   "files.trimTrailingWhitespace": true,

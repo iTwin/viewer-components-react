@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Point3d } from "@bentley/geometry-core";
+import { Point3d } from "@itwin/core-geometry";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import { AngleMeasurement } from "../measurements/AngleMeasurement";
 
@@ -30,7 +30,7 @@ export class MeasureAngleToolModel extends MeasurementToolModel<AngleMeasurement
     return this._currentState;
   }
 
-  public get dynamicMeasurement(): AngleMeasurement | undefined {
+  public override get dynamicMeasurement(): AngleMeasurement | undefined {
     return this._currentMeasurement;
   }
 
@@ -113,7 +113,7 @@ export class MeasureAngleToolModel extends MeasurementToolModel<AngleMeasurement
     }
   }
 
-  public reset(clearMeasurements: boolean): void {
+  public override reset(clearMeasurements: boolean): void {
     super.reset(clearMeasurements);
 
     this._currentMeasurement = undefined;

@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Viewport } from "@bentley/imodeljs-frontend";
+import { Viewport } from "@itwin/core-frontend";
 import { MeasurementManager } from "../api/MeasurementManager";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { Measurement } from "../api/Measurement";
@@ -11,25 +11,25 @@ import { PrimitiveToolBase} from "../api/MeasurementTool";
 import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 
 export class ClearMeasurementsTool extends PrimitiveToolBase {
-  public static toolId = "ClearMeasurements";
-  public static iconSpec = "icon-measure-clear";
+  public static override toolId = "ClearMeasurements";
+  public static override iconSpec = "icon-measure-clear";
 
-  protected get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_ClearMeasurements; }
+  protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_ClearMeasurements; }
 
   constructor() {
     super();
   }
 
-  public requireWriteableTarget(): boolean {
+  public override requireWriteableTarget(): boolean {
     return false;
   }
 
-  public isCompatibleViewport(_vp: Viewport | undefined, _isSelectedViewChange: boolean): boolean {
+  public override isCompatibleViewport(_vp: Viewport | undefined, _isSelectedViewChange: boolean): boolean {
     return true;
   }
 
-  public onPostInstall() {
-    super.onPostInstall();
+  public override async onPostInstall(): Promise<void> {
+    await super.onPostInstall();
 
     // NOTE: If we were laying out measurements in a tool, by virtue of how tools run, those measurements will have persisted by the time
     // we install this clear tool
@@ -44,12 +44,14 @@ export class ClearMeasurementsTool extends PrimitiveToolBase {
       MeasurementManager.instance.clear(false);
     }
 
-    this.exitTool();
+    await this.exitTool();
   }
 
-  public onRestartTool(): void {
+  public async onRestartTool(): Promise<void> {
     const tool = new ClearMeasurementsTool();
-    if (!tool.run())
-      this.exitTool();
+    if (await tool.run())
+      return;
+
+    return this.exitTool();
   }
 }

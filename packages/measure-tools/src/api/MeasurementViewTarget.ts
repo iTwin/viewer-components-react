@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { DrawingViewState, IModelApp, SheetViewState, SpatialViewState, Viewport, ViewState } from "@bentley/imodeljs-frontend";
+import { DrawingViewState, IModelApp, SheetViewState, SpatialViewState, Viewport, ViewState } from "@itwin/core-frontend";
 import { MeasurementCachedGraphicsHandler } from "./MeasurementCachedGraphicsHandler";
 import { WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementViewTargetProps } from "./MeasurementProps";

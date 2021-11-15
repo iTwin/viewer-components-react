@@ -3,15 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Viewport } from "@bentley/imodeljs-frontend";
+import { Viewport } from "@itwin/core-frontend";
 import { Feature, FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { PrimitiveToolBase } from "../api/MeasurementTool";
 
 export class ToggleDisplayMeasurementAxesTool extends PrimitiveToolBase {
-  public static toolId = "ToggleDisplayMeasurementAxes";
+  public static override toolId = "ToggleDisplayMeasurementAxes";
 
-  public static get iconSpec(): string {
+  public static override get iconSpec(): string {
     if (MeasurementPreferences.current.displayMeasurementAxes)
       return "icon-measure-2d-hide";
 
@@ -19,33 +19,35 @@ export class ToggleDisplayMeasurementAxesTool extends PrimitiveToolBase {
   }
 
   // Ignore built-in feature tracking on the tool, since we want to add a toggle state to the tracking so we will call it ourselves
-  protected get feature(): Feature | undefined { return undefined; }
+  protected override get feature(): Feature | undefined { return undefined; }
 
   constructor() {
     super();
   }
 
-  public requireWriteableTarget(): boolean {
+  public override requireWriteableTarget(): boolean {
     return false;
   }
 
-  public isCompatibleViewport(_vp: Viewport | undefined, _isSelectedViewChange: boolean): boolean {
+  public override isCompatibleViewport(_vp: Viewport | undefined, _isSelectedViewChange: boolean): boolean {
     return true;
   }
 
-  public onPostInstall() {
-    super.onPostInstall();
+  public override async onPostInstall(): Promise<void> {
+    await super.onPostInstall();
 
     const isEnabled = !MeasurementPreferences.current.displayMeasurementAxes;
     MeasurementPreferences.current.displayMeasurementAxes = isEnabled;
     FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.Tools_ToggleDisplayMeasurementAxes, isEnabled);
 
-    this.exitTool();
+    await this.exitTool();
   }
 
-  public onRestartTool(): void {
+  public async onRestartTool(): Promise<void> {
     const tool = new ToggleDisplayMeasurementAxesTool();
-    if (!tool.run())
-      this.exitTool();
+    if (await tool.run())
+      return;
+
+    return this.exitTool();
   }
 }

@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d, PolygonOps, Ray3d } from "@bentley/geometry-core";
-import { DecorateContext, GraphicBuilder, IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
+import { Point3d, PolygonOps, Ray3d } from "@itwin/core-geometry";
+import { DecorateContext, GraphicBuilder, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "./GraphicStyle";
 import { TextEntry, TextMarker } from "./TextMarker";
 

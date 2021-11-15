@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { Angle, AngleSweep, Arc3d, AxisOrder, IModelJson, Matrix3d, Point3d, PointString3d, Vector3d, XYZProps } from "@bentley/geometry-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
+import { Id64String } from "@itwin/core-bentley";
+import { Angle, AngleSweep, Arc3d, AxisOrder, IModelJson, Matrix3d, Point3d, PointString3d, Vector3d, XYZProps } from "@itwin/core-geometry";
+import { GeometryStreamProps } from "@itwin/core-common";
+import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
@@ -40,7 +40,7 @@ export class AngleMeasurementSerializer extends MeasurementSerializer {
 }
 
 export class AngleMeasurement extends Measurement {
-  public static readonly serializer = Measurement.registerSerializer(
+  public static override readonly serializer = Measurement.registerSerializer(
     new AngleMeasurementSerializer(),
   );
 
@@ -85,7 +85,7 @@ export class AngleMeasurement extends Measurement {
     return angle;
   }
 
-  public readFromJSON(props: AngleMeasurementProps) {
+  public override readFromJSON(props: AngleMeasurementProps) {
     super.readFromJSON(props);
     if (props.startPoint)
       this._startPoint = Point3d.fromJSON(props.startPoint);
@@ -101,7 +101,7 @@ export class AngleMeasurement extends Measurement {
    * Serializes properties to a JSON object.
    * @param json JSON object to append data to.
    */
-  protected writeToJSON(json: MeasurementProps) {
+  protected override writeToJSON(json: MeasurementProps) {
     super.writeToJSON(json);
 
     const jsonDist = json as AngleMeasurementProps;
@@ -119,7 +119,7 @@ export class AngleMeasurement extends Measurement {
    * @param opts Options for equality testing.
    * @returns true if the other measurement is equal, false if some property is not the same or if the measurement is not of the same type.
    */
-  public equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
+  public override equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
     if (!super.equals(other, opts))
       return false;
 
@@ -151,7 +151,7 @@ export class AngleMeasurement extends Measurement {
    * Copies data from the other measurement into this instance.
    * @param other Measurement to copy property values from.
    */
-  protected copyFrom(other: Measurement) {
+  protected override copyFrom(other: Measurement) {
     super.copyFrom(other);
 
     if (other instanceof AngleMeasurement) {
@@ -178,7 +178,7 @@ export class AngleMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
-  public testDecorationHit(pickContext: MeasurementPickContext) {
+  public override testDecorationHit(pickContext: MeasurementPickContext) {
     if (this.transientId && this.transientId === pickContext.geomId)
       return true;
 
@@ -192,13 +192,13 @@ export class AngleMeasurement extends Measurement {
     return false;
   }
 
-  public async getDecorationToolTip(
+  public override async getDecorationToolTip(
     _pickContext: MeasurementPickContext,
   ): Promise<HTMLElement | string> {
-    return IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.measurement");
+    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.measurement");
   }
 
-  public getDecorationGeometry(
+  public override getDecorationGeometry(
     _pickContext: MeasurementPickContext,
   ): GeometryStreamProps | undefined {
     // No need to snap to the geometry during dynamics
@@ -218,7 +218,7 @@ export class AngleMeasurement extends Measurement {
     return this.transientId;
   }
 
-  protected onTransientIdChanged(_prevId: Id64String) {
+  protected override onTransientIdChanged(_prevId: Id64String) {
     if (this._textMarker) this._textMarker.transientHiliteId = this.transientId;
   }
 
@@ -227,11 +227,11 @@ export class AngleMeasurement extends Measurement {
       return undefined;
 
     const v1 = Vector3d.createStartEnd(center, p0);
+    v1.normalizeInPlace();
     const v2 = Vector3d.createStartEnd(center, p1);
+    v2.normalizeInPlace();
     const length = Math.min(v1.magnitude(), v2.magnitude()) / 2.0;
-    const vn1 = v1.normalize();
-    const vn2 = v2.normalize();
-    const matrix = Matrix3d.createRigidFromColumns(vn1!, vn2!, AxisOrder.XYZ);
+    const matrix = Matrix3d.createRigidFromColumns(v1, v2, AxisOrder.XYZ);
     const angle = this.angle;
     if (matrix === undefined || angle === undefined)
       return undefined;
@@ -241,7 +241,7 @@ export class AngleMeasurement extends Measurement {
     return Arc3d.createScaledXYColumns(center, matrix, length, length, AngleSweep.createStartSweep(startAngle, sweepAngle));
   }
 
-  public decorate(context: DecorateContext): void {
+  public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -280,7 +280,7 @@ export class AngleMeasurement extends Measurement {
     context.addDecorationFromBuilder(builder);
   }
 
-  protected async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
+  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
     const angleSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
       QuantityType.Angle,
     );
@@ -292,14 +292,14 @@ export class AngleMeasurement extends Measurement {
       angleSpec,
     );
 
-    let title = IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.measurement");
+    let title = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.measurement");
     title += ` [${fAngle}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push({
-      label: IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.angle"),
+      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.angle"),
       name: "AngleMeasurement_Angle",
       value: fAngle,
       aggregatableValue: (angleSpec !== undefined) ? { value: angle, formatSpec: angleSpec } : undefined,
@@ -344,11 +344,11 @@ export class AngleMeasurement extends Measurement {
     this._textMarker.applyStyle(tStyle);
   }
 
-  protected onStyleChanged(_isLock: boolean, _prevStyle: string) {
+  protected override onStyleChanged(_isLock: boolean, _prevStyle: string) {
     this.updateMarkerStyle();
   }
 
-  protected onLockToggled() {
+  protected override onLockToggled() {
     this.updateMarkerStyle();
   }
 

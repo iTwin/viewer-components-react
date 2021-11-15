@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, XYZProps } from "@bentley/geometry-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, GraphicBuilder, GraphicType, IModelApp, QuantityType, RenderGraphicOwner } from "@bentley/imodeljs-frontend";
+import { Id64String } from "@itwin/core-bentley";
+import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, XYZProps } from "@itwin/core-geometry";
+import { GeometryStreamProps } from "@itwin/core-common";
+import { BeButtonEvent, DecorateContext, GraphicBuilder, GraphicType, IModelApp, QuantityType, RenderGraphicOwner } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
@@ -32,7 +32,7 @@ export class AreaMeasurementSerializer extends MeasurementSerializer {
     return measurement instanceof AreaMeasurement;
   }
 
-  public isValidJSON(json: any): boolean {
+  public override isValidJSON(json: any): boolean {
     if (!super.isValidJSON(json) || !json.hasOwnProperty("polygonPoints") || !Array.isArray(json.polygonPoints))
       return false;
 
@@ -52,7 +52,7 @@ export class AreaMeasurementSerializer extends MeasurementSerializer {
  * Area measurement. A polygon with formatted area in a "text pill" at the center.
  */
 export class AreaMeasurement extends Measurement {
-  public static readonly serializer = Measurement.registerSerializer(new AreaMeasurementSerializer());
+  public static override readonly serializer = Measurement.registerSerializer(new AreaMeasurementSerializer());
 
   private _polygon: Polygon;
 
@@ -166,7 +166,7 @@ export class AreaMeasurement extends Measurement {
     return true;
   }
 
-  public testDecorationHit(pickContext: MeasurementPickContext): boolean {
+  public override testDecorationHit(pickContext: MeasurementPickContext): boolean {
     if (this.transientId && this.transientId === pickContext.geomId)
       return true;
 
@@ -176,7 +176,7 @@ export class AreaMeasurement extends Measurement {
     return false;
   }
 
-  public getDecorationGeometry(_pickContext: MeasurementPickContext): GeometryStreamProps | undefined {
+  public override getDecorationGeometry(_pickContext: MeasurementPickContext): GeometryStreamProps | undefined {
     if (this.polygonPoints.length === 0)
       return undefined;
 
@@ -191,11 +191,11 @@ export class AreaMeasurement extends Measurement {
     return [IModelJson.Writer.toIModelJson(PointString3d.create(this.polygonPoints))];
   }
 
-  public async getDecorationToolTip(_pickContext: MeasurementPickContext): Promise<HTMLElement | string> {
+  public override async getDecorationToolTip(_pickContext: MeasurementPickContext): Promise<HTMLElement | string> {
     if (this.isDynamic)
-      return IModelApp.i18n.translate("MeasureTools:Measurements.closePolygon");
+      return IModelApp.localization.getLocalizedString("MeasureTools:Measurements.closePolygon");
 
-    return IModelApp.i18n.translate("MeasureTools:Measurements.areaMeasurement");
+    return IModelApp.localization.getLocalizedString("MeasureTools:Measurements.areaMeasurement");
   }
 
   private getSnapId(): string | undefined {
@@ -216,11 +216,11 @@ export class AreaMeasurement extends Measurement {
     }
   }
 
-  public onCleanup() {
+  public override onCleanup() {
     this.clearCachedGraphics();
   }
 
-  protected onTransientIdChanged(_prevId: Id64String) {
+  protected override onTransientIdChanged(_prevId: Id64String) {
     this._polygon.textMarker.transientHiliteId = this.transientId;
     this.clearCachedGraphics();
   }
@@ -243,7 +243,7 @@ export class AreaMeasurement extends Measurement {
     context.addDecorationFromBuilder(builder);
   }
 
-  public decorate(context: DecorateContext): void {
+  public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
     if (this.polygonPoints.length === 0)
@@ -310,7 +310,7 @@ export class AreaMeasurement extends Measurement {
     }
   }
 
-  protected async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
+  protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
 
     const lengthSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(QuantityType.LengthEngineering);
     const areaSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(QuantityType.Area);
@@ -320,7 +320,7 @@ export class AreaMeasurement extends Measurement {
     const fAreaXY = IModelApp.quantityFormatter.formatQuantity(this._polygon.areaXY, areaSpec);
     const fEdgeCount = (this._polygon.points.length - 1).toFixed();
 
-    let title = IModelApp.i18n.translate("MeasureTools:Measurements.areaMeasurement");
+    let title = IModelApp.localization.getLocalizedString("MeasureTools:Measurements.areaMeasurement");
     title += ` [${fArea}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
@@ -328,21 +328,21 @@ export class AreaMeasurement extends Measurement {
 
     data.properties.push(
       {
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupArea"), name: "AreaMeasurement_Area", value: fArea,
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.popupArea"), name: "AreaMeasurement_Area", value: fArea,
         aggregatableValue: (areaSpec !== undefined) ? { value: this._polygon.area, formatSpec: areaSpec } : undefined,
       },
       {
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupAreaXY"), name: "AreaMeasurement_AreaXY", value: fAreaXY,
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.popupAreaXY"), name: "AreaMeasurement_AreaXY", value: fAreaXY,
         aggregatableValue: (areaSpec !== undefined) ? { value: this._polygon.areaXY, formatSpec: areaSpec } : undefined,
       },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupPerimeter"), name: "AreaMeasurement_Perimeter", value: fPerimeter },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupEdgeCount"), name: "AreaMeasurement_EdgeCount", value: fEdgeCount },
+      { label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.popupPerimeter"), name: "AreaMeasurement_Perimeter", value: fPerimeter },
+      { label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.popupEdgeCount"), name: "AreaMeasurement_EdgeCount", value: fEdgeCount },
     );
 
     return data;
   }
 
-  protected onStyleChanged(isLock: boolean, _prevStyle: string) {
+  protected override onStyleChanged(isLock: boolean, _prevStyle: string) {
     // Make sure polygon uses the active style
     this._polygon.styleSet = StyleSet.getOrDefault(this.activeStyle);
     this.clearCachedGraphics();
@@ -357,17 +357,17 @@ export class AreaMeasurement extends Measurement {
       this._dynamicEdge.style = this.style;
   }
 
-  protected onDisplayLabelsToggled() {
+  protected override onDisplayLabelsToggled() {
     if (this._dynamicEdge)
       this._dynamicEdge.displayLabels = this.displayLabels;
   }
 
-  protected onLockToggled() {
+  protected override onLockToggled() {
     this._polygon.styleSet = StyleSet.getOrDefault(this.activeStyle);
     this.clearCachedGraphics();
   }
 
-  public onDisplayUnitsChanged(): void {
+  public override onDisplayUnitsChanged(): void {
     this._polygon.recomputeFromPoints();
   }
 
@@ -377,7 +377,7 @@ export class AreaMeasurement extends Measurement {
    * @param opts Options for equality testing.
    * @returns true if the other measurement is equal, false if some property is not the same or if the measurement is not of the same type.
    */
-  public equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
+  public override equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
     if (!super.equals(other, opts))
       return false;
 
@@ -405,7 +405,7 @@ export class AreaMeasurement extends Measurement {
    * Copies data from the other measurement into this instance.
    * @param other Measurement to copy property values from.
    */
-  protected copyFrom(other: Measurement) {
+  protected override copyFrom(other: Measurement) {
     super.copyFrom(other);
 
     if (other instanceof AreaMeasurement) {
@@ -421,7 +421,7 @@ export class AreaMeasurement extends Measurement {
    * Deserializes properties (if they exist) from the JSON object.
    * @param json JSON object to read data from.
    */
-  protected readFromJSON(json: MeasurementProps) {
+  protected override readFromJSON(json: MeasurementProps) {
     super.readFromJSON(json);
 
     const jsonArea = json as AreaMeasurementProps;
@@ -441,7 +441,7 @@ export class AreaMeasurement extends Measurement {
    * Serializes properties to a JSON object.
    * @param json JSON object to append data to.
    */
-  protected writeToJSON(json: MeasurementProps) {
+  protected override writeToJSON(json: MeasurementProps) {
     super.writeToJSON(json);
 
     const pts = new Array<XYZProps>();

@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Point3d } from "@bentley/geometry-core";
+import { Point3d } from "@itwin/core-geometry";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import { RadiusMeasurement } from "../measurements/RadiusMeasurement";
 
@@ -30,7 +30,7 @@ export class MeasureRadiusToolModel extends MeasurementToolModel<RadiusMeasureme
     return this._currentState;
   }
 
-  public get dynamicMeasurement(): RadiusMeasurement | undefined {
+  public override get dynamicMeasurement(): RadiusMeasurement | undefined {
     return this._currentMeasurement;
   }
 
@@ -113,7 +113,7 @@ export class MeasureRadiusToolModel extends MeasurementToolModel<RadiusMeasureme
     }
   }
 
-  public reset(clearMeasurements: boolean): void {
+  public override reset(clearMeasurements: boolean): void {
     super.reset(clearMeasurements);
 
     this._currentMeasurement = undefined;

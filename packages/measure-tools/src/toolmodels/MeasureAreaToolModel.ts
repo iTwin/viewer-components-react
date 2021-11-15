@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@bentley/geometry-core";
+import { Point3d } from "@itwin/core-geometry";
 import { AreaMeasurement } from "../measurements/AreaMeasurement";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 
@@ -33,7 +33,7 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
     return this._currentMeasurement.isValidPolygon;
   }
 
-  public get dynamicMeasurement(): AreaMeasurement | undefined { return this._currentMeasurement; }
+  public override get dynamicMeasurement(): AreaMeasurement | undefined { return this._currentMeasurement; }
 
   public setMeasurementViewport(viewType: string): boolean {
     if (State.SetMeasurementViewport !== this._currentState)
@@ -106,7 +106,7 @@ export class MeasureAreaToolModel extends MeasurementToolModel<AreaMeasurement> 
     return true;
   }
 
-  public reset(clearMeasurements: boolean): void {
+  public override reset(clearMeasurements: boolean): void {
     super.reset(clearMeasurements);
 
     this._currentMeasurement = undefined;

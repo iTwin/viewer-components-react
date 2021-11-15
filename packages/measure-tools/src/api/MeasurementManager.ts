@@ -3,9 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeUiEvent } from "@bentley/bentleyjs-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, Decorator, EventHandled, HitDetail, IModelApp, ScreenViewport, Viewport } from "@bentley/imodeljs-frontend";
+import { BeUiEvent } from "@itwin/core-bentley";
+import { GeometryStreamProps } from "@itwin/core-common";
+import { BeButtonEvent, DecorateContext, Decorator, EventHandled, HitDetail, IModelApp, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import { Measurement, MeasurementPickContext } from "./Measurement";
 import { MeasurementCachedGraphicsHandler } from "./MeasurementCachedGraphicsHandler";
 import { MeasurementButtonHandledEvent, WellKnownViewType } from "./MeasurementEnums";

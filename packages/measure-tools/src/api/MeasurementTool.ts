@@ -3,12 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeDuration, BeUiEvent, Id64String } from "@bentley/bentleyjs-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
+import { BeDuration, BeUiEvent, Id64String } from "@itwin/core-bentley";
+import { GeometryStreamProps } from "@itwin/core-common";
 import {
   BeButtonEvent, DecorateContext, EventHandled, HitDetail, IModelApp, IModelConnection, NotifyMessageDetails, OutputMessageAlert,
   OutputMessagePriority, OutputMessageType, PrimitiveTool, ToolAssistance, ToolAssistanceInputMethod, ToolAssistanceInstruction,
-} from "@bentley/imodeljs-frontend";
+} from "@itwin/core-frontend";
 import { Feature, FeatureTracking } from "./FeatureTracking";
 import { Measurement } from "./Measurement";
 import { MeasurementToolModel } from "./MeasurementToolModel";
@@ -90,8 +90,8 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
 
   protected get feature(): Feature | undefined { return undefined; }
 
-  public onPostInstall(): void {
-    super.onPostInstall();
+  public override async onPostInstall(): Promise<void> {
+    await super.onPostInstall();
 
     const feature = this.feature;
     if (feature)
@@ -113,17 +113,17 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
   }
 
   protected createMouseUndoInstruction(textOverride?: string): ToolAssistanceInstruction {
-    const text = textOverride || IModelApp.i18n.translate("MeasureTools:Generic.undoMeasurement");
+    const text = textOverride || IModelApp.localization.getLocalizedString("MeasureTools:Generic.undoMeasurement");
     return ToolAssistance.createKeyboardInstruction(ToolAssistance.createKeyboardInfo([ToolAssistance.ctrlKey, "Z"]), text, false, ToolAssistanceInputMethod.Mouse);
   }
 
   protected createMouseRedoInstruction(textOverride?: string): ToolAssistanceInstruction {
-    const text = textOverride || IModelApp.i18n.translate("MeasureTools:Generic.redoMeasurement");
+    const text = textOverride || IModelApp.localization.getLocalizedString("MeasureTools:Generic.redoMeasurement");
     return ToolAssistance.createKeyboardInstruction(ToolAssistance.createKeyboardInfo([ToolAssistance.ctrlKey, "Y"]), text, false, ToolAssistanceInputMethod.Mouse);
   }
 
   // For most of our cases we expect to draw our decorations when suspended also
-  public decorateSuspended(context: DecorateContext): void {
+  public override decorateSuspended(context: DecorateContext): void {
     this.decorate(context);
   }
 }
@@ -165,17 +165,17 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     this.setupEvents();
   }
 
-  public requireWriteableTarget(): boolean {
+  public override requireWriteableTarget(): boolean {
     return false;
   }
 
-  public isValidLocation(_ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
+  public override isValidLocation(_ev: BeButtonEvent, _isButtonEvent: boolean): boolean {
     // In most cases, the location will be okay even if outside the model extents
     return true;
   }
 
-  public onPostInstall(): void {
-    super.onPostInstall();
+  public override async onPostInstall(): Promise<void> {
+    await super.onPostInstall();
 
     if (this.saveRestoreSelection)
       this._selectionHolder.saveSelection(this.iModel, true);
@@ -185,8 +185,8 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     this.updateToolAssistance();
   }
 
-  public onCleanup() {
-    super.onCleanup();
+  public override async onCleanup(): Promise<void> {
+    await super.onCleanup();
 
     if (this.saveRestoreSelection)
       this._selectionHolder.restoreSelection();
@@ -196,16 +196,16 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     this._toolModel.cleanup();
   }
 
-  public onReinitialize(): void {
+  public override async onReinitialize(): Promise<void> {
     this.toolModel.reset(false);
     this.updateAccuSnap();
     this.updateToolAssistance();
   }
 
-  public async onUndoPreviousStep(): Promise<boolean> {
+  public override async onUndoPreviousStep(): Promise<boolean> {
     // If we have an active measurement, reset to initial state
     if (undefined !== this._toolModel.dynamicMeasurement) {
-      this.onReinitialize();
+      await this.onReinitialize();
       return true;
     }
 
@@ -216,12 +216,12 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
       return result;
     }
 
-    const message = IModelApp.i18n.translate("MeasureTools:Generic.nothingToUndo");
+    const message = IModelApp.localization.getLocalizedString("MeasureTools:Generic.nothingToUndo");
     this.showMessage(OutputMessagePriority.Info, message);
     return false;
   }
 
-  public async onRedoPreviousStep(): Promise<boolean> {
+  public override async onRedoPreviousStep(): Promise<boolean> {
     // Probably not a good idea if there are ongoing measurements
     if (undefined !== this._toolModel.dynamicMeasurement)
       return false;
@@ -232,41 +232,41 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
       return result;
     }
 
-    const message = IModelApp.i18n.translate("MeasureTools:Generic.nothingToRedo");
+    const message = IModelApp.localization.getLocalizedString("MeasureTools:Generic.nothingToRedo");
     this.showMessage(OutputMessagePriority.Info, message);
     return false;
   }
 
-  public async onResetButtonDown(_ev: BeButtonEvent): Promise<EventHandled> {
+  public override async onResetButtonDown(_ev: BeButtonEvent): Promise<EventHandled> {
     if (undefined !== this.toolModel.dynamicMeasurement)
-      this.onReinitialize();
+      await this.onReinitialize();
     else
       this.onRestartTool();
 
     return EventHandled.Yes;
   }
 
-  public async onKeyTransition(wentDown: boolean, keyEvent: KeyboardEvent): Promise<EventHandled> {
+  public override async onKeyTransition(wentDown: boolean, keyEvent: KeyboardEvent): Promise<EventHandled> {
     if (EventHandled.Yes === await super.onKeyTransition(wentDown, keyEvent))
       return EventHandled.Yes;
 
     if (wentDown && "escape" === keyEvent.key.toLowerCase()) {
-      this.exitTool();
+      await this.exitTool();
       return EventHandled.Yes;
     }
 
     return EventHandled.No;
   }
 
-  public testDecorationHit(id: string): boolean {
+  public override testDecorationHit(id: string): boolean {
     return this._toolModel.testDecorationHit(id);
   }
 
-  public getDecorationGeometry(hit: HitDetail): GeometryStreamProps | undefined {
+  public override getDecorationGeometry(hit: HitDetail): GeometryStreamProps | undefined {
     return this._toolModel.getDecorationGeometry(hit);
   }
 
-  public async getToolTip(hit: HitDetail): Promise<HTMLElement | string> {
+  public override async getToolTip(hit: HitDetail): Promise<HTMLElement | string> {
     const toolTip = await this._toolModel.getToolTip(hit);
 
     if (toolTip === "")
@@ -275,11 +275,11 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     return toolTip;
   }
 
-  public decorate(context: DecorateContext): void {
+  public override decorate(context: DecorateContext): void {
     this._toolModel.decorate(context);
   }
 
-  public onUnsuspend(): void {
+  public override async onUnsuspend(): Promise<void> {
     this.updateAccuSnap();
     this.updateToolAssistance();
   }

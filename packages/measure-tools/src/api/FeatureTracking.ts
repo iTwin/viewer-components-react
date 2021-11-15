@@ -3,11 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeUiEvent, GuidString, Logger } from "@bentley/bentleyjs-core";
-import { AuthorizedFrontendRequestContext, IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
+import { BeUiEvent, GuidString, Logger } from "@itwin/core-bentley";
+import { IModelApp, IModelConnection } from "@itwin/core-frontend";
 import { TelemetryEvent } from "@bentley/telemetry-client";
-import { UiFramework } from "@bentley/ui-framework";
+import { UiFramework } from "@itwin/appui-react";
 import { MeasureToolsLoggerCategory } from "./MeasureToolsLoggerCategory";
+import { RpcActivity } from "@itwin/core-common";
 
 /** Each feature has a human-readable name that should be unique, but also a GUID. */
 export interface Feature {
@@ -63,22 +64,26 @@ export class FeatureTracking {
   }
 
   private static async postTelemetry(feature: Feature, iModelConnection: IModelConnection | undefined) {
-    if (!IModelApp.authorizationClient || !IModelApp.authorizationClient.isAuthorized)
-      return;
-
     try {
-      const context = await AuthorizedFrontendRequestContext.create();
+      const activity: RpcActivity = {
+        accessToken: await IModelApp.getAccessToken(),
+        activityId: "",
+        applicationId: IModelApp.applicationId,
+        applicationVersion: IModelApp.applicationVersion,
+        sessionId: IModelApp.sessionId,
+      };
+
       let imodelId, changesetId, contextId;
       if (iModelConnection) {
         imodelId = iModelConnection.iModelId;
         changesetId = iModelConnection.changeset.id;
-        contextId = iModelConnection.contextId;
+        contextId = iModelConnection.iTwinId;
       }
 
       const evt = new TelemetryEvent(feature.name, feature.guid, contextId, imodelId, changesetId, undefined, feature.metaData);
-      await IModelApp.telemetry.postTelemetry(context, evt);
+      await IModelApp.telemetry.postTelemetry(activity, evt);
     } catch (e) {
-      Logger.logException(MeasureToolsLoggerCategory.Root, e);
+      Logger.logException(MeasureToolsLoggerCategory.Root, e as Error);
     }
   }
 
@@ -136,6 +141,7 @@ export function createToggledFeature(featureName: string, featureGuid: GuidStrin
   return { name: featureName, guid: featureGuid, metaData };
 }
 
+/* eslint-disable @typescript-eslint/naming-convention */
 // Note: CRT_ prefix is legacy since these features were originally from the Civil-ReviewTools packages. Newly defined features do not need to use this prefix, and can use MST_ for MeaSure-Tools
 export class MeasureToolsFeatures {
   // Tools

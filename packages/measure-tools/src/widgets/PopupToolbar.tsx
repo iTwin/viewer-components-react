@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { Toolbar, ToolbarProps } from "@bentley/ui-ninezone";
+import { Toolbar, ToolbarProps } from "@itwin/appui-layout-react";
 
 /** Popup toolbar properties. */
 export interface PopupToolbarProps extends ToolbarProps {
@@ -31,12 +31,12 @@ export class PopupToolbar extends React.PureComponent<PopupToolbarProps> {
     this.setWrapperRef = this.setWrapperRef.bind(this);
   }
 
-  public componentDidMount() {
+  public override componentDidMount() {
     document.addEventListener("mousedown", this.handleMouseDown);
     document.addEventListener("wheel", this.handleMouseWheel);
   }
 
-  public componentWillUnmount() {
+  public override componentWillUnmount() {
     document.removeEventListener("mousedown", this.handleMouseDown);
     document.removeEventListener("wheel", this.handleMouseWheel);
     this._isClosing = false;
@@ -60,7 +60,7 @@ export class PopupToolbar extends React.PureComponent<PopupToolbarProps> {
     this._wrapperRef = node;
   }
 
-  public render() {
+  public override render() {
     return (<div ref={this.setWrapperRef}>
       {this._toolbar.render()}
     </div>);

@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { IModelApp } from "@bentley/imodeljs-frontend";
-import { I18N } from "@bentley/imodeljs-i18n";
+import { IModelApp } from "@itwin/core-frontend";
+import { Localization } from "@itwin/core-common";
 import {
   AbstractWidgetProps, CommonToolbarItem, ConditionalBooleanValue, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
   ToolbarOrientation, ToolbarUsage, UiItemsProvider,
-} from "@bentley/ui-abstract";
-import { ToolbarHelper, ToolItemDef } from "@bentley/ui-framework";
+} from "@itwin/appui-abstract";
+import { ToolbarHelper, ToolItemDef } from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";
@@ -19,10 +19,10 @@ import { MeasurementPropertyWidget } from "./MeasurementPropertyWidget";
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  public static i18n: I18N;
+  public static localization: Localization;
 
-  public constructor(i18n?: I18N) {
-    MeasureToolsUiItemsProvider.i18n = i18n ?? IModelApp.i18n;
+  public constructor(localization?: Localization) {
+    MeasureToolsUiItemsProvider.localization = localization ?? IModelApp.localization;
   }
 
   public provideToolbarButtonItems(
@@ -61,7 +61,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
             "measure-tools-toolbar",
             100,
             "icon-measure",
-            IModelApp.i18n.translate(
+            IModelApp.localization.getLocalizedString(
               "MeasureTools:MeasurementGroupButton.tooltip",
             ),
             ToolbarHelper.constructChildToolbarItems(tools),
@@ -108,7 +108,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     ) {
       widgets.push({
         id: "measure-tools-property-widget",
-        label: IModelApp.i18n.translate("MeasureTools:Generic.measurements"),
+        label: IModelApp.localization.getLocalizedString("MeasureTools:Generic.measurements"),
         getWidgetContent: () => <MeasurementPropertyWidget />, // eslint-disable-line react/display-name
       });
     }

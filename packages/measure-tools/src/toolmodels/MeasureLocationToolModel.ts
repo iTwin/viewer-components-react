@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@bentley/geometry-core";
+import { Point3d } from "@itwin/core-geometry";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import { LocationMeasurement, LocationMeasurementProps } from "../measurements/LocationMeasurement";
 import { MeasurementProps } from "../api/MeasurementProps";
@@ -21,7 +21,7 @@ export interface AddLocationProps extends Omit<LocationMeasurementPropsOnly, "lo
 export class MeasureLocationToolModel extends MeasurementToolModel<LocationMeasurement> {
   private _currentMeasurement?: LocationMeasurement;
 
-  public get dynamicMeasurement(): LocationMeasurement | undefined { return this._currentMeasurement; }
+  public override get dynamicMeasurement(): LocationMeasurement | undefined { return this._currentMeasurement; }
 
   constructor() {
     super();

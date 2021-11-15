@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButton, BeButtonEvent, DecorateContext, HitDetail, IModelApp } from "@bentley/imodeljs-frontend";
-import { FormatterSpec } from "@bentley/imodeljs-quantity";
+import { Id64String } from "@itwin/core-bentley";
+import { GeometryStreamProps } from "@itwin/core-common";
+import { BeButton, BeButtonEvent, DecorateContext, HitDetail, IModelApp } from "@itwin/core-frontend";
+import { FormatterSpec } from "@itwin/core-quantity";
 import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementPreferences } from "./MeasurementPreferences";
 import { MeasurementProps } from "./MeasurementProps";

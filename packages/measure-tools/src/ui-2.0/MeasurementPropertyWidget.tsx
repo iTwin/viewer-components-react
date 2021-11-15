@@ -3,15 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { Id64String } from "@bentley/bentleyjs-core";
-import { IModelApp } from "@bentley/imodeljs-frontend";
-import { PropertyDescription, PropertyRecord, PropertyValue, PropertyValueFormat } from "@bentley/ui-abstract";
-import { PropertyGrid, SimplePropertyDataProvider } from "@bentley/ui-components";
-import { Orientation } from "@bentley/ui-core";
+import { Id64String } from "@itwin/core-bentley";
+import { IModelApp } from "@itwin/core-frontend";
+import { PropertyDescription, PropertyRecord, PropertyValue, PropertyValueFormat } from "@itwin/appui-abstract";
+import { PropertyGrid, SimplePropertyDataProvider } from "@itwin/components-react";
+import { Orientation } from "@itwin/core-react";
 import { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const MeasurementPropertyWidget = () => {
   const [dataProvider] = React.useState(new SimplePropertyDataProvider());
   const [lastSelectedCount, setLastSelectedCount] = React.useState(MeasurementSelectionSet.global.measurements.length);
@@ -59,7 +60,7 @@ export const MeasurementPropertyWidget = () => {
     ) {
       const catIndex = dataProvider.addCategory({
         expand: true,
-        label: IModelApp.i18n.translate("MeasureTools:Generic.cumulativeTotals"),
+        label: IModelApp.localization.getLocalizedString("MeasureTools:Generic.cumulativeTotals"),
         name: "cumulativeTotals",
       });
       for (const entry of orderedAggrPropEntries) {

@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Geometry, Point3d } from "@bentley/geometry-core";
+import { Geometry, Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
 import { Measurement, MeasurementEqualityOptions } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
@@ -280,20 +280,20 @@ describe("Measurement Serialization tests", () => {
 export class DistanceMeasurementSubclassSerializer extends DistanceMeasurementSerializer {
   public static readonly distanceMeasurementSubclassName = "distanceMeasurementSubclass";
 
-  public get measurementName(): string { return DistanceMeasurementSubclassSerializer.distanceMeasurementSubclassName; }
+  public override get measurementName(): string { return DistanceMeasurementSubclassSerializer.distanceMeasurementSubclassName; }
 
-  public isValidType(measurement: Measurement): boolean {
+  public override isValidType(measurement: Measurement): boolean {
     return measurement instanceof DistanceMeasurementSubClass;
   }
 
-  public isValidJSON(json: any): boolean {
+  public override isValidJSON(json: any): boolean {
     if (!super.isValidJSON(json) || !json.hasOwnProperty("extraProp"))
       return false;
 
     return true;
   }
 
-  protected parseSingle(data: MeasurementProps): Measurement | undefined {
+  protected override parseSingle(data: MeasurementProps): Measurement | undefined {
     if (!this.isValidJSON(data))
       return undefined;
 
@@ -302,7 +302,7 @@ export class DistanceMeasurementSubclassSerializer extends DistanceMeasurementSe
 }
 
 export class DistanceMeasurementSubClass extends DistanceMeasurement {
-  public static readonly serializer = Measurement.registerSerializer(new DistanceMeasurementSubclassSerializer());
+  public static override readonly serializer = Measurement.registerSerializer(new DistanceMeasurementSubclassSerializer());
 
   public extraProp: number;
 
@@ -314,7 +314,7 @@ export class DistanceMeasurementSubClass extends DistanceMeasurement {
       this.readFromJSON(props);
   }
 
-  public equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
+  public override equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
     if (!super.equals(other, opts))
       return false;
 
@@ -325,7 +325,7 @@ export class DistanceMeasurementSubClass extends DistanceMeasurement {
     return true;
   }
 
-  protected copyFrom(other: Measurement) {
+  protected override copyFrom(other: Measurement) {
     super.copyFrom(other);
 
     if (other instanceof DistanceMeasurementSubClass) {
@@ -333,7 +333,7 @@ export class DistanceMeasurementSubClass extends DistanceMeasurement {
     }
   }
 
-  protected readFromJSON(json: MeasurementProps) {
+  protected override readFromJSON(json: MeasurementProps) {
     super.readFromJSON(json);
 
     const jsonAny = json as any;
@@ -342,7 +342,7 @@ export class DistanceMeasurementSubClass extends DistanceMeasurement {
       this.extraProp = jsonAny.extraProp;
   }
 
-  protected writeToJSON(json: MeasurementProps) {
+  protected override writeToJSON(json: MeasurementProps) {
     super.writeToJSON(json);
 
     const jsonAny = json as any;

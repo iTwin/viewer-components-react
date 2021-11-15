@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeUiEvent } from "@bentley/bentleyjs-core";
+import { BeUiEvent } from "@itwin/core-bentley";
 
 /** Measurement preferences for serializing. */
 export interface MeasurementPreferencesProps {

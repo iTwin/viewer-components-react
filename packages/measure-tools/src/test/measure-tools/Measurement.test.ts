@@ -20,7 +20,7 @@ describe("Measurement tests", () => {
     assert.isTrue(other.equals(other2));
   });
 
-  it ("Test display labels", () => {
+  it("Test display labels", () => {
     MeasurementPreferences.current.displayMeasurementLabels = true;
     const test = new DistanceMeasurement();
     assert.isTrue(test.displayLabels);
@@ -90,7 +90,7 @@ describe("Measurement tests", () => {
     assert.isTrue(test2.label === test.label);
   });
 
-  it ("Test roundtrip json", () => {
+  it("Test roundtrip json", () => {
     const test = new DistanceMeasurementSubClass();
     test.extraProp = 42;
     test.label = "Solution 42";
@@ -103,7 +103,7 @@ describe("Measurement tests", () => {
     assert.isTrue(test2!.equals(test));
   });
 
-  it ("Test styles/locking", () => {
+  it("Test styles/locking", () => {
     const test = new DistanceMeasurementSubClass();
 
     assert.isTrue(test.activeStyle === WellKnownMeasurementStyle.Default);
@@ -120,7 +120,7 @@ describe("Measurement tests", () => {
     assert.isTrue(test.activeStyle === "yada");
   });
 
-  it ("Test measurement manager, add/remove", () => {
+  it("Test measurement manager, add/remove", () => {
     const dist = new DistanceMeasurement();
     MeasurementManager.instance.clear();
     MeasurementManager.instance.addMeasurement(dist);
@@ -142,7 +142,7 @@ describe("Measurement tests", () => {
     assert.isTrue(MeasurementManager.instance.measurements.length === 2);
   });
 
-  it ("Test measurement manager, getMeasurementsForViewType", () => {
+  it("Test measurement manager, getMeasurementsForViewType", () => {
     const dist1 = new DistanceMeasurement();
     dist1.viewTarget.include(WellKnownViewType.AnySpatial);
     dist1.viewTarget.exclude(WellKnownViewType.XSection);
@@ -188,7 +188,7 @@ describe("Measurement tests", () => {
     assert.isTrue(MeasurementManager.instance.measurements.length === 0);
   });
 
-  it ("Test measurement manager, onCleanup for dropped measurements", () => {
+  it("Test measurement manager, onCleanup for dropped measurements", () => {
     const test = new CleanupDistanceMeasurement();
 
     MeasurementManager.instance.clear();
@@ -216,7 +216,7 @@ describe("Measurement tests", () => {
 class CleanupDistanceMeasurement extends DistanceMeasurement {
   public cleanupCalled = false;
 
-  public onCleanup() {
+  public override onCleanup() {
     this.cleanupCalled = true;
   }
 }

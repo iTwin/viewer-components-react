@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp } from "@bentley/imodeljs-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { MeasureDistanceTool } from "./tools/MeasureDistanceTool";
 import { MeasureAreaTool } from "./tools/MeasureAreaTool";
 import { MeasureLocationTool } from "./tools/MeasureLocationTool";
@@ -52,7 +52,8 @@ export class MeasureTools {
     MeasureTools._isInitialized = true;
 
     // Setup tools and i18n
-    const measureToolsNamespace = IModelApp.i18n.registerNamespace("MeasureTools");
+    const measureToolsNamespace = "MeasureTools";
+    await IModelApp.localization.registerNamespace(measureToolsNamespace);
 
     const featureFlags = {
       enableDistanceTool: true,

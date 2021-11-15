@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeUiEvent, Id64, Id64Arg, Id64String } from "@bentley/bentleyjs-core";
+import { BeUiEvent, Id64, Id64Arg, Id64String } from "@itwin/core-bentley";
 import {
   IModelConnection, SelectAddEvent, SelectionSetEvent, SelectionSetEventType, SelectRemoveEvent, SelectReplaceEvent,
-} from "@bentley/imodeljs-frontend";
-import { SessionStateActionId, SyncUiEventArgs, SyncUiEventDispatcher, UiFramework } from "@bentley/ui-framework";
+} from "@itwin/core-frontend";
+import { SessionStateActionId, SyncUiEventArgs, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
 import { Measurement } from "./Measurement";
 import { MeasurementSyncUiEventId } from "./MeasurementEnums";
 import { ShimFunctions } from "./ShimFunctions";
@@ -516,7 +516,7 @@ class NullMeasurement extends Measurement {
 
   private constructor() { super(); }
 
-  protected createNewInstance(): Measurement {
+  protected override createNewInstance(): Measurement {
     return this;
   }
 }

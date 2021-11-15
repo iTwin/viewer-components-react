@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@bentley/geometry-core";
+import { Point3d } from "@itwin/core-geometry";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
@@ -28,7 +28,7 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
 
   public get currentState(): State { return this._currentState; }
 
-  public get dynamicMeasurement(): DistanceMeasurement | undefined { return this._currentMeasurement; }
+  public override get dynamicMeasurement(): DistanceMeasurement | undefined { return this._currentMeasurement; }
 
   public setMeasurementViewport(viewType: string): boolean {
     if (State.SetMeasurementViewport !== this._currentState)
@@ -85,7 +85,7 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
     }
   }
 
-  public reset(clearMeasurements: boolean): void {
+  public override reset(clearMeasurements: boolean): void {
     super.reset(clearMeasurements);
 
     this._currentMeasurement = undefined;
