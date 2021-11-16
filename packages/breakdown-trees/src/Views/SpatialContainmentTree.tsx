@@ -18,7 +18,7 @@ import { BreakdownTrees } from "../BreakdownTrees";
 import { BuildingClipPlanesProvider, ClearSectionsFunctionalityProvider, CombinedTreeNodeFunctionalityProvider, SpaceClipPlanesProvider, StoryClipPlanesProvider, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders";
 import { ClipAtSpacesHandler, GenericOptionItemHandler, LabelHandler, TopViewHandler, OptionItemHandler } from "./OptionItemHandlers";
 import { LoadableRuleSetComponent } from "./LoadableRuleSetComponent";
-import { ToolbarItemKeys } from "./TreeNodeFunctionsToolbar.js";
+import { ToolbarItemKeys } from "./TreeNodeFunctionsToolbar";
 import { BeEvent } from "@bentley/bentleyjs-core";
 
 export interface SpatialContainmentEventHandlers {

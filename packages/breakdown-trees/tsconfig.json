@@ -1,6 +1,7 @@
 {
   "extends": "./node_modules/@bentley/build-tools/tsconfig-base.json",
   "compilerOptions": {
+    "noImplicitOverride": false,
     "skipLibCheck": true,
     "declaration": true,
     "outDir": "./lib",
