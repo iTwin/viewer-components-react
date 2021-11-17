@@ -5,29 +5,29 @@
 
 import "./ElementList.scss";
 
-import { IModelConnection } from "@bentley/imodeljs-frontend";
-import { InstanceKey } from "@bentley/presentation-common";
-import { PresentationLabelsProvider } from "@bentley/presentation-components";
+import { IModelConnection } from "@itwin/core-frontend";
+import { InstanceKey } from "@itwin/presentation-common";
+import { PresentationLabelsProvider } from "@itwin/presentation-components";
 import {
   PropertyDescription,
   PropertyEditorInfo,
   PropertyRecord,
   PropertyValue,
   PropertyValueFormat,
-} from "@bentley/ui-abstract";
+} from "@itwin/appui-abstract";
 import {
   ColumnDescription,
   RowItem,
   SelectionMode,
   SimpleTableDataProvider,
   Table,
-} from "@bentley/ui-components";
-import { Icon } from "@bentley/ui-core";
+} from "@itwin/components-react";
+import { Icon } from "@itwin/core-react";
 import classnames from "classnames";
 import * as React from "react";
 
 import { PropertyGridManager } from "../PropertyGridManager";
-import { Logger } from "@bentley/bentleyjs-core";
+import { Logger } from "@itwin/core-bentley";
 
 export interface ElementListProps {
   iModelConnection: IModelConnection;

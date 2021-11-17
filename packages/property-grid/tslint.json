@@ -1,5 +1,5 @@
 {
-  "extends": "@bentley/build-tools/tslint-docs.json",
+  "extends": "@itwin/build-tools/tslint-docs.json",
   "rules": {
     "completed-docs": false
   }

@@ -1,7 +1,7 @@
 import {
   SpatialContainmentTree,
   SpatialContainmentTreeProps,
-} from "@bentley/ui-framework";
+} from "@itwin/appui-react";
 import React from "react";
 import { useResizeDetector } from "react-resize-detector";
 

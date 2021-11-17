@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { Ruleset } from "@bentley/presentation-common";
+import { Ruleset } from "@itwin/presentation-common";
 import { SimpleTreeWithRuleset } from "./TreeWithRuleset";
-import { IModelConnection } from "@bentley/imodeljs-frontend";
-import { PresentationTreeDataProvider } from "@bentley/presentation-components";
+import { IModelConnection } from "@itwin/core-frontend";
+import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import classificationRules from "../rulesets/ClassificationSystems.json";
 
 export interface ClassificationsTreeComponentProps {

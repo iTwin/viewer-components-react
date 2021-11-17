@@ -8,11 +8,11 @@ import "./PropertyGrid.scss";
 import {
   AuthorizedFrontendRequestContext,
   IModelApp,
-} from "@bentley/imodeljs-frontend";
-import { Field } from "@bentley/presentation-common";
-import { Presentation } from "@bentley/presentation-frontend";
+} from "@itwin/core-frontend";
+import { Field } from "@itwin/presentation-common";
+import { Presentation } from "@itwin/presentation-frontend";
 import { SettingsStatus } from "@bentley/product-settings-client";
-import { PropertyRecord } from "@bentley/ui-abstract";
+import { PropertyRecord } from "@itwin/appui-abstract";
 import {
   ActionButtonRenderer,
   ActionButtonRendererProps,
@@ -21,18 +21,18 @@ import {
   PropertyGridContextMenuArgs,
   PropertyValueRendererManager,
   VirtualizedPropertyGridWithDataProvider,
-} from "@bentley/ui-components";
+} from "@itwin/components-react";
 import {
   ContextMenuItem,
   GlobalContextMenu,
   Icon,
   Orientation,
-} from "@bentley/ui-core";
+} from "@itwin/core-react";
 import {
   ConfigurableCreateInfo,
   useActiveIModelConnection,
   WidgetControl,
-} from "@bentley/ui-framework";
+} from "@itwin/appui-react";
 import * as React from "react";
 
 import { copyToClipboard } from "../api/WebUtilities";

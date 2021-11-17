@@ -4,22 +4,22 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { RegisteredRuleset, Ruleset } from "@bentley/presentation-common";
+import { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
 import {
   IPresentationTreeDataProvider,
   usePresentationTreeNodeLoader,
   useUnifiedSelectionTreeEventHandler,
   PresentationTreeDataProvider,
-} from "@bentley/presentation-components";
+} from "@itwin/presentation-components";
 import {
   SelectionMode,
   ControlledTree,
   useTreeModel,
-} from "@bentley/ui-components";
-import { Presentation } from "@bentley/presentation-frontend";
+} from "@itwin/components-react";
+import { Presentation } from "@itwin/presentation-frontend";
 import "./TreeWithRulesetTree.scss";
-import { connectIModelConnection } from "@bentley/ui-framework";
-import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { connectIModelConnection } from "@itwin/appui-react";
+import { IModelConnection } from "@itwin/core-frontend";
 import { useResizeDetector } from "react-resize-detector";
 
 export interface ControlledTreeProps {
@@ -43,7 +43,7 @@ export interface TreeState {
 export abstract class TreeWithRuleset<
   T extends TreeProps,
   S extends TreeState
-> extends React.Component<T, S> {
+  > extends React.Component<T, S> {
   private _ruleset?: RegisteredRuleset;
   /** @internal */
   public async componentDidMount() {
@@ -115,7 +115,6 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (
   const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
     ruleset: props.rulesetId,
-    preloadingEnabled: false,
     pagingSize: props.pageSize || 20,
   });
 

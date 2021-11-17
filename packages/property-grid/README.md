@@ -105,7 +105,7 @@ import {
   FrontstageProps,
   FrontstageProvider,
   UiFramework,
-} from "@bentley/ui-framework";
+} from "@itwin/appui-react";
 import { PropertyGridControl } from "@bentley/property-grid-react";
 
 export class PropertyGridFrontstage extends FrontstageProvider {

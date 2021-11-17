@@ -11,21 +11,20 @@ import {
   ScreenViewport,
   SelectedViewportChangedArgs,
   Viewport,
-} from "@bentley/imodeljs-frontend";
-import { ModelsTree, ClassGroupingOption } from "@bentley/ui-framework";
+} from "@itwin/core-frontend";
+import { ModelsTree, ClassGroupingOption } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./ModelsTree.scss";
 import {
   GeometricModel3dProps,
   ModelQueryParams,
-} from "@bentley/imodeljs-common";
+} from "@itwin/core-common";
 import { TreeHeaderComponent } from "../header/TreeHeader";
 
 export interface ModelTreeProps {
   iModel: IModelConnection;
   allViewports?: boolean;
   activeView?: Viewport;
-  enablePreloading?: boolean;
   enableElementsClassGrouping?: boolean;
 }
 
@@ -188,7 +187,6 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
               filterInfo={{ filter: filterString, activeMatchIndex }}
               onFilterApplied={onFilterApplied}
               activeView={viewport}
-              enablePreloading={props.enablePreloading}
               enableElementsClassGrouping={
                 props.enableElementsClassGrouping
                   ? ClassGroupingOption.YesWithCounts

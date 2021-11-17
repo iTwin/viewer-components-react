@@ -2,13 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { BeEvent, Id64 } from "@bentley/bentleyjs-core";
-import { WidgetState } from "@bentley/ui-abstract";
+import { BeEvent, Id64 } from "@itwin/core-bentley";
+import { WidgetState } from "@itwin/appui-abstract";
 import {
   FrontstageDef,
   FrontstageManager,
   WidgetDef,
-} from "@bentley/ui-framework";
+} from "@itwin/appui-react";
 
 /** Used to control properties grid automatic opening based on selection set changes */
 export class PropertiesGridSelectionContext {

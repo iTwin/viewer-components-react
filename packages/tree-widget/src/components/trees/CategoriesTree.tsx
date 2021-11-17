@@ -8,22 +8,21 @@ import {
   IModelApp,
   IModelConnection,
   Viewport,
-} from "@bentley/imodeljs-frontend";
+} from "@itwin/core-frontend";
 import {
   CategoryTree,
   toggleAllCategories,
   getCategories,
-} from "@bentley/ui-framework";
+} from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
-import { CategoryVisibilityHandler } from "@bentley/ui-framework/lib/ui-framework/imodel-components/category-tree/CategoryVisibilityHandler";
 import { TreeHeaderComponent } from "../header/TreeHeader";
+import { CategoryVisibilityHandler } from "@itwin/appui-react/lib/cjs/appui-react/imodel-components/category-tree/CategoryVisibilityHandler";
 
 export interface CategoriesTreeComponentProps {
   iModel: IModelConnection;
   allViewports?: boolean;
   activeView?: Viewport;
-  enablePreloading?: boolean;
 }
 
 export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
@@ -104,7 +103,6 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
         {width && height && (
           <CategoryTree
             {...props}
-            enablePreloading={props.enablePreloading}
             filterInfo={{ filter: filterString, activeMatchIndex }}
             onFilterApplied={onFilterApplied}
             width={width}
