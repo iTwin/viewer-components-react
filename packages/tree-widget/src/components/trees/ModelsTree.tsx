@@ -49,7 +49,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
   const [available3dModels, setAvailable3dModels] = useState([] as string[]);
   const [availableModels, setAvailableModels] = useState([] as string[]);
   const [viewport, setViewport] = useState<ScreenViewport | undefined>(
-    undefined
+    IModelApp.viewManager.selectedView
   );
 
   const {
@@ -84,7 +84,6 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
   };
 
   useEffect(() => {
-    setViewport(IModelApp.viewManager.selectedView);
     IModelApp.viewManager.onSelectedViewportChanged.addListener(
       _handleSelectedViewportChanged
     );
@@ -93,7 +92,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
         _handleSelectedViewportChanged
       );
     };
-  }, [IModelApp.viewManager.selectedView]);
+  }, []);
 
   useEffect(() => {
     queryModels(viewport)
