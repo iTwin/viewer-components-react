@@ -5,10 +5,7 @@
 
 import "./PropertyGrid.scss";
 
-import {
-  AuthorizedFrontendRequestContext,
-  IModelApp,
-} from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { Field } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import { SettingsStatus } from "@bentley/product-settings-client";
@@ -68,7 +65,7 @@ export const PropertyGrid = ({
   featureTracking,
 }: Partial<PropertyGridProps>) => {
   const iModelConnection = useActiveIModelConnection();
-  const projectId = iModelConnection?.contextId;
+  const projectId = iModelConnection?.iTwinId;
   const iModelId = iModelConnection?.iModelId;
 
   const dataProvider = React.useMemo(() => {
@@ -159,115 +156,113 @@ export const PropertyGrid = ({
     };
   }, []);
 
-  /**
-   * Finds the name of the Favorites category
-   * @param propertyRecords
-   */
-  const getFavoritesCategoryName = React.useCallback(
-    async (categories: {
-      [categoryName: string]: PropertyRecord[];
-    }): Promise<string> => {
-      const keys = Object.keys(categories);
+  // /**
+  //  * Finds the name of the Favorites category
+  //  * @param propertyRecords
+  //  */
+  // const getFavoritesCategoryName = React.useCallback(
+  //   async (categories: {
+  //     [categoryName: string]: PropertyRecord[];
+  //   }): Promise<string> => {
+  //     const keys = Object.keys(categories);
 
-      for (const key of keys) {
-        const category = categories[key];
+  //     for (const key of keys) {
+  //       const category = categories[key];
+  //       for (const record of category) {
+  //         const field = await dataProvider?.getFieldByPropertyRecord(record);
+  //         if (
+  //           field !== undefined &&
+  //           Presentation.favoriteProperties.has(field, projectId)
+  //         ) {
+  //           return key;
+  //         }
+  //       }
+  //     }
+  //     return "Favorite";
+  //   },
+  //   [dataProvider, projectId]
+  // );
 
-        for (const record of category) {
-          const field = await dataProvider?.getFieldByPropertyRecord(record);
-          if (
-            field !== undefined &&
-            Presentation.favoriteProperties.has(field, projectId)
-          ) {
-            return key;
-          }
-        }
-      }
-      return "Favorite";
-    },
-    [dataProvider, projectId]
-  );
+  // const addSharedFavsToData = React.useCallback(
+  //   async (propertyData: PropertyData) => {
+  //     if (!enableFavoriteProperties) {
+  //       return propertyData;
+  //     }
 
-  const addSharedFavsToData = React.useCallback(
-    async (propertyData: PropertyData) => {
-      if (!enableFavoriteProperties) {
-        return propertyData;
-      }
+  //     let newSharedFavs: string[] = [];
+  //     if (projectId) {
+  //       const result = await IModelApp.settings.getSharedSetting(
+  //         requestContext,
+  //         SHARED_NAMESPACE,
+  //         SHARED_NAME,
+  //         false,
+  //         projectId,
+  //         iModelId
+  //       );
+  //       if (result.setting?.slice) {
+  //         newSharedFavs = (result.setting as string[]).slice();
+  //       }
+  //       setSharedFavorites(newSharedFavs);
+  //     }
+  //     if (propertyData.categories[0]?.name !== "Favorite") {
+  //       propertyData.categories.unshift({
+  //         name: "Favorite",
+  //         label: "Favorite",
+  //         expand: true,
+  //       });
+  //       propertyData.records.Favorite = [];
+  //     }
+  //     const favoritesCategoryName = await getFavoritesCategoryName(
+  //       propertyData.records
+  //     );
+  //     const dataFavs = propertyData.records[favoritesCategoryName];
 
-      let newSharedFavs: string[] = [];
-      if (projectId) {
-        const requestContext = await AuthorizedFrontendRequestContext.create();
-        const result = await IModelApp.settings.getSharedSetting(
-          requestContext,
-          SHARED_NAMESPACE,
-          SHARED_NAME,
-          false,
-          projectId,
-          iModelId
-        );
-        if (result.setting?.slice) {
-          newSharedFavs = (result.setting as string[]).slice();
-        }
-        setSharedFavorites(newSharedFavs);
-      }
-      if (propertyData.categories[0]?.name !== "Favorite") {
-        propertyData.categories.unshift({
-          name: "Favorite",
-          label: "Favorite",
-          expand: true,
-        });
-        propertyData.records.Favorite = [];
-      }
-      const favoritesCategoryName = await getFavoritesCategoryName(
-        propertyData.records
-      );
-      const dataFavs = propertyData.records[favoritesCategoryName];
-
-      for (const cat of propertyData.categories) {
-        if (cat.name !== "Favorite") {
-          for (const rec of propertyData.records[cat.name]) {
-            const propName = rec.property.name;
-            const shared =
-              newSharedFavs &&
-              newSharedFavs?.findIndex(
-                (fav: string) => rec.property.name === fav
-              ) >= 0;
-            if (
-              shared &&
-              !dataFavs.find(
-                (favRec: PropertyRecord) => favRec.property.name === propName
-              )
-            ) {
-              // if shared & not already in favorites
-              dataFavs.push(rec);
-              const propertyField =
-                await dataProvider?.getFieldByPropertyRecord(rec);
-              if (propertyField) {
-                await Presentation.favoriteProperties.add(
-                  propertyField,
-                  projectId
-                );
-              }
-            }
-          }
-        }
-      }
-      return dataProvider?.getData();
-    },
-    [
-      enableFavoriteProperties,
-      projectId,
-      iModelId,
-      getFavoritesCategoryName,
-      dataProvider,
-    ]
-  );
+  //     for (const cat of propertyData.categories) {
+  //       if (cat.name !== "Favorite") {
+  //         for (const rec of propertyData.records[cat.name]) {
+  //           const propName = rec.property.name;
+  //           const shared =
+  //             newSharedFavs &&
+  //             newSharedFavs?.findIndex(
+  //               (fav: string) => rec.property.name === fav
+  //             ) >= 0;
+  //           if (
+  //             shared &&
+  //             !dataFavs.find(
+  //               (favRec: PropertyRecord) => favRec.property.name === propName
+  //             )
+  //           ) {
+  //             // if shared & not already in favorites
+  //             dataFavs.push(rec);
+  //             const propertyField =
+  //               await dataProvider?.getFieldByPropertyRecord(rec);
+  //             if (propertyField) {
+  //               await Presentation.favoriteProperties.add(
+  //                 propertyField,
+  //                 projectId
+  //               );
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //     return dataProvider?.getData();
+  //   },
+  //   [
+  //     enableFavoriteProperties,
+  //     projectId,
+  //     iModelId,
+  //     getFavoritesCategoryName,
+  //     dataProvider,
+  //   ]
+  // );
 
   React.useEffect(() => {
     const onDataChanged = async () => {
       let propertyData: PropertyData | undefined =
         await dataProvider?.getData();
       if (propertyData) {
-        propertyData = await addSharedFavsToData(propertyData);
+        // propertyData = await addSharedFavsToData(propertyData);
         setTitle(propertyData?.label);
         setClassName(propertyData?.description ?? "");
       }
@@ -280,111 +275,111 @@ export const PropertyGrid = ({
       dataProvider?.onDataChanged.removeListener(onDataChanged);
       dataProvider?.dispose();
     };
-  }, [dataProvider, addSharedFavsToData]);
+  }, [dataProvider
+    // , addSharedFavsToData
+  ]);
 
-  const onAddFavorite = React.useCallback(
-    async (propertyField: Field) => {
-      await Presentation.favoriteProperties.add(propertyField, projectId);
-      setContextMenu(undefined);
-    },
-    [projectId]
-  );
+  // const onAddFavorite = React.useCallback(
+  //   async (propertyField: Field) => {
+  //     await Presentation.favoriteProperties.add(propertyField, projectId);
+  //     setContextMenu(undefined);
+  //   },
+  //   [projectId]
+  // );
 
-  const onRemoveFavorite = React.useCallback(
-    async (propertyField: Field) => {
-      await Presentation.favoriteProperties.remove(propertyField, projectId);
-      setContextMenu(undefined);
-    },
-    [projectId]
-  );
+  // const onRemoveFavorite = React.useCallback(
+  //   async (propertyField: Field) => {
+  //     await Presentation.favoriteProperties.remove(propertyField, projectId, );
+  //     setContextMenu(undefined);
+  //   },
+  //   [projectId]
+  // );
 
-  const onShareFavorite = React.useCallback(
-    async (propName: string) => {
-      if (!projectId || !sharedFavorites) {
-        setContextMenu(undefined);
-        return;
-      }
-      sharedFavorites.push(propName);
+  // const onShareFavorite = React.useCallback(
+  //   async (propName: string) => {
+  //     if (!projectId || !sharedFavorites) {
+  //       setContextMenu(undefined);
+  //       return;
+  //     }
+  //     sharedFavorites.push(propName);
 
-      const requestContext = await AuthorizedFrontendRequestContext.create();
-      const result = await IModelApp.settings.saveSharedSetting(
-        requestContext,
-        sharedFavorites,
-        SHARED_NAMESPACE,
-        SHARED_NAME,
-        false,
-        projectId,
-        iModelId
-      );
-      if (result.status !== SettingsStatus.Success) {
-        throw new Error(
-          "Could not share favoriteProperties: " + result.errorMessage
-        );
-      }
-      const result2 = await IModelApp.settings.getSharedSetting(
-        requestContext,
-        SHARED_NAMESPACE,
-        SHARED_NAME,
-        false,
-        projectId,
-        iModelId
-      );
-      if (result2.status !== SettingsStatus.Success) {
-        throw new Error(
-          "Could not share favoriteProperties: " + result2.errorMessage
-        );
-      }
-      setContextMenu(undefined);
-    },
-    [sharedFavorites, projectId, iModelId]
-  );
+  //     const result = await IModelApp.settings.saveSharedSetting(
+  //       requestContext,
+  //       sharedFavorites,
+  //       SHARED_NAMESPACE,
+  //       SHARED_NAME,
+  //       false,
+  //       projectId,
+  //       iModelId
+  //     );
+  //     if (result.status !== SettingsStatus.Success) {
+  //       throw new Error(
+  //         "Could not share favoriteProperties: " + result.errorMessage
+  //       );
+  //     }
+  //     const result2 = await IModelApp.settings.getSharedSetting(
+  //       requestContext,
+  //       SHARED_NAMESPACE,
+  //       SHARED_NAME,
+  //       false,
+  //       projectId,
+  //       iModelId
+  //     );
+  //     if (result2.status !== SettingsStatus.Success) {
+  //       throw new Error(
+  //         "Could not share favoriteProperties: " + result2.errorMessage
+  //       );
+  //     }
+  //     setContextMenu(undefined);
+  //   },
+  //   [sharedFavorites, projectId, iModelId]
+  // );
 
-  const onUnshareFavorite = React.useCallback(
-    async (propName: string) => {
-      if (!projectId || !sharedFavorites) {
-        setContextMenu(undefined);
-        return;
-      }
-      const index = sharedFavorites.indexOf(propName);
-      if (index > -1) {
-        sharedFavorites.splice(index, 1);
-      }
-      const requestContext = await AuthorizedFrontendRequestContext.create();
-      const result = await IModelApp.settings.saveSharedSetting(
-        requestContext,
-        sharedFavorites,
-        SHARED_NAMESPACE,
-        SHARED_NAME,
-        false,
-        projectId,
-        iModelId
-      );
-      if (result.status !== SettingsStatus.Success) {
-        throw new Error(
-          "Could not unshare favoriteProperties: " + result.errorMessage
-        );
-      }
-      setContextMenu(undefined);
-    },
-    [sharedFavorites, projectId, iModelId]
-  );
+  // const onUnshareFavorite = React.useCallback(
+  //   async (propName: string) => {
+  //     if (!projectId || !sharedFavorites) {
+  //       setContextMenu(undefined);
+  //       return;
+  //     }
+  //     const index = sharedFavorites.indexOf(propName);
+  //     if (index > -1) {
+  //       sharedFavorites.splice(index, 1);
+  //     }
+  //     const result = await IModelApp.settings.saveSharedSetting(
+  //       requestContext,
+  //       sharedFavorites,
+  //       SHARED_NAMESPACE,
+  //       SHARED_NAME,
+  //       false,
+  //       projectId,
+  //       iModelId
+  //     );
+  //     if (result.status !== SettingsStatus.Success) {
+  //       throw new Error(
+  //         "Could not unshare favoriteProperties: " + result.errorMessage
+  //       );
+  //     }
+  //     setContextMenu(undefined);
+  //   },
+  //   [sharedFavorites, projectId, iModelId]
+  // );
 
-  const shareActionButtonRenderer: ActionButtonRenderer = (
-    props: ActionButtonRendererProps
-  ) => {
-    const shared =
-      sharedFavorites !== undefined &&
-      sharedFavorites?.findIndex(
-        (fav: string) => props.property.property.name === fav
-      ) >= 0;
-    return (
-      <div>
-        {shared && (
-          <span className="icon icon-share" style={{ paddingRight: "5px" }} />
-        )}
-      </div>
-    );
-  };
+  // const shareActionButtonRenderer: ActionButtonRenderer = (
+  //   props: ActionButtonRendererProps
+  // ) => {
+  //   const shared =
+  //     sharedFavorites !== undefined &&
+  //     sharedFavorites?.findIndex(
+  //       (fav: string) => props.property.property.name === fav
+  //     ) >= 0;
+  //   return (
+  //     <div>
+  //       {shared && (
+  //         <span className="icon icon-share" style={{ paddingRight: "5px" }} />
+  //       )}
+  //     </div>
+  //   );
+  // };
 
   const onHideNull = React.useCallback(() => {
     setFilterer(new NonEmptyValuesPropertyDataFilterer());
@@ -405,46 +400,46 @@ export const PropertyGrid = ({
           args.propertyRecord
         );
         const items: ContextMenuItemInfo[] = [];
-        if (enableFavoriteProperties) {
-          if (field) {
-            if (
-              sharedFavorites &&
-              sharedFavorites?.findIndex(
-                (fav: string) => args.propertyRecord.property.name === fav
-              ) >= 0
-            ) {
-              // i.e. if shared
-              items.push({
-                key: "unshare-favorite",
-                onSelect: async () =>
-                  onUnshareFavorite(args.propertyRecord.property.name),
-                title: localizations.unshareFavorite.title,
-                label: localizations.unshareFavorite.label,
-              });
-            } else if (Presentation.favoriteProperties.has(field, projectId)) {
-              items.push({
-                key: "share-favorite",
-                onSelect: async () =>
-                  onShareFavorite(args.propertyRecord.property.name),
-                title: localizations.shareFavorite.title,
-                label: localizations.shareFavorite.label,
-              });
-              items.push({
-                key: "remove-favorite",
-                onSelect: async () => onRemoveFavorite(field),
-                title: localizations.removeFavorite.title,
-                label: localizations.removeFavorite.label,
-              });
-            } else {
-              items.push({
-                key: "add-favorite",
-                onSelect: async () => onAddFavorite(field),
-                title: localizations.addFavorite.title,
-                label: localizations.addFavorite.label,
-              });
-            }
-          }
-        }
+        // if (enableFavoriteProperties) {
+        //   if (field) {
+        //     if (
+        //       sharedFavorites &&
+        //       sharedFavorites?.findIndex(
+        //         (fav: string) => args.propertyRecord.property.name === fav
+        //       ) >= 0
+        //     ) {
+        //       // i.e. if shared
+        //       items.push({
+        //         key: "unshare-favorite",
+        //         onSelect: async () =>
+        //           onUnshareFavorite(args.propertyRecord.property.name),
+        //         title: localizations.unshareFavorite.title,
+        //         label: localizations.unshareFavorite.label,
+        //       });
+        //     } else if (Presentation.favoriteProperties.has(field, projectId)) {
+        //       items.push({
+        //         key: "share-favorite",
+        //         onSelect: async () =>
+        //           onShareFavorite(args.propertyRecord.property.name),
+        //         title: localizations.shareFavorite.title,
+        //         label: localizations.shareFavorite.label,
+        //       });
+        //       items.push({
+        //         key: "remove-favorite",
+        //         onSelect: async () => onRemoveFavorite(field),
+        //         title: localizations.removeFavorite.title,
+        //         label: localizations.removeFavorite.label,
+        //       });
+        //     } else {
+        //       items.push({
+        //         key: "add-favorite",
+        //         onSelect: async () => onAddFavorite(field),
+        //         title: localizations.addFavorite.title,
+        //         label: localizations.addFavorite.label,
+        //       });
+        //     }
+        //   }
+        // }
 
         if (enableCopyingPropertyText) {
           items.push({
@@ -514,10 +509,10 @@ export const PropertyGrid = ({
       enableCopyingPropertyText,
       enableNullValueToggle,
       additionalContextMenuOptions,
-      onAddFavorite,
-      onRemoveFavorite,
-      onShareFavorite,
-      onUnshareFavorite,
+      // onAddFavorite,
+      // onRemoveFavorite,
+      // onShareFavorite,
+      // onUnshareFavorite,
       onHideNull,
       onShowNull,
       featureTracking,
@@ -617,7 +612,8 @@ export const PropertyGrid = ({
           isPropertyHoverEnabled={true}
           isPropertySelectionEnabled={true}
           onPropertyContextMenu={onPropertyContextMenu}
-          actionButtonRenderers={[shareActionButtonRenderer]}
+          width={100}
+          height={100} // actionButtonRenderers={[shareActionButtonRenderer]}
         />
       );
     } else {
@@ -630,7 +626,8 @@ export const PropertyGrid = ({
           isPropertyHoverEnabled={true}
           isPropertySelectionEnabled={true}
           onPropertyContextMenu={onPropertyContextMenu}
-          actionButtonRenderers={[shareActionButtonRenderer]}
+          width={100}
+          height={100} // actionButtonRenderers={[shareActionButtonRenderer]}
         />
       );
     }

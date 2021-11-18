@@ -1,12 +1,12 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
-import * as i18next from "i18next";
 import { UiError, getClassName } from "@itwin/appui-abstract";
 import { IModelApp } from "@itwin/core-frontend";
 import { Localization } from "@itwin/core-common";
+import { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
  * Entry point for static initialization required by various components used in the package.
@@ -26,8 +26,7 @@ export class TreeWidget {
     this._initialized = true;
     TreeWidget._i18n = i18n ?? IModelApp.localization;
 
-    return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace)
-      .readFinished;
+    return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace);
   }
 
   /** Unregisters the TreeWidget internationalization service namespace */
@@ -60,7 +59,7 @@ export class TreeWidget {
    */
   public static translate(
     key: string | string[],
-    options?: i18next.TranslationOptions
+    options?: LocalizationOptions
   ): string {
     return TreeWidget.i18n.getLocalizedStringWithNamespace(
       TreeWidget.i18nNamespace,

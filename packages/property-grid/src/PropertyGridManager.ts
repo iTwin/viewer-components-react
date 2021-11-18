@@ -3,18 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { I18N } from "@itwin/core-i18n";
 import { getClassName, UiError } from "@itwin/appui-abstract";
-import * as i18next from "i18next";
-
 import { PropertyGridManagerFeatureFlags } from "./types";
+import { Localization } from "@itwin/core-common";
+import { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
  * Entry point for static initialization required by various components used in the package.
  * @public
  */
 export class PropertyGridManager {
-  private static _i18n?: I18N;
+  private static _i18n?: Localization;
 
   /** Feature Flag object with default values */
   private static _featureFlags: PropertyGridManagerFeatureFlags = {
@@ -25,7 +24,7 @@ export class PropertyGridManager {
    * @param i18n - The internationalization service created by the IModelApp.
    */
   public static async initialize(
-    i18n: I18N,
+    i18n: Localization,
     featureFlags?: PropertyGridManagerFeatureFlags
   ): Promise<void> {
     if (featureFlags) {
@@ -35,7 +34,7 @@ export class PropertyGridManager {
     PropertyGridManager._i18n = i18n;
     return PropertyGridManager._i18n.registerNamespace(
       PropertyGridManager.i18nNamespace
-    ).readFinished;
+    );
   }
 
   /** Unregisters the PropertyGridManager internationalization service namespace */
@@ -49,7 +48,7 @@ export class PropertyGridManager {
   }
 
   /** The internationalization service created by the IModelApp. */
-  public static get i18n(): I18N {
+  public static get i18n(): Localization {
     if (!PropertyGridManager._i18n) {
       throw new UiError(
         PropertyGridManager.loggerCategory(this),
@@ -72,9 +71,9 @@ export class PropertyGridManager {
    */
   public static translate(
     key: string | string[],
-    options?: i18next.TranslationOptions
+    options?: LocalizationOptions
   ): string {
-    return PropertyGridManager.i18n.translateWithNamespace(
+    return PropertyGridManager.i18n.getLocalizedStringWithNamespace(
       PropertyGridManager.i18nNamespace,
       key,
       options
