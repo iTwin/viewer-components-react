@@ -22,12 +22,14 @@
     {
       "packageName": "@bentley/imodel-select-react",
       "projectFolder": "packages/imodel-select",
-      "versionPolicyName": "imodel-select"
+      "versionPolicyName": "imodel-select",
+      "shouldPublish": false
     },
     {
       "packageName": "@bentley/markup-frontstage-react",
       "projectFolder": "packages/markup-frontstage",
-      "versionPolicyName": "markup-frontstage"
+      "versionPolicyName": "markup-frontstage",
+      "shouldPublish": false
     },
     {
       "packageName": "@bentley/tree-widget-react",
