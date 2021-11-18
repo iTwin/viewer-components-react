@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { I18N } from "@bentley/imodeljs-i18n";
-import { getClassName, UiError } from "@bentley/ui-abstract";
+import { I18N } from "@itwin/core-i18n";
+import { getClassName, UiError } from "@itwin/appui-abstract";
 import * as i18next from "i18next";
 
 import { PropertyGridManagerFeatureFlags } from "./types";

@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useState } from "react";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 export interface SearchOptions {
   isFiltering: boolean;

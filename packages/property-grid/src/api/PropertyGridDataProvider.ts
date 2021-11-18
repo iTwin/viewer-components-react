@@ -2,10 +2,10 @@
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-import { IModelConnection } from "@bentley/imodeljs-frontend";
-import { Field } from "@bentley/presentation-common";
-import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
-import { PropertyCategory, PropertyData } from "@bentley/ui-components";
+import { IModelConnection } from "@itwin/core-frontend";
+import { Field } from "@itwin/presentation-common";
+import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import { PropertyCategory, PropertyData } from "@itwin/components-react";
 export class PropertyDataProvider extends PresentationPropertyDataProvider {
   // tslint:disable-next-line:naming-convention
   private _parentIsFieldFavorite = this.isFieldFavorite;

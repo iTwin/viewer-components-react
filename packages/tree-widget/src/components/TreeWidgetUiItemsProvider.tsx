@@ -8,8 +8,8 @@ import {
   StagePanelSection,
   StageUsage,
   UiItemsProvider,
-} from "@bentley/ui-abstract";
-import { ClassGroupingOption, UiFramework } from "@bentley/ui-framework";
+} from "@itwin/appui-abstract";
+import { ClassGroupingOption, UiFramework } from "@itwin/appui-react";
 import React from "react";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
 import {
@@ -17,8 +17,8 @@ import {
   CategoriesTreeComponent,
   SpatialTreeComponent,
 } from "./trees";
-import { IModelConnection, Viewport } from "@bentley/imodeljs-frontend";
-import { SelectableContentDefinition } from "@bentley/ui-components";
+import { IModelConnection, Viewport } from "@itwin/core-frontend";
+import { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
 import { TreeWidgetControlOptions } from "./TreeWidgetControl";
 
@@ -27,7 +27,6 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
 
   private _imodel?: IModelConnection;
   private _activeView?: Viewport;
-  private _enablePreloading?: boolean;
   private _enableElementsClassGrouping?: boolean;
   private _allViewports?: boolean;
   private _additionalTrees?: SelectableContentDefinition[];
@@ -41,7 +40,6 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   constructor(props?: Partial<TreeWidgetControlOptions>) {
     this._imodel = props?.iModelConnection;
     this._activeView = props?.activeView;
-    this._enablePreloading = props?.enablePreloading;
     this._enableElementsClassGrouping = props?.enableElementsClassGrouping;
     this._allViewports = props?.allViewports;
     this._additionalTrees = props?.additionalTrees;
@@ -71,7 +69,6 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
           iModel={this._imodel ?? imodel}
           allViewports={this._allViewports}
           activeView={this._activeView}
-          enablePreloading={this._enablePreloading}
           enableElementsClassGrouping={this._enableElementsClassGrouping}
           {...this._modelsTreeProps}
         />
@@ -82,7 +79,6 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
           iModel={this._imodel ?? imodel}
           allViewports={this._allViewports}
           activeView={this._activeView}
-          enablePreloading={this._enablePreloading}
           {...this._categoriesTreeProps}
         />
       );
@@ -90,7 +86,6 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       const spatialContainmentComponent = (
         <SpatialTreeComponent
           iModel={this._imodel ?? imodel}
-          enablePreloading={this._enablePreloading}
           enableElementsClassGrouping={
             this._enableElementsClassGrouping
               ? ClassGroupingOption.Yes

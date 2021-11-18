@@ -6,7 +6,7 @@
 
 import * as React from "react";
 import classnames from "classnames";
-import { CommonProps, UiCore } from "@bentley/ui-core";
+import { CommonProps, UiCore } from "@itwin/core-react";
 import { IconButton } from "../IconButton";
 import "./SearchBox.scss";
 

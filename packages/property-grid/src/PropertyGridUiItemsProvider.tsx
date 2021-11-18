@@ -10,7 +10,7 @@ import {
   StageUsage,
   UiItemsProvider,
   WidgetState,
-} from "@bentley/ui-abstract";
+} from "@itwin/appui-abstract";
 import * as React from "react";
 
 import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid";

@@ -5,13 +5,13 @@
 
 import "./MultiElementPropertyGrid.scss";
 
-import { InstanceKey, KeySet } from "@bentley/presentation-common";
-import { Presentation } from "@bentley/presentation-frontend";
+import { InstanceKey, KeySet } from "@itwin/presentation-common";
+import { Presentation } from "@itwin/presentation-frontend";
 import {
   ConfigurableCreateInfo,
   useActiveIModelConnection,
   WidgetControl,
-} from "@bentley/ui-framework";
+} from "@itwin/appui-react";
 import * as React from "react";
 import { animated, Transition } from "react-spring/renderprops.cjs";
 

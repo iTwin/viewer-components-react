@@ -3,12 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import "./PropertyGrid.scss";
-import { IDisposable } from "@bentley/bentleyjs-core";
+import { IDisposable } from "@itwin/core-bentley";
 import {
   IPresentationPropertyDataProvider,
   usePropertyDataProviderWithUnifiedSelection,
-} from "@bentley/presentation-components";
-import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
+} from "@itwin/presentation-components";
+import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import {
   FilteredType,
   FilteringPropertyDataProvider,
@@ -21,8 +21,8 @@ import {
   PropertyRecordDataFiltererBase,
   VirtualizedPropertyGridWithDataProvider,
   VirtualizedPropertyGridWithDataProviderProps,
-} from "@bentley/ui-components";
-import { FillCentered } from "@bentley/ui-core";
+} from "@itwin/components-react";
+import { FillCentered } from "@itwin/core-react";
 import * as React from "react";
 
 import { PropertyGridManager } from "../PropertyGridManager";

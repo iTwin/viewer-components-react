@@ -3,14 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelConnection } from "@bentley/imodeljs-frontend";
-import { Field } from "@bentley/presentation-common";
+import { IModelConnection } from "@itwin/core-frontend";
+import { Field } from "@itwin/presentation-common";
 import {
   IPresentationPropertyDataProvider,
   PresentationPropertyDataProvider,
-} from "@bentley/presentation-components";
-import { PropertyGridContextMenuArgs } from "@bentley/ui-components";
-import { ContextMenuItemProps, Orientation } from "@bentley/ui-core";
+} from "@itwin/presentation-components";
+import { PropertyGridContextMenuArgs } from "@itwin/components-react";
+import { ContextMenuItemProps, Orientation } from "@itwin/core-react";
 
 export const SHARED_NAMESPACE = "favoriteProperties";
 export const SHARED_NAME = "sharedProps";

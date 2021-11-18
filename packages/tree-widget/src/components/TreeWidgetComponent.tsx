@@ -8,7 +8,7 @@ import { useState } from "react";
 import {
   SelectableContent,
   SelectableContentDefinition,
-} from "@bentley/ui-components";
+} from "@itwin/components-react";
 
 interface TreeWidgetComponentProps {
   trees?: SelectableContentDefinition[];
