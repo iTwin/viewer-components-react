@@ -1,12 +1,8 @@
 [
   {
-    "policyName": "imodel-select",
+    "policyName": "deprecated",
     "definitionName": "individualVersion",
-    "lockedMajor": 2
-  },
-  {
-    "policyName": "markup-frontstage",
-    "definitionName": "individualVersion"
+    "exemptFromRushChange": true
   },
   {
     "policyName": "tree-widget",
