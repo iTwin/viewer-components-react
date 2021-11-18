@@ -1,10 +1,14 @@
-# @bentley\imodel-select-react
+# @bentley/imodel-select-react
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 
 The imodel-select-react provides React components to select an iModel or a Project on iModelHub.
 
-## Sample deployments
+## Deprecation notice
+
+**This package has been deprecated. Please use [@itwin/imodel-browser-react](https://www.npmjs.com/package/@itwin/imodel-browser-react) in its place.**
+
+## Usage
 
 ### Selecting an iModel in iModelHub
 
