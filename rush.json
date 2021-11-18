@@ -58,6 +58,11 @@
       "packageName": "@bentley/measure-tools-react",
       "projectFolder": "packages/measure-tools",
       "versionPolicyName": "measure-tools"
+    },
+    {
+      "packageName": "@bentley/breakdown-trees-react",
+      "projectFolder": "packages/breakdown-trees",
+      "versionPolicyName": "breakdown-trees"
     }
   ]
 }

@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.4.4",
+      "tag": "@bentley/tree-widget-react_v1.4.4",
+      "date": "Thu, 16 Sep 2021 17:55:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Stop delivering psuedo-localized strings"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.3",
       "tag": "@bentley/tree-widget-react_v1.4.3",
       "date": "Thu, 26 Aug 2021 14:00:14 GMT",

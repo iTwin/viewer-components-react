@@ -588,6 +588,7 @@ export const PropertyGrid = ({
           <div
             className="property-grid-react-panel-info-btn"
             onClick={onInfoButton}
+            title={PropertyGridManager.translate("element-list.title")}
           >
             <Icon
               className="property-grid-react-panel-icon"

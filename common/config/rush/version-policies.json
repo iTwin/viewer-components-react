@@ -36,5 +36,10 @@
     "policyName": "measure-tools",
     "definitionName": "individualVersion",
     "lockedMajor": 0
+  },
+  {
+    "policyName": "breakdown-trees",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   }
 ]

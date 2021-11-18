@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Thu, 26 Aug 2021 14:00:14 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Sep 2021 17:55:54 GMT and should not be manually modified.
+
+## 1.4.4
+Thu, 16 Sep 2021 17:55:54 GMT
+
+### Patches
+
+- Stop delivering psuedo-localized strings
 
 ## 1.4.3
 Thu, 26 Aug 2021 14:00:14 GMT

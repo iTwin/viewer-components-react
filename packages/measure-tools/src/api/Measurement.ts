@@ -216,6 +216,9 @@ export interface MeasurementEqualityOptions {
   /** If true, ignore any ID information (grouping or otherwise). */
   ignoreIds?: true | undefined;
 
+  /** If true, ignore the measurement labels. */
+  ignoreLabel?: true | undefined;
+
   /** If true, ignore any other non-data state information, such as if the measurement's lock state. When combined with the other ignore options, the equality will not test base measurement properties. */
   ignoreNonDataState?: true | undefined;
 
@@ -242,6 +245,7 @@ export abstract class Measurement {
   private _groupId?: string;
   private _subgroupId?: string;
   private _id?: string;
+  private _label?: string;
   private _style?: string;
   private _lockStyle?: string;
 
@@ -334,6 +338,17 @@ export abstract class Measurement {
     this.onIdChanged(prevId);
   }
 
+  /** Gets or sets the display label for the measurement. */
+  public get label(): string | undefined {
+    return this._label;
+  }
+
+  public set label(value: string | undefined) {
+    const prevLabel = this._label;
+    this._label = value;
+    this.onLabelChanged(prevLabel);
+  }
+
   /** Gets or sets the mame of the StyleSet to apply when drawing this measurement. If undefined, the default style is used. */
   public get style(): string | undefined {
     return this._style;
@@ -423,6 +438,7 @@ export abstract class Measurement {
     let ignoreStyle = false;
     let ignoreViewTarget = false;
     let ignoreIds = false;
+    let ignoreLabel = false;
     let ignoreNonDataState = false;
 
     if (opts) {
@@ -437,6 +453,9 @@ export abstract class Measurement {
 
       if (opts.ignoreNonDataState)
         ignoreNonDataState = true;
+
+      if (opts.ignoreLabel)
+        ignoreLabel = true;
     }
 
     if (!ignoreStyle) {
@@ -454,6 +473,11 @@ export abstract class Measurement {
         return false;
     }
 
+    if (!ignoreLabel) {
+      if (this._label !== other._label)
+        return false;
+    }
+
     if (!ignoreNonDataState) {
       if (this._isLocked !== other._isLocked)
         return false;
@@ -465,10 +489,16 @@ export abstract class Measurement {
     return true;
   }
 
-  /** Draw the measurement.
+  /** Draw the measurement. This is called every frame, e.g. when the mouse moves. This is suitable for small or dynamic graphics, but if the measurement
+   * has complicated graphics, consider using the decorateCached method.
    * @param context Decorate context for drawing to a viewport.
    */
   public decorate(_context: DecorateContext): void { }
+
+  /** Draw any graphics that need to be cached. This is called when the scene changes, e.g. zoom or rotate.
+    * @param context Decorate context for drawing to a viewport.
+  */
+  public decorateCached(_context: DecorateContext): void { }
 
   /** Test if the measurement was picked.
    * @param _pickContext Picking context to test against.
@@ -566,6 +596,7 @@ export abstract class Measurement {
     this.groupId = other.groupId;
     this.subgroupId = other.subgroupId;
     this.id = other.id;
+    this.label = other.label;
     this.style = other.style;
     this.lockStyle = other.lockStyle;
     this.viewTarget.copyFrom(other.viewTarget);
@@ -581,6 +612,7 @@ export abstract class Measurement {
     this._groupId = (json.groupId !== undefined) ? json.groupId : undefined;
     this._subgroupId = (json.subgroupId !== undefined) ? json.subgroupId : undefined;
     this._id = (json.id !== undefined) ? json.id : undefined;
+    this._label = (json.label !== undefined) ? json.label : undefined;
     this._style = (json.style !== undefined) ? json.style : undefined;
     this._lockStyle = (json.style !== undefined) ? json.lockStyle : undefined;
     this._displayLabels = (json.displayLabels !== undefined) ? json.displayLabels : MeasurementPreferences.current.displayMeasurementLabels;
@@ -621,6 +653,7 @@ export abstract class Measurement {
     json.groupId = this._groupId;
     json.subgroupId = this._subgroupId;
     json.id = this._id;
+    json.label = this._label;
     json.style = this._style;
     json.lockStyle = this._lockStyle;
     json.viewTarget = this._viewTarget.toJSON();
@@ -647,6 +680,12 @@ export abstract class Measurement {
    * @param _prevId The previous ID.
    */
   protected onIdChanged(_prevId?: string) { }
+
+  /**
+   * Notify subclasses the label changed.
+   * @param _prevLabel The previous label value.
+   */
+  protected onLabelChanged(_prevLabel?: string) { }
 
   /** Notify subclasses when the measurement's lock is toggled. */
   protected onLockToggled() { }

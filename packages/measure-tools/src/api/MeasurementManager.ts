@@ -5,8 +5,9 @@
 
 import { BeUiEvent } from "@bentley/bentleyjs-core";
 import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, Decorator, EventHandled, HitDetail, IModelApp, Viewport } from "@bentley/imodeljs-frontend";
+import { BeButtonEvent, DecorateContext, Decorator, EventHandled, HitDetail, IModelApp, ScreenViewport, Viewport } from "@bentley/imodeljs-frontend";
 import { Measurement, MeasurementPickContext } from "./Measurement";
+import { MeasurementCachedGraphicsHandler } from "./MeasurementCachedGraphicsHandler";
 import { MeasurementButtonHandledEvent, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementSelectionSet } from "./MeasurementSelectionSet";
 import { MeasurementUIEvents } from "./MeasurementUIEvents";
@@ -100,7 +101,7 @@ export class MeasurementManager implements Decorator {
     this.onMeasurementsAdded.emit(arr);
 
     MeasurementUIEvents.notifyMeasurementsChanged();
-    IModelApp.viewManager.invalidateDecorationsAllViews();
+    this.invalidateDecorationsAllViews();
   }
 
   /**
@@ -186,7 +187,7 @@ export class MeasurementManager implements Decorator {
     this.onMeasurementsRemoved.emit(removed);
     MeasurementSelectionSet.global.remove(measurement);
     MeasurementUIEvents.notifyMeasurementsChanged();
-    IModelApp.viewManager.invalidateDecorationsAllViews();
+    this.invalidateDecorationsAllViews();
     return true;
   }
 
@@ -255,7 +256,7 @@ export class MeasurementManager implements Decorator {
       this.onMeasurementsRemoved.emit(measurementsDropped);
       MeasurementSelectionSet.global.remove(measurementsDropped);
       MeasurementUIEvents.notifyMeasurementsChanged();
-      IModelApp.viewManager.invalidateDecorationsAllViews();
+      this.invalidateDecorationsAllViews();
     }
 
     return measurementsDropped;
@@ -298,7 +299,7 @@ export class MeasurementManager implements Decorator {
       this.onMeasurementsRemoved.emit(removed);
       MeasurementSelectionSet.global.clear();
       MeasurementUIEvents.notifyMeasurementsChanged();
-      IModelApp.viewManager.invalidateDecorationsAllViews();
+      this.invalidateDecorationsAllViews();
     }
   }
 
@@ -396,11 +397,41 @@ export class MeasurementManager implements Decorator {
     }
   }
 
+  /** Draws all measurements that have cached graphics to a given viewport. Measurements that do not have the correct viewport type are not drawn to the viewport.
+   * @param context Decorate context for drawing to a viewport.
+   */
+  public decorateCached(context: DecorateContext): void {
+    for (const measurement of this._measurements) {
+      if (measurement.isVisible && measurement.viewTarget.isViewportCompatible(context.viewport))
+        measurement.decorateCached(context);
+    }
+  }
+
+  /** Invalidates decorations in all views, including any cached graphics measurements may be using. */
+  public invalidateDecorationsAllViews(): void {
+    IModelApp.viewManager.invalidateDecorationsAllViews();
+    MeasurementCachedGraphicsHandler.instance.invalidateDecorations();
+  }
+
+  /** Invalidates decorations in a specified viewport. If undefined then all viewports are invalidated. This includes any cached graphics measurements may be using.
+   * @param vp Viewport to invalidate decorations, if undefined all viewports.
+  */
+  public invalidateDecorations(vp?: ScreenViewport): void {
+    if (vp) {
+      vp.invalidateDecorations();
+      MeasurementCachedGraphicsHandler.instance.invalidateDecorations(vp);
+    } else {
+      this.invalidateDecorationsAllViews();
+    }
+  }
+
   /** Adds the decorator singleton to the view manager's list of active decorators. The decorator will participate in drawing and picking operations. */
   public startDecorator(): void {
     if (this._dropCallback)
       return;
 
+    MeasurementCachedGraphicsHandler.instance.setDecorateCallback(this.decorateCached.bind(this));
+    MeasurementCachedGraphicsHandler.instance.startDecorator();
     this._dropCallback = IModelApp.viewManager.addDecorator(this);
 
     if (undefined === this._dropUnitCallback) {
@@ -418,10 +449,14 @@ export class MeasurementManager implements Decorator {
       this._dropCallback();
       this._dropCallback = undefined;
     }
+
     if (this._dropUnitCallback) {
       this._dropUnitCallback();
       this._dropUnitCallback = undefined;
     }
+
+    MeasurementCachedGraphicsHandler.instance.setDecorateCallback(undefined);
+    MeasurementCachedGraphicsHandler.instance.stopDecorator();
   }
 
   public onActiveUnitSystemChanged() {

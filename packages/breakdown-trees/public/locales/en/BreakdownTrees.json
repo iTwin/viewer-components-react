@@ -1,0 +1,58 @@
+{
+  "contextMenu": {
+    "selectRelatedLabel": "Select related",
+    "createSectionPlanes": "Create section planes",
+    "clearSectionPlanes": "Clear section planes",
+    "zoomSelectedLabel": "Zoom to selected elements",
+    "createSpaceSectionPlanes": "Create space clip planes",
+    "moreOptions": "More Options",
+    "topDownView": "Top Down View",
+    "toggleSpaceLabels": "Show Space Labels",
+    "clipAtSpaces": "Clip At Spaces",
+    "showGuids": "Show IDs",
+    "groupByType": "Group By Type",
+    "groupByDiscipline": "Group By Discipline",
+    "addToSchedule": "Add to schedule",
+    "removeFromSchedule": "Remove from schedule",
+    "clearSchedule": "Clear schedule",
+    "enableDisplaySet": "Enable Display Set",
+    "clearDisplaySet": "Clear Display Set",
+    "addToDisplaySet": " Add To Display Set"
+  },
+  "searchTool": {
+    "placeHolder": "Search",
+    "title": "Search for something",
+    "noData": "No Match Found",
+    "noMatchingItem": "There is no item matching your search."
+  },
+  "clipSection": {
+    "briefTimeoutMessage": "Story has no elements",
+    "detailedTimeoutMessage": "Story has no elements associated. Cannot create section planes."
+  },
+  "zoomToElement": {
+    "briefTimeoutMessage": "Element has no geometry",
+    "detailedTimeoutMessage": "Element has no geometry associated. Cannot zoom to the selected element."
+  },
+  "displaySet": {
+    "briefEnableSetMessage": "No Display Set found",
+    "detailedEnableSetMessage": "No Display Set found. First Enable a Display Set and then try to add to that set."
+  },
+  "scheduleToolbar": {
+    "clearSchedule": "Clear schedule",
+    "selectProperties": "Select properties to be displayed",
+    "zoomToElement": "Zoom to selected Element",
+    "exportData": "Export data to a spreadsheet in Excel",
+    "removeFromSchedule": "Remove from schedule"
+  },
+  "schedulePropertySelector": {
+    "selectProperty": "Select property",
+    "deselectProperty": "Deselect property",
+    "close": "Close window",
+    "ok": "Apply changes",
+    "cancel": "Cancel changes",
+    "moveTop": "Move property to the top",
+    "moveUp": "Move property up",
+    "moveDown": "Move property down",
+    "moveBottom": "Move property to the bottom"
+  }
+}

@@ -12,6 +12,7 @@ import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { WellKnownViewType } from "../api/MeasurementEnums";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
 import { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
@@ -189,6 +190,7 @@ export class LocationMeasurement extends Measurement {
     title += ` [${fCoordinates}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
+    MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push({
       label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.coordinates"),

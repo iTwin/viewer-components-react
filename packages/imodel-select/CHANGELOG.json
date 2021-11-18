@@ -2,6 +2,18 @@
   "name": "@bentley/imodel-select-react",
   "entries": [
     {
+      "version": "2.0.11",
+      "tag": "@bentley/imodel-select-react_v2.0.11",
+      "date": "Thu, 16 Sep 2021 17:55:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Stop delivering psuedo-localized strings"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.10",
       "tag": "@bentley/imodel-select-react_v2.0.10",
       "date": "Tue, 08 Jun 2021 21:23:59 GMT",

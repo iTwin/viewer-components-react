@@ -170,6 +170,8 @@ export const ElementList = ({
     [onSelect]
   );
 
+  const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
+
   return (
     <div
       className={classnames("property-grid-react-element-list", rootClassName)}
@@ -185,7 +187,7 @@ export const ElementList = ({
           />
         </div>
         <div className="property-grid-react-element-list-title">
-          {PropertyGridManager.translate("element-list.title")}
+          {title}
         </div>
       </div>
       <div className="property-grid-react-element-list-container">
@@ -197,11 +199,6 @@ export const ElementList = ({
             hideHeader={true}
           />
         )}
-      </div>
-      <div className="property-grid-react-element-list-results-label">
-        {`${instanceKeys.length} ${PropertyGridManager.translate(
-          "element-list.results"
-        )}`}
       </div>
     </div>
   );

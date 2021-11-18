@@ -1,6 +1,6 @@
 {
   "name": "@bentley/geo-tools-react",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "React Geospatial Tools",
   "keywords": [
     "Bentley",
@@ -23,7 +23,7 @@
   "main": "lib/geo-tools.js",
   "typings": "lib/geo-tools",
   "scripts": {
-    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
+    "build": " tsc 1>&2 && npm run copy:assets",
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build",

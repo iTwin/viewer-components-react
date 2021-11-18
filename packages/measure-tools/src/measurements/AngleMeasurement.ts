@@ -9,6 +9,7 @@ import { GeometryStreamProps } from "@bentley/imodeljs-common";
 import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
+import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
 import { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
@@ -295,6 +296,8 @@ export class AngleMeasurement extends Measurement {
     title += ` [${fAngle}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
+    MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
+
     data.properties.push({
       label: IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.angle"),
       name: "AngleMeasurement_Angle",

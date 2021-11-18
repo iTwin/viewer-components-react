@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import React, { useEffect, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
@@ -45,7 +45,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
   const [available3dModels, setAvailable3dModels] = useState([] as string[]);
   const [availableModels, setAvailableModels] = useState([] as string[]);
   const [viewport, setViewport] = useState<ScreenViewport | undefined>(
-    undefined
+    IModelApp.viewManager.selectedView
   );
 
   const { searchOptions, filterString, activeMatchIndex, onFilterApplied } =
@@ -77,7 +77,6 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
   };
 
   useEffect(() => {
-    setViewport(IModelApp.viewManager.selectedView);
     IModelApp.viewManager.onSelectedViewportChanged.addListener(
       _handleSelectedViewportChanged
     );
@@ -86,7 +85,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
         _handleSelectedViewportChanged
       );
     };
-  }, [IModelApp.viewManager.selectedView]);
+  }, []);
 
   useEffect(() => {
     queryModels(viewport)

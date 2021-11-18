@@ -1,6 +1,6 @@
 {
   "name": "@bentley/imodel-select-react",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "iModel Select React",
   "keywords": [
     "Bentley",
@@ -19,7 +19,7 @@
   "main": "lib/imodel-select-react.js",
   "typings": "lib/imodel-select-react",
   "scripts": {
-    "build": " tsc 1>&2 && npm run copy:assets && npm run pseudolocalize",
+    "build": " tsc 1>&2 && npm run copy:assets",
     "build-prod": " tsc -p tsconfig.json 1>&2 && npm run copy:assets",
     "rebuild": "npm run clean && npm run build",
     "clean": "rimraf lib build .rush/temp/package-deps*.json",
