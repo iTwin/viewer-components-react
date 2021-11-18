@@ -16,7 +16,7 @@
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
   "repository": {
-    "url": "https://github.com/imodeljs/viewer-components-react"
+    "url": "https://github.com/iTwin/viewer-components-react"
   },
   "projects": [
     {
