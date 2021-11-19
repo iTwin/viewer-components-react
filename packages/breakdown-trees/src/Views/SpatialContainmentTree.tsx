@@ -9,7 +9,6 @@ import spatialRulesDefault from "../assets/SpatialBreakdown.json";
 import spatialRulesByType from "../assets/SpatialBreakdownByType.json";
 import spatialRulesByDiscipline from "../assets/SpatialBreakdownByDiscipline.json";
 import spatialRulesByTypeAndDiscipline from "../assets/SpatialBreakdownByTypeAndDiscipline.json";
-
 import { IModelApp, IModelConnection, SpatialViewState } from "@bentley/imodeljs-frontend";
 import { IPresentationTreeDataProvider, PresentationTreeDataProvider } from "@bentley/presentation-components";
 import { Ruleset } from "@bentley/presentation-common";
@@ -38,6 +37,7 @@ export interface SpatialContainmentTreeProps {
   groupByDiscipline: boolean;
   setGroupByDiscipline: (groupByDiscipline: boolean) => void;
   eventHandlers?: SpatialContainmentEventHandlers;
+  additionalFunctionIconMapper?: TreeNodeFunctionIconInfoMapper;
 }
 
 function updateModelsInRulesetVars() {
@@ -50,7 +50,6 @@ const _onModelsChanged = async () => {
   updateModelsInRulesetVars();
 }
 
-// <ConnectedSimpleTreeWithRuleset ruleSet={spatialRules as Ruleset}  controller={treeWithRulesetController} />
 export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (props: SpatialContainmentTreeProps) => {
   const treeName = "SpatialContainmentTree";
   let spatialRules = spatialRulesDefault as Ruleset;
@@ -85,7 +84,7 @@ export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (pr
   }, [props.iModel.key, props.groupByType, props.groupByDiscipline, spatialRules.id]);
 
   const { functionIconMapper, optionItems, displayGuidHandler, groupByTypeHandler, groupByDisciplineHandler } = React.useMemo(() => {
-    const functionIconMapper = new TreeNodeFunctionIconInfoMapper(dataProvider);
+    const functionIconMapper = props.additionalFunctionIconMapper ?? new TreeNodeFunctionIconInfoMapper(dataProvider);
     const optionItems: OptionItemHandler[] = [];
 
     populateContextAndOptionMenuItems(treeName, functionIconMapper, optionItems, dataProvider, spatialRules, props.eventHandlers, props.clipHeight, props.clipAtSpaces);
@@ -122,8 +121,6 @@ export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (pr
 }
 
 function populateContextAndOptionMenuItems(treeName: string, mapper: TreeNodeFunctionIconInfoMapper, optionItems: OptionItemHandler[], dataProvider: IPresentationTreeDataProvider, spatialRules: any, eventHandlers?: SpatialContainmentEventHandlers, clipHeight?: number, clipAtSpaces?: boolean) {
-  populateMapWithCommonMenuItems(treeName, mapper, dataProvider, spatialRules.id, eventHandlers);
-
   const combinedFunctionalityProvider = new CombinedTreeNodeFunctionalityProvider(treeName, dataProvider);
   const storyClipSectionProvider = new StoryClipPlanesProvider(treeName, dataProvider, false, false, clipHeight);
   const spaceClipSectionProvider = new SpaceClipPlanesProvider(treeName, dataProvider, false, clipHeight);
@@ -131,19 +128,20 @@ function populateContextAndOptionMenuItems(treeName: string, mapper: TreeNodeFun
   combinedFunctionalityProvider.setFunctionalityProviderForClass("BuildingSpatial:Story", storyClipSectionProvider);
   combinedFunctionalityProvider.setFunctionalityProviderForClass("BuildingSpatial:Space", spaceClipSectionProvider);
   combinedFunctionalityProvider.setFunctionalityProviderForClass("BuildingSpatial:Building", buildingClipSectionProvider);
-
-  mapper.registerForNodesOfClasses(["BuildingSpatial:Story", "BuildingSpatial:Space", "BuildingSpatial:Building"], {
-    key: ToolbarItemKeys.createSectionPlanes,
-    label: BreakdownTrees.translate("contextMenu.createSectionPlanes"),
-    functionalityProvider: combinedFunctionalityProvider,
-    toolbarIcon: "icon-section-tool",
-  });
   mapper.registerGlobal({
     key: ToolbarItemKeys.clearSectionPlanes,
     label: BreakdownTrees.translate("contextMenu.clearSectionPlanes"),
     functionalityProvider: new ClearSectionsFunctionalityProvider(treeName, dataProvider),
     toolbarIcon: "icon-section-clear",
   });
+  mapper.registerForNodesOfClasses(["BuildingSpatial:Story", "BuildingSpatial:Space", "BuildingSpatial:Building"], {
+    key: ToolbarItemKeys.createSectionPlanes,
+    label: BreakdownTrees.translate("contextMenu.createSectionPlanes"),
+    functionalityProvider: combinedFunctionalityProvider,
+    toolbarIcon: "icon-section-tool",
+  });
+
+  populateMapWithCommonMenuItems(treeName, mapper, dataProvider, spatialRules.id, eventHandlers);
 
   const labelHandler = new LabelHandler(storyClipSectionProvider, "Toggle Space Labels", BreakdownTrees.translate("contextMenu.toggleSpaceLabels"), "icon-text");
   optionItems.push(labelHandler);

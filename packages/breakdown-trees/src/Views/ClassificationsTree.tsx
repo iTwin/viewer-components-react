@@ -27,6 +27,7 @@ export interface ClassificationsTreeProps {
   setIsDisplayGuids: (displayGuids: boolean) => void;
   enableVisibility?: boolean;
   eventHandlers?: ClassificationsTreeEventHandlers;
+  additionalFunctionIconMapper?: TreeNodeFunctionIconInfoMapper;
 }
 const CLASSIFICATIONS_TREE_NAME = "ClassificationsTree";
 
@@ -42,7 +43,7 @@ export const ClassificationsTree: React.FC<ClassificationsTreeProps> = (props: C
   );
 
   const { functionIconMapper, optionItems, displayGuidHandler } = React.useMemo(() => {
-    const functionIconMapper = new TreeNodeFunctionIconInfoMapper(dataProvider);
+    const functionIconMapper = props.additionalFunctionIconMapper ?? new TreeNodeFunctionIconInfoMapper(dataProvider);
     const optionItems: OptionItemHandler[] = [];
     populateMapWithCommonMenuItems(CLASSIFICATIONS_TREE_NAME, functionIconMapper, dataProvider, classificationRules.id, props.eventHandlers);
     const displayGuidHandler = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon-label", () => { return props.displayGuids; }, props.setIsDisplayGuids);

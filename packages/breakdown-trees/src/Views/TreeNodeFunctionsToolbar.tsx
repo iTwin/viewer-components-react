@@ -22,11 +22,19 @@ export interface TreeNodeFunctionsToolbarProps {
 
 export const TreeNodeFunctionsToolbar: React.FC<TreeNodeFunctionsToolbarProps> = (props: TreeNodeFunctionsToolbarProps) => {
   const [toolBarIcons, setToolbarIcons] = React.useState<React.ReactNode[] | undefined>(undefined);
+  const [clickedInfo, setClickedInfo] = React.useState<FunctionIconInfo | undefined>(undefined);
 
   React.useEffect(() => {
-    getToolbarIcons(props.treeNodeIconMapper, props.selectedNodes, props.treeModel)
+    getToolbarIcons(props.treeNodeIconMapper, props.selectedNodes, setClickedInfo)
       .then((icons) => setToolbarIcons(icons))
-  }, [props.treeNodeIconMapper, props.selectedNodes, props.treeModel]);
+  }, [props.treeNodeIconMapper, props.selectedNodes]);
+
+  React.useMemo(() => {
+    if (clickedInfo) {
+      clickedInfo.functionalityProvider.performAction(props.selectedNodes, props.treeModel);
+      setClickedInfo(undefined);
+    }
+  }, [clickedInfo, props.selectedNodes, props.treeModel])
 
   return (<div className="custom-tree-toolbar">
     {toolBarIcons}
@@ -34,7 +42,7 @@ export const TreeNodeFunctionsToolbar: React.FC<TreeNodeFunctionsToolbarProps> =
 };
 
 
-async function getToolbarIcons(iconMapper: TreeNodeFunctionIconInfoMapper, selectedNodes: TreeModelNode[], treeModel: TreeModel) {
+async function getToolbarIcons(iconMapper: TreeNodeFunctionIconInfoMapper, selectedNodes: TreeModelNode[], setClickedInfo: (info: FunctionIconInfo) => void) {
   const items: React.ReactNode[] = [];
   let functionIconInfos: Array<FunctionIconInfo> = [];
   if (selectedNodes.length === 1) {
@@ -56,10 +64,10 @@ async function getToolbarIcons(iconMapper: TreeNodeFunctionIconInfoMapper, selec
         icon={info.toolbarIcon}
         className={"toolbar-icon"}
         disabled={info.disabled !== false}
-        onClick={() => { info.functionalityProvider.performAction(selectedNodes, treeModel); }}
+        onClick={() => { setClickedInfo(info) }}
         title={info.label}
       />,
     );
   });
-  return items;
+  return items.reverse();
 }

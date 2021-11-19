@@ -28,6 +28,7 @@ export interface ComponentIndexProps {
   setIsDisplayGuids: (displayGuids: boolean) => void;
   enableVisibility?: boolean;
   eventHandlers?: ComponentIndexEventHandlers;
+  additionalFunctionIconMapper?: TreeNodeFunctionIconInfoMapper;
 }
 const COMPONENT_INDEX_NAME = "ComponentIndex";
 
@@ -44,7 +45,7 @@ export const ComponentIndex: React.FC<ComponentIndexProps> = (props: ComponentIn
   );
 
   const { functionIconMapper, optionItems, displayGuidHandler } = React.useMemo(() => {
-    const functionIconMapper = new TreeNodeFunctionIconInfoMapper(dataProvider);
+    const functionIconMapper = props.additionalFunctionIconMapper ?? new TreeNodeFunctionIconInfoMapper(dataProvider);
     const optionItems: OptionItemHandler[] = [];
 
     populateContextMenuItems(treeName, functionIconMapper, dataProvider, props.eventHandlers);
