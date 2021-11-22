@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/breakdown-trees-react",
+      "comment": "Accept additional Functionality Providers from client, Export required classes",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/breakdown-trees-react"
+}
