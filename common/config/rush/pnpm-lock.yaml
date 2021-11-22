@@ -16,7 +16,7 @@ importers:
       '@bentley/imodeljs-markup': ^2.19.9
       '@bentley/imodeljs-quantity': ^2.19.9
       '@bentley/itwin-client': ^2.19.9
-      '@bentley/measure-tools-react': ^0.5.0
+      '@bentley/measure-tools-react': workspace:*
       '@bentley/presentation-common': ^2.19.9
       '@bentley/presentation-components': ^2.19.9
       '@bentley/presentation-frontend': ^2.19.9
@@ -76,7 +76,7 @@ importers:
       '@bentley/imodeljs-markup': 2.19.21_9806ebbc68e60b0d0b5831dff0b345b2
       '@bentley/imodeljs-quantity': 2.19.21_@bentley+bentleyjs-core@2.19.21
       '@bentley/itwin-client': 2.19.21_@bentley+bentleyjs-core@2.19.21
-      '@bentley/measure-tools-react': 0.5.0_1976324a07272d759aa62995f71c3c0f
+      '@bentley/measure-tools-react': link:../measure-tools
       '@bentley/presentation-common': 2.19.21_f1e7d0bbf9c524638153c4e4dca87b8f
       '@bentley/presentation-components': 2.19.21_8f9b6bd362a13086f970e68fc7df3cad
       '@bentley/presentation-frontend': 2.19.21_118b1935ca3431b990a0d71bb0d1daaa
@@ -4084,44 +4084,6 @@ packages:
       xpath: 0.0.27
     transitivePeerDependencies:
       - supports-color
-    dev: true
-
-  /@bentley/measure-tools-react/0.5.0_1976324a07272d759aa62995f71c3c0f:
-    resolution: {integrity: sha512-HzbXHc1mqKxa+RXvlywhCloYFGAKAmvBLZ38uWBzSZc9xyDshePIm1jM5K8pCAhFRBQ+CJw0CL36GmzooJMgdg==}
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.19.0
-      '@bentley/geometry-core': ^2.19.0
-      '@bentley/imodeljs-common': ^2.19.0
-      '@bentley/imodeljs-frontend': ^2.19.0
-      '@bentley/imodeljs-i18n': ^2.19.0
-      '@bentley/imodeljs-quantity': ^2.19.0
-      '@bentley/itwin-client': ^2.19.0
-      '@bentley/presentation-components': ^2.19.0
-      '@bentley/telemetry-client': ^2.19.0
-      '@bentley/ui-abstract': ^2.19.0
-      '@bentley/ui-components': ^2.19.0
-      '@bentley/ui-core': ^2.19.0
-      '@bentley/ui-framework': ^2.19.0
-      '@bentley/ui-ninezone': ^2.19.0
-      react: ^16.8.0
-      react-dom: ^16.8.0
-    dependencies:
-      '@bentley/bentleyjs-core': 2.19.21
-      '@bentley/geometry-core': 2.19.21_@bentley+bentleyjs-core@2.19.21
-      '@bentley/icons-generic-webfont': 1.0.34
-      '@bentley/imodeljs-common': 2.19.21_0271aaf25f6430d9b6163a5abcc2e372
-      '@bentley/imodeljs-frontend': 2.19.21_da03d3f9557a5ca1d29252a1c3dfbfc5
-      '@bentley/imodeljs-i18n': 2.19.21_@bentley+bentleyjs-core@2.19.21
-      '@bentley/imodeljs-quantity': 2.19.21_@bentley+bentleyjs-core@2.19.21
-      '@bentley/itwin-client': 2.19.21_@bentley+bentleyjs-core@2.19.21
-      '@bentley/presentation-components': 2.19.21_8f9b6bd362a13086f970e68fc7df3cad
-      '@bentley/ui-abstract': 2.19.21_5f6c47cf4a12bed6bedcc39f96790c68
-      '@bentley/ui-components': 2.19.21_0bf970d6f6f1881314c2a0e717fdc477
-      '@bentley/ui-core': 2.19.21_54fbab4f96f3af1f87d5f33ca5d12e03
-      '@bentley/ui-framework': 2.19.21_29343149fa56ff2a654f341933ba1ca3
-      '@bentley/ui-ninezone': 2.19.21_1c93ea684737bf90e86bc2930f8f27b7
-      react: 16.14.0
-      react-dom: 16.14.0_react@16.14.0
     dev: true
 
   /@bentley/orbitgt-core/2.19.6:
@@ -22520,7 +22482,7 @@ packages:
       tsutils: ^3.0.0
     dependencies:
       '@types/yargs': 17.0.2
-      tsutils: 3.17.1_typescript@4.3.5
+      tsutils: 3.17.1_typescript@4.1.6
       yargs: 17.1.1
     dev: true
 
