@@ -111,7 +111,7 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
   };
 
   const optionHandlerItems = [...props.optionItems];
-  const onNewSelectionSetCallback = React.useCallback((newSelection: TreeModelNode[]) => { setSelectedTreeNodes(newSelection) }, [props.treeNodeIconMapper]);
+  const onNewSelectionSetCallback = React.useCallback((newSelection: TreeModelNode[]) => { setSelectedTreeNodes(newSelection) }, []);
 
   const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
@@ -225,6 +225,12 @@ const createVisibilityHandler = (rulesetId: string, treeDataProvider: IPresentat
 };
 
 export function populateMapWithCommonMenuItems(treeName: string, treeFunctionalityMapper: TreeNodeFunctionIconInfoMapper, dataProvider: IPresentationTreeDataProvider, rulesetId: string, eventHandlers?: TreeWithRulesetEventHandlers) {
+  treeFunctionalityMapper.registerForNodesOfClasses(["BisCore:GeometricElement3d"], {
+    key: ToolbarItemKeys.zoom,
+    label: BreakdownTrees.translate("contextMenu.zoomSelectedLabel"),
+    functionalityProvider: new ZoomFunctionalityProvider(treeName, dataProvider, eventHandlers?.onZoomToElement!),
+    toolbarIcon: "icon-re-center",
+  });
   const selectRelatedIcon: FunctionIconInfo = {
     key: ToolbarItemKeys.selectRelated,
     label: BreakdownTrees.translate("contextMenu.selectRelatedLabel"),
@@ -233,10 +239,4 @@ export function populateMapWithCommonMenuItems(treeName: string, treeFunctionali
   };
   treeFunctionalityMapper.registerGlobal(selectRelatedIcon);
   treeFunctionalityMapper.registerForNodesOfClasses(["BisCore:Element"], selectRelatedIcon);
-  treeFunctionalityMapper.registerForNodesOfClasses(["BisCore:GeometricElement3d"], {
-    key: ToolbarItemKeys.zoom,
-    label: BreakdownTrees.translate("contextMenu.zoomSelectedLabel"),
-    functionalityProvider: new ZoomFunctionalityProvider(treeName, dataProvider, eventHandlers?.onZoomToElement!),
-    toolbarIcon: "icon-re-center",
-  });
 }
