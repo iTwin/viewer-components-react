@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@bentley/tree-widget-react",
-      "comment": "Fix an issue where ModelsTree Component could lose its state",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@bentley/tree-widget-react"

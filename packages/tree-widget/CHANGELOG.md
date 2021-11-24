@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Thu, 16 Sep 2021 17:55:54 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Nov 2021 21:19:42 GMT and should not be manually modified.
+
+## 1.4.5
+Tue, 23 Nov 2021 21:19:42 GMT
+
+### Patches
+
+- Fix an issue where ModelsTree Component could lose its state
 
 ## 1.4.4
 Thu, 16 Sep 2021 17:55:54 GMT
