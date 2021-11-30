@@ -2796,7 +2796,7 @@ exports[`TreeComponent tests. TreeNodeWrapper renders correctly 1`] = `
         "getNodesCount": [Function],
         "imodel": null,
         "loadHierarchy": [Function],
-        "rulesetId": "ui-framework/RulesList",
+        "rulesetId": "breakdown-trees-react/RulesList",
       },
     }
   }
@@ -2916,7 +2916,7 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
         "getNodesCount": [Function],
         "imodel": null,
         "loadHierarchy": [Function],
-        "rulesetId": "ui-framework/RulesList",
+        "rulesetId": "breakdown-trees-react/RulesList",
       }
     }
     displayGuids={true}
@@ -3257,7 +3257,7 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
           "getNodesCount": [Function],
           "imodel": null,
           "loadHierarchy": [Function],
-          "rulesetId": "ui-framework/RulesList",
+          "rulesetId": "breakdown-trees-react/RulesList",
         },
       }
     }
@@ -3299,7 +3299,7 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
         "getNodesCount": [Function],
         "imodel": null,
         "loadHierarchy": [Function],
-        "rulesetId": "ui-framework/RulesList",
+        "rulesetId": "breakdown-trees-react/RulesList",
       }
     }
     displayGuids={true}
@@ -3640,7 +3640,7 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
           "getNodesCount": [Function],
           "imodel": null,
           "loadHierarchy": [Function],
-          "rulesetId": "ui-framework/RulesList",
+          "rulesetId": "breakdown-trees-react/RulesList",
         },
       }
     }
