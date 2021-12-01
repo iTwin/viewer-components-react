@@ -30,11 +30,11 @@ describe("StoryClipPlanesProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
-    if (IModelApp.initialized)
-      IModelApp.shutdown();
-    NoRenderApp.startup();
-    Presentation.terminate();
-    Presentation.initialize();
+    if (IModelApp.initialized) {
+      await IModelApp.shutdown();
+    }
+    await NoRenderApp.startup();
+
     await TestUtils.initializeUiFramework(connection.object);
     IModelApp.i18n.registerNamespace("BreakdownTrees");
 
@@ -51,11 +51,11 @@ describe("StoryClipPlanesProvider", () => {
     IModelApp.viewManager.setSelectedView(selectedViewMock.object);
   });
 
-  after(() => {
+  after(async () => {
     selectedViewMock.reset();
     viewStateMock.reset();
     TestUtils.terminateUiFramework();
-    IModelApp.shutdown();
+    await IModelApp.shutdown();
   });
 
   it("should perform action for StoryClipPlanesProvider", async () => {

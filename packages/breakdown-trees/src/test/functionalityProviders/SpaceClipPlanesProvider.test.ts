@@ -31,10 +31,8 @@ describe("SpaceClipPlanesProvider", () => {
 
   before(async () => {
     if (IModelApp.initialized)
-      IModelApp.shutdown();
-    NoRenderApp.startup();
-    Presentation.terminate();
-    Presentation.initialize();
+      await IModelApp.shutdown();
+    await NoRenderApp.startup();
     await TestUtils.initializeUiFramework(connection.object);
     IModelApp.i18n.registerNamespace("BreakdownTrees");
 
@@ -62,12 +60,12 @@ describe("SpaceClipPlanesProvider", () => {
 
   });
 
-  after(() => {
+  after(async () => {
     isolateRoomsForStoriesStub.restore();
     checkIsSpaceStub.restore();
     createCaptureSpy.restore();
     TestUtils.terminateUiFramework();
-    IModelApp.shutdown();
+    await IModelApp.shutdown();
   });
   it("should perform action for SpaceClipPlanesProvider", async () => {
     const dummyTreeModelItem: TreeModelNode = FunctionalityProviderTestUtils.createTreeModelNode(MockStrings.IfcWallNode);

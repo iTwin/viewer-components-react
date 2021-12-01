@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { TreeModelNode, TreeNodeItem } from "@bentley/ui-components";
 import { TestUtils } from "../Utils";
-import { Presentation } from "@bentley/presentation-frontend";
+import { Presentation, SelectionManager } from "@bentley/presentation-frontend";
 import * as moq from "typemoq";
 import sinon from "sinon";
 import { IModelApp, IModelConnection, NoRenderApp } from "@bentley/imodeljs-frontend";
@@ -26,16 +26,14 @@ describe("SelectRelatedFunctionalityProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
-    if (IModelApp.initialized)
-      IModelApp.shutdown();
-    NoRenderApp.startup();
-    sinon.stub(UiFramework, "i18n").get(() => { return { translate: sinon.stub().returns("testLabel") } });
-    try {
+    if (IModelApp.initialized) {
       Presentation.terminate();
-      Presentation.initialize();
-    } catch (error) {
-
+      await IModelApp.shutdown();
     }
+    await NoRenderApp.startup();
+    try {
+      await Presentation.initialize();
+    } catch (error) { }
 
     await TestUtils.initializeUiFramework(connection.object);
     IModelApp.i18n.registerNamespace("BreakdownTrees");
@@ -43,7 +41,9 @@ describe("SelectRelatedFunctionalityProvider", () => {
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
     dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey);
 
-    replaceSelectionSpy = sinon.spy(Presentation.selection, "replaceSelection");
+    const selectionManager = new SelectionManager({ scopes: undefined as any });
+    sinon.stub(Presentation, "selection").get(() => selectionManager);
+    replaceSelectionSpy = sinon.stub(Presentation.selection, "replaceSelection").returns();
     relatedElementSpy = sinon.stub(RelatedElementIdsProvider.prototype, "getElementIds" as any);
   });
 
@@ -51,9 +51,10 @@ describe("SelectRelatedFunctionalityProvider", () => {
     replaceSelectionSpy.restore();
     relatedElementSpy.restore();
   });
-  after(() => {
+  after(async () => {
     TestUtils.terminateUiFramework();
-    IModelApp.shutdown();
+    Presentation.terminate();
+    await IModelApp.shutdown();
   });
 
   it("should perform action for SelectRelatedFunctionalityProvider", async () => {

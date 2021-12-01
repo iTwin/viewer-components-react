@@ -27,16 +27,16 @@ describe("TreeComponent tests.", () => {
 
   const connection = moq.Mock.ofType<IModelConnection>();
   const controller = moq.Mock.ofType<TreeWithRuleSetController>();
-  const shutdownIModelApp = () => {
+  const shutdownIModelApp = async () => {
+    Presentation.terminate();
     if (IModelApp.initialized)
-      IModelApp.shutdown();
+      await IModelApp.shutdown();
   };
   before(async () => {
-    shutdownIModelApp();
-    NoRenderApp.startup();
+    await shutdownIModelApp();
+    await NoRenderApp.startup();
     try {
-      Presentation.terminate();
-      Presentation.initialize();
+      await Presentation.initialize();
     } catch (error) {
     }
 

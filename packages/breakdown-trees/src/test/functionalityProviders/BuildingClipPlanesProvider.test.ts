@@ -27,13 +27,8 @@ describe("BuildingClipPlanesProvider", () => {
 
   before(async () => {
     if (IModelApp.initialized)
-      IModelApp.shutdown();
-    NoRenderApp.startup();
-    try {
-      Presentation.terminate();
-      Presentation.initialize();
-    } catch (error) {
-    }
+      await IModelApp.shutdown();
+    await NoRenderApp.startup();
 
     await TestUtils.initializeUiFramework(connection.object);
     IModelApp.i18n.registerNamespace("BreakdownTrees");
@@ -49,12 +44,12 @@ describe("BuildingClipPlanesProvider", () => {
     queryBuildingRangeStub = sinon.stub(BuildingClipPlanesProvider.prototype, "queryBuildingRange" as any).returns(() => Promise.resolve(true));
     createRange3DPlaneStub = sinon.stub(ConvexClipPlaneSet, "createRange3dPlanes").returns(moq.It.isAny());
   });
-  after(() => {
+  after(async () => {
     checkIsBuildingStub.restore();
     queryBuildingRangeStub.restore();
     createRange3DPlaneStub.restore();
     TestUtils.terminateUiFramework();
-    IModelApp.shutdown();
+    await IModelApp.shutdown();
   });
 
   it("should perform action for BuildingClipPlanesProvider", async () => {

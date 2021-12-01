@@ -27,10 +27,9 @@ describe("TreeNodeFunctionalityMapper", () => {
 
   before(async () => {
     if (IModelApp.initialized)
-      IModelApp.shutdown();
-    NoRenderApp.startup();
-    Presentation.terminate();
-    Presentation.initialize();
+      await IModelApp.shutdown();
+    await NoRenderApp.startup();
+
     await TestUtils.initializeUiFramework(connection.object);
     IModelApp.i18n.registerNamespace("BreakdownTrees");
 
@@ -60,10 +59,10 @@ describe("TreeNodeFunctionalityMapper", () => {
     iModelReadRpcInterfaceStub.returns(iModelReadRPCInterfaceMock.object);
   });
 
-  after(() => {
+  after(async () => {
     iModelReadRpcInterfaceStub.restore();
     TestUtils.terminateUiFramework();
-    IModelApp.shutdown();
+    await IModelApp.shutdown();
   });
 
 

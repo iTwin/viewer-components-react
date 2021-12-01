@@ -24,24 +24,19 @@ describe("ClearSectionsFunctionalityProvider", () => {
 
   before(async () => {
     if (IModelApp.initialized)
-      IModelApp.shutdown();
-    NoRenderApp.startup();
-    Presentation.terminate();
-    Presentation.initialize();
+      await IModelApp.shutdown();
+    await NoRenderApp.startup();
     await TestUtils.initializeUiFramework(connection.object);
     IModelApp.i18n.registerNamespace("BreakdownTrees");
 
     isolateRoomsForStoriesStub = sinon.stub(SectioningUtil, "isolateRoomsForStories");
     IModelApp.viewManager.setSelectedView(selectedViewMock.object);
   });
-  afterEach(() => {
-    isolateRoomsForStoriesStub.resetHistory();
-  });
-  after(() => {
+  after(async () => {
     isolateRoomsForStoriesStub.restore();
     selectedViewMock.reset();
     TestUtils.terminateUiFramework();
-    IModelApp.shutdown();
+    await IModelApp.shutdown();
   });
 
   it("should clear a Clipped section and remove section handles", async () => {
