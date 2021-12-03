@@ -32,3 +32,4 @@ export * from "./Views/OptionItemHandlers";
 export * from "./Views/RelatedElementIdsProvider";
 export * from "./Views/NodeRenderers/FunctionalTreeNodeRenderer";
 export * from "./Views/TreeNodeFunctionsToolbar";
+export * from "./test/functionalityProviders/FunctionalityProviderTestUtils";
