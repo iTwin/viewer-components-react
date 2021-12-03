@@ -2,6 +2,18 @@
   "name": "@bentley/breakdown-trees-react",
   "entries": [
     {
+      "version": "0.1.4",
+      "tag": "@bentley/breakdown-trees-react_v0.1.4",
+      "date": "Fri, 03 Dec 2021 14:01:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Tests added"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.3",
       "tag": "@bentley/breakdown-trees-react_v0.1.3",
       "date": "Tue, 23 Nov 2021 21:19:42 GMT",
