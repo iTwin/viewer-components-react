@@ -41,5 +41,11 @@
     "policyName": "breakdown-trees",
     "definitionName": "individualVersion",
     "lockedMajor": 0
+  },
+  {
+    "policyName": "prerelease-monorepo-lockStep",
+    "definitionName": "lockStepVersion",
+    "version": "0.1.0-dev.1",
+    "nextBump": "prerelease"
   }
 ]

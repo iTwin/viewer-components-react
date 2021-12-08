@@ -1,9 +1,8 @@
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* Licensed under the MIT License. See LICENSE.md in the project root for license terms.
+* See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/ui-core/index";
-@import "~@itwin/core-react/lib/ui-core/index.scss";
+@import "~@itwin/core-react/lib/esm/core-react/index";
 
 .tree-widget-search-popup {
   display: block;

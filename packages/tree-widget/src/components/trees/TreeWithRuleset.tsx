@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
 import { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
@@ -18,7 +18,6 @@ import {
 } from "@itwin/components-react";
 import { Presentation } from "@itwin/presentation-frontend";
 import "./TreeWithRulesetTree.scss";
-import { connectIModelConnection } from "@itwin/appui-react";
 import { IModelConnection } from "@itwin/core-frontend";
 import { useResizeDetector } from "react-resize-detector";
 
@@ -143,7 +142,3 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (
   );
 };
 
-export const ConnectedSimpleTreeWithRuleset = connectIModelConnection(
-  null,
-  null
-)(SimpleTreeWithRuleset); // tslint:disable-line

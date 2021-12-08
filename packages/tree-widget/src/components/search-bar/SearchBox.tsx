@@ -6,9 +6,10 @@
 
 import * as React from "react";
 import classnames from "classnames";
-import { CommonProps, UiCore } from "@itwin/core-react";
+import { CommonProps } from "@itwin/core-react";
 import { IconButton } from "../IconButton";
 import "./SearchBox.scss";
+import { TreeWidget } from "../../tree-widget-react";
 
 export interface SearchBoxProps extends CommonProps {
   /** value to set SearchBox */
@@ -117,7 +118,7 @@ export class SearchBox extends React.PureComponent<
     );
   };
 
-  private _handleKeyDown = (e: React.KeyboardEvent) => {
+  private _handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     switch (e.key) {
       case "Escape":
         // istanbul ignore else
@@ -224,9 +225,9 @@ export class SearchBox extends React.PureComponent<
           onPaste={this._trackChange}
           onCut={this._trackChange}
           placeholder={
-            placeholder ? placeholder : UiCore.translate("searchbox.search")
+            placeholder ? placeholder : TreeWidget.translate("searchbox.search")
           }
-        ></input>
+        />
         <div className="searchbox-stepping-container">
           {showCount && (
             <span className="searchbox-stepping-count">{`${selectedIndex}/${resultCount}`}</span>
