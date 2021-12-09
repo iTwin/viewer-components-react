@@ -110,6 +110,7 @@ export const MultiElementPropertyGrid = (props: Partial<PropertyGridProps>) => {
     };
 
     Presentation.selection.selectionChange.addListener(onSelectionChange);
+    onSelectionChange();
     return () => {
       Presentation.selection.selectionChange.removeListener(onSelectionChange);
     };
