@@ -1,6 +1,13 @@
 # Change Log - @bentley/property-grid-react
 
-This log was last generated on Thu, 30 Sep 2021 19:32:32 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Dec 2021 15:33:50 GMT and should not be manually modified.
+
+## 2.2.5
+Fri, 10 Dec 2021 15:33:50 GMT
+
+### Patches
+
+- Fix for info button not appearing when multiple elements are selected
 
 ## 2.2.4
 Thu, 30 Sep 2021 19:32:32 GMT
