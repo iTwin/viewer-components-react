@@ -80,7 +80,7 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
         disabled.push(id);
       }
     }
-    // Disabled enabled
+    // Disable enabled
     CategoryVisibilityHandler.enableCategory(
       IModelApp.viewManager,
       props.iModel,
