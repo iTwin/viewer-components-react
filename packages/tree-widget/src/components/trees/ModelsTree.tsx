@@ -72,15 +72,13 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
       .then((modelInfos: TreeViewModelInfo[]) => {
         setAvailableModels(modelInfos.map(({ id }) => id));
 
-        const models3d = modelInfos
-          .filter(({ isPlanProjection }) => !isPlanProjection)
-          .map(({ id }) => id);
-        setAvailable3dModels(models3d);
+        const { models2d, models3d } = modelInfos.reduce((acc, { id, isPlanProjection }) => {
+          isPlanProjection ? acc.models2d.push(id) : acc.models3d.push(id);
+          return acc;
+        }, { models2d: [] as string[], models3d: [] as string[] });
 
-        const models2d = modelInfos
-          .filter(({ isPlanProjection }) => isPlanProjection)
-          .map(({ id }) => id);
         setAvailable2dModels(models2d);
+        setAvailable3dModels(models3d);
       })
       .catch((_e) => {
         setAvailableModels([]);
