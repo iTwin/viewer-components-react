@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { useResizeDetector } from "react-resize-detector";
 import {
@@ -17,7 +17,7 @@ import {
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
 import { TreeHeaderComponent } from "../header/TreeHeader";
-import { CategoryVisibilityHandler } from "@itwin/appui-react/lib/cjs/appui-react/imodel-components/category-tree/CategoryVisibilityHandler";
+import { CategoryVisibilityHandler } from "@itwin/appui-react";
 
 export interface CategoriesTreeComponentProps {
   iModel: IModelConnection;

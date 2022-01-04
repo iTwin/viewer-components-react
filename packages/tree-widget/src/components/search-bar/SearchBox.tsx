@@ -9,7 +9,7 @@ import classnames from "classnames";
 import { CommonProps } from "@itwin/core-react";
 import { IconButton } from "../IconButton";
 import "./SearchBox.scss";
-import { TreeWidget } from "../../tree-widget-react";
+import { TreeWidget } from "../../TreeWidget";
 
 export interface SearchBoxProps extends CommonProps {
   /** value to set SearchBox */
@@ -68,7 +68,7 @@ interface SearchBoxState {
 export class SearchBox extends React.PureComponent<
   SearchBoxProps,
   SearchBoxState
-  > {
+> {
   private _inputElement: HTMLInputElement | null = null;
   private _timeoutId: number = 0;
 
