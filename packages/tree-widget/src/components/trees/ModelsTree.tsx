@@ -3,8 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import React, { useEffect, useState } from "react";
-import { useResizeDetector } from "react-resize-detector";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   IModelApp,
   IModelConnection,
@@ -20,6 +19,7 @@ import {
   ModelQueryParams,
 } from "@itwin/core-common";
 import { TreeHeaderComponent } from "../header/TreeHeader";
+import { useResizeObserver } from "@itwin/core-react";
 
 export interface ModelTreeProps {
   iModel: IModelConnection;
@@ -41,16 +41,23 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
   const [icon2dToggle, setIcon2dToggle] = useState<string>("icon-visibility");
   const [icon3dToggle, setIcon3dToggle] = useState<string>("icon-visibility");
 
-  const [available2dModels, setAvailable2dModels] = useState([] as string[]);
-  const [available3dModels, setAvailable3dModels] = useState([] as string[]);
-  const [availableModels, setAvailableModels] = useState([] as string[]);
+  const [available2dModels, setAvailable2dModels] = useState<string[]>([]);
+  const [available3dModels, setAvailable3dModels] = useState<string[]>([]);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [viewport, setViewport] = useState<ScreenViewport | undefined>(
     IModelApp.viewManager.selectedView
   );
 
   const { searchOptions, filterString, activeMatchIndex, onFilterApplied } =
     useTreeFilteringState();
-  const { width, height, ref } = useResizeDetector();
+
+  const [height, setHeight] = useState(0);
+  const [width, setWidth] = useState(0);
+  const handleResize = useCallback((w: number, h: number) => {
+    setHeight(h);
+    setWidth(w);
+  }, []);
+  const ref = useResizeObserver<HTMLDivElement>(handleResize);
 
   const queryModels = async (
     vp: Viewport | undefined

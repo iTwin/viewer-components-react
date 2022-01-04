@@ -2,8 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
-import * as React from "react";
+import React, { useCallback, useState } from "react";
 import { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
 import {
   IPresentationTreeDataProvider,
@@ -19,7 +18,7 @@ import {
 import { Presentation } from "@itwin/presentation-frontend";
 import "./TreeWithRulesetTree.scss";
 import { IModelConnection } from "@itwin/core-frontend";
-import { useResizeDetector } from "react-resize-detector";
+import { useResizeObserver } from "@itwin/core-react";
 
 export interface ControlledTreeProps {
   iModel: IModelConnection;
@@ -122,7 +121,14 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (
     nodeLoader,
     collapsedChildrenDisposalEnabled: true,
   });
-  const { width, height, ref } = useResizeDetector();
+
+  const [height, setHeight] = useState(0);
+  const [width, setWidth] = useState(0);
+  const handleResize = useCallback((w: number, h: number) => {
+    setHeight(h);
+    setWidth(w);
+  }, []);
+  const ref = useResizeObserver<HTMLDivElement>(handleResize);
 
   const treeModel = useTreeModel(modelSource);
 
