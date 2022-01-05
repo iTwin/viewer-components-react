@@ -65,7 +65,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     return modelProps
       .map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection }))
       .filter(({ id }) => id) as TreeViewModelInfo[];
-  }, []);
+  }, [iModel]);
 
   useEffect(() => {
     queryModels(viewport)
