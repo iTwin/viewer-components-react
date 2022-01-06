@@ -604,34 +604,35 @@ export const PropertyGrid = ({
     if (!dataProvider) {
       return undefined;
     }
-    if (disableUnifiedSelection) {
-      return (
-        <VirtualizedPropertyGridWithDataProvider
-          orientation={orientation ?? Orientation.Horizontal}
-          isOrientationFixed={isOrientationFixed ?? true}
-          dataProvider={dataProvider}
-          isPropertyHoverEnabled={true}
-          isPropertySelectionEnabled={true}
-          onPropertyContextMenu={onPropertyContextMenu}
-          width={100}
-          height={100} // actionButtonRenderers={[shareActionButtonRenderer]}
-        />
-      );
-    } else {
-      return (
-        <FilteringPropertyGridWithUnifiedSelection
-          orientation={orientation ?? Orientation.Horizontal}
-          isOrientationFixed={isOrientationFixed ?? true}
-          dataProvider={dataProvider}
-          filterer={filterer}
-          isPropertyHoverEnabled={true}
-          isPropertySelectionEnabled={true}
-          onPropertyContextMenu={onPropertyContextMenu}
-          width={100}
-          height={100} // actionButtonRenderers={[shareActionButtonRenderer]}
-        />
-      );
-    }
+
+    return (
+      <div ref={ref} style={{ width: "100%", height: "100%" }}>
+        {disableUnifiedSelection ? (
+          <VirtualizedPropertyGridWithDataProvider
+            orientation={orientation ?? Orientation.Horizontal}
+            isOrientationFixed={isOrientationFixed ?? true}
+            dataProvider={dataProvider}
+            isPropertyHoverEnabled={true}
+            isPropertySelectionEnabled={true}
+            onPropertyContextMenu={onPropertyContextMenu}
+            width={width}
+            height={height} // actionButtonRenderers={[shareActionButtonRenderer]}
+          />
+        ) : (
+          <FilteringPropertyGridWithUnifiedSelection
+            orientation={orientation ?? Orientation.Horizontal}
+            isOrientationFixed={isOrientationFixed ?? true}
+            dataProvider={dataProvider}
+            filterer={filterer}
+            isPropertyHoverEnabled={true}
+            isPropertySelectionEnabled={true}
+            onPropertyContextMenu={onPropertyContextMenu}
+            width={width}
+            height={height} // actionButtonRenderers={[shareActionButtonRenderer]}
+          />
+        )}
+      </div>
+    )
   };
 
   return (

@@ -2,15 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@bentley/ui-core/lib/ui-core/index";
+@import "~@itwin/core-react/lib/esm/core-react/index";
 
 .property-grid-react-transition-container {
   height: 100%;
   width: auto;
   display: flex;
   position: relative;
-  margin-left: $uicore-xs;
-  margin-bottom: $uicore-xs;
+  padding-left: $uicore-xs;
+  padding-bottom: $uicore-xs;
 }
 
 .property-grid-react-animated-tab {
