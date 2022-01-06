@@ -123,9 +123,9 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
           onInfoButton={
             moreThanOneElement
               ? () => {
-                  setContent(MultiElementPropertyContent.ElementList);
-                  setAnimationForward(true);
-                }
+                setContent(MultiElementPropertyContent.ElementList);
+                setAnimationForward(true);
+              }
               : undefined
           }
           key={"PropertyGrid"}
@@ -185,6 +185,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
             : "translate(-100%,0)",
         }}
       >
+        {/* eslint-disable-next-line react/display-name */}
         {(index) => (style) =>
           (
             <animated.div

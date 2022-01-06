@@ -66,12 +66,11 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
 }
 
 type CustomPropertyDataProvider<TPropertyData> = IDisposable &
-  Omit<IPropertyDataProvider, "getData"> & {
-    getData: () => Promise<TPropertyData>;
-  };
+Omit<IPropertyDataProvider, "getData"> & {
+  getData: () => Promise<TPropertyData>;
+};
 class AutoExpandingPropertyDataProvider<TPropertyData extends PropertyData>
-  implements IPropertyDataProvider, IDisposable
-{
+implements IPropertyDataProvider, IDisposable {
   public onDataChanged = new PropertyDataChangeEvent();
   public constructor(
     private _wrapped: CustomPropertyDataProvider<TPropertyData>

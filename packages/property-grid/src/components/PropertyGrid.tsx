@@ -84,10 +84,10 @@ export const PropertyGrid = ({
   const [title, setTitle] = React.useState<PropertyRecord>();
   const [className, setClassName] = React.useState<string>("");
   const [contextMenu, setContextMenu] = React.useState<
-    PropertyGridContextMenuArgs | undefined
+  PropertyGridContextMenuArgs | undefined
   >(undefined);
   const [contextMenuItemInfos, setContextMenuItemInfos] = React.useState<
-    ContextMenuItemInfo[] | undefined
+  ContextMenuItemInfo[] | undefined
   >(undefined);
   const [showNullValues, setShowNullValues] = React.useState<boolean>(true);
   const [filterer, setFilterer] = React.useState<PropertyDataFiltererBase>(
@@ -158,7 +158,7 @@ export const PropertyGrid = ({
 
   React.useEffect(() => {
     const onDataChanged = async () => {
-      let propertyData: PropertyData | undefined =
+      const propertyData: PropertyData | undefined =
         await dataProvider?.getData();
       if (propertyData) {
         setTitle(propertyData?.label);
@@ -297,6 +297,7 @@ export const PropertyGrid = ({
       localizations,
       showNullValues,
       enableFavoriteProperties,
+      favoritePropertiesScope,
       enableCopyingPropertyText,
       enableNullValueToggle,
       additionalContextMenuOptions,
@@ -304,6 +305,7 @@ export const PropertyGrid = ({
       onRemoveFavorite,
       onHideNull,
       onShowNull,
+      iModelConnection,
     ]
   );
 
@@ -356,9 +358,11 @@ export const PropertyGrid = ({
     return (
       <div className="property-grid-react-panel-header">
         {onBackButton !== undefined && (
+          /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
           <div
             className="property-grid-react-panel-back-btn"
             onClick={onBackButton}
+            onKeyDown={onBackButton}
           >
             <Icon
               className="property-grid-react-panel-icon"
@@ -373,9 +377,11 @@ export const PropertyGrid = ({
           <div className="property-grid-react-panel-class">{className}</div>
         </div>
         {onInfoButton !== undefined && (
+          /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
           <div
             className="property-grid-react-panel-info-btn"
             onClick={onInfoButton}
+            onKeyDown={onInfoButton}
             title={PropertyGridManager.translate("element-list.title")}
           >
             <Icon
@@ -420,7 +426,7 @@ export const PropertyGrid = ({
           />
         )}
       </div>
-    )
+    );
   };
 
   return (

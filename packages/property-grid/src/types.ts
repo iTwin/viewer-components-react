@@ -13,8 +13,7 @@ import { ContextMenuItemProps, Orientation } from "@itwin/core-react";
 import { FavoritePropertiesScope } from "@itwin/presentation-frontend";
 
 export type ContextMenuItemInfo = ContextMenuItemProps &
-  React.Attributes & { label: string };
-
+React.Attributes & { label: string };
 
 export interface OnSelectEventArgs {
   dataProvider: IPresentationPropertyDataProvider;
