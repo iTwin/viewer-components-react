@@ -16,7 +16,6 @@ import * as React from "react";
 import { animated, Transition } from "react-spring/renderprops.cjs";
 
 import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
-import { PropertyGridManager } from "../PropertyGridManager";
 import { PropertyGridProps } from "../types";
 import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
@@ -27,7 +26,7 @@ export enum MultiElementPropertyContent {
   SingleElementPropertyGrid = 2,
 }
 
-interface SingleElementPropertyGridProps extends Partial<PropertyGridProps> {
+interface SingleElementPropertyGridProps extends PropertyGridProps {
   instanceKey?: InstanceKey;
 }
 
@@ -50,7 +49,7 @@ const SingleElementPropertyGrid = ({
     if (dp) {
       dp.pagingSize = 50;
       dp.isNestedPropertyCategoryGroupingEnabled =
-        !!PropertyGridManager.flags.enablePropertyGroupNesting;
+        !!props.enablePropertyGroupNesting;
       // Set inspected instance as the key
       if (instanceKey) {
         dp.keys = new KeySet([instanceKey]);
@@ -62,6 +61,7 @@ const SingleElementPropertyGrid = ({
     iModelConnection,
     props.rulesetId,
     props.enableFavoriteProperties,
+    props.enablePropertyGroupNesting,
     instanceKey,
   ]);
 
@@ -74,7 +74,7 @@ const SingleElementPropertyGrid = ({
   );
 };
 
-export const MultiElementPropertyGrid = (props: Partial<PropertyGridProps>) => {
+export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   const iModelConnection = useActiveIModelConnection();
   const [content, setContent] = React.useState<MultiElementPropertyContent>(
     MultiElementPropertyContent.PropertyGrid
