@@ -22,10 +22,10 @@ import {
   VirtualizedPropertyGridWithDataProvider,
   VirtualizedPropertyGridWithDataProviderProps,
 } from "@itwin/components-react";
-import { FillCentered } from "@itwin/core-react";
-import * as React from "react";
+import { FillCentered, useDisposable } from "@itwin/core-react";
 
 import { PropertyGridManager } from "../PropertyGridManager";
+import React, { useCallback, useMemo } from "react";
 
 export class PlaceholderPropertyDataFilterer extends PropertyRecordDataFiltererBase {
   public get isActive() {
@@ -66,22 +66,27 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
 }
 
 type CustomPropertyDataProvider<TPropertyData> = IDisposable &
-Omit<IPropertyDataProvider, "getData"> & {
-  getData: () => Promise<TPropertyData>;
-};
-class AutoExpandingPropertyDataProvider<TPropertyData extends PropertyData>
-implements IPropertyDataProvider, IDisposable {
+  Omit<IPropertyDataProvider, "getData"> & {
+    getData: () => Promise<TPropertyData>;
+  };
+class AutoExpandingPropertyFilterDataProvider<TPropertyData extends PropertyData>
+  implements IPropertyDataProvider, IDisposable {
   public onDataChanged = new PropertyDataChangeEvent();
+  private _removeListener: () => void;
+
   public constructor(
     private _wrapped: CustomPropertyDataProvider<TPropertyData>
   ) {
-    this._wrapped.onDataChanged.addListener(() =>
+    this._removeListener = this._wrapped.onDataChanged.addListener(() =>
       this.onDataChanged.raiseEvent()
     );
   }
+
   public dispose() {
+    this._removeListener();
     this._wrapped.dispose();
   }
+
   public async getData(): Promise<TPropertyData> {
     function expandCategories(categories: PropertyCategory[]) {
       categories.forEach((category: PropertyCategory) => {
@@ -102,59 +107,48 @@ interface FilteringPropertyGrid
   filterer: PropertyDataFiltererBase;
 }
 
-export function FilteringPropertyGridWithUnifiedSelection(
+export const FilteringPropertyGridWithUnifiedSelection = (
   props: FilteringPropertyGrid
-): JSX.Element {
-  const localizations = React.useMemo(() => {
-    return {
-      tooManySelected: PropertyGridManager.translate(
-        "context-menu.selection.too-many-elements-selected"
-      ),
-      noneSelected: PropertyGridManager.translate(
-        "context-menu.selection.no-elements-selected"
-      ),
-    };
-  }, []);
+) => {
+  const localizations = useMemo(() => ({
+    tooManySelected: PropertyGridManager.translate(
+      "context-menu.selection.too-many-elements-selected"
+    ),
+    noneSelected: PropertyGridManager.translate(
+      "context-menu.selection.no-elements-selected"
+    ),
+  }), []);
 
-  // numSelectedElements will return undefined until presentation-components 2.17.x
-  const { isOverLimit, numSelectedElements } = (
-    usePropertyDataProviderWithUnifiedSelection as any
-  )({ dataProvider: props.dataProvider as IPresentationPropertyDataProvider });
+  const { isOverLimit, numSelectedElements } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider as IPresentationPropertyDataProvider });
 
-  const filteringDataProvider = React.useMemo(() => {
-    return new FilteringPropertyDataProvider(
+  const filteringDataProvider = useDisposable(useCallback(
+    () => new FilteringPropertyDataProvider(
       props.dataProvider,
       props.filterer
-    );
-  }, [props.dataProvider, props.filterer]);
+    ),
+    [props.dataProvider, props.filterer,]
+  ));
 
-  const autoExpandingFilteringDataProvider = React.useMemo(() => {
-    return new AutoExpandingPropertyDataProvider(filteringDataProvider);
-  }, [filteringDataProvider]);
+  const autoExpandingFilteringDataProvider = useDisposable(useCallback(
+    () => new AutoExpandingPropertyFilterDataProvider(filteringDataProvider),
+    [filteringDataProvider],
+  ));
 
-  if (isOverLimit) {
-    return (
-      <FillCentered>
-        <div className="property-grid-react-filtering-pg-label">
-          {localizations.tooManySelected}
-        </div>
-      </FillCentered>
-    );
-  }
-  if (numSelectedElements !== undefined && numSelectedElements === 0) {
-    return (
-      <FillCentered style={{flexDirection: "column"}}>
-        <i className="property-grid-react-filtering-pg-icon icon icon-info" />
-        <div className="property-grid-react-filtering-pg-label">
-          {localizations.noneSelected}
-        </div>
-      </FillCentered>
-    );
-  }
   return (
-    <VirtualizedPropertyGridWithDataProvider
-      {...props}
-      dataProvider={autoExpandingFilteringDataProvider}
-    />
+    <>
+      {(isOverLimit || !numSelectedElements) ? (
+        <FillCentered style={{ flexDirection: "column" }}>
+          {!numSelectedElements && <i className="property-grid-react-filtering-pg-icon icon icon-info" />}
+          <div className="property-grid-react-filtering-pg-label">
+            {isOverLimit ? localizations.tooManySelected : localizations.noneSelected}
+          </div>
+        </FillCentered>
+      ) : (
+        <VirtualizedPropertyGridWithDataProvider
+          {...props}
+          dataProvider={autoExpandingFilteringDataProvider}
+        />
+      )}
+    </>
   );
 }

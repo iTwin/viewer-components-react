@@ -12,13 +12,14 @@ import {
   useActiveIModelConnection,
   WidgetControl,
 } from "@itwin/appui-react";
-import * as React from "react";
 import { animated, Transition } from "react-spring/renderprops.cjs";
 
 import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
 import { PropertyGridProps } from "../types";
 import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useOptionalDisposable } from "@itwin/core-react";
 
 export enum MultiElementPropertyContent {
   PropertyGrid = 0,
@@ -34,28 +35,21 @@ const SingleElementPropertyGrid = ({
   instanceKey,
   ...props
 }: SingleElementPropertyGridProps) => {
+  /* gah, why do we have this again? why dont we just pass the instanceKey into the property grid? */
   const iModelConnection = useActiveIModelConnection();
-  const dataProvider = React.useMemo(() => {
+  const createDataProvider = useCallback(() => {
     let dp;
-
     if (iModelConnection) {
       dp = new AutoExpandingPropertyDataProvider({
         imodel: iModelConnection,
         ruleset: props.rulesetId,
         disableFavoritesCategory: !props.enableFavoriteProperties,
       });
-    }
-
-    if (dp) {
-      dp.pagingSize = 50;
-      dp.isNestedPropertyCategoryGroupingEnabled =
-        !!props.enablePropertyGroupNesting;
-      // Set inspected instance as the key
       if (instanceKey) {
+        // Set inspected instance as the key
         dp.keys = new KeySet([instanceKey]);
       }
     }
-
     return dp;
   }, [
     iModelConnection,
@@ -64,6 +58,8 @@ const SingleElementPropertyGrid = ({
     props.enablePropertyGroupNesting,
     instanceKey,
   ]);
+
+  const dataProvider = useOptionalDisposable(createDataProvider);
 
   return (
     <PropertyGrid
@@ -76,16 +72,16 @@ const SingleElementPropertyGrid = ({
 
 export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   const iModelConnection = useActiveIModelConnection();
-  const [content, setContent] = React.useState<MultiElementPropertyContent>(
+  const [content, setContent] = useState<MultiElementPropertyContent>(
     MultiElementPropertyContent.PropertyGrid
   );
-  const [animationForward, setAnimationForward] = React.useState(true);
-  const [instanceKeys, setInstanceKeys] = React.useState<InstanceKey[]>([]);
-  const [moreThanOneElement, setMoreThanOneElement] = React.useState(false);
+  const [animationForward, setAnimationForward] = useState(true);
+  const [instanceKeys, setInstanceKeys] = useState<InstanceKey[]>([]);
+  const [moreThanOneElement, setMoreThanOneElement] = useState(false);
   const [selectedInstanceKey, setSelectedInstanceKey] =
-    React.useState<InstanceKey>();
+    useState<InstanceKey>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onSelectionChange = () => {
       setContent(MultiElementPropertyContent.PropertyGrid);
       setAnimationForward(false);
@@ -109,14 +105,12 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
       }
     };
 
-    Presentation.selection.selectionChange.addListener(onSelectionChange);
-    return () => {
-      Presentation.selection.selectionChange.removeListener(onSelectionChange);
-    };
+    const removeListener = Presentation.selection.selectionChange.addListener(onSelectionChange);
+    return () => removeListener();
   }, [iModelConnection]);
 
   const items = [
-    ...React.useMemo(() => {
+    ...useMemo(() => {
       const _items = [
         <PropertyGrid
           {...props}
@@ -141,10 +135,9 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
               setAnimationForward(false);
             }}
             onSelect={(instanceKey: InstanceKey) => {
-              // Need to set animation first, otherwise the animation is incorrect. Theres some issue batching these state changes.
-              setAnimationForward(true);
               setContent(MultiElementPropertyContent.SingleElementPropertyGrid);
               setSelectedInstanceKey(instanceKey);
+              setAnimationForward(true);
             }}
             rootClassName={props.rootClassName}
             key={"ElementList"}
@@ -186,16 +179,15 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
               : "translate(-100%,0)",
           }}
         >
-          {/* eslint-disable-next-line react/display-name */}
           {(index) => (style) =>
-            (
-              <animated.div
-                className="property-grid-react-animated-tab"
-                style={style}
-              >
-                {items[index]}
-              </animated.div>
-            )}
+          (
+            <animated.div
+              className="property-grid-react-animated-tab"
+              style={style}
+            >
+              {items[index]}
+            </animated.div>
+          )}
         </Transition>
       </div>
     </div>

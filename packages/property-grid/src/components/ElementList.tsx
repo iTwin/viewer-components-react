@@ -177,11 +177,11 @@ export const ElementList = ({
       className={classnames("property-grid-react-element-list", rootClassName)}
     >
       <div className="property-grid-react-element-list-header">
-        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
         <div
           className="property-grid-react-element-list-back-btn"
           onClick={onBack}
           onKeyDown={onBack}
+          role="button"
         >
           <Icon
             className="property-grid-react-element-list-icon"

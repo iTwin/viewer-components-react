@@ -96,3 +96,9 @@ $header-height: 50px;
   text-align: center;
   padding: 0 $uicore-m;
 }
+
+.property-grid-react-filtering-pg-icon {
+  font-size: 64px;
+  color: RGBA(var(--buic-foreground-body-rgb), 0.3);
+  margin-bottom: $uicore-m;
+}

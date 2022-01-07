@@ -19,14 +19,16 @@ import {
   GlobalContextMenu,
   Icon,
   Orientation,
+  useOptionalDisposable,
   useResizeObserver,
 } from "@itwin/core-react";
 import {
   ConfigurableCreateInfo,
+  UiFramework,
   useActiveIModelConnection,
   WidgetControl,
 } from "@itwin/appui-react";
-import * as React from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
@@ -42,11 +44,6 @@ import {
 } from "./FilteringPropertyGrid";
 import classnames from "classnames";
 import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
-
-import {
-  IPresentationPropertyDataProvider,
-  usePropertyDataProviderWithUnifiedSelection,
-} from "@itwin/presentation-components";
 
 export const PropertyGrid = ({
   orientation,
@@ -66,7 +63,7 @@ export const PropertyGrid = ({
 }: PropertyGridProps) => {
   const iModelConnection = useActiveIModelConnection();
 
-  const dataProvider = React.useMemo(() => {
+  const createDataProvider = useCallback(() => {
     let dp;
     if (propDataProvider) {
       dp = propDataProvider;
@@ -86,32 +83,30 @@ export const PropertyGrid = ({
     return dp;
   }, [propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting]);
 
-  const { numSelectedElements } = (
-    usePropertyDataProviderWithUnifiedSelection as any
-  )({ dataProvider: dataProvider as IPresentationPropertyDataProvider });
-  
-  const [title, setTitle] = React.useState<PropertyRecord>();
-  const [className, setClassName] = React.useState<string>("");
-  const [contextMenu, setContextMenu] = React.useState<
-  PropertyGridContextMenuArgs | undefined
+  const dataProvider = useOptionalDisposable(createDataProvider);
+
+  const [title, setTitle] = useState<PropertyRecord>();
+  const [className, setClassName] = useState<string>("");
+  const [contextMenu, setContextMenu] = useState<
+    PropertyGridContextMenuArgs | undefined
   >(undefined);
-  const [contextMenuItemInfos, setContextMenuItemInfos] = React.useState<
-  ContextMenuItemInfo[] | undefined
+  const [contextMenuItemInfos, setContextMenuItemInfos] = useState<
+    ContextMenuItemInfo[] | undefined
   >(undefined);
-  const [showNullValues, setShowNullValues] = React.useState<boolean>(true);
-  const [filterer, setFilterer] = React.useState<PropertyDataFiltererBase>(
+  const [showNullValues, setShowNullValues] = useState<boolean>(true);
+  const [filterer, setFilterer] = useState<PropertyDataFiltererBase>(
     new PlaceholderPropertyDataFilterer()
   );
 
-  const [height, setHeight] = React.useState(0);
-  const [width, setWidth] = React.useState(0);
-  const handleResize = React.useCallback((w: number, h: number) => {
+  const [height, setHeight] = useState(0);
+  const [width, setWidth] = useState(0);
+  const handleResize = useCallback((w: number, h: number) => {
     setHeight(h);
     setWidth(w);
   }, []);
   const ref = useResizeObserver<HTMLDivElement>(handleResize);
 
-  const localizations = React.useMemo(() => {
+  const localizations = useMemo(() => {
     return {
       favorite: PropertyGridManager.translate("context-menu.favorite"),
       unshareFavorite: {
@@ -165,7 +160,7 @@ export const PropertyGrid = ({
     };
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onDataChanged = async () => {
       const propertyData: PropertyData | undefined =
         await dataProvider?.getData();
@@ -175,16 +170,15 @@ export const PropertyGrid = ({
       }
     };
 
-    dataProvider?.onDataChanged.addListener(onDataChanged);
+    const removeListener = dataProvider?.onDataChanged.addListener(onDataChanged);
     void onDataChanged();
 
     return () => {
-      dataProvider?.onDataChanged.removeListener(onDataChanged);
-      dataProvider?.dispose();
+      removeListener?.();
     };
   }, [dataProvider]);
 
-  const onAddFavorite = React.useCallback(
+  const onAddFavorite = useCallback(
     async (propertyField: Field) => {
       if (iModelConnection) {
         await Presentation.favoriteProperties.add(propertyField, iModelConnection, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
@@ -194,7 +188,7 @@ export const PropertyGrid = ({
     [iModelConnection, favoritePropertiesScope]
   );
 
-  const onRemoveFavorite = React.useCallback(
+  const onRemoveFavorite = useCallback(
     async (propertyField: Field) => {
       if (iModelConnection) {
         await Presentation.favoriteProperties.remove(propertyField, iModelConnection, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
@@ -205,19 +199,19 @@ export const PropertyGrid = ({
     [iModelConnection, favoritePropertiesScope]
   );
 
-  const onHideNull = React.useCallback(() => {
+  const onHideNull = useCallback(() => {
     setFilterer(new NonEmptyValuesPropertyDataFilterer());
     setContextMenu(undefined);
     setShowNullValues(false);
   }, []);
 
-  const onShowNull = React.useCallback(() => {
+  const onShowNull = useCallback(() => {
     setFilterer(new PlaceholderPropertyDataFilterer());
     setContextMenu(undefined);
     setShowNullValues(true);
   }, []);
 
-  const buildContextMenu = React.useCallback(
+  const buildContextMenu = useCallback(
     async (args: PropertyGridContextMenuArgs) => {
       if (dataProvider) {
         const field = await dataProvider.getFieldByPropertyRecord(
@@ -318,7 +312,7 @@ export const PropertyGrid = ({
     ]
   );
 
-  const onPropertyContextMenu = React.useCallback(
+  const onPropertyContextMenu = useCallback(
     async (args: PropertyGridContextMenuArgs) => {
       args.event.persist();
       setContextMenu(args.propertyRecord.isMerged ? undefined : args);
@@ -332,7 +326,7 @@ export const PropertyGrid = ({
       return undefined;
     }
 
-    const items: React.ReactNode[] = [];
+    const items: ReactNode[] = [];
     contextMenuItemInfos.forEach((info: ContextMenuItemInfo) =>
       items.push(
         <ContextMenuItem
@@ -367,11 +361,11 @@ export const PropertyGrid = ({
     return (
       <div className="property-grid-react-panel-header">
         {onBackButton !== undefined && (
-          /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
           <div
             className="property-grid-react-panel-back-btn"
             onClick={onBackButton}
             onKeyDown={onBackButton}
+            role="button"
           >
             <Icon
               className="property-grid-react-panel-icon"
@@ -386,12 +380,12 @@ export const PropertyGrid = ({
           <div className="property-grid-react-panel-class">{className}</div>
         </div>
         {onInfoButton !== undefined && (
-          /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
           <div
             className="property-grid-react-panel-info-btn"
             onClick={onInfoButton}
             onKeyDown={onInfoButton}
             title={PropertyGridManager.translate("element-list.title")}
+            role="button"
           >
             <Icon
               className="property-grid-react-panel-icon"
@@ -442,7 +436,7 @@ export const PropertyGrid = ({
     <div
       className={classnames("property-grid-widget-container", rootClassName)}
     >
-      {numSelectedElements > 0 && renderHeader()}
+      {!!UiFramework.frameworkState?.sessionState?.numItemsSelected && renderHeader()}
       <div className={"property-grid-container"}>{renderPropertyGrid()}</div>
       {renderContextMenu()}
     </div>
