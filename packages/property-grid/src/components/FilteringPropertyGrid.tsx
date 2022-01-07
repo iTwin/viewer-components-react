@@ -143,7 +143,8 @@ export function FilteringPropertyGridWithUnifiedSelection(
   }
   if (numSelectedElements !== undefined && numSelectedElements === 0) {
     return (
-      <FillCentered>
+      <FillCentered style={{flexDirection: "column"}}>
+        <i className="property-grid-react-filtering-pg-icon icon icon-info" />
         <div className="property-grid-react-filtering-pg-label">
           {localizations.noneSelected}
         </div>
