@@ -170,32 +170,34 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
 
   return (
     <div className="property-grid-react-transition-container">
-      <Transition
-        items={content as number}
-        config={{ duration: 250, easing: (t: number) => t * t }}
-        from={{
-          transform: animationForward
-            ? "translate(100%,0)"
-            : "translate(-100%,0)",
-        }}
-        enter={{ transform: "translate(0,0)" }}
-        leave={{
-          transform: !animationForward
-            ? "translate(100%,0)"
-            : "translate(-100%,0)",
-        }}
-      >
-        {/* eslint-disable-next-line react/display-name */}
-        {(index) => (style) =>
-          (
-            <animated.div
-              className="property-grid-react-animated-tab"
-              style={style}
-            >
-              {items[index]}
-            </animated.div>
-          )}
-      </Transition>
+      <div className="property-grid-react-transition-container-inner">
+        <Transition
+          items={content as number}
+          config={{ duration: 250, easing: (t: number) => t * t }}
+          from={{
+            transform: animationForward
+              ? "translate(100%,0)"
+              : "translate(-100%,0)",
+          }}
+          enter={{ transform: "translate(0,0)" }}
+          leave={{
+            transform: !animationForward
+              ? "translate(100%,0)"
+              : "translate(-100%,0)",
+          }}
+        >
+          {/* eslint-disable-next-line react/display-name */}
+          {(index) => (style) =>
+            (
+              <animated.div
+                className="property-grid-react-animated-tab"
+                style={style}
+              >
+                {items[index]}
+              </animated.div>
+            )}
+        </Transition>
+      </div>
     </div>
   );
 };

@@ -43,6 +43,11 @@ import {
 import classnames from "classnames";
 import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
 
+import {
+  IPresentationPropertyDataProvider,
+  usePropertyDataProviderWithUnifiedSelection,
+} from "@itwin/presentation-components";
+
 export const PropertyGrid = ({
   orientation,
   isOrientationFixed,
@@ -81,6 +86,10 @@ export const PropertyGrid = ({
     return dp;
   }, [propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting]);
 
+  const { numSelectedElements } = (
+    usePropertyDataProviderWithUnifiedSelection as any
+  )({ dataProvider: dataProvider as IPresentationPropertyDataProvider });
+  
   const [title, setTitle] = React.useState<PropertyRecord>();
   const [className, setClassName] = React.useState<string>("");
   const [contextMenu, setContextMenu] = React.useState<
@@ -433,7 +442,7 @@ export const PropertyGrid = ({
     <div
       className={classnames("property-grid-widget-container", rootClassName)}
     >
-      {renderHeader()}
+      {numSelectedElements > 0 && renderHeader()}
       <div className={"property-grid-container"}>{renderPropertyGrid()}</div>
       {renderContextMenu()}
     </div>

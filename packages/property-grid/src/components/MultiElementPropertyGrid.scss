@@ -11,10 +11,19 @@
   position: relative;
   padding-left: $uicore-xs;
   padding-bottom: $uicore-xs;
+  box-sizing: border-box;
+}
+
+.property-grid-react-transition-container-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .property-grid-react-animated-tab {
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100%;
   width: 100%;
-  position: absolute;
 }
