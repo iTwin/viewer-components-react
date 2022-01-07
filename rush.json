@@ -32,7 +32,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "projectFolder": "packages/tree-widget",
-      "versionPolicyName": "tree-widget"
+      "versionPolicyName": "prerelease-monorepo-lockStep"
     },
     {
       "packageName": "@bentley/property-grid-react",
