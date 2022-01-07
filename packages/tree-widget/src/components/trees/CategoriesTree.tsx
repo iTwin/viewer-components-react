@@ -1,9 +1,8 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
-import * as React from "react";
-import { useResizeDetector } from "react-resize-detector";
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+import React, { useCallback, useState } from "react";
 import {
   IModelApp,
   IModelConnection,
@@ -17,7 +16,8 @@ import {
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
 import { TreeHeaderComponent } from "../header/TreeHeader";
-import { CategoryVisibilityHandler } from "@itwin/appui-react/lib/cjs/appui-react/imodel-components/category-tree/CategoryVisibilityHandler";
+import { CategoryVisibilityHandler } from "@itwin/appui-react";
+import { useResizeObserver } from "@itwin/core-react";
 
 export interface CategoriesTreeComponentProps {
   iModel: IModelConnection;
@@ -33,9 +33,16 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
     onFilterApplied,
     filteredProvider,
   } = useTreeFilteringState();
-  const { width, height, ref } = useResizeDetector();
 
-  const showAll = React.useCallback(async () => {
+  const [height, setHeight] = useState(0);
+  const [width, setWidth] = useState(0);
+  const handleResize = useCallback((w: number, h: number) => {
+    setHeight(h);
+    setWidth(w);
+  }, []);
+  const ref = useResizeObserver<HTMLDivElement>(handleResize);
+
+  const showAll = useCallback(async () => {
     return toggleAllCategories(
       IModelApp.viewManager,
       props.iModel,
@@ -46,7 +53,7 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
     );
   }, [props.iModel, filteredProvider]);
 
-  const hideAll = React.useCallback(async () => {
+  const hideAll = useCallback(async () => {
     return toggleAllCategories(
       IModelApp.viewManager,
       props.iModel,
@@ -57,7 +64,7 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
     );
   }, [props.iModel, filteredProvider]);
 
-  const invert = React.useCallback(async () => {
+  const invert = useCallback(async () => {
     const activeView = IModelApp.viewManager.getFirstOpenView();
     if (!activeView) {
       return;
@@ -73,7 +80,7 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
         disabled.push(id);
       }
     }
-    // Disabled enabled
+    // Disable enabled
     CategoryVisibilityHandler.enableCategory(
       IModelApp.viewManager,
       props.iModel,

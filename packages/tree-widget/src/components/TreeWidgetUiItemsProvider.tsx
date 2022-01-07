@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import {
   AbstractWidgetProps,
   StagePanelLocation,
@@ -23,7 +23,7 @@ import { TreeWidget } from "../TreeWidget";
 import { TreeWidgetControlOptions } from "./TreeWidgetControl";
 
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
-  public readonly id = "TreeUiitemsProvider";
+  public readonly id = "TreeWidgetUiitemsProvider";
 
   private _imodel?: IModelConnection;
   private _activeView?: Viewport;
