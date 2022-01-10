@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/tree-widget-react",
+      "comment": "Fix hide all button blocked by search bar",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/tree-widget-react"
+}
