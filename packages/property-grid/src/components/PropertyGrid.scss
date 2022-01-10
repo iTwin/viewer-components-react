@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "~@itwin/core-react/lib/ui-core/style/index";
-@import "~@itwin/core-react/lib/ui-core/text/index";
+@import "~@itwin/core-react/lib/esm/core-react/style/index";
+@import "~@itwin/core-react/lib/esm/core-react/text/index";
 
 $header-height: 50px;
 
@@ -14,6 +14,7 @@ $header-height: 50px;
   position: absolute;
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .pcomponents-property-grid-with-unified-selection {
@@ -22,7 +23,7 @@ $header-height: 50px;
 
 .property-grid-container {
   flex: 1;
-  margin-top: $uicore-s;
+  overflow: hidden;
 }
 
 .virtualized-grid-node-content > .components--hoverable:hover {
@@ -92,4 +93,12 @@ $header-height: 50px;
 .property-grid-react-filtering-pg-label {
   @include uicore-text;
   font-size: $uicore-font-size;
+  text-align: center;
+  padding: 0 $uicore-m;
+}
+
+.property-grid-react-filtering-pg-icon {
+  font-size: 64px;
+  color: RGBA(var(--buic-foreground-body-rgb), 0.3);
+  margin-bottom: $uicore-m;
 }

@@ -180,6 +180,8 @@ export const ElementList = ({
         <div
           className="property-grid-react-element-list-back-btn"
           onClick={onBack}
+          onKeyDown={onBack}
+          role="button"
         >
           <Icon
             className="property-grid-react-element-list-icon"
@@ -192,6 +194,7 @@ export const ElementList = ({
       </div>
       <div className="property-grid-react-element-list-container">
         {dataProvider && (
+          /* eslint-disable-next-line deprecation/deprecation */
           <Table
             dataProvider={dataProvider}
             onRowsSelected={onRowsSelected}

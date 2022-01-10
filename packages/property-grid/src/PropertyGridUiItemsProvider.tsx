@@ -21,9 +21,9 @@ import { PropertyGridProps } from "./types";
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
 
-  private _props?: Partial<PropertyGridProps>;
+  private _props?: PropertyGridProps;
 
-  constructor(props?: Partial<PropertyGridProps>) {
+  constructor(props?: PropertyGridProps) {
     this._props = props;
   }
 

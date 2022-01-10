@@ -5,87 +5,38 @@
 
 import "./MultiElementPropertyGrid.scss";
 
-import { InstanceKey, KeySet } from "@itwin/presentation-common";
+import { InstanceKey } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
   ConfigurableCreateInfo,
   useActiveIModelConnection,
   WidgetControl,
 } from "@itwin/appui-react";
-import * as React from "react";
 import { animated, Transition } from "react-spring/renderprops.cjs";
 
-import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
-import { PropertyGridManager } from "../PropertyGridManager";
 import { PropertyGridProps } from "../types";
 import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
+import React, { useEffect, useMemo, useState } from "react";
 
-export enum MultiElementPropertyContent {
+enum MultiElementPropertyContent {
   PropertyGrid = 0,
   ElementList = 1,
   SingleElementPropertyGrid = 2,
 }
 
-interface SingleElementPropertyGridProps extends Partial<PropertyGridProps> {
-  instanceKey?: InstanceKey;
-}
-
-const SingleElementPropertyGrid = ({
-  instanceKey,
-  ...props
-}: SingleElementPropertyGridProps) => {
+export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   const iModelConnection = useActiveIModelConnection();
-  const dataProvider = React.useMemo(() => {
-    let dp;
-
-    if (iModelConnection) {
-      dp = new AutoExpandingPropertyDataProvider({
-        imodel: iModelConnection,
-        ruleset: props.rulesetId,
-        disableFavoritesCategory: !props.enableFavoriteProperties,
-      });
-    }
-
-    if (dp) {
-      dp.pagingSize = 50;
-      dp.isNestedPropertyCategoryGroupingEnabled =
-        !!PropertyGridManager.flags.enablePropertyGroupNesting;
-      // Set inspected instance as the key
-      if (instanceKey) {
-        dp.keys = new KeySet([instanceKey]);
-      }
-    }
-
-    return dp;
-  }, [
-    iModelConnection,
-    props.rulesetId,
-    props.enableFavoriteProperties,
-    instanceKey,
-  ]);
-
-  return (
-    <PropertyGrid
-      {...props}
-      dataProvider={dataProvider}
-      disableUnifiedSelection={true}
-    />
-  );
-};
-
-export const MultiElementPropertyGrid = (props: Partial<PropertyGridProps>) => {
-  const iModelConnection = useActiveIModelConnection();
-  const [content, setContent] = React.useState<MultiElementPropertyContent>(
+  const [content, setContent] = useState<MultiElementPropertyContent>(
     MultiElementPropertyContent.PropertyGrid
   );
-  const [animationForward, setAnimationForward] = React.useState(true);
-  const [instanceKeys, setInstanceKeys] = React.useState<InstanceKey[]>([]);
-  const [moreThanOneElement, setMoreThanOneElement] = React.useState(false);
+  const [animationForward, setAnimationForward] = useState(true);
+  const [instanceKeys, setInstanceKeys] = useState<InstanceKey[]>([]);
+  const [moreThanOneElement, setMoreThanOneElement] = useState(false);
   const [selectedInstanceKey, setSelectedInstanceKey] =
-    React.useState<InstanceKey>();
+    useState<InstanceKey>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onSelectionChange = () => {
       setContent(MultiElementPropertyContent.PropertyGrid);
       setAnimationForward(false);
@@ -109,23 +60,21 @@ export const MultiElementPropertyGrid = (props: Partial<PropertyGridProps>) => {
       }
     };
 
-    Presentation.selection.selectionChange.addListener(onSelectionChange);
-    return () => {
-      Presentation.selection.selectionChange.removeListener(onSelectionChange);
-    };
+    const removeListener = Presentation.selection.selectionChange.addListener(onSelectionChange);
+    return () => removeListener();
   }, [iModelConnection]);
 
   const items = [
-    ...React.useMemo(() => {
+    ...useMemo(() => {
       const _items = [
         <PropertyGrid
           {...props}
           onInfoButton={
             moreThanOneElement
               ? () => {
-                  setContent(MultiElementPropertyContent.ElementList);
-                  setAnimationForward(true);
-                }
+                setContent(MultiElementPropertyContent.ElementList);
+                setAnimationForward(true);
+              }
               : undefined
           }
           key={"PropertyGrid"}
@@ -157,9 +106,10 @@ export const MultiElementPropertyGrid = (props: Partial<PropertyGridProps>) => {
   ];
 
   items.push(
-    <SingleElementPropertyGrid
+    <PropertyGrid
       {...props}
       instanceKey={selectedInstanceKey}
+      disableUnifiedSelection={true}
       onBackButton={() => {
         setContent(MultiElementPropertyContent.ElementList);
         setAnimationForward(false);
@@ -170,22 +120,23 @@ export const MultiElementPropertyGrid = (props: Partial<PropertyGridProps>) => {
 
   return (
     <div className="property-grid-react-transition-container">
-      <Transition
-        items={content as number}
-        config={{ duration: 250, easing: (t: number) => t * t }}
-        from={{
-          transform: animationForward
-            ? "translate(100%,0)"
-            : "translate(-100%,0)",
-        }}
-        enter={{ transform: "translate(0,0)" }}
-        leave={{
-          transform: !animationForward
-            ? "translate(100%,0)"
-            : "translate(-100%,0)",
-        }}
-      >
-        {(index) => (style) =>
+      <div className="property-grid-react-transition-container-inner">
+        <Transition
+          items={content as number}
+          config={{ duration: 250, easing: (t: number) => t * t }}
+          from={{
+            transform: animationForward
+              ? "translate(100%,0)"
+              : "translate(-100%,0)",
+          }}
+          enter={{ transform: "translate(0,0)" }}
+          leave={{
+            transform: !animationForward
+              ? "translate(100%,0)"
+              : "translate(-100%,0)",
+          }}
+        >
+          {(index) => (style) =>
           (
             <animated.div
               className="property-grid-react-animated-tab"
@@ -194,7 +145,8 @@ export const MultiElementPropertyGrid = (props: Partial<PropertyGridProps>) => {
               {items[index]}
             </animated.div>
           )}
-      </Transition>
+        </Transition>
+      </div>
     </div>
   );
 };

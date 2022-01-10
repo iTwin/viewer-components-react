@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { getClassName, UiError } from "@itwin/appui-abstract";
-import { PropertyGridManagerFeatureFlags } from "./types";
 import { Localization } from "@itwin/core-common";
 import { LocalizationOptions } from "@itwin/core-i18n";
 
@@ -15,22 +14,11 @@ import { LocalizationOptions } from "@itwin/core-i18n";
 export class PropertyGridManager {
   private static _i18n?: Localization;
 
-  /** Feature Flag object with default values */
-  private static _featureFlags: PropertyGridManagerFeatureFlags = {
-    enablePropertyGroupNesting: false,
-  };
   /**
    * Called by IModelApp to initialize PropertyGridManager
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(
-    i18n: Localization,
-    featureFlags?: PropertyGridManagerFeatureFlags
-  ): Promise<void> {
-    if (featureFlags) {
-      PropertyGridManager.changeFlags(featureFlags);
-    }
-
+  public static async initialize(i18n: Localization): Promise<void> {
     PropertyGridManager._i18n = i18n;
     return PropertyGridManager._i18n.registerNamespace(
       PropertyGridManager.i18nNamespace
@@ -85,17 +73,5 @@ export class PropertyGridManager {
     const category =
       PropertyGridManager.packageName + (className ? `.${className}` : "");
     return category;
-  }
-
-  public static changeFlags(featureFlags: any) {
-    PropertyGridManager._featureFlags = {
-      ...PropertyGridManager._featureFlags,
-      ...featureFlags,
-    };
-  }
-
-  /** Return object that contains all feature flags */
-  public static get flags() {
-    return PropertyGridManager._featureFlags;
   }
 }
