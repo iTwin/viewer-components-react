@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGrid.scss";
-import { Field } from "@itwin/presentation-common";
+import { Field, InstanceKey, KeySet } from "@itwin/presentation-common";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import {
@@ -45,6 +45,10 @@ import {
 import classnames from "classnames";
 import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
 
+interface PropertyGridPropsWithSingleElement extends PropertyGridProps {
+  instanceKey?: InstanceKey;
+}
+
 export const PropertyGrid = ({
   orientation,
   isOrientationFixed,
@@ -60,7 +64,8 @@ export const PropertyGrid = ({
   onInfoButton,
   onBackButton,
   disableUnifiedSelection,
-}: PropertyGridProps) => {
+  instanceKey
+}: PropertyGridPropsWithSingleElement) => {
   const iModelConnection = useActiveIModelConnection();
 
   const createDataProvider = useCallback(() => {
@@ -74,14 +79,18 @@ export const PropertyGrid = ({
         disableFavoritesCategory: !enableFavoriteProperties,
       });
     }
-
     if (dp) {
       dp.pagingSize = 50;
       dp.isNestedPropertyCategoryGroupingEnabled =
         !!enablePropertyGroupNesting;
+
+      // Set selected instance as the key (for Single Element Property Grid)
+      if (instanceKey) {
+        dp.keys = new KeySet([instanceKey]);
+      }
     }
     return dp;
-  }, [propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting]);
+  }, [propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting, instanceKey]);
 
   const dataProvider = useOptionalDisposable(createDataProvider);
 

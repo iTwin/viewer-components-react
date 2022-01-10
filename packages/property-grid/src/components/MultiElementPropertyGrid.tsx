@@ -5,7 +5,7 @@
 
 import "./MultiElementPropertyGrid.scss";
 
-import { InstanceKey, KeySet } from "@itwin/presentation-common";
+import { InstanceKey } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
   ConfigurableCreateInfo,
@@ -14,61 +14,16 @@ import {
 } from "@itwin/appui-react";
 import { animated, Transition } from "react-spring/renderprops.cjs";
 
-import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
 import { PropertyGridProps } from "../types";
 import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useOptionalDisposable } from "@itwin/core-react";
+import React, { useEffect, useMemo, useState } from "react";
 
-export enum MultiElementPropertyContent {
+enum MultiElementPropertyContent {
   PropertyGrid = 0,
   ElementList = 1,
   SingleElementPropertyGrid = 2,
 }
-
-interface SingleElementPropertyGridProps extends PropertyGridProps {
-  instanceKey?: InstanceKey;
-}
-
-const SingleElementPropertyGrid = ({
-  instanceKey,
-  ...props
-}: SingleElementPropertyGridProps) => {
-  /* gah, why do we have this again? why dont we just pass the instanceKey into the property grid? */
-  const iModelConnection = useActiveIModelConnection();
-  const createDataProvider = useCallback(() => {
-    let dp;
-    if (iModelConnection) {
-      dp = new AutoExpandingPropertyDataProvider({
-        imodel: iModelConnection,
-        ruleset: props.rulesetId,
-        disableFavoritesCategory: !props.enableFavoriteProperties,
-      });
-      if (instanceKey) {
-        // Set inspected instance as the key
-        dp.keys = new KeySet([instanceKey]);
-      }
-    }
-    return dp;
-  }, [
-    iModelConnection,
-    props.rulesetId,
-    props.enableFavoriteProperties,
-    props.enablePropertyGroupNesting,
-    instanceKey,
-  ]);
-
-  const dataProvider = useOptionalDisposable(createDataProvider);
-
-  return (
-    <PropertyGrid
-      {...props}
-      dataProvider={dataProvider}
-      disableUnifiedSelection={true}
-    />
-  );
-};
 
 export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   const iModelConnection = useActiveIModelConnection();
@@ -135,9 +90,10 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
               setAnimationForward(false);
             }}
             onSelect={(instanceKey: InstanceKey) => {
+              // Need to set animation first, otherwise the animation is incorrect. Theres some issue batching these state changes.
+              setAnimationForward(true);
               setContent(MultiElementPropertyContent.SingleElementPropertyGrid);
               setSelectedInstanceKey(instanceKey);
-              setAnimationForward(true);
             }}
             rootClassName={props.rootClassName}
             key={"ElementList"}
@@ -150,9 +106,10 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   ];
 
   items.push(
-    <SingleElementPropertyGrid
+    <PropertyGrid
       {...props}
       instanceKey={selectedInstanceKey}
+      disableUnifiedSelection={true}
       onBackButton={() => {
         setContent(MultiElementPropertyContent.ElementList);
         setAnimationForward(false);
