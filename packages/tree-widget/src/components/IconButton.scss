@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/ui-core/index.scss";
-@import "~@itwin/appui-layout-react/lib/ui-ninezone/footer/_variables";
+@import "~@itwin/core-react/lib/esm/core-react/index";
+@import "~@itwin/appui-layout-react/lib/esm/appui-layout-react/footer/_variables";
 
 .tree-widget-icon-button {
   display: inline-block;

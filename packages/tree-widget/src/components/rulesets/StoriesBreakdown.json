@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-  "id": "StoreysAndRooms",
+  "id": "tree-widget-react/StoriesBreakdown",
   "rules": [
     {
       "ruleType": "RootNodes",

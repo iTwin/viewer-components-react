@@ -30,9 +30,9 @@
       "versionPolicyName": "markup-frontstage"
     },
     {
-      "packageName": "@bentley/tree-widget-react",
+      "packageName": "@itwin/tree-widget-react",
       "projectFolder": "packages/tree-widget",
-      "versionPolicyName": "tree-widget"
+      "versionPolicyName": "prerelease-monorepo-lockStep"
     },
     {
       "packageName": "@itwin/property-grid-react",
