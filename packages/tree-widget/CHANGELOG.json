@@ -2,6 +2,18 @@
   "name": "@bentley/tree-widget-react",
   "entries": [
     {
+      "version": "1.4.6",
+      "tag": "@bentley/tree-widget-react_v1.4.6",
+      "date": "Tue, 11 Jan 2022 15:27:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix hide all button blocked by search bar"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.5",
       "tag": "@bentley/tree-widget-react_v1.4.5",
       "date": "Tue, 23 Nov 2021 21:19:42 GMT",
