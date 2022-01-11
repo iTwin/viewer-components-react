@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d, Ray3d } from "@bentley/geometry-core";
-import { DrawingViewState, SheetViewState, SpatialViewState, Viewport, ViewRect } from "@bentley/imodeljs-frontend";
+import { Point3d, Ray3d } from "@itwin/core-geometry";
+import { DrawingViewState, SheetViewState, SpatialViewState, Viewport, ViewRect } from "@itwin/core-frontend";
 import { WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementViewTarget } from "./MeasurementViewTarget";
 

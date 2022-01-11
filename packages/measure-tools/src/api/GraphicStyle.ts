@@ -3,9 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Arc3d, LineSegment3d, Path, Point3d, XYProps } from "@bentley/geometry-core";
-import { ColorByName, ColorDef, ColorDefProps, LinePixels } from "@bentley/imodeljs-common";
-import { GraphicBuilder } from "@bentley/imodeljs-frontend";
+import { Arc3d, LineSegment3d, Path, Point3d, XYProps } from "@itwin/core-geometry";
+import { ColorByName, ColorDef, ColorDefProps, LinePixels } from "@itwin/core-common";
+import { GraphicBuilder } from "@itwin/core-frontend";
 
 /** List of well-known graphic styles. */
 export enum WellKnownGraphicStyleType {

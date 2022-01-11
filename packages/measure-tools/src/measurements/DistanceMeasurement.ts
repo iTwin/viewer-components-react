@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { IModelJson, LineSegment3d, Point3d, PointString3d, Range3d, Ray3d, Vector3d, XYAndZ, XYZProps } from "@bentley/geometry-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
+import { Id64String } from "@itwin/core-bentley";
+import { IModelJson, LineSegment3d, Point3d, PointString3d, Range3d, Ray3d, Vector3d, XYAndZ, XYZProps } from "@itwin/core-geometry";
+import { GeometryStreamProps } from "@itwin/core-common";
+import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { FormatterUtils } from "../api/FormatterUtils";
 import { StyleSet, TextOffsetType, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
@@ -85,6 +85,7 @@ export class DistanceMeasurement extends Measurement {
   public get showAxes(): boolean { return this._showAxes; }
   public set showAxes(v: boolean) { this._showAxes = v; }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private get isAxis(): boolean {
     return undefined !== this._textStyleOverride || undefined !== this._graphicStyleOverride;
   }
@@ -163,7 +164,7 @@ export class DistanceMeasurement extends Measurement {
   }
 
   public override async getDecorationToolTip(_pickContext: MeasurementPickContext): Promise<HTMLElement | string> {
-    return IModelApp.i18n.translate("MeasureTools:Measurements.distanceMeasurement");
+    return IModelApp.localization.getLocalizedString("MeasureTools:Measurements.distanceMeasurement");
   }
 
   private getSnapId(): string | undefined {
@@ -374,7 +375,7 @@ export class DistanceMeasurement extends Measurement {
     const fDeltaY = IModelApp.quantityFormatter.formatQuantity(dy, lengthSpec);
     const fRise = IModelApp.quantityFormatter.formatQuantity(rise, lengthSpec);
 
-    let title = IModelApp.i18n.translate("MeasureTools:Measurements.distanceMeasurement");
+    let title = IModelApp.localization.getLocalizedString("MeasureTools:Measurements.distanceMeasurement");
     title += ` [${fDistance}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
@@ -382,19 +383,19 @@ export class DistanceMeasurement extends Measurement {
 
     data.properties.push(
       {
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.distance"), name: "DistanceMeasurement_Distance", value: fDistance,
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.distance"), name: "DistanceMeasurement_Distance", value: fDistance,
         aggregatableValue: (lengthSpec !== undefined) ? { value: distance, formatSpec: lengthSpec } : undefined,
       },
       {
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.run"), name: "DistanceMeasurement_Run", value: fRun,
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.run"), name: "DistanceMeasurement_Run", value: fRun,
         aggregatableValue: (lengthSpec !== undefined) ? { value: run, formatSpec: lengthSpec } : undefined,
       },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.rise"), name: "DistanceMeasurement_Rise", value: fRise },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.slope"), name: "DistanceMeasurement_Slope", value: fSlope },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.delta_x"), name: "DistanceMeasurement_Dx", value: fDeltaX },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.delta_y"), name: "DistanceMeasurement_Dy", value: fDeltaY },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.startCoordinates"), name: "DistanceMeasurement_StartPoint", value: fStartCoords },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureDistance.endCoordinates"), name: "DistanceMeasurement_EndPoint", value: fEndCoords },
+      { label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.rise"), name: "DistanceMeasurement_Rise", value: fRise },
+      { label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.slope"), name: "DistanceMeasurement_Slope", value: fSlope },
+      { label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.delta_x"), name: "DistanceMeasurement_Dx", value: fDeltaX },
+      { label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.delta_y"), name: "DistanceMeasurement_Dy", value: fDeltaY },
+      { label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.startCoordinates"), name: "DistanceMeasurement_StartPoint", value: fStartCoords },
+      { label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.endCoordinates"), name: "DistanceMeasurement_EndPoint", value: fEndCoords },
     );
     return data;
   }

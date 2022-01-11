@@ -5,7 +5,7 @@
 import {
   BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod, ToolAssistanceInstruction,
   ToolAssistanceSection,
-} from "@bentley/imodeljs-frontend";
+} from "@itwin/core-frontend";
 import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
@@ -22,10 +22,10 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
   // TODO: Change icon once UX team provides icon
   public static override iconSpec = "icon-angle-measure";
   public static get label() {
-    return IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.flyover");
+    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.flyover");
   }
   public static override get flyover() {
-    return IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.flyover");
+    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.flyover");
   }
 
   protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureAngle; }
@@ -34,20 +34,23 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
     super();
   }
 
-  public onRestartTool(): void {
+  public async onRestartTool(): Promise<void> {
     const tool = new MeasureAngleTool();
-    if (!tool.run()) this.exitTool();
+    if (await tool.run())
+      return;
+
+    return this.exitTool();
   }
 
   /** Show tool assistance messages to user */
   public showPrompt() {
-    const identifyStartMessage = IModelApp.i18n.translate(
+    const identifyStartMessage = IModelApp.localization.getLocalizedString(
       "MeasureTools:tools.MeasureAngle.identifyStart",
     );
-    const identifyCenterMessage = IModelApp.i18n.translate(
+    const identifyCenterMessage = IModelApp.localization.getLocalizedString(
       "MeasureTools:tools.MeasureAngle.identifyCenter",
     );
-    const identifyEndMessage = IModelApp.i18n.translate(
+    const identifyEndMessage = IModelApp.localization.getLocalizedString(
       "MeasureTools:tools.MeasureAngle.identifyEnd",
     );
     let currentMsg = "";

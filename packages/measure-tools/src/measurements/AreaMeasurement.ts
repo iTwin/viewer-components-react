@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, XYZProps } from "@bentley/geometry-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, GraphicBuilder, GraphicType, IModelApp, QuantityType, RenderGraphicOwner } from "@bentley/imodeljs-frontend";
+import { Id64String } from "@itwin/core-bentley";
+import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, XYZProps } from "@itwin/core-geometry";
+import { GeometryStreamProps } from "@itwin/core-common";
+import { BeButtonEvent, DecorateContext, GraphicBuilder, GraphicType, IModelApp, QuantityType, RenderGraphicOwner } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
@@ -193,9 +193,9 @@ export class AreaMeasurement extends Measurement {
 
   public override async getDecorationToolTip(_pickContext: MeasurementPickContext): Promise<HTMLElement | string> {
     if (this.isDynamic)
-      return IModelApp.i18n.translate("MeasureTools:Measurements.closePolygon");
+      return IModelApp.localization.getLocalizedString("MeasureTools:Measurements.closePolygon");
 
-    return IModelApp.i18n.translate("MeasureTools:Measurements.areaMeasurement");
+    return IModelApp.localization.getLocalizedString("MeasureTools:Measurements.areaMeasurement");
   }
 
   private getSnapId(): string | undefined {
@@ -320,7 +320,7 @@ export class AreaMeasurement extends Measurement {
     const fAreaXY = IModelApp.quantityFormatter.formatQuantity(this._polygon.areaXY, areaSpec);
     const fEdgeCount = (this._polygon.points.length - 1).toFixed();
 
-    let title = IModelApp.i18n.translate("MeasureTools:Measurements.areaMeasurement");
+    let title = IModelApp.localization.getLocalizedString("MeasureTools:Measurements.areaMeasurement");
     title += ` [${fArea}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
@@ -328,15 +328,15 @@ export class AreaMeasurement extends Measurement {
 
     data.properties.push(
       {
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupArea"), name: "AreaMeasurement_Area", value: fArea,
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.popupArea"), name: "AreaMeasurement_Area", value: fArea,
         aggregatableValue: (areaSpec !== undefined) ? { value: this._polygon.area, formatSpec: areaSpec } : undefined,
       },
       {
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupAreaXY"), name: "AreaMeasurement_AreaXY", value: fAreaXY,
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.popupAreaXY"), name: "AreaMeasurement_AreaXY", value: fAreaXY,
         aggregatableValue: (areaSpec !== undefined) ? { value: this._polygon.areaXY, formatSpec: areaSpec } : undefined,
       },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupPerimeter"), name: "AreaMeasurement_Perimeter", value: fPerimeter },
-      { label: IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.popupEdgeCount"), name: "AreaMeasurement_EdgeCount", value: fEdgeCount },
+      { label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.popupPerimeter"), name: "AreaMeasurement_Perimeter", value: fPerimeter },
+      { label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.popupEdgeCount"), name: "AreaMeasurement_EdgeCount", value: fEdgeCount },
     );
 
     return data;

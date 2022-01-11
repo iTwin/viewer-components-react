@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Viewport } from "@bentley/imodeljs-frontend";
+import { Viewport } from "@itwin/core-frontend";
 import { Feature, FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { PrimitiveToolBase } from "../api/MeasurementTool";
@@ -33,19 +33,21 @@ export class ToggleDisplayMeasurementAxesTool extends PrimitiveToolBase {
     return true;
   }
 
-  public override onPostInstall() {
-    super.onPostInstall();
+  public override async onPostInstall(): Promise<void> {
+    await super.onPostInstall();
 
     const isEnabled = !MeasurementPreferences.current.displayMeasurementAxes;
     MeasurementPreferences.current.displayMeasurementAxes = isEnabled;
     FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.Tools_ToggleDisplayMeasurementAxes, isEnabled);
 
-    this.exitTool();
+    await this.exitTool();
   }
 
-  public onRestartTool(): void {
+  public async onRestartTool(): Promise<void> {
     const tool = new ToggleDisplayMeasurementAxesTool();
-    if (!tool.run())
-      this.exitTool();
+    if (await tool.run())
+      return;
+
+    return this.exitTool();
   }
 }

@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Geometry, Point3d } from "@bentley/geometry-core";
+import { Geometry, Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
 import { Measurement, MeasurementEqualityOptions } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";

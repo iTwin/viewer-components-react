@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Plane3dByOriginAndUnitNormal, Point3d, Ray3d, Vector3d } from "@bentley/geometry-core";
+import { Plane3dByOriginAndUnitNormal, Point3d, Ray3d, Vector3d } from "@itwin/core-geometry";
 import {
   BeButtonEvent, EventHandled, IModelApp, OutputMessagePriority, TentativeOrAccuSnap, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
   ToolAssistanceInstruction, ToolAssistanceSection,
-} from "@bentley/imodeljs-frontend";
+} from "@itwin/core-frontend";
 import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
@@ -21,10 +21,12 @@ export class MeasurePerpendicularTool extends MeasurementToolBase<DistanceMeasur
   protected _firstSurface?: Plane3dByOriginAndUnitNormal;
   protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasurePerpendicular; }
 
-  public onRestartTool(): void {
+  public async onRestartTool(): Promise<void> {
     const tool = new MeasurePerpendicularTool();
-    if (!tool.run())
-      this.exitTool();
+    if (await tool.run())
+      return;
+
+    return this.exitTool();
   }
 
   private _computePlanePoint(origin: Point3d, normal: Vector3d): Point3d | undefined {
@@ -43,7 +45,7 @@ export class MeasurePerpendicularTool extends MeasurementToolBase<DistanceMeasur
 
     const snap = TentativeOrAccuSnap.getCurrentSnap(false);
     if (undefined === snap || undefined === snap.normal) {
-      const message = IModelApp.i18n.translate("MeasureTools:tools.MeasurePerpendicular.identifySurface");
+      const message = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasurePerpendicular.identifySurface");
       this.showMessage(OutputMessagePriority.Info, message);
       return EventHandled.No;
     }
@@ -66,7 +68,7 @@ export class MeasurePerpendicularTool extends MeasurementToolBase<DistanceMeasur
       const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
       current.startPointRef.setFrom(ev.point);
       this.toolModel.setEndPoint(viewType, perpPt, false);
-      this.onReinitialize();
+      await this.onReinitialize();
     }
 
     ev.viewport.invalidateDecorations();
@@ -102,17 +104,17 @@ export class MeasurePerpendicularTool extends MeasurementToolBase<DistanceMeasur
   protected override updateToolAssistance(): void {
     let promptMainInstruction: string;
     if (MeasureDistanceToolModel.State.SetEndPoint !== this.toolModel.currentState)
-      promptMainInstruction = IModelApp.i18n.translate("MeasureTools:tools.MeasurePerpendicular.mainInstruction");
+      promptMainInstruction = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasurePerpendicular.mainInstruction");
     else
-      promptMainInstruction = IModelApp.i18n.translate("MeasureTools:tools.MeasurePerpendicular.mainInstruction2");
+      promptMainInstruction = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasurePerpendicular.mainInstruction2");
 
-    const promptClickTap = IModelApp.i18n.translate("MeasureTools:tools.GenericPrompts.acceptPoint");
+    const promptClickTap = IModelApp.localization.getLocalizedString("MeasureTools:tools.GenericPrompts.acceptPoint");
 
     let promptRightClick: string;
     if (undefined !== this.toolModel.dynamicMeasurement)
-      promptRightClick = IModelApp.i18n.translate("MeasureTools:tools.GenericPrompts.clearCurrentMeasurement");
+      promptRightClick = IModelApp.localization.getLocalizedString("MeasureTools:tools.GenericPrompts.clearCurrentMeasurement");
     else
-      promptRightClick = IModelApp.i18n.translate("MeasureTools:tools.GenericPrompts.restart");
+      promptRightClick = IModelApp.localization.getLocalizedString("MeasureTools:tools.GenericPrompts.restart");
 
     const mainInstruction = ToolAssistance.createInstruction(this.iconSpec, promptMainInstruction);
     const mouseInstructions: ToolAssistanceInstruction[] = [];

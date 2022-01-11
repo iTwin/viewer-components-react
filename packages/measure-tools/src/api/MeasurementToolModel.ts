@@ -3,14 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { DecorateContext, HitDetail, IModelApp } from "@bentley/imodeljs-frontend";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeUiEvent } from "@bentley/bentleyjs-core";
+import { DecorateContext, HitDetail, IModelApp } from "@itwin/core-frontend";
+import { GeometryStreamProps } from "@itwin/core-common";
+import { BeUiEvent } from "@itwin/core-bentley";
 import { Measurement, MeasurementPickContext } from "./Measurement";
 import { MeasurementSelectionSet } from "./MeasurementSelectionSet";
 import { MeasurementSyncUiEventId, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementManager } from "./MeasurementManager";
-import { SyncUiEventDispatcher } from "@bentley/ui-framework";
+import { SyncUiEventDispatcher } from "@itwin/appui-react";
 
 class Stack<T> {
   private _data: T[] = [];

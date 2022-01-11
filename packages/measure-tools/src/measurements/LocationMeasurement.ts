@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { Geometry, IModelJson, Point3d, PointString3d, XYZProps } from "@bentley/geometry-core";
-import { Cartographic, GeometryStreamProps, LatLongAndHeight } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, GraphicType, IModelApp } from "@bentley/imodeljs-frontend";
+import { Id64String } from "@itwin/core-bentley";
+import { Geometry, IModelJson, Point3d, PointString3d, XYZProps } from "@itwin/core-geometry";
+import { Cartographic, CartographicProps, GeometryStreamProps } from "@itwin/core-common";
+import { BeButtonEvent, DecorateContext, GraphicType, IModelApp } from "@itwin/core-frontend";
 import { FormatterUtils } from "../api/FormatterUtils";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
@@ -23,7 +23,7 @@ import { TextMarker } from "../api/TextMarker";
 export interface LocationMeasurementProps extends MeasurementProps {
   location: XYZProps;
 
-  geoLocation?: LatLongAndHeight;
+  geoLocation?: CartographicProps;
   slope?: number;
   station?: number;
   offset?: number;
@@ -125,7 +125,7 @@ export class LocationMeasurement extends Measurement {
   }
 
   public override async getDecorationToolTip(_pickContext: MeasurementPickContext): Promise<HTMLElement | string> {
-    return IModelApp.i18n.translate("MeasureTools:Measurements.locationMeasurement");
+    return IModelApp.localization.getLocalizedString("MeasureTools:Measurements.locationMeasurement");
   }
 
   private getSnapId(): string | undefined {
@@ -157,15 +157,15 @@ export class LocationMeasurement extends Measurement {
   private async createTextMarker(): Promise<void> {
     const entries = [
       {
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.coordinate_x"),
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.coordinate_x"),
         value: await FormatterUtils.formatLength(this._location.x),
       },
       {
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.coordinate_y"),
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.coordinate_y"),
         value: await FormatterUtils.formatLength(this._location.y),
       },
       {
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.coordinate_z"),
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.coordinate_z"),
         value: await FormatterUtils.formatLength(this._location.z),
       },
     ];
@@ -186,28 +186,28 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData | undefined> {
     const fCoordinates = await FormatterUtils.formatCoordinates(this._location);
 
-    let title = IModelApp.i18n.translate("MeasureTools:Measurements.locationMeasurement");
+    let title = IModelApp.localization.getLocalizedString("MeasureTools:Measurements.locationMeasurement");
     title += ` [${fCoordinates}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push({
-      label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.coordinates"),
+      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.coordinates"),
       name: "LocationMeasurement_Location",
       value: fCoordinates,
     });
 
     if (this._geoLocation)
       data.properties.push({
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.latLong"),
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.latLong"),
         name: "LocationMeasurement_LatLong",
         value: await FormatterUtils.formatCartographicToLatLong(this._geoLocation),
       });
 
     if (MeasurementPreferences.current.displayLocationAltitude) {
       data.properties.push({
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.altitude"),
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.altitude"),
         name: "LocationMeasurement_Altitude",
         value: await FormatterUtils.formatLength(this._location.z),
       });
@@ -217,17 +217,17 @@ export class LocationMeasurement extends Measurement {
     if (undefined !== this._slope)
       slopeValue = FormatterUtils.formatSlope(100.0 * this._slope, true);
     else
-      slopeValue = IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.slopeUnavailable");
+      slopeValue = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.slopeUnavailable");
 
     data.properties.push({
-      label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.slope"),
+      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.slope"),
       name: "LocationMeasurement_Slope",
       value: slopeValue,
     });
 
     if (undefined !== this._station) {
       data.properties.push({
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.station"),
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.station"),
         name: "LocationMeasurement_Station",
         value: await FormatterUtils.formatStation(this._station),
       });
@@ -235,7 +235,7 @@ export class LocationMeasurement extends Measurement {
 
     if (undefined !== this._offset) {
       data.properties.push({
-        label: IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.offset"),
+        label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.offset"),
         name: "LocationMeasurement_Offset",
         value: await FormatterUtils.formatLength(this._offset),
       });
@@ -330,7 +330,7 @@ export class LocationMeasurement extends Measurement {
       this._location.setFromJSON(jsonLoc.location);
 
     if (jsonLoc.geoLocation)
-      this._geoLocation = Cartographic.fromRadians(jsonLoc.geoLocation.longitude, jsonLoc.geoLocation.latitude, jsonLoc.geoLocation.height);
+      this._geoLocation = Cartographic.fromRadians(jsonLoc.geoLocation);
     else
       this._geoLocation = undefined;
 

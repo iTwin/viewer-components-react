@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/measure-tools-react",
+      "comment": "Update to itwinjs 3.0",
+      "type": "major"
+    }
+  ],
+  "packageName": "@bentley/measure-tools-react"
+}

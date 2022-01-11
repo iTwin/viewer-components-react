@@ -6,12 +6,12 @@
 import * as React from "react";
 import "./MeasurementWidget.scss";
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
-import { PropertyDescription, PropertyRecord, PropertyValue, PropertyValueFormat, WidgetState } from "@bentley/ui-abstract";
-import { PropertyGrid, SimplePropertyDataProvider } from "@bentley/ui-components";
-import { Orientation } from "@bentley/ui-core";
-import { ConfigurableCreateInfo, WidgetControl } from "@bentley/ui-framework";
+import { Id64String } from "@itwin/core-bentley";
+import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import { PropertyDescription, PropertyRecord, PropertyValue, PropertyValueFormat, WidgetState } from "@itwin/appui-abstract";
+import { PropertyGrid, SimplePropertyDataProvider } from "@itwin/components-react";
+import { Orientation } from "@itwin/core-react";
+import { ConfigurableCreateInfo, WidgetControl } from "@itwin/appui-react";
 import { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
@@ -121,7 +121,7 @@ export class MeasurementWidget extends WidgetControl {
 
     // Want to show if either: two types or one type with at least two instances
     if (data.length > 1 && (orderedAggrPropEntries.length >= 2 || (orderedAggrPropEntries.length === 1 && hasAtLeastTwoInstances))) {
-      const catIndex = this._dataProvider.addCategory({ expand: true, label: IModelApp.i18n.translate("MeasureTools:Generic.cumulativeTotals"), name: "cumulativeTotals" });
+      const catIndex = this._dataProvider.addCategory({ expand: true, label: IModelApp.localization.getLocalizedString("MeasureTools:Generic.cumulativeTotals"), name: "cumulativeTotals" });
       for (const entry of orderedAggrPropEntries) {
         const label = entry.label;
         const aggrProp = entry.prop;

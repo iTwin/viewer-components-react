@@ -5,9 +5,9 @@
 
 import { Measurement } from "./Measurement";
 import { MeasurementSyncUiEventId } from "./MeasurementEnums";
-import { BeUiEvent } from "@bentley/bentleyjs-core";
+import { BeUiEvent } from "@itwin/core-bentley";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
-import { SyncUiEventDispatcher } from "@bentley/ui-framework";
+import { SyncUiEventDispatcher } from "@itwin/appui-react";
 import { ShimFunctions } from "./ShimFunctions";
 
 export type AcceptMeasurementHandler = (args: Measurement) => boolean;

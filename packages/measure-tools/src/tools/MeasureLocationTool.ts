@@ -3,13 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { GeoServiceStatus } from "@bentley/bentleyjs-core";
-import { CurvePrimitive, GeometryQuery, IModelJson, Vector3d } from "@bentley/geometry-core";
-import { IModelError, SnapRequestProps } from "@bentley/imodeljs-common";
+import { GeoServiceStatus } from "@itwin/core-bentley";
+import { CurvePrimitive, GeometryQuery, IModelJson, Vector3d } from "@itwin/core-geometry";
+import { IModelError, SnapRequestProps } from "@itwin/core-common";
 import {
   BeButtonEvent, EventHandled, IModelApp, LocateResponse, OutputMessagePriority, SnapDetail, SnapMode, SnapStatus, ToolAssistance,
   ToolAssistanceImage, ToolAssistanceInputMethod, ToolAssistanceInstruction, ToolAssistanceSection,
-} from "@bentley/imodeljs-frontend";
+} from "@itwin/core-frontend";
 import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
@@ -28,10 +28,12 @@ export class MeasureLocationTool extends MeasurementToolBase<LocationMeasurement
     super();
   }
 
-  public onRestartTool(): void {
+  public async onRestartTool(): Promise<void> {
     const tool = new MeasureLocationTool();
-    if (!tool.run())
-      this.exitTool();
+    if (await tool.run())
+      return;
+
+    return this.exitTool();
   }
 
   public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
@@ -122,16 +124,16 @@ export class MeasureLocationTool extends MeasurementToolBase<LocationMeasurement
 
       switch (error.errorNumber) {
         case GeoServiceStatus.NoGeoLocation:
-          message = IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.iModelNotGeoLocated");
+          message = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.iModelNotGeoLocated");
           priority = OutputMessagePriority.Info;
           break;
         case GeoServiceStatus.OutOfMathematicalDomain:
         case GeoServiceStatus.OutOfUsefulRange:
-          message = IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.locationOutOfGCSRange");
+          message = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.locationOutOfGCSRange");
           priority = OutputMessagePriority.Warning;
           break;
         default:
-          message = IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.unhandledGeoLocationError");
+          message = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.unhandledGeoLocationError");
           priority = OutputMessagePriority.Error;
       }
     }
@@ -148,9 +150,9 @@ export class MeasureLocationTool extends MeasurementToolBase<LocationMeasurement
   }
 
   protected override updateToolAssistance(): void {
-    const promptMainInstruction = IModelApp.i18n.translate("MeasureTools:tools.MeasureLocation.mainInstruction");
-    const promptClickTap = IModelApp.i18n.translate("MeasureTools:tools.GenericPrompts.acceptPoint");
-    const promptRightClick = IModelApp.i18n.translate("MeasureTools:tools.GenericPrompts.restart");
+    const promptMainInstruction = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureLocation.mainInstruction");
+    const promptClickTap = IModelApp.localization.getLocalizedString("MeasureTools:tools.GenericPrompts.acceptPoint");
+    const promptRightClick = IModelApp.localization.getLocalizedString("MeasureTools:tools.GenericPrompts.restart");
 
     const mainInstruction = ToolAssistance.createInstruction(this.iconSpec, promptMainInstruction);
     const mouseInstructions: ToolAssistanceInstruction[] = [];

@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { Point2d, XAndY } from "@bentley/geometry-core";
-import { IModelApp } from "@bentley/imodeljs-frontend";
-import { RelativePosition } from "@bentley/ui-abstract";
-import { ActionButtonItemDef, ActionItemButton, CursorInformation, CursorPopupManager, ItemProps } from "@bentley/ui-framework";
-import { Direction } from "@bentley/ui-ninezone";
+import { Point2d, XAndY } from "@itwin/core-geometry";
+import { IModelApp } from "@itwin/core-frontend";
+import { RelativePosition } from "@itwin/appui-abstract";
+import { ActionButtonItemDef, ActionItemButton, CursorInformation, CursorPopupManager, ItemProps } from "@itwin/appui-react";
+import { Direction } from "@itwin/components-react";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { Measurement, MeasurementPickContext } from "../api/Measurement";
 import { MeasurementManager } from "../api/MeasurementManager";
@@ -71,8 +71,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "delete",
       iconSpec: "icon-measure-clear",
-      label: () => IModelApp.i18n.translate("MeasureTools:Measurements.clearMeasurement"),
-      tooltip: () => IModelApp.i18n.translate("MeasureTools:Measurements.clearMeasurement"),
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Measurements.clearMeasurement"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Measurements.clearMeasurement"),
       execute: (arg: Measurement[]) => {
         MeasurementManager.instance.dropMeasurement(arg);
         FeatureTracking.notifyFeature(MeasureToolsFeatures.MeasurementActions_Delete);
@@ -85,8 +85,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "open-properties",
       iconSpec: "icon-properties",
-      label: () => IModelApp.i18n.translate("MeasureTools:Generic.properties"),
-      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.properties"),
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.properties"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.properties"),
       execute: (args: Measurement[]) => {
         MeasurementSelectionSet.global.add(args);
       },
@@ -98,8 +98,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "unlock",
       iconSpec: "icon-lock-unlocked",
-      label: () => IModelApp.i18n.translate("MeasureTools:Generic.unlock"),
-      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.unlock"),
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.unlock"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.unlock"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -120,8 +120,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "lock",
       iconSpec: "icon-lock",
-      label: () => IModelApp.i18n.translate("MeasureTools:Generic.lock"),
-      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.lock"),
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.lock"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.lock"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -141,8 +141,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "hide-measurements",
       iconSpec: "icon-visibility-hide",
-      label: () => IModelApp.i18n.translate("MeasureTools:Generic.hideMeasurements"),
-      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.hideMeaurements"),
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideMeasurements"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideMeaurements"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -161,8 +161,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "display-measurements",
       iconSpec: "icon-visibility",
-      label: () => IModelApp.i18n.translate("MeasureTools:Generic.displayMeasurements"),
-      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.displayMeasurements"),
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayMeasurements"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayMeasurements"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -181,8 +181,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "display-labels",
       iconSpec: "icon-layers",
-      label: () => IModelApp.i18n.translate("MeasureTools:Generic.displayLabels"),
-      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.displayLabels"),
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayLabels"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayLabels"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -201,8 +201,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "hide-labels",
       iconSpec: "icon-layers-hide",
-      label: () => IModelApp.i18n.translate("MeasureTools:Generic.hideLabels"),
-      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.hideLabels"),
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideLabels"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideLabels"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -221,8 +221,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "display-rise-run",
       iconSpec: "icon-measure-2d-show",
-      label: () => IModelApp.i18n.translate("MeasureTools:Generic.displayMeasurementAxes"),
-      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.displayMeasurementAxes"),
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayMeasurementAxes"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayMeasurementAxes"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -241,8 +241,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "hide-rise-run",
       iconSpec: "icon-measure-2d-hide",
-      label: () => IModelApp.i18n.translate("MeasureTools:Generic.hideMeasurementAxes"),
-      tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.hideMeasurementAxes"),
+      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideMeasurementAxes"),
+      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideMeasurementAxes"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -312,7 +312,7 @@ export class MeasurementActionToolbar {
    * @param screenPoint Where on the screen the toolbar is to be positioned (e.g. cursor point)
    * @param offset Optional offset from the position. Default is (0,0)
    * @param relativePosition Optional direction the toolbar will open from. Default is Top (so will be above and centered from point + offset).
-   * @returns true if the toolba was opened, false if otherwise (e.g. no action items to view).
+   * @returns true if the toolbar was opened, false if otherwise (e.g. no action items to view).
    */
   public static openToolbar(measurements: Measurement[], screenPoint: XAndY, offset?: XAndY, relativePosition?: RelativePosition): boolean {
     // Ensure a previous toolbar was closed out

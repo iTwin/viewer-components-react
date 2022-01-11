@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { AxisOrder, Matrix3d, Vector3d } from "@bentley/geometry-core";
+import { AxisOrder, Matrix3d, Vector3d } from "@itwin/core-geometry";
 import {
   AccuDrawHintBuilder, BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
   ToolAssistanceInstruction, ToolAssistanceSection,
-} from "@bentley/imodeljs-frontend";
+} from "@itwin/core-frontend";
 import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
@@ -25,14 +25,16 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
     super();
   }
 
-  public onRestartTool(): void {
+  public async onRestartTool(): Promise<void> {
     const tool = new MeasureAreaTool();
-    if (!tool.run())
-      this.exitTool();
+    if (await tool.run())
+      return;
+
+    return this.exitTool();
   }
 
-  public override onReinitialize(): void {
-    super.onReinitialize();
+  public override async onReinitialize(): Promise<void> {
+    await super.onReinitialize();
     AccuDrawHintBuilder.deactivate();
   }
 
@@ -64,7 +66,7 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
 
     this.toolModel.addPoint(viewType, ev.point, false);
     if (undefined === this.toolModel.dynamicMeasurement) {
-      this.onReinitialize();
+      await this.onReinitialize();
     } else {
       this._sendHintsToAccuDraw(ev);
       this.updateToolAssistance();
@@ -112,7 +114,7 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
   public override async onResetButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
     // Attempt to close polygon
     if (this.toolModel.tryCommitMeasurement()) {
-      this.onReinitialize();
+      await this.onReinitialize();
       return EventHandled.Yes;
     }
 
@@ -138,19 +140,19 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
 
     let promptMainInstruction: string;
     if (hasEnoughPoints)
-      promptMainInstruction = IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.mainInstructionClose");
+      promptMainInstruction = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.mainInstructionClose");
     else
-      promptMainInstruction = IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.mainInstruction");
+      promptMainInstruction = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.mainInstruction");
 
-    const promptClickTap = IModelApp.i18n.translate("MeasureTools:tools.GenericPrompts.acceptPoint");
+    const promptClickTap = IModelApp.localization.getLocalizedString("MeasureTools:tools.GenericPrompts.acceptPoint");
 
     let promptRightClick: string;
     if (hasEnoughPoints)
-      promptRightClick = IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.rightClickCloseShape");
+      promptRightClick = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.rightClickCloseShape");
     else if (hasPoints)
-      promptRightClick = IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.rightClickClearShape");
+      promptRightClick = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.rightClickClearShape");
     else
-      promptRightClick = IModelApp.i18n.translate("MeasureTools:tools.GenericPrompts.restart");
+      promptRightClick = IModelApp.localization.getLocalizedString("MeasureTools:tools.GenericPrompts.restart");
 
     const mainInstruction = ToolAssistance.createInstruction(this.iconSpec, promptMainInstruction);
     const mouseInstructions: ToolAssistanceInstruction[] = [];
@@ -159,19 +161,19 @@ export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, Measur
     if (!ToolAssistance.createTouchCursorInstructions(touchInstructions)) {
       touchInstructions.push(ToolAssistance.createInstruction(ToolAssistanceImage.OneTouchTap, promptClickTap, false, ToolAssistanceInputMethod.Touch));
       if (hasEnoughPoints) {
-        const tmp = IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.oneTouchTapClose");
+        const tmp = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.oneTouchTapClose");
         touchInstructions.push(ToolAssistance.createInstruction(ToolAssistanceImage.OneTouchTap, tmp, false, ToolAssistanceInputMethod.Touch));
       }
     }
     mouseInstructions.push(ToolAssistance.createInstruction(ToolAssistanceImage.LeftClick, promptClickTap, false, ToolAssistanceInputMethod.Mouse));
     if (hasEnoughPoints) {
-      const tmp = IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.leftClickClose");
+      const tmp = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.leftClickClose");
       mouseInstructions.push(ToolAssistance.createInstruction(ToolAssistanceImage.LeftClick, tmp, false, ToolAssistanceInputMethod.Mouse));
     }
     mouseInstructions.push(ToolAssistance.createInstruction(ToolAssistanceImage.RightClick, promptRightClick, false, ToolAssistanceInputMethod.Mouse));
 
     if (undefined !== this.toolModel.dynamicMeasurement) {
-      const undoPointText = IModelApp.i18n.translate("MeasureTools:tools.MeasureArea.undoLastPoint");
+      const undoPointText = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureArea.undoLastPoint");
       mouseInstructions.push(this.createMouseUndoInstruction(undoPointText));
     } else {
       if (this.toolModel.canUndo)

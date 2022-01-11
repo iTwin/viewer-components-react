@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { Arc3d, IModelJson, Point3d, Ray3d, Vector3d, XYZProps } from "@bentley/geometry-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType, Viewport } from "@bentley/imodeljs-frontend";
+import { Id64String } from "@itwin/core-bentley";
+import { Arc3d, IModelJson, Point3d, Ray3d, Vector3d, XYZProps } from "@itwin/core-geometry";
+import { GeometryStreamProps } from "@itwin/core-common";
+import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType, Viewport } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
@@ -215,7 +215,7 @@ export class RadiusMeasurement extends Measurement {
   public override async getDecorationToolTip(
     _pickContext: MeasurementPickContext,
   ): Promise<HTMLElement | string> {
-    return IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.measurement");
+    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.measurement");
   }
 
   public override getDecorationGeometry(
@@ -370,9 +370,9 @@ export class RadiusMeasurement extends Measurement {
       QuantityType.LengthEngineering,
     );
 
-    const radius = this._arc!.circularRadius()!;
+    const radius = this._arc?.circularRadius() ?? 0.0;
     const diameter = radius * 2;
-    const length = this._arc!.curveLength();
+    const length = this._arc?.curveLength() ?? 0.0;
     const circumference = 2 * Math.PI * radius;
 
     const fRadius = IModelApp.quantityFormatter.formatQuantity(
@@ -392,32 +392,32 @@ export class RadiusMeasurement extends Measurement {
       lengthSpec,
     );
 
-    let title = IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.measurement");
+    let title = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.measurement");
     title += ` [${fRadius}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push({
-      label: IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.radius"),
+      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.radius"),
       name: "RadiusMeasurement_Radius",
       value: fRadius,
       aggregatableValue: (lengthSpec !== undefined) ? { value: radius, formatSpec: lengthSpec } : undefined,
     });
     data.properties.push({
-      label: IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.diameter"),
+      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.diameter"),
       name: "RadiusMeasurement_Diameter",
       value: fDiameter,
       aggregatableValue: (lengthSpec !== undefined) ? { value: length, formatSpec: lengthSpec } : undefined,
     });
     data.properties.push({
-      label: IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.arcLength"),
+      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.arcLength"),
       name: "RadiusMeasurement_ArcLength",
       value: fArcLength,
       aggregatableValue: (lengthSpec !== undefined) ? { value: length, formatSpec: lengthSpec } : undefined,
     });
     data.properties.push({
-      label: IModelApp.i18n.translate(
+      label: IModelApp.localization.getLocalizedString(
         "MeasureTools:tools.MeasureRadius.circleCircumference",
       ),
       name: "RadiusMeasurement_CircleCircumference",

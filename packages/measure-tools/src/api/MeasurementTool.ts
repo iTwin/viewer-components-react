@@ -3,12 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeDuration, BeUiEvent, Id64String } from "@bentley/bentleyjs-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
+import { BeDuration, BeUiEvent, Id64String } from "@itwin/core-bentley";
+import { GeometryStreamProps } from "@itwin/core-common";
 import {
   BeButtonEvent, DecorateContext, EventHandled, HitDetail, IModelApp, IModelConnection, NotifyMessageDetails, OutputMessageAlert,
   OutputMessagePriority, OutputMessageType, PrimitiveTool, ToolAssistance, ToolAssistanceInputMethod, ToolAssistanceInstruction,
-} from "@bentley/imodeljs-frontend";
+} from "@itwin/core-frontend";
 import { Feature, FeatureTracking } from "./FeatureTracking";
 import { Measurement } from "./Measurement";
 import { MeasurementToolModel } from "./MeasurementToolModel";
@@ -90,8 +90,8 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
 
   protected get feature(): Feature | undefined { return undefined; }
 
-  public override onPostInstall(): void {
-    super.onPostInstall();
+  public override async onPostInstall(): Promise<void> {
+    await super.onPostInstall();
 
     const feature = this.feature;
     if (feature)
@@ -113,12 +113,12 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
   }
 
   protected createMouseUndoInstruction(textOverride?: string): ToolAssistanceInstruction {
-    const text = textOverride || IModelApp.i18n.translate("MeasureTools:Generic.undoMeasurement");
+    const text = textOverride || IModelApp.localization.getLocalizedString("MeasureTools:Generic.undoMeasurement");
     return ToolAssistance.createKeyboardInstruction(ToolAssistance.createKeyboardInfo([ToolAssistance.ctrlKey, "Z"]), text, false, ToolAssistanceInputMethod.Mouse);
   }
 
   protected createMouseRedoInstruction(textOverride?: string): ToolAssistanceInstruction {
-    const text = textOverride || IModelApp.i18n.translate("MeasureTools:Generic.redoMeasurement");
+    const text = textOverride || IModelApp.localization.getLocalizedString("MeasureTools:Generic.redoMeasurement");
     return ToolAssistance.createKeyboardInstruction(ToolAssistance.createKeyboardInfo([ToolAssistance.ctrlKey, "Y"]), text, false, ToolAssistanceInputMethod.Mouse);
   }
 
@@ -174,8 +174,8 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     return true;
   }
 
-  public override onPostInstall(): void {
-    super.onPostInstall();
+  public override async onPostInstall(): Promise<void> {
+    await super.onPostInstall();
 
     if (this.saveRestoreSelection)
       this._selectionHolder.saveSelection(this.iModel, true);
@@ -185,8 +185,8 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     this.updateToolAssistance();
   }
 
-  public override onCleanup() {
-    super.onCleanup();
+  public override async onCleanup(): Promise<void> {
+    await super.onCleanup();
 
     if (this.saveRestoreSelection)
       this._selectionHolder.restoreSelection();
@@ -196,7 +196,7 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     this._toolModel.cleanup();
   }
 
-  public override onReinitialize(): void {
+  public override async onReinitialize(): Promise<void> {
     this.toolModel.reset(false);
     this.updateAccuSnap();
     this.updateToolAssistance();
@@ -205,7 +205,7 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
   public override async onUndoPreviousStep(): Promise<boolean> {
     // If we have an active measurement, reset to initial state
     if (undefined !== this._toolModel.dynamicMeasurement) {
-      this.onReinitialize();
+      await this.onReinitialize();
       return true;
     }
 
@@ -216,7 +216,7 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
       return result;
     }
 
-    const message = IModelApp.i18n.translate("MeasureTools:Generic.nothingToUndo");
+    const message = IModelApp.localization.getLocalizedString("MeasureTools:Generic.nothingToUndo");
     this.showMessage(OutputMessagePriority.Info, message);
     return false;
   }
@@ -232,16 +232,16 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
       return result;
     }
 
-    const message = IModelApp.i18n.translate("MeasureTools:Generic.nothingToRedo");
+    const message = IModelApp.localization.getLocalizedString("MeasureTools:Generic.nothingToRedo");
     this.showMessage(OutputMessagePriority.Info, message);
     return false;
   }
 
   public override async onResetButtonDown(_ev: BeButtonEvent): Promise<EventHandled> {
     if (undefined !== this.toolModel.dynamicMeasurement)
-      this.onReinitialize();
+      await this.onReinitialize();
     else
-      this.onRestartTool();
+      await this.onRestartTool();
 
     return EventHandled.Yes;
   }
@@ -251,7 +251,7 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
       return EventHandled.Yes;
 
     if (wentDown && "escape" === keyEvent.key.toLowerCase()) {
-      this.exitTool();
+      await this.exitTool();
       return EventHandled.Yes;
     }
 
@@ -279,7 +279,7 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     this._toolModel.decorate(context);
   }
 
-  public override onUnsuspend(): void {
+  public override async onUnsuspend(): Promise<void> {
     this.updateAccuSnap();
     this.updateToolAssistance();
   }

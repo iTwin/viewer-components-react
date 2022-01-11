@@ -3,12 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp } from "@bentley/imodeljs-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { Measurement, WidgetValue } from "./Measurement";
 
 export class MeasurementPropertyHelper {
   public static buildNameProperty(name: string): WidgetValue {
-    return { label: IModelApp.i18n.translate("MeasureTools:Generic.name"), name: "Measurement_Name", value: name };
+    return { label: IModelApp.localization.getLocalizedString("MeasureTools:Generic.name"), name: "Measurement_Name", value: name };
   }
 
   public static tryAddNameProperty(measurement: Measurement, properties: WidgetValue[]): boolean {

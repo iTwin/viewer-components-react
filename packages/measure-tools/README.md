@@ -71,8 +71,8 @@ MeasurementActionToolbar.addActionProvider(
       new MeasurementActionItemDef({
         id: "faded-toggle",
         iconSpec: "icon-palette",
-        label: () => IModelApp.i18n.translate("MeasureTools:Generic.faded"),
-        tooltip: () => IModelApp.i18n.translate("MeasureTools:Generic.faded"),
+        label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.faded"),
+        tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.faded"),
         execute: (args: Measurement[]) => {
           const notAllFaded = args.some(
             (m) => m.style !== WellKnownMeasurementStyle.Faded

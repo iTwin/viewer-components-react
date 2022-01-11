@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d, XAndY } from "@bentley/geometry-core";
-import { Cartographic } from "@bentley/imodeljs-common";
-import { IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
-import { FormatterSpec } from "@bentley/imodeljs-quantity";
+import { Point3d, XAndY } from "@itwin/core-geometry";
+import { Cartographic } from "@itwin/core-common";
+import { IModelApp, QuantityType } from "@itwin/core-frontend";
+import { FormatterSpec } from "@itwin/core-quantity";
 
 export class FormatterUtils {
 
@@ -21,14 +21,14 @@ export class FormatterUtils {
     const yStr = FormatterUtils.removeUnitSuffixes(IModelApp.quantityFormatter.formatQuantity(point.y, spec));
     const zStr = FormatterUtils.removeUnitSuffixes(IModelApp.quantityFormatter.formatQuantity(point.z, spec));
 
-    return IModelApp.i18n.translate("MeasureTools:Formatting.xyzPoint", { x: xStr, y: yStr, z: zStr });
+    return IModelApp.localization.getLocalizedString("MeasureTools:Formatting.xyzPoint", { x: xStr, y: yStr, z: zStr });
   }
 
   private static formatCoordinatesXYWithSpec(point: XAndY, spec: FormatterSpec): string {
     const xStr = FormatterUtils.removeUnitSuffixes(IModelApp.quantityFormatter.formatQuantity(point.x, spec));
     const yStr = FormatterUtils.removeUnitSuffixes(IModelApp.quantityFormatter.formatQuantity(point.y, spec));
 
-    return IModelApp.i18n.translate("MeasureTools:Formatting.xyPoint", { x: xStr, y: yStr });
+    return IModelApp.localization.getLocalizedString("MeasureTools:Formatting.xyPoint", { x: xStr, y: yStr });
   }
 
   public static async formatCoordinates(point: Point3d): Promise<string> {
@@ -84,10 +84,10 @@ export class FormatterUtils {
     const longSuffixKey = 0 < c.longitude ? "MeasureTools:Generic.longitudeEastSuffix" : "MeasureTools:Generic.longitudeWestSuffix";
 
     let str = FormatterUtils.formatAngleToDMS(Math.abs(c.latitude));
-    str += IModelApp.i18n.translate(latSuffixKey);
+    str += IModelApp.localization.getLocalizedString(latSuffixKey);
     str += ", ";
     str += FormatterUtils.formatAngleToDMS(Math.abs(c.longitude));
-    str += IModelApp.i18n.translate(longSuffixKey);
+    str += IModelApp.localization.getLocalizedString(longSuffixKey);
     return str;
   }
 
@@ -97,10 +97,10 @@ export class FormatterUtils {
     const longSuffixKey = 0 < c.longitude ? "MeasureTools:Generic.longitudeEastSuffix" : "MeasureTools:Generic.longitudeWestSuffix";
 
     let str = IModelApp.quantityFormatter.formatQuantity(Math.abs(c.latitude), latLongSpec);
-    str += IModelApp.i18n.translate(latSuffixKey);
+    str += IModelApp.localization.getLocalizedString(latSuffixKey);
     str += ", ";
     str += IModelApp.quantityFormatter.formatQuantity(Math.abs(c.longitude), latLongSpec);
-    str += IModelApp.i18n.translate(longSuffixKey);
+    str += IModelApp.localization.getLocalizedString(longSuffixKey);
     return str;
   }
 

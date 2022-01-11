@@ -5,7 +5,7 @@
 import {
   BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod, ToolAssistanceInstruction,
   ToolAssistanceSection,
-} from "@bentley/imodeljs-frontend";
+} from "@itwin/core-frontend";
 import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
@@ -22,10 +22,10 @@ export class MeasureRadiusTool extends MeasurementToolBase<RadiusMeasurement, Me
   // TODO: Change icon once UX team provides icon
   public static override iconSpec = "icon-three-points-circular-arc";
   public static get label() {
-    return IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.measureRadius");
+    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.measureRadius");
   }
   public static override get flyover() {
-    return IModelApp.i18n.translate("MeasureTools:tools.MeasureRadius.measureRadius");
+    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.measureRadius");
   }
 
   protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureRadius; }
@@ -34,20 +34,23 @@ export class MeasureRadiusTool extends MeasurementToolBase<RadiusMeasurement, Me
     super();
   }
 
-  public onRestartTool(): void {
+  public async onRestartTool(): Promise<void> {
     const tool = new MeasureRadiusTool();
-    if (!tool.run()) this.exitTool();
+    if (await tool.run())
+      return;
+
+    return this.exitTool();
   }
 
   /** Show tool assistance messages to user */
   public showPrompt() {
-    const identifyStartMessage = IModelApp.i18n.translate(
+    const identifyStartMessage = IModelApp.localization.getLocalizedString(
       "MeasureTools:tools.MeasureRadius.identifyStart",
     );
-    const identifyCenterMessage = IModelApp.i18n.translate(
+    const identifyCenterMessage = IModelApp.localization.getLocalizedString(
       "MeasureTools:tools.MeasureRadius.identifyMidpoint",
     );
-    const identifyEndMessage = IModelApp.i18n.translate(
+    const identifyEndMessage = IModelApp.localization.getLocalizedString(
       "MeasureTools:tools.MeasureRadius.identifyEnd",
     );
     let currentMsg = "";

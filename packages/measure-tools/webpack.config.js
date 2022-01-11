@@ -9,7 +9,7 @@ const glob = require("glob");
 
 module.exports = {
   mode: "development",
-  entry: glob.sync(path.resolve(__dirname, "lib/**/*.test.js")),
+  entry: glob.sync(path.resolve(__dirname, "lib/cjs/**/*.test.js")),
   output: {
     path: path.resolve(__dirname, "lib/test/webpack"),
     filename: "bundled-tests.js",

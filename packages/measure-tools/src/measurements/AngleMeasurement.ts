@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@bentley/bentleyjs-core";
-import { Angle, AngleSweep, Arc3d, AxisOrder, IModelJson, Matrix3d, Point3d, PointString3d, Vector3d, XYZProps } from "@bentley/geometry-core";
-import { GeometryStreamProps } from "@bentley/imodeljs-common";
-import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType } from "@bentley/imodeljs-frontend";
+import { Id64String } from "@itwin/core-bentley";
+import { Angle, AngleSweep, Arc3d, AxisOrder, IModelJson, Matrix3d, Point3d, PointString3d, Vector3d, XYZProps } from "@itwin/core-geometry";
+import { GeometryStreamProps } from "@itwin/core-common";
+import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
 import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
@@ -195,7 +195,7 @@ export class AngleMeasurement extends Measurement {
   public override async getDecorationToolTip(
     _pickContext: MeasurementPickContext,
   ): Promise<HTMLElement | string> {
-    return IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.measurement");
+    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.measurement");
   }
 
   public override getDecorationGeometry(
@@ -227,11 +227,11 @@ export class AngleMeasurement extends Measurement {
       return undefined;
 
     const v1 = Vector3d.createStartEnd(center, p0);
+    v1.normalizeInPlace();
     const v2 = Vector3d.createStartEnd(center, p1);
+    v2.normalizeInPlace();
     const length = Math.min(v1.magnitude(), v2.magnitude()) / 2.0;
-    const vn1 = v1.normalize();
-    const vn2 = v2.normalize();
-    const matrix = Matrix3d.createRigidFromColumns(vn1!, vn2!, AxisOrder.XYZ);
+    const matrix = Matrix3d.createRigidFromColumns(v1, v2, AxisOrder.XYZ);
     const angle = this.angle;
     if (matrix === undefined || angle === undefined)
       return undefined;
@@ -292,14 +292,14 @@ export class AngleMeasurement extends Measurement {
       angleSpec,
     );
 
-    let title = IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.measurement");
+    let title = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.measurement");
     title += ` [${fAngle}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push({
-      label: IModelApp.i18n.translate("MeasureTools:tools.MeasureAngle.angle"),
+      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.angle"),
       name: "AngleMeasurement_Angle",
       value: fAngle,
       aggregatableValue: (angleSpec !== undefined) ? { value: angle, formatSpec: angleSpec } : undefined,

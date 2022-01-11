@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { NoRenderApp } from "@bentley/imodeljs-frontend";
+import { NoRenderApp } from "@itwin/core-frontend";
 
 // Before all tests, initialize any global services
 before(async () => {
