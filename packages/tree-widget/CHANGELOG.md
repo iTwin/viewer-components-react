@@ -1,6 +1,13 @@
 # Change Log - @bentley/tree-widget-react
 
-This log was last generated on Tue, 23 Nov 2021 21:19:42 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Jan 2022 16:25:27 GMT and should not be manually modified.
+
+## 1.4.6
+Tue, 11 Jan 2022 16:25:27 GMT
+
+### Patches
+
+- Fix hide all button blocked by search bar
 
 ## 1.4.5
 Tue, 23 Nov 2021 21:19:42 GMT

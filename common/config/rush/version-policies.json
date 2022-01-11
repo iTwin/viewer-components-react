@@ -1,8 +1,7 @@
 [
   {
     "policyName": "deprecated",
-    "definitionName": "individualVersion",
-    "exemptFromRushChange": true
+    "definitionName": "individualVersion"
   },
   {
     "policyName": "tree-widget",
@@ -21,7 +20,7 @@
   {
     "policyName": "imodel-react-hooks",
     "definitionName": "individualVersion",
-    "lockedMajor": 1
+    "lockedMajor": 0
   },
   {
     "policyName": "geo-tools",
