@@ -4,13 +4,19 @@
     "definitionName": "individualVersion"
   },
   {
-    "policyName": "tree-widget",
+    "policyName": "itwin-tree-widget",
     "definitionName": "individualVersion",
-    "lockedMajor": 1
+    "lockedMajor": 0
   },
   {
-    "policyName": "property-grid",
-    "definitionName": "individualVersion"
+    "policyName": "itwin-property-grid",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
+  },
+  {
+    "policyName": "itwin-measure-tools",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "imodel-content-tree",
@@ -28,19 +34,8 @@
     "lockedMajor": 0
   },
   {
-    "policyName": "measure-tools",
-    "definitionName": "individualVersion",
-    "lockedMajor": 0
-  },
-  {
     "policyName": "breakdown-trees",
     "definitionName": "individualVersion",
     "lockedMajor": 0
-  },
-  {
-    "policyName": "prerelease-monorepo-lockStep",
-    "definitionName": "lockStepVersion",
-    "version": "0.1.0",
-    "nextBump": "minor"
   }
 ]

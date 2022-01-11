@@ -52,17 +52,17 @@
     {
       "packageName": "@itwin/measure-tools-react",
       "projectFolder": "packages/itwin/measure-tools",
-      "versionPolicyName": "measure-tools"
+      "versionPolicyName": "itwin-measure-tools"
     },
     {
       "packageName": "@itwin/tree-widget-react",
       "projectFolder": "packages/itwin/tree-widget",
-      "versionPolicyName": "prerelease-monorepo-lockStep"
+      "versionPolicyName": "itwin-tree-widget"
     },
     {
       "packageName": "@itwin/property-grid-react",
       "projectFolder": "packages/itwin/property-grid",
-      "versionPolicyName": "property-grid"
+      "versionPolicyName": "itwin-property-grid"
     }
   ]
 }

@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/itwin/viewer-components-react/tree/master/packages/tree-widget"
+    "url": "https://github.com/itwin/viewer-components-react/tree/master/packages/itwin/tree-widget"
   },
   "license": "MIT",
   "author": {
