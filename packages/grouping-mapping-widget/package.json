@@ -21,10 +21,9 @@
   "types": "lib/grouping-mapping-widget.d.ts",
   "scripts": {
     "build": "npm run clean && webpack && npm run copy-files ",
-    "build:watch": "npm run clean && webpack --watch",
-    "clean": "rimraf lib",
+    "clean": "rimraf lib .rush/temp/package-deps*.json",
     "copy-files": "ncp README.md lib/README.md && ncp CONTRIBUTING.md lib/CONTRIBUTING.md && ncp LICENSE.md lib/LICENSE.md",
-    "cover": "nyc npm -s test",
+    "cover": "",
     "lint": "npm run lint:ts && npm run lint:scss",
     "lint:copyright": "node scripts/copyrightLinter.js",
     "lint:fix": "npm run lint:ts -- --fix && npm run lint:scss -- --fix && npm run lint:copyright -- --fix */**/*.{js,ts,tsx,scss}",
@@ -36,26 +35,14 @@
     "test:watch": "npm -s test -- --reporter min --watch-extensions ts,tsx --watch"
   },
   "dependencies": {
-    "@bentley/bentleyjs-core": "^2.19.25",
-    "@bentley/geometry-core": "^2.19.25",
-    "@bentley/imodeljs-common": "^2.19.25",
-    "@bentley/imodeljs-frontend": "^2.19.25",
-    "@bentley/presentation-components": "^2.19.25",
-    "@bentley/presentation-frontend": "^2.19.25",
-    "@bentley/ui-framework": "^2.19.25",
-    "@itwin/itwinui-css": "^0.40.0",
-    "@itwin/itwinui-icons-react": "^1.3.0",
-    "@itwin/itwinui-react": "^1.22.0",
-    "@types/webpack": "^5.28.0",
-    "cross-fetch": "^3.1.4",
-    "simple-react-validator": "^1.6.1",
-    "stylelint-config-sass-guidelines": "^9.0.1"
+    "classnames": "^2.3.1"
   },
   "devDependencies": {
     "@bentley/webpack-tools-core": "^2.19.25",
     "@svgr/webpack": "^5.5.0",
     "@types/node": "^16.11.11",
     "@types/react": "^17.0.37",
+    "@types/webpack": "^5.28.0",
     "@typescript-eslint/eslint-plugin": "^5.6.0",
     "@typescript-eslint/parser": "^5.6.0",
     "css-loader": "^5.2.7",
@@ -76,6 +63,7 @@
     "style-loader": "^2.0.0",
     "stylelint": "^14.1.0",
     "stylelint-config-prettier": "^9.0.3",
+    "stylelint-config-sass-guidelines": "^9.0.1",
     "stylelint-config-standard-scss": "^3.0.0",
     "svg-sprite-loader": "^6.0.11",
     "svgo-loader": "^3.0.0",
@@ -89,6 +77,20 @@
     "webpack-cli": "^4.9.1"
   },
   "peerDependencies": {
+    "@bentley/bentleyjs-core": "^2.19.25",
+    "@bentley/geometry-core": "^2.19.25",
+    "@bentley/imodeljs-common": "^2.19.25",
+    "@bentley/imodeljs-frontend": "^2.19.25",
+    "@bentley/presentation-common": "^2.19.25",
+    "@bentley/presentation-components": "^2.19.25",
+    "@bentley/presentation-frontend": "^2.19.25",
+    "@bentley/ui-abstract": "^2.19.25",
+    "@bentley/ui-framework": "^2.19.25",
+    "@itwin/itwinui-css": "^0.40.0",
+    "@itwin/itwinui-icons-react": "^1.3.0",
+    "@itwin/itwinui-react": "^1.22.0",
+    "cross-fetch": "^3.1.4",
+    "simple-react-validator": "^1.6.1",
     "react": "16.13.1",
     "react-dom": "16.13.1"
   }

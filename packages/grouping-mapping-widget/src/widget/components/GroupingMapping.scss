@@ -1,0 +1,24 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+// Widgets by default don't get horizontal scrollbars...
+/* stylelint-disable-next-line selector-class-pattern */
+.nz-widget-contentRenderer {
+  width: 100%;
+}
+
+.group-mapping-container {
+  display: flex;
+  flex-direction: column;
+  padding: $iui-baseline $iui-m;
+  box-sizing: border-box;
+  height: 100%;
+  overflow: auto;
+}
+
+.field-legend {
+  color: $iui-color-system-gray;
+}

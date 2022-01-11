@@ -1,0 +1,4 @@
+scripts/**
+lib/**
+release-notes/**
+webpack.config.ts

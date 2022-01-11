@@ -1,21 +1,35 @@
 {
-  "extends": "./node_modules/@bentley/build-tools/tsconfig-base.json",
   "compilerOptions": {
     "target": "es2017",
-    "module": "commonjs",
-    "declarationMap": true,
-    "outDir": "./lib",
-    "skipLibCheck": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "outDir": "lib",
+    "declaration": true,
     "esModuleInterop": true,
+    "sourceMap": true,
+    "allowJs": false,
     "jsx": "react",
-    "preserveSymlinks": true,
-    "resolveJsonModule": true
+    "moduleResolution": "node",
+    "traceResolution": false,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "importHelpers": false,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true
   },
+  "files": [
+    "custom.d.ts"
+  ],
   "include": [
-    "./src/**/*.ts*"
+    "src/**/*"
   ],
   "exclude": [
-    "lib",
-    "node_modules"
-  ]
+    "lib/**/*"
+  ],
 }
