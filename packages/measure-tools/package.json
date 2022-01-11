@@ -1,6 +1,6 @@
 {
-  "name": "@bentley/measure-tools-react",
-  "version": "0.6.0",
+  "name": "@itwin/measure-tools-react",
+  "version": "0.1.0",
   "license": "MIT",
   "description": "Frontend framework and tools for measurements",
   "repository": {
