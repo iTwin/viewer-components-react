@@ -24,7 +24,7 @@ export const MoreOptionsButton: React.FC<MoreOptionsButtonProps> = (props: MoreO
     const items: React.ReactNode[] = [];
     props.optionItems.forEach((optionHandler: OptionItemHandler) => {
       items.push(
-        <div className={styles.itemContainer}>
+        <div key={optionHandler.key} className={styles.itemContainer}>
           <ContextMenuItem
             key={optionHandler.key}
             icon={optionHandler.toolIcon}

@@ -144,7 +144,7 @@ export class TreeNodeWrapper extends React.Component<TreeNodeWrapperProps, { row
         </ContextMenuItem>,
       );
     });
-    return items;
+    return items.reverse();
   }
 
   private async _renderRowContextMenu(node: TreeModelNode, treeModel: TreeModel, selectedTreenodeCount: number, x: number, y: number) {

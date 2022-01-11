@@ -2,6 +2,38 @@
   "name": "@bentley/breakdown-trees-react",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@bentley/breakdown-trees-react_v0.2.0",
+      "date": "Fri, 10 Dec 2021 15:33:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "package fix- Remove export statement from test directory"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Tests added"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.3",
+      "tag": "@bentley/breakdown-trees-react_v0.1.3",
+      "date": "Tue, 23 Nov 2021 21:19:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Export Data Trees"
+          },
+          {
+            "comment": "Accept additional Functionality Providers from client, Export required classes"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@bentley/breakdown-trees-react_v0.1.2",
       "date": "Sun, 10 Oct 2021 03:39:20 GMT",
