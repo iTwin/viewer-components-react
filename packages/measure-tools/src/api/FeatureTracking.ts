@@ -5,7 +5,7 @@
 
 import { BeUiEvent, GuidString, Logger } from "@itwin/core-bentley";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { TelemetryEvent } from "@bentley/telemetry-client";
+import { TelemetryEvent } from "@itwin/core-telemetry";
 import { UiFramework } from "@itwin/appui-react";
 import { MeasureToolsLoggerCategory } from "./MeasureToolsLoggerCategory";
 import { RpcActivity } from "@itwin/core-common";

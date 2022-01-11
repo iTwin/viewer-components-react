@@ -167,6 +167,7 @@ export class TextMarker implements CanvasDecoration {
       return;
     }
 
+    // eslint-disable-next-line deprecation/deprecation
     const elem = document.createElement("i");
     elem.className = `icon ${style.iconSpec}`;
 

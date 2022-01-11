@@ -7,10 +7,11 @@ import { BeUiEvent, Id64, Id64Arg, Id64String } from "@itwin/core-bentley";
 import {
   IModelConnection, SelectAddEvent, SelectionSetEvent, SelectionSetEventType, SelectRemoveEvent, SelectReplaceEvent,
 } from "@itwin/core-frontend";
-import { SessionStateActionId, SyncUiEventArgs, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
+import { SessionStateActionId, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
 import { Measurement } from "./Measurement";
 import { MeasurementSyncUiEventId } from "./MeasurementEnums";
 import { ShimFunctions } from "./ShimFunctions";
+import { UiSyncEventArgs } from "@itwin/appui-abstract";
 
 export interface MeasurementSelectAddEvent {
   type: SelectionSetEventType.Add;
@@ -439,7 +440,7 @@ export class MeasurementSelectionSet {
     }
   }
 
-  private onSyncEvent(args: SyncUiEventArgs) {
+  private onSyncEvent(args: UiSyncEventArgs ) {
     if (args.eventIds.has(SessionStateActionId.SetIModelConnection))
       this.changeActiveIModel(this.getUiFameworkIModel());
   }

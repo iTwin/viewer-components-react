@@ -8,7 +8,7 @@ import { Point2d, XAndY } from "@itwin/core-geometry";
 import { IModelApp } from "@itwin/core-frontend";
 import { RelativePosition } from "@itwin/appui-abstract";
 import { ActionButtonItemDef, ActionItemButton, CursorInformation, CursorPopupManager, ItemProps } from "@itwin/appui-react";
-import { Direction } from "@itwin/appui-layout-react";
+import { Direction } from "@itwin/components-react";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { Measurement, MeasurementPickContext } from "../api/Measurement";
 import { MeasurementManager } from "../api/MeasurementManager";
@@ -312,7 +312,7 @@ export class MeasurementActionToolbar {
    * @param screenPoint Where on the screen the toolbar is to be positioned (e.g. cursor point)
    * @param offset Optional offset from the position. Default is (0,0)
    * @param relativePosition Optional direction the toolbar will open from. Default is Top (so will be above and centered from point + offset).
-   * @returns true if the toolba was opened, false if otherwise (e.g. no action items to view).
+   * @returns true if the toolbar was opened, false if otherwise (e.g. no action items to view).
    */
   public static openToolbar(measurements: Measurement[], screenPoint: XAndY, offset?: XAndY, relativePosition?: RelativePosition): boolean {
     // Ensure a previous toolbar was closed out

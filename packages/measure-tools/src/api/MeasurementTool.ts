@@ -241,7 +241,7 @@ export abstract class MeasurementToolBase<T extends Measurement, ToolModel exten
     if (undefined !== this.toolModel.dynamicMeasurement)
       await this.onReinitialize();
     else
-      this.onRestartTool();
+      await this.onRestartTool();
 
     return EventHandled.Yes;
   }

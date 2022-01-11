@@ -45,7 +45,6 @@
     "!lib/**/test/**/*"
   ],
   "peerDependencies": {
-    "@bentley/telemetry-client": "rc",
     "@itwin/appui-abstract": "rc",
     "@itwin/appui-layout-react": "rc",
     "@itwin/appui-react": "rc",
@@ -56,13 +55,12 @@
     "@itwin/core-geometry": "rc",
     "@itwin/core-quantity": "rc",
     "@itwin/core-react": "rc",
+    "@itwin/core-telemetry": "rc",
     "react": "^17.0.0",
     "react-dom": "^17.0.0"
   },
   "devDependencies": {
     "@bentley/itwin-client": "rc",
-    "@bentley/product-settings-client": "rc",
-    "@bentley/telemetry-client": "rc",
     "@itwin/appui-abstract": "rc",
     "@itwin/appui-layout-react": "rc",
     "@itwin/appui-react": "rc",
@@ -78,6 +76,7 @@
     "@itwin/core-orbitgt": "rc",
     "@itwin/core-quantity": "rc",
     "@itwin/core-react": "rc",
+    "@itwin/core-telemetry": "rc",
     "@itwin/eslint-plugin": "rc",
     "@itwin/imodel-components-react": "rc",
     "@itwin/presentation-common": "rc",
@@ -123,7 +122,7 @@
     "plugins": [
       "@itwin"
     ],
-    "extends": "plugin:@itwin/itwinjs-recommended",
+    "extends": "plugin:@itwin/ui",
     "rules": {
       "@typescript-eslint/unbound-method": "off"
     }
