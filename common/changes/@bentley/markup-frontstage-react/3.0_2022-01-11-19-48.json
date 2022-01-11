@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/markup-frontstage-react",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@bentley/markup-frontstage-react"
+}
