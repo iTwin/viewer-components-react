@@ -182,6 +182,7 @@ export const ElementList = ({
           onClick={onBack}
           onKeyDown={onBack}
           role="button"
+          tabIndex={0}
         >
           <Icon
             className="property-grid-react-element-list-icon"

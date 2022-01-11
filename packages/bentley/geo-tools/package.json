@@ -29,7 +29,8 @@
     "rebuild": "npm run clean && npm run build",
     "copy:assets": "cpx \"./src/**/*.{*css,json,svg}\" \"./lib\" && cpx \"./public/**/*\" \"./lib/public\"",
     "cover": "nyc npm test",
-    "lint": "eslint ./src/**/*.{ts,tsx} 1>&2",
+    "lint": "",
+    "lint:real": "eslint ./src/**/*.{ts,tsx} 1>&2",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test": "mocha --opts ./mocha.opts \"./lib/test/**/*.test.js\""
   },

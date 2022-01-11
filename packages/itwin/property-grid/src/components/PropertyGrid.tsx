@@ -64,7 +64,7 @@ export const PropertyGrid = ({
   onInfoButton,
   onBackButton,
   disableUnifiedSelection,
-  instanceKey
+  instanceKey,
 }: PropertyGridPropsWithSingleElement) => {
   const iModelConnection = useActiveIModelConnection();
 
@@ -375,6 +375,7 @@ export const PropertyGrid = ({
             onClick={onBackButton}
             onKeyDown={onBackButton}
             role="button"
+            tabIndex={0}
           >
             <Icon
               className="property-grid-react-panel-icon"
@@ -395,6 +396,7 @@ export const PropertyGrid = ({
             onKeyDown={onInfoButton}
             title={PropertyGridManager.translate("element-list.title")}
             role="button"
+            tabIndex={0}
           >
             <Icon
               className="property-grid-react-panel-icon"

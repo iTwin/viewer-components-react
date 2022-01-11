@@ -136,15 +136,16 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
               : "translate(-100%,0)",
           }}
         >
+          {/* eslint-disable-next-line react/display-name */}
           {(index) => (style) =>
-          (
-            <animated.div
-              className="property-grid-react-animated-tab"
-              style={style}
-            >
-              {items[index]}
-            </animated.div>
-          )}
+            (
+              <animated.div
+                className="property-grid-react-animated-tab"
+                style={style}
+              >
+                {items[index]}
+              </animated.div>
+            )}
         </Transition>
       </div>
     </div>

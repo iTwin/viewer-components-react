@@ -68,6 +68,7 @@
     "@types/react": "^17.0.19",
     "@types/react-dom": "^17.0.9",
     "@types/react-redux": "^7.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
     "cpx": "^1.5.0",
     "eslint": "^7.11.0",
     "react": "^17.0.2",
@@ -103,9 +104,7 @@
     "plugins": [
       "@itwin"
     ],
-    "extends": [
-      "plugin:@itwin/ui"
-    ],
+    "extends": "plugin:@itwin/ui",
     "rules": {
       "@typescript-eslint/no-shadow": "off"
     }
