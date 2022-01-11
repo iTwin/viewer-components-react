@@ -97,10 +97,10 @@ export const PropertyGrid = ({
   const [title, setTitle] = useState<PropertyRecord>();
   const [className, setClassName] = useState<string>("");
   const [contextMenu, setContextMenu] = useState<
-    PropertyGridContextMenuArgs | undefined
+  PropertyGridContextMenuArgs | undefined
   >(undefined);
   const [contextMenuItemInfos, setContextMenuItemInfos] = useState<
-    ContextMenuItemInfo[] | undefined
+  ContextMenuItemInfo[] | undefined
   >(undefined);
   const [showNullValues, setShowNullValues] = useState<boolean>(true);
   const [filterer, setFilterer] = useState<PropertyDataFiltererBase>(
