@@ -36,3 +36,6 @@
 
 /packages/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty
 /common/changes/@bentley/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty
+
+/packages/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw
+/common/changes/@bentley/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw

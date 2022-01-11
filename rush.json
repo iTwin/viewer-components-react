@@ -65,6 +65,11 @@
       "packageName": "@bentley/breakdown-trees-react",
       "projectFolder": "packages/breakdown-trees",
       "versionPolicyName": "breakdown-trees"
+    },
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "projectFolder": "packages/grouping-mapping-widget",
+      "versionPolicyName": "grouping-mapping-widget"
     }
   ]
 }
