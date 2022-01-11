@@ -2,24 +2,23 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
-import * as React from "react";
-import { RegisteredRuleset, Ruleset } from "@bentley/presentation-common";
+import React, { useCallback, useState } from "react";
+import { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
 import {
   IPresentationTreeDataProvider,
   usePresentationTreeNodeLoader,
   useUnifiedSelectionTreeEventHandler,
   PresentationTreeDataProvider,
-} from "@bentley/presentation-components";
+} from "@itwin/presentation-components";
 import {
-  useVisibleTreeNodes,
   SelectionMode,
   ControlledTree,
-} from "@bentley/ui-components";
-import { Presentation } from "@bentley/presentation-frontend";
+  useTreeModel,
+} from "@itwin/components-react";
+import { Presentation } from "@itwin/presentation-frontend";
 import "./TreeWithRulesetTree.scss";
-import { connectIModelConnection } from "@bentley/ui-framework";
-import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { IModelConnection } from "@itwin/core-frontend";
+import { useResizeObserver } from "@itwin/core-react";
 
 export interface ControlledTreeProps {
   iModel: IModelConnection;
@@ -114,30 +113,38 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (
   const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
     ruleset: props.rulesetId,
-    preloadingEnabled: false,
     pagingSize: props.pageSize || 20,
-    dataProvider: props.dataProvider,
   });
-  nodeLoader.dataProvider;
+
   const modelSource = nodeLoader.modelSource;
   const unifiedSelectionEventHandler = useUnifiedSelectionTreeEventHandler({
     nodeLoader,
     collapsedChildrenDisposalEnabled: true,
   });
 
-  const visibleNodes = useVisibleTreeNodes(modelSource);
+  const [height, setHeight] = useState(0);
+  const [width, setWidth] = useState(0);
+  const handleResize = useCallback((w: number, h: number) => {
+    setHeight(h);
+    setWidth(w);
+  }, []);
+  const ref = useResizeObserver<HTMLDivElement>(handleResize);
+
+  const treeModel = useTreeModel(modelSource);
 
   return (
-    <ControlledTree
-      visibleNodes={visibleNodes}
-      nodeLoader={nodeLoader}
-      treeEvents={unifiedSelectionEventHandler}
-      selectionMode={SelectionMode.Extended}
-    />
+    <div ref={ref} style={{ width: "100%", height: "100%" }}>
+      {width && height && (
+        <ControlledTree
+          model={treeModel}
+          nodeLoader={nodeLoader}
+          eventsHandler={unifiedSelectionEventHandler}
+          selectionMode={SelectionMode.Extended}
+          width={width}
+          height={height}
+        />
+      )}
+    </div>
   );
 };
 
-export const ConnectedSimpleTreeWithRuleset = connectIModelConnection(
-  null,
-  null
-)(SimpleTreeWithRuleset); // tslint:disable-line

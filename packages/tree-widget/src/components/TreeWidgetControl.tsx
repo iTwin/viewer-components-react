@@ -6,21 +6,22 @@
 import {
   WidgetControl,
   ConfigurableCreateInfo,
-  SpatialContainmentTree,
-  ClassGroupingOption
-} from "@bentley/ui-framework";
+  ClassGroupingOption,
+} from "@itwin/appui-react";
 import React from "react";
-import { ModelsTreeComponent } from "./trees/ModelsTree";
-import { CategoriesTreeComponent } from "./trees/CategoriesTree";
-import { IModelConnection, Viewport } from "@bentley/imodeljs-frontend";
+import {
+  ModelsTreeComponent,
+  CategoriesTreeComponent,
+  SpatialTreeComponent,
+} from "./trees";
+import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
-import { SelectableContentDefinition } from "@bentley/ui-components";
+import { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
 
 export interface TreeWidgetControlOptions {
   iModelConnection: IModelConnection;
   activeView?: Viewport;
-  enablePreloading?: boolean;
   enableElementsClassGrouping?: boolean;
   allViewports?: boolean;
   additionalTrees?: SelectableContentDefinition[];
@@ -33,14 +34,14 @@ export interface TreeWidgetControlOptions {
     modelsTree?: () => React.ReactNode;
     categoriesTree?: () => React.ReactNode;
     spatialTree?: () => React.ReactNode;
-  }
+  };
 }
 
 export class TreeWidgetControl extends WidgetControl {
   constructor(info: ConfigurableCreateInfo, options: TreeWidgetControlOptions) {
     super(info, options);
 
-    const { iModelConnection: imodel, activeView, enablePreloading } = options;
+    const { iModelConnection: imodel, activeView } = options;
     const modelsTreeProps = options.additionalProps?.modelsTree;
     const categoriesTreeProps = options.additionalProps?.categoriesTree;
     const spatialTreeProps = options.additionalProps?.spatialTree;
@@ -56,7 +57,6 @@ export class TreeWidgetControl extends WidgetControl {
         iModel={imodel}
         allViewports={allViewPorts}
         activeView={activeView}
-        enablePreloading={enablePreloading}
         enableElementsClassGrouping={enableElementsClassGrouping}
         {...modelsTreeProps}
       />
@@ -67,15 +67,13 @@ export class TreeWidgetControl extends WidgetControl {
         iModel={imodel}
         allViewports={allViewPorts}
         activeView={activeView}
-        enablePreloading={enablePreloading}
         {...categoriesTreeProps}
       />
     );
 
     const spatialContainmentComponent = (
-      <SpatialContainmentTree
+      <SpatialTreeComponent
         iModel={imodel}
-        enablePreloading={enablePreloading}
         enableElementsClassGrouping={
           enableElementsClassGrouping
             ? ClassGroupingOption.Yes
@@ -89,17 +87,23 @@ export class TreeWidgetControl extends WidgetControl {
       {
         label: TreeWidget.translate("modeltree"),
         id: "model-tree",
-        render: modelsTreeReplacement ? modelsTreeReplacement : () => modelsTreeComponent,
+        render: modelsTreeReplacement
+          ? modelsTreeReplacement
+          : () => modelsTreeComponent,
       },
       {
         label: TreeWidget.translate("categories"),
         id: "categories-tree",
-        render: categoriesTreeReplacement ? categoriesTreeReplacement : () => categoriesTreeComponent,
+        render: categoriesTreeReplacement
+          ? categoriesTreeReplacement
+          : () => categoriesTreeComponent,
       },
       {
         label: TreeWidget.translate("containment"),
         id: "spatial-containment-tree",
-        render: spatialTreeReplacement ? spatialTreeReplacement : () => spatialContainmentComponent,
+        render: spatialTreeReplacement
+          ? spatialTreeReplacement
+          : () => spatialContainmentComponent,
       },
     ];
 

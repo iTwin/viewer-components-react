@@ -1,11 +1,6 @@
 [
   {
-    "policyName": "imodel-select",
-    "definitionName": "individualVersion",
-    "lockedMajor": 2
-  },
-  {
-    "policyName": "markup-frontstage",
+    "policyName": "deprecated",
     "definitionName": "individualVersion"
   },
   {
@@ -25,7 +20,7 @@
   {
     "policyName": "imodel-react-hooks",
     "definitionName": "individualVersion",
-    "lockedMajor": 1
+    "lockedMajor": 0
   },
   {
     "policyName": "geo-tools",
@@ -36,5 +31,16 @@
     "policyName": "measure-tools",
     "definitionName": "individualVersion",
     "lockedMajor": 0
+  },
+  {
+    "policyName": "breakdown-trees",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
+  },
+  {
+    "policyName": "prerelease-monorepo-lockStep",
+    "definitionName": "lockStepVersion",
+    "version": "0.1.0",
+    "nextBump": "minor"
   }
 ]

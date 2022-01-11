@@ -5,29 +5,29 @@
 
 import "./ElementList.scss";
 
-import { IModelConnection } from "@bentley/imodeljs-frontend";
-import { InstanceKey } from "@bentley/presentation-common";
-import { PresentationLabelsProvider } from "@bentley/presentation-components";
+import { IModelConnection } from "@itwin/core-frontend";
+import { InstanceKey } from "@itwin/presentation-common";
+import { PresentationLabelsProvider } from "@itwin/presentation-components";
 import {
   PropertyDescription,
   PropertyEditorInfo,
   PropertyRecord,
   PropertyValue,
   PropertyValueFormat,
-} from "@bentley/ui-abstract";
+} from "@itwin/appui-abstract";
 import {
   ColumnDescription,
   RowItem,
   SelectionMode,
   SimpleTableDataProvider,
   Table,
-} from "@bentley/ui-components";
-import { Icon } from "@bentley/ui-core";
+} from "@itwin/components-react";
+import { Icon } from "@itwin/core-react";
 import classnames from "classnames";
 import * as React from "react";
 
 import { PropertyGridManager } from "../PropertyGridManager";
-import { Logger } from "@bentley/bentleyjs-core";
+import { Logger } from "@itwin/core-bentley";
 
 export interface ElementListProps {
   iModelConnection: IModelConnection;
@@ -170,6 +170,8 @@ export const ElementList = ({
     [onSelect]
   );
 
+  const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
+
   return (
     <div
       className={classnames("property-grid-react-element-list", rootClassName)}
@@ -178,6 +180,8 @@ export const ElementList = ({
         <div
           className="property-grid-react-element-list-back-btn"
           onClick={onBack}
+          onKeyDown={onBack}
+          role="button"
         >
           <Icon
             className="property-grid-react-element-list-icon"
@@ -185,11 +189,12 @@ export const ElementList = ({
           />
         </div>
         <div className="property-grid-react-element-list-title">
-          {PropertyGridManager.translate("element-list.title")}
+          {title}
         </div>
       </div>
       <div className="property-grid-react-element-list-container">
         {dataProvider && (
+          /* eslint-disable-next-line deprecation/deprecation */
           <Table
             dataProvider={dataProvider}
             onRowsSelected={onRowsSelected}
@@ -197,11 +202,6 @@ export const ElementList = ({
             hideHeader={true}
           />
         )}
-      </div>
-      <div className="property-grid-react-element-list-results-label">
-        {`${instanceKeys.length} ${PropertyGridManager.translate(
-          "element-list.results"
-        )}`}
       </div>
     </div>
   );

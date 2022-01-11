@@ -34,7 +34,7 @@ const copyToClipboardWin = (info: string) => {
 
     e.clipboardData.setData("text/plain", info);
     e.preventDefault();
-    document.removeEventListener("copy", listener!);
+    document.removeEventListener("copy", listener);
   };
   document.addEventListener("copy", listener);
   document.execCommand("copy");

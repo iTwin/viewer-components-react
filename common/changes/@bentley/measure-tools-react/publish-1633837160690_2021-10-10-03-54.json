@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/measure-tools-react",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@bentley/measure-tools-react"
+}

@@ -1,6 +1,6 @@
 {
-  "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
-  "id": "StoreysAndRooms",
+  "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
+  "id": "tree-widget-react/StoriesBreakdown",
   "rules": [
     {
       "ruleType": "RootNodes",
@@ -10,9 +10,7 @@
           "classes": [
             {
               "schemaName": "BuildingSpatial",
-              "classNames": [
-                "Story"
-              ]
+              "classNames": ["Story"]
             }
           ],
           "arePolymorphic": true,

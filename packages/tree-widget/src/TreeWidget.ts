@@ -3,32 +3,30 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as i18next from "i18next";
-import { I18N } from "@bentley/imodeljs-i18n";
-import { UiError, getClassName } from "@bentley/ui-abstract";
-import { IModelApp } from "@bentley/imodeljs-frontend";
+import { UiError, getClassName } from "@itwin/appui-abstract";
+import { IModelApp } from "@itwin/core-frontend";
+import { Localization } from "@itwin/core-common";
+import { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
  * Entry point for static initialization required by various components used in the package.
  * @public
  */
 export class TreeWidget {
-  private static _i18n?: I18N;
+  private static _i18n?: Localization;
   private static _initialized?: boolean;
 
   /**
    * Called by IModelApp to initialize the Tree Widget
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n?: I18N): Promise<void> {
-    if (this._initialized)
-      return;
+  public static async initialize(i18n?: Localization): Promise<void> {
+    if (this._initialized) return;
 
     this._initialized = true;
-    TreeWidget._i18n = i18n ?? IModelApp.i18n;
+    TreeWidget._i18n = i18n ?? IModelApp.localization;
 
-    return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace)
-      .readFinished;
+    return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace);
   }
 
   /** Unregisters the TreeWidget internationalization service namespace */
@@ -39,7 +37,7 @@ export class TreeWidget {
   }
 
   /** The internationalization service created by the IModelApp. */
-  public static get i18n(): I18N {
+  public static get i18n(): Localization {
     if (!TreeWidget._i18n)
       throw new UiError(
         TreeWidget.loggerCategory(this),
@@ -61,9 +59,9 @@ export class TreeWidget {
    */
   public static translate(
     key: string | string[],
-    options?: i18next.TranslationOptions
+    options?: LocalizationOptions
   ): string {
-    return TreeWidget.i18n.translateWithNamespace(
+    return TreeWidget.i18n.getLocalizedStringWithNamespace(
       TreeWidget.i18nNamespace,
       key,
       options

@@ -2,6 +2,18 @@
   "name": "@bentley/imodel-content-tree-react",
   "entries": [
     {
+      "version": "0.3.3",
+      "tag": "@bentley/imodel-content-tree-react_v0.3.3",
+      "date": "Tue, 23 Nov 2021 21:19:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Load InformationContentElement nodes under geometric models"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.2",
       "tag": "@bentley/imodel-content-tree-react_v0.3.2",
       "date": "Tue, 08 Jun 2021 21:23:59 GMT",

@@ -1,29 +1,32 @@
-# @bentley/tree-widget-react
+# @itwin/tree-widget-react
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 
-The tree-widget-react package provides a UiProvider class - `TreeWidgetUiItemsProvider` - which can be passed into the `uiProviders` prop of the iTwin Viewer's `<Viewer />` component to provide access to the following features:
+The tree-widget-react package provides React components to access Models and Categories within an iModel via a UiProvider, `TreeWidgetUiItemsProvider`.
 
-- Spatial Containment Tree
+The package also provides the underlying component, `TreeWidgetComponent`, which you can wrap within your own custom UiProvider and pass in your own custom trees to display.
 
-- Models Tree
+## Usage
 
-- Categories Tree
+### What to add in your iTwin AppUI based application
 
-The package also provides the underlying component - `TreeWidgetComponent` - which you can wrap within your own custom UiProvider and pass in your own custom trees to display.
+With a few short lines, you can add the tree widget to your app.
 
-## Sample usage
-
-Initializing `TreeWidget` before using the `TreeWidgetUiItemsProvider` is **required**
+#### Call TreeWidget.initialize() **_before_** making use of the provided Tree Widget Provider
 
 ```ts
-const handleOnIModelAppInit = async () => {
-    await TreeWidget.initialize(IModelApp.i18n);
-  };
+import { TreeWidget } from "@itwin/tree-widget-react";
+...
+await TreeWidget.initialize(IModelApp.localization);
+```
 
-<Viewer
-  ...
-  onIModelAppInit={handleOnIModelAppInit}
-  uiProviders={[new TreeWidgetUiItemsProvider(props)]}
-/>
+#### Register Tree Widget Provider
+
+```ts
+import { UiItemsManager } from "@itwin/appui-abstract";
+import { TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
+...
+UiItemsManager.register(
+  new TreeWidgetUiItemsProvider({ ...TreeWidgetControlOptions })
+);
 ```

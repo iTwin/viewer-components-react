@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
-import { PropertyCategory, PropertyData } from "@bentley/ui-components";
+import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import { PropertyCategory, PropertyData } from "@itwin/components-react";
 
 export class AutoExpandingPropertyDataProvider extends PresentationPropertyDataProvider {
-  public async getData(): Promise<PropertyData> {
+  public override async getData(): Promise<PropertyData> {
     const result = await super.getData();
     this.expandCategories(result.categories);
     return result;

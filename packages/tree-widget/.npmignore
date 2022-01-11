@@ -5,4 +5,4 @@
 !lib/**/*.js.map
 !lib/**/*.*css
 !lib/public/**/*
-!lib/components/rulesets/**/*
+!lib/**/components/rulesets/**/*

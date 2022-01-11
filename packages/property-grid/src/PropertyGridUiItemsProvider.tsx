@@ -10,7 +10,7 @@ import {
   StageUsage,
   UiItemsProvider,
   WidgetState,
-} from "@bentley/ui-abstract";
+} from "@itwin/appui-abstract";
 import * as React from "react";
 
 import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid";
@@ -21,9 +21,9 @@ import { PropertyGridProps } from "./types";
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
 
-  private _props?: Partial<PropertyGridProps>;
+  private _props?: PropertyGridProps;
 
-  constructor(props?: Partial<PropertyGridProps>) {
+  constructor(props?: PropertyGridProps) {
     this._props = props;
   }
 

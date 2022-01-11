@@ -8,27 +8,25 @@ import {
   StagePanelSection,
   StageUsage,
   UiItemsProvider,
-} from "@bentley/ui-abstract";
-import {
-  SpatialContainmentTree,
-  ClassGroupingOption,
-  UiFramework
-} from "@bentley/ui-framework";
+} from "@itwin/appui-abstract";
+import { ClassGroupingOption, UiFramework } from "@itwin/appui-react";
 import React from "react";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
-import { CategoriesTreeComponent } from "./trees/CategoriesTree";
-import { ModelsTreeComponent } from "./trees/ModelsTree";
-import { IModelConnection, Viewport } from "@bentley/imodeljs-frontend";
-import { SelectableContentDefinition } from "@bentley/ui-components";
+import {
+  ModelsTreeComponent,
+  CategoriesTreeComponent,
+  SpatialTreeComponent,
+} from "./trees";
+import { IModelConnection, Viewport } from "@itwin/core-frontend";
+import { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
 import { TreeWidgetControlOptions } from "./TreeWidgetControl";
 
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
-  public readonly id = "TreeUiitemsProvider";
+  public readonly id = "TreeWidgetUiitemsProvider";
 
   private _imodel?: IModelConnection;
   private _activeView?: Viewport;
-  private _enablePreloading?: boolean;
   private _enableElementsClassGrouping?: boolean;
   private _allViewports?: boolean;
   private _additionalTrees?: SelectableContentDefinition[];
@@ -42,7 +40,6 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   constructor(props?: Partial<TreeWidgetControlOptions>) {
     this._imodel = props?.iModelConnection;
     this._activeView = props?.activeView;
-    this._enablePreloading = props?.enablePreloading;
     this._enableElementsClassGrouping = props?.enableElementsClassGrouping;
     this._allViewports = props?.allViewports;
     this._additionalTrees = props?.additionalTrees;
@@ -58,7 +55,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
     _stageId: string,
     stageUsage: string,
     location: StagePanelLocation,
-    _section: StagePanelSection | undefined,
+    _section: StagePanelSection | undefined
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
     const imodel = UiFramework.getIModelConnection();
@@ -67,13 +64,11 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       location === StagePanelLocation.Right &&
       imodel !== undefined
     ) {
-
       const modelsTreeComponent = (
         <ModelsTreeComponent
           iModel={this._imodel ?? imodel}
           allViewports={this._allViewports}
           activeView={this._activeView}
-          enablePreloading={this._enablePreloading}
           enableElementsClassGrouping={this._enableElementsClassGrouping}
           {...this._modelsTreeProps}
         />
@@ -84,15 +79,13 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
           iModel={this._imodel ?? imodel}
           allViewports={this._allViewports}
           activeView={this._activeView}
-          enablePreloading={this._enablePreloading}
           {...this._categoriesTreeProps}
         />
       );
 
       const spatialContainmentComponent = (
-        <SpatialContainmentTree
+        <SpatialTreeComponent
           iModel={this._imodel ?? imodel}
-          enablePreloading={this._enablePreloading}
           enableElementsClassGrouping={
             this._enableElementsClassGrouping
               ? ClassGroupingOption.Yes
@@ -106,17 +99,23 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
         {
           label: TreeWidget.translate("modeltree"),
           id: "model-tree",
-          render: this._modelsTreeReplacement ? this._modelsTreeReplacement : () => modelsTreeComponent,
+          render: this._modelsTreeReplacement
+            ? this._modelsTreeReplacement
+            : () => modelsTreeComponent,
         },
         {
           label: TreeWidget.translate("categories"),
           id: "categories-tree",
-          render: this._categoriesTreeReplacement ? this._categoriesTreeReplacement : () => categoriesTreeComponent,
+          render: this._categoriesTreeReplacement
+            ? this._categoriesTreeReplacement
+            : () => categoriesTreeComponent,
         },
         {
           label: TreeWidget.translate("containment"),
           id: "spatial-containment-tree",
-          render: this._spatialTreeReplacement ? this._spatialTreeReplacement : () => spatialContainmentComponent,
+          render: this._spatialTreeReplacement
+            ? this._spatialTreeReplacement
+            : () => spatialContainmentComponent,
         },
       ];
 
@@ -127,9 +126,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       widgets.push({
         id: "tree",
         label: TreeWidget.translate("treeview"),
-        getWidgetContent: () =>
-          <TreeWidgetComponent trees={trees} />
-        ,
+        getWidgetContent: () => <TreeWidgetComponent trees={trees} />,
       });
     }
 
