@@ -4,13 +4,19 @@
     "definitionName": "individualVersion"
   },
   {
-    "policyName": "tree-widget",
+    "policyName": "itwin-tree-widget",
     "definitionName": "individualVersion",
-    "lockedMajor": 1
+    "lockedMajor": 0
   },
   {
-    "policyName": "property-grid",
-    "definitionName": "individualVersion"
+    "policyName": "itwin-property-grid",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
+  },
+  {
+    "policyName": "itwin-measure-tools",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "imodel-content-tree",
@@ -24,11 +30,6 @@
   },
   {
     "policyName": "geo-tools",
-    "definitionName": "individualVersion",
-    "lockedMajor": 0
-  },
-  {
-    "policyName": "measure-tools",
     "definitionName": "individualVersion",
     "lockedMajor": 0
   },

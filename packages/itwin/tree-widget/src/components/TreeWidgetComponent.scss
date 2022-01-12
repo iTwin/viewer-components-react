@@ -1,0 +1,64 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "~@itwin/core-react/lib/esm/core-react/index";
+
+.tree-widget-visibility-widget {
+  padding: $uicore-s;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  .components-selectable-content {
+    flex: 1;
+  }
+
+  .components-selectable-content-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: $uicore-xs;
+
+    .uicore-reactSelectTop {
+      flex: 1;
+    }
+  }
+
+  .components-selectable-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%;
+  }
+
+  .visibility-tree-toolbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: $uicore-xs;
+
+    .tree-toolbar-searchbox {
+      margin-left: auto;
+
+      .components-filtering-input {
+        margin: 0;
+      }
+    }
+  }
+}
+
+.tree-widget-select {
+  margin-bottom: $uicore-xs;
+}
+
+.tree-widget-tree-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tree-widget-search-bar {
+  margin-bottom: $uicore-s;
+}
