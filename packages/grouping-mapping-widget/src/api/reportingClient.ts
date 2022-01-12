@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from '@bentley/imodeljs-frontend';
-import { AuthorizationClient } from '@bentley/itwin-client';
+import { FrontendAuthorizationClient } from '@bentley/frontend-authorization-client';
 import { getConfig } from '../config';
 
 import {
@@ -52,7 +52,7 @@ class ReportingClient {
 
   public async getMappings(iModelId: string) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.getMappings(
       iModelId,
@@ -68,7 +68,7 @@ class ReportingClient {
     mapping: MappingCreateReportingAPI,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.createMapping(
       iModelId,
@@ -83,7 +83,7 @@ class ReportingClient {
     mapping: MappingUpdateReportingAPI,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.updateMapping(
       iModelId,
@@ -95,7 +95,7 @@ class ReportingClient {
 
   public async deleteMapping(iModelId: string, mappingId: string) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.deleteMapping(
       iModelId,
@@ -106,7 +106,7 @@ class ReportingClient {
 
   public async getGroups(iModelId: string, mappingId: string) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.getGroups(
       iModelId,
@@ -121,7 +121,7 @@ class ReportingClient {
     group: GroupCreateReportingAPI,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.createGroup(
       iModelId,
@@ -133,7 +133,7 @@ class ReportingClient {
 
   public async getGroup(iModelId: string, mappingId: string, groupId: string) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.getGroup(
       iModelId,
@@ -150,7 +150,7 @@ class ReportingClient {
     group: GroupUpdateReportingAPI,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.updateGroup(
       iModelId,
@@ -167,7 +167,7 @@ class ReportingClient {
     groupId: string,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.deleteGroup(
       iModelId,
@@ -183,7 +183,7 @@ class ReportingClient {
     groupId: string,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.getGroupproperties(
       iModelId,
@@ -200,7 +200,7 @@ class ReportingClient {
     propertyId: string,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.getGroupproperty(
       iModelId,
@@ -218,7 +218,7 @@ class ReportingClient {
     groupProperty: GroupPropertyCreateReportingAPI,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.createGroupproperty(
       iModelId,
@@ -237,7 +237,7 @@ class ReportingClient {
     groupProperty: GroupPropertyUpdateReportingAPI,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.updateGroupproperty(
       iModelId,
@@ -256,7 +256,7 @@ class ReportingClient {
     groupPropertyId: string,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.deleteGroupproperty(
       iModelId,
@@ -273,7 +273,7 @@ class ReportingClient {
     groupId: string,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.getCalculatedproperties(
       iModelId,
@@ -290,7 +290,7 @@ class ReportingClient {
     propertyId: string,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.getCalculatedproperty(
       iModelId,
@@ -308,7 +308,7 @@ class ReportingClient {
     property: CalculatedPropertyCreateReportingAPI,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.createCalculatedproperty(
       iModelId,
@@ -327,7 +327,7 @@ class ReportingClient {
     property: CalculatedPropertyUpdateReportingAPI,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.updateCalculatedproperty(
       iModelId,
@@ -346,7 +346,7 @@ class ReportingClient {
     propertyId: string,
   ) {
     const _accessToken = await (
-      IModelApp.authorizationClient as AuthorizationClient
+      IModelApp.authorizationClient as FrontendAuthorizationClient
     ).getAccessToken();
     return this._mappingsApi.deleteCalculatedproperty(
       iModelId,
