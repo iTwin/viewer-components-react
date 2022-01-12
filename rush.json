@@ -63,6 +63,11 @@
       "packageName": "@itwin/property-grid-react",
       "projectFolder": "packages/itwin/property-grid",
       "versionPolicyName": "itwin-property-grid"
+    },
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "projectFolder": "packages/itwin/grouping-mapping-widget",
+      "versionPolicyName": "grouping-mapping-widget"
     }
   ]
 }
