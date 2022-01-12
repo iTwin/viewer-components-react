@@ -1,0 +1,110 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "~@itwin/core-react/lib/esm/core-react/index";
+
+.tree-widget-search-bar {
+  display: flex;
+  align-items: center;
+  position: relative;
+
+  // "..." group button
+  .search-bar-group-button2 {
+    opacity: 0;
+    display: none;
+    animation: hide ease-in 0.1s;
+    animation-fill-mode: forwards;
+
+    &.search-bar-group-button2.show {
+      animation: show ease-in 0.25s;
+      animation-delay: 0.1s;
+      animation-fill-mode: forwards;
+      display: block;
+    }
+  }
+
+  // button container
+  .search-bar-button-container {
+    display: flex;
+    align-items: center;
+
+    &.right {
+      justify-content: flex-end;
+    }
+
+    &.hide {
+      display: none;
+    }
+  }
+
+  // dropdown container
+  .search-bar-dropdown-container {
+    display: flex;
+    align-items: center;
+    padding: 0 $uicore-s;
+  }
+
+  // override of the search box styling
+  .search-bar-search-icon {
+    position: absolute;
+    right: 0;
+    opacity: 0;
+    transition: all 0.2s ease;
+    color: $buic-icon-color;
+    &.show {
+      opacity: 1;
+    }
+  }
+
+  // search box container
+  .search-bar-search-container {
+    flex: 1;
+    height: 100%;
+    position: absolute;
+    left: 0;
+
+    .search-bar-search-box {
+      height: 32px;
+      float: right;
+      margin-right: 0;
+      box-sizing: border-box;
+      width: 0px;
+      visibility: hidden;
+      opacity: 0;
+      overflow: hidden;
+      transition: all 0.25s ease;
+
+      &.show {
+        visibility: visible;
+        opacity: 1;
+        width: 100%;
+      }
+    }
+
+    &.search-bar-grouping-enabled {
+      left: 32px;
+    }
+  }
+}
+
+@keyframes show {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes hide {
+  0% {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

@@ -1,17 +1,22 @@
 [
   {
     "policyName": "deprecated",
-    "definitionName": "individualVersion",
-    "exemptFromRushChange": true
-  },
-  {
-    "policyName": "tree-widget",
-    "definitionName": "individualVersion",
-    "lockedMajor": 1
-  },
-  {
-    "policyName": "property-grid",
     "definitionName": "individualVersion"
+  },
+  {
+    "policyName": "itwin-tree-widget",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
+  },
+  {
+    "policyName": "itwin-property-grid",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
+  },
+  {
+    "policyName": "itwin-measure-tools",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "imodel-content-tree",
@@ -21,15 +26,10 @@
   {
     "policyName": "imodel-react-hooks",
     "definitionName": "individualVersion",
-    "lockedMajor": 1
-  },
-  {
-    "policyName": "geo-tools",
-    "definitionName": "individualVersion",
     "lockedMajor": 0
   },
   {
-    "policyName": "measure-tools",
+    "policyName": "geo-tools",
     "definitionName": "individualVersion",
     "lockedMajor": 0
   },

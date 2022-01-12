@@ -1,0 +1,72 @@
+{
+  "name": "@bentley/imodel-content-tree-react",
+  "version": "0.3.3",
+  "description": "React tree component that shows iModel content",
+  "keywords": [
+    "Bentley",
+    "iModel.js",
+    "iModel Content",
+    "Tree"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/bentley/imodel-content-tree"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Bentley Systems, Inc.",
+    "url": "http://www.bentley.com"
+  },
+  "main": "lib/imodel-content-tree.js",
+  "typings": "lib/imodel-content-tree",
+  "scripts": {
+    "build": "tsc 1>&2 && npm run copy:assets",
+    "clean": "rimraf lib .rush/temp/package-deps*.json",
+    "rebuild": "npm run clean && npm run build",
+    "copy:assets": "cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
+    "cover": "",
+    "lint": "",
+    "lint:real": "eslint ./src/**/*.{ts,tsx} 1>&2",
+    "test": ""
+  },
+  "dependencies": {
+    "classnames": "^2.3.1"
+  },
+  "devDependencies": {
+    "@bentley/bentleyjs-core": "^2.15.2",
+    "@bentley/build-tools": "~2.16.0",
+    "@bentley/imodeljs-common": "^2.15.2",
+    "@bentley/imodeljs-frontend": "^2.15.2",
+    "@bentley/presentation-common": "^2.15.2",
+    "@bentley/presentation-components": "^2.15.2",
+    "@bentley/presentation-frontend": "^2.15.2",
+    "@bentley/ui-abstract": "^2.15.2",
+    "@bentley/ui-components": "^2.15.2",
+    "@bentley/ui-core": "^2.15.2",
+    "@types/react": "~16.9.35",
+    "@types/react-dom": "^16.8.0",
+    "cpx": "^1.5.0",
+    "eslint": "^6.8.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
+    "rimraf": "^3.0.2",
+    "tslint": "^5.11.0",
+    "typescript": "~4.3.0"
+  },
+  "peerDependencies": {
+    "@bentley/bentleyjs-core": "^2.15.2",
+    "@bentley/imodeljs-common": "^2.15.2",
+    "@bentley/imodeljs-frontend": "^2.15.2",
+    "@bentley/presentation-common": "^2.15.2",
+    "@bentley/presentation-components": "^2.15.2",
+    "@bentley/presentation-frontend": "^2.15.2",
+    "@bentley/ui-abstract": "^2.15.2",
+    "@bentley/ui-components": "^2.15.2",
+    "@bentley/ui-core": "^2.15.2",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "eslintConfig": {
+    "extends": "./node_modules/@bentley/build-tools/.eslintrc.js"
+  }
+}

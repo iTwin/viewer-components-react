@@ -1,0 +1,104 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+@import "~@itwin/core-react/lib/esm/core-react/style/index";
+@import "~@itwin/core-react/lib/esm/core-react/text/index";
+
+$header-height: 50px;
+
+.property-grid-widget-container {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pcomponents-property-grid-with-unified-selection {
+  overflow: hidden !important;
+}
+
+.property-grid-container {
+  flex: 1;
+  overflow: hidden;
+}
+
+.virtualized-grid-node-content > .components--hoverable:hover {
+  background: $buic-row-hover !important;
+}
+
+.property-grid-react-panel-label-and-class {
+  display: block;
+  overflow: hidden;
+}
+
+.property-grid-react-panel-label {
+  @include uicore-text(leading);
+  font-size: $uicore-font-size-leading;
+  padding: $uicore-xs 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.property-grid-react-panel-info-btn {
+  cursor: pointer;
+  margin-left: auto;
+  display: flex;
+  color: $buic-icon-color;
+  padding: 4px;
+  height: 100%;
+
+  &:hover {
+    color: $buic-foreground-primary;
+  }
+}
+
+.property-grid-react-panel-back-btn {
+  cursor: pointer;
+  padding: $uicore-xs;
+  display: flex;
+  color: $buic-icon-color;
+  margin-right: 2px;
+
+  &:hover {
+    color: $buic-foreground-primary;
+  }
+}
+
+.property-grid-react-panel-icon {
+  font-size: 24px;
+  margin: auto;
+}
+
+.property-grid-react-panel-header {
+  display: flex;
+  margin-left: 6px;
+  margin-right: 6px;
+  height: $header-height;
+  box-sizing: border-box;
+}
+
+.property-grid-react-panel-class {
+  @include uicore-text;
+  font-size: $uicore-font-size;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.property-grid-react-filtering-pg-label {
+  @include uicore-text;
+  font-size: $uicore-font-size;
+  text-align: center;
+  padding: 0 $uicore-m;
+}
+
+.property-grid-react-filtering-pg-icon {
+  font-size: 64px;
+  color: RGBA(var(--buic-foreground-body-rgb), 0.3);
+  margin-bottom: $uicore-m;
+}

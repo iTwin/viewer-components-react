@@ -1,0 +1,14 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+@import "~@itwin/core-react/lib/esm/core-react/index";
+
+.tree-widget-models-tree-container {
+  flex: 1;
+}
+
+.tree-widget-models-tree-toolbar-icon {
+  color: $buic-icon-color;
+}
