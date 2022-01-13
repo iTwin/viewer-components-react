@@ -5,12 +5,14 @@
 
 import * as React from "react";
 import { IModelApp } from "@itwin/core-frontend";
-import { Localization } from "@itwin/core-common";
-import {
-  AbstractWidgetProps, CommonToolbarItem, ConditionalBooleanValue, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
-  ToolbarOrientation, ToolbarUsage, UiItemsProvider,
+import type { Localization } from "@itwin/core-common";
+import type {
+  AbstractWidgetProps, CommonToolbarItem, UiItemsProvider} from "@itwin/appui-abstract";
+import { ConditionalBooleanValue, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
+  ToolbarOrientation, ToolbarUsage,
 } from "@itwin/appui-abstract";
-import { ToolbarHelper, ToolItemDef } from "@itwin/appui-react";
+import type { ToolItemDef } from "@itwin/appui-react";
+import { ToolbarHelper } from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";

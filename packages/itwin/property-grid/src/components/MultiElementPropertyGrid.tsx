@@ -5,16 +5,17 @@
 
 import "./MultiElementPropertyGrid.scss";
 
-import { InstanceKey } from "@itwin/presentation-common";
+import type { InstanceKey } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
+import type {
+  ConfigurableCreateInfo} from "@itwin/appui-react";
 import {
-  ConfigurableCreateInfo,
   useActiveIModelConnection,
   WidgetControl,
 } from "@itwin/appui-react";
 import { animated, Transition } from "react-spring/renderprops.cjs";
 
-import { PropertyGridProps } from "../types";
+import type { PropertyGridProps } from "../types";
 import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
 import React, { useEffect, useMemo, useState } from "react";

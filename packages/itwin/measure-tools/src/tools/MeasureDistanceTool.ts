@@ -3,14 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import type { BeButtonEvent,
+  ToolAssistanceInstruction, ToolAssistanceSection} from "@itwin/core-frontend";
 import {
-  AccuDrawHintBuilder, BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
-  ToolAssistanceInstruction, ToolAssistanceSection,
+  AccuDrawHintBuilder, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
+import type { Feature} from "../api/FeatureTracking";
+import { MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
-import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
+import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 
 export class MeasureDistanceTool extends MeasurementToolBase<DistanceMeasurement, MeasureDistanceToolModel> {

@@ -2,14 +2,16 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import {
-  BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod, ToolAssistanceInstruction,
-  ToolAssistanceSection,
+import type {
+  BeButtonEvent, ToolAssistanceInstruction,
+  ToolAssistanceSection} from "@itwin/core-frontend";
+import { EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
+import type { Feature} from "../api/FeatureTracking";
+import { MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
-import { RadiusMeasurement } from "../measurements/RadiusMeasurement";
+import type { RadiusMeasurement } from "../measurements/RadiusMeasurement";
 import { MeasureRadiusToolModel } from "../toolmodels/MeasureRadiusToolModel";
 
 /** Tool for measuring radius using 3-points */

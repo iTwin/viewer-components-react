@@ -5,11 +5,13 @@
 
 import { Geometry, Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
-import { Measurement, MeasurementEqualityOptions } from "../../api/Measurement";
+import type { MeasurementEqualityOptions } from "../../api/Measurement";
+import { Measurement } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
-import { MeasurementProps } from "../../api/MeasurementProps";
+import type { MeasurementProps } from "../../api/MeasurementProps";
 import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/AreaMeasurement";
-import { DistanceMeasurement, DistanceMeasurementProps, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement";
+import type { DistanceMeasurementProps} from "../../measurements/DistanceMeasurement";
+import { DistanceMeasurement, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement";
 import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement";
 
 function assertIsArrayWithCount(json: any, ofLength: number) {

@@ -3,8 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d, Ray3d } from "@itwin/core-geometry";
-import { DrawingViewState, SheetViewState, SpatialViewState, Viewport, ViewRect } from "@itwin/core-frontend";
+import type { Point3d, Ray3d } from "@itwin/core-geometry";
+import type { Viewport, ViewRect } from "@itwin/core-frontend";
+import { DrawingViewState, SheetViewState, SpatialViewState } from "@itwin/core-frontend";
 import { WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementViewTarget } from "./MeasurementViewTarget";
 

@@ -6,13 +6,16 @@
 import * as React from "react";
 import "./MeasurementWidget.scss";
 
-import { Id64String } from "@itwin/core-bentley";
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { PropertyDescription, PropertyRecord, PropertyValue, PropertyValueFormat, WidgetState } from "@itwin/appui-abstract";
+import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import type { PropertyDescription, PropertyValue} from "@itwin/appui-abstract";
+import { PropertyRecord, PropertyValueFormat, WidgetState } from "@itwin/appui-abstract";
 import { PropertyGrid, SimplePropertyDataProvider } from "@itwin/components-react";
 import { Orientation } from "@itwin/core-react";
-import { ConfigurableCreateInfo, WidgetControl } from "@itwin/appui-react";
-import { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
+import type { ConfigurableCreateInfo} from "@itwin/appui-react";
+import { WidgetControl } from "@itwin/appui-react";
+import type { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 

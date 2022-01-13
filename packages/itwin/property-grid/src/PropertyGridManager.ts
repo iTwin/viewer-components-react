@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { getClassName, UiError } from "@itwin/appui-abstract";
-import { Localization } from "@itwin/core-common";
-import { LocalizationOptions } from "@itwin/core-i18n";
+import type { Localization } from "@itwin/core-common";
+import type { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
  * Entry point for static initialization required by various components used in the package.

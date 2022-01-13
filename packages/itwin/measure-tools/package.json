@@ -22,6 +22,7 @@
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "lint:fix": "npm run lint -- --fix",
     "test": "certa -c certa.json -r chrome",
     "cover": "nyc npm test",
     "madge": "madge --circular --extensions ts,tsx src",
@@ -123,7 +124,9 @@
     ],
     "extends": "plugin:@itwin/ui",
     "rules": {
-      "@typescript-eslint/unbound-method": "off"
+      "@typescript-eslint/unbound-method": "off",
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/consistent-type-imports": "error"
     }
   }
 }

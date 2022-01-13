@@ -3,15 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeDuration, BeUiEvent, Id64String } from "@itwin/core-bentley";
-import { GeometryStreamProps } from "@itwin/core-common";
-import {
-  BeButtonEvent, DecorateContext, EventHandled, HitDetail, IModelApp, IModelConnection, NotifyMessageDetails, OutputMessageAlert,
-  OutputMessagePriority, OutputMessageType, PrimitiveTool, ToolAssistance, ToolAssistanceInputMethod, ToolAssistanceInstruction,
+import type { Id64String } from "@itwin/core-bentley";
+import { BeDuration, BeUiEvent } from "@itwin/core-bentley";
+import type { GeometryStreamProps } from "@itwin/core-common";
+import type {
+  BeButtonEvent, DecorateContext, HitDetail, IModelConnection, ToolAssistanceInstruction} from "@itwin/core-frontend";
+import { EventHandled, IModelApp, NotifyMessageDetails, OutputMessageAlert,
+  OutputMessagePriority, OutputMessageType, PrimitiveTool, ToolAssistance, ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import { Feature, FeatureTracking } from "./FeatureTracking";
-import { Measurement } from "./Measurement";
-import { MeasurementToolModel } from "./MeasurementToolModel";
+import type { Feature} from "./FeatureTracking";
+import { FeatureTracking } from "./FeatureTracking";
+import type { Measurement } from "./Measurement";
+import type { MeasurementToolModel } from "./MeasurementToolModel";
 
 /** Interface for any interactive tool that creates measurements. */
 export interface MeasurementTool {

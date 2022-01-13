@@ -4,13 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { Point2d, XAndY } from "@itwin/core-geometry";
+import type { XAndY } from "@itwin/core-geometry";
+import { Point2d } from "@itwin/core-geometry";
 import { IModelApp } from "@itwin/core-frontend";
 import { RelativePosition } from "@itwin/appui-abstract";
-import { ActionButtonItemDef, ActionItemButton, CursorInformation, CursorPopupManager, ItemProps } from "@itwin/appui-react";
+import type { ItemProps } from "@itwin/appui-react";
+import { ActionButtonItemDef, ActionItemButton, CursorInformation, CursorPopupManager } from "@itwin/appui-react";
 import { Direction } from "@itwin/components-react";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
-import { Measurement, MeasurementPickContext } from "../api/Measurement";
+import type { Measurement, MeasurementPickContext } from "../api/Measurement";
 import { MeasurementManager } from "../api/MeasurementManager";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";

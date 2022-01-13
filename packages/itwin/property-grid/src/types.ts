@@ -3,14 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Field } from "@itwin/presentation-common";
-import {
+import type { Field } from "@itwin/presentation-common";
+import type {
   IPresentationPropertyDataProvider,
   PresentationPropertyDataProvider,
 } from "@itwin/presentation-components";
-import { PropertyGridContextMenuArgs } from "@itwin/components-react";
-import { ContextMenuItemProps, Orientation } from "@itwin/core-react";
-import { FavoritePropertiesScope } from "@itwin/presentation-frontend";
+import type { PropertyGridContextMenuArgs } from "@itwin/components-react";
+import type { ContextMenuItemProps, Orientation } from "@itwin/core-react";
+import type { FavoritePropertiesScope } from "@itwin/presentation-frontend";
 
 export type ContextMenuItemInfo = ContextMenuItemProps &
 React.Attributes & { label: string };

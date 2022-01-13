@@ -3,12 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { Id64String } from "@itwin/core-bentley";
+import type { Id64String } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { PropertyDescription, PropertyRecord, PropertyValue, PropertyValueFormat } from "@itwin/appui-abstract";
+import type { PropertyDescription, PropertyValue} from "@itwin/appui-abstract";
+import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyGrid, SimplePropertyDataProvider } from "@itwin/components-react";
 import { Orientation } from "@itwin/core-react";
-import { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
+import type { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 

@@ -5,7 +5,8 @@
 /* eslint-disable deprecation/deprecation */
 
 import * as React from "react";
-import { Toolbar, ToolbarProps } from "@itwin/appui-layout-react";
+import type { ToolbarProps } from "@itwin/appui-layout-react";
+import { Toolbar } from "@itwin/appui-layout-react";
 
 /** Popup toolbar properties. */
 export interface PopupToolbarProps extends ToolbarProps {

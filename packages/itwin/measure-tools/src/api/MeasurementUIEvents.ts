@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Measurement } from "./Measurement";
+import type { Measurement } from "./Measurement";
 import { MeasurementSyncUiEventId } from "./MeasurementEnums";
 import { BeUiEvent } from "@itwin/core-bentley";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement";

@@ -4,14 +4,16 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { AxisOrder, Matrix3d, Vector3d } from "@itwin/core-geometry";
+import type {
+  ToolAssistanceInstruction, ToolAssistanceSection} from "@itwin/core-frontend";
 import {
   AccuDrawHintBuilder, BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
-  ToolAssistanceInstruction, ToolAssistanceSection,
 } from "@itwin/core-frontend";
-import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
+import type { Feature} from "../api/FeatureTracking";
+import { MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
-import { AreaMeasurement } from "../measurements/AreaMeasurement";
+import type { AreaMeasurement } from "../measurements/AreaMeasurement";
 import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 
 export class MeasureAreaTool extends MeasurementToolBase<AreaMeasurement, MeasureAreaToolModel> {
