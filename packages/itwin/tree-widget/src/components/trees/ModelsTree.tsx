@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 import React, { useCallback, useEffect, useState } from "react";
-import { IModelConnection, Viewport } from "@itwin/core-frontend";
-import { ModelsTree, ClassGroupingOption, useActiveViewport } from "@itwin/appui-react";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import { ClassGroupingOption, ModelsTree, useActiveViewport } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./ModelsTree.scss";
-import {
+import type {
   GeometricModel3dProps,
   ModelQueryParams,
 } from "@itwin/core-common";

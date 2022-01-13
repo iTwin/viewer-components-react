@@ -29,7 +29,8 @@
     "copy:cjs": "cpx \"./src/**/*.scss\" ./lib/cjs",
     "copy:esm": "cpx \"./src/**/*.scss\" ./lib/esm",
     "cover": "",
-    "lint": "",
+    "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",
     "test": "",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
@@ -56,6 +57,7 @@
     "@itwin/core-orbitgt": "rc",
     "@itwin/core-quantity": "rc",
     "@itwin/core-react": "rc",
+    "@itwin/eslint-plugin": "rc",
     "@itwin/presentation-common": "rc",
     "@itwin/presentation-components": "rc",
     "@itwin/presentation-frontend": "rc",
@@ -64,7 +66,9 @@
     "@types/react": "^17.0.19",
     "@types/react-dom": "^17.0.9",
     "@types/react-redux": "^7.0.1",
-    "cpx": "^1.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "cpx2": "^3.0.0",
+    "eslint": "^7.11.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "rimraf": "^3.0.2",
@@ -91,5 +95,15 @@
     "@itwin/webgl-compatibility": "rc",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
+  },
+  "eslintConfig": {
+    "plugins": [
+      "@itwin"
+    ],
+    "extends": "plugin:@itwin/ui",
+    "rules": {
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/consistent-type-imports": "error"
+    }
   }
 }

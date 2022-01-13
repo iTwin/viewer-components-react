@@ -2,25 +2,25 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import {
+import type {
   AbstractWidgetProps,
-  StagePanelLocation,
   StagePanelSection,
-  StageUsage,
   UiItemsProvider,
+} from "@itwin/appui-abstract";
+import {
+  StagePanelLocation,
+  StageUsage,
 } from "@itwin/appui-abstract";
 import { ClassGroupingOption, UiFramework } from "@itwin/appui-react";
 import React from "react";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
-import {
-  ModelsTreeComponent,
-  CategoriesTreeComponent,
-  SpatialTreeComponent,
-} from "./trees";
-import { IModelConnection, Viewport } from "@itwin/core-frontend";
-import { SelectableContentDefinition } from "@itwin/components-react";
+import { CategoriesTreeComponent } from "./trees/CategoriesTree";
+import { ModelsTreeComponent } from "./trees/ModelsTree";
+import { SpatialTreeComponent } from "./trees/SpatialTree";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
-import { TreeWidgetControlOptions } from "./TreeWidgetControl";
+import type { TreeWidgetControlOptions } from "./TreeWidgetControl";
 
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   public readonly id = "TreeWidgetUiitemsProvider";
@@ -126,6 +126,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       widgets.push({
         id: "tree",
         label: TreeWidget.translate("treeview"),
+        // eslint-disable-next-line react/display-name
         getWidgetContent: () => <TreeWidgetComponent trees={trees} />,
       });
     }

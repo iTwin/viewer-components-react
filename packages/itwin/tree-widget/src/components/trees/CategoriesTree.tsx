@@ -3,15 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useState } from "react";
+import type {
+  IModelConnection,
+  Viewport} from "@itwin/core-frontend";
 import {
   IModelApp,
-  IModelConnection,
-  Viewport,
 } from "@itwin/core-frontend";
 import {
   CategoryTree,
-  toggleAllCategories,
   getCategories,
+  toggleAllCategories,
 } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
@@ -71,8 +72,8 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
     }
 
     const ids = await getCategories(props.iModel, activeView, filteredProvider);
-    let enabled: string[] = [];
-    let disabled: string[] = [];
+    const enabled: string[] = [];
+    const disabled: string[] = [];
     for (const id of ids) {
       if (activeView.view.viewsCategory(id)) {
         enabled.push(id);

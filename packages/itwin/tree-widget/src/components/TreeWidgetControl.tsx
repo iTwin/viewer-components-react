@@ -3,20 +3,19 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import type {
+  ConfigurableCreateInfo} from "@itwin/appui-react";
 import {
-  WidgetControl,
-  ConfigurableCreateInfo,
   ClassGroupingOption,
+  WidgetControl,
 } from "@itwin/appui-react";
 import React from "react";
-import {
-  ModelsTreeComponent,
-  CategoriesTreeComponent,
-  SpatialTreeComponent,
-} from "./trees";
-import { IModelConnection, Viewport } from "@itwin/core-frontend";
+import { CategoriesTreeComponent } from "./trees/CategoriesTree";
+import { ModelsTreeComponent } from "./trees/ModelsTree";
+import { SpatialTreeComponent } from "./trees/SpatialTree";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
-import { SelectableContentDefinition } from "@itwin/components-react";
+import type { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
 
 export interface TreeWidgetControlOptions {

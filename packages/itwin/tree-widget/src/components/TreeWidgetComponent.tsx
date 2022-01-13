@@ -4,11 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import "./TreeWidgetComponent.scss";
-import { useState } from "react";
-import {
-  SelectableContent,
-  SelectableContentDefinition,
-} from "@itwin/components-react";
+import type { SelectableContentDefinition } from "@itwin/components-react";
+import { SelectableContent } from "@itwin/components-react";
 
 interface TreeWidgetComponentProps {
   trees?: SelectableContentDefinition[];
@@ -26,7 +23,7 @@ export function TreeWidgetComponent(props: TreeWidgetComponentProps) {
   return (
     <div className="tree-widget-visibility-widget">
       <SelectableContent
-        children={trees}
+        children={trees} // eslint-disable-line react/no-children-prop
         defaultSelectedContentId={trees[0].id}
       />
     </div>
