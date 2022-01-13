@@ -1,11 +1,11 @@
 {
-  "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+  "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
   "id": "imodel-content-tree/Default",
-  "supportedSchemas": {
-    "schemaNames": [
-      "BisCore"
-    ]
-  },
+  "requiredSchemas": [
+    {
+      "name": "BisCore"
+    }
+  ],
   "rules": [
     {
       "ruleType": "RootNodes",
@@ -18,11 +18,11 @@
               "schemaName": "BisCore",
               "classNames": [
                 "Subject"
-              ]
+              ],
+              "arePolymorphic": false
             }
           ],
           "instanceFilter": "this.Parent = NULL",
-          "arePolymorphic": false,
           "groupByClass": false,
           "groupByLabel": false
         }
@@ -83,9 +83,9 @@
             "schemaName": "BisCore",
             "classNames": [
               "Model"
-            ]
+            ],
+            "arePolymorphic": true
           },
-          "arePolymorphic": true,
           "relatedInstances": [
             {
               "relationshipPath": {
@@ -113,9 +113,9 @@
             "schemaName": "BisCore",
             "classNames": [
               "Model"
-            ]
+            ],
+            "arePolymorphic": true
           },
-          "arePolymorphic": true,
           "relatedInstances": [
             {
               "relationshipPath": {

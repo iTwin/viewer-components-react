@@ -10,7 +10,9 @@
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
   "gitPolicy": {
-    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
+    "allowedEmailRegExps": [
+      "[^@]+@users\\.noreply\\.github\\.com"
+    ],
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
   "repository": {
@@ -40,11 +42,6 @@
       "versionPolicyName": "geo-tools"
     },
     {
-      "packageName": "@bentley/imodel-content-tree-react",
-      "projectFolder": "packages/bentley/imodel-content-tree",
-      "versionPolicyName": "imodel-content-tree"
-    },
-    {
       "packageName": "@bentley/imodel-react-hooks",
       "projectFolder": "packages/bentley/imodel-react-hooks",
       "versionPolicyName": "imodel-react-hooks"
@@ -63,6 +60,11 @@
       "packageName": "@itwin/property-grid-react",
       "projectFolder": "packages/itwin/property-grid",
       "versionPolicyName": "itwin-property-grid"
+    },
+    {
+      "packageName": "@itwin/imodel-content-tree-react",
+      "projectFolder": "packages/itwin/imodel-content-tree",
+      "versionPolicyName": "imodel-content-tree"
     }
   ]
 }
