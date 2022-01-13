@@ -7,8 +7,7 @@ import "./MultiElementPropertyGrid.scss";
 
 import type { InstanceKey } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
-import type {
-  ConfigurableCreateInfo} from "@itwin/appui-react";
+import type { ConfigurableCreateInfo } from "@itwin/appui-react";
 import {
   useActiveIModelConnection,
   WidgetControl,

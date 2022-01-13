@@ -4,9 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 /* eslint-disable react/display-name */
 
-import type {
-  AbstractWidgetProps,
-  UiItemsProvider} from "@itwin/appui-abstract";
+import type { AbstractWidgetProps, UiItemsProvider } from "@itwin/appui-abstract";
 import {
   StagePanelLocation,
   StagePanelSection,

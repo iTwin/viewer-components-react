@@ -11,14 +11,16 @@ import { PresentationLabelsProvider } from "@itwin/presentation-components";
 import type {
   PropertyDescription,
   PropertyEditorInfo,
-  PropertyValue} from "@itwin/appui-abstract";
+  PropertyValue,
+} from "@itwin/appui-abstract";
 import {
   PropertyRecord,
   PropertyValueFormat,
 } from "@itwin/appui-abstract";
 import type {
   ColumnDescription,
-  RowItem} from "@itwin/components-react";
+  RowItem,
+} from "@itwin/components-react";
 import {
   SelectionMode,
   SimpleTableDataProvider,

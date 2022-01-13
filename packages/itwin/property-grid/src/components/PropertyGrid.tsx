@@ -4,14 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGrid.scss";
-import type { Field, InstanceKey} from "@itwin/presentation-common";
+import type { Field, InstanceKey } from "@itwin/presentation-common";
 import { KeySet } from "@itwin/presentation-common";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
   PropertyData,
   PropertyDataFiltererBase,
-  PropertyGridContextMenuArgs} from "@itwin/components-react";
+  PropertyGridContextMenuArgs
+} from "@itwin/components-react";
 import {
   PropertyValueRendererManager,
   VirtualizedPropertyGridWithDataProvider,
@@ -24,14 +25,13 @@ import {
   useOptionalDisposable,
   useResizeObserver,
 } from "@itwin/core-react";
-import type {
-  ConfigurableCreateInfo} from "@itwin/appui-react";
+import type { ConfigurableCreateInfo } from "@itwin/appui-react";
 import {
   UiFramework,
   useActiveIModelConnection,
   WidgetControl,
 } from "@itwin/appui-react";
-import type { ReactNode} from "react";
+import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { copyToClipboard } from "../api/WebUtilities";

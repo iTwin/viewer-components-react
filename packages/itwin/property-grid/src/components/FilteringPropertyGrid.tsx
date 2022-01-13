@@ -5,11 +5,12 @@
 import "./PropertyGrid.scss";
 import type { IDisposable } from "@itwin/core-bentley";
 import type {
-  IPresentationPropertyDataProvider} from "@itwin/presentation-components";
+  IPresentationPropertyDataProvider,
+} from "@itwin/presentation-components";
 import {
   usePropertyDataProviderWithUnifiedSelection,
 } from "@itwin/presentation-components";
-import type { PropertyRecord} from "@itwin/appui-abstract";
+import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import type {
   IPropertyDataProvider,
@@ -17,7 +18,8 @@ import type {
   PropertyData,
   PropertyDataFiltererBase,
   PropertyDataFilterResult,
-  VirtualizedPropertyGridWithDataProviderProps} from "@itwin/components-react";
+  VirtualizedPropertyGridWithDataProviderProps,
+} from "@itwin/components-react";
 import {
   FilteredType,
   FilteringPropertyDataProvider,
