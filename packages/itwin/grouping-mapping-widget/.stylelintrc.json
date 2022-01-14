@@ -1,6 +1,7 @@
 {
     "ignoreFiles": ["lib/**/*", "node_modules/**/*.scss"],
     "extends": [
+        "stylelint-config-standard-scss",
         "stylelint-config-sass-guidelines",
         "stylelint-config-prettier"
     ],
