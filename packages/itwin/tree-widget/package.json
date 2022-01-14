@@ -37,8 +37,6 @@
     "rebuild": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@itwin/core-i18n": "rc",
-    "@itwin/presentation-common": "rc",
     "classnames": "^2.3.1",
     "i18next": "^10.2.2",
     "react-redux": "^7.2.0",
@@ -54,9 +52,11 @@
     "@itwin/core-common": "rc",
     "@itwin/core-frontend": "rc",
     "@itwin/core-geometry": "rc",
+    "@itwin/core-i18n": "rc",
     "@itwin/core-quantity": "rc",
     "@itwin/core-react": "rc",
     "@itwin/eslint-plugin": "rc",
+    "@itwin/presentation-common": "rc",
     "@itwin/presentation-components": "rc",
     "@itwin/presentation-frontend": "rc",
     "@itwin/webgl-compatibility": "rc",
