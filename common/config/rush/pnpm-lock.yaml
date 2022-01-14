@@ -547,7 +547,6 @@ importers:
       simple-react-validator: ^1.6.1
       style-loader: ^2.0.0
       stylelint: ^14.1.0
-      stylelint-config-prettier: ^9.0.3
       stylelint-config-sass-guidelines: ^9.0.1
       stylelint-config-standard-scss: ^3.0.0
       svg-sprite-loader: ^6.0.11
@@ -607,7 +606,6 @@ importers:
       sass-loader: 10.2.0_sass@1.48.0+webpack@4.46.0
       style-loader: 2.0.0_webpack@4.46.0
       stylelint: 14.2.0
-      stylelint-config-prettier: 9.0.3_stylelint@14.2.0
       stylelint-config-sass-guidelines: 9.0.1_stylelint@14.2.0
       stylelint-config-standard-scss: 3.0.0_stylelint@14.2.0
       svg-sprite-loader: 6.0.11
@@ -25038,16 +25036,6 @@ packages:
       browserslist: 4.19.1
       postcss: 7.0.39
       postcss-selector-parser: 3.1.2
-    dev: true
-
-  /stylelint-config-prettier/9.0.3_stylelint@14.2.0:
-    resolution: {integrity: sha512-5n9gUDp/n5tTMCq1GLqSpA30w2sqWITSSEiAWQlpxkKGAUbjcemQ0nbkRvRUa0B1LgD3+hCvdL7B1eTxy1QHJg==}
-    engines: {node: '>= 12'}
-    hasBin: true
-    peerDependencies:
-      stylelint: '>=11.0.0'
-    dependencies:
-      stylelint: 14.2.0
     dev: true
 
   /stylelint-config-recommended-scss/5.0.2_stylelint@14.2.0:

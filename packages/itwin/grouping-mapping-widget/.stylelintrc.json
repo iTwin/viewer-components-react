@@ -1,8 +1,7 @@
 {
     "ignoreFiles": ["lib/**/*", "node_modules/**/*.scss"],
     "extends": [
-        "stylelint-config-sass-guidelines",
-        "stylelint-config-prettier"
+        "stylelint-config-sass-guidelines"
     ],
     "rules": {
         "color-hex-case": "upper",
