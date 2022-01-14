@@ -3,8 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type {
-  ConfigurableCreateInfo} from "@itwin/appui-react";
+import type { ConfigurableCreateInfo } from "@itwin/appui-react";
 import {
   ClassGroupingOption,
   WidgetControl,
