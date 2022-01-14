@@ -24,11 +24,11 @@
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "copy-files": "ncp README.md lib/README.md && ncp LICENSE.md lib/LICENSE.md",
     "cover": "",
-    "lint": "",
+    "lint": "npm run lint:ts && npm run lint:scss",
     "lint:copyright": "node scripts/copyrightLinter.js",
     "lint:fix": "npm run lint:ts -- --fix && npm run lint:scss -- --fix && npm run lint:copyright -- --fix */**/*.{js,ts,tsx,scss}",
     "lint:scss": "npx stylelint \"src/**/*.scss\"",
-    "lint:ts": "eslint */**/*.{js,ts,tsx} --max-warnings=0",
+    "lint:ts": "eslint -f visualstudio */**/*.{js,ts,tsx} --max-warnings=0",
     "rebuild": "npm run build",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./public/locales/en-PSEUDO",
     "test": "",
@@ -70,14 +70,11 @@
     "@typescript-eslint/parser": "^5.6.0",
     "css-loader": "^5.2.7",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.25.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "ncp": "^2.0.0",
     "postcss-loader": "^4.2.0",
     "postcss-normalize": "^10.0.1",
-    "prettier": "^2.2.1",
     "react-dev-utils": "^11.0.4",
     "resolve-url-loader": "^4.0.0",
     "rimraf": "^3.0.2",
@@ -85,7 +82,6 @@
     "sass-loader": "^10.1.1",
     "style-loader": "^2.0.0",
     "stylelint": "^14.1.0",
-    "stylelint-config-prettier": "^9.0.3",
     "stylelint-config-sass-guidelines": "^9.0.1",
     "stylelint-config-standard-scss": "^3.0.0",
     "svg-sprite-loader": "^6.0.11",
@@ -102,5 +98,14 @@
   "peerDependencies": {
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
+  },
+  "eslintConfig": {
+    "plugins": [
+      "@itwin"
+    ],
+    "extends": "plugin:@itwin/ui",
+    "rules": {
+      "@typescript-eslint/no-shadow": "off"
+    }
   }
 }
