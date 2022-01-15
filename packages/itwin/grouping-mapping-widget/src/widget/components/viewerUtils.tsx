@@ -8,14 +8,14 @@ import {
   IModelConnection,
   MarginPercent,
   ViewChangeOptions,
-} from '@bentley/imodeljs-frontend';
+} from "@bentley/imodeljs-frontend";
 import {
   ColorDef,
   ElementProps,
   FeatureOverrideType,
-} from '@bentley/imodeljs-common';
-import { KeySet } from '@bentley/presentation-common';
-import { HiliteSetProvider } from '@bentley/presentation-frontend';
+} from "@bentley/imodeljs-common";
+import { KeySet } from "@bentley/presentation-common";
+import { HiliteSetProvider } from "@bentley/presentation-frontend";
 
 export const visualizeElementsById = async (
   elementIds: string[],

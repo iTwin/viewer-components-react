@@ -3,13 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from 'react';
-import { PresentationPropertyDataProvider } from '@bentley/presentation-components';
+import * as React from "react";
+import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
 
-import { FindSimilarApi, PropertyProps } from '../../../api/FindSimilarApi';
-import { PropertyGrid } from './PropertyGrid';
-import '../FindSimilar.scss';
-import { FindSimilarContext } from '../FindSimilarContext';
+import { FindSimilarApi, PropertyProps } from "../../../api/FindSimilarApi";
+import { PropertyGrid } from "./PropertyGrid";
+import "../FindSimilar.scss";
+import { FindSimilarContext } from "../FindSimilarContext";
 
 interface PropertyGridWrapperState {
   dataProvider?: PresentationPropertyDataProvider;
@@ -18,10 +18,10 @@ interface PropertyGridWrapperState {
 /* This approach uses PresentationPropertyDataProvider to all the work of querying the backend and
    providing the content to the PropertyGrid component. */
 export class PropertyGridWrapperApp extends React.Component<
-  PropertyProps,
-  PropertyGridWrapperState
+PropertyProps,
+PropertyGridWrapperState
 > {
-  static contextType = FindSimilarContext;
+  static override contextType = FindSimilarContext;
   constructor(props: PropertyProps | Readonly<PropertyProps>) {
     super(props);
     this.state = {};
@@ -42,11 +42,11 @@ export class PropertyGridWrapperApp extends React.Component<
     this.setState({ dataProvider });
   }
 
-  public componentDidMount() {
+  public override componentDidMount() {
     this.createDataProvider();
   }
 
-  public componentDidUpdate(prevProps: PropertyProps) {
+  public override componentDidUpdate(prevProps: PropertyProps) {
     if (prevProps.keys === this.props.keys) {
       return;
     }
@@ -54,11 +54,11 @@ export class PropertyGridWrapperApp extends React.Component<
     this.createDataProvider();
   }
 
-  public render() {
+  public override render() {
     const dataProvider = this.state.dataProvider;
     return (
       <>
-        <div className={'table-box'}>
+        <div className={"table-box"}>
           {dataProvider && <PropertyGrid dataProvider={dataProvider} />}
           {!dataProvider && (
             <div className='select-element-hint'>

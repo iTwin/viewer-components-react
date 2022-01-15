@@ -3,18 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import React, { useEffect } from 'react';
-import { useActiveIModelConnection } from '@bentley/ui-framework';
+import React, { useEffect } from "react";
+import { useActiveIModelConnection } from "@bentley/ui-framework";
 import {
   ISelectionProvider,
   SelectionChangeEventArgs,
-} from '@bentley/presentation-frontend';
-import { KeySet } from '@bentley/presentation-common';
-import { FindSimilarApi } from '../../api/FindSimilarApi';
-import { PropertyGridWrapperApp } from './property-grid/PropertyGridWrapper';
-import { FindSimilarContext } from './FindSimilarContext';
-import { Button } from '@itwin/itwinui-react';
-import './FindSimilar.scss';
+} from "@bentley/presentation-frontend";
+import { KeySet } from "@bentley/presentation-common";
+import { FindSimilarApi } from "../../api/FindSimilarApi";
+import { PropertyGridWrapperApp } from "./property-grid/PropertyGridWrapper";
+import { FindSimilarContext } from "./FindSimilarContext";
+import { Button } from "@itwin/itwinui-react";
+import "./FindSimilar.scss";
 
 export const FindSimilarContainer: React.FunctionComponent = () => {
   const iModelConnection = useActiveIModelConnection();
@@ -45,7 +45,7 @@ export const FindSimilarContainer: React.FunctionComponent = () => {
   }, [iModelConnection, context]);
 
   const _onClickResetButton = async () => {
-    context.setQuery('');
+    context.setQuery("");
     context.queryBuilder.query = undefined;
     context.setCurrentPropertyList([]);
   };

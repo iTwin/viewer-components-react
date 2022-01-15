@@ -540,7 +540,10 @@ importers:
       postcss-loader: ^4.2.0
       postcss-normalize: ^10.0.1
       postcss-preset-env: ^7.2.3
+      react: ^16.13.1
       react-dev-utils: ^11.0.4
+      react-dom: ^16.13.1
+      react-table: ^7.7.0
       resolve-url-loader: ^4.0.0
       rimraf: ^3.0.2
       sass: ^1.44.0
@@ -565,21 +568,24 @@ importers:
       '@bentley/imodeljs-frontend': 2.19.28_bd009ceb8e98364a94ff52b0dc08fe73
       '@bentley/itwin-client': 2.19.28_@bentley+bentleyjs-core@2.19.28
       '@bentley/presentation-common': 2.19.28_c30f1c1d261af0dd0e84643208d86bee
-      '@bentley/presentation-components': 2.19.28_9c308346c85a66dafd88ba4c7ad56505
+      '@bentley/presentation-components': 2.19.28_020c41ef9014149b2174c90a3f94f922
       '@bentley/presentation-frontend': 2.19.28_3522d2d7a75f8b3a0e1b987e1436b5a9
       '@bentley/ui-abstract': 2.19.28_5a3fc1123493d2bcc353bf0895e717a3
-      '@bentley/ui-components': 2.19.28_b20546b19206f958db01c1dee37a5e89
-      '@bentley/ui-core': 2.19.28_ab37be8fa3b0dca22b6326d456af0f48
-      '@bentley/ui-framework': 2.19.28_1617835f8d344457edbe24db79cea198
+      '@bentley/ui-components': 2.19.28_6dd541cc6df596e54e30a402c4ce5ffb
+      '@bentley/ui-core': 2.19.28_be6bed29555d0e5ebee185a91719146c
+      '@bentley/ui-framework': 2.19.28_c3a156afb7d199cdde9b6592f8d85469
       '@itwin/itwinui-css': 0.44.0
-      '@itwin/itwinui-icons-react': 1.5.0
-      '@itwin/itwinui-react': 1.29.0
+      '@itwin/itwinui-icons-react': 1.5.0_react-dom@16.14.0+react@16.14.0
+      '@itwin/itwinui-react': 1.29.0_react-dom@16.14.0+react@16.14.0
       classnames: 2.3.1
       cross-fetch: 3.1.4
       file-loader: 4.3.0_webpack@4.46.0
       immer: 9.0.12
       postcss-flexbugs-fixes: 5.0.2
       postcss-preset-env: 7.2.3
+      react: 16.14.0
+      react-dom: 16.14.0_react@16.14.0
+      react-table: 7.7.0_react@16.14.0
       simple-react-validator: 1.6.1
     devDependencies:
       '@bentley/webpack-tools-core': 2.19.28_webpack@4.46.0
@@ -5019,7 +5025,6 @@ packages:
       react: 16.14.0
       react-dom: 16.14.0_react@16.14.0
       rxjs: 6.6.7
-    dev: true
 
   /@bentley/presentation-components/2.19.28_08fc55fbacf3ef630e3517d05730770c:
     resolution: {integrity: sha512-ExXhs0Dpm5T5EdTON+3abL6g85AaClrzuJHRd2+hJhMecunUz9HPE37+lT5sE/l+0xV6GWHN424nOM0Q+d0mCA==}
@@ -5116,36 +5121,6 @@ packages:
       react-dom: 16.14.0_react@16.14.0
       rxjs: 6.6.7
     dev: true
-
-  /@bentley/presentation-components/2.19.28_9c308346c85a66dafd88ba4c7ad56505:
-    resolution: {integrity: sha512-ExXhs0Dpm5T5EdTON+3abL6g85AaClrzuJHRd2+hJhMecunUz9HPE37+lT5sE/l+0xV6GWHN424nOM0Q+d0mCA==}
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.19.28
-      '@bentley/imodeljs-common': ^2.19.28
-      '@bentley/imodeljs-frontend': ^2.19.28
-      '@bentley/imodeljs-i18n': ^2.19.28
-      '@bentley/presentation-common': ^2.19.28
-      '@bentley/presentation-frontend': ^2.19.28
-      '@bentley/ui-abstract': ^2.19.28
-      '@bentley/ui-components': ^2.19.28
-      '@bentley/ui-core': ^2.19.28
-      react: ^16.8.0
-      react-dom: ^16.8.0
-    dependencies:
-      '@bentley/bentleyjs-core': 2.19.28
-      '@bentley/imodeljs-common': 2.19.28_9ec0965d004603b44c4567735b817ced
-      '@bentley/imodeljs-frontend': 2.19.28_bd009ceb8e98364a94ff52b0dc08fe73
-      '@bentley/presentation-common': 2.19.28_c30f1c1d261af0dd0e84643208d86bee
-      '@bentley/presentation-frontend': 2.19.28_3522d2d7a75f8b3a0e1b987e1436b5a9
-      '@bentley/ui-abstract': 2.19.28_5a3fc1123493d2bcc353bf0895e717a3
-      '@bentley/ui-components': 2.19.28_b20546b19206f958db01c1dee37a5e89
-      '@bentley/ui-core': 2.19.28_ab37be8fa3b0dca22b6326d456af0f48
-      fast-deep-equal: 3.1.3
-      fast-sort: 3.1.1
-      immer: 9.0.12
-      micro-memoize: 4.0.9
-      rxjs: 6.6.7
-    dev: false
 
   /@bentley/presentation-frontend/2.19.28_3522d2d7a75f8b3a0e1b987e1436b5a9:
     resolution: {integrity: sha512-5P/BSPhZrvrNd21lBjOENrQy0A1ewB6UTAK7ARmSGpcHiJppt2QhiE+eUdRGdarCKryU0dH1ptKKZO+HFQU2og==}
@@ -5507,7 +5482,7 @@ packages:
       ts-key-enum: 2.0.8
     dev: true
 
-  /@bentley/ui-components/2.19.28_b20546b19206f958db01c1dee37a5e89:
+  /@bentley/ui-components/2.19.28_6dd541cc6df596e54e30a402c4ce5ffb:
     resolution: {integrity: sha512-7UUhAdrW346VNuEQk5HRcMSC5UAL81aPDHegRVx2jzTjNKRjACtpJa18CeTfEesZ8V1SkLN1LLwbAqDr3xQ4fw==}
     peerDependencies:
       '@bentley/bentleyjs-core': ^2.19.28
@@ -5527,7 +5502,7 @@ packages:
       '@bentley/imodeljs-common': 2.19.28_9ec0965d004603b44c4567735b817ced
       '@bentley/imodeljs-frontend': 2.19.28_bd009ceb8e98364a94ff52b0dc08fe73
       '@bentley/ui-abstract': 2.19.28_5a3fc1123493d2bcc353bf0895e717a3
-      '@bentley/ui-core': 2.19.28_ab37be8fa3b0dca22b6326d456af0f48
+      '@bentley/ui-core': 2.19.28_be6bed29555d0e5ebee185a91719146c
       '@types/shortid': 0.0.29
       callable-instance2: 1.0.0
       classnames: 2.3.1
@@ -5537,15 +5512,17 @@ packages:
       inspire-tree: 5.0.2
       linkify-it: 2.2.0
       lodash: 4.17.21
-      react-compound-slider: 2.5.0
-      react-data-grid: 6.0.1
-      react-dnd: 11.1.3
+      react: 16.14.0
+      react-compound-slider: 2.5.0_react@16.14.0
+      react-data-grid: 6.0.1_react-dom@16.14.0+react@16.14.0
+      react-dnd: 11.1.3_react-dom@16.14.0+react@16.14.0
       react-dnd-html5-backend: 11.1.3
-      react-highlight-words: 0.14.0
-      react-select: 3.1.0
-      react-virtualized: 9.22.3
-      react-virtualized-auto-sizer: 1.0.6
-      react-window: 1.8.6
+      react-dom: 16.14.0_react@16.14.0
+      react-highlight-words: 0.14.0_react@16.14.0
+      react-select: 3.1.0_react-dom@16.14.0+react@16.14.0
+      react-virtualized: 9.22.3_react-dom@16.14.0+react@16.14.0
+      react-virtualized-auto-sizer: 1.0.6_react-dom@16.14.0+react@16.14.0
+      react-window: 1.8.6_react-dom@16.14.0+react@16.14.0
       rxjs: 6.6.7
       shortid: 2.2.16
       ts-key-enum: 2.0.8
@@ -5680,7 +5657,7 @@ packages:
       - webpack
     dev: true
 
-  /@bentley/ui-core/2.19.28_ab37be8fa3b0dca22b6326d456af0f48:
+  /@bentley/ui-core/2.19.28_be6bed29555d0e5ebee185a91719146c:
     resolution: {integrity: sha512-zdJBPVNJskoLBR6tqe9LoL/n1PwyAemoLbW4spreZ85za54Yws85i9TQDsLjIeuFrirV/66zP68rC5OeMVT+Pg==}
     peerDependencies:
       '@bentley/bentleyjs-core': ^2.19.28
@@ -5697,63 +5674,12 @@ packages:
       classnames: 2.3.1
       dompurify: 2.3.4
       lodash: 4.17.21
-      react-autosuggest: 10.1.0
-      react-compound-slider: 2.5.0
-      react-select: 3.1.0
+      react: 16.14.0
+      react-autosuggest: 10.1.0_react@16.14.0
+      react-compound-slider: 2.5.0_react@16.14.0
+      react-dom: 16.14.0_react@16.14.0
+      react-select: 3.1.0_react-dom@16.14.0+react@16.14.0
       resize-observer-polyfill: 1.5.1
-      svg-sprite-loader: 4.2.1_webpack@4.46.0
-    transitivePeerDependencies:
-      - webpack
-    dev: false
-
-  /@bentley/ui-framework/2.19.28_1617835f8d344457edbe24db79cea198:
-    resolution: {integrity: sha512-5UqU41CNuzfgxmY/YOta+ucjoydCzlBewksHAtOpuM8rcKGDB3YFSS3YsLA+opiq+oq3lzZuwrOyTRBofnKZxQ==}
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.19.28
-      '@bentley/frontend-authorization-client': ^2.19.28
-      '@bentley/geometry-core': ^2.19.28
-      '@bentley/imodelhub-client': ^2.19.28
-      '@bentley/imodeljs-common': ^2.19.28
-      '@bentley/imodeljs-frontend': ^2.19.28
-      '@bentley/imodeljs-i18n': ^2.19.28
-      '@bentley/imodeljs-markup': ^2.19.28
-      '@bentley/imodeljs-quantity': ^2.19.28
-      '@bentley/itwin-client': ^2.19.28
-      '@bentley/presentation-common': ^2.19.28
-      '@bentley/presentation-frontend': ^2.19.28
-      '@bentley/product-settings-client': ^2.19.28
-      '@bentley/rbac-client': ^2.19.28
-      '@bentley/ui-abstract': ^2.19.28
-      '@bentley/ui-components': ^2.19.28
-      '@bentley/ui-core': ^2.19.28
-      '@bentley/ui-ninezone': ^2.19.28
-      react: ^16.8.0
-      react-dom: ^16.8.0
-      react-redux: ^7.2.0
-      redux: ^4.0.3
-    dependencies:
-      '@bentley/bentleyjs-core': 2.19.28
-      '@bentley/context-registry-client': 2.19.28_b246b79f6ea18b44a6130a6f08e38320
-      '@bentley/frontend-authorization-client': 2.19.28_b246b79f6ea18b44a6130a6f08e38320
-      '@bentley/geometry-core': 2.19.28_@bentley+bentleyjs-core@2.19.28
-      '@bentley/icons-generic': 1.0.34
-      '@bentley/icons-generic-webfont': 1.0.34
-      '@bentley/imodeljs-common': 2.19.28_9ec0965d004603b44c4567735b817ced
-      '@bentley/imodeljs-frontend': 2.19.28_bd009ceb8e98364a94ff52b0dc08fe73
-      '@bentley/itwin-client': 2.19.28_@bentley+bentleyjs-core@2.19.28
-      '@bentley/presentation-common': 2.19.28_c30f1c1d261af0dd0e84643208d86bee
-      '@bentley/presentation-components': 2.19.28_9c308346c85a66dafd88ba4c7ad56505
-      '@bentley/presentation-frontend': 2.19.28_3522d2d7a75f8b3a0e1b987e1436b5a9
-      '@bentley/ui-abstract': 2.19.28_5a3fc1123493d2bcc353bf0895e717a3
-      '@bentley/ui-components': 2.19.28_b20546b19206f958db01c1dee37a5e89
-      '@bentley/ui-core': 2.19.28_ab37be8fa3b0dca22b6326d456af0f48
-      classnames: 2.3.1
-      immer: 9.0.12
-      lodash: 4.17.21
-      react-dnd: 11.1.3
-      react-dnd-html5-backend: 11.1.3
-      react-split-pane: 0.1.92
-      rxjs: 6.6.7
       svg-sprite-loader: 4.2.1_webpack@4.46.0
     transitivePeerDependencies:
       - webpack
@@ -5989,6 +5915,61 @@ packages:
     transitivePeerDependencies:
       - webpack
     dev: true
+
+  /@bentley/ui-framework/2.19.28_c3a156afb7d199cdde9b6592f8d85469:
+    resolution: {integrity: sha512-5UqU41CNuzfgxmY/YOta+ucjoydCzlBewksHAtOpuM8rcKGDB3YFSS3YsLA+opiq+oq3lzZuwrOyTRBofnKZxQ==}
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.19.28
+      '@bentley/frontend-authorization-client': ^2.19.28
+      '@bentley/geometry-core': ^2.19.28
+      '@bentley/imodelhub-client': ^2.19.28
+      '@bentley/imodeljs-common': ^2.19.28
+      '@bentley/imodeljs-frontend': ^2.19.28
+      '@bentley/imodeljs-i18n': ^2.19.28
+      '@bentley/imodeljs-markup': ^2.19.28
+      '@bentley/imodeljs-quantity': ^2.19.28
+      '@bentley/itwin-client': ^2.19.28
+      '@bentley/presentation-common': ^2.19.28
+      '@bentley/presentation-frontend': ^2.19.28
+      '@bentley/product-settings-client': ^2.19.28
+      '@bentley/rbac-client': ^2.19.28
+      '@bentley/ui-abstract': ^2.19.28
+      '@bentley/ui-components': ^2.19.28
+      '@bentley/ui-core': ^2.19.28
+      '@bentley/ui-ninezone': ^2.19.28
+      react: ^16.8.0
+      react-dom: ^16.8.0
+      react-redux: ^7.2.0
+      redux: ^4.0.3
+    dependencies:
+      '@bentley/bentleyjs-core': 2.19.28
+      '@bentley/context-registry-client': 2.19.28_b246b79f6ea18b44a6130a6f08e38320
+      '@bentley/frontend-authorization-client': 2.19.28_b246b79f6ea18b44a6130a6f08e38320
+      '@bentley/geometry-core': 2.19.28_@bentley+bentleyjs-core@2.19.28
+      '@bentley/icons-generic': 1.0.34
+      '@bentley/icons-generic-webfont': 1.0.34
+      '@bentley/imodeljs-common': 2.19.28_9ec0965d004603b44c4567735b817ced
+      '@bentley/imodeljs-frontend': 2.19.28_bd009ceb8e98364a94ff52b0dc08fe73
+      '@bentley/itwin-client': 2.19.28_@bentley+bentleyjs-core@2.19.28
+      '@bentley/presentation-common': 2.19.28_c30f1c1d261af0dd0e84643208d86bee
+      '@bentley/presentation-components': 2.19.28_020c41ef9014149b2174c90a3f94f922
+      '@bentley/presentation-frontend': 2.19.28_3522d2d7a75f8b3a0e1b987e1436b5a9
+      '@bentley/ui-abstract': 2.19.28_5a3fc1123493d2bcc353bf0895e717a3
+      '@bentley/ui-components': 2.19.28_6dd541cc6df596e54e30a402c4ce5ffb
+      '@bentley/ui-core': 2.19.28_be6bed29555d0e5ebee185a91719146c
+      classnames: 2.3.1
+      immer: 9.0.12
+      lodash: 4.17.21
+      react: 16.14.0
+      react-dnd: 11.1.3_react-dom@16.14.0+react@16.14.0
+      react-dnd-html5-backend: 11.1.3
+      react-dom: 16.14.0_react@16.14.0
+      react-split-pane: 0.1.92_react-dom@16.14.0+react@16.14.0
+      rxjs: 6.6.7
+      svg-sprite-loader: 4.2.1_webpack@4.46.0
+    transitivePeerDependencies:
+      - webpack
+    dev: false
 
   /@bentley/ui-ninezone/2.19.28_a374bdd65427832daaceb45a27ed340a:
     resolution: {integrity: sha512-bTi22u+uV2P2KO2bqz0o3Rwc2iPZM4UpG3QWsQhv88fEbwEotuOxfSuqu3+AVHurhYemi7HDXSI6OQjAXxmpAA==}
@@ -6238,19 +6219,6 @@ packages:
       '@emotion/utils': 0.11.3
       '@emotion/weak-memoize': 0.2.5
 
-  /@emotion/core/10.3.1:
-    resolution: {integrity: sha512-447aUEjPIm0MnE6QYIaFz9VQOHSXf4Iu6EWOIqq11EAPqinkSZmfymPTmlOE3QjLv846lH4JVZBUOtwGbuQoww==}
-    peerDependencies:
-      react: '>=16.3.0'
-    dependencies:
-      '@babel/runtime': 7.16.7
-      '@emotion/cache': 10.0.29
-      '@emotion/css': 10.0.27
-      '@emotion/serialize': 0.11.16
-      '@emotion/sheet': 0.9.4
-      '@emotion/utils': 0.11.3
-    dev: false
-
   /@emotion/core/10.3.1_react@16.14.0:
     resolution: {integrity: sha512-447aUEjPIm0MnE6QYIaFz9VQOHSXf4Iu6EWOIqq11EAPqinkSZmfymPTmlOE3QjLv846lH4JVZBUOtwGbuQoww==}
     peerDependencies:
@@ -6263,7 +6231,6 @@ packages:
       '@emotion/sheet': 0.9.4
       '@emotion/utils': 0.11.3
       react: 16.14.0
-    dev: true
 
   /@emotion/core/10.3.1_react@17.0.2:
     resolution: {integrity: sha512-447aUEjPIm0MnE6QYIaFz9VQOHSXf4Iu6EWOIqq11EAPqinkSZmfymPTmlOE3QjLv846lH4JVZBUOtwGbuQoww==}
@@ -6943,11 +6910,14 @@ packages:
     resolution: {integrity: sha512-3rbXNUn34JIAqALyvk9ASTRMuu6IAyVYXV9wRDaypYmuNcG4fOHXobEEAPMDEOO7U8ZiWjSRfgB95qc4moznCA==}
     dev: false
 
-  /@itwin/itwinui-icons-react/1.5.0:
+  /@itwin/itwinui-icons-react/1.5.0_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-ezYD4Vj7aIpTfUlaphb+wq1uYatOgfnKawGteJw4jrBLQ4uXEW+WChnSmHe3c6UnBUYFSy+oG6G+xrVQv1drUw==}
     peerDependencies:
       react: ^16.8.6 || ^17.0.0
       react-dom: ^16.8.6 || ^17.0.0
+    dependencies:
+      react: 16.14.0
+      react-dom: 16.14.0_react@16.14.0
     dev: false
 
   /@itwin/itwinui-icons-react/1.5.0_react-dom@17.0.2+react@17.0.2:
@@ -6960,11 +6930,14 @@ packages:
       react-dom: 17.0.2_react@17.0.2
     dev: true
 
-  /@itwin/itwinui-illustrations-react/1.2.0:
+  /@itwin/itwinui-illustrations-react/1.2.0_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-uGX7PVyGuMexLFlVxU/qi1Bzv14RJcv0MwHB43harqUjWOOSvy7l7eXIwEmjuwlfmXDnUULJ88gmgvcnEJGXCA==}
     peerDependencies:
       react: ^16.8.6 || ^17.0.0
       react-dom: ^16.8.6 || ^17.0.0
+    dependencies:
+      react: 16.14.0
+      react-dom: 16.14.0_react@16.14.0
     dev: false
 
   /@itwin/itwinui-illustrations-react/1.2.0_react-dom@17.0.2+react@17.0.2:
@@ -6995,20 +6968,22 @@ packages:
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
     dev: true
 
-  /@itwin/itwinui-react/1.29.0:
+  /@itwin/itwinui-react/1.29.0_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-f6SxNIbEWHYb4v5Apo7ytDdTgTeiuU8JIjH0cJcPlJVzmee3G04ZoFE3j2U45S892dwPst5WNNTKxqtkdxw9jQ==}
     peerDependencies:
       react: ^16.8.6 || ^17.0.0
       react-dom: ^16.8.6 || ^17.0.0
     dependencies:
       '@itwin/itwinui-css': 0.44.0
-      '@itwin/itwinui-icons-react': 1.5.0
-      '@itwin/itwinui-illustrations-react': 1.2.0
-      '@tippyjs/react': 4.2.6
+      '@itwin/itwinui-icons-react': 1.5.0_react-dom@16.14.0+react@16.14.0
+      '@itwin/itwinui-illustrations-react': 1.2.0_react-dom@16.14.0+react@16.14.0
+      '@tippyjs/react': 4.2.6_react-dom@16.14.0+react@16.14.0
       '@types/react-table': 7.7.9
       classnames: 2.3.1
-      react-table: 7.7.0
-      react-transition-group: 4.4.2
+      react: 16.14.0
+      react-dom: 16.14.0_react@16.14.0
+      react-table: 7.7.0_react@16.14.0
+      react-transition-group: 4.4.2_react-dom@16.14.0+react@16.14.0
     dev: false
 
   /@itwin/presentation-common/3.0.0-dev.185_f812673f4fadb3bedeaaa9994dcd1c5b:
@@ -7994,12 +7969,14 @@ packages:
       react-dom: 16.14.0_react@16.14.0
     dev: true
 
-  /@tippyjs/react/4.2.6:
+  /@tippyjs/react/4.2.6_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-91RicDR+H7oDSyPycI13q3b7o4O60wa2oRbjlz2fyRLmHImc4vyDwuUP8NtZaN0VARJY5hybvDYrFzhY9+Lbyw==}
     peerDependencies:
       react: '>=16.8'
       react-dom: '>=16.8'
     dependencies:
+      react: 16.14.0
+      react-dom: 16.14.0_react@16.14.0
       tippy.js: 6.3.7
     dev: false
 
@@ -22388,18 +22365,6 @@ packages:
       whatwg-fetch: 3.6.2
     dev: true
 
-  /react-autosuggest/10.1.0:
-    resolution: {integrity: sha512-/azBHmc6z/31s/lBf6irxPf/7eejQdR0IqnZUzjdSibtlS8+Rw/R79pgDAo6Ft5QqCUTyEQ+f0FhL+1olDQ8OA==}
-    peerDependencies:
-      react: '>=16.3.0'
-    dependencies:
-      es6-promise: 4.2.8
-      prop-types: 15.8.1
-      react-themeable: 1.1.0
-      section-iterator: 2.0.0
-      shallow-equal: 1.2.1
-    dev: false
-
   /react-autosuggest/10.1.0_react@16.14.0:
     resolution: {integrity: sha512-/azBHmc6z/31s/lBf6irxPf/7eejQdR0IqnZUzjdSibtlS8+Rw/R79pgDAo6Ft5QqCUTyEQ+f0FhL+1olDQ8OA==}
     peerDependencies:
@@ -22425,17 +22390,6 @@ packages:
       shallow-equal: 1.2.1
     dev: true
 
-  /react-compound-slider/2.5.0:
-    resolution: {integrity: sha512-T84FtSI0bkQPmH5GaaHbL+2McOyIR6M5sqS80dqw/bHc5r2UKLYY64BWTbsL+XO0jlx7REuJJnZUBqo4eSRl7g==}
-    peerDependencies:
-      react: ^16.3.0
-    dependencies:
-      '@babel/runtime': 7.16.7
-      d3-array: 1.2.4
-      prop-types: 15.8.1
-      warning: 3.0.0
-    dev: false
-
   /react-compound-slider/2.5.0_react@16.14.0:
     resolution: {integrity: sha512-T84FtSI0bkQPmH5GaaHbL+2McOyIR6M5sqS80dqw/bHc5r2UKLYY64BWTbsL+XO0jlx7REuJJnZUBqo4eSRl7g==}
     peerDependencies:
@@ -22446,14 +22400,6 @@ packages:
       prop-types: 15.8.1
       react: 16.14.0
       warning: 3.0.0
-    dev: true
-
-  /react-data-grid/6.0.1:
-    resolution: {integrity: sha512-a4OGEjWTOCJ64GvXwTXEHDEQ8iXZ8Xk30izUKyAVmP5q+Q2AOTMq/qUcHQwpL+XJ81/vTPTIhR//ELjjzYGwFQ==}
-    peerDependencies:
-      react: ^16.0.0
-      react-dom: ^16.0.0
-    dev: false
 
   /react-data-grid/6.0.1_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-a4OGEjWTOCJ64GvXwTXEHDEQ8iXZ8Xk30izUKyAVmP5q+Q2AOTMq/qUcHQwpL+XJ81/vTPTIhR//ELjjzYGwFQ==}
@@ -22463,7 +22409,6 @@ packages:
     dependencies:
       react: 16.14.0
       react-dom: 16.14.0_react@16.14.0
-    dev: true
 
   /react-data-grid/6.0.1_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-a4OGEjWTOCJ64GvXwTXEHDEQ8iXZ8Xk30izUKyAVmP5q+Q2AOTMq/qUcHQwpL+XJ81/vTPTIhR//ELjjzYGwFQ==}
@@ -22570,18 +22515,6 @@ packages:
     dependencies:
       dnd-core: 11.1.3
 
-  /react-dnd/11.1.3:
-    resolution: {integrity: sha512-8rtzzT8iwHgdSC89VktwhqdKKtfXaAyC4wiqp0SywpHG12TTLvfOoL6xNEIUWXwIEWu+CFfDn4GZJyynCEuHIQ==}
-    peerDependencies:
-      react: '>= 16.9.0'
-      react-dom: '>= 16.9.0'
-    dependencies:
-      '@react-dnd/shallowequal': 2.0.0
-      '@types/hoist-non-react-statics': 3.3.1
-      dnd-core: 11.1.3
-      hoist-non-react-statics: 3.3.2
-    dev: false
-
   /react-dnd/11.1.3_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-8rtzzT8iwHgdSC89VktwhqdKKtfXaAyC4wiqp0SywpHG12TTLvfOoL6xNEIUWXwIEWu+CFfDn4GZJyynCEuHIQ==}
     peerDependencies:
@@ -22594,7 +22527,6 @@ packages:
       hoist-non-react-statics: 3.3.2
       react: 16.14.0
       react-dom: 16.14.0_react@16.14.0
-    dev: true
 
   /react-dnd/11.1.3_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-8rtzzT8iwHgdSC89VktwhqdKKtfXaAyC4wiqp0SywpHG12TTLvfOoL6xNEIUWXwIEWu+CFfDn4GZJyynCEuHIQ==}
@@ -22620,7 +22552,6 @@ packages:
       prop-types: 15.8.1
       react: 16.14.0
       scheduler: 0.19.1
-    dev: true
 
   /react-dom/17.0.2_react@17.0.2:
     resolution: {integrity: sha512-s4h96KtLDUQlsENhMn1ar8t2bEa+q/YAtj8pPPdIjPDGBDIVNsrD9aXNWqspUe6AzKCIG0C1HZZLqLV7qpOBGA==}
@@ -22641,16 +22572,6 @@ packages:
     resolution: {integrity: sha512-mKR90fX7Pm5seCOfz8q9F+66VCc1PGsWSBxKbITjfKVQHMNF2zudxHnMdJiB1fRCb+XsbQV9sO9DCkgsMQgBIA==}
     dev: true
 
-  /react-highlight-words/0.14.0:
-    resolution: {integrity: sha512-DNp1zAIiNqs1nunFv5K67ca0KVSKihbmpZLNwqQj61yMK6zf8YHoGrpLlEt7WEqj1227FOm41FuXiv9KZgcwdA==}
-    peerDependencies:
-      react: ^0.14.0 || ^15.0.0 || ^16.0.0-0
-    dependencies:
-      highlight-words-core: 1.2.2
-      memoize-one: 4.0.3
-      prop-types: 15.8.1
-    dev: false
-
   /react-highlight-words/0.14.0_react@16.14.0:
     resolution: {integrity: sha512-DNp1zAIiNqs1nunFv5K67ca0KVSKihbmpZLNwqQj61yMK6zf8YHoGrpLlEt7WEqj1227FOm41FuXiv9KZgcwdA==}
     peerDependencies:
@@ -22660,7 +22581,6 @@ packages:
       memoize-one: 4.0.3
       prop-types: 15.8.1
       react: 16.14.0
-    dev: true
 
   /react-highlight-words/0.17.0_react@17.0.2:
     resolution: {integrity: sha512-uX1Qh5IGjnLuJT0Zok234QDwRC8h4hcVMnB99Cb7aquB1NlPPDiWKm0XpSZOTdSactvnClCk8LOmVlP+75dgHA==}
@@ -22673,14 +22593,6 @@ packages:
       react: 17.0.2
     dev: true
 
-  /react-input-autosize/2.2.2:
-    resolution: {integrity: sha512-jQJgYCA3S0j+cuOwzuCd1OjmBmnZLdqQdiLKRYrsMMzbjUrVDS5RvJUDwJqA7sKuksDuzFtm6hZGKFu7Mjk5aw==}
-    peerDependencies:
-      react: ^0.14.9 || ^15.3.0 || ^16.0.0-rc || ^16.0
-    dependencies:
-      prop-types: 15.8.1
-    dev: false
-
   /react-input-autosize/2.2.2_react@16.14.0:
     resolution: {integrity: sha512-jQJgYCA3S0j+cuOwzuCd1OjmBmnZLdqQdiLKRYrsMMzbjUrVDS5RvJUDwJqA7sKuksDuzFtm6hZGKFu7Mjk5aw==}
     peerDependencies:
@@ -22688,7 +22600,6 @@ packages:
     dependencies:
       prop-types: 15.8.1
       react: 16.14.0
-    dev: true
 
   /react-input-autosize/3.0.0_react@17.0.2:
     resolution: {integrity: sha512-nL9uS7jEs/zu8sqwFE5MAPx6pPkNAriACQ2rGLlqmKr2sPGtN7TXTyDdQt4lbNXVx7Uzadb40x8qotIuru6Rhg==}
@@ -22750,22 +22661,6 @@ packages:
       react-dom: 17.0.2_react@17.0.2
       react-is: 17.0.2
 
-  /react-select/3.1.0:
-    resolution: {integrity: sha512-wBFVblBH1iuCBprtpyGtd1dGMadsG36W5/t2Aj8OE6WbByDg5jIFyT7X5gT+l0qmT5TqWhxX+VsKJvCEl2uL9g==}
-    peerDependencies:
-      react: ^16.8.0
-      react-dom: ^16.8.0
-    dependencies:
-      '@babel/runtime': 7.16.7
-      '@emotion/cache': 10.0.29
-      '@emotion/core': 10.3.1
-      '@emotion/css': 10.0.27
-      memoize-one: 5.2.1
-      prop-types: 15.8.1
-      react-input-autosize: 2.2.2
-      react-transition-group: 4.4.2
-    dev: false
-
   /react-select/3.1.0_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-wBFVblBH1iuCBprtpyGtd1dGMadsG36W5/t2Aj8OE6WbByDg5jIFyT7X5gT+l0qmT5TqWhxX+VsKJvCEl2uL9g==}
     peerDependencies:
@@ -22782,7 +22677,6 @@ packages:
       react-dom: 16.14.0_react@16.14.0
       react-input-autosize: 2.2.2_react@16.14.0
       react-transition-group: 4.4.2_react-dom@16.14.0+react@16.14.0
-    dev: true
 
   /react-select/3.2.0_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-B/q3TnCZXEKItO0fFN/I0tWOX3WJvi/X2wtdffmwSQVRwg5BpValScTO1vdic9AxlUgmeSzib2hAZAwIUQUZGQ==}
@@ -22802,17 +22696,6 @@ packages:
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
     dev: true
 
-  /react-split-pane/0.1.92:
-    resolution: {integrity: sha512-GfXP1xSzLMcLJI5BM36Vh7GgZBpy+U/X0no+VM3fxayv+p1Jly5HpMofZJraeaMl73b3hvlr+N9zJKvLB/uz9w==}
-    peerDependencies:
-      react: ^16.0.0-0
-      react-dom: ^16.0.0-0
-    dependencies:
-      prop-types: 15.8.1
-      react-lifecycles-compat: 3.0.4
-      react-style-proptype: 3.2.2
-    dev: false
-
   /react-split-pane/0.1.92_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-GfXP1xSzLMcLJI5BM36Vh7GgZBpy+U/X0no+VM3fxayv+p1Jly5HpMofZJraeaMl73b3hvlr+N9zJKvLB/uz9w==}
     peerDependencies:
@@ -22824,7 +22707,6 @@ packages:
       react-dom: 16.14.0_react@16.14.0
       react-lifecycles-compat: 3.0.4
       react-style-proptype: 3.2.2
-    dev: true
 
   /react-spring/8.0.27_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-nDpWBe3ZVezukNRandTeLSPcwwTMjNVu1IDq9qA/AMiUqHuRN4BeSWvKr3eIxxg1vtiYiOLy4FqdfCP5IoP77g==}
@@ -22843,10 +22725,12 @@ packages:
     dependencies:
       prop-types: 15.8.1
 
-  /react-table/7.7.0:
+  /react-table/7.7.0_react@16.14.0:
     resolution: {integrity: sha512-jBlj70iBwOTvvImsU9t01LjFjy4sXEtclBovl3mTiqjz23Reu0DKnRza4zlLtOPACx6j2/7MrQIthIK1Wi+LIA==}
     peerDependencies:
       react: ^16.8.3 || ^17.0.0-0
+    dependencies:
+      react: 16.14.0
     dev: false
 
   /react-table/7.7.0_react@17.0.2:
@@ -22874,18 +22758,6 @@ packages:
     dependencies:
       object-assign: 3.0.0
 
-  /react-transition-group/4.4.2:
-    resolution: {integrity: sha512-/RNYfRAMlZwDSr6z4zNKV6xu53/e2BuaBbGhbyYIXTrmgu/bGHzmqOs7mJSJBHy9Ud+ApHx3QjrkKSp1pxvlFg==}
-    peerDependencies:
-      react: '>=16.6.0'
-      react-dom: '>=16.6.0'
-    dependencies:
-      '@babel/runtime': 7.16.7
-      dom-helpers: 5.2.1
-      loose-envify: 1.4.0
-      prop-types: 15.8.1
-    dev: false
-
   /react-transition-group/4.4.2_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-/RNYfRAMlZwDSr6z4zNKV6xu53/e2BuaBbGhbyYIXTrmgu/bGHzmqOs7mJSJBHy9Ud+ApHx3QjrkKSp1pxvlFg==}
     peerDependencies:
@@ -22898,7 +22770,6 @@ packages:
       prop-types: 15.8.1
       react: 16.14.0
       react-dom: 16.14.0_react@16.14.0
-    dev: true
 
   /react-transition-group/4.4.2_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-/RNYfRAMlZwDSr6z4zNKV6xu53/e2BuaBbGhbyYIXTrmgu/bGHzmqOs7mJSJBHy9Ud+ApHx3QjrkKSp1pxvlFg==}
@@ -22914,14 +22785,6 @@ packages:
       react-dom: 17.0.2_react@17.0.2
     dev: true
 
-  /react-virtualized-auto-sizer/1.0.6:
-    resolution: {integrity: sha512-7tQ0BmZqfVF6YYEWcIGuoR3OdYe8I/ZFbNclFlGOC3pMqunkYF/oL30NCjSGl9sMEb17AnzixDz98Kqc3N76HQ==}
-    engines: {node: '>8.0.0'}
-    peerDependencies:
-      react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0
-      react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0
-    dev: false
-
   /react-virtualized-auto-sizer/1.0.6_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-7tQ0BmZqfVF6YYEWcIGuoR3OdYe8I/ZFbNclFlGOC3pMqunkYF/oL30NCjSGl9sMEb17AnzixDz98Kqc3N76HQ==}
     engines: {node: '>8.0.0'}
@@ -22931,21 +22794,6 @@ packages:
     dependencies:
       react: 16.14.0
       react-dom: 16.14.0_react@16.14.0
-    dev: true
-
-  /react-virtualized/9.22.3:
-    resolution: {integrity: sha512-MKovKMxWTcwPSxE1kK1HcheQTWfuCxAuBoSTf2gwyMM21NdX/PXUhnoP8Uc5dRKd+nKm8v41R36OellhdCpkrw==}
-    peerDependencies:
-      react: ^15.3.0 || ^16.0.0-alpha
-      react-dom: ^15.3.0 || ^16.0.0-alpha
-    dependencies:
-      '@babel/runtime': 7.16.7
-      clsx: 1.1.1
-      dom-helpers: 5.2.1
-      loose-envify: 1.4.0
-      prop-types: 15.8.1
-      react-lifecycles-compat: 3.0.4
-    dev: false
 
   /react-virtualized/9.22.3_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-MKovKMxWTcwPSxE1kK1HcheQTWfuCxAuBoSTf2gwyMM21NdX/PXUhnoP8Uc5dRKd+nKm8v41R36OellhdCpkrw==}
@@ -22961,18 +22809,6 @@ packages:
       react: 16.14.0
       react-dom: 16.14.0_react@16.14.0
       react-lifecycles-compat: 3.0.4
-    dev: true
-
-  /react-window/1.8.6:
-    resolution: {integrity: sha512-8VwEEYyjz6DCnGBsd+MgkD0KJ2/OXFULyDtorIiTz+QzwoP94tBoA7CnbtyXMm+cCeAUER5KJcPtWl9cpKbOBg==}
-    engines: {node: '>8.0.0'}
-    peerDependencies:
-      react: ^15.0.0 || ^16.0.0 || ^17.0.0
-      react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0
-    dependencies:
-      '@babel/runtime': 7.16.7
-      memoize-one: 5.2.1
-    dev: false
 
   /react-window/1.8.6_react-dom@16.14.0+react@16.14.0:
     resolution: {integrity: sha512-8VwEEYyjz6DCnGBsd+MgkD0KJ2/OXFULyDtorIiTz+QzwoP94tBoA7CnbtyXMm+cCeAUER5KJcPtWl9cpKbOBg==}
@@ -22985,7 +22821,6 @@ packages:
       memoize-one: 5.2.1
       react: 16.14.0
       react-dom: 16.14.0_react@16.14.0
-    dev: true
 
   /react-window/1.8.6_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-8VwEEYyjz6DCnGBsd+MgkD0KJ2/OXFULyDtorIiTz+QzwoP94tBoA7CnbtyXMm+cCeAUER5KJcPtWl9cpKbOBg==}
@@ -23007,7 +22842,6 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       prop-types: 15.8.1
-    dev: true
 
   /react/17.0.2:
     resolution: {integrity: sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA==}
@@ -23840,7 +23674,6 @@ packages:
     dependencies:
       loose-envify: 1.4.0
       object-assign: 4.1.1
-    dev: true
 
   /scheduler/0.20.2:
     resolution: {integrity: sha512-2eWfGgAqqWFGqtdMmcL5zCMK1U8KlXv8SQFGglL3CEtd0aDVDWgeF/YoCmvln55m5zSk3J/20hTaSBeSObsQDQ==}

@@ -1,6 +1,6 @@
 {
   "name": "@itwin/grouping-mapping-widget",
-  "version": "0.0.12",
+  "version": "0.0.14",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the Bentley Reporting Platform.",
   "keywords": [
     "Bentley",
@@ -26,7 +26,7 @@
     "cover": "",
     "lint": "npm run lint:ts",
     "lint:fix": "npm run lint:ts -- --fix */**/*.{js,ts,tsx,scss}",
-    "lint:ts": "eslint -f visualstudio */**/*.{js,ts,tsx} --max-warnings=0",
+    "lint:ts": "eslint -f visualstudio \"./src/**/*.{js,ts,tsx}\" --max-warnings=0",
     "rebuild": "npm run build",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./public/locales/en-PSEUDO",
     "test": "",
@@ -55,6 +55,9 @@
     "immer": "^9.0.7",
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-preset-env": "^7.2.3",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-table": "^7.7.0",
     "simple-react-validator": "^1.6.1"
   },
   "devDependencies": {
@@ -91,17 +94,16 @@
     "webpack": "^4.42.0",
     "webpack-cli": "^4.9.1"
   },
-  "peerDependencies": {
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1"
-  },
   "eslintConfig": {
     "plugins": [
       "@itwin"
     ],
     "extends": "plugin:@itwin/ui",
     "rules": {
-      "@typescript-eslint/no-shadow": "off"
+      "@typescript-eslint/no-shadow": "off",
+      "deprecation/deprecation": "off",
+      "jsx-a11y/click-events-have-key-events": "off",
+      "jsx-a11y/interactive-supports-focus": "off"
     }
   }
 }

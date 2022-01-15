@@ -2,15 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { SvgChevronLeft } from '@itwin/itwinui-icons-react';
-import { Text } from '@itwin/itwinui-react';
-import './utils.scss';
-import React from 'react';
+import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
+import { Text } from "@itwin/itwinui-react";
+import "./utils.scss";
+import React from "react";
 import {
   ISelectionProvider,
   SelectionChangeEventArgs,
-} from '@bentley/presentation-frontend';
-import { IModelConnection } from '@bentley/imodeljs-frontend';
+} from "@bentley/presentation-frontend";
+import { IModelConnection } from "@bentley/imodeljs-frontend";
 
 export const onSelectionChanged = (
   evt: SelectionChangeEventArgs,
@@ -19,22 +19,22 @@ export const onSelectionChanged = (
   /* eslint-disable no-console */
   const selection = selectionProvider.getSelection(evt.imodel, evt.level);
   if (selection.isEmpty) {
-    console.log('========== Selection cleared ==========');
+    console.log("========== Selection cleared ==========");
   } else {
-    console.log('========== Selection change ===========');
+    console.log("========== Selection change ===========");
     if (selection.instanceKeys.size !== 0) {
       // log all selected ECInstance ids grouped by ECClass name
-      console.log('ECInstances:');
+      console.log("ECInstances:");
       selection.instanceKeys.forEach((ids, ecclass) => {
-        console.log(`${ecclass}: [${[...ids].join(',')}]`);
+        console.log(`${ecclass}: [${[...ids].join(",")}]`);
       });
     }
     if (selection.nodeKeys.size !== 0) {
       // log all selected node keys
-      console.log('Nodes:');
+      console.log("Nodes:");
       selection.nodeKeys.forEach((key) => console.log(JSON.stringify(key)));
     }
-    console.log('=======================================');
+    console.log("=======================================");
   }
   /* eslint-enable no-console */
 };
@@ -54,7 +54,7 @@ export const WidgetHeader = ({
     <div className='widget-header-container'>
       {returnFn && (
         <div
-          className={disabled ? 'chevron-disabled' : 'chevron'}
+          className={disabled ? "chevron-disabled" : "chevron"}
           onClick={disabled ? undefined : returnFn}
         >
           <SvgChevronLeft />
@@ -84,7 +84,7 @@ export const fetchIdsFromQuery = async (
   query: string,
   iModelConnection: IModelConnection,
 ) => {
-  if (query === '') {
+  if (query === "") {
     return [];
   }
   const ids: string[] = [];
@@ -94,14 +94,14 @@ export const fetchIdsFromQuery = async (
     if (done) {
       break;
     }
-    if (Object.keys(value).includes('id')) {
+    if (Object.keys(value).includes("id")) {
       // eslint-disable-next-line dot-notation
-      ids.push(value['id']);
-    } else if (Object.keys(value).includes('element.id')) {
-      ids.push(value['element.id']);
+      ids.push(value.id);
+    } else if (Object.keys(value).includes("element.id")) {
+      ids.push(value["element.id"]);
     }
     // eslint-disable-next-line dot-notation
-    ids.push(value['id']);
+    ids.push(value.id);
   }
   return ids;
 };

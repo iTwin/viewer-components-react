@@ -3,15 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from 'react';
-import { PropertyRecord, PropertyValueFormat } from '@bentley/ui-abstract';
-import { CommonPropertyRenderer } from '@bentley/ui-components/lib/ui-components/properties/renderers/CommonPropertyRenderer';
-import { NonPrimitivePropertyLabelRenderer } from '@bentley/ui-components';
+import * as React from "react";
+import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
+import { CommonPropertyRenderer } from "@bentley/ui-components/lib/ui-components/properties/renderers/CommonPropertyRenderer";
+import { NonPrimitivePropertyLabelRenderer } from "@bentley/ui-components";
 
-import { PropertyRenderer } from './PropertyRender';
-import { PropertyView } from './PropertyView';
-import { PrimitiveRendererProps } from './PrimitivePropertyRenderer';
-import './NonPrimitivePropertyRenderer.scss';
+import { PropertyRenderer } from "./PropertyRender";
+import { PropertyView } from "./PropertyView";
+import { PrimitiveRendererProps } from "./PrimitivePropertyRenderer";
+import "./NonPrimitivePropertyRenderer.scss";
 
 /** Properties of [[NonPrimitivePropertyRenderer]] React component
  * @public
@@ -34,11 +34,11 @@ interface NonPrimitivePropertyRendererState {
  * @public
  */
 export class NonPrimitivePropertyRenderer extends React.Component<
-  NonPrimitivePropertyRendererProps,
-  NonPrimitivePropertyRendererState
+NonPrimitivePropertyRendererProps,
+NonPrimitivePropertyRendererState
 > {
   /** @internal */
-  public readonly state: NonPrimitivePropertyRendererState = {
+  public override readonly state: NonPrimitivePropertyRendererState = {
     /** If it's not collapsible, that means it's expanded by default and can't be collapsed */
     isExpanded:
       !this.props.isCollapsible || this.props.propertyRecord.autoExpand,
@@ -124,7 +124,7 @@ export class NonPrimitivePropertyRenderer extends React.Component<
   };
 
   /** @internal */
-  public render() {
+  public override render() {
     let items: PropertyRecord[] =
       this.props.propertyRecord.getChildrenRecords();
     if (

@@ -3,13 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { PresentationPropertyDataProvider } from '@bentley/presentation-components';
-import { InstanceKey, PropertiesField } from '@bentley/presentation-common';
+import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
+import { InstanceKey, PropertiesField } from "@bentley/presentation-common";
 import {
   Primitives,
   PropertyRecord,
   PropertyValueFormat,
-} from '@bentley/ui-abstract';
+} from "@bentley/ui-abstract";
 
 export interface Query {
   classes: QueryClass[];
@@ -32,9 +32,9 @@ export interface QueryProperty {
 /* This class is to build adaptive and dynamic query for find similar property selections */
 export class QueryBuilder {
   public static readonly MULTI_ASPECT_PRIMARY_CLASS =
-    'BisCore:ElementOwnsMultiAspects';
+    "BisCore:ElementOwnsMultiAspects";
   public static readonly UNIQUE_ASPECT_PRIMARY_CLASS =
-    'BisCore:ElementOwnsUniqueAspect';
+    "BisCore:ElementOwnsUniqueAspect";
   public static readonly DEFAULT_DOUBLE_PRECISION = 4;
 
   public dataProvider: PresentationPropertyDataProvider | undefined;
@@ -58,7 +58,7 @@ export class QueryBuilder {
 
     // if property value has single quote, escape
     if (
-      (typeof prop.value.value === 'string' ||
+      (typeof prop.value.value === "string" ||
         prop.value.value instanceof String) &&
       String(prop.value.value).indexOf("'") >= 0
     ) {
@@ -74,7 +74,7 @@ export class QueryBuilder {
 
     // get the special cases
     const isNavigation: boolean =
-      prop.property.typename.toLowerCase() === 'navigation';
+      prop.property.typename.toLowerCase() === "navigation";
 
     const isAspect: boolean =
       propertyField.parent?.pathToPrimaryClass.find(
@@ -85,7 +85,7 @@ export class QueryBuilder {
       ) !== undefined;
 
     const className =
-      propertyField.properties[0].property.classInfo.name.replace(':', '.');
+      propertyField.properties[0].property.classInfo.name.replace(":", ".");
     const propertyName = isNavigation
       ? `${propertyField.properties[0].property.name}.id`
       : propertyField.properties[0].property.name;
@@ -121,10 +121,10 @@ export class QueryBuilder {
 
   private _needsQuote(propertyField: PropertiesField): boolean {
     // list of property types that need quote around property value
-    if (propertyField.type.typeName.toLowerCase() === 'string') {
+    if (propertyField.type.typeName.toLowerCase() === "string") {
       return true;
     }
-    if (propertyField.type.typeName.toLowerCase() === 'uri') {
+    if (propertyField.type.typeName.toLowerCase() === "uri") {
       return true;
     }
     return false;
@@ -138,9 +138,9 @@ export class QueryBuilder {
   ) {
     const paths = [...(propertyField.parent?.pathToPrimaryClass ?? [])];
     paths.reverse().forEach((path) => {
-      const sourceClassName = path.sourceClassInfo?.name.replace(':', '.');
-      const targetClassName = path.targetClassInfo?.name.replace(':', '.');
-      const relClassName = path.relationshipInfo?.name.replace(':', '.');
+      const sourceClassName = path.sourceClassInfo?.name.replace(":", ".");
+      const targetClassName = path.targetClassInfo?.name.replace(":", ".");
+      const relClassName = path.relationshipInfo?.name.replace(":", ".");
       if (!path.isForwardRelationship) {
         this.addPropertyToQuery(
           targetClassName,
@@ -235,14 +235,14 @@ export class QueryBuilder {
       this.query = {
         classes: [
           {
-            className: className,
-            isAspect: isAspect,
-            isRelational: isRelational,
+            className,
+            isAspect,
+            isRelational,
             properties: [
               {
                 name: propertyName,
                 value: propertyValue,
-                needsQuote: needsQuote,
+                needsQuote,
               },
             ],
           },
@@ -260,21 +260,21 @@ export class QueryBuilder {
         foundClass.properties.push({
           name: propertyName,
           value: propertyValue,
-          needsQuote: needsQuote,
+          needsQuote,
         });
       }
     } else {
       this.query.classes.push({
-        className: className,
-        isRelational: isRelational,
+        className,
+        isRelational,
         properties: [
           {
             name: propertyName,
             value: propertyValue,
-            needsQuote: needsQuote,
+            needsQuote,
           },
         ],
-        isAspect: isAspect,
+        isAspect,
       });
     }
   }
@@ -300,13 +300,13 @@ export class QueryBuilder {
       ) !== undefined;
 
     const isNavigation: boolean =
-      prop.property.typename.toLowerCase() === 'navigation';
+      prop.property.typename.toLowerCase() === "navigation";
 
     const propertyName = isNavigation
       ? `${propertyField.properties[0].property.name}.id`
       : propertyField.properties[0].property.name;
     const className =
-      propertyField.properties[0].property.classInfo.name.replace(':', '.');
+      propertyField.properties[0].property.classInfo.name.replace(":", ".");
 
     if (
       !isAspect &&
@@ -325,9 +325,9 @@ export class QueryBuilder {
   ) {
     const paths = [...(propertyField.parent?.pathToPrimaryClass ?? [])];
     paths.reverse().forEach((path) => {
-      const sourceClassName = path.sourceClassInfo?.name.replace(':', '.');
-      const targetClassName = path.targetClassInfo?.name.replace(':', '.');
-      const relClassName = path.relationshipInfo?.name.replace(':', '.');
+      const sourceClassName = path.sourceClassInfo?.name.replace(":", ".");
+      const targetClassName = path.targetClassInfo?.name.replace(":", ".");
+      const relClassName = path.relationshipInfo?.name.replace(":", ".");
       if (!path.isForwardRelationship) {
         this.removePropertyFromQuery(targetClassName, `ECInstanceId`);
         this.removePropertyFromQuery(relClassName, `TargetECInstanceId`);
@@ -378,7 +378,7 @@ export class QueryBuilder {
 
   public buildQueryString() {
     if (this.query === undefined || this.query.classes.length === 0) {
-      return '';
+      return "";
     }
 
     const baseClass = this.query.classes[0];

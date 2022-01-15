@@ -2,14 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Fieldset, LabeledInput, Small } from '@itwin/itwinui-react';
-import React, { useState } from 'react';
-import { MappingReportingAPI } from '../../api/generated';
-import { reportingClientApi } from '../../api/reportingClient';
-import ActionPanel from './ActionPanel';
-import useValidator from '../hooks/useValidator';
-import { handleInputChange, WidgetHeader } from './utils';
-import './MappingAction.scss';
+import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
+import React, { useState } from "react";
+import { MappingReportingAPI } from "../../api/generated/api";
+import { reportingClientApi } from "../../api/reportingClient";
+import ActionPanel from "./ActionPanel";
+import useValidator from "../hooks/useValidator";
+import { handleInputChange, WidgetHeader } from "./utils";
+import "./MappingAction.scss";
 
 interface MappingActionProps {
   iModelId: string;
@@ -19,13 +19,13 @@ interface MappingActionProps {
 
 const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
   const [values, setValues] = useState({
-    name: mapping?.mappingName ?? '',
-    description: mapping?.description ?? '',
+    name: mapping?.mappingName ?? "",
+    description: mapping?.description ?? "",
   });
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  //TODO ERRORED STATE
+  // TODO ERRORED STATE
   const onSave = async () => {
     try {
       if (!validator.allValid()) {
@@ -34,14 +34,14 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
       }
       setIsLoading(true);
       mapping
-        ? await reportingClientApi.updateMapping(iModelId, mapping.id ?? '', {
-            mappingName: values.name,
-            description: values.description,
-          })
+        ? await reportingClientApi.updateMapping(iModelId, mapping.id ?? "", {
+          mappingName: values.name,
+          description: values.description,
+        })
         : await reportingClientApi.createMapping(iModelId, {
-            mappingName: values.name,
-            description: values.description,
-          });
+          mappingName: values.name,
+          description: values.description,
+        });
       await returnFn();
     } catch {
       setIsLoading(false);
@@ -51,7 +51,7 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
   return (
     <>
       <WidgetHeader
-        title={mapping ? 'Modify Mapping' : 'Add Mapping'}
+        title={mapping ? "Modify Mapping" : "Add Mapping"}
         returnFn={returnFn}
       />
       <div className='details-form-container'>
@@ -67,30 +67,30 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
             required
             onChange={(event) => {
               handleInputChange(event, values, setValues);
-              validator.showMessageFor('name');
+              validator.showMessageFor("name");
             }}
             message={
               validator.message(
-                'name',
+                "name",
                 values.name,
-                'required|NoSpacesInName|NoInvalidChars',
-              ) || 'Name cannot contain spaces or special characters.'
+                "required|NoSpacesInName|NoInvalidChars",
+              ) || "Name cannot contain spaces or special characters."
             }
             status={
               validator.message(
-                'name',
+                "name",
                 values.name,
-                'required|NoSpacesInName|NoInvalidChars',
+                "required|NoSpacesInName|NoInvalidChars",
               )
-                ? 'negative'
+                ? "negative"
                 : undefined
             }
             onBlur={() => {
-              validator.showMessageFor('name');
+              validator.showMessageFor("name");
             }}
             onBlurCapture={(event) => {
               handleInputChange(event, values, setValues);
-              validator.showMessageFor('name');
+              validator.showMessageFor("name");
             }}
           />
           <LabeledInput
@@ -101,24 +101,24 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
             value={values.description}
             onChange={(event) => {
               handleInputChange(event, values, setValues);
-              validator.showMessageFor('description');
+              validator.showMessageFor("description");
             }}
             message={validator.message(
-              'description',
+              "description",
               values.description,
-              'required',
+              "required",
             )}
             status={
-              validator.message('description', values.description, 'required')
-                ? 'negative'
+              validator.message("description", values.description, "required")
+                ? "negative"
                 : undefined
             }
             onBlur={() => {
-              validator.showMessageFor('description');
+              validator.showMessageFor("description");
             }}
             onBlurCapture={(event) => {
               handleInputChange(event, values, setValues);
-              validator.showMessageFor('description');
+              validator.showMessageFor("description");
             }}
           />
         </Fieldset>

@@ -6,19 +6,19 @@
  * @module PropertyGrid
  */
 
-import classnames from 'classnames';
-import * as React from 'react';
-import { PropertyRecord, PropertyValueFormat } from '@bentley/ui-abstract';
-import { CommonProps, Orientation, RatioChangeResult } from '@bentley/ui-core';
+import classnames from "classnames";
+import * as React from "react";
+import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
+import { CommonProps, Orientation, RatioChangeResult } from "@bentley/ui-core";
 import {
   ActionButtonRenderer,
   PropertyCategory,
   PropertyUpdatedArgs,
   PropertyValueRendererManager,
-} from '@bentley/ui-components';
-import { PropertyGridColumnInfo } from '@bentley/ui-components/lib/ui-components/properties/renderers/PropertyGridColumns';
+} from "@bentley/ui-components";
+import { PropertyGridColumnInfo } from "@bentley/ui-components/lib/ui-components/properties/renderers/PropertyGridColumns";
 
-import { PropertyRenderer } from './PropertyRender';
+import { PropertyRenderer } from "./PropertyRender";
 
 /** Properties of [[PropertyList]] React component
  * @public
@@ -89,11 +89,11 @@ interface PropertyListState {
  * @public
  */
 export class PropertyList extends React.Component<
-  PropertyListProps,
-  PropertyListState
+PropertyListProps,
+PropertyListState
 > {
   /** @internal */
-  public readonly state: PropertyListState = {};
+  public override readonly state: PropertyListState = {};
 
   private _listRef = React.createRef<HTMLDivElement>();
 
@@ -122,21 +122,21 @@ export class PropertyList extends React.Component<
   }
 
   /** @internal */
-  public componentDidMount() {
+  public override componentDidMount() {
     this.afterRender();
   }
 
   /** @internal */
-  public componentDidUpdate() {
+  public override componentDidUpdate() {
     this.afterRender();
   }
 
   /** @internal */
-  public render() {
+  public override render() {
     const propertyListClassName = classnames(
       this.props.orientation === Orientation.Horizontal
-        ? 'components-property-list--horizontal'
-        : 'components-property-list--vertical',
+        ? "components-property-list--horizontal"
+        : "components-property-list--vertical",
       this.props.className,
     );
 

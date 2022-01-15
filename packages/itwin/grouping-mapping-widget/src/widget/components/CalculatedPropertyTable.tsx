@@ -7,28 +7,28 @@ import {
   SvgDelete,
   SvgEdit,
   SvgMore,
-} from '@itwin/itwinui-icons-react';
+} from "@itwin/itwinui-icons-react";
 import {
   Button,
   DropdownMenu,
   IconButton,
   MenuItem,
   Table,
-} from '@itwin/itwinui-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CalculatedPropertyReportingAPI } from '../../api/generated';
-import { reportingClientApi } from '../../api/reportingClient';
-import { CreateTypeFromInterface } from '../utils';
-import { PropertyMenuView } from './PropertyMenu';
-import { CellProps } from 'react-table';
-import DeleteModal from './DeleteModal';
+} from "@itwin/itwinui-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { CalculatedPropertyReportingAPI } from "../../api/generated/api";
+import { reportingClientApi } from "../../api/reportingClient";
+import { CreateTypeFromInterface } from "../utils";
+import { PropertyMenuView } from "./PropertyMenu";
+import { CellProps } from "react-table";
+import DeleteModal from "./DeleteModal";
 
 export type CalculatedProperty =
   CreateTypeFromInterface<CalculatedPropertyReportingAPI>;
 
 const fetchCalculatedProperties = async (
   setCalculatedProperties: React.Dispatch<
-    React.SetStateAction<CalculatedProperty[]>
+  React.SetStateAction<CalculatedProperty[]>
   >,
   iModelId: string,
   mappingId: string,
@@ -45,7 +45,7 @@ const fetchCalculatedProperties = async (
       );
     setCalculatedProperties(calculatedProperties.properties ?? []);
   } catch {
-    //TODO Toaster
+    // TODO Toaster
   } finally {
     setIsLoading(false);
   }
@@ -61,7 +61,7 @@ const useFetchCalculatedProperties = (
   React.Dispatch<React.SetStateAction<CalculatedProperty[]>>,
 ] => {
   const [calculatedProperties, setCalculatedProperties] = useState<
-    CalculatedProperty[]
+  CalculatedProperty[]
   >([]);
 
   useEffect(() => {
@@ -83,9 +83,9 @@ interface CalculatedPropertyTableProps {
   groupId: string;
 
   setSelectedCalculatedProperty: React.Dispatch<
-    React.SetStateAction<
-      CreateTypeFromInterface<CalculatedPropertyReportingAPI> | undefined
-    >
+  React.SetStateAction<
+  CreateTypeFromInterface<CalculatedPropertyReportingAPI> | undefined
+  >
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
   onCalculatedPropertyModify: (value: CellProps<CalculatedProperty>) => void;
@@ -123,15 +123,16 @@ const CalculatedPropertyTable = ({
   const calculatedPropertiesColumns = useMemo(
     () => [
       {
-        Header: 'Table',
+        Header: "Table",
         columns: [
           {
-            id: 'propertyName',
-            Header: 'Calculated Property',
-            accessor: 'propertyName',
+            id: "propertyName",
+            Header: "Calculated Property",
+            accessor: "propertyName",
             Cell: (value: CellProps<CalculatedProperty>) => (
               <div
-                className='iui-anchor'
+                role="button"
+                className="iui-anchor"
                 onClick={() => onCalculatedPropertyModify(value)}
               >
                 {value.row.original.propertyName}
@@ -139,8 +140,8 @@ const CalculatedPropertyTable = ({
             ),
           },
           {
-            id: 'dropdown',
-            Header: '',
+            id: "dropdown",
+            Header: "",
             width: 80,
             Cell: (value: CellProps<CalculatedProperty>) => {
               return (
@@ -169,8 +170,8 @@ const CalculatedPropertyTable = ({
                   <IconButton styleType='borderless'>
                     <SvgMore
                       style={{
-                        width: '16px',
-                        height: '16px',
+                        width: "16px",
+                        height: "16px",
                       }}
                     />
                   </IconButton>
@@ -205,7 +206,7 @@ const CalculatedPropertyTable = ({
       />
 
       <DeleteModal
-        entityName={selectedCalculatedProperty?.propertyName ?? ''}
+        entityName={selectedCalculatedProperty?.propertyName ?? ""}
         show={showCalculatedPropertyDeleteModal}
         setShow={setShowCalculatedPropertyDeleteModal}
         onDelete={async () => {
@@ -213,7 +214,7 @@ const CalculatedPropertyTable = ({
             iModelId,
             mappingId,
             groupId,
-            selectedCalculatedProperty?.id ?? '',
+            selectedCalculatedProperty?.id ?? "",
           );
         }}
         refresh={refresh}

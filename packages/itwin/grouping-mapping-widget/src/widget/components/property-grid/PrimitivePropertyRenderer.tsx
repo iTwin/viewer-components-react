@@ -3,15 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from 'react';
-import { Orientation } from '@bentley/ui-core';
-import { PrimitivePropertyLabelRenderer } from '@bentley/ui-components';
-import { HighlightingComponentProps } from '@bentley/ui-components/lib/ui-components/common/HighlightingComponentProps';
-import { CommonPropertyRenderer } from '@bentley/ui-components/lib/ui-components/properties/renderers/CommonPropertyRenderer';
-import { HighlightedText } from '@bentley/ui-components/lib/ui-components/common/HighlightedText';
+import * as React from "react";
+import { Orientation } from "@bentley/ui-core";
+import { PrimitivePropertyLabelRenderer } from "@bentley/ui-components";
+import { HighlightingComponentProps } from "@bentley/ui-components/lib/ui-components/common/HighlightingComponentProps";
+import { CommonPropertyRenderer } from "@bentley/ui-components/lib/ui-components/properties/renderers/CommonPropertyRenderer";
+import { HighlightedText } from "@bentley/ui-components/lib/ui-components/common/HighlightedText";
 
-import { PropertyView } from './PropertyView';
-import { SharedRendererProps } from './PropertyRender';
+import { PropertyView } from "./PropertyView";
+import { SharedRendererProps } from "./PropertyRender";
 
 /** Properties of [[PrimitivePropertyRenderer]] React component
  * @public
@@ -34,7 +34,7 @@ export interface PrimitiveRendererProps extends SharedRendererProps {
  */
 export class PrimitivePropertyRenderer extends React.Component<PrimitiveRendererProps> {
   /** @internal */
-  public render() {
+  public override render() {
     const { indentation, highlight, ...props } = this.props;
     const displayLabel = this.props.propertyRecord.property.displayLabel;
     const offset = CommonPropertyRenderer.getLabelOffset(
@@ -52,10 +52,10 @@ export class PrimitivePropertyRenderer extends React.Component<PrimitiveRenderer
         : undefined;
     const label = highlight
       ? HighlightedText({
-          text: displayLabel,
-          searchText: highlight.highlightedText,
-          activeMatchIndex,
-        })
+        text: displayLabel,
+        searchText: highlight.highlightedText,
+        activeMatchIndex,
+      })
       : displayLabel;
 
     return (

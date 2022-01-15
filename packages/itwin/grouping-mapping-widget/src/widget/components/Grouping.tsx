@@ -2,18 +2,18 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { CellProps } from 'react-table';
-import { useActiveIModelConnection } from '@bentley/ui-framework';
+import { CellProps } from "react-table";
+import { useActiveIModelConnection } from "@bentley/ui-framework";
 import React, {
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { GroupReportingAPI, MappingReportingAPI } from '../../api/generated';
-import { reportingClientApi } from '../../api/reportingClient';
-import { CreateTypeFromInterface } from '../utils';
+} from "react";
+import { GroupReportingAPI, MappingReportingAPI } from "../../api/generated/api";
+import { reportingClientApi } from "../../api/reportingClient";
+import { CreateTypeFromInterface } from "../utils";
 import {
   Button,
   DropdownMenu,
@@ -21,34 +21,34 @@ import {
   MenuItem,
   ProgressRadial,
   Table,
-} from '@itwin/itwinui-react';
+} from "@itwin/itwinui-react";
 import {
   SvgAdd,
   SvgDelete,
   SvgEdit,
   SvgList,
   SvgMore,
-} from '@itwin/itwinui-icons-react';
-import DeleteModal from './DeleteModal';
-import './Grouping.scss';
-import { IModelConnection } from '@bentley/imodeljs-frontend';
-import { PropertyMenu } from './PropertyMenu';
+} from "@itwin/itwinui-icons-react";
+import DeleteModal from "./DeleteModal";
+import "./Grouping.scss";
+import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { PropertyMenu } from "./PropertyMenu";
 import {
   clearEmphasizedElements,
   visualizeElements,
   visualizeElementsById,
   zoomToElements,
-} from './viewerUtils';
-import { fetchIdsFromQuery, WidgetHeader } from './utils';
-import GroupAction from './GroupAction';
+} from "./viewerUtils";
+import { fetchIdsFromQuery, WidgetHeader } from "./utils";
+import GroupAction from "./GroupAction";
 
 export type Group = CreateTypeFromInterface<GroupReportingAPI>;
 
 enum GroupsView {
-  GROUPS = 'groups',
-  MODIFYING = 'modifying',
-  ADD = 'ADD',
-  PROPERTIES = 'properties',
+  GROUPS = "groups",
+  MODIFYING = "modifying",
+  ADD = "ADD",
+  PROPERTIES = "properties",
 }
 
 interface GroupsTreeProps {
@@ -97,7 +97,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   );
   const [groups, setGroups] = useFetchGroups(
     iModelId,
-    mapping.id ?? '',
+    mapping.id ?? "",
     setIsLoading,
   );
   const hilitedElements = useRef<Map<string, string[]>>(new Map());
@@ -107,7 +107,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     setGroupsView(GroupsView.GROUPS);
     setSelectedGroup(undefined);
     setGroups([]);
-    await fetchGroups(setGroups, iModelId, mapping.id ?? '', setIsLoading);
+    await fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading);
   }, [iModelId, mapping.id, setGroups]);
 
   const addGroup = () => {
@@ -133,19 +133,20 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const groupsColumns = useMemo(
     () => [
       {
-        Header: 'Table',
+        Header: "Table",
         columns: [
           {
-            id: 'groupName',
-            Header: 'Group',
-            accessor: 'groupName',
+            id: "groupName",
+            Header: "Group",
+            accessor: "groupName",
             Cell: (value: CellProps<Group>) => (
               <>
                 {isLoadingQuery ? (
                   value.row.original.groupName
                 ) : (
                   <div
-                    className='iui-anchor'
+                    role="button"
+                    className="iui-anchor"
                     onClick={(e) => {
                       e.stopPropagation();
                       openProperties(value);
@@ -158,17 +159,17 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             ),
           },
           {
-            id: 'description',
-            Header: 'Description',
-            accessor: 'description',
+            id: "description",
+            Header: "Description",
+            accessor: "description",
           },
           {
-            id: 'dropdown',
-            Header: '',
+            id: "dropdown",
+            Header: "",
             width: 80,
             Cell: (value: CellProps<Group>) => {
               return (
-                <div onClick={(e) => e.stopPropagation()}>
+                <div role="button" onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu
                     disabled={isLoadingQuery}
                     menuItems={(close: () => void) => [
@@ -205,8 +206,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                     >
                       <SvgMore
                         style={{
-                          width: '16px',
-                          height: '16px',
+                          width: "16px",
+                          height: "16px",
                         }}
                       />
                     </IconButton>
@@ -221,16 +222,17 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     [isLoadingQuery, onModify, openProperties],
   );
 
-  //Temp
+  // Temp
   const stringToColor = function (str: string) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
-    let colour = '#';
+    let colour = "#";
     for (let i = 0; i < 3; i++) {
       const value = (hash >> (i * 8)) & 0xff;
-      colour += ('00' + value.toString(16)).substr(-2);
+      const hex = (`00${  value.toString(16)}`);
+      colour += hex.substring(hex.length - 2);
     }
     return colour;
   };
@@ -242,22 +244,22 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
         setLoadingQuery(true);
         let allIds: string[] = [];
         for (const row of selectedData) {
-          const query = row.query ?? '';
+          const query = row.query ?? "";
           if (hilitedElements.current.has(query)) {
             const hilitedIds = hilitedElements.current.get(query) ?? [];
-            visualizeElements(hilitedIds, stringToColor(row.id ?? ''));
+            visualizeElements(hilitedIds, stringToColor(row.id ?? ""));
             allIds = allIds.concat(hilitedIds);
           } else {
             const ids: string[] = await fetchIdsFromQuery(
-              row.query ?? '',
+              row.query ?? "",
               iModelConnection,
             );
             const hiliteIds = await visualizeElementsById(
               ids,
-              stringToColor(row.id ?? ''),
+              stringToColor(row.id ?? ""),
               iModelConnection,
             );
-            hilitedElements.current.set(row.query ?? '', hiliteIds);
+            hilitedElements.current.set(row.query ?? "", hiliteIds);
 
             allIds = allIds.concat(ids);
           }
@@ -274,7 +276,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return (
         <GroupAction
           iModelId={iModelId}
-          mappingId={mapping.id ?? ''}
+          mappingId={mapping.id ?? ""}
           goBack={async () => {
             clearEmphasizedElements();
             setGroupsView(GroupsView.GROUPS);
@@ -286,7 +288,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return selectedGroup ? (
         <GroupAction
           iModelId={iModelId}
-          mappingId={mapping.id ?? ''}
+          mappingId={mapping.id ?? ""}
           group={selectedGroup}
           goBack={async () => {
             clearEmphasizedElements();
@@ -299,7 +301,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return selectedGroup ? (
         <PropertyMenu
           iModelId={iModelId}
-          mappingId={mapping.id ?? ''}
+          mappingId={mapping.id ?? ""}
           group={selectedGroup}
           goBack={async () => {
             clearEmphasizedElements();
@@ -312,7 +314,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return (
         <>
           <WidgetHeader
-            title={mapping.mappingName ?? ''}
+            title={mapping.mappingName ?? ""}
             disabled={isLoading || isLoadingQuery}
             returnFn={async () => {
               clearEmphasizedElements();
@@ -328,7 +330,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               disabled={isLoadingQuery}
               onClick={() => addGroup()}
             >
-              {isLoadingQuery ? 'Loading Group(s)' : 'Add Group'}
+              {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
             </Button>
             <Table<Group>
               data={groups}
@@ -343,14 +345,14 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             />
           </div>
           <DeleteModal
-            entityName={selectedGroup?.groupName ?? ''}
+            entityName={selectedGroup?.groupName ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
               await reportingClientApi.deleteGroup(
                 iModelId,
-                mapping.id ?? '',
-                selectedGroup?.id ?? '',
+                mapping.id ?? "",
+                selectedGroup?.id ?? "",
               );
             }}
             refresh={refresh}

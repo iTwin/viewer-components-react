@@ -9,8 +9,8 @@ import {
   Modal,
   ModalButtonBar,
   ProgressRadial,
-} from '@itwin/itwinui-react';
-import React, { useState } from 'react';
+} from "@itwin/itwinui-react";
+import React, { useState } from "react";
 
 export interface DeleteModalProps {
   entityName: string;

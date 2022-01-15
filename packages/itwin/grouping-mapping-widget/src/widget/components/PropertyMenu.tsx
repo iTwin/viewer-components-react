@@ -3,27 +3,27 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelConnection } from '@bentley/imodeljs-frontend';
-import { Presentation } from '@bentley/presentation-frontend';
-import { useActiveIModelConnection } from '@bentley/ui-framework';
-import React, { useCallback, useEffect, useState } from 'react';
+import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { Presentation } from "@bentley/presentation-frontend";
+import { useActiveIModelConnection } from "@bentley/ui-framework";
+import React, { useCallback, useEffect, useState } from "react";
 
-import { fetchIdsFromQuery, WidgetHeader } from './utils';
+import { fetchIdsFromQuery, WidgetHeader } from "./utils";
 import {
   clearEmphasizedElements,
   manufactureKeys,
   visualizeElements,
   visualizeElementsByKeys,
   zoomToElements,
-} from './viewerUtils';
-import { Group } from './Grouping';
-import './PropertyMenu.scss';
-import GroupPropertyAction from './GroupPropertyAction';
-import CalculatedPropertyAction from './CalculatedPropertyAction';
-import GroupPropertyTable, { GroupProperty } from './GroupPropertyTable';
+} from "./viewerUtils";
+import { Group } from "./Grouping";
+import "./PropertyMenu.scss";
+import GroupPropertyAction from "./GroupPropertyAction";
+import CalculatedPropertyAction from "./CalculatedPropertyAction";
+import GroupPropertyTable, { GroupProperty } from "./GroupPropertyTable";
 import CalculatedPropertyTable, {
   CalculatedProperty,
-} from './CalculatedPropertyTable';
+} from "./CalculatedPropertyTable";
 import {
   IconButton,
   InformationPanel,
@@ -33,10 +33,10 @@ import {
   LabeledTextarea,
   ProgressRadial,
   Text,
-} from '@itwin/itwinui-react';
-import DatabaseInfoIcon from '../icons/DatabaseInfo';
-import { CellProps } from 'react-table';
-import { KeySet } from '@bentley/presentation-common';
+} from "@itwin/itwinui-react";
+import DatabaseInfoIcon from "../icons/DatabaseInfo";
+import { CellProps } from "react-table";
+import { KeySet } from "@bentley/presentation-common";
 
 interface PropertyModifyProps {
   iModelId: string;
@@ -48,11 +48,11 @@ interface PropertyModifyProps {
 }
 
 export enum PropertyMenuView {
-  DEFAULT = 'default',
-  ADD_GROUP_PROPERTY = 'add_group_property',
-  MODIFY_GROUP_PROPERTY = 'modify_group_property',
-  ADD_CALCULATED_PROPERTY = 'add_calculated_property',
-  MODIFY_CALCULATED_PROPERTY = 'modify_calculated_property',
+  DEFAULT = "default",
+  ADD_GROUP_PROPERTY = "add_group_property",
+  MODIFY_GROUP_PROPERTY = "modify_group_property",
+  ADD_CALCULATED_PROPERTY = "add_calculated_property",
+  MODIFY_CALCULATED_PROPERTY = "modify_calculated_property",
 }
 
 export const PropertyMenu = ({
@@ -68,10 +68,10 @@ export const PropertyMenu = ({
     PropertyMenuView.DEFAULT,
   );
   const [selectedGroupProperty, setSelectedGroupProperty] = useState<
-    GroupProperty | undefined
+  GroupProperty | undefined
   >(undefined);
   const [selectedCalculatedProperty, setSelectedCalculatedProperty] = useState<
-    CalculatedProperty | undefined
+  CalculatedProperty | undefined
   >(undefined);
   const [isInformationPanelOpen, setIsInformationPanelOpen] =
     useState<boolean>(false);
@@ -81,15 +81,15 @@ export const PropertyMenu = ({
 
   useEffect(() => {
     const initialize = async () => {
-      const ids = await fetchIdsFromQuery(group.query ?? '', iModelConnection);
+      const ids = await fetchIdsFromQuery(group.query ?? "", iModelConnection);
       const keys = await manufactureKeys(ids, iModelConnection);
       setKeySet(keys);
       Presentation.selection.clearSelection(
-        'GroupingMappingWidget',
+        "GroupingMappingWidget",
         iModelConnection,
       );
       clearEmphasizedElements();
-      const resolvedIds = await visualizeElementsByKeys(keys, 'red');
+      const resolvedIds = await visualizeElementsByKeys(keys, "red");
       await zoomToElements(resolvedIds);
       setResolvedHiliteIds(resolvedIds);
       setIsLoading(false);
@@ -114,7 +114,7 @@ export const PropertyMenu = ({
   );
 
   const calculatedPropertyReturn = useCallback(async () => {
-    visualizeElements(resolvedHiliteIds, 'red');
+    visualizeElements(resolvedHiliteIds, "red");
     await zoomToElements(resolvedHiliteIds);
     setPropertyMenuView(PropertyMenuView.DEFAULT);
   }, [resolvedHiliteIds]);
@@ -135,7 +135,7 @@ export const PropertyMenu = ({
         <GroupPropertyAction
           iModelId={iModelId}
           mappingId={mappingId}
-          groupId={group.id ?? ''}
+          groupId={group.id ?? ""}
           keySet={keySet ?? new KeySet()}
           returnFn={async () => {
             setPropertyMenuView(PropertyMenuView.DEFAULT);
@@ -147,10 +147,10 @@ export const PropertyMenu = ({
         <GroupPropertyAction
           iModelId={iModelId}
           mappingId={mappingId}
-          groupId={group.id ?? ''}
+          groupId={group.id ?? ""}
           keySet={keySet ?? new KeySet()}
-          groupPropertyId={selectedGroupProperty?.id ?? ''}
-          groupPropertyName={selectedGroupProperty?.propertyName ?? ''}
+          groupPropertyId={selectedGroupProperty?.id ?? ""}
+          groupPropertyName={selectedGroupProperty?.propertyName ?? ""}
           returnFn={async () => {
             setPropertyMenuView(PropertyMenuView.DEFAULT);
           }}
@@ -161,7 +161,7 @@ export const PropertyMenu = ({
         <CalculatedPropertyAction
           iModelId={iModelId}
           mappingId={mappingId}
-          groupId={group.id ?? ''}
+          groupId={group.id ?? ""}
           ids={resolvedHiliteIds}
           returnFn={calculatedPropertyReturn}
         />
@@ -171,7 +171,7 @@ export const PropertyMenu = ({
         <CalculatedPropertyAction
           iModelId={iModelId}
           mappingId={mappingId}
-          groupId={group.id ?? ''}
+          groupId={group.id ?? ""}
           property={selectedCalculatedProperty}
           ids={resolvedHiliteIds}
           returnFn={calculatedPropertyReturn}
@@ -182,7 +182,7 @@ export const PropertyMenu = ({
         <InformationPanelWrapper className='property-menu-wrapper'>
           <div className='property-header'>
             <WidgetHeader
-              title={`${group.groupName ?? ''}`}
+              title={`${group.groupName ?? ""}`}
               returnFn={goBack}
             />
             <IconButton
@@ -196,7 +196,7 @@ export const PropertyMenu = ({
             {!hideGroupProps && <GroupPropertyTable
               iModelId={iModelId}
               mappingId={mappingId}
-              groupId={group.id ?? ''}
+              groupId={group.id ?? ""}
               onGroupPropertyModify={onGroupPropertyModify}
               setSelectedGroupProperty={setSelectedGroupProperty}
               setGroupModifyView={setPropertyMenuView}
@@ -206,7 +206,7 @@ export const PropertyMenu = ({
             {!hideCalculatedProps && <CalculatedPropertyTable
               iModelId={iModelId}
               mappingId={mappingId}
-              groupId={group.id ?? ''}
+              groupId={group.id ?? ""}
               onCalculatedPropertyModify={onCalculatedPropertyModify}
               setSelectedCalculatedProperty={setSelectedCalculatedProperty}
               setGroupModifyView={setPropertyMenuView}
@@ -221,7 +221,7 @@ export const PropertyMenu = ({
               onClose={() => setIsInformationPanelOpen(false)}
             >
               <Text variant='subheading'>{`${
-                group.groupName ?? ''
+                group.groupName ?? ""
               } Information`}</Text>
             </InformationPanelHeader>
             <InformationPanelBody>
@@ -230,7 +230,7 @@ export const PropertyMenu = ({
                   label='Query'
                   rows={15}
                   readOnly
-                  defaultValue={group.query ?? ''}
+                  defaultValue={group.query ?? ""}
                 />
               </div>
             </InformationPanelBody>

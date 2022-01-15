@@ -2,24 +2,24 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useState } from 'react';
-import SimpleReactValidator from 'simple-react-validator';
+import { useState } from "react";
+import SimpleReactValidator from "simple-react-validator";
 
 export const Validators = {
   NoInvalidChars: {
-    message: 'Contains invalid characters.',
+    message: "Contains invalid characters.",
     rule: (val: string) => {
       const regex = RegExp(/^[a-zA-Z0-9]+$/);
       return regex.test(val);
     },
   },
   NoSpacesInName: {
-    message: 'Name cannot contain spaces.',
+    message: "Name cannot contain spaces.",
     rule: (val: string) => !val.match(/ /),
   },
 };
 
-export const Messages = { required: 'This field is required.' };
+export const Messages = { required: "This field is required." };
 
 const useValidator = (
   customMessage = Messages,

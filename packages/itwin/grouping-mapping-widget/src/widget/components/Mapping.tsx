@@ -2,39 +2,39 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Presentation } from '@bentley/presentation-frontend';
-import { useActiveIModelConnection } from '@bentley/ui-framework';
+import { Presentation } from "@bentley/presentation-frontend";
+import { useActiveIModelConnection } from "@bentley/ui-framework";
 import {
-  SvgDelete,
-  SvgMore,
   SvgAdd,
+  SvgDelete,
   SvgEdit,
-} from '@itwin/itwinui-icons-react';
+  SvgMore,
+} from "@itwin/itwinui-icons-react";
 import {
-  DropdownMenu,
-  MenuItem,
-  IconButton,
-  Table,
   Button,
-} from '@itwin/itwinui-react';
-import { CellProps } from 'react-table';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { MappingReportingAPI } from '../../api/generated';
-import { CreateTypeFromInterface } from '../utils';
-import { onSelectionChanged, WidgetHeader } from './utils';
-import './Mapping.scss';
-import { reportingClientApi } from '../../api/reportingClient';
-import DeleteModal from './DeleteModal';
-import { Groupings } from './Grouping';
-import MappingAction from './MappingAction';
+  DropdownMenu,
+  IconButton,
+  MenuItem,
+  Table,
+} from "@itwin/itwinui-react";
+import { CellProps } from "react-table";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { MappingReportingAPI } from "../../api/generated/api";
+import { CreateTypeFromInterface } from "../utils";
+import { onSelectionChanged, WidgetHeader } from "./utils";
+import "./Mapping.scss";
+import { reportingClientApi } from "../../api/reportingClient";
+import DeleteModal from "./DeleteModal";
+import { Groupings } from "./Grouping";
+import MappingAction from "./MappingAction";
 
 type Mapping = CreateTypeFromInterface<MappingReportingAPI>;
 
 enum MappingView {
-  MAPPINGS = 'mappings',
-  GROUPS = 'groups',
-  ADDING = 'adding',
-  MODIFYING = 'modifying',
+  MAPPINGS = "mappings",
+  GROUPS = "groups",
+  ADDING = "adding",
+  MODIFYING = "modifying",
 }
 
 const fetchMappings = async (
@@ -75,7 +75,7 @@ export const Mappings = () => {
     MappingView.MAPPINGS,
   );
   const [selectedMapping, setSelectedMapping] = useState<
-    MappingReportingAPI | undefined
+  MappingReportingAPI | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useFetchMappings(iModelId, setIsLoading);
@@ -102,15 +102,16 @@ export const Mappings = () => {
   const mappingsColumns = useMemo(
     () => [
       {
-        Header: 'Table',
+        Header: "Table",
         columns: [
           {
-            id: 'mappingName',
-            Header: 'Mapping',
-            accessor: 'mappingName',
+            id: "mappingName",
+            Header: "Mapping",
+            accessor: "mappingName",
             Cell: (value: CellProps<{ mappingName: string }>) => (
               <div
-                className='iui-anchor'
+                role="button"
+                className="iui-anchor"
                 onClick={() => {
                   setSelectedMapping(value.row.original);
                   setMappingView(MappingView.GROUPS);
@@ -121,13 +122,13 @@ export const Mappings = () => {
             ),
           },
           {
-            id: 'description',
-            Header: 'Description',
-            accessor: 'description',
+            id: "description",
+            Header: "Description",
+            accessor: "description",
           },
           {
-            id: 'dropdown',
-            Header: '',
+            id: "dropdown",
+            Header: "",
             width: 80,
             Cell: (value: CellProps<Mapping>) => {
               return (
@@ -160,8 +161,8 @@ export const Mappings = () => {
                   <IconButton styleType='borderless'>
                     <SvgMore
                       style={{
-                        width: '16px',
-                        height: '16px',
+                        width: "16px",
+                        height: "16px",
                       }}
                     />
                   </IconButton>
@@ -200,7 +201,7 @@ export const Mappings = () => {
           <div className='mappings-container'>
             <Button
               startIcon={<SvgAdd />}
-              onClick={() => addMapping()}
+              onClick={() => void addMapping()}
               styleType='high-visibility'
             >
               Add Mapping
@@ -215,13 +216,13 @@ export const Mappings = () => {
             />
           </div>
           <DeleteModal
-            entityName={selectedMapping?.mappingName ?? ''}
+            entityName={selectedMapping?.mappingName ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
               await reportingClientApi.deleteMapping(
                 iModelId,
-                selectedMapping?.id ?? '',
+                selectedMapping?.id ?? "",
               );
             }}
             refresh={refresh}

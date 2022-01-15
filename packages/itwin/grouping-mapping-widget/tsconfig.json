@@ -1,18 +1,16 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "outDir": "lib",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "outDir": "./lib",
     "declaration": true,
-    "esModuleInterop": true,
     "sourceMap": true,
+    "skipLibCheck": true,
     "allowJs": false,
     "jsx": "react",
     "moduleResolution": "node",
+    "preserveSymlinks": true,
+    "esModuleInterop": true,
     "traceResolution": false,
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
@@ -20,16 +18,9 @@
     "noImplicitAny": true,
     "importHelpers": false,
     "strictNullChecks": true,
-    "noUnusedLocals": true,
-    "skipLibCheck": true
+    "noUnusedLocals": true
   },
-  "files": [
-    "custom.d.ts"
-  ],
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "lib/**/*"
-  ],
+  "files": ["custom.d.ts"],
+  "include": ["src/**/*"],
+  "exclude": ["lib/**/*"],
 }

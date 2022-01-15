@@ -7,21 +7,21 @@ import {
   SvgDelete,
   SvgEdit,
   SvgMore,
-} from '@itwin/itwinui-icons-react';
+} from "@itwin/itwinui-icons-react";
 import {
   Button,
   DropdownMenu,
   IconButton,
   MenuItem,
   Table,
-} from '@itwin/itwinui-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { GroupPropertyReportingAPI } from '../../api/generated';
-import { reportingClientApi } from '../../api/reportingClient';
-import { CreateTypeFromInterface } from '../utils';
-import { CellProps } from 'react-table';
-import DeleteModal from './DeleteModal';
-import { PropertyMenuView } from './PropertyMenu';
+} from "@itwin/itwinui-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { GroupPropertyReportingAPI } from "../../api/generated/api";
+import { reportingClientApi } from "../../api/reportingClient";
+import { CreateTypeFromInterface } from "../utils";
+import { CellProps } from "react-table";
+import DeleteModal from "./DeleteModal";
+import { PropertyMenuView } from "./PropertyMenu";
 
 export type GroupProperty = CreateTypeFromInterface<GroupPropertyReportingAPI>;
 
@@ -41,7 +41,7 @@ const fetchGroupProperties = async (
     );
     setGroupProperties(groupProperties.properties ?? []);
   } catch {
-    //TODO Toaster
+    // TODO Toaster
   } finally {
     setIsLoading(false);
   }
@@ -74,9 +74,9 @@ interface GroupPropertyTableProps {
   groupId: string;
 
   setSelectedGroupProperty: React.Dispatch<
-    React.SetStateAction<
-      CreateTypeFromInterface<GroupPropertyReportingAPI> | undefined
-    >
+  React.SetStateAction<
+  CreateTypeFromInterface<GroupPropertyReportingAPI> | undefined
+  >
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
   onGroupPropertyModify: (value: CellProps<GroupProperty>) => void;
@@ -116,15 +116,16 @@ const GroupPropertyTable = ({
   const groupPropertiesColumns = useMemo(
     () => [
       {
-        Header: 'Table',
+        Header: "Table",
         columns: [
           {
-            id: 'propertyName',
-            Header: 'Property',
-            accessor: 'propertyName',
+            id: "propertyName",
+            Header: "Property",
+            accessor: "propertyName",
             Cell: (value: CellProps<GroupProperty>) => (
               <div
-                className='iui-anchor'
+                role="button"
+                className="iui-anchor"
                 onClick={() => onGroupPropertyModify(value)}
               >
                 {value.row.original.propertyName}
@@ -132,8 +133,8 @@ const GroupPropertyTable = ({
             ),
           },
           {
-            id: 'dropdown',
-            Header: '',
+            id: "dropdown",
+            Header: "",
             width: 80,
             Cell: (value: CellProps<GroupProperty>) => {
               return (
@@ -162,8 +163,8 @@ const GroupPropertyTable = ({
                   <IconButton styleType='borderless'>
                     <SvgMore
                       style={{
-                        width: '16px',
-                        height: '16px',
+                        width: "16px",
+                        height: "16px",
                       }}
                     />
                   </IconButton>
@@ -197,7 +198,7 @@ const GroupPropertyTable = ({
         isLoading={isLoading}
       />
       <DeleteModal
-        entityName={selectedGroupProperty?.propertyName ?? ''}
+        entityName={selectedGroupProperty?.propertyName ?? ""}
         show={showGroupPropertyDeleteModal}
         setShow={setShowGroupPropertyDeleteModal}
         onDelete={async () => {
@@ -205,7 +206,7 @@ const GroupPropertyTable = ({
             iModelId,
             mappingId,
             groupId,
-            selectedGroupProperty?.id ?? '',
+            selectedGroupProperty?.id ?? "",
           );
         }}
         refresh={refresh}

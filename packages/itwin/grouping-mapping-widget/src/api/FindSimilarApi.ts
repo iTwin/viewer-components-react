@@ -3,16 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { KeySet } from '@bentley/presentation-common';
+import { KeySet } from "@bentley/presentation-common";
 import {
   Presentation,
   SelectionChangesListener,
-} from '@bentley/presentation-frontend';
+} from "@bentley/presentation-frontend";
 import {
   DEFAULT_PROPERTY_GRID_RULESET,
   PresentationPropertyDataProvider,
-} from '@bentley/presentation-components';
-import { IModelConnection } from '@bentley/imodeljs-frontend';
+} from "@bentley/presentation-components";
+import { IModelConnection } from "@bentley/imodeljs-frontend";
 
 export interface PropertyProps {
   keys: KeySet;

@@ -3,14 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from 'react';
-import { PropertyRecord } from '@bentley/ui-abstract';
-import { QueryBuilder } from './QueryBuilder';
+import * as React from "react";
+import { PropertyRecord } from "@bentley/ui-abstract";
+import { QueryBuilder } from "./QueryBuilder";
 
 export interface PropertySelection {
   currentPropertyList: PropertyRecord[];
   setCurrentPropertyList: React.Dispatch<
-    React.SetStateAction<PropertyRecord[]>
+  React.SetStateAction<PropertyRecord[]>
   >;
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
@@ -20,8 +20,8 @@ export interface PropertySelection {
 export const FindSimilarContext = React.createContext<PropertySelection>({
   currentPropertyList: [],
   setCurrentPropertyList: () => [],
-  query: '',
-  setQuery: () => '',
+  query: "",
+  setQuery: () => "",
   queryBuilder: new QueryBuilder(undefined),
   setQueryBuilder: () => new QueryBuilder(undefined),
 });

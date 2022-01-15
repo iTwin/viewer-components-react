@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelApp } from '@bentley/imodeljs-frontend';
+import { IModelApp } from "@bentley/imodeljs-frontend";
 import {
   Fieldset,
   LabeledInput,
@@ -10,20 +10,20 @@ import {
   MenuItem,
   SelectOption,
   Small,
-} from '@itwin/itwinui-react';
-import React, { useEffect, useState } from 'react';
-import { CalculatedPropertyCreateReportingAPI } from '../../api/generated';
-import { reportingClientApi } from '../../api/reportingClient';
-import ActionPanel from './ActionPanel';
+} from "@itwin/itwinui-react";
+import React, { useEffect, useState } from "react";
+import { CalculatedPropertyCreateReportingAPI } from "../../api/generated/api";
+import { reportingClientApi } from "../../api/reportingClient";
+import ActionPanel from "./ActionPanel";
 import {
   BboxDimension,
   BboxDimensionsDecorator,
-} from '../../decorators/BboxDimensionsDecorator';
-import useValidator from '../hooks/useValidator';
-import { WidgetHeader } from './utils';
-import { visualizeElements, zoomToElements } from './viewerUtils';
-import './CalculatedPropertyAction.scss';
-import { CalculatedProperty } from './CalculatedPropertyTable';
+} from "../../decorators/BboxDimensionsDecorator";
+import useValidator from "../hooks/useValidator";
+import { WidgetHeader } from "./utils";
+import { visualizeElements, zoomToElements } from "./viewerUtils";
+import "./CalculatedPropertyAction.scss";
+import { CalculatedProperty } from "./CalculatedPropertyTable";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
@@ -43,15 +43,15 @@ const CalculatedPropertyAction = ({
   returnFn,
 }: CalculatedPropertyActionProps) => {
   const [propertyName, setPropertyName] = useState<string>(
-    property?.propertyName ?? '',
+    property?.propertyName ?? "",
   );
-  const [type, setType] = useState<string>(property?.type ?? '');
+  const [type, setType] = useState<string>(property?.type ?? "");
   const [bboxDecorator, setBboxDecorator] = useState<
-    BboxDimensionsDecorator | undefined
+  BboxDimensionsDecorator | undefined
   >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [inferredSpatialData, setInferredSpatialData] = useState<
-    Map<BboxDimension, number> | undefined
+  Map<BboxDimension, number> | undefined
   >();
   const [validator, showValidationMessage] = useValidator();
 
@@ -65,7 +65,7 @@ const CalculatedPropertyAction = ({
   }, []);
 
   useEffect(() => {
-    visualizeElements([ids[0]], 'red');
+    visualizeElements([ids[0]], "red");
     void zoomToElements([ids[0]]);
   }, [ids]);
 
@@ -83,13 +83,13 @@ const CalculatedPropertyAction = ({
     if (bboxDecorator && type && inferredSpatialData) {
       inferredSpatialData.has(BboxDimension[type as keyof typeof BboxDimension])
         ? bboxDecorator.drawContext(
-            BboxDimension[type as keyof typeof BboxDimension],
-          )
+          BboxDimension[type as keyof typeof BboxDimension],
+        )
         : bboxDecorator.clearContext();
     }
   }, [bboxDecorator, inferredSpatialData, type]);
 
-  //TODO ERRORED STATE
+  // TODO ERRORED STATE
   const onSave = async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
@@ -99,24 +99,24 @@ const CalculatedPropertyAction = ({
       setIsLoading(true);
 
       const calculatedProperty: CalculatedPropertyCreateReportingAPI = {
-        propertyName: propertyName,
-        type: type,
+        propertyName,
+        type,
       };
 
       property
         ? await reportingClientApi.updateCalculatedProperty(
-            iModelId,
-            mappingId,
-            groupId,
-            property.id ?? '',
-            calculatedProperty,
-          )
+          iModelId,
+          mappingId,
+          groupId,
+          property.id ?? "",
+          calculatedProperty,
+        )
         : await reportingClientApi.createCalculatedProperty(
-            iModelId,
-            mappingId,
-            groupId,
-            calculatedProperty,
-          );
+          iModelId,
+          mappingId,
+          groupId,
+          calculatedProperty,
+        );
       await returnFn();
     } catch {
       setIsLoading(false);
@@ -137,8 +137,8 @@ const CalculatedPropertyAction = ({
       <WidgetHeader
         title={
           property
-            ? `${property?.propertyName ?? ''} Calculated Property`
-            : 'Create Calculated Property'
+            ? `${property?.propertyName ?? ""} Calculated Property`
+            : "Create Calculated Property"
         }
         returnFn={returnFn}
       />
@@ -154,66 +154,66 @@ const CalculatedPropertyAction = ({
             label='Name'
             onChange={(event) => {
               setPropertyName(event.target.value);
-              validator.showMessageFor('name');
+              validator.showMessageFor("name");
             }}
             message={
               validator.message(
-                'name',
+                "name",
                 propertyName,
-                'required|NoSpacesInName|NoInvalidChars',
-              ) || 'Name cannot contain spaces or special characters.'
+                "required|NoSpacesInName|NoInvalidChars",
+              ) || "Name cannot contain spaces or special characters."
             }
             status={
               validator.message(
-                'name',
+                "name",
                 propertyName,
-                'required|NoSpacesInName|NoInvalidChars',
+                "required|NoSpacesInName|NoInvalidChars",
               )
-                ? 'negative'
+                ? "negative"
                 : undefined
             }
             onBlur={() => {
-              validator.showMessageFor('name');
+              validator.showMessageFor("name");
             }}
             onBlurCapture={(event) => {
               setPropertyName(event.target.value);
-              validator.showMessageFor('name');
+              validator.showMessageFor("name");
             }}
           />
           <LabeledSelect<string>
             label='Quantity Type'
             required
             options={[
-              { value: 'Length', label: 'Length' },
-              { value: 'Area', label: 'Area' },
-              { value: 'Volume', label: 'Volume' },
+              { value: "Length", label: "Length" },
+              { value: "Area", label: "Area" },
+              { value: "Volume", label: "Volume" },
               {
-                value: 'BoundingBoxLongestEdgeLength',
-                label: 'Longest Edge Length',
+                value: "BoundingBoxLongestEdgeLength",
+                label: "Longest Edge Length",
               },
               {
-                value: 'BoundingBoxIntermediateEdgeLength',
-                label: 'Intermediate Edge Length',
+                value: "BoundingBoxIntermediateEdgeLength",
+                label: "Intermediate Edge Length",
               },
               {
-                value: 'BoundingBoxShortestEdgeLength',
-                label: 'Shortest Edge Length',
+                value: "BoundingBoxShortestEdgeLength",
+                label: "Shortest Edge Length",
               },
               {
-                value: 'BoundingBoxDiagonalLength',
-                label: 'Diagonal Length',
+                value: "BoundingBoxDiagonalLength",
+                label: "Diagonal Length",
               },
               {
-                value: 'BoundingBoxLongestFaceDiagonalLength',
-                label: 'Longest Face Diagonal Length',
+                value: "BoundingBoxLongestFaceDiagonalLength",
+                label: "Longest Face Diagonal Length",
               },
               {
-                value: 'BoundingBoxIntermediateFaceDiagonalLength',
-                label: 'Intermediate Face Diagonal Length',
+                value: "BoundingBoxIntermediateFaceDiagonalLength",
+                label: "Intermediate Face Diagonal Length",
               },
               {
-                value: 'BoundingBoxShortestFaceDiagonalLength',
-                label: 'Shortest Face Diagonal Length',
+                value: "BoundingBoxShortestFaceDiagonalLength",
+                label: "Shortest Face Diagonal Length",
               },
             ]}
             value={type}
@@ -232,6 +232,8 @@ const CalculatedPropertyAction = ({
                 {getSpatialData(option.value)}
               </div>
             )}
+            onShow={() => {}}
+            onHide={() => {}}
           />
         </Fieldset>
       </div>

@@ -2,9 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import * as React from 'react';
-import { PropertyRecord, PropertyValueFormat } from '@bentley/ui-abstract';
-import { Orientation, RatioChangeResult } from '@bentley/ui-core';
+import * as React from "react";
+import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
+import { Orientation, RatioChangeResult } from "@bentley/ui-core";
 import {
   ActionButtonRenderer,
   EditorContainer,
@@ -12,13 +12,13 @@ import {
   PropertyUpdatedArgs,
   PropertyValueRendererManager,
   UiComponents,
-} from '@bentley/ui-components';
-import { PropertyGridColumnInfo } from '@bentley/ui-components/lib/ui-components/properties/renderers/PropertyGridColumns';
-import { HighlightingComponentProps } from '@bentley/ui-components/lib/ui-components/common/HighlightingComponentProps';
-import { CommonPropertyRenderer } from '@bentley/ui-components/lib/ui-components/properties/renderers/CommonPropertyRenderer';
+} from "@bentley/ui-components";
+import { PropertyGridColumnInfo } from "@bentley/ui-components/lib/ui-components/properties/renderers/PropertyGridColumns";
+import { HighlightingComponentProps } from "@bentley/ui-components/lib/ui-components/common/HighlightingComponentProps";
+import { CommonPropertyRenderer } from "@bentley/ui-components/lib/ui-components/properties/renderers/CommonPropertyRenderer";
 
-import { NonPrimitivePropertyRenderer } from './NonPrimitivePropertyRenderer';
-import { PrimitivePropertyRenderer } from './PrimitivePropertyRenderer';
+import { NonPrimitivePropertyRenderer } from "./NonPrimitivePropertyRenderer";
+import { PrimitivePropertyRenderer } from "./PrimitivePropertyRenderer";
 
 /** Properties shared by all renderers and PropertyView
  * @public
@@ -92,12 +92,12 @@ interface PropertyRendererState {
  * @public
  */
 export class PropertyRenderer extends React.Component<
-  PropertyRendererProps,
-  PropertyRendererState
+PropertyRendererProps,
+PropertyRendererState
 > {
   /** @internal */
-  public readonly state: Readonly<PropertyRendererState> = {
-    displayValue: UiComponents.translate('general.loading'),
+  public override readonly state: Readonly<PropertyRendererState> = {
+    displayValue: UiComponents.translate("general.loading"),
   };
 
   public static getLabelOffset(
@@ -160,12 +160,12 @@ export class PropertyRenderer extends React.Component<
   }
 
   /** @internal */
-  public componentDidMount() {
+  public override componentDidMount() {
     this.updateDisplayValue(this.props);
   }
 
   /** @internal */
-  public componentDidUpdate(prevProps: PropertyRendererProps) {
+  public override componentDidUpdate(prevProps: PropertyRendererProps) {
     if (
       prevProps.propertyRecord !== this.props.propertyRecord ||
       prevProps.isEditing !== this.props.isEditing ||
@@ -176,7 +176,7 @@ export class PropertyRenderer extends React.Component<
   }
 
   /** @internal */
-  public render() {
+  public override render() {
     const { ...props } = this.props;
     const primitiveRendererProps: PrimitiveRendererProps = {
       ...props,

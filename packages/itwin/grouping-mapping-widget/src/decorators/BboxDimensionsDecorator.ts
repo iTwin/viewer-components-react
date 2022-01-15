@@ -21,14 +21,14 @@ import {
   StrokeOptions,
   Transform,
   YawPitchRollAngles,
-} from '@bentley/geometry-core';
+} from "@bentley/geometry-core";
 import {
   ColorByName,
   ColorDef,
   LinePixels,
   Placement3d,
   ViewFlagOverrides,
-} from '@bentley/imodeljs-common';
+} from "@bentley/imodeljs-common";
 import {
   DecorateContext,
   Decorator,
@@ -38,16 +38,16 @@ import {
   IModelApp,
   Marker,
   RenderGraphic,
-} from '@bentley/imodeljs-frontend';
+} from "@bentley/imodeljs-frontend";
 
 export enum BboxDimension {
-  BoundingBoxShortestEdgeLength = 'Shortest Edge Length',
-  BoundingBoxIntermediateEdgeLength = 'Intermediate Edge Length',
-  BoundingBoxLongestEdgeLength = 'Longest Edge Length',
-  BoundingBoxShortestFaceDiagonalLength = 'Shortest Face Diagonal Length',
-  BoundingBoxIntermediateFaceDiagonalLength = 'Intermediate Face Diagonal Length',
-  BoundingBoxLongestFaceDiagonalLength = 'Longest Face Diagonal Length',
-  BoundingBoxDiagonalLength = 'Diagonal Length',
+  BoundingBoxShortestEdgeLength = "Shortest Edge Length",
+  BoundingBoxIntermediateEdgeLength = "Intermediate Edge Length",
+  BoundingBoxLongestEdgeLength = "Longest Edge Length",
+  BoundingBoxShortestFaceDiagonalLength = "Shortest Face Diagonal Length",
+  BoundingBoxIntermediateFaceDiagonalLength = "Intermediate Face Diagonal Length",
+  BoundingBoxLongestFaceDiagonalLength = "Longest Face Diagonal Length",
+  BoundingBoxDiagonalLength = "Diagonal Length",
   // SmallestFaceArea = "Smallest Face Area",
   // IntermediateFaceArea = "Intermediate Face Area",
   // LargestFaceArea = "Largest Face Area",
@@ -149,11 +149,13 @@ export class BboxDimensionsDecorator implements Decorator {
     const corners = this.instance.placement.getWorldCorners().points;
     const mappings = this.instance.pointMappings;
     for (const dimKey in BboxDimension) {
-      const dim = BboxDimension[dimKey as keyof typeof BboxDimension];
-      if (mappings.has(dim)) {
-        const points = mappings.get(dim);
-        if (points) {
-          data.set(dim, corners[points[0]].distance(corners[points[1]]));
+      if (Object.prototype.hasOwnProperty.call(BboxDimension, dimKey)) {
+        const dim = BboxDimension[dimKey as keyof typeof BboxDimension];
+        if (mappings.has(dim)) {
+          const points = mappings.get(dim);
+          if (points) {
+            data.set(dim, corners[points[0]].distance(corners[points[1]]));
+          }
         }
       }
     }
@@ -212,7 +214,7 @@ export class BboxDimensionsDecorator implements Decorator {
     });
   }
 
-  //#region Helper Functions
+  // #region Helper Functions
 
   /** Calculate all BBox dimensions and properties and save. */
   private inferSpatialData(
@@ -471,12 +473,12 @@ export class BboxDimensionsDecorator implements Decorator {
     this.shapes.push(styledGeometry);
 
     const marker = new Marker(line.fractionToPoint(0.5), { x: 25, y: 25 });
-    const label: HTMLDivElement = document.createElement('div');
+    const label: HTMLDivElement = document.createElement("div");
     label.textContent = `${line.quickLength().toFixed(3)}m`;
-    label.style.backgroundColor = 'rgba(17,17,17,0.75)';
-    label.style.borderRadius = '4px';
-    label.style.color = 'white';
-    label.style.padding = '4px 8px';
+    label.style.backgroundColor = "rgba(17,17,17,0.75)";
+    label.style.borderRadius = "4px";
+    label.style.color = "white";
+    label.style.padding = "4px 8px";
     marker.htmlElement = label;
     marker.visible = true;
     this.markers.push(marker);
@@ -596,5 +598,5 @@ export class BboxDimensionsDecorator implements Decorator {
     }
   }
 
-  //#endregion
+  // #endregion
 }

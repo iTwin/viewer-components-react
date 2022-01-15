@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-type Falsy = false | 0 | '' | null | undefined;
+type Falsy = false | 0 | "" | null | undefined;
 
 /**
  * Spread the result to add `addIfTrue` to an array based on input "Truthiness",
@@ -26,7 +26,7 @@ export type CreateTypeFromInterface<Interface> = {
  */
 export const pascalCaseToSentenceCase = (text?: string) => {
   const str = text
-    ?.replace(/([A-Z])/g, ' $1')
+    ?.replace(/([A-Z])/g, " $1")
     .trim()
     .toLowerCase();
   return str ? str.charAt(0).toUpperCase() + str.slice(1) : undefined;

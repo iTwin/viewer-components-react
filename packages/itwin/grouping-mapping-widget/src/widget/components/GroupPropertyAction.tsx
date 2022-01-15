@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelConnection } from '@bentley/imodeljs-frontend';
+import { IModelConnection } from "@bentley/imodeljs-frontend";
 import {
   ContentDescriptorRequestOptions,
   ContentSpecificationTypes,
@@ -17,36 +17,32 @@ import {
   RulesetVariable,
   RuleTypes,
   StructFieldMemberDescription,
-  StructTypeDescription,
-} from '@bentley/presentation-common';
-import { Presentation } from '@bentley/presentation-frontend';
-import { useActiveIModelConnection } from '@bentley/ui-framework';
+} from "@bentley/presentation-common";
+import { Presentation } from "@bentley/presentation-frontend";
+import { useActiveIModelConnection } from "@bentley/ui-framework";
 import {
   SvgChevronDown,
   SvgChevronUp,
   SvgRemove,
-} from '@itwin/itwinui-icons-react';
+} from "@itwin/itwinui-icons-react";
 import {
   Alert,
   ComboBox,
+  Fieldset,
   IconButton,
   LabeledInput,
   LabeledSelect,
-  Text,
   Small,
-  Fieldset,
-} from '@itwin/itwinui-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+  Text,
+} from "@itwin/itwinui-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
-  ECPropertyReportingAPI,
-  GroupPropertyCreateReportingAPI,
-} from '../../api/generated';
-import { reportingClientApi } from '../../api/reportingClient';
-import ActionPanel from './ActionPanel';
-import useValidator from '../hooks/useValidator';
-import { WidgetHeader } from './utils';
-import './GroupPropertyAction.scss';
+import { ECPropertyReportingAPI, GroupPropertyCreateReportingAPI } from "../../api/generated/api";
+import { reportingClientApi } from "../../api/reportingClient";
+import ActionPanel from "./ActionPanel";
+import useValidator from "../hooks/useValidator";
+import { WidgetHeader } from "./utils";
+import "./GroupPropertyAction.scss";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -99,7 +95,7 @@ const extractPrimitive = (
 
   classToPropertiesMapping.get(className)?.push({
     name: propertyName,
-    label: label,
+    label,
     type: propertiesField.properties[0].property.type,
   });
 };
@@ -126,7 +122,7 @@ const extractStructProperties = (
         `${name}.${member.name}`,
         className,
         classToPropertiesMapping,
-        (member.type as StructTypeDescription).members,
+        member.type.members,
       );
     }
   }
@@ -147,7 +143,7 @@ const extractProperties = (
         );
         break;
       }
-      //Get structs
+      // Get structs
       case PropertyValueFormat.Struct: {
         const nestedContentField = property as NestedContentField;
         // Only handling single path and not handling nested content fields within navigations
@@ -170,15 +166,15 @@ const extractProperties = (
                   : columnName,
                 navigation ? navigation.rootClassName : className,
                 classToPropertiesMapping,
-                (property.type as StructTypeDescription).members,
+                property.type.members,
               );
               // Check for aspects. Ignore them if coming from navigation.
             } else if (
               !navigation &&
               (nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                .name === 'BisCore:ElementOwnsUniqueAspect' ||
+                .name === "BisCore:ElementOwnsUniqueAspect" ||
                 nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                  .name === 'BisCore:ElementOwnsMultiAspects')
+                  .name === "BisCore:ElementOwnsMultiAspects")
             ) {
               const className = nestedContentField.contentClassInfo.name;
               if (!classToPropertiesMapping.has(className)) {
@@ -194,12 +190,12 @@ const extractProperties = (
 
             break;
           }
-          //Navigation properties
+          // Navigation properties
           case RelationshipMeaning.RelatedInstance: {
             if (
-              //Deal with a TypeDefinition
+              // Deal with a TypeDefinition
               nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
-              'BisCore:GeometricElement3dHasTypeDefinition'
+              "BisCore:GeometricElement3dHasTypeDefinition"
             ) {
               const className =
                 nestedContentField.pathToPrimaryClass[0].targetClassInfo.name;
@@ -207,7 +203,7 @@ const extractProperties = (
                 nestedContentField.nestedFields,
                 classToPropertiesMapping,
                 {
-                  navigationName: 'TypeDefinition',
+                  navigationName: "TypeDefinition",
                   rootClassName: className,
                 },
               );
@@ -230,9 +226,9 @@ const GroupPropertyAction = ({
   returnFn,
 }: GroupPropertyActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
-  const [propertyName, setPropertyName] = useState<string>('');
+  const [propertyName, setPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<string | undefined>();
-  const [quantityType, setQuantityType] = useState<string>('Undefined');
+  const [quantityType, setQuantityType] = useState<string>("Undefined");
   const [classToPropertiesMapping, setClassToPropertiesMapping] =
     useState<Map<string, Property[]>>();
   const [ecProperties, setEcProperties] = useState<ECPropertyReportingAPI[]>(
@@ -246,7 +242,7 @@ const GroupPropertyAction = ({
     const getContent = async () => {
       setIsLoading(true);
       const ruleSet: Ruleset = {
-        id: 'element-properties',
+        id: "element-properties",
         rules: [
           {
             ruleType: RuleTypes.Content,
@@ -268,9 +264,9 @@ const GroupPropertyAction = ({
         ],
       };
       const requestOptions: ContentDescriptorRequestOptions<
-        IModelConnection,
-        KeySet,
-        RulesetVariable
+      IModelConnection,
+      KeySet,
+      RulesetVariable
       > = {
         imodel: iModelConnection,
         keys: keySet,
@@ -318,25 +314,25 @@ const GroupPropertyAction = ({
 
         newEcProperties.push(
           ...keys.map((key) => ({
-            ecSchemaName: key.split(':')[0],
-            ecClassName: key.split(':')[1],
+            ecSchemaName: key.split(":")[0],
+            ecClassName: key.split(":")[1],
             // Placeholders for properties
-            ecPropertyName: '',
-            ecPropertyType: '',
+            ecPropertyName: "",
+            ecPropertyType: "",
           })),
         );
 
-        setPropertyName(response.property?.propertyName ?? '');
-        setDataType(response.property?.dataType ?? '');
-        setQuantityType(response.property?.quantityType ?? '');
+        setPropertyName(response.property?.propertyName ?? "");
+        setDataType(response.property?.dataType ?? "");
+        setQuantityType(response.property?.quantityType ?? "");
       } else {
         newEcProperties = Array.from(classToPropertiesMapping)
           .map(([key]) => ({
-            ecSchemaName: key.split(':')[0],
-            ecClassName: key.split(':')[1],
+            ecSchemaName: key.split(":")[0],
+            ecClassName: key.split(":")[1],
             // Placeholders for properties
-            ecPropertyName: '',
-            ecPropertyType: '',
+            ecPropertyName: "",
+            ecPropertyType: "",
           }))
           .reverse();
       }
@@ -362,25 +358,25 @@ const GroupPropertyAction = ({
     try {
       setIsLoading(true);
       const groupProperty: GroupPropertyCreateReportingAPI = {
-        propertyName: propertyName,
-        dataType: dataType,
-        quantityType: quantityType,
+        propertyName,
+        dataType,
+        quantityType,
         ecProperties: filteredEcProperties,
       };
       groupPropertyId
         ? await reportingClientApi.updateGroupProperty(
-            iModelId,
-            mappingId,
-            groupId,
-            groupPropertyId,
-            groupProperty,
-          )
+          iModelId,
+          mappingId,
+          groupId,
+          groupPropertyId,
+          groupProperty,
+        )
         : await reportingClientApi.createGroupProperty(
-            iModelId,
-            mappingId,
-            groupId,
-            groupProperty,
-          );
+          iModelId,
+          mappingId,
+          groupId,
+          groupProperty,
+        );
       await returnFn();
     } catch {
       setIsLoading(false);
@@ -395,10 +391,10 @@ const GroupPropertyAction = ({
       updatedEcProperties[index].ecPropertyName = property.name;
 
       // Unique types
-      let type = '';
+      let type = "";
       switch (property.type) {
-        case 'long':
-          type = 'integer';
+        case "long":
+          type = "integer";
           break;
         default:
           type = property.type;
@@ -443,7 +439,7 @@ const GroupPropertyAction = ({
   return (
     <>
       <WidgetHeader
-        title={groupPropertyName ?? 'Add Property'}
+        title={groupPropertyName ?? "Add Property"}
         returnFn={returnFn}
       />
       <div className='group-property-container'>
@@ -459,74 +455,78 @@ const GroupPropertyAction = ({
             disabled={isLoading}
             onChange={(event) => {
               setPropertyName(event.target.value);
-              validator.showMessageFor('propertyName');
+              validator.showMessageFor("propertyName");
             }}
             message={
               validator.message(
-                'propertyName',
+                "propertyName",
                 propertyName,
-                'required|NoSpacesInName|NoInvalidChars',
-              ) || 'Name cannot contain spaces or special characters.'
+                "required|NoSpacesInName|NoInvalidChars",
+              ) || "Name cannot contain spaces or special characters."
             }
             status={
               validator.message(
-                'propertyName',
+                "propertyName",
                 propertyName,
-                'required|NoSpacesInName|NoInvalidChars',
+                "required|NoSpacesInName|NoInvalidChars",
               )
-                ? 'negative'
+                ? "negative"
                 : undefined
             }
             onBlur={() => {
-              validator.showMessageFor('propertyName');
+              validator.showMessageFor("propertyName");
             }}
           />
           <LabeledSelect<string>
-            label={'Data Type'}
+            label={"Data Type"}
             id='dataType'
             disabled={isLoading}
             options={[
-              { value: 'Boolean', label: 'Boolean' },
-              { value: 'Number', label: 'Number' },
-              { value: 'String', label: 'String' },
+              { value: "Boolean", label: "Boolean" },
+              { value: "Number", label: "Number" },
+              { value: "String", label: "String" },
             ]}
             required
             value={dataType}
             onChange={(value) => {
-              validator.showMessageFor('dataType');
+              validator.showMessageFor("dataType");
               setDataType(value);
             }}
-            message={validator.message('dataType', propertyName, 'required')}
+            message={validator.message("dataType", propertyName, "required")}
             status={
-              validator.message('dataType', propertyName, 'required')
-                ? 'negative'
+              validator.message("dataType", propertyName, "required")
+                ? "negative"
                 : undefined
             }
             onBlur={() => {
-              validator.showMessageFor('dataType');
+              validator.showMessageFor("dataType");
             }}
+            onShow={() => {}}
+            onHide={() => {}}
           />
           <LabeledSelect<string>
             label='Quantity Type'
             disabled={isLoading}
             options={[
-              { value: 'Area', label: 'Area' },
-              { value: 'Distance', label: 'Distance' },
-              { value: 'Force', label: 'Force' },
-              { value: 'Mass', label: 'Mass' },
-              { value: 'Monetary', label: 'Monetary' },
-              { value: 'Time', label: 'Time' },
-              { value: 'Volume', label: 'Volume' },
-              { value: 'Undefined', label: 'No Quantity Type' },
+              { value: "Area", label: "Area" },
+              { value: "Distance", label: "Distance" },
+              { value: "Force", label: "Force" },
+              { value: "Mass", label: "Mass" },
+              { value: "Monetary", label: "Monetary" },
+              { value: "Time", label: "Time" },
+              { value: "Volume", label: "Volume" },
+              { value: "Undefined", label: "No Quantity Type" },
             ]}
             value={quantityType}
             onChange={setQuantityType}
+            onShow={() => {}}
+            onHide={() => {}}
           />
         </Fieldset>
         {/* <Title>Properties</Title> */}
         <Fieldset className='property-selection-container' legend='Properties'>
           {propertyAlert && (
-            <Alert type={'negative'}>
+            <Alert type={"negative"}>
               Please select at least one property.
             </Alert>
           )}
@@ -555,17 +555,17 @@ const GroupPropertyAction = ({
                     value={getValue(ecProperty, index)}
                     onChange={(value) => onChange(value, index)}
                     inputProps={{
-                      placeholder: '<No Property Mapped>',
+                      placeholder: "<No Property Mapped>",
                     }}
-                    style={{ width: '100%' }}
+                    style={{ width: "100%" }}
                   />
                   <IconButton
                     onClick={() => {
                       const updatedEcPropertyList = [...ecProperties];
                       updatedEcPropertyList[index] = {
                         ...updatedEcPropertyList[index],
-                        ecPropertyName: '',
-                        ecPropertyType: '',
+                        ecPropertyName: "",
+                        ecPropertyType: "",
                       };
                       setEcProperties(updatedEcPropertyList);
                     }}

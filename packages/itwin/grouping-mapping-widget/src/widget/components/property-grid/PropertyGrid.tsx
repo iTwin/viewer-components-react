@@ -3,35 +3,35 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import classnames from 'classnames';
-import { produce } from 'immer';
-import * as React from 'react';
-import { DisposeFunc } from '@bentley/bentleyjs-core';
-import { PropertyRecord } from '@bentley/ui-abstract';
+import classnames from "classnames";
+import { produce } from "immer";
+import * as React from "react";
+import { DisposeFunc } from "@bentley/bentleyjs-core";
+import { PropertyRecord } from "@bentley/ui-abstract";
 import {
   CommonPropertyGridProps,
-  PropertyGridCommons,
-  PropertyCategoryBlock,
-  PropertyGridEventsRelatedPropsSupplier,
   PropertyCategory,
+  PropertyCategoryBlock,
   PropertyData,
-} from '@bentley/ui-components';
+  PropertyGridCommons,
+  PropertyGridEventsRelatedPropsSupplier,
+} from "@bentley/ui-components";
 import {
-  ColumnResizingPropertyListPropsSupplier,
   ColumnResizeRelatedPropertyListProps,
-} from '@bentley/ui-components/lib/ui-components/propertygrid/component/ColumnResizingPropertyListPropsSupplier';
-import { DelayedSpinner } from '@bentley/ui-components/lib/ui-components/common/DelayedSpinner';
+  ColumnResizingPropertyListPropsSupplier,
+} from "@bentley/ui-components/lib/ui-components/propertygrid/component/ColumnResizingPropertyListPropsSupplier";
+import { DelayedSpinner } from "@bentley/ui-components/lib/ui-components/common/DelayedSpinner";
 import {
   Orientation,
   ResizableContainerObserver,
   SpinnerSize,
-} from '@bentley/ui-core';
+} from "@bentley/ui-core";
 
-import { PropertyList, PropertyListProps } from './PropertyList';
-import './PropertyGrid.scss';
+import { PropertyList, PropertyListProps } from "./PropertyList";
+import "./PropertyGrid.scss";
 
-import { PresentationPropertyDataProvider } from '@bentley/presentation-components';
-import { FindSimilarContext } from '../FindSimilarContext';
+import { PresentationPropertyDataProvider } from "@bentley/presentation-components";
+import { FindSimilarContext } from "../FindSimilarContext";
 
 /** Properties for [[PropertyGrid]] React component
  * @public
@@ -75,15 +75,15 @@ interface PropertyGridState {
  * @public
  */
 export class PropertyGrid extends React.Component<
-  PropertyGridProps,
-  PropertyGridState
+PropertyGridProps,
+PropertyGridState
 > {
   private _dataChangesListenerDisposeFunc?: DisposeFunc;
   private _isMounted = false;
   private _isInDataRequest = false;
   private _hasPendingDataRequest = false;
 
-  static contextType = FindSimilarContext;
+  static override contextType = FindSimilarContext;
 
   /** @internal */
   constructor(props: PropertyGridProps) {
@@ -96,18 +96,18 @@ export class PropertyGrid extends React.Component<
   }
 
   /** @internal */
-  public componentDidMount() {
+  public override componentDidMount() {
     this._isMounted = true;
     this._dataChangesListenerDisposeFunc =
       this.props.dataProvider.onDataChanged.addListener(
         this._onPropertyDataChanged,
       );
 
-    this.gatherData();
+    void this.gatherData();
   }
 
   /** @internal */
-  public componentWillUnmount() {
+  public override componentWillUnmount() {
     // istanbul ignore else
     if (this._dataChangesListenerDisposeFunc) {
       this._dataChangesListenerDisposeFunc();
@@ -116,7 +116,7 @@ export class PropertyGrid extends React.Component<
     this._isMounted = false;
   }
 
-  public componentDidUpdate(prevProps: PropertyGridProps) {
+  public override componentDidUpdate(prevProps: PropertyGridProps) {
     if (this.props.dataProvider !== prevProps.dataProvider) {
       // istanbul ignore else
       if (this._dataChangesListenerDisposeFunc) {
@@ -127,7 +127,7 @@ export class PropertyGrid extends React.Component<
           this._onPropertyDataChanged,
         );
 
-      this.gatherData();
+      void this.gatherData();
     }
 
     if (
@@ -141,7 +141,7 @@ export class PropertyGrid extends React.Component<
   }
 
   private _onPropertyDataChanged = () => {
-    this.gatherData();
+    void this.gatherData();
   };
 
   private async gatherData(): Promise<void> {
@@ -248,7 +248,7 @@ export class PropertyGrid extends React.Component<
   }
 
   /** @internal */
-  public render() {
+  public override render() {
     if (this.state.loadStart) {
       return (
         <div className='components-property-grid-loader'>
@@ -278,15 +278,15 @@ export class PropertyGrid extends React.Component<
           {(selectionContext) => (
             <div
               className={classnames(
-                'components-property-grid-wrapper',
+                "components-property-grid-wrapper",
                 this.props.className,
               )}
               style={this.props.style}
             >
               <div
                 className={classnames(
-                  'components-property-grid',
-                  'components-smallEditor-host',
+                  "components-property-grid",
+                  "components-smallEditor-host",
                 )}
               >
                 <div className='property-categories'>
@@ -343,8 +343,8 @@ function findCategory(
 
 interface NestedCategoryBlockProps
   extends Omit<
-    PropertyListProps,
-    keyof ColumnResizeRelatedPropertyListProps | 'properties'
+  PropertyListProps,
+  keyof ColumnResizeRelatedPropertyListProps | "properties"
   > {
   categorizedRecords: CategorizedPropertyGridRecords;
   onCategoryExpansionToggled: (categoryName: string) => void;

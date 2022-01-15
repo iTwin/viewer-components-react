@@ -2,30 +2,30 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelConnection } from '@bentley/imodeljs-frontend';
+import { IModelConnection } from "@bentley/imodeljs-frontend";
 import {
   ISelectionProvider,
   Presentation,
   SelectionChangeEventArgs,
-} from '@bentley/presentation-frontend';
-import { useActiveIModelConnection } from '@bentley/ui-framework';
-import { LabeledInput, Small, Fieldset } from '@itwin/itwinui-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { reportingClientApi } from '../../api/reportingClient';
-import { fetchIdsFromQuery, handleInputChange, WidgetHeader } from './utils';
-import { Group } from './Grouping';
-import './GroupAction.scss';
-import ActionPanel from './ActionPanel';
-import useValidator from '../hooks/useValidator';
-import { PropertyRecord } from '@bentley/ui-abstract';
-import { FindSimilarContainer } from './FindSimilarContainer';
-import { FindSimilarContext } from './FindSimilarContext';
-import { QueryBuilder } from './QueryBuilder';
+} from "@bentley/presentation-frontend";
+import { useActiveIModelConnection } from "@bentley/ui-framework";
+import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { reportingClientApi } from "../../api/reportingClient";
+import { fetchIdsFromQuery, handleInputChange, WidgetHeader } from "./utils";
+import { Group } from "./Grouping";
+import "./GroupAction.scss";
+import ActionPanel from "./ActionPanel";
+import useValidator from "../hooks/useValidator";
+import { PropertyRecord } from "@bentley/ui-abstract";
+import { FindSimilarContainer } from "./FindSimilarContainer";
+import { FindSimilarContext } from "./FindSimilarContext";
+import { QueryBuilder } from "./QueryBuilder";
 import {
   clearEmphasizedElements,
   visualizeElementsById,
   zoomToElements,
-} from './viewerUtils';
+} from "./viewerUtils";
 
 interface GroupActionProps {
   iModelId: string;
@@ -42,15 +42,15 @@ const GroupAction = ({
 }: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const [details, setDetails] = useState({
-    groupName: group?.groupName ?? '',
-    description: group?.description ?? '',
+    groupName: group?.groupName ?? "",
+    description: group?.description ?? "",
   });
-  const [query, setQuery] = useState<string>('');
-  const [simpleQuery, setSimpleQuery] = useState<string>('');
+  const [query, setQuery] = useState<string>("");
+  const [simpleQuery, setSimpleQuery] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
-    PropertyRecord[]
+  PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
@@ -86,13 +86,13 @@ const GroupAction = ({
   useEffect(() => {
     const reemphasize = async () => {
       clearEmphasizedElements();
-      if (!query || query === '') {
+      if (!query || query === "") {
         return;
       }
-      const ids = await fetchIdsFromQuery(query ?? '', iModelConnection);
+      const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
       const resolvedHiliteIds = await visualizeElementsById(
         ids,
-        'red',
+        "red",
         iModelConnection,
       );
       await zoomToElements(resolvedHiliteIds);
@@ -103,7 +103,7 @@ const GroupAction = ({
 
   useEffect(() => {
     Presentation.selection.clearSelection(
-      'GroupingMappingWidget',
+      "GroupingMappingWidget",
       iModelConnection,
     );
   }, [iModelConnection]);
@@ -119,17 +119,17 @@ const GroupAction = ({
 
       group
         ? await reportingClientApi.updateGroup(
-            iModelId,
-            mappingId,
-            group.id ?? '',
-            { ...details, query: currentQuery },
-          )
+          iModelId,
+          mappingId,
+          group.id ?? "",
+          { ...details, query: currentQuery },
+        )
         : await reportingClientApi.createGroup(iModelId, mappingId, {
-            ...details,
-            query: currentQuery,
-          });
+          ...details,
+          query: currentQuery,
+        });
       Presentation.selection.clearSelection(
-        'GroupingMappingWidget',
+        "GroupingMappingWidget",
         iModelConnection,
       );
       await goBack();
@@ -152,10 +152,10 @@ const GroupAction = ({
   return (
     <>
       <WidgetHeader
-        title={group ? group.groupName ?? '' : 'Add Group'}
+        title={group ? group.groupName ?? "" : "Add Group"}
         returnFn={async () => {
           Presentation.selection.clearSelection(
-            'GroupingMappingWidget',
+            "GroupingMappingWidget",
             iModelConnection,
           );
           await goBack();
@@ -174,30 +174,30 @@ const GroupAction = ({
             required
             onChange={(event) => {
               handleInputChange(event, details, setDetails);
-              validator.showMessageFor('groupName');
+              validator.showMessageFor("groupName");
             }}
             message={
               validator.message(
-                'groupName',
+                "groupName",
                 details.groupName,
-                'required|NoSpacesInName|NoInvalidChars',
-              ) || 'Name cannot contain spaces or special characters.'
+                "required|NoSpacesInName|NoInvalidChars",
+              ) || "Name cannot contain spaces or special characters."
             }
             status={
               validator.message(
-                'groupName',
+                "groupName",
                 details.groupName,
-                'required|NoSpacesInName|NoInvalidChars',
+                "required|NoSpacesInName|NoInvalidChars",
               )
-                ? 'negative'
+                ? "negative"
                 : undefined
             }
             onBlur={() => {
-              validator.showMessageFor('groupName');
+              validator.showMessageFor("groupName");
             }}
             onBlurCapture={(event) => {
               handleInputChange(event, details, setDetails);
-              validator.showMessageFor('groupName');
+              validator.showMessageFor("groupName");
             }}
           />
           <LabeledInput
@@ -208,24 +208,24 @@ const GroupAction = ({
             value={details.description}
             onChange={(event) => {
               handleInputChange(event, details, setDetails);
-              validator.showMessageFor('description');
+              validator.showMessageFor("description");
             }}
             message={validator.message(
-              'description',
+              "description",
               details.description,
-              'required',
+              "required",
             )}
             status={
-              validator.message('description', details.description, 'required')
-                ? 'negative'
+              validator.message("description", details.description, "required")
+                ? "negative"
                 : undefined
             }
             onBlur={() => {
-              validator.showMessageFor('description');
+              validator.showMessageFor("description");
             }}
             onBlurCapture={(event) => {
               handleInputChange(event, details, setDetails);
-              validator.showMessageFor('description');
+              validator.showMessageFor("description");
             }}
           />
         </Fieldset>
@@ -251,7 +251,7 @@ const GroupAction = ({
         }}
         onCancel={async () => {
           Presentation.selection.clearSelection(
-            'GroupingMappingWidget',
+            "GroupingMappingWidget",
             iModelConnection,
           );
           await goBack();

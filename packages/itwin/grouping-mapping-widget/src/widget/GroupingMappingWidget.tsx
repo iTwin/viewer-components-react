@@ -7,13 +7,13 @@ import {
   StagePanelLocation,
   StagePanelSection,
   UiItemsProvider,
-} from '@bentley/ui-abstract';
+} from "@bentley/ui-abstract";
 
-import * as React from 'react';
-import GroupingMapping from './components/GroupingMapping';
+import * as React from "react";
+import GroupingMapping from "./components/GroupingMapping";
 
 export class GroupingMappingProvider implements UiItemsProvider {
-  public readonly id = 'GroupingMappingProvider';
+  public readonly id = "GroupingMappingProvider";
 
   public provideWidgets(
     _stageId: string,
@@ -27,8 +27,8 @@ export class GroupingMappingProvider implements UiItemsProvider {
       section === StagePanelSection.Start
     ) {
       const GroupingMappingWidget: AbstractWidgetProps = {
-        id: 'GroupingMappingWidget',
-        label: 'Grouping & Mapping',
+        id: "GroupingMappingWidget",
+        label: "Grouping & Mapping",
         getWidgetContent() {
           return <GroupingMapping />;
         },

@@ -3,16 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from 'react';
-import { PropertyRecord, PropertyValueFormat } from '@bentley/ui-abstract';
-import { Checkbox, ElementSeparator, Orientation } from '@bentley/ui-core';
-import { ActionButtonList } from '@bentley/ui-components';
-import { PropertyGridColumnStyleProvider } from '@bentley/ui-components/lib/ui-components/properties/renderers/PropertyGridColumns';
+import * as React from "react";
+import { PropertyRecord, PropertyValueFormat } from "@bentley/ui-abstract";
+import { Checkbox, ElementSeparator, Orientation } from "@bentley/ui-core";
+import { ActionButtonList } from "@bentley/ui-components";
+import { PropertyGridColumnStyleProvider } from "@bentley/ui-components/lib/ui-components/properties/renderers/PropertyGridColumns";
 
-import './PropertyView.scss';
-import { SharedRendererProps } from './PropertyRender';
-import { FindSimilarContext } from '../FindSimilarContext';
-import { useCallback } from 'react';
+import "./PropertyView.scss";
+import { SharedRendererProps } from "./PropertyRender";
+import { FindSimilarContext } from "../FindSimilarContext";
+import { useCallback } from "react";
 
 /** Properties of [[PropertyView]] React component
  * @public
@@ -99,7 +99,7 @@ export const PropertyView = (props: PropertyViewProps) => {
           await context.queryBuilder.addProperty(prop);
           context.setQuery(context.queryBuilder.buildQueryString());
         } catch {
-          console.error('Failed to select property.');
+          // handle exception
         }
       }
     },
@@ -110,11 +110,11 @@ export const PropertyView = (props: PropertyViewProps) => {
     (prop: PropertyRecord) => {
       switch (prop.value.valueFormat) {
         case PropertyValueFormat.Primitive:
-          _addSelectedProperty(prop);
+          void _addSelectedProperty(prop);
           break;
         case PropertyValueFormat.Array:
           if (prop.value.items.length === 0) {
-            _addSelectedProperty(prop);
+            void _addSelectedProperty(prop);
           }
           break;
         case PropertyValueFormat.Struct:
@@ -143,7 +143,7 @@ export const PropertyView = (props: PropertyViewProps) => {
           await context.queryBuilder.removeProperty(prop);
           context.setQuery(context.queryBuilder.buildQueryString());
         } catch {
-          console.error('Failed to unselect property.');
+          // handle exception
         }
       }
     },
@@ -154,11 +154,11 @@ export const PropertyView = (props: PropertyViewProps) => {
     (prop: PropertyRecord) => {
       switch (prop.value.valueFormat) {
         case PropertyValueFormat.Primitive:
-          _removeSelectedProperty(prop);
+          void _removeSelectedProperty(prop);
           break;
         case PropertyValueFormat.Array:
           if (prop.value.items.length === 0) {
-            _removeSelectedProperty(prop);
+            void _removeSelectedProperty(prop);
           }
           break;
         case PropertyValueFormat.Struct:
@@ -238,16 +238,16 @@ export const PropertyView = (props: PropertyViewProps) => {
   const getClassName = (viewProps: PropertyViewProps) => {
     let propertyRecordClassName =
       viewProps.orientation === Orientation.Horizontal
-        ? 'components-property-record--horizontal'
-        : 'components-property-record--vertical';
+        ? "components-property-record--horizontal"
+        : "components-property-record--vertical";
     if (viewProps.isSelected) {
-      propertyRecordClassName += ' components--selected';
+      propertyRecordClassName += " components--selected";
     }
     if (viewProps.onClick) {
-      propertyRecordClassName += ' components--clickable';
+      propertyRecordClassName += " components--clickable";
     }
     if (viewProps.isHoverable) {
-      propertyRecordClassName += ' components--hoverable';
+      propertyRecordClassName += " components--hoverable";
     }
     return propertyRecordClassName;
   };
@@ -301,14 +301,14 @@ export const PropertyView = (props: PropertyViewProps) => {
       ) : undefined}
       {props.propertyRecord.value.valueFormat ===
       PropertyValueFormat.Primitive ? (
-        <div className='components-property-record-value'>
-          <span>
-            {props.valueElementRenderer
-              ? props.valueElementRenderer()
-              : props.valueElement}
-          </span>
-        </div>
-      ) : undefined}
+          <div className='components-property-record-value'>
+            <span>
+              {props.valueElementRenderer
+                ? props.valueElementRenderer()
+                : props.valueElement}
+            </span>
+          </div>
+        ) : undefined}
       {props.actionButtonRenderers ? (
         <ActionButtonList
           orientation={props.orientation}
