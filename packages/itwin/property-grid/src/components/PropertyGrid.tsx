@@ -11,7 +11,7 @@ import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
   PropertyData,
   PropertyDataFiltererBase,
-  PropertyGridContextMenuArgs
+  PropertyGridContextMenuArgs,
 } from "@itwin/components-react";
 import {
   PropertyValueRendererManager,
