@@ -7,11 +7,13 @@ import type { Id64String } from "@itwin/core-bentley";
 import { BeDuration, BeUiEvent } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type {
-  BeButtonEvent, DecorateContext, HitDetail, IModelConnection, ToolAssistanceInstruction} from "@itwin/core-frontend";
-import { EventHandled, IModelApp, NotifyMessageDetails, OutputMessageAlert,
+  BeButtonEvent, DecorateContext, HitDetail, IModelConnection, ToolAssistanceInstruction
+} from "@itwin/core-frontend";
+import {
+  EventHandled, IModelApp, NotifyMessageDetails, OutputMessageAlert,
   OutputMessagePriority, OutputMessageType, PrimitiveTool, ToolAssistance, ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import type { Feature} from "./FeatureTracking";
+import type { Feature } from "./FeatureTracking";
 import { FeatureTracking } from "./FeatureTracking";
 import type { Measurement } from "./Measurement";
 import type { MeasurementToolModel } from "./MeasurementToolModel";

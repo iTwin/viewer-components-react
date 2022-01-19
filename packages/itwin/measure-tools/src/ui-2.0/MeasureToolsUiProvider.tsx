@@ -7,8 +7,10 @@ import * as React from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import type { Localization } from "@itwin/core-common";
 import type {
-  AbstractWidgetProps, CommonToolbarItem, UiItemsProvider} from "@itwin/appui-abstract";
-import { ConditionalBooleanValue, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
+  AbstractWidgetProps, CommonToolbarItem, UiItemsProvider
+} from "@itwin/appui-abstract";
+import {
+  ConditionalBooleanValue, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
   ToolbarOrientation, ToolbarUsage,
 } from "@itwin/appui-abstract";
 import type { ToolItemDef } from "@itwin/appui-react";

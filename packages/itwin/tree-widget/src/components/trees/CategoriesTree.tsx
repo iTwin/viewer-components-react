@@ -3,17 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useState } from "react";
-import type {
-  IModelConnection,
-  Viewport} from "@itwin/core-frontend";
-import {
-  IModelApp,
-} from "@itwin/core-frontend";
-import {
-  CategoryTree,
-  getCategories,
-  toggleAllCategories,
-} from "@itwin/appui-react";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import { CategoryTree, getCategories, toggleAllCategories } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
 import { TreeHeaderComponent } from "../header/TreeHeader";

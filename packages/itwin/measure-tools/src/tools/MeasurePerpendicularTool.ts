@@ -7,10 +7,12 @@ import type { Vector3d } from "@itwin/core-geometry";
 import { Plane3dByOriginAndUnitNormal, Point3d, Ray3d } from "@itwin/core-geometry";
 import type {
   BeButtonEvent,
-  ToolAssistanceInstruction, ToolAssistanceSection} from "@itwin/core-frontend";
-import { EventHandled, IModelApp, OutputMessagePriority, TentativeOrAccuSnap, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
+  ToolAssistanceInstruction, ToolAssistanceSection
 } from "@itwin/core-frontend";
-import type { Feature} from "../api/FeatureTracking";
+import {
+  EventHandled, IModelApp, OutputMessagePriority, TentativeOrAccuSnap, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
+} from "@itwin/core-frontend";
+import type { Feature } from "../api/FeatureTracking";
 import { MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";

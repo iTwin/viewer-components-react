@@ -7,11 +7,11 @@ import type { Id64String } from "@itwin/core-bentley";
 import type { Vector3d, XAndY, XYAndZ } from "@itwin/core-geometry";
 import { Angle, AxisIndex, LineString3d, Matrix3d, Point2d, Point3d, PolygonOps, Transform } from "@itwin/core-geometry";
 import { ColorDef, Hilite } from "@itwin/core-common";
-import type { BeButtonEvent, CanvasDecoration, DecorateContext, Viewport} from "@itwin/core-frontend";
+import type { BeButtonEvent, CanvasDecoration, DecorateContext, Viewport } from "@itwin/core-frontend";
 import {
   BeButton, IModelApp, SelectionMode, SelectionTool,
 } from "@itwin/core-frontend";
-import type { IconStyleProps, TextOffsetProps, TextStyleProps} from "./GraphicStyle";
+import type { IconStyleProps, TextOffsetProps, TextStyleProps } from "./GraphicStyle";
 import { IconAlignment, StyleSet, TextOffsetType, WellKnownTextStyleType } from "./GraphicStyle";
 
 /**

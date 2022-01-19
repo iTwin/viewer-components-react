@@ -4,10 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 import type {
   BeButtonEvent, ToolAssistanceInstruction,
-  ToolAssistanceSection} from "@itwin/core-frontend";
-import { EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
+  ToolAssistanceSection
 } from "@itwin/core-frontend";
-import type { Feature} from "../api/FeatureTracking";
+import {
+  EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
+} from "@itwin/core-frontend";
+import type { Feature } from "../api/FeatureTracking";
 import { MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";

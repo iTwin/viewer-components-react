@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { DecorateContext, HitDetail} from "@itwin/core-frontend";
+import type { DecorateContext, HitDetail } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import { BeUiEvent } from "@itwin/core-bentley";
-import type { Measurement} from "./Measurement";
+import type { Measurement } from "./Measurement";
 import { MeasurementPickContext } from "./Measurement";
 import { MeasurementSelectionSet } from "./MeasurementSelectionSet";
 import { MeasurementSyncUiEventId, WellKnownViewType } from "./MeasurementEnums";
@@ -17,7 +17,7 @@ import { SyncUiEventDispatcher } from "@itwin/appui-react";
 class Stack<T> {
   private _data: T[] = [];
 
-  constructor() {}
+  constructor() { }
 
   public get isEmpty(): boolean { return 0 === this._data.length; }
   public size(): number { return this._data.length; }

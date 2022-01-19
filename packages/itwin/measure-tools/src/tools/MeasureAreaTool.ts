@@ -5,11 +5,12 @@
 
 import { AxisOrder, Matrix3d, Vector3d } from "@itwin/core-geometry";
 import type {
-  ToolAssistanceInstruction, ToolAssistanceSection} from "@itwin/core-frontend";
+  ToolAssistanceInstruction, ToolAssistanceSection
+} from "@itwin/core-frontend";
 import {
   AccuDrawHintBuilder, BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import type { Feature} from "../api/FeatureTracking";
+import type { Feature } from "../api/FeatureTracking";
 import { MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";

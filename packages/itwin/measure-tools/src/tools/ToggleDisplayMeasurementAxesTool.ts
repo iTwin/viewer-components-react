@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { Viewport } from "@itwin/core-frontend";
-import type { Feature} from "../api/FeatureTracking";
+import type { Feature } from "../api/FeatureTracking";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { PrimitiveToolBase } from "../api/MeasurementTool";

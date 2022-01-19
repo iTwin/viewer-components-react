@@ -5,7 +5,7 @@
 import * as React from "react";
 import type { Id64String } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import type { PropertyDescription, PropertyValue} from "@itwin/appui-abstract";
+import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyGrid, SimplePropertyDataProvider } from "@itwin/components-react";
 import { Orientation } from "@itwin/core-react";

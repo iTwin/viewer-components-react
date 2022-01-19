@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { GuidString} from "@itwin/core-bentley";
+import type { GuidString } from "@itwin/core-bentley";
 import { BeUiEvent, Logger } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
@@ -25,7 +25,7 @@ export interface Feature {
 export class FeatureTracking {
   private static _enabled: boolean = true;
 
-  /** Feature tracking notiication event. */
+  /** Feature tracking notification event. */
   public static readonly onFeature: BeUiEvent<Feature> = new BeUiEvent<Feature>();
 
   /**

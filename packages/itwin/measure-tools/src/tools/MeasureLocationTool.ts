@@ -4,21 +4,23 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { GeoServiceStatus } from "@itwin/core-bentley";
-import type { CurvePrimitive} from "@itwin/core-geometry";
+import type { CurvePrimitive } from "@itwin/core-geometry";
 import { GeometryQuery, IModelJson, Vector3d } from "@itwin/core-geometry";
 import type { SnapRequestProps } from "@itwin/core-common";
 import { IModelError } from "@itwin/core-common";
 import type {
-  BeButtonEvent, ToolAssistanceInstruction, ToolAssistanceSection} from "@itwin/core-frontend";
-import { EventHandled, IModelApp, LocateResponse, OutputMessagePriority, SnapDetail, SnapMode, SnapStatus, ToolAssistance,
+  BeButtonEvent, ToolAssistanceInstruction, ToolAssistanceSection
+} from "@itwin/core-frontend";
+import {
+  EventHandled, IModelApp, LocateResponse, OutputMessagePriority, SnapDetail, SnapMode, SnapStatus, ToolAssistance,
   ToolAssistanceImage, ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
-import type { Feature} from "../api/FeatureTracking";
+import type { Feature } from "../api/FeatureTracking";
 import { MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { LocationMeasurement } from "../measurements/LocationMeasurement";
-import type { AddLocationProps} from "../toolmodels/MeasureLocationToolModel";
+import type { AddLocationProps } from "../toolmodels/MeasureLocationToolModel";
 import { MeasureLocationToolModel } from "../toolmodels/MeasureLocationToolModel";
 
 /** Tool that measure precise locations */
