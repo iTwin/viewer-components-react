@@ -47,6 +47,7 @@
   ],
   "peerDependencies": {
     "@itwin/appui-abstract": "rc",
+    "@itwin/appui-layout-react": "rc",
     "@itwin/appui-react": "rc",
     "@itwin/components-react": "rc",
     "@itwin/core-bentley": "rc",
