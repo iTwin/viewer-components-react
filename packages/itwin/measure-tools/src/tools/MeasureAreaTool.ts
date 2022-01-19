@@ -5,7 +5,7 @@
 
 import { AxisOrder, Matrix3d, Vector3d } from "@itwin/core-geometry";
 import type {
-  ToolAssistanceInstruction, ToolAssistanceSection
+  ToolAssistanceInstruction, ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
   AccuDrawHintBuilder, BeButtonEvent, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,

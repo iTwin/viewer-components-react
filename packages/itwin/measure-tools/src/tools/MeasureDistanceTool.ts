@@ -5,7 +5,7 @@
 
 import type {
   BeButtonEvent,
-  ToolAssistanceInstruction, ToolAssistanceSection
+  ToolAssistanceInstruction, ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
   AccuDrawHintBuilder, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,

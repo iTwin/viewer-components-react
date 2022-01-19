@@ -7,7 +7,7 @@ import * as React from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import type { Localization } from "@itwin/core-common";
 import type {
-  AbstractWidgetProps, CommonToolbarItem, UiItemsProvider
+  AbstractWidgetProps, CommonToolbarItem, UiItemsProvider,
 } from "@itwin/appui-abstract";
 import {
   ConditionalBooleanValue, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,

@@ -7,7 +7,7 @@ import type { Vector3d } from "@itwin/core-geometry";
 import { Plane3dByOriginAndUnitNormal, Point3d, Ray3d } from "@itwin/core-geometry";
 import type {
   BeButtonEvent,
-  ToolAssistanceInstruction, ToolAssistanceSection
+  ToolAssistanceInstruction, ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
   EventHandled, IModelApp, OutputMessagePriority, TentativeOrAccuSnap, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,

@@ -9,7 +9,7 @@ import { GeometryQuery, IModelJson, Vector3d } from "@itwin/core-geometry";
 import type { SnapRequestProps } from "@itwin/core-common";
 import { IModelError } from "@itwin/core-common";
 import type {
-  BeButtonEvent, ToolAssistanceInstruction, ToolAssistanceSection
+  BeButtonEvent, ToolAssistanceInstruction, ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
   EventHandled, IModelApp, LocateResponse, OutputMessagePriority, SnapDetail, SnapMode, SnapStatus, ToolAssistance,

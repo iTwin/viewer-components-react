@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import type {
   BeButtonEvent, ToolAssistanceInstruction,
-  ToolAssistanceSection
+  ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
   EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,

@@ -7,7 +7,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import { BeDuration, BeUiEvent } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type {
-  BeButtonEvent, DecorateContext, HitDetail, IModelConnection, ToolAssistanceInstruction
+  BeButtonEvent, DecorateContext, HitDetail, IModelConnection, ToolAssistanceInstruction,
 } from "@itwin/core-frontend";
 import {
   EventHandled, IModelApp, NotifyMessageDetails, OutputMessageAlert,
