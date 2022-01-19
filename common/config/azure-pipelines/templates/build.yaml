@@ -10,12 +10,10 @@ steps:
       git config --local user.email imodeljs-admin@users.noreply.github.com
       git config --local user.name imodeljs-admin
     displayName: git config
-  - script: 'node common/scripts/install-run-rush.js change --verify'
-    displayName: 'rush change --verify'
+  - script: node common/scripts/install-run-rush.js change -v
+    displayName: rush change --verify
   - script: node common/scripts/install-run-rush.js install
     displayName: rush install
-  - script: node common/scripts/install-run-rush.js change -v
-    displayName: Rush change
   - script: node common/scripts/install-run-rush.js rebuild -v
     displayName: rush build
   - script: node common/scripts/install-run-rush.js lint
