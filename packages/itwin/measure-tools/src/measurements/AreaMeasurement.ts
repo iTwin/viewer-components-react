@@ -3,14 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@itwin/core-bentley";
-import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps, XYZProps } from "@itwin/core-geometry";
-import { GeometryStreamProps } from "@itwin/core-common";
-import { BeButtonEvent, DecorateContext, GraphicBuilder, GraphicType, IModelApp, QuantityType, RenderGraphicOwner } from "@itwin/core-frontend";
+import type { Id64String } from "@itwin/core-bentley";
+import type { XYZProps } from "@itwin/core-geometry";
+import { Geometry, IModelJson, Point3d, PointString3d, PolygonOps } from "@itwin/core-geometry";
+import type { GeometryStreamProps } from "@itwin/core-common";
+import type { BeButtonEvent, DecorateContext, GraphicBuilder, RenderGraphicOwner } from "@itwin/core-frontend";
+import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType } from "../api/GraphicStyle";
-import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
+import type { MeasurementEqualityOptions, MeasurementWidgetData } from "../api/Measurement";
+import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
-import { MeasurementProps } from "../api/MeasurementProps";
+import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { Polygon } from "../api/Polygon";
 import { DistanceMeasurement } from "./DistanceMeasurement";

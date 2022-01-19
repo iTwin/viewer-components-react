@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { assert } from "chai";
-import { Measurement } from "../../api/Measurement";
+import type { Measurement } from "../../api/Measurement";
 import { MeasurementManager } from "../../api/MeasurementManager";
 import { MeasurementUIEvents } from "../../api/MeasurementUIEvents";
 import { AreaMeasurement } from "../../measurements/AreaMeasurement";

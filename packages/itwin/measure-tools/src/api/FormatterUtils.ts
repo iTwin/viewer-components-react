@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d, XAndY } from "@itwin/core-geometry";
-import { Cartographic } from "@itwin/core-common";
+import type { Point3d, XAndY } from "@itwin/core-geometry";
+import type { Cartographic } from "@itwin/core-common";
 import { IModelApp, QuantityType } from "@itwin/core-frontend";
-import { FormatterSpec } from "@itwin/core-quantity";
+import type { FormatterSpec } from "@itwin/core-quantity";
 
 export class FormatterUtils {
 

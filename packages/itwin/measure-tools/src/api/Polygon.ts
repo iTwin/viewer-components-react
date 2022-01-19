@@ -3,10 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d, PolygonOps, Ray3d } from "@itwin/core-geometry";
-import { DecorateContext, GraphicBuilder, IModelApp, QuantityType } from "@itwin/core-frontend";
+import type { Ray3d } from "@itwin/core-geometry";
+import { Point3d, PolygonOps } from "@itwin/core-geometry";
+import type { DecorateContext, GraphicBuilder} from "@itwin/core-frontend";
+import { IModelApp, QuantityType } from "@itwin/core-frontend";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "./GraphicStyle";
-import { TextEntry, TextMarker } from "./TextMarker";
+import type { TextEntry} from "./TextMarker";
+import { TextMarker } from "./TextMarker";
 
 export class Polygon {
   public isSelected: boolean;

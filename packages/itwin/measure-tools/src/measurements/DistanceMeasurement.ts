@@ -3,17 +3,20 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@itwin/core-bentley";
-import { IModelJson, LineSegment3d, Point3d, PointString3d, Range3d, Ray3d, Vector3d, XYAndZ, XYZProps } from "@itwin/core-geometry";
-import { GeometryStreamProps } from "@itwin/core-common";
-import { BeButtonEvent, DecorateContext, GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
+import type { Id64String } from "@itwin/core-bentley";
+import type { XYAndZ, XYZProps } from "@itwin/core-geometry";
+import { IModelJson, LineSegment3d, Point3d, PointString3d, Range3d, Ray3d, Vector3d } from "@itwin/core-geometry";
+import type { GeometryStreamProps } from "@itwin/core-common";
+import type { BeButtonEvent, DecorateContext} from "@itwin/core-frontend";
+import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
 import { FormatterUtils } from "../api/FormatterUtils";
 import { StyleSet, TextOffsetType, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
-import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
+import type { MeasurementEqualityOptions, MeasurementWidgetData } from "../api/Measurement";
+import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement";
 import { MeasurementManager } from "../api/MeasurementManager";
 import { MeasurementPreferences, MeasurementPreferencesProperty } from "../api/MeasurementPreferences";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
-import { MeasurementProps } from "../api/MeasurementProps";
+import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
 import { ViewHelper } from "../api/ViewHelper";

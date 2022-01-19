@@ -5,7 +5,7 @@
 import * as React from "react";
 import { IconButton } from "../IconButton";
 import { SearchBar } from "../search-bar/SearchBar";
-import { SearchOptions } from "../TreeFilteringState";
+import type { SearchOptions } from "../TreeFilteringState";
 import { TreeWidget } from "../../TreeWidget";
 import "./TreeHeader.scss";
 

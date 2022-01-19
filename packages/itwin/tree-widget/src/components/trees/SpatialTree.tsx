@@ -2,10 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import {
-  SpatialContainmentTree,
-  SpatialContainmentTreeProps,
-} from "@itwin/appui-react";
+import type { SpatialContainmentTreeProps } from "@itwin/appui-react";
+import { SpatialContainmentTree } from "@itwin/appui-react";
 import { useResizeObserver } from "@itwin/core-react";
 import React, { useCallback, useState } from "react";
 

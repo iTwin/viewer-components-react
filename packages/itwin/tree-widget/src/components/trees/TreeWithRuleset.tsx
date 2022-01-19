@@ -3,21 +3,23 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useState } from "react";
-import { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
-import {
+import type { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
+import type {
   IPresentationTreeDataProvider,
-  usePresentationTreeNodeLoader,
-  useUnifiedSelectionTreeEventHandler,
   PresentationTreeDataProvider,
 } from "@itwin/presentation-components";
 import {
-  SelectionMode,
+  usePresentationTreeNodeLoader,
+  useUnifiedSelectionTreeEventHandler,
+} from "@itwin/presentation-components";
+import {
   ControlledTree,
+  SelectionMode,
   useTreeModel,
 } from "@itwin/components-react";
 import { Presentation } from "@itwin/presentation-frontend";
 import "./TreeWithRulesetTree.scss";
-import { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { useResizeObserver } from "@itwin/core-react";
 
 export interface ControlledTreeProps {
@@ -41,7 +43,7 @@ export interface TreeState {
 export abstract class TreeWithRuleset<
   T extends TreeProps,
   S extends TreeState
-  > extends React.Component<T, S> {
+> extends React.Component<T, S> {
   private _ruleset?: RegisteredRuleset;
   /** @internal */
   public async componentDidMount() {
@@ -60,14 +62,17 @@ export abstract class TreeWithRuleset<
   }
 
   private removeRuleset() {
-    if (this._ruleset)
-      Presentation.presentation.rulesets().remove(this._ruleset); // tslint:disable-line:no-floating-promises
+    if (this._ruleset) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      Presentation.presentation.rulesets().remove(this._ruleset);
+    }
   }
 
   private _setRuleSet = async () => {
     return Presentation.presentation
       .rulesets()
-      .add(this.props.ruleSet) // tslint:disable-line:no-floating-promises
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      .add(this.props.ruleSet)
       .then((ruleset: RegisteredRuleset) => {
         this._ruleset = ruleset;
         const dataProvider = this.props.dataProvider;
@@ -77,8 +82,8 @@ export abstract class TreeWithRuleset<
 }
 
 export class SimpleTreeWithRuleset extends TreeWithRuleset<
-  TreeProps,
-  TreeState
+TreeProps,
+TreeState
 > {
   constructor(props: TreeProps) {
     super(props);
@@ -98,7 +103,7 @@ export class SimpleTreeWithRuleset extends TreeWithRuleset<
             rulesetId={this.props.ruleSet.id}
             iModel={this.props.imodel}
             dataProvider={dataProvider}
-            pageSize={(dataProvider as PresentationTreeDataProvider).pagingSize}
+            pageSize={dataProvider.pagingSize}
           />
         </div>
       );
@@ -106,7 +111,6 @@ export class SimpleTreeWithRuleset extends TreeWithRuleset<
   }
 }
 
-// tslint:disable-next-line:variable-name naming-convention
 export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (
   props: ControlledTreeProps
 ) => {

@@ -2,7 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { DecorateContext, Decorator, IModelApp, ScreenViewport } from "@itwin/core-frontend";
+import type { DecorateContext, Decorator, ScreenViewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 
 /** Handles forwarding a cached graphics decorate call for measurements. Note this is package internal and not meant to be exposed as public API. */
 export class MeasurementCachedGraphicsHandler implements Decorator {

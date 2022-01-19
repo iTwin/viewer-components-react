@@ -22,6 +22,7 @@
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "lint:fix": "npm run lint -- --fix",
     "test": "certa -c certa.json -r chrome",
     "cover": "nyc npm test",
     "madge": "madge --circular --extensions ts,tsx src",
@@ -53,14 +54,12 @@
     "@itwin/core-common": "rc",
     "@itwin/core-frontend": "rc",
     "@itwin/core-geometry": "rc",
-    "@itwin/core-quantity": "rc",
     "@itwin/core-react": "rc",
     "@itwin/core-telemetry": "rc",
     "react": "^17.0.0",
     "react-dom": "^17.0.0"
   },
   "devDependencies": {
-    "@bentley/itwin-client": "rc",
     "@itwin/appui-abstract": "rc",
     "@itwin/appui-layout-react": "rc",
     "@itwin/appui-react": "rc",
@@ -71,7 +70,6 @@
     "@itwin/core-common": "rc",
     "@itwin/core-frontend": "rc",
     "@itwin/core-geometry": "rc",
-    "@itwin/core-i18n": "rc",
     "@itwin/core-markup": "rc",
     "@itwin/core-orbitgt": "rc",
     "@itwin/core-quantity": "rc",
@@ -79,8 +77,6 @@
     "@itwin/core-telemetry": "rc",
     "@itwin/eslint-plugin": "rc",
     "@itwin/imodel-components-react": "rc",
-    "@itwin/presentation-common": "rc",
-    "@itwin/presentation-frontend": "rc",
     "@itwin/webgl-compatibility": "rc",
     "@types/chai": "^4.2.0",
     "@types/chai-as-promised": "^7.1.1",
@@ -124,7 +120,9 @@
     ],
     "extends": "plugin:@itwin/ui",
     "rules": {
-      "@typescript-eslint/unbound-method": "off"
+      "@typescript-eslint/unbound-method": "off",
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/consistent-type-imports": "error"
     }
   }
 }
