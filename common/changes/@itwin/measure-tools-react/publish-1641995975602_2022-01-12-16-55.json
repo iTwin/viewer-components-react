@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/measure-tools-react",
-      "comment": "iTwin.js 3.0 first rc",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@itwin/measure-tools-react"

@@ -1,6 +1,13 @@
-# Change Log - @bentley/measure-tools-react
+# Change Log - @itwin/measure-tools-react
 
-This log was last generated on Sun, 10 Oct 2021 03:39:20 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Jan 2022 13:59:35 GMT and should not be manually modified.
+
+## 0.1.1
+Wed, 12 Jan 2022 13:59:35 GMT
+
+### Patches
+
+- iTwin.js 3.0 first rc
 
 ## 0.5.0
 Sun, 10 Oct 2021 03:39:20 GMT

@@ -1,6 +1,18 @@
 {
-  "name": "@bentley/measure-tools-react",
+  "name": "@itwin/measure-tools-react",
   "entries": [
+    {
+      "version": "0.1.1",
+      "tag": "@itwin/measure-tools-react_v0.1.1",
+      "date": "Wed, 12 Jan 2022 13:59:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "iTwin.js 3.0 first rc"
+          }
+        ]
+      }
+    },
     {
       "version": "0.5.0",
       "tag": "@bentley/measure-tools-react_v0.5.0",
