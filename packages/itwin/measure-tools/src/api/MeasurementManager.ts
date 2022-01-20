@@ -4,9 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { BeUiEvent } from "@itwin/core-bentley";
-import { GeometryStreamProps } from "@itwin/core-common";
-import { BeButtonEvent, DecorateContext, Decorator, EventHandled, HitDetail, IModelApp, ScreenViewport, Viewport } from "@itwin/core-frontend";
-import { Measurement, MeasurementPickContext } from "./Measurement";
+import type { GeometryStreamProps } from "@itwin/core-common";
+import type { BeButtonEvent, DecorateContext, Decorator, HitDetail, ScreenViewport, Viewport } from "@itwin/core-frontend";
+import { EventHandled, IModelApp } from "@itwin/core-frontend";
+import type { Measurement} from "./Measurement";
+import { MeasurementPickContext } from "./Measurement";
 import { MeasurementCachedGraphicsHandler } from "./MeasurementCachedGraphicsHandler";
 import { MeasurementButtonHandledEvent, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementSelectionSet } from "./MeasurementSelectionSet";

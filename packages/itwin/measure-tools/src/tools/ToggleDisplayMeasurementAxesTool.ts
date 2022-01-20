@@ -3,8 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Viewport } from "@itwin/core-frontend";
-import { Feature, FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
+import type { Viewport } from "@itwin/core-frontend";
+import type { Feature } from "../api/FeatureTracking";
+import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { PrimitiveToolBase } from "../api/MeasurementTool";
 

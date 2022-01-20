@@ -3,7 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Logger, LogLevel } from "@itwin/core-bentley";
+import type { LogLevel } from "@itwin/core-bentley";
+import { Logger } from "@itwin/core-bentley";
 
 /** Enumerates log categories used by the **measure-tools** package. */
 export enum MeasureToolsLoggerCategory {

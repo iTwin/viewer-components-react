@@ -1,6 +1,20 @@
-# Change Log - @bentley/property-grid-react
+# Change Log - @itwin/property-grid-react
 
-This log was last generated on Fri, 10 Dec 2021 15:33:50 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Jan 2022 17:39:40 GMT and should not be manually modified.
+
+## 0.1.2
+Wed, 19 Jan 2022 17:39:40 GMT
+
+### Patches
+
+- updated to latest rc, dev-185, and updated deps
+
+## 0.1.1
+Wed, 12 Jan 2022 13:59:35 GMT
+
+### Patches
+
+- iTwin.js 3.0 first rc
 
 ## 2.2.5
 Fri, 10 Dec 2021 15:33:50 GMT

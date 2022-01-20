@@ -1,6 +1,20 @@
-# Change Log - @bentley/tree-widget-react
+# Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 11 Jan 2022 16:25:27 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Jan 2022 17:39:40 GMT and should not be manually modified.
+
+## 0.1.2
+Wed, 19 Jan 2022 17:39:40 GMT
+
+### Patches
+
+- updated to latest rc, dev-185, and updated deps
+
+## 0.1.1
+Wed, 12 Jan 2022 13:59:35 GMT
+
+### Patches
+
+- iTwin.js 3.0 first rc
 
 ## 1.4.6
 Tue, 11 Jan 2022 16:25:27 GMT

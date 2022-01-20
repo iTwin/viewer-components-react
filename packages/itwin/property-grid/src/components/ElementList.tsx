@@ -5,19 +5,23 @@
 
 import "./ElementList.scss";
 
-import { IModelConnection } from "@itwin/core-frontend";
-import { InstanceKey } from "@itwin/presentation-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { InstanceKey } from "@itwin/presentation-common";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
-import {
+import type {
   PropertyDescription,
   PropertyEditorInfo,
-  PropertyRecord,
   PropertyValue,
-  PropertyValueFormat,
 } from "@itwin/appui-abstract";
 import {
+  PropertyRecord,
+  PropertyValueFormat,
+} from "@itwin/appui-abstract";
+import type {
   ColumnDescription,
   RowItem,
+} from "@itwin/components-react";
+import {
   SelectionMode,
   SimpleTableDataProvider,
   Table,

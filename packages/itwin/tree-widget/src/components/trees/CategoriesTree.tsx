@@ -3,16 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useState } from "react";
-import {
-  IModelApp,
-  IModelConnection,
-  Viewport,
-} from "@itwin/core-frontend";
-import {
-  CategoryTree,
-  toggleAllCategories,
-  getCategories,
-} from "@itwin/appui-react";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import { CategoryTree, getCategories, toggleAllCategories } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
 import { TreeHeaderComponent } from "../header/TreeHeader";
@@ -71,8 +64,8 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
     }
 
     const ids = await getCategories(props.iModel, activeView, filteredProvider);
-    let enabled: string[] = [];
-    let disabled: string[] = [];
+    const enabled: string[] = [];
+    const disabled: string[] = [];
     for (const id of ids) {
       if (activeView.view.viewsCategory(id)) {
         enabled.push(id);

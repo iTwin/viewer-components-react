@@ -4,19 +4,18 @@
 *--------------------------------------------------------------------------------------------*/
 /* eslint-disable react/display-name */
 
+import type { AbstractWidgetProps, UiItemsProvider } from "@itwin/appui-abstract";
 import {
-  AbstractWidgetProps,
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
-  UiItemsProvider,
   WidgetState,
 } from "@itwin/appui-abstract";
 import * as React from "react";
 
 import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid";
 import { PropertyGridManager } from "./PropertyGridManager";
-import { PropertyGridProps } from "./types";
+import type { PropertyGridProps } from "./types";
 
 /** Provides the property grid widget to zone 9 */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {

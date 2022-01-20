@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { PropertyCategory, PropertyData } from "@itwin/components-react";
+import type { PropertyCategory, PropertyData } from "@itwin/components-react";
 
 export class AutoExpandingPropertyDataProvider extends PresentationPropertyDataProvider {
   public override async getData(): Promise<PropertyData> {

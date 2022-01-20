@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import classnames from "classnames";
-import { CommonProps } from "@itwin/core-react";
+import type { CommonProps } from "@itwin/core-react";
 import "./IconButton.scss";
 
 /** Properties for [[IconButton]] component */
@@ -15,7 +15,7 @@ export interface IconButtonProps
   icon: string;
   /** A function to be run when the element is clicked */
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  //** An optional text label to display to the left of the button  */
+  /** An optional text label to display to the left of the button  */
   label?: string;
 }
 

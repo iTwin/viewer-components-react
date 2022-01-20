@@ -6,7 +6,7 @@
 
 import * as React from "react";
 import classnames from "classnames";
-import { CommonProps } from "@itwin/core-react";
+import type { CommonProps } from "@itwin/core-react";
 import { IconButton } from "../IconButton";
 import "./SearchBox.scss";
 import { TreeWidget } from "../../TreeWidget";
@@ -38,8 +38,6 @@ export interface SearchBoxProps extends CommonProps {
   resultCount: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged: (index: number) => void;
-  /** Specify that the <input> element should automatically get focus */
-  autoFocus?: boolean;
 }
 
 /**
@@ -66,8 +64,8 @@ interface SearchBoxState {
 }
 
 export class SearchBox extends React.PureComponent<
-  SearchBoxProps,
-  SearchBoxState
+SearchBoxProps,
+SearchBoxState
 > {
   private _inputElement: HTMLInputElement | null = null;
   private _timeoutId: number = 0;
@@ -131,7 +129,7 @@ export class SearchBox extends React.PureComponent<
     }
   };
 
-  private _handleIconClick = (_event: React.MouseEvent<HTMLElement>): void => {
+  private _handleIconClick = (): void => {
     // istanbul ignore else
     if (this._inputElement) {
       const clear = this.state.searchText !== "";
@@ -200,7 +198,6 @@ export class SearchBox extends React.PureComponent<
 
   public render() {
     const {
-      autoFocus,
       className,
       style,
       resultCount,
@@ -219,7 +216,6 @@ export class SearchBox extends React.PureComponent<
           ref={(el) => {
             this._inputElement = el;
           }}
-          autoFocus={autoFocus}
           onChange={this._trackChange}
           onKeyDown={this._handleKeyDown}
           onPaste={this._trackChange}
@@ -251,6 +247,9 @@ export class SearchBox extends React.PureComponent<
         <span
           className="searchbox-step-button icon icon-close searchbox-close-button"
           onClick={this._handleIconClick}
+          onKeyDown={this._handleIconClick}
+          role="button"
+          tabIndex={0}
         />
       </div>
     );

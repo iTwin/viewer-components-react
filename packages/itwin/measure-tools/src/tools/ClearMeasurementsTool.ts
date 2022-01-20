@@ -3,12 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Viewport } from "@itwin/core-frontend";
+import type { Viewport } from "@itwin/core-frontend";
 import { MeasurementManager } from "../api/MeasurementManager";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
-import { Measurement } from "../api/Measurement";
+import type { Measurement } from "../api/Measurement";
 import { PrimitiveToolBase} from "../api/MeasurementTool";
-import { Feature, MeasureToolsFeatures } from "../api/FeatureTracking";
+import type { Feature} from "../api/FeatureTracking";
+import { MeasureToolsFeatures } from "../api/FeatureTracking";
 
 export class ClearMeasurementsTool extends PrimitiveToolBase {
   public static override toolId = "ClearMeasurements";
