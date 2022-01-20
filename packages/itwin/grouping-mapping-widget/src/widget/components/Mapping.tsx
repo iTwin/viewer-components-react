@@ -8,10 +8,12 @@ import {
   SvgAdd,
   SvgDelete,
   SvgEdit,
+  SvgImport,
   SvgMore,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
+  ButtonGroup,
   DropdownMenu,
   IconButton,
   MenuItem,
@@ -27,14 +29,16 @@ import { reportingClientApi } from "../../api/reportingClient";
 import DeleteModal from "./DeleteModal";
 import { Groupings } from "./Grouping";
 import MappingAction from "./MappingAction";
+import { MappingImportWizardModal } from "./MappingImportWizardModal";
 
-type Mapping = CreateTypeFromInterface<MappingReportingAPI>;
+export type Mapping = CreateTypeFromInterface<MappingReportingAPI>;
 
 enum MappingView {
   MAPPINGS = "mappings",
   GROUPS = "groups",
   ADDING = "adding",
   MODIFYING = "modifying",
+  IMPORT = "import",
 }
 
 const fetchMappings = async (
@@ -45,7 +49,7 @@ const fetchMappings = async (
   try {
     setIsLoading(true);
     const mappings = await reportingClientApi.getMappings(iModelId);
-    setMappings(mappings.mappings ?? []);
+    setMappings(mappings);
   } catch {
   } finally {
     setIsLoading(false);
@@ -60,7 +64,6 @@ const useFetchMappings = (
   React.Dispatch<React.SetStateAction<MappingReportingAPI[]>>,
 ] => {
   const [mappings, setMappings] = useState<MappingReportingAPI[]>([]);
-
   useEffect(() => {
     void fetchMappings(setMappings, iModelId, setIsLoading);
   }, [iModelId, setIsLoading]);
@@ -71,6 +74,7 @@ const useFetchMappings = (
 export const Mappings = () => {
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showImportModal, setShowImportModal] = useState<boolean>(false);
   const [mappingView, setMappingView] = useState<MappingView>(
     MappingView.MAPPINGS,
   );
@@ -110,8 +114,7 @@ export const Mappings = () => {
             accessor: "mappingName",
             Cell: (value: CellProps<{ mappingName: string }>) => (
               <div
-                role="button"
-                className="iui-anchor"
+                className='iui-anchor'
                 onClick={() => {
                   setSelectedMapping(value.row.original);
                   setMappingView(MappingView.GROUPS);
@@ -199,13 +202,20 @@ export const Mappings = () => {
         <>
           <WidgetHeader title='Mappings' />
           <div className='mappings-container'>
-            <Button
-              startIcon={<SvgAdd />}
-              onClick={() => void addMapping()}
-              styleType='high-visibility'
-            >
-              Add Mapping
-            </Button>
+            <div className='table-toolbar'>
+              <Button
+                startIcon={<SvgAdd />}
+                onClick={async () => addMapping()}
+                styleType='high-visibility'
+              >
+                New
+              </Button>
+              <ButtonGroup onClick={() => setShowImportModal(true)}>
+                <IconButton title='Import Mappings'>
+                  <SvgImport />
+                </IconButton>
+              </ButtonGroup>
+            </div>
             <Table<Mapping>
               data={mappings}
               density='extra-condensed'
@@ -226,6 +236,11 @@ export const Mappings = () => {
               );
             }}
             refresh={refresh}
+          />
+          <MappingImportWizardModal
+            show={showImportModal}
+            setShow={setShowImportModal}
+            onFinish={refresh}
           />
         </>
       );

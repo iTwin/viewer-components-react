@@ -96,7 +96,7 @@ PropertyRendererProps,
 PropertyRendererState
 > {
   /** @internal */
-  public override readonly state: Readonly<PropertyRendererState> = {
+  public readonly state: Readonly<PropertyRendererState> = {
     displayValue: UiComponents.translate("general.loading"),
   };
 
@@ -160,12 +160,12 @@ PropertyRendererState
   }
 
   /** @internal */
-  public override componentDidMount() {
+  public componentDidMount() {
     this.updateDisplayValue(this.props);
   }
 
   /** @internal */
-  public override componentDidUpdate(prevProps: PropertyRendererProps) {
+  public componentDidUpdate(prevProps: PropertyRendererProps) {
     if (
       prevProps.propertyRecord !== this.props.propertyRecord ||
       prevProps.isEditing !== this.props.isEditing ||
@@ -176,7 +176,7 @@ PropertyRendererState
   }
 
   /** @internal */
-  public override render() {
+  public render() {
     const { ...props } = this.props;
     const primitiveRendererProps: PrimitiveRendererProps = {
       ...props,

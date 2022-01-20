@@ -93,7 +93,7 @@ PropertyListProps,
 PropertyListState
 > {
   /** @internal */
-  public override readonly state: PropertyListState = {};
+  public readonly state: PropertyListState = {};
 
   private _listRef = React.createRef<HTMLDivElement>();
 
@@ -122,17 +122,17 @@ PropertyListState
   }
 
   /** @internal */
-  public override componentDidMount() {
+  public componentDidMount() {
     this.afterRender();
   }
 
   /** @internal */
-  public override componentDidUpdate() {
+  public componentDidUpdate() {
     this.afterRender();
   }
 
   /** @internal */
-  public override render() {
+  public render() {
     const propertyListClassName = classnames(
       this.props.orientation === Orientation.Horizontal
         ? "components-property-list--horizontal"

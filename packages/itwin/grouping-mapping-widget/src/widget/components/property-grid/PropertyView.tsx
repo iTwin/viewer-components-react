@@ -99,7 +99,7 @@ export const PropertyView = (props: PropertyViewProps) => {
           await context.queryBuilder.addProperty(prop);
           context.setQuery(context.queryBuilder.buildQueryString());
         } catch {
-          // handle exception
+          // handle error
         }
       }
     },
@@ -143,7 +143,7 @@ export const PropertyView = (props: PropertyViewProps) => {
           await context.queryBuilder.removeProperty(prop);
           context.setQuery(context.queryBuilder.buildQueryString());
         } catch {
-          // handle exception
+          // handle error
         }
       }
     },

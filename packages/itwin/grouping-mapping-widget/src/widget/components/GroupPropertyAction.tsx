@@ -40,7 +40,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ECPropertyReportingAPI, GroupPropertyCreateReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
 import ActionPanel from "./ActionPanel";
-import useValidator from "../hooks/useValidator";
+import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
 
@@ -122,7 +122,7 @@ const extractStructProperties = (
         `${name}.${member.name}`,
         className,
         classToPropertiesMapping,
-        member.type.members,
+        (member.type ).members,
       );
     }
   }
@@ -166,7 +166,7 @@ const extractProperties = (
                   : columnName,
                 navigation ? navigation.rootClassName : className,
                 classToPropertiesMapping,
-                property.type.members,
+                (property.type ).members,
               );
               // Check for aspects. Ignore them if coming from navigation.
             } else if (
@@ -457,19 +457,13 @@ const GroupPropertyAction = ({
               setPropertyName(event.target.value);
               validator.showMessageFor("propertyName");
             }}
-            message={
-              validator.message(
-                "propertyName",
-                propertyName,
-                "required|NoSpacesInName|NoInvalidChars",
-              ) || "Name cannot contain spaces or special characters."
-            }
+            message={validator.message(
+              "propertyName",
+              propertyName,
+              NAME_REQUIREMENTS,
+            )}
             status={
-              validator.message(
-                "propertyName",
-                propertyName,
-                "required|NoSpacesInName|NoInvalidChars",
-              )
+              validator.message("propertyName", propertyName, NAME_REQUIREMENTS)
                 ? "negative"
                 : undefined
             }

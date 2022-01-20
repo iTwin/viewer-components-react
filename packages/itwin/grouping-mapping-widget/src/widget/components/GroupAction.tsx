@@ -16,7 +16,7 @@ import { fetchIdsFromQuery, handleInputChange, WidgetHeader } from "./utils";
 import { Group } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
-import useValidator from "../hooks/useValidator";
+import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { PropertyRecord } from "@bentley/ui-abstract";
 import { FindSimilarContainer } from "./FindSimilarContainer";
 import { FindSimilarContext } from "./FindSimilarContext";
@@ -176,18 +176,16 @@ const GroupAction = ({
               handleInputChange(event, details, setDetails);
               validator.showMessageFor("groupName");
             }}
-            message={
-              validator.message(
-                "groupName",
-                details.groupName,
-                "required|NoSpacesInName|NoInvalidChars",
-              ) || "Name cannot contain spaces or special characters."
-            }
+            message={validator.message(
+              "groupName",
+              details.groupName,
+              NAME_REQUIREMENTS,
+            )}
             status={
               validator.message(
                 "groupName",
                 details.groupName,
-                "required|NoSpacesInName|NoInvalidChars",
+                NAME_REQUIREMENTS,
               )
                 ? "negative"
                 : undefined

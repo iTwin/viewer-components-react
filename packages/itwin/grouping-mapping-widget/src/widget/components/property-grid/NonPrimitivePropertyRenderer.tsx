@@ -38,7 +38,7 @@ NonPrimitivePropertyRendererProps,
 NonPrimitivePropertyRendererState
 > {
   /** @internal */
-  public override readonly state: NonPrimitivePropertyRendererState = {
+  public readonly state: NonPrimitivePropertyRendererState = {
     /** If it's not collapsible, that means it's expanded by default and can't be collapsed */
     isExpanded:
       !this.props.isCollapsible || this.props.propertyRecord.autoExpand,
@@ -124,7 +124,7 @@ NonPrimitivePropertyRendererState
   };
 
   /** @internal */
-  public override render() {
+  public render() {
     let items: PropertyRecord[] =
       this.props.propertyRecord.getChildrenRecords();
     if (

@@ -4,21 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-// Widgets by default don't get horizontal scrollbars...
-/* stylelint-disable-next-line selector-class-pattern */
-.nz-widget-contentRenderer {
-  width: 100%;
-}
-
-.group-mapping-container {
+.select-mapping-container {
   display: flex;
   flex-direction: column;
-  padding: $iui-baseline $iui-m;
-  box-sizing: border-box;
-  height: 100%;
-  overflow: auto;
-}
+  height: 66vh;
+  gap: $iui-baseline * 2;
 
-.field-legend {
-  color: $iui-color-system-gray;
+  .select-mapping-table {
+    flex-grow: 1;
+    overflow: auto;
+  }
 }

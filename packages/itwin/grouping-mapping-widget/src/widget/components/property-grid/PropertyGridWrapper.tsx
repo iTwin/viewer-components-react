@@ -21,7 +21,7 @@ export class PropertyGridWrapperApp extends React.Component<
 PropertyProps,
 PropertyGridWrapperState
 > {
-  static override contextType = FindSimilarContext;
+  static contextType = FindSimilarContext;
   constructor(props: PropertyProps | Readonly<PropertyProps>) {
     super(props);
     this.state = {};
@@ -42,11 +42,11 @@ PropertyGridWrapperState
     this.setState({ dataProvider });
   }
 
-  public override componentDidMount() {
+  public componentDidMount() {
     this.createDataProvider();
   }
 
-  public override componentDidUpdate(prevProps: PropertyProps) {
+  public componentDidUpdate(prevProps: PropertyProps) {
     if (prevProps.keys === this.props.keys) {
       return;
     }
@@ -54,7 +54,7 @@ PropertyGridWrapperState
     this.createDataProvider();
   }
 
-  public override render() {
+  public render() {
     const dataProvider = this.state.dataProvider;
     return (
       <>

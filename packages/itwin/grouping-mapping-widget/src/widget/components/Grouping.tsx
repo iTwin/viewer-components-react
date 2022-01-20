@@ -145,8 +145,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   value.row.original.groupName
                 ) : (
                   <div
-                    role="button"
-                    className="iui-anchor"
+                    className='iui-anchor'
                     onClick={(e) => {
                       e.stopPropagation();
                       openProperties(value);
@@ -169,7 +168,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             width: 80,
             Cell: (value: CellProps<Group>) => {
               return (
-                <div role="button" onClick={(e) => e.stopPropagation()}>
+                <div onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu
                     disabled={isLoadingQuery}
                     menuItems={(close: () => void) => [
@@ -231,8 +230,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     let colour = "#";
     for (let i = 0; i < 3; i++) {
       const value = (hash >> (i * 8)) & 0xff;
-      const hex = (`00${  value.toString(16)}`);
-      colour += hex.substring(hex.length - 2);
+      colour += (`00${  value.toString(16)}`).substr(-2);
     }
     return colour;
   };

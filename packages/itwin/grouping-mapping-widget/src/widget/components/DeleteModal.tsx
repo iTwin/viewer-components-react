@@ -6,6 +6,7 @@ import {
   Button,
   IconButton,
   Leading,
+  MiddleTextTruncation,
   Modal,
   ModalButtonBar,
   ProgressRadial,
@@ -56,7 +57,8 @@ export const DeleteModal = ({
         }}
       >
         <Leading>
-          Are you sure you want to delete <strong>{entityName}</strong>?
+          Are you sure you want to delete{" "}
+          <strong>{<MiddleTextTruncation text={`${entityName  }?`} />}</strong>
         </Leading>
         <ModalButtonBar>
           {isLoading ? (

@@ -83,7 +83,7 @@ PropertyGridState
   private _isInDataRequest = false;
   private _hasPendingDataRequest = false;
 
-  static override contextType = FindSimilarContext;
+  static contextType = FindSimilarContext;
 
   /** @internal */
   constructor(props: PropertyGridProps) {
@@ -96,7 +96,7 @@ PropertyGridState
   }
 
   /** @internal */
-  public override componentDidMount() {
+  public componentDidMount() {
     this._isMounted = true;
     this._dataChangesListenerDisposeFunc =
       this.props.dataProvider.onDataChanged.addListener(
@@ -107,7 +107,7 @@ PropertyGridState
   }
 
   /** @internal */
-  public override componentWillUnmount() {
+  public componentWillUnmount() {
     // istanbul ignore else
     if (this._dataChangesListenerDisposeFunc) {
       this._dataChangesListenerDisposeFunc();
@@ -116,7 +116,7 @@ PropertyGridState
     this._isMounted = false;
   }
 
-  public override componentDidUpdate(prevProps: PropertyGridProps) {
+  public componentDidUpdate(prevProps: PropertyGridProps) {
     if (this.props.dataProvider !== prevProps.dataProvider) {
       // istanbul ignore else
       if (this._dataChangesListenerDisposeFunc) {
@@ -248,7 +248,7 @@ PropertyGridState
   }
 
   /** @internal */
-  public override render() {
+  public render() {
     if (this.state.loadStart) {
       return (
         <div className='components-property-grid-loader'>

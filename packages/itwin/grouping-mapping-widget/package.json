@@ -25,7 +25,7 @@
     "copy-files": "ncp README.md lib/README.md && ncp LICENSE.md lib/LICENSE.md",
     "cover": "",
     "lint": "npm run lint:ts",
-    "lint:fix": "npm run lint:ts -- --fix */**/*.{js,ts,tsx,scss}",
+    "lint:fix": "npm run lint:ts -- --fix",
     "lint:ts": "eslint -f visualstudio \"./src/**/*.{js,ts,tsx}\" --max-warnings=0",
     "rebuild": "npm run build",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./public/locales/en-PSEUDO",
@@ -46,9 +46,10 @@
     "@bentley/ui-components": "^2.19.25",
     "@bentley/ui-core": "^2.19.25",
     "@bentley/ui-framework": "^2.19.25",
+    "@itwin/imodel-browser-react": "^0.12.1",
+    "@itwin/itwinui-css": "^0.44.0",
     "@itwin/itwinui-icons-react": "^1.5.0",
     "@itwin/itwinui-react": "^1.22.0",
-    "@itwin/itwinui-css": "^0.44.0",
     "classnames": "^2.3.1",
     "cross-fetch": "^3.1.4",
     "file-loader": "^4.3.0",
@@ -103,7 +104,8 @@
       "@typescript-eslint/no-shadow": "off",
       "deprecation/deprecation": "off",
       "jsx-a11y/click-events-have-key-events": "off",
-      "jsx-a11y/interactive-supports-focus": "off"
+      "jsx-a11y/interactive-supports-focus": "off",
+      "jsx-a11y/no-static-element-interactions": "off"
     }
   }
 }

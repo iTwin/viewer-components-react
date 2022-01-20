@@ -7,7 +7,7 @@
 // tslint:disable
 /**
  * Reporting
- * Insights is a resource for aggregating iTwin data to build custom dashboards and integrate iTwin data with your business applications.    - Create digitial twin based reports which can be consumed through business intelligence applications such as Power BI.  - Leverage the OData feed Data Access to generate reports by combining data from multiple data streams in the digital twin.
+ * Reporting is a resource for aggregating iTwin data to build custom dashboards and integrate iTwin data with your business applications.    - Create digitial twin based reports which can be consumed through business intelligence applications such as Power BI.  - Leverage the OData feed Data Access to generate reports by combining data from multiple data streams in the digital twin.
  *
  * OpenAPI spec version: v1
  *
@@ -17,13 +17,13 @@
  * Do not edit the file manually.
  */
 
-import * as url from "url";
-import isomorphicFetch from "cross-fetch";
-import { Configuration } from "./configuration";
+import * as url from 'url';
+import isomorphicFetch from 'cross-fetch';
+import { Configuration } from './configuration';
 
-export const BASE_PATH = "https://api.bentley.com/insights/reporting".replace(
+export const BASE_PATH = 'https://api.bentley.com/insights/reporting'.replace(
   /\/+$/,
-  ""
+  '',
 );
 
 /**
@@ -31,10 +31,10 @@ export const BASE_PATH = "https://api.bentley.com/insights/reporting".replace(
  * @export
  */
 export const COLLECTION_FORMATS = {
-  csv: ",",
-  ssv: " ",
-  tsv: "\t",
-  pipes: "|",
+  csv: ',',
+  ssv: ' ',
+  tsv: '\t',
+  pipes: '|',
 };
 
 /**
@@ -67,7 +67,7 @@ export class BaseAPI {
   constructor(
     configuration?: Configuration,
     protected basePath: string = BASE_PATH,
-    protected fetch: FetchAPI = isomorphicFetch
+    protected fetch: FetchAPI = isomorphicFetch,
   ) {
     if (configuration) {
       this.configuration = configuration;
@@ -83,20 +83,20 @@ export class BaseAPI {
  * @extends {Error}
  */
 export class RequiredError extends Error {
-  name: "RequiredError";
+  name: 'RequiredError';
   constructor(public field: string, msg?: string) {
     super(msg);
   }
 }
 
 /**
- * List of Calculated Properties.
+ * List of CalculatedProperties.
  * @export
  * @interface CalculatedPropertyCollectionReportingAPI
  */
 export interface CalculatedPropertyCollectionReportingAPI {
   /**
-   * List of Calculated Properties.
+   * List of CalculatedProperties.
    * @type {Array<CalculatedPropertyReportingAPI>}
    * @memberof CalculatedPropertyCollectionReportingAPI
    */
@@ -109,19 +109,19 @@ export interface CalculatedPropertyCollectionReportingAPI {
   _links?: PagedResponseLinksReportingAPI;
 }
 /**
- * Properties of the Calculated Property to be created.
+ * Properties of the CalculatedProperty to be created.
  * @export
  * @interface CalculatedPropertyCreateReportingAPI
  */
 export interface CalculatedPropertyCreateReportingAPI {
   /**
-   * Name of the Calculated Property.
+   * Name of the CalculatedProperty.
    * @type {string}
    * @memberof CalculatedPropertyCreateReportingAPI
    */
   propertyName: string;
   /**
-   * The type of the Calculated Property. One of 'Area', 'Length', 'Volume', 'BoundingBoxLongestEdgeLength', 'BoundingBoxIntermediateEdgeLength', 'BoundingBoxShortestEdgeLength', 'BoundingBoxDiagonalLength', 'BoundingBoxLongestFaceDiagonalLength', 'BoundingBoxIntermediateFaceDiagonalLength', 'BoundingBoxShortestFaceDiagonalLength'.
+   * The type of the CalculatedProperty. One of 'Area', 'Length', 'Volume', 'BoundingBoxLongestEdgeLength', 'BoundingBoxIntermediateEdgeLength', 'BoundingBoxShortestEdgeLength', 'BoundingBoxDiagonalLength', 'BoundingBoxLongestFaceDiagonalLength', 'BoundingBoxIntermediateFaceDiagonalLength', 'BoundingBoxShortestFaceDiagonalLength'.
    * @type {string}
    * @memberof CalculatedPropertyCreateReportingAPI
    */
@@ -153,13 +153,13 @@ export interface CalculatedPropertyLinksReportingAPI {
   group?: LinkReportingAPI;
 }
 /**
- * Defines a Calculated Property or 'column' for a Group. It is calculated for each element returned by the Group's query.
+ * Defines a CalculatedProperty or 'column' for a Group. It is calculated for each element returned by the Group's query.
  * @export
  * @interface CalculatedPropertyReportingAPI
  */
 export interface CalculatedPropertyReportingAPI {
   /**
-   * The Calculated Property Id.
+   * The CalculatedProperty Id.
    * @type {string}
    * @memberof CalculatedPropertyReportingAPI
    */
@@ -171,13 +171,13 @@ export interface CalculatedPropertyReportingAPI {
    */
   propertyName?: string;
   /**
-   * The type of the Calculated Property. One of 'Area', 'Length', 'Volume', 'BoundingBoxLongestEdgeLength', 'BoundingBoxIntermediateEdgeLength', 'BoundingBoxShortestEdgeLength', 'BoundingBoxDiagonalLength', 'BoundingBoxLongestFaceDiagonalLength', 'BoundingBoxIntermediateFaceDiagonalLength', 'BoundingBoxShortestFaceDiagonalLength'.
+   * The type of the CalculatedProperty. One of 'Area', 'Length', 'Volume', 'BoundingBoxLongestEdgeLength', 'BoundingBoxIntermediateEdgeLength', 'BoundingBoxShortestEdgeLength', 'BoundingBoxDiagonalLength', 'BoundingBoxLongestFaceDiagonalLength', 'BoundingBoxIntermediateFaceDiagonalLength', 'BoundingBoxShortestFaceDiagonalLength'.
    * @type {string}
    * @memberof CalculatedPropertyReportingAPI
    */
   type?: string;
   /**
-   * The quantity type of the Calculated Property. One of 'Area', 'Distance', 'Force', 'Mass', 'Monetary', 'Time', 'Volume, or 'Undefined'.
+   * The quantity type of the CalculatedProperty. One of 'Area', 'Distance', 'Force', 'Mass', 'Monetary', 'Time', 'Volume, or 'Undefined'.
    * @type {string}
    * @memberof CalculatedPropertyReportingAPI
    */
@@ -190,7 +190,7 @@ export interface CalculatedPropertyReportingAPI {
   _links?: CalculatedPropertyLinksReportingAPI;
 }
 /**
- * Container for a Calculated Property object.
+ * Container for a CalculatedProperty object.
  * @export
  * @interface CalculatedPropertySingleReportingAPI
  */
@@ -203,23 +203,124 @@ export interface CalculatedPropertySingleReportingAPI {
   property?: CalculatedPropertyReportingAPI;
 }
 /**
- * Properties of the Calculated Property to be updated.
+ * Properties of the CalculatedProperty to be updated.
  * @export
  * @interface CalculatedPropertyUpdateReportingAPI
  */
 export interface CalculatedPropertyUpdateReportingAPI {
   /**
-   * Name of the Calculated Property.
+   * Name of the CalculatedProperty.
    * @type {string}
    * @memberof CalculatedPropertyUpdateReportingAPI
    */
   propertyName?: string;
   /**
-   * The type of the Calculated Property. One of 'Area', 'Length', 'Volume', 'BoundingBoxLongestEdgeLength', 'BoundingBoxIntermediateEdgeLength', 'BoundingBoxShortestEdgeLength', 'BoundingBoxDiagonalLength', 'BoundingBoxLongestFaceDiagonalLength', 'BoundingBoxIntermediateFaceDiagonalLength', 'BoundingBoxShortestFaceDiagonalLength'.
+   * The type of the CalculatedProperty. One of 'Area', 'Length', 'Volume', 'BoundingBoxLongestEdgeLength', 'BoundingBoxIntermediateEdgeLength', 'BoundingBoxShortestEdgeLength', 'BoundingBoxDiagonalLength', 'BoundingBoxLongestFaceDiagonalLength', 'BoundingBoxIntermediateFaceDiagonalLength', 'BoundingBoxShortestFaceDiagonalLength'.
    * @type {string}
    * @memberof CalculatedPropertyUpdateReportingAPI
    */
   type?: string;
+}
+/**
+ * List of CustomCalculations.
+ * @export
+ * @interface CustomCalculationCollectionReportingAPI
+ */
+export interface CustomCalculationCollectionReportingAPI {
+  /**
+   * List of CustomCalculations.
+   * @type {Array<CustomCalculationReportingAPI>}
+   * @memberof CustomCalculationCollectionReportingAPI
+   */
+  customCalculations?: Array<CustomCalculationReportingAPI>;
+  /**
+   *
+   * @type {PagedResponseLinksReportingAPI}
+   * @memberof CustomCalculationCollectionReportingAPI
+   */
+  _links?: PagedResponseLinksReportingAPI;
+}
+/**
+ * Properties of the CustomCalculation to be created.
+ * @export
+ * @interface CustomCalculationCreateReportingAPI
+ */
+export interface CustomCalculationCreateReportingAPI {
+  /**
+   * Name of the Property (OData v4 SimpleIdentifier).
+   * @type {string}
+   * @memberof CustomCalculationCreateReportingAPI
+   */
+  propertyName: string;
+  /**
+   * A mathematical formula which will be evaluated for each element returned by the Group's query.
+   * @type {string}
+   * @memberof CustomCalculationCreateReportingAPI
+   */
+  formula: string;
+}
+/**
+ * Defines a CustomCalculation or 'column' for a Group. It is calculated using the given formula for each element returned by the Group's query.
+ * @export
+ * @interface CustomCalculationReportingAPI
+ */
+export interface CustomCalculationReportingAPI {
+  /**
+   * The CustomCalculation Id.
+   * @type {string}
+   * @memberof CustomCalculationReportingAPI
+   */
+  id?: string;
+  /**
+   * Name of the Property (OData v4 SimpleIdentifier).
+   * @type {string}
+   * @memberof CustomCalculationReportingAPI
+   */
+  propertyName?: string;
+  /**
+   * A mathematical formula which will be evaluated for each element returned by the Group's query.
+   * @type {string}
+   * @memberof CustomCalculationReportingAPI
+   */
+  formula?: string;
+  /**
+   *
+   * @type {CalculatedPropertyLinksReportingAPI}
+   * @memberof CustomCalculationReportingAPI
+   */
+  _links?: CalculatedPropertyLinksReportingAPI;
+}
+/**
+ * Container for a CustomCalculation object.
+ * @export
+ * @interface CustomCalculationSingleReportingAPI
+ */
+export interface CustomCalculationSingleReportingAPI {
+  /**
+   *
+   * @type {CustomCalculationReportingAPI}
+   * @memberof CustomCalculationSingleReportingAPI
+   */
+  customCalculation?: CustomCalculationReportingAPI;
+}
+/**
+ * Properties of the CustomCalculation to be updated.
+ * @export
+ * @interface CustomCalculationUpdateReportingAPI
+ */
+export interface CustomCalculationUpdateReportingAPI {
+  /**
+   * Name of the Property (OData v4 SimpleIdentifier).
+   * @type {string}
+   * @memberof CustomCalculationUpdateReportingAPI
+   */
+  propertyName?: string;
+  /**
+   * A mathematical formula which will be evaluated for each element returned by the Group's query.
+   * @type {string}
+   * @memberof CustomCalculationUpdateReportingAPI
+   */
+  formula?: string;
 }
 /**
  * Defines a target ECProperty for a Group. This is used to determine what properties will be read from the query response of a Group.
@@ -253,23 +354,48 @@ export interface ECPropertyReportingAPI {
   ecPropertyType?: string;
 }
 /**
- * Error information.
+ * Contains error information.
  * @export
- * @interface ErrorResponseErrorReportingAPI
+ * @interface ErrorDetailsReportingAPI
  */
-export interface ErrorResponseErrorReportingAPI {
+export interface ErrorDetailsReportingAPI {
   /**
    * One of a server-defined set of error codes.
    * @type {string}
-   * @memberof ErrorResponseErrorReportingAPI
+   * @memberof ErrorDetailsReportingAPI
    */
-  code?: string;
+  code: string;
   /**
    * A human-readable representation of the error.
    * @type {string}
-   * @memberof ErrorResponseErrorReportingAPI
+   * @memberof ErrorDetailsReportingAPI
    */
-  message?: string;
+  message: string;
+}
+/**
+ * Contains error information and an optional array of more specific errors.
+ * @export
+ * @interface ErrorReportingAPI
+ */
+export interface ErrorReportingAPI {
+  /**
+   * One of a server-defined set of error codes.
+   * @type {string}
+   * @memberof ErrorReportingAPI
+   */
+  code: string;
+  /**
+   * A human-readable representation of the error.
+   * @type {string}
+   * @memberof ErrorReportingAPI
+   */
+  message: string;
+  /**
+   * Optional array of more specific errors.
+   * @type {Array<ErrorDetailsReportingAPI>}
+   * @memberof ErrorReportingAPI
+   */
+  details?: Array<ErrorDetailsReportingAPI>;
 }
 /**
  * Gives details for an error that occurred while handling the request. Note that clients MUST NOT assume that every failed request will produce an object of this schema, or that all of the properties in the response will be non-null, as the error may have prevented this response from being constructed.
@@ -279,10 +405,10 @@ export interface ErrorResponseErrorReportingAPI {
 export interface ErrorResponseReportingAPI {
   /**
    *
-   * @type {ErrorResponseErrorReportingAPI}
+   * @type {Error}
    * @memberof ErrorResponseReportingAPI
    */
-  error?: ErrorResponseErrorReportingAPI;
+  error: Error;
 }
 /**
  * Metadata associated with a data extraction run.
@@ -387,13 +513,13 @@ export interface GroupCreateReportingAPI {
   query?: string;
 }
 /**
- * List of Group Properties.
+ * List of GroupProperties.
  * @export
  * @interface GroupPropertyCollectionReportingAPI
  */
 export interface GroupPropertyCollectionReportingAPI {
   /**
-   * List of Group Properties.
+   * List of GroupProperties.
    * @type {Array<GroupPropertyReportingAPI>}
    * @memberof GroupPropertyCollectionReportingAPI
    */
@@ -406,7 +532,7 @@ export interface GroupPropertyCollectionReportingAPI {
   _links?: PagedResponseLinksReportingAPI;
 }
 /**
- * Properties of the Group Property to be created.
+ * Properties of the GroupProperty to be created.
  * @export
  * @interface GroupPropertyCreateReportingAPI
  */
@@ -418,19 +544,19 @@ export interface GroupPropertyCreateReportingAPI {
    */
   propertyName?: string;
   /**
-   * The data type of the Group Property. One of 'Boolean', 'Number', 'String', or 'Undefined'.
+   * The data type of the GroupProperty. One of 'Boolean', 'Number', 'String', or 'Undefined'.
    * @type {string}
    * @memberof GroupPropertyCreateReportingAPI
    */
   dataType?: string;
   /**
-   * The quantity type of the Group Property. One of 'Area', 'Distance', 'Force', 'Mass', 'Monetary', 'Time', 'Volume, or 'Undefined'.
+   * The quantity type of the GroupProperty. One of 'Area', 'Distance', 'Force', 'Mass', 'Monetary', 'Time', 'Volume, or 'Undefined'.
    * @type {string}
    * @memberof GroupPropertyCreateReportingAPI
    */
   quantityType?: string;
   /**
-   * List of ECProperties that map to this Group Property.
+   * List of ECProperties that map to this GroupProperty.
    * @type {Array<ECPropertyReportingAPI>}
    * @memberof GroupPropertyCreateReportingAPI
    */
@@ -443,7 +569,7 @@ export interface GroupPropertyCreateReportingAPI {
  */
 export interface GroupPropertyReportingAPI {
   /**
-   * The Group Property Id.
+   * The GroupProperty Id.
    * @type {string}
    * @memberof GroupPropertyReportingAPI
    */
@@ -455,26 +581,26 @@ export interface GroupPropertyReportingAPI {
    */
   propertyName?: string;
   /**
-   * The data type of the Group Property. One of 'Boolean', 'Number', 'String', or 'Undefined'.
+   * The data type of the GroupProperty. One of 'Boolean', 'Number', 'String', or 'Undefined'.
    * @type {string}
    * @memberof GroupPropertyReportingAPI
    */
   dataType?: string;
   /**
-   * The quantity type of the Group Property. One of 'Area', 'Distance', 'Force', 'Mass', 'Monetary', 'Time', 'Volume, or 'Undefined'.
+   * The quantity type of the GroupProperty. One of 'Area', 'Distance', 'Force', 'Mass', 'Monetary', 'Time', 'Volume, or 'Undefined'.
    * @type {string}
    * @memberof GroupPropertyReportingAPI
    */
   quantityType?: string;
   /**
-   * List of ECProperties that map to this Group Property.
+   * List of ECProperties that map to this GroupProperty.
    * @type {Array<ECPropertyReportingAPI>}
    * @memberof GroupPropertyReportingAPI
    */
   ecProperties?: Array<ECPropertyReportingAPI>;
 }
 /**
- * Container for a Group Property object.
+ * Container for a GroupProperty object.
  * @export
  * @interface GroupPropertySingleReportingAPI
  */
@@ -487,7 +613,7 @@ export interface GroupPropertySingleReportingAPI {
   property?: GroupPropertyReportingAPI;
 }
 /**
- * Properties of the Group Property to be updated.
+ * Properties of the GroupProperty to be updated.
  * @export
  * @interface GroupPropertyUpdateReportingAPI
  */
@@ -499,19 +625,19 @@ export interface GroupPropertyUpdateReportingAPI {
    */
   propertyName?: string;
   /**
-   * The data type of the Group Property. One of 'Boolean', 'Number', 'String', or 'Undefined'.
+   * The data type of the GroupProperty. One of 'Boolean', 'Number', 'String', or 'Undefined'.
    * @type {string}
    * @memberof GroupPropertyUpdateReportingAPI
    */
   dataType?: string;
   /**
-   * The quantity type of the Group Property. One of 'Area', 'Distance', 'Force', 'Mass', 'Monetary', 'Time', 'Volume, or 'Undefined'.
+   * The quantity type of the GroupProperty. One of 'Area', 'Distance', 'Force', 'Mass', 'Monetary', 'Time', 'Volume, or 'Undefined'.
    * @type {string}
    * @memberof GroupPropertyUpdateReportingAPI
    */
   quantityType?: string;
   /**
-   * List of ECProperties that map to this Group Property.
+   * List of ECProperties that map to this GroupProperty.
    * @type {Array<ECPropertyReportingAPI>}
    * @memberof GroupPropertyUpdateReportingAPI
    */
@@ -617,6 +743,25 @@ export interface MappingCollectionReportingAPI {
    * @memberof MappingCollectionReportingAPI
    */
   _links?: PagedResponseLinksReportingAPI;
+}
+/**
+ * Properties for the copied Mapping.
+ * @export
+ * @interface MappingCopyReportingAPI
+ */
+export interface MappingCopyReportingAPI {
+  /**
+   * The target iModel Id.
+   * @type {string}
+   * @memberof MappingCopyReportingAPI
+   */
+  targetIModelId: string;
+  /**
+   * Name of the target Mapping (OData v4 SimpleIdentifier).
+   * @type {string}
+   * @memberof MappingCopyReportingAPI
+   */
+  mappingName?: string;
 }
 /**
  * Properties of the Mapping to be created.
@@ -1026,86 +1171,99 @@ export interface ReportUpdateReportingAPI {
  * DataAccessApi - fetch parameter creator
  * @export
  */
-export const DataAccessApiFetchParamCreator = function(
-  configuration?: Configuration
+export const DataAccessApiFetchParamCreator = function (
+  configuration?: Configuration,
 ) {
   return {
     /**
      * ---    Lists all OData Entities for a Report. This endpoint can be used as an OData feed in applications like Excel or Power BI.    ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Export
+     * @summary OData
      * @param {string} reportId The Report Id.
      * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
      * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    _export(
+    odata(
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'reportId' is not null or undefined
       if (reportId === null || reportId === undefined) {
         throw new RequiredError(
-          "reportId",
-          "Required parameter reportId was null or undefined when calling _export."
+          'reportId',
+          'Required parameter reportId was null or undefined when calling odata.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling _export."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling odata.',
         );
       }
-      const localVarPath = `/export/{reportId}`.replace(
-        `{${"reportId"}}`,
-        encodeURIComponent(String(reportId))
+      const localVarPath = `/odata/{reportId}`.replace(
+        `{${'reportId'}}`,
+        encodeURIComponent(String(reportId)),
       );
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -1115,108 +1273,122 @@ export const DataAccessApiFetchParamCreator = function(
     },
     /**
      * ---    Lists the raw table data for a Report Entity.     ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Export Entity
+     * @summary OData Entity
      * @param {string} reportId The Report Id.
-     * @param {string} region NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
-     * @param {string} manifestId NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
-     * @param {string} entityType NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
+     * @param {string} region NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
+     * @param {string} manifestId NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
+     * @param {string} entityType NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
      * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
      * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    exportEntity(
+    odataEntity(
       reportId: string,
       region: string,
       manifestId: string,
       entityType: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'reportId' is not null or undefined
       if (reportId === null || reportId === undefined) {
         throw new RequiredError(
-          "reportId",
-          "Required parameter reportId was null or undefined when calling exportEntity."
+          'reportId',
+          'Required parameter reportId was null or undefined when calling odataEntity.',
         );
       }
       // verify required parameter 'region' is not null or undefined
       if (region === null || region === undefined) {
         throw new RequiredError(
-          "region",
-          "Required parameter region was null or undefined when calling exportEntity."
+          'region',
+          'Required parameter region was null or undefined when calling odataEntity.',
         );
       }
       // verify required parameter 'manifestId' is not null or undefined
       if (manifestId === null || manifestId === undefined) {
         throw new RequiredError(
-          "manifestId",
-          "Required parameter manifestId was null or undefined when calling exportEntity."
+          'manifestId',
+          'Required parameter manifestId was null or undefined when calling odataEntity.',
         );
       }
       // verify required parameter 'entityType' is not null or undefined
       if (entityType === null || entityType === undefined) {
         throw new RequiredError(
-          "entityType",
-          "Required parameter entityType was null or undefined when calling exportEntity."
+          'entityType',
+          'Required parameter entityType was null or undefined when calling odataEntity.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling exportEntity."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling odataEntity.',
         );
       }
-      const localVarPath = `/export/{reportId}/{region}/{manifestId}/{entityType}`
-        .replace(`{${"reportId"}}`, encodeURIComponent(String(reportId)))
-        .replace(`{${"region"}}`, encodeURIComponent(String(region)))
-        .replace(`{${"manifestId"}}`, encodeURIComponent(String(manifestId)))
-        .replace(`{${"entityType"}}`, encodeURIComponent(String(entityType)));
+      const localVarPath =
+        `/odata/{reportId}/{region}/{manifestId}/{entityType}`
+          .replace(`{${'reportId'}}`, encodeURIComponent(String(reportId)))
+          .replace(`{${'region'}}`, encodeURIComponent(String(region)))
+          .replace(`{${'manifestId'}}`, encodeURIComponent(String(manifestId)))
+          .replace(`{${'entityType'}}`, encodeURIComponent(String(entityType)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -1226,80 +1398,93 @@ export const DataAccessApiFetchParamCreator = function(
     },
     /**
      * ---    Lists schemas for all Entities tied to a Report.    ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Export Metadata
+     * @summary OData Metadata
      * @param {string} reportId The Report Id.
      * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
      * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    exportMetadata(
+    odataMetadata(
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'reportId' is not null or undefined
       if (reportId === null || reportId === undefined) {
         throw new RequiredError(
-          "reportId",
-          "Required parameter reportId was null or undefined when calling exportMetadata."
+          'reportId',
+          'Required parameter reportId was null or undefined when calling odataMetadata.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling exportMetadata."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling odataMetadata.',
         );
       }
-      const localVarPath = `/export/{reportId}/$metadata`.replace(
-        `{${"reportId"}}`,
-        encodeURIComponent(String(reportId))
+      const localVarPath = `/odata/{reportId}/$metadata`.replace(
+        `{${'reportId'}}`,
+        encodeURIComponent(String(reportId)),
       );
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -1314,36 +1499,36 @@ export const DataAccessApiFetchParamCreator = function(
  * DataAccessApi - functional programming interface
  * @export
  */
-export const DataAccessApiFp = function(configuration?: Configuration) {
+export const DataAccessApiFp = function (configuration?: Configuration) {
   return {
     /**
      * ---    Lists all OData Entities for a Report. This endpoint can be used as an OData feed in applications like Excel or Power BI.    ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Export
+     * @summary OData
      * @param {string} reportId The Report Id.
      * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
      * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    _export(
+    odata(
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<ODataResponseReportingAPI> {
       const localVarFetchArgs = DataAccessApiFetchParamCreator(
-        configuration
-      )._export(reportId, Authorization, Accept, options);
+        configuration,
+      ).odata(reportId, Authorization, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -1355,43 +1540,43 @@ export const DataAccessApiFp = function(configuration?: Configuration) {
     },
     /**
      * ---    Lists the raw table data for a Report Entity.     ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Export Entity
+     * @summary OData Entity
      * @param {string} reportId The Report Id.
-     * @param {string} region NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
-     * @param {string} manifestId NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
-     * @param {string} entityType NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
+     * @param {string} region NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
+     * @param {string} manifestId NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
+     * @param {string} entityType NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
      * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
      * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    exportEntity(
+    odataEntity(
       reportId: string,
       region: string,
       manifestId: string,
       entityType: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = DataAccessApiFetchParamCreator(
-        configuration
-      ).exportEntity(
+        configuration,
+      ).odataEntity(
         reportId,
         region,
         manifestId,
         entityType,
         Authorization,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response;
@@ -1403,29 +1588,29 @@ export const DataAccessApiFp = function(configuration?: Configuration) {
     },
     /**
      * ---    Lists schemas for all Entities tied to a Report.    ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Export Metadata
+     * @summary OData Metadata
      * @param {string} reportId The Report Id.
      * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
      * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    exportMetadata(
+    odataMetadata(
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = DataAccessApiFetchParamCreator(
-        configuration
-      ).exportMetadata(reportId, Authorization, Accept, options);
+        configuration,
+      ).odataMetadata(reportId, Authorization, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response;
@@ -1442,85 +1627,85 @@ export const DataAccessApiFp = function(configuration?: Configuration) {
  * DataAccessApi - factory interface
  * @export
  */
-export const DataAccessApiFactory = function(
+export const DataAccessApiFactory = function (
   configuration?: Configuration,
   fetch?: FetchAPI,
-  basePath?: string
+  basePath?: string,
 ) {
   return {
     /**
      * ---    Lists all OData Entities for a Report. This endpoint can be used as an OData feed in applications like Excel or Power BI.    ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Export
+     * @summary OData
      * @param {string} reportId The Report Id.
      * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
      * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    _export(
+    odata(
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
-      return DataAccessApiFp(configuration)._export(
+      return DataAccessApiFp(configuration).odata(
         reportId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
      * ---    Lists the raw table data for a Report Entity.     ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Export Entity
+     * @summary OData Entity
      * @param {string} reportId The Report Id.
-     * @param {string} region NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
-     * @param {string} manifestId NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
-     * @param {string} entityType NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
+     * @param {string} region NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
+     * @param {string} manifestId NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
+     * @param {string} entityType NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
      * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
      * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    exportEntity(
+    odataEntity(
       reportId: string,
       region: string,
       manifestId: string,
       entityType: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
-      return DataAccessApiFp(configuration).exportEntity(
+      return DataAccessApiFp(configuration).odataEntity(
         reportId,
         region,
         manifestId,
         entityType,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
      * ---    Lists schemas for all Entities tied to a Report.    ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Export Metadata
+     * @summary OData Metadata
      * @param {string} reportId The Report Id.
      * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
      * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    exportMetadata(
+    odataMetadata(
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
-      return DataAccessApiFp(configuration).exportMetadata(
+      return DataAccessApiFp(configuration).odataMetadata(
         reportId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
   };
@@ -1535,7 +1720,7 @@ export const DataAccessApiFactory = function(
 export class DataAccessApi extends BaseAPI {
   /**
    * ---    Lists all OData Entities for a Report. This endpoint can be used as an OData feed in applications like Excel or Power BI.    ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-   * @summary Export
+   * @summary OData
    * @param {string} reportId The Report Id.
    * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
    * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
@@ -1543,56 +1728,56 @@ export class DataAccessApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof DataAccessApi
    */
-  public _export(
+  public odata(
     reportId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
-    return DataAccessApiFp(this.configuration)._export(
+    return DataAccessApiFp(this.configuration).odata(
       reportId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
    * ---    Lists the raw table data for a Report Entity.     ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-   * @summary Export Entity
+   * @summary OData Entity
    * @param {string} reportId The Report Id.
-   * @param {string} region NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
-   * @param {string} manifestId NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
-   * @param {string} entityType NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the Export endpoint directly.
+   * @param {string} region NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
+   * @param {string} manifestId NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
+   * @param {string} entityType NOTE: These parameters are not meant to be set manually. Instead use the URLs generated by the OData endpoint directly.
    * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
    * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DataAccessApi
    */
-  public exportEntity(
+  public odataEntity(
     reportId: string,
     region: string,
     manifestId: string,
     entityType: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
-    return DataAccessApiFp(this.configuration).exportEntity(
+    return DataAccessApiFp(this.configuration).odataEntity(
       reportId,
       region,
       manifestId,
       entityType,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
    * ---    Lists schemas for all Entities tied to a Report.    ### Notes    This is an OData v4 compliant endpoint.    This endpoint should only be accessed using OData compliant libraries and tools such as Power BI.    Use of these endpoints directly is not prohibited, however we recommend understanding the [OData protocols and conventions](https://www.odata.org/documentation/) first.    ### Authentication    Requires `Authorization` header with one of schemes:    - Valid [API Key](/apis/insights/api-keys) used as the password in Basic auth.  - Valid Bearer token for scope `insights:read`.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-   * @summary Export Metadata
+   * @summary OData Metadata
    * @param {string} reportId The Report Id.
    * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
    * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
@@ -1600,17 +1785,17 @@ export class DataAccessApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof DataAccessApi
    */
-  public exportMetadata(
+  public odataMetadata(
     reportId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
-    return DataAccessApiFp(this.configuration).exportMetadata(
+    return DataAccessApiFp(this.configuration).odataMetadata(
       reportId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 }
@@ -1618,8 +1803,8 @@ export class DataAccessApi extends BaseAPI {
  * ExtractionApi - fetch parameter creator
  * @export
  */
-export const ExtractionApiFetchParamCreator = function(
-  configuration?: Configuration
+export const ExtractionApiFetchParamCreator = function (
+  configuration?: Configuration,
 ) {
   return {
     /**
@@ -1637,75 +1822,89 @@ export const ExtractionApiFetchParamCreator = function(
       jobId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling getExtractionStatus."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getExtractionStatus.',
         );
       }
       // verify required parameter 'jobId' is not null or undefined
       if (jobId === null || jobId === undefined) {
         throw new RequiredError(
-          "jobId",
-          "Required parameter jobId was null or undefined when calling getExtractionStatus."
+          'jobId',
+          'Required parameter jobId was null or undefined when calling getExtractionStatus.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getExtractionStatus."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getExtractionStatus.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/extraction/status/{jobId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"jobId"}}`, encodeURIComponent(String(jobId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/extraction/status/{jobId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'jobId'}}`, encodeURIComponent(String(jobId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -1726,69 +1925,83 @@ export const ExtractionApiFetchParamCreator = function(
       imodelId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling runExtraction."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling runExtraction.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling runExtraction."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling runExtraction.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/extraction/run`.replace(
-        `{${"imodelId"}}`,
-        encodeURIComponent(String(imodelId))
-      );
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/extraction/run`.replace(
+          `{${'imodelId'}}`,
+          encodeURIComponent(String(imodelId)),
+        );
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "POST" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -1803,7 +2016,7 @@ export const ExtractionApiFetchParamCreator = function(
  * ExtractionApi - functional programming interface
  * @export
  */
-export const ExtractionApiFp = function(configuration?: Configuration) {
+export const ExtractionApiFp = function (configuration?: Configuration) {
   return {
     /**
      * ---    Gets the Status of an Extraction Run.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
@@ -1820,21 +2033,21 @@ export const ExtractionApiFp = function(configuration?: Configuration) {
       jobId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<ExtractionStatusReportingAPI> {
       const localVarFetchArgs = ExtractionApiFetchParamCreator(
-        configuration
+        configuration,
       ).getExtractionStatus(imodelId, jobId, Authorization, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -1857,21 +2070,21 @@ export const ExtractionApiFp = function(configuration?: Configuration) {
       imodelId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<ExtractionRunReportingAPI> {
       const localVarFetchArgs = ExtractionApiFetchParamCreator(
-        configuration
+        configuration,
       ).runExtraction(imodelId, Authorization, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -1888,10 +2101,10 @@ export const ExtractionApiFp = function(configuration?: Configuration) {
  * ExtractionApi - factory interface
  * @export
  */
-export const ExtractionApiFactory = function(
+export const ExtractionApiFactory = function (
   configuration?: Configuration,
   fetch?: FetchAPI,
-  basePath?: string
+  basePath?: string,
 ) {
   return {
     /**
@@ -1909,14 +2122,14 @@ export const ExtractionApiFactory = function(
       jobId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return ExtractionApiFp(configuration).getExtractionStatus(
         imodelId,
         jobId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -1932,13 +2145,13 @@ export const ExtractionApiFactory = function(
       imodelId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return ExtractionApiFp(configuration).runExtraction(
         imodelId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
   };
@@ -1967,14 +2180,14 @@ export class ExtractionApi extends BaseAPI {
     jobId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return ExtractionApiFp(this.configuration).getExtractionStatus(
       imodelId,
       jobId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -1992,13 +2205,13 @@ export class ExtractionApi extends BaseAPI {
     imodelId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return ExtractionApiFp(this.configuration).runExtraction(
       imodelId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 }
@@ -2006,13 +2219,128 @@ export class ExtractionApi extends BaseAPI {
  * MappingsApi - fetch parameter creator
  * @export
  */
-export const MappingsApiFetchParamCreator = function(
-  configuration?: Configuration
+export const MappingsApiFetchParamCreator = function (
+  configuration?: Configuration,
 ) {
   return {
     /**
-     * ---    Creates a Calculated Property for a Group. Each Calculated Property defines a property or 'column' which is calculated for each element that is returned by the Group's query.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Create Calculated Property
+     * ---    Copies a Mapping and all its Groups, GroupProperties, CalculatedProperties, and CustomCalculations to a target iModel.    The `mappingName` request body property is optional. If the `mappingName` is not provided the new Mapping will have the same name as the source Mapping but with the `_Copy` appendix. If the `mappingName` is provided the new Mapping will have the provided name.    The `mappingName` property becomes mandatory if the source Mapping has 124 or more characters in its name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Copy Mapping
+     * @param {string} imodelId Id of the source Mapping&#x27;s iModel.
+     * @param {string} mappingId Id of the source Mapping.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {MappingCopyReportingAPI} [body]
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    copyMapping(
+      imodelId: string,
+      mappingId: string,
+      Authorization: string,
+      body?: MappingCopyReportingAPI,
+      Accept?: string,
+      options: any = {},
+    ): FetchArgs {
+      // verify required parameter 'imodelId' is not null or undefined
+      if (imodelId === null || imodelId === undefined) {
+        throw new RequiredError(
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling copyMapping.',
+        );
+      }
+      // verify required parameter 'mappingId' is not null or undefined
+      if (mappingId === null || mappingId === undefined) {
+        throw new RequiredError(
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling copyMapping.',
+        );
+      }
+      // verify required parameter 'Authorization' is not null or undefined
+      if (Authorization === null || Authorization === undefined) {
+        throw new RequiredError(
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling copyMapping.',
+        );
+      }
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/copy`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)));
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication apiKeyHeader required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
+            : configuration.apiKey;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
+      }
+
+      // authentication apiKeyQuery required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
+            : configuration.apiKey;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
+      }
+
+      if (Authorization !== undefined && Authorization !== null) {
+        localVarHeaderParameter['Authorization'] = String(Authorization);
+      }
+
+      if (Accept !== undefined && Accept !== null) {
+        localVarHeaderParameter['Accept'] = String(Accept);
+      }
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+      const needsSerialization =
+        <any>'MappingCopyReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * ---    Creates a CalculatedProperty for a Group. Each CalculatedProperty defines a property or 'column' which is calculated for each element that is returned by the Group's query.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Create CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId Id of the Group for which to create a new CalculatedProperty.
@@ -2029,92 +2357,106 @@ export const MappingsApiFetchParamCreator = function(
       Authorization: string,
       body?: CalculatedPropertyCreateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling createCalculatedproperty."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling createCalculatedproperty.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling createCalculatedproperty."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling createCalculatedproperty.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling createCalculatedproperty."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling createCalculatedproperty.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling createCalculatedproperty."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling createCalculatedproperty.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/calculatedProperties`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/calculatedProperties`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "POST" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"CalculatedPropertyCreateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'CalculatedPropertyCreateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -2122,7 +2464,132 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Creates a Group for an iModel data source Mappping. A Group is a collection of design elements from an iModel represented by an [ECSQL](https://www.itwinjs.org/learning/ecsql/) query and defines one table in the output data of a Report.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Creates a CustomCalculation for a Group. Each CustomCalculation defines a column in the output data which is filled with values calculated using the given formula for each element that is returned by the Group's query.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Create CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId Id of the Group for which to create a new CustomCalculation.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {CustomCalculationCreateReportingAPI} [body]
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      Authorization: string,
+      body?: CustomCalculationCreateReportingAPI,
+      Accept?: string,
+      options: any = {},
+    ): FetchArgs {
+      // verify required parameter 'imodelId' is not null or undefined
+      if (imodelId === null || imodelId === undefined) {
+        throw new RequiredError(
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling createCustomcalculation.',
+        );
+      }
+      // verify required parameter 'mappingId' is not null or undefined
+      if (mappingId === null || mappingId === undefined) {
+        throw new RequiredError(
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling createCustomcalculation.',
+        );
+      }
+      // verify required parameter 'groupId' is not null or undefined
+      if (groupId === null || groupId === undefined) {
+        throw new RequiredError(
+          'groupId',
+          'Required parameter groupId was null or undefined when calling createCustomcalculation.',
+        );
+      }
+      // verify required parameter 'Authorization' is not null or undefined
+      if (Authorization === null || Authorization === undefined) {
+        throw new RequiredError(
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling createCustomcalculation.',
+        );
+      }
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/customCalculations`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)));
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication apiKeyHeader required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
+            : configuration.apiKey;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
+      }
+
+      // authentication apiKeyQuery required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
+            : configuration.apiKey;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
+      }
+
+      if (Authorization !== undefined && Authorization !== null) {
+        localVarHeaderParameter['Authorization'] = String(Authorization);
+      }
+
+      if (Accept !== undefined && Accept !== null) {
+        localVarHeaderParameter['Accept'] = String(Accept);
+      }
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+      const needsSerialization =
+        <any>'CustomCalculationCreateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * ---    Creates a Group for an iModel data source Mapping. A Group is a collection of design elements from an iModel represented by an [ECSQL](https://www.itwinjs.org/learning/ecsql/) query and defines one table in the output data of a report.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Create Group
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId Id of the Mapping for which to create a new Group.
@@ -2138,84 +2605,98 @@ export const MappingsApiFetchParamCreator = function(
       Authorization: string,
       body?: GroupCreateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling createGroup."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling createGroup.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling createGroup."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling createGroup.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling createGroup."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling createGroup.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "POST" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"GroupCreateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'GroupCreateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -2223,7 +2704,7 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Creates a Group Property for a Group. Each Group Property defines a property or 'column' of data desired from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Creates a GroupProperty for a Group. Each GroupProperty defines a column of mapped data.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Create GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -2241,92 +2722,106 @@ export const MappingsApiFetchParamCreator = function(
       Authorization: string,
       body?: GroupPropertyCreateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling createGroupproperty."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling createGroupproperty.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling createGroupproperty."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling createGroupproperty.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling createGroupproperty."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling createGroupproperty.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling createGroupproperty."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling createGroupproperty.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/properties`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/properties`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "POST" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"GroupPropertyCreateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'GroupPropertyCreateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -2348,78 +2843,91 @@ export const MappingsApiFetchParamCreator = function(
       Authorization: string,
       body?: MappingCreateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling createMapping."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling createMapping.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling createMapping."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling createMapping.',
         );
       }
       const localVarPath = `/datasources/imodels/{imodelId}/mappings`.replace(
-        `{${"imodelId"}}`,
-        encodeURIComponent(String(imodelId))
+        `{${'imodelId'}}`,
+        encodeURIComponent(String(imodelId)),
       );
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "POST" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"MappingCreateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'MappingCreateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -2427,8 +2935,8 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Deletes a Calculated Property from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Delete Calculated Property
+     * ---    Deletes a CalculatedProperty from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Delete CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -2445,52 +2953,53 @@ export const MappingsApiFetchParamCreator = function(
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling deleteCalculatedproperty."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling deleteCalculatedproperty.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling deleteCalculatedproperty."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling deleteCalculatedproperty.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling deleteCalculatedproperty."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling deleteCalculatedproperty.',
         );
       }
       // verify required parameter 'propertyId' is not null or undefined
       if (propertyId === null || propertyId === undefined) {
         throw new RequiredError(
-          "propertyId",
-          "Required parameter propertyId was null or undefined when calling deleteCalculatedproperty."
+          'propertyId',
+          'Required parameter propertyId was null or undefined when calling deleteCalculatedproperty.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling deleteCalculatedproperty."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling deleteCalculatedproperty.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/calculatedProperties/{propertyId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)))
-        .replace(`{${"propertyId"}}`, encodeURIComponent(String(propertyId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/calculatedProperties/{propertyId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)))
+          .replace(`{${'propertyId'}}`, encodeURIComponent(String(propertyId)));
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign(
-        { method: "DELETE" },
-        options
+        { method: 'DELETE' },
+        options,
       );
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
@@ -2498,41 +3007,185 @@ export const MappingsApiFetchParamCreator = function(
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
+      );
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * ---    Deletes a CustomCalculation from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Delete CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} customCalculationId Id of the CustomCalculation to be deleted.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      customCalculationId: string,
+      Authorization: string,
+      Accept?: string,
+      options: any = {},
+    ): FetchArgs {
+      // verify required parameter 'imodelId' is not null or undefined
+      if (imodelId === null || imodelId === undefined) {
+        throw new RequiredError(
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling deleteCustomcalculation.',
+        );
+      }
+      // verify required parameter 'mappingId' is not null or undefined
+      if (mappingId === null || mappingId === undefined) {
+        throw new RequiredError(
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling deleteCustomcalculation.',
+        );
+      }
+      // verify required parameter 'groupId' is not null or undefined
+      if (groupId === null || groupId === undefined) {
+        throw new RequiredError(
+          'groupId',
+          'Required parameter groupId was null or undefined when calling deleteCustomcalculation.',
+        );
+      }
+      // verify required parameter 'customCalculationId' is not null or undefined
+      if (customCalculationId === null || customCalculationId === undefined) {
+        throw new RequiredError(
+          'customCalculationId',
+          'Required parameter customCalculationId was null or undefined when calling deleteCustomcalculation.',
+        );
+      }
+      // verify required parameter 'Authorization' is not null or undefined
+      if (Authorization === null || Authorization === undefined) {
+        throw new RequiredError(
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling deleteCustomcalculation.',
+        );
+      }
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/customCalculations/{customCalculationId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)))
+          .replace(
+            `{${'customCalculationId'}}`,
+            encodeURIComponent(String(customCalculationId)),
+          );
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign(
+        { method: 'DELETE' },
+        options,
+      );
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication apiKeyHeader required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
+            : configuration.apiKey;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
+      }
+
+      // authentication apiKeyQuery required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
+            : configuration.apiKey;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
+      }
+
+      if (Authorization !== undefined && Authorization !== null) {
+        localVarHeaderParameter['Authorization'] = String(Authorization);
+      }
+
+      if (Accept !== undefined && Accept !== null) {
+        localVarHeaderParameter['Accept'] = String(Accept);
+      }
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
       );
 
       return {
@@ -2557,44 +3210,45 @@ export const MappingsApiFetchParamCreator = function(
       groupId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling deleteGroup."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling deleteGroup.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling deleteGroup."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling deleteGroup.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling deleteGroup."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling deleteGroup.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling deleteGroup."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling deleteGroup.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)));
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign(
-        { method: "DELETE" },
-        options
+        { method: 'DELETE' },
+        options,
       );
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
@@ -2602,41 +3256,54 @@ export const MappingsApiFetchParamCreator = function(
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -2645,7 +3312,7 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Deletes a Group Property from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Deletes a GroupProperty from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Delete GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -2663,52 +3330,53 @@ export const MappingsApiFetchParamCreator = function(
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling deleteGroupproperty."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling deleteGroupproperty.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling deleteGroupproperty."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling deleteGroupproperty.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling deleteGroupproperty."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling deleteGroupproperty.',
         );
       }
       // verify required parameter 'propertyId' is not null or undefined
       if (propertyId === null || propertyId === undefined) {
         throw new RequiredError(
-          "propertyId",
-          "Required parameter propertyId was null or undefined when calling deleteGroupproperty."
+          'propertyId',
+          'Required parameter propertyId was null or undefined when calling deleteGroupproperty.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling deleteGroupproperty."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling deleteGroupproperty.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/properties/{propertyId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)))
-        .replace(`{${"propertyId"}}`, encodeURIComponent(String(propertyId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/properties/{propertyId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)))
+          .replace(`{${'propertyId'}}`, encodeURIComponent(String(propertyId)));
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign(
-        { method: "DELETE" },
-        options
+        { method: 'DELETE' },
+        options,
       );
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
@@ -2716,41 +3384,54 @@ export const MappingsApiFetchParamCreator = function(
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -2773,36 +3454,37 @@ export const MappingsApiFetchParamCreator = function(
       mappingId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling deleteMapping."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling deleteMapping.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling deleteMapping."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling deleteMapping.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling deleteMapping."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling deleteMapping.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)));
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign(
-        { method: "DELETE" },
-        options
+        { method: 'DELETE' },
+        options,
       );
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
@@ -2810,41 +3492,54 @@ export const MappingsApiFetchParamCreator = function(
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -2853,8 +3548,8 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Gets all Calculated Properties for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Get Calculated Properties
+     * ---    Gets all CalculatedProperties for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CalculatedProperties
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -2873,91 +3568,105 @@ export const MappingsApiFetchParamCreator = function(
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling getCalculatedproperties."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getCalculatedproperties.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling getCalculatedproperties."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling getCalculatedproperties.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling getCalculatedproperties."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling getCalculatedproperties.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getCalculatedproperties."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getCalculatedproperties.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/calculatedProperties`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/calculatedProperties`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (top !== undefined) {
-        localVarQueryParameter["$top"] = top;
+        localVarQueryParameter['$top'] = top;
       }
 
       if (continuationToken !== undefined) {
-        localVarQueryParameter["$continuationToken"] = continuationToken;
+        localVarQueryParameter['$continuationToken'] = continuationToken;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -2966,8 +3675,8 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Gets a Calculated Property for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Get Calculated Property
+     * ---    Gets a CalculatedProperty for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -2984,91 +3693,105 @@ export const MappingsApiFetchParamCreator = function(
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling getCalculatedproperty."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getCalculatedproperty.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling getCalculatedproperty."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling getCalculatedproperty.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling getCalculatedproperty."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling getCalculatedproperty.',
         );
       }
       // verify required parameter 'propertyId' is not null or undefined
       if (propertyId === null || propertyId === undefined) {
         throw new RequiredError(
-          "propertyId",
-          "Required parameter propertyId was null or undefined when calling getCalculatedproperty."
+          'propertyId',
+          'Required parameter propertyId was null or undefined when calling getCalculatedproperty.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getCalculatedproperty."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getCalculatedproperty.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/calculatedProperties/{propertyId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)))
-        .replace(`{${"propertyId"}}`, encodeURIComponent(String(propertyId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/calculatedProperties/{propertyId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)))
+          .replace(`{${'propertyId'}}`, encodeURIComponent(String(propertyId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -3077,7 +3800,262 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Gets a Group for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets a CustomCalculation for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} customCalculationId The CalculatedProperty Id.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      customCalculationId: string,
+      Authorization: string,
+      Accept?: string,
+      options: any = {},
+    ): FetchArgs {
+      // verify required parameter 'imodelId' is not null or undefined
+      if (imodelId === null || imodelId === undefined) {
+        throw new RequiredError(
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getCustomcalculation.',
+        );
+      }
+      // verify required parameter 'mappingId' is not null or undefined
+      if (mappingId === null || mappingId === undefined) {
+        throw new RequiredError(
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling getCustomcalculation.',
+        );
+      }
+      // verify required parameter 'groupId' is not null or undefined
+      if (groupId === null || groupId === undefined) {
+        throw new RequiredError(
+          'groupId',
+          'Required parameter groupId was null or undefined when calling getCustomcalculation.',
+        );
+      }
+      // verify required parameter 'customCalculationId' is not null or undefined
+      if (customCalculationId === null || customCalculationId === undefined) {
+        throw new RequiredError(
+          'customCalculationId',
+          'Required parameter customCalculationId was null or undefined when calling getCustomcalculation.',
+        );
+      }
+      // verify required parameter 'Authorization' is not null or undefined
+      if (Authorization === null || Authorization === undefined) {
+        throw new RequiredError(
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getCustomcalculation.',
+        );
+      }
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/customCalculations/{customCalculationId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)))
+          .replace(
+            `{${'customCalculationId'}}`,
+            encodeURIComponent(String(customCalculationId)),
+          );
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication apiKeyHeader required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
+            : configuration.apiKey;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
+      }
+
+      // authentication apiKeyQuery required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
+            : configuration.apiKey;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
+      }
+
+      if (Authorization !== undefined && Authorization !== null) {
+        localVarHeaderParameter['Authorization'] = String(Authorization);
+      }
+
+      if (Accept !== undefined && Accept !== null) {
+        localVarHeaderParameter['Accept'] = String(Accept);
+      }
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * ---    Gets all CustomCalculations for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CustomCalculations
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
+     * @param {number} [top] Optional max items to be sent in response.
+     * @param {string} [continuationToken] Optional token to retrieve next page in paginated response.
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getCustomcalculations(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      Authorization: string,
+      top?: number,
+      continuationToken?: string,
+      Accept?: string,
+      options: any = {},
+    ): FetchArgs {
+      // verify required parameter 'imodelId' is not null or undefined
+      if (imodelId === null || imodelId === undefined) {
+        throw new RequiredError(
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getCustomcalculations.',
+        );
+      }
+      // verify required parameter 'mappingId' is not null or undefined
+      if (mappingId === null || mappingId === undefined) {
+        throw new RequiredError(
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling getCustomcalculations.',
+        );
+      }
+      // verify required parameter 'groupId' is not null or undefined
+      if (groupId === null || groupId === undefined) {
+        throw new RequiredError(
+          'groupId',
+          'Required parameter groupId was null or undefined when calling getCustomcalculations.',
+        );
+      }
+      // verify required parameter 'Authorization' is not null or undefined
+      if (Authorization === null || Authorization === undefined) {
+        throw new RequiredError(
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getCustomcalculations.',
+        );
+      }
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/customCalculations`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)));
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication apiKeyHeader required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
+            : configuration.apiKey;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
+      }
+
+      // authentication apiKeyQuery required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
+            : configuration.apiKey;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
+      }
+
+      if (top !== undefined) {
+        localVarQueryParameter['$top'] = top;
+      }
+
+      if (continuationToken !== undefined) {
+        localVarQueryParameter['$continuationToken'] = continuationToken;
+      }
+
+      if (Authorization !== undefined && Authorization !== null) {
+        localVarHeaderParameter['Authorization'] = String(Authorization);
+      }
+
+      if (Accept !== undefined && Accept !== null) {
+        localVarHeaderParameter['Accept'] = String(Accept);
+      }
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * ---    Gets a Group for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get Group
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -3093,83 +4071,97 @@ export const MappingsApiFetchParamCreator = function(
       groupId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling getGroup."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getGroup.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling getGroup."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling getGroup.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling getGroup."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling getGroup.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getGroup."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getGroup.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -3178,7 +4170,7 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Gets all Group Properties for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets all GroupProperties for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get GroupProperties
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -3198,91 +4190,105 @@ export const MappingsApiFetchParamCreator = function(
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling getGroupproperties."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getGroupproperties.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling getGroupproperties."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling getGroupproperties.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling getGroupproperties."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling getGroupproperties.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getGroupproperties."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getGroupproperties.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/properties`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/properties`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (top !== undefined) {
-        localVarQueryParameter["$top"] = top;
+        localVarQueryParameter['$top'] = top;
       }
 
       if (continuationToken !== undefined) {
-        localVarQueryParameter["$continuationToken"] = continuationToken;
+        localVarQueryParameter['$continuationToken'] = continuationToken;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -3291,7 +4297,7 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Gets a Group Property for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets a GroupProperty for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -3309,91 +4315,105 @@ export const MappingsApiFetchParamCreator = function(
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling getGroupproperty."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getGroupproperty.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling getGroupproperty."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling getGroupproperty.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling getGroupproperty."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling getGroupproperty.',
         );
       }
       // verify required parameter 'propertyId' is not null or undefined
       if (propertyId === null || propertyId === undefined) {
         throw new RequiredError(
-          "propertyId",
-          "Required parameter propertyId was null or undefined when calling getGroupproperty."
+          'propertyId',
+          'Required parameter propertyId was null or undefined when calling getGroupproperty.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getGroupproperty."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getGroupproperty.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/properties/{propertyId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)))
-        .replace(`{${"propertyId"}}`, encodeURIComponent(String(propertyId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/properties/{propertyId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)))
+          .replace(`{${'propertyId'}}`, encodeURIComponent(String(propertyId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -3402,7 +4422,7 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Gets all Groups for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets all Groups for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get Groups
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -3420,83 +4440,97 @@ export const MappingsApiFetchParamCreator = function(
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling getGroups."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getGroups.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling getGroups."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling getGroups.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getGroups."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getGroups.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (top !== undefined) {
-        localVarQueryParameter["$top"] = top;
+        localVarQueryParameter['$top'] = top;
       }
 
       if (continuationToken !== undefined) {
-        localVarQueryParameter["$continuationToken"] = continuationToken;
+        localVarQueryParameter['$continuationToken'] = continuationToken;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -3519,75 +4553,89 @@ export const MappingsApiFetchParamCreator = function(
       mappingId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling getMapping."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getMapping.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling getMapping."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling getMapping.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getMapping."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getMapping.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -3612,77 +4660,90 @@ export const MappingsApiFetchParamCreator = function(
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling getMappings."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling getMappings.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getMappings."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getMappings.',
         );
       }
       const localVarPath = `/datasources/imodels/{imodelId}/mappings`.replace(
-        `{${"imodelId"}}`,
-        encodeURIComponent(String(imodelId))
+        `{${'imodelId'}}`,
+        encodeURIComponent(String(imodelId)),
       );
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (top !== undefined) {
-        localVarQueryParameter["$top"] = top;
+        localVarQueryParameter['$top'] = top;
       }
 
       if (continuationToken !== undefined) {
-        localVarQueryParameter["$continuationToken"] = continuationToken;
+        localVarQueryParameter['$continuationToken'] = continuationToken;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -3691,8 +4752,8 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Updates a Calculated Property for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Update Calculated Property
+     * ---    Updates a CalculatedProperty for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Update CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -3711,52 +4772,53 @@ export const MappingsApiFetchParamCreator = function(
       Authorization: string,
       body?: CalculatedPropertyUpdateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling updateCalculatedproperty."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling updateCalculatedproperty.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling updateCalculatedproperty."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling updateCalculatedproperty.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling updateCalculatedproperty."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling updateCalculatedproperty.',
         );
       }
       // verify required parameter 'propertyId' is not null or undefined
       if (propertyId === null || propertyId === undefined) {
         throw new RequiredError(
-          "propertyId",
-          "Required parameter propertyId was null or undefined when calling updateCalculatedproperty."
+          'propertyId',
+          'Required parameter propertyId was null or undefined when calling updateCalculatedproperty.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling updateCalculatedproperty."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling updateCalculatedproperty.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/calculatedProperties/{propertyId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)))
-        .replace(`{${"propertyId"}}`, encodeURIComponent(String(propertyId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/calculatedProperties/{propertyId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)))
+          .replace(`{${'propertyId'}}`, encodeURIComponent(String(propertyId)));
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign(
-        { method: "PATCH" },
-        options
+        { method: 'PATCH' },
+        options,
       );
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
@@ -3764,50 +4826,63 @@ export const MappingsApiFetchParamCreator = function(
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"CalculatedPropertyUpdateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'CalculatedPropertyUpdateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -3815,7 +4890,148 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Updates a Group for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Updates a CustomCalculation for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Update CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} customCalculationId Id of the CustomCalculation to be updated.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {CustomCalculationUpdateReportingAPI} [body]
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    updateCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      customCalculationId: string,
+      Authorization: string,
+      body?: CustomCalculationUpdateReportingAPI,
+      Accept?: string,
+      options: any = {},
+    ): FetchArgs {
+      // verify required parameter 'imodelId' is not null or undefined
+      if (imodelId === null || imodelId === undefined) {
+        throw new RequiredError(
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling updateCustomcalculation.',
+        );
+      }
+      // verify required parameter 'mappingId' is not null or undefined
+      if (mappingId === null || mappingId === undefined) {
+        throw new RequiredError(
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling updateCustomcalculation.',
+        );
+      }
+      // verify required parameter 'groupId' is not null or undefined
+      if (groupId === null || groupId === undefined) {
+        throw new RequiredError(
+          'groupId',
+          'Required parameter groupId was null or undefined when calling updateCustomcalculation.',
+        );
+      }
+      // verify required parameter 'customCalculationId' is not null or undefined
+      if (customCalculationId === null || customCalculationId === undefined) {
+        throw new RequiredError(
+          'customCalculationId',
+          'Required parameter customCalculationId was null or undefined when calling updateCustomcalculation.',
+        );
+      }
+      // verify required parameter 'Authorization' is not null or undefined
+      if (Authorization === null || Authorization === undefined) {
+        throw new RequiredError(
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling updateCustomcalculation.',
+        );
+      }
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/customCalculations/{customCalculationId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)))
+          .replace(
+            `{${'customCalculationId'}}`,
+            encodeURIComponent(String(customCalculationId)),
+          );
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign(
+        { method: 'PATCH' },
+        options,
+      );
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication apiKeyHeader required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
+            : configuration.apiKey;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
+      }
+
+      // authentication apiKeyQuery required
+      if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue =
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
+            : configuration.apiKey;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
+      }
+
+      if (Authorization !== undefined && Authorization !== null) {
+        localVarHeaderParameter['Authorization'] = String(Authorization);
+      }
+
+      if (Accept !== undefined && Accept !== null) {
+        localVarHeaderParameter['Accept'] = String(Accept);
+      }
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+      const needsSerialization =
+        <any>'CustomCalculationUpdateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * ---    Updates a Group for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Update Group
      * @param {string} imodelId Globally Unique Identifier of the target iModel.
      * @param {string} mappingId Globally Unique Identifier of the target Mapping.
@@ -3833,44 +5049,45 @@ export const MappingsApiFetchParamCreator = function(
       Authorization: string,
       body?: GroupUpdateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling updateGroup."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling updateGroup.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling updateGroup."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling updateGroup.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling updateGroup."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling updateGroup.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling updateGroup."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling updateGroup.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)));
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign(
-        { method: "PATCH" },
-        options
+        { method: 'PATCH' },
+        options,
       );
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
@@ -3878,50 +5095,63 @@ export const MappingsApiFetchParamCreator = function(
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"GroupUpdateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'GroupUpdateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -3929,7 +5159,7 @@ export const MappingsApiFetchParamCreator = function(
       };
     },
     /**
-     * ---    Updates a Group Property for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Updates a GroupProperty for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Update GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -3949,100 +5179,114 @@ export const MappingsApiFetchParamCreator = function(
       Authorization: string,
       body?: GroupPropertyUpdateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling updateGroupproperty."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling updateGroupproperty.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling updateGroupproperty."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling updateGroupproperty.',
         );
       }
       // verify required parameter 'groupId' is not null or undefined
       if (groupId === null || groupId === undefined) {
         throw new RequiredError(
-          "groupId",
-          "Required parameter groupId was null or undefined when calling updateGroupproperty."
+          'groupId',
+          'Required parameter groupId was null or undefined when calling updateGroupproperty.',
         );
       }
       // verify required parameter 'propertyId' is not null or undefined
       if (propertyId === null || propertyId === undefined) {
         throw new RequiredError(
-          "propertyId",
-          "Required parameter propertyId was null or undefined when calling updateGroupproperty."
+          'propertyId',
+          'Required parameter propertyId was null or undefined when calling updateGroupproperty.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling updateGroupproperty."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling updateGroupproperty.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/properties/{propertyId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)))
-        .replace(`{${"groupId"}}`, encodeURIComponent(String(groupId)))
-        .replace(`{${"propertyId"}}`, encodeURIComponent(String(propertyId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}/groups/{groupId}/properties/{propertyId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)))
+          .replace(`{${'groupId'}}`, encodeURIComponent(String(groupId)))
+          .replace(`{${'propertyId'}}`, encodeURIComponent(String(propertyId)));
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "PUT" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'PUT' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"GroupPropertyUpdateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'GroupPropertyUpdateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -4066,36 +5310,37 @@ export const MappingsApiFetchParamCreator = function(
       Authorization: string,
       body?: MappingUpdateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'imodelId' is not null or undefined
       if (imodelId === null || imodelId === undefined) {
         throw new RequiredError(
-          "imodelId",
-          "Required parameter imodelId was null or undefined when calling updateMapping."
+          'imodelId',
+          'Required parameter imodelId was null or undefined when calling updateMapping.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling updateMapping."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling updateMapping.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling updateMapping."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling updateMapping.',
         );
       }
-      const localVarPath = `/datasources/imodels/{imodelId}/mappings/{mappingId}`
-        .replace(`{${"imodelId"}}`, encodeURIComponent(String(imodelId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)));
+      const localVarPath =
+        `/datasources/imodels/{imodelId}/mappings/{mappingId}`
+          .replace(`{${'imodelId'}}`, encodeURIComponent(String(imodelId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)));
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign(
-        { method: "PATCH" },
-        options
+        { method: 'PATCH' },
+        options,
       );
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
@@ -4103,50 +5348,63 @@ export const MappingsApiFetchParamCreator = function(
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"MappingUpdateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'MappingUpdateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -4160,11 +5418,52 @@ export const MappingsApiFetchParamCreator = function(
  * MappingsApi - functional programming interface
  * @export
  */
-export const MappingsApiFp = function(configuration?: Configuration) {
+export const MappingsApiFp = function (configuration?: Configuration) {
   return {
     /**
-     * ---    Creates a Calculated Property for a Group. Each Calculated Property defines a property or 'column' which is calculated for each element that is returned by the Group's query.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Create Calculated Property
+     * ---    Copies a Mapping and all its Groups, GroupProperties, CalculatedProperties, and CustomCalculations to a target iModel.    The `mappingName` request body property is optional. If the `mappingName` is not provided the new Mapping will have the same name as the source Mapping but with the `_Copy` appendix. If the `mappingName` is provided the new Mapping will have the provided name.    The `mappingName` property becomes mandatory if the source Mapping has 124 or more characters in its name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Copy Mapping
+     * @param {string} imodelId Id of the source Mapping&#x27;s iModel.
+     * @param {string} mappingId Id of the source Mapping.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {MappingCopyReportingAPI} [body]
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    copyMapping(
+      imodelId: string,
+      mappingId: string,
+      Authorization: string,
+      body?: MappingCopyReportingAPI,
+      Accept?: string,
+      options?: any,
+    ): (
+      fetch?: FetchAPI,
+      basePath?: string,
+    ) => Promise<MappingSingleReportingAPI> {
+      const localVarFetchArgs = MappingsApiFetchParamCreator(
+        configuration,
+      ).copyMapping(imodelId, mappingId, Authorization, body, Accept, options);
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     * ---    Creates a CalculatedProperty for a Group. Each CalculatedProperty defines a property or 'column' which is calculated for each element that is returned by the Group's query.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Create CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId Id of the Group for which to create a new CalculatedProperty.
@@ -4181,13 +5480,13 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: CalculatedPropertyCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<CalculatedPropertySingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).createCalculatedproperty(
         imodelId,
         mappingId,
@@ -4195,15 +5494,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         Authorization,
         body,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4214,7 +5513,58 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Creates a Group for an iModel data source Mappping. A Group is a collection of design elements from an iModel represented by an [ECSQL](https://www.itwinjs.org/learning/ecsql/) query and defines one table in the output data of a Report.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Creates a CustomCalculation for a Group. Each CustomCalculation defines a column in the output data which is filled with values calculated using the given formula for each element that is returned by the Group's query.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Create CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId Id of the Group for which to create a new CustomCalculation.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {CustomCalculationCreateReportingAPI} [body]
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      Authorization: string,
+      body?: CustomCalculationCreateReportingAPI,
+      Accept?: string,
+      options?: any,
+    ): (
+      fetch?: FetchAPI,
+      basePath?: string,
+    ) => Promise<CustomCalculationSingleReportingAPI> {
+      const localVarFetchArgs = MappingsApiFetchParamCreator(
+        configuration,
+      ).createCustomcalculation(
+        imodelId,
+        mappingId,
+        groupId,
+        Authorization,
+        body,
+        Accept,
+        options,
+      );
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     * ---    Creates a Group for an iModel data source Mapping. A Group is a collection of design elements from an iModel represented by an [ECSQL](https://www.itwinjs.org/learning/ecsql/) query and defines one table in the output data of a report.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Create Group
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId Id of the Mapping for which to create a new Group.
@@ -4230,21 +5580,21 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: GroupCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<GroupSingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).createGroup(imodelId, mappingId, Authorization, body, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4255,7 +5605,7 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Creates a Group Property for a Group. Each Group Property defines a property or 'column' of data desired from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Creates a GroupProperty for a Group. Each GroupProperty defines a column of mapped data.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Create GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -4273,13 +5623,13 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: GroupPropertyCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<GroupPropertySingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).createGroupproperty(
         imodelId,
         mappingId,
@@ -4287,15 +5637,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         Authorization,
         body,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4320,21 +5670,21 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: MappingCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<MappingSingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).createMapping(imodelId, Authorization, body, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4345,8 +5695,8 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Deletes a Calculated Property from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Delete Calculated Property
+     * ---    Deletes a CalculatedProperty from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Delete CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -4363,10 +5713,10 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).deleteCalculatedproperty(
         imodelId,
         mappingId,
@@ -4374,15 +5724,63 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         propertyId,
         Authorization,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response;
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     * ---    Deletes a CustomCalculation from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Delete CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} customCalculationId Id of the CustomCalculation to be deleted.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      customCalculationId: string,
+      Authorization: string,
+      Accept?: string,
+      options?: any,
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+      const localVarFetchArgs = MappingsApiFetchParamCreator(
+        configuration,
+      ).deleteCustomcalculation(
+        imodelId,
+        mappingId,
+        groupId,
+        customCalculationId,
+        Authorization,
+        Accept,
+        options,
+      );
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response;
@@ -4409,25 +5807,25 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       groupId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).deleteGroup(
         imodelId,
         mappingId,
         groupId,
         Authorization,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response;
@@ -4438,7 +5836,7 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Deletes a Group Property from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Deletes a GroupProperty from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Delete GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -4456,10 +5854,10 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).deleteGroupproperty(
         imodelId,
         mappingId,
@@ -4467,15 +5865,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         propertyId,
         Authorization,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response;
@@ -4500,18 +5898,18 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       mappingId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).deleteMapping(imodelId, mappingId, Authorization, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response;
@@ -4522,8 +5920,8 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Gets all Calculated Properties for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Get Calculated Properties
+     * ---    Gets all CalculatedProperties for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CalculatedProperties
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -4542,13 +5940,13 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<CalculatedPropertyCollectionReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getCalculatedproperties(
         imodelId,
         mappingId,
@@ -4557,15 +5955,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         top,
         continuationToken,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4576,8 +5974,8 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Gets a Calculated Property for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Get Calculated Property
+     * ---    Gets a CalculatedProperty for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -4594,13 +5992,13 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<CalculatedPropertySingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getCalculatedproperty(
         imodelId,
         mappingId,
@@ -4608,15 +6006,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         propertyId,
         Authorization,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4627,7 +6025,112 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Gets a Group for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets a CustomCalculation for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} customCalculationId The CalculatedProperty Id.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      customCalculationId: string,
+      Authorization: string,
+      Accept?: string,
+      options?: any,
+    ): (
+      fetch?: FetchAPI,
+      basePath?: string,
+    ) => Promise<CustomCalculationSingleReportingAPI> {
+      const localVarFetchArgs = MappingsApiFetchParamCreator(
+        configuration,
+      ).getCustomcalculation(
+        imodelId,
+        mappingId,
+        groupId,
+        customCalculationId,
+        Authorization,
+        Accept,
+        options,
+      );
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     * ---    Gets all CustomCalculations for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CustomCalculations
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
+     * @param {number} [top] Optional max items to be sent in response.
+     * @param {string} [continuationToken] Optional token to retrieve next page in paginated response.
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getCustomcalculations(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      Authorization: string,
+      top?: number,
+      continuationToken?: string,
+      Accept?: string,
+      options?: any,
+    ): (
+      fetch?: FetchAPI,
+      basePath?: string,
+    ) => Promise<CustomCalculationCollectionReportingAPI> {
+      const localVarFetchArgs = MappingsApiFetchParamCreator(
+        configuration,
+      ).getCustomcalculations(
+        imodelId,
+        mappingId,
+        groupId,
+        Authorization,
+        top,
+        continuationToken,
+        Accept,
+        options,
+      );
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     * ---    Gets a Group for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get Group
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -4643,21 +6146,21 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       groupId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<GroupSingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getGroup(imodelId, mappingId, groupId, Authorization, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4668,7 +6171,7 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Gets all Group Properties for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets all GroupProperties for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get GroupProperties
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -4688,13 +6191,13 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<GroupPropertyCollectionReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getGroupproperties(
         imodelId,
         mappingId,
@@ -4703,15 +6206,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         top,
         continuationToken,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4722,7 +6225,7 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Gets a Group Property for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets a GroupProperty for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -4740,13 +6243,13 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<GroupPropertySingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getGroupproperty(
         imodelId,
         mappingId,
@@ -4754,15 +6257,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         propertyId,
         Authorization,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4773,7 +6276,7 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Gets all Groups for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets all Groups for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get Groups
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -4791,13 +6294,13 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<GroupCollectionReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getGroups(
         imodelId,
         mappingId,
@@ -4805,15 +6308,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         top,
         continuationToken,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4838,21 +6341,21 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       mappingId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<MappingSingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getMapping(imodelId, mappingId, Authorization, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4879,28 +6382,28 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<MappingCollectionReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getMappings(
         imodelId,
         Authorization,
         top,
         continuationToken,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4911,8 +6414,8 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Updates a Calculated Property for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Update Calculated Property
+     * ---    Updates a CalculatedProperty for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Update CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -4931,13 +6434,13 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: CalculatedPropertyUpdateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<CalculatedPropertySingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).updateCalculatedproperty(
         imodelId,
         mappingId,
@@ -4946,15 +6449,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         Authorization,
         body,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -4965,7 +6468,61 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Updates a Group for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Updates a CustomCalculation for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Update CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} customCalculationId Id of the CustomCalculation to be updated.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {CustomCalculationUpdateReportingAPI} [body]
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    updateCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      customCalculationId: string,
+      Authorization: string,
+      body?: CustomCalculationUpdateReportingAPI,
+      Accept?: string,
+      options?: any,
+    ): (
+      fetch?: FetchAPI,
+      basePath?: string,
+    ) => Promise<CustomCalculationSingleReportingAPI> {
+      const localVarFetchArgs = MappingsApiFetchParamCreator(
+        configuration,
+      ).updateCustomcalculation(
+        imodelId,
+        mappingId,
+        groupId,
+        customCalculationId,
+        Authorization,
+        body,
+        Accept,
+        options,
+      );
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     * ---    Updates a Group for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Update Group
      * @param {string} imodelId Globally Unique Identifier of the target iModel.
      * @param {string} mappingId Globally Unique Identifier of the target Mapping.
@@ -4983,13 +6540,13 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: GroupUpdateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<GroupSingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).updateGroup(
         imodelId,
         mappingId,
@@ -4997,15 +6554,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         Authorization,
         body,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -5016,7 +6573,7 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       };
     },
     /**
-     * ---    Updates a Group Property for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Updates a GroupProperty for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Update GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -5036,13 +6593,13 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: GroupPropertyUpdateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<GroupPropertySingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).updateGroupproperty(
         imodelId,
         mappingId,
@@ -5051,15 +6608,15 @@ export const MappingsApiFp = function(configuration?: Configuration) {
         Authorization,
         body,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -5086,28 +6643,28 @@ export const MappingsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: MappingUpdateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<MappingSingleReportingAPI> {
       const localVarFetchArgs = MappingsApiFetchParamCreator(
-        configuration
+        configuration,
       ).updateMapping(
         imodelId,
         mappingId,
         Authorization,
         body,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -5124,15 +6681,43 @@ export const MappingsApiFp = function(configuration?: Configuration) {
  * MappingsApi - factory interface
  * @export
  */
-export const MappingsApiFactory = function(
+export const MappingsApiFactory = function (
   configuration?: Configuration,
   fetch?: FetchAPI,
-  basePath?: string
+  basePath?: string,
 ) {
   return {
     /**
-     * ---    Creates a Calculated Property for a Group. Each Calculated Property defines a property or 'column' which is calculated for each element that is returned by the Group's query.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Create Calculated Property
+     * ---    Copies a Mapping and all its Groups, GroupProperties, CalculatedProperties, and CustomCalculations to a target iModel.    The `mappingName` request body property is optional. If the `mappingName` is not provided the new Mapping will have the same name as the source Mapping but with the `_Copy` appendix. If the `mappingName` is provided the new Mapping will have the provided name.    The `mappingName` property becomes mandatory if the source Mapping has 124 or more characters in its name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Copy Mapping
+     * @param {string} imodelId Id of the source Mapping&#x27;s iModel.
+     * @param {string} mappingId Id of the source Mapping.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {MappingCopyReportingAPI} [body]
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    copyMapping(
+      imodelId: string,
+      mappingId: string,
+      Authorization: string,
+      body?: MappingCopyReportingAPI,
+      Accept?: string,
+      options?: any,
+    ) {
+      return MappingsApiFp(configuration).copyMapping(
+        imodelId,
+        mappingId,
+        Authorization,
+        body,
+        Accept,
+        options,
+      )(fetch, basePath);
+    },
+    /**
+     * ---    Creates a CalculatedProperty for a Group. Each CalculatedProperty defines a property or 'column' which is calculated for each element that is returned by the Group's query.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Create CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId Id of the Group for which to create a new CalculatedProperty.
@@ -5149,7 +6734,7 @@ export const MappingsApiFactory = function(
       Authorization: string,
       body?: CalculatedPropertyCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).createCalculatedproperty(
         imodelId,
@@ -5158,11 +6743,42 @@ export const MappingsApiFactory = function(
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Creates a Group for an iModel data source Mappping. A Group is a collection of design elements from an iModel represented by an [ECSQL](https://www.itwinjs.org/learning/ecsql/) query and defines one table in the output data of a Report.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Creates a CustomCalculation for a Group. Each CustomCalculation defines a column in the output data which is filled with values calculated using the given formula for each element that is returned by the Group's query.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Create CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId Id of the Group for which to create a new CustomCalculation.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {CustomCalculationCreateReportingAPI} [body]
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      Authorization: string,
+      body?: CustomCalculationCreateReportingAPI,
+      Accept?: string,
+      options?: any,
+    ) {
+      return MappingsApiFp(configuration).createCustomcalculation(
+        imodelId,
+        mappingId,
+        groupId,
+        Authorization,
+        body,
+        Accept,
+        options,
+      )(fetch, basePath);
+    },
+    /**
+     * ---    Creates a Group for an iModel data source Mapping. A Group is a collection of design elements from an iModel represented by an [ECSQL](https://www.itwinjs.org/learning/ecsql/) query and defines one table in the output data of a report.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Create Group
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId Id of the Mapping for which to create a new Group.
@@ -5178,7 +6794,7 @@ export const MappingsApiFactory = function(
       Authorization: string,
       body?: GroupCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).createGroup(
         imodelId,
@@ -5186,11 +6802,11 @@ export const MappingsApiFactory = function(
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Creates a Group Property for a Group. Each Group Property defines a property or 'column' of data desired from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Creates a GroupProperty for a Group. Each GroupProperty defines a column of mapped data.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Create GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -5208,7 +6824,7 @@ export const MappingsApiFactory = function(
       Authorization: string,
       body?: GroupPropertyCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).createGroupproperty(
         imodelId,
@@ -5217,7 +6833,7 @@ export const MappingsApiFactory = function(
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -5235,19 +6851,19 @@ export const MappingsApiFactory = function(
       Authorization: string,
       body?: MappingCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).createMapping(
         imodelId,
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Deletes a Calculated Property from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Delete Calculated Property
+     * ---    Deletes a CalculatedProperty from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Delete CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -5264,7 +6880,7 @@ export const MappingsApiFactory = function(
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).deleteCalculatedproperty(
         imodelId,
@@ -5273,7 +6889,38 @@ export const MappingsApiFactory = function(
         propertyId,
         Authorization,
         Accept,
-        options
+        options,
+      )(fetch, basePath);
+    },
+    /**
+     * ---    Deletes a CustomCalculation from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Delete CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} customCalculationId Id of the CustomCalculation to be deleted.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      customCalculationId: string,
+      Authorization: string,
+      Accept?: string,
+      options?: any,
+    ) {
+      return MappingsApiFp(configuration).deleteCustomcalculation(
+        imodelId,
+        mappingId,
+        groupId,
+        customCalculationId,
+        Authorization,
+        Accept,
+        options,
       )(fetch, basePath);
     },
     /**
@@ -5293,7 +6940,7 @@ export const MappingsApiFactory = function(
       groupId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).deleteGroup(
         imodelId,
@@ -5301,11 +6948,11 @@ export const MappingsApiFactory = function(
         groupId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Deletes a Group Property from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Deletes a GroupProperty from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Delete GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -5323,7 +6970,7 @@ export const MappingsApiFactory = function(
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).deleteGroupproperty(
         imodelId,
@@ -5332,7 +6979,7 @@ export const MappingsApiFactory = function(
         propertyId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -5350,19 +6997,19 @@ export const MappingsApiFactory = function(
       mappingId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).deleteMapping(
         imodelId,
         mappingId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Gets all Calculated Properties for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Get Calculated Properties
+     * ---    Gets all CalculatedProperties for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CalculatedProperties
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -5381,7 +7028,7 @@ export const MappingsApiFactory = function(
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).getCalculatedproperties(
         imodelId,
@@ -5391,12 +7038,12 @@ export const MappingsApiFactory = function(
         top,
         continuationToken,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Gets a Calculated Property for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Get Calculated Property
+     * ---    Gets a CalculatedProperty for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -5413,7 +7060,7 @@ export const MappingsApiFactory = function(
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).getCalculatedproperty(
         imodelId,
@@ -5422,11 +7069,76 @@ export const MappingsApiFactory = function(
         propertyId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Gets a Group for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets a CustomCalculation for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} customCalculationId The CalculatedProperty Id.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      customCalculationId: string,
+      Authorization: string,
+      Accept?: string,
+      options?: any,
+    ) {
+      return MappingsApiFp(configuration).getCustomcalculation(
+        imodelId,
+        mappingId,
+        groupId,
+        customCalculationId,
+        Authorization,
+        Accept,
+        options,
+      )(fetch, basePath);
+    },
+    /**
+     * ---    Gets all CustomCalculations for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Get CustomCalculations
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
+     * @param {number} [top] Optional max items to be sent in response.
+     * @param {string} [continuationToken] Optional token to retrieve next page in paginated response.
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getCustomcalculations(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      Authorization: string,
+      top?: number,
+      continuationToken?: string,
+      Accept?: string,
+      options?: any,
+    ) {
+      return MappingsApiFp(configuration).getCustomcalculations(
+        imodelId,
+        mappingId,
+        groupId,
+        Authorization,
+        top,
+        continuationToken,
+        Accept,
+        options,
+      )(fetch, basePath);
+    },
+    /**
+     * ---    Gets a Group for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get Group
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -5442,7 +7154,7 @@ export const MappingsApiFactory = function(
       groupId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).getGroup(
         imodelId,
@@ -5450,11 +7162,11 @@ export const MappingsApiFactory = function(
         groupId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Gets all Group Properties for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets all GroupProperties for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get GroupProperties
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -5474,7 +7186,7 @@ export const MappingsApiFactory = function(
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).getGroupproperties(
         imodelId,
@@ -5484,11 +7196,11 @@ export const MappingsApiFactory = function(
         top,
         continuationToken,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Gets a Group Property for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets a GroupProperty for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -5506,7 +7218,7 @@ export const MappingsApiFactory = function(
       propertyId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).getGroupproperty(
         imodelId,
@@ -5515,11 +7227,11 @@ export const MappingsApiFactory = function(
         propertyId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Gets all Groups for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Gets all Groups for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Get Groups
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -5537,7 +7249,7 @@ export const MappingsApiFactory = function(
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).getGroups(
         imodelId,
@@ -5546,7 +7258,7 @@ export const MappingsApiFactory = function(
         top,
         continuationToken,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -5564,14 +7276,14 @@ export const MappingsApiFactory = function(
       mappingId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).getMapping(
         imodelId,
         mappingId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -5591,7 +7303,7 @@ export const MappingsApiFactory = function(
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).getMappings(
         imodelId,
@@ -5599,12 +7311,12 @@ export const MappingsApiFactory = function(
         top,
         continuationToken,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Updates a Calculated Property for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-     * @summary Update Calculated Property
+     * ---    Updates a CalculatedProperty for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Update CalculatedProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
      * @param {string} groupId The Group Id.
@@ -5623,7 +7335,7 @@ export const MappingsApiFactory = function(
       Authorization: string,
       body?: CalculatedPropertyUpdateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).updateCalculatedproperty(
         imodelId,
@@ -5633,11 +7345,45 @@ export const MappingsApiFactory = function(
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Updates a Group for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Updates a CustomCalculation for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * @summary Update CustomCalculation
+     * @param {string} imodelId The iModel Id.
+     * @param {string} mappingId The Mapping Id.
+     * @param {string} groupId The Group Id.
+     * @param {string} customCalculationId Id of the CustomCalculation to be updated.
+     * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+     * @param {CustomCalculationUpdateReportingAPI} [body]
+     * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    updateCustomcalculation(
+      imodelId: string,
+      mappingId: string,
+      groupId: string,
+      customCalculationId: string,
+      Authorization: string,
+      body?: CustomCalculationUpdateReportingAPI,
+      Accept?: string,
+      options?: any,
+    ) {
+      return MappingsApiFp(configuration).updateCustomcalculation(
+        imodelId,
+        mappingId,
+        groupId,
+        customCalculationId,
+        Authorization,
+        body,
+        Accept,
+        options,
+      )(fetch, basePath);
+    },
+    /**
+     * ---    Updates a Group for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Update Group
      * @param {string} imodelId Globally Unique Identifier of the target iModel.
      * @param {string} mappingId Globally Unique Identifier of the target Mapping.
@@ -5655,7 +7401,7 @@ export const MappingsApiFactory = function(
       Authorization: string,
       body?: GroupUpdateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).updateGroup(
         imodelId,
@@ -5664,11 +7410,11 @@ export const MappingsApiFactory = function(
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
-     * ---    Updates a Group Property for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+     * ---    Updates a GroupProperty for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
      * @summary Update GroupProperty
      * @param {string} imodelId The iModel Id.
      * @param {string} mappingId The Mapping Id.
@@ -5688,7 +7434,7 @@ export const MappingsApiFactory = function(
       Authorization: string,
       body?: GroupPropertyUpdateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).updateGroupproperty(
         imodelId,
@@ -5698,7 +7444,7 @@ export const MappingsApiFactory = function(
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -5718,7 +7464,7 @@ export const MappingsApiFactory = function(
       Authorization: string,
       body?: MappingUpdateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return MappingsApiFp(configuration).updateMapping(
         imodelId,
@@ -5726,7 +7472,7 @@ export const MappingsApiFactory = function(
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
   };
@@ -5740,8 +7486,38 @@ export const MappingsApiFactory = function(
  */
 export class MappingsApi extends BaseAPI {
   /**
-   * ---    Creates a Calculated Property for a Group. Each Calculated Property defines a property or 'column' which is calculated for each element that is returned by the Group's query.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-   * @summary Create Calculated Property
+   * ---    Copies a Mapping and all its Groups, GroupProperties, CalculatedProperties, and CustomCalculations to a target iModel.    The `mappingName` request body property is optional. If the `mappingName` is not provided the new Mapping will have the same name as the source Mapping but with the `_Copy` appendix. If the `mappingName` is provided the new Mapping will have the provided name.    The `mappingName` property becomes mandatory if the source Mapping has 124 or more characters in its name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Copy Mapping
+   * @param {string} imodelId Id of the source Mapping&#x27;s iModel.
+   * @param {string} mappingId Id of the source Mapping.
+   * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+   * @param {MappingCopyReportingAPI} [body]
+   * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof MappingsApi
+   */
+  public copyMapping(
+    imodelId: string,
+    mappingId: string,
+    Authorization: string,
+    body?: MappingCopyReportingAPI,
+    Accept?: string,
+    options?: any,
+  ) {
+    return MappingsApiFp(this.configuration).copyMapping(
+      imodelId,
+      mappingId,
+      Authorization,
+      body,
+      Accept,
+      options,
+    )(this.fetch, this.basePath);
+  }
+
+  /**
+   * ---    Creates a CalculatedProperty for a Group. Each CalculatedProperty defines a property or 'column' which is calculated for each element that is returned by the Group's query.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Create CalculatedProperty
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
    * @param {string} groupId Id of the Group for which to create a new CalculatedProperty.
@@ -5759,7 +7535,7 @@ export class MappingsApi extends BaseAPI {
     Authorization: string,
     body?: CalculatedPropertyCreateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).createCalculatedproperty(
       imodelId,
@@ -5768,12 +7544,45 @@ export class MappingsApi extends BaseAPI {
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Creates a Group for an iModel data source Mappping. A Group is a collection of design elements from an iModel represented by an [ECSQL](https://www.itwinjs.org/learning/ecsql/) query and defines one table in the output data of a Report.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * ---    Creates a CustomCalculation for a Group. Each CustomCalculation defines a column in the output data which is filled with values calculated using the given formula for each element that is returned by the Group's query.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Create CustomCalculation
+   * @param {string} imodelId The iModel Id.
+   * @param {string} mappingId The Mapping Id.
+   * @param {string} groupId Id of the Group for which to create a new CustomCalculation.
+   * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+   * @param {CustomCalculationCreateReportingAPI} [body]
+   * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof MappingsApi
+   */
+  public createCustomcalculation(
+    imodelId: string,
+    mappingId: string,
+    groupId: string,
+    Authorization: string,
+    body?: CustomCalculationCreateReportingAPI,
+    Accept?: string,
+    options?: any,
+  ) {
+    return MappingsApiFp(this.configuration).createCustomcalculation(
+      imodelId,
+      mappingId,
+      groupId,
+      Authorization,
+      body,
+      Accept,
+      options,
+    )(this.fetch, this.basePath);
+  }
+
+  /**
+   * ---    Creates a Group for an iModel data source Mapping. A Group is a collection of design elements from an iModel represented by an [ECSQL](https://www.itwinjs.org/learning/ecsql/) query and defines one table in the output data of a report.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
    * @summary Create Group
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId Id of the Mapping for which to create a new Group.
@@ -5790,7 +7599,7 @@ export class MappingsApi extends BaseAPI {
     Authorization: string,
     body?: GroupCreateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).createGroup(
       imodelId,
@@ -5798,12 +7607,12 @@ export class MappingsApi extends BaseAPI {
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Creates a Group Property for a Group. Each Group Property defines a property or 'column' of data desired from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * ---    Creates a GroupProperty for a Group. Each GroupProperty defines a column of mapped data.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
    * @summary Create GroupProperty
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
@@ -5822,7 +7631,7 @@ export class MappingsApi extends BaseAPI {
     Authorization: string,
     body?: GroupPropertyCreateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).createGroupproperty(
       imodelId,
@@ -5831,7 +7640,7 @@ export class MappingsApi extends BaseAPI {
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -5851,20 +7660,20 @@ export class MappingsApi extends BaseAPI {
     Authorization: string,
     body?: MappingCreateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).createMapping(
       imodelId,
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Deletes a Calculated Property from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-   * @summary Delete Calculated Property
+   * ---    Deletes a CalculatedProperty from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Delete CalculatedProperty
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
    * @param {string} groupId The Group Id.
@@ -5882,7 +7691,7 @@ export class MappingsApi extends BaseAPI {
     propertyId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).deleteCalculatedproperty(
       imodelId,
@@ -5891,7 +7700,40 @@ export class MappingsApi extends BaseAPI {
       propertyId,
       Authorization,
       Accept,
-      options
+      options,
+    )(this.fetch, this.basePath);
+  }
+
+  /**
+   * ---    Deletes a CustomCalculation from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Delete CustomCalculation
+   * @param {string} imodelId The iModel Id.
+   * @param {string} mappingId The Mapping Id.
+   * @param {string} groupId The Group Id.
+   * @param {string} customCalculationId Id of the CustomCalculation to be deleted.
+   * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+   * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof MappingsApi
+   */
+  public deleteCustomcalculation(
+    imodelId: string,
+    mappingId: string,
+    groupId: string,
+    customCalculationId: string,
+    Authorization: string,
+    Accept?: string,
+    options?: any,
+  ) {
+    return MappingsApiFp(this.configuration).deleteCustomcalculation(
+      imodelId,
+      mappingId,
+      groupId,
+      customCalculationId,
+      Authorization,
+      Accept,
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -5913,7 +7755,7 @@ export class MappingsApi extends BaseAPI {
     groupId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).deleteGroup(
       imodelId,
@@ -5921,12 +7763,12 @@ export class MappingsApi extends BaseAPI {
       groupId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Deletes a Group Property from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * ---    Deletes a GroupProperty from a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
    * @summary Delete GroupProperty
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
@@ -5945,7 +7787,7 @@ export class MappingsApi extends BaseAPI {
     propertyId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).deleteGroupproperty(
       imodelId,
@@ -5954,7 +7796,7 @@ export class MappingsApi extends BaseAPI {
       propertyId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -5974,20 +7816,20 @@ export class MappingsApi extends BaseAPI {
     mappingId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).deleteMapping(
       imodelId,
       mappingId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Gets all Calculated Properties for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-   * @summary Get Calculated Properties
+   * ---    Gets all CalculatedProperties for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Get CalculatedProperties
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
    * @param {string} groupId The Group Id.
@@ -6007,7 +7849,7 @@ export class MappingsApi extends BaseAPI {
     top?: number,
     continuationToken?: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).getCalculatedproperties(
       imodelId,
@@ -6017,13 +7859,13 @@ export class MappingsApi extends BaseAPI {
       top,
       continuationToken,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Gets a Calculated Property for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-   * @summary Get Calculated Property
+   * ---    Gets a CalculatedProperty for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Get CalculatedProperty
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
    * @param {string} groupId The Group Id.
@@ -6041,7 +7883,7 @@ export class MappingsApi extends BaseAPI {
     propertyId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).getCalculatedproperty(
       imodelId,
@@ -6050,12 +7892,81 @@ export class MappingsApi extends BaseAPI {
       propertyId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Gets a Group for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * ---    Gets a CustomCalculation for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Get CustomCalculation
+   * @param {string} imodelId The iModel Id.
+   * @param {string} mappingId The Mapping Id.
+   * @param {string} groupId The Group Id.
+   * @param {string} customCalculationId The CalculatedProperty Id.
+   * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
+   * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof MappingsApi
+   */
+  public getCustomcalculation(
+    imodelId: string,
+    mappingId: string,
+    groupId: string,
+    customCalculationId: string,
+    Authorization: string,
+    Accept?: string,
+    options?: any,
+  ) {
+    return MappingsApiFp(this.configuration).getCustomcalculation(
+      imodelId,
+      mappingId,
+      groupId,
+      customCalculationId,
+      Authorization,
+      Accept,
+      options,
+    )(this.fetch, this.basePath);
+  }
+
+  /**
+   * ---    Gets all CustomCalculations for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Get CustomCalculations
+   * @param {string} imodelId The iModel Id.
+   * @param {string} mappingId The Mapping Id.
+   * @param {string} groupId The Group Id.
+   * @param {string} Authorization OAuth access token with scope &#x60;insights:read&#x60;
+   * @param {number} [top] Optional max items to be sent in response.
+   * @param {string} [continuationToken] Optional token to retrieve next page in paginated response.
+   * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof MappingsApi
+   */
+  public getCustomcalculations(
+    imodelId: string,
+    mappingId: string,
+    groupId: string,
+    Authorization: string,
+    top?: number,
+    continuationToken?: string,
+    Accept?: string,
+    options?: any,
+  ) {
+    return MappingsApiFp(this.configuration).getCustomcalculations(
+      imodelId,
+      mappingId,
+      groupId,
+      Authorization,
+      top,
+      continuationToken,
+      Accept,
+      options,
+    )(this.fetch, this.basePath);
+  }
+
+  /**
+   * ---    Gets a Group for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
    * @summary Get Group
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
@@ -6072,7 +7983,7 @@ export class MappingsApi extends BaseAPI {
     groupId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).getGroup(
       imodelId,
@@ -6080,12 +7991,12 @@ export class MappingsApi extends BaseAPI {
       groupId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Gets all Group Properties for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * ---    Gets all GroupProperties for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
    * @summary Get GroupProperties
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
@@ -6106,7 +8017,7 @@ export class MappingsApi extends BaseAPI {
     top?: number,
     continuationToken?: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).getGroupproperties(
       imodelId,
@@ -6116,12 +8027,12 @@ export class MappingsApi extends BaseAPI {
       top,
       continuationToken,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Gets a Group Property for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * ---    Gets a GroupProperty for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
    * @summary Get GroupProperty
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
@@ -6140,7 +8051,7 @@ export class MappingsApi extends BaseAPI {
     propertyId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).getGroupproperty(
       imodelId,
@@ -6149,12 +8060,12 @@ export class MappingsApi extends BaseAPI {
       propertyId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Gets all Groups for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * ---    Gets all Groups for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_read` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
    * @summary Get Groups
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
@@ -6173,7 +8084,7 @@ export class MappingsApi extends BaseAPI {
     top?: number,
     continuationToken?: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).getGroups(
       imodelId,
@@ -6182,7 +8093,7 @@ export class MappingsApi extends BaseAPI {
       top,
       continuationToken,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -6202,14 +8113,14 @@ export class MappingsApi extends BaseAPI {
     mappingId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).getMapping(
       imodelId,
       mappingId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -6231,7 +8142,7 @@ export class MappingsApi extends BaseAPI {
     top?: number,
     continuationToken?: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).getMappings(
       imodelId,
@@ -6239,13 +8150,13 @@ export class MappingsApi extends BaseAPI {
       top,
       continuationToken,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Updates a Calculated Property for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
-   * @summary Update Calculated Property
+   * ---    Updates a CalculatedProperty for a Group.    ### Calculation Types    Calculation types that start with `BoundingBox` use element aligned bounding boxes. They can be used for approximations of geometric element dimensions when there are no available properties that would have exact dimensions. Some errors may occur due to bounding boxes not being a perfect fit for the surrounded element.    List of all available calculation types:    - `Length` - calculation of a linear element length or a perimeter of a geometric element that does not have a volume. For elements that have a volume use BoundingBox calculations to approximate the length.  - `Area` - calculation of a geometric element's surface area.  - `Volume` - calculation of a geometric element's volume.  - `BoundingBoxLongestEdgeLength` - calculation that gives the longest edge length of an element aligned bounding box.  - `BoundingBoxIntermediateEdgeLength` - calculation that gives the edge length that is not the longest nor the shortest of an element aligned bounding box.  - `BoundingBoxShortestEdgeLength` - calculation that gives the shortest edge length of an element aligned bounding box.  - `BoundingBoxDiagonalLength` - calculation that gives the distance between 2 opposite corners of the element aligned bounding box.  - `BoundingBoxLongestFaceDiagonalLength` - calculation that gives the longest distance between 2 opposite corners of a face on the element aligned bounding box.  - `BoundingBoxIntermediateFaceDiagonalLength` - calculation that gives the distance between 2 opposite corners of a face on the element aligned bounding box that is not the longest nor the shortest.  - `BoundingBoxShortestFaceDiagonalLength` - calculation that gives the shortest distance between 2 opposite corners of a face on the element aligned bounding box.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Update CalculatedProperty
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
    * @param {string} groupId The Group Id.
@@ -6265,7 +8176,7 @@ export class MappingsApi extends BaseAPI {
     Authorization: string,
     body?: CalculatedPropertyUpdateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).updateCalculatedproperty(
       imodelId,
@@ -6275,12 +8186,48 @@ export class MappingsApi extends BaseAPI {
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Updates a Group for a Mapping.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * ---    Updates a CustomCalculation for a Group.    ### CustomCalculations    CustomCalculation is a kind of Group property which has a mathematical formula. CustomCalculation defines a column in the output data which gets filled with a result of the formula evaluation. The formula is evaluated during each extraction for each row of the Group's query result.    The formula supports using other columns (GroupProperty, CalculatedProperty or CustomCalculation entities) as variables. Recursive formulas are not supported, i.e., formula containing a variable `X` is not supported inside a CustomCalculation with a `propertyName` equal to `X`.    Supported operators:    - Unary `-` (negation) has a precedence of 5 and right associativity  - `**` (exponentiation) has a precedence of 4 and right associativity  - `*` (multiplication) has a precedence of 3 and left associativity  - `/` (division) has a precedence of 3 and left associativity  - `%` (remainder) has a precedence of 3 and left associativity  - `+` (addition) has a precedence of 2 and left associativity  - Binary `-` (subtraction) has a precedence of 2 and left associativity    Parenthesis `(` and `)` can be used to change the precedence of operations. Variables, constants, and functions have a precedence of 1 and left associativity.    Supported constants:    - `E` - Euler's constant and the base of natural logarithms (approx. 2.718)  - `LN2` - natural logarithm of 2 (approx. 0.693)  - `LN10` - natural logarithm of 10 (approx. 2.303)  - `LOG2E` - base-2 logarithm of `E` (approx. 1.443)  - `PI` - ratio of a circle's circumference to its diameter (approx. 3.14159)  - `SQRT1_2` - square root of ½ (approx. 0.707)  - `SQRT2` - square root of 2 (approx. 1.414)    Supported numeric constant formats:    - Decimal, e.g., `123` or `1.123`  - Binary (base 2), e.g., `0b1010`  - Octal (base 8), e.g., `0o1234567`  - Hexadecimal (base 16), e.g., `0x123af`  - Scientific notation, e.g., `1.123e+3`    Supported functions:    - `abs(x)` - returns the absolute value of `x`  - `acos(x)` - returns the arccosine of `x`  - `acosh(x)` - returns the hyperbolic arccosine of `x`  - `asin(x)` - returns the arcsine of `x`  - `asinh(x)` - returns the hyperbolic arcsine of `x`  - `atan(x)` - returns the arctangent of `x`  - `atanh(x)` - returns the hyperbolic arctangent of `x`  - `atan2(y, x)` - returns the arctangent of the quotient of `y` divided by `x`  - `cbrt(x)` - returns the cube root of `x`  - `ceil(x)` - returns the smallest integer greater than or equal to `x`  - `clz32(x)` - returns the number of leading zero bits of the 32-bit integer `x`  - `cos(x)` - returns the cosine of `x`  - `cosh(x)` - returns the hyperbolic cosine of `x`  - `exp(x)` - returns `E ** x` or `pow(E, x)`, where `x` is the argument, and `E` is Euler's constant (2.718…, the base of the natural logarithm)  - `expm1(x)` - returns subtracting 1 from `exp(x)`  - `floor(x)` - returns the largest integer less than or equal to `x`  - `fround(x)` - returns the nearest single precision float representation of `x`  - `hypot(x, y[, z[, …]])` - returns the square root of the sum of squares of its arguments  - `imul(x, y)` - returns the result of the 32-bit integer multiplication of `x` and `y`  - `log(x)` - returns the natural logarithm of `x`  - `log1p(x)` - returns the natural logarithm of `1 + x`  - `log10(x)` - returns the base-10 logarithm of `x`  - `log2(x)` - returns the base-2 logarithm of `x`  - `max(x, y[, z[, …]])` - returns the largest of 2 or more numbers  - `min(x, y[, z[, …]])` - returns the smallest of 2 or more numbers  - `pow(x, y)` - returns base `x` to the exponent power `y` (i.e., `x**y`)  - `random()` - returns a pseudo-random number between 0 and 1. The value only changes between different output tables. All rows within a single output table get the same value  - `round(x)` - returns the value of the number `x` rounded to the nearest integer  - `sign(x)` - returns the sign of the `x`, indicating whether `x` is positive (`1`), negative (`-1`), or zero (`0`)  - `sin(x)` - returns the sine of `x`  - `sinh(x)` - returns the hyperbolic sine of `x`  - `sqrt(x)` - returns the positive square root of `x`  - `tan(x)` - returns the tangent of `x`  - `tanh(x)` - returns the hyperbolic tangent of `x`  - `trunc(x)` - returns the integer portion of `x`, removing any fractional digits    Examples of supported formulas:    - `min(A * B, B * C, A * C)` - if `A`, `B`, and `C` are 3 different lengths of box edges, then this formula will result in the smallest side surface area of that box  - `min * max` - formula does not have parenthesis after function names, so the `min` and `max` operands are treated as variables (other columns), not as functions. If the Group has columns `min` and `max`, and their values are `2` and `5`, then the result of this formula is `10` for that row  - `2 ** 3` - 2 raised to the power of 3. Result will be 8. This can also be written as `pow(2, 3)`  - `min(cos(X), sin(X))` - function nesting is supported  - `A * (B + C)` - `A` multiplied by the sum of `B` and `C`  - `A * B + C` - same as `(A * B) + C`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * @summary Update CustomCalculation
+   * @param {string} imodelId The iModel Id.
+   * @param {string} mappingId The Mapping Id.
+   * @param {string} groupId The Group Id.
+   * @param {string} customCalculationId Id of the CustomCalculation to be updated.
+   * @param {string} Authorization OAuth access token with scope &#x60;insights:modify&#x60;
+   * @param {CustomCalculationUpdateReportingAPI} [body]
+   * @param {string} [Accept] Setting to &#x60;application/vnd.bentley.itwin-platform.v1+json&#x60; is recommended.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof MappingsApi
+   */
+  public updateCustomcalculation(
+    imodelId: string,
+    mappingId: string,
+    groupId: string,
+    customCalculationId: string,
+    Authorization: string,
+    body?: CustomCalculationUpdateReportingAPI,
+    Accept?: string,
+    options?: any,
+  ) {
+    return MappingsApiFp(this.configuration).updateCustomcalculation(
+      imodelId,
+      mappingId,
+      groupId,
+      customCalculationId,
+      Authorization,
+      body,
+      Accept,
+      options,
+    )(this.fetch, this.basePath);
+  }
+
+  /**
+   * ---    Updates a Group for a Mapping.    ### Group Query    The `query` parameter of a Group supports ECSql and ECClassIds.    If a valid ECSql query is given and the selected class is `bis.Element`, or if it is a descendant of the class `bis.Element`, the only required column is `ECInstanceId`.    - `SELECT * FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT * FROM Building.Beam` is a valid query  - `SELECT ECInstanceId FROM bis.Element` is a valid query  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECInstanceId FROM Building.Beam` is valid  - `SELECT ECClassId FROM bis.Element` is _not_ a valid query because ECInstanceId column is missing  - Assuming that class `Building.Beam` is a descendant of the class `bis.Element`, the query `SELECT ECClassId FROM Building.Beam` is _not_ valid because ECInstanceId column is missing  - Assuming that `Building.BeamAspect` is an aspect, the query `SELECT A.ECInstanceId FROM bis.Element E JOIN Building.BeamAspect A ON A.Element.Id = E.ECInstanceId` is _not_ valid because the selected `ECInstanceId` is of the aspect, not the element    In all other cases when providing an ECSql query it is required to select `ECInstanceId`, `ECClassId`, and all other columns that you are planning to use for mapping. If only `ECInstanceId` and `ECClassId` are selected and other columns are used for mapping, those columns will be filled with `null` values. If either `ECInstanceId` or `ECClassId` column is not selected, the query will not produce any output.    If the `query` parameter does not contain a valid ECSql query, then it must be equal to `bis.Element`, `bis.ElementAspect`, or any of their descendants.    The ECClassId format `{schemaName}:{schemaItemName}` where `schemaName` does not contain a 3-part version number is supported.    The ECClassId format `{schemaName}.{schemaItemName}` is supported.    The ECClassId format `{schemaAlias}:{schemaItemName}` where `schemaAlias` is the alias of a `schemaName` is supported.    The ECClassId format `{schemaFullName}:{schemaItemName}` where `schemaFullName` contains a 3-part version number is _not_ supported.    When the given ECClassId is equal to `bis.Element` or is one of its descendants, then all elements with the ECClassId will be selected.    When the given ECClassId is equal to `bis.ElementAspect` or is one of its descendants, then all elements that have such aspect will be selected.    When the given ECClassId is none of the above, the query will not produce any output.    - If a class `Building.Beam` does not have any subclasses and the `query` parameter is set to `Building.Beam`, then all elements with ECClassIds of `Building.Beam` will be selected  - If there is a class `Building.StructuralMember` which has 2 subclasses `Building.Beam` and `Building.Column`, and the `query` parameter is set to `Building.StructuralMember`, then all elements with ECClassIds of `Building.StructuralMember`, `Building.Beam`, and `Building.Column` will be selected  - If a class `Building.BeamAspect` inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.BeamAspect`, then all elements that have a `Building.BeamAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId  - If there is class `Building.StructuralMemberAspect` which has 2 subclasses `Building.BeamAspect` and `Building.ColumnAspect`, the `Building.StructuralMemberAspect` class inherits from a class `bis.ElementAspect` (is unique or multi aspect) and the `query` parameter is set to `Building.StructuralMemberAspect`, then all elements that have `Building.StructuralMemberAspect`, `Building.BeamAspect`, or `Building.ColumnAspect` attached to them will be selected. This query will _not_ select the aspects themselves, but the elements that they are attached to. The selected elements may have any ECClassId    If different queries are needed for a single output table, then create multiple Groups with those different queries but with the same name for each Group. That will cause results of all these queries to be concatenated into a single output table. The output table will have column list equal to a union of all GroupProperties of Groups with the same name.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
    * @summary Update Group
    * @param {string} imodelId Globally Unique Identifier of the target iModel.
    * @param {string} mappingId Globally Unique Identifier of the target Mapping.
@@ -6299,7 +8246,7 @@ export class MappingsApi extends BaseAPI {
     Authorization: string,
     body?: GroupUpdateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).updateGroup(
       imodelId,
@@ -6308,12 +8255,12 @@ export class MappingsApi extends BaseAPI {
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
   /**
-   * ---    Updates a Group Property for a Group.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
+   * ---    Updates a GroupProperty for a Group.    ### Mapping ECProperties    GroupProperties define mappings from ECProperties on an iModel to columns. They allow mapping the queried, element, element aspect, or related element properties.    Content of the columns depend on the `ecProperties` field. The `ecProperties` field is a prioritized array which contains `ECProperty` entities. The closer the `ECProperty` is to the array's start, the higher the priority. The priority of `ECProperty` can be changed by reordering the `ecProperties` array. Reading of the `ecProperties` array stops when a valid value is found. For example, if the `ecProperties` array contains 2 entries and the first entry results in a null or undefined value, it will take the second entry. The value can be undefined if the given ECProperty does not exist. The result column will be filled with a null value if no valid value was found.    Evaluating `ecProperties` is prioritized by:    1. Queried properties  2. Element properties  3. Element aspect properties    Having queried properties as the highest priority allows for constant or complex values to be added to a mapping.    `ECProperty` lookup is defined by 3 values - `ECSchemaName`, `ECClassName`, and `ECPropertyName`.    `ECSchemaName` and `ECClassName` are used together to create a ECClassId which is the ECClassId of the current row when selecting a property. Class inheritance is _not_ checked. If the ECClassId of a selected row does not match the `ECSchemaName` and `ECClassName` pair, the value for this `ECProperty` is considered undefined. If the formed ECClassId is of an element aspect, the current selected row is an element and there is only 1 instance of that element aspect related to the element, the property lookup is done on the element aspect.    `ECSchemaName` and `ECClassName` are case-insensitive.    `ECSchemaName` and `ECClassName` can be set to a wildcard value `*`.    - If the value of `ECSchemaName` is `*` and the value of `ECClassName` is `Beam`, then it will match any `Beam` class from any schema (e.g. `Building.Beam`, `Structural.Beam`, etc.)  - If the value of `ECSchemaName` is `Building` and the value of `ECClassName` is `*`, then it will match any class from the schema `Building` (e.g. `Building.Beam`, `Building.CurtainWall`, etc.)  - If values of `ECSchemaName` and `ECClassName` are `*`, then it will match any ECClassId (e.g. `Building.Beam`, `Structural.Column`, etc.)  - If either value of `ECSchemaName` or `ECClassName` are `*`, then no element aspect lookup is done    Set `ECPropertyName` to a property name that you want to select. The value of `ECPropertyName` can also be a path defining how to find a property. The path segments must be separated by a period (`.`). The path can contain the names of:    - A navigation property  - A struct property  - A string property that happens to contain a string representation of a json object  - A property inside the selected json    Names of properties are not case sensitive. If json object does not have duplicate property names which only differ in letter casing, then those json properties are not case sensitive. We recommend treating json properties as case sensitive.    - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category` or `category`, then the whole value `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` will be selected  - If `Category` property is a navigation property with a value of `{\"id\":\"0x2000000000b\",\"relClassName\":\"BisCore.GeometricElement3dIsInCategory\"}` and the `ECPropertyName` is set to `Category.id`, then only the `id` value `0x2000000000b` will be selected  - If `Category` property is a navigation property and it points to a row that has a property `CodeValue` that we want to select, the `ECPropertyName` should be set to `Category.CodeValue`  - If `Model` property is a navigation property and it points to a row that has a property `JsonProperties` with a value `{\"formatter\":{\"mastUnit\":{\"label\":\"m\"}}}` and we want to select the master unit label, the `ECPropertyName` should be set to `Model.JsonProperties.formatter.mastUnit.label`. The result will be `m`    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `imodels_write` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
    * @summary Update GroupProperty
    * @param {string} imodelId The iModel Id.
    * @param {string} mappingId The Mapping Id.
@@ -6334,7 +8281,7 @@ export class MappingsApi extends BaseAPI {
     Authorization: string,
     body?: GroupPropertyUpdateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).updateGroupproperty(
       imodelId,
@@ -6344,7 +8291,7 @@ export class MappingsApi extends BaseAPI {
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -6366,7 +8313,7 @@ export class MappingsApi extends BaseAPI {
     Authorization: string,
     body?: MappingUpdateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return MappingsApiFp(this.configuration).updateMapping(
       imodelId,
@@ -6374,7 +8321,7 @@ export class MappingsApi extends BaseAPI {
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 }
@@ -6382,8 +8329,8 @@ export class MappingsApi extends BaseAPI {
  * ReportsApi - fetch parameter creator
  * @export
  */
-export const ReportsApiFetchParamCreator = function(
-  configuration?: Configuration
+export const ReportsApiFetchParamCreator = function (
+  configuration?: Configuration,
 ) {
   return {
     /**
@@ -6399,68 +8346,81 @@ export const ReportsApiFetchParamCreator = function(
       Authorization: string,
       body?: ReportCreateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling createReport."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling createReport.',
         );
       }
       const localVarPath = `/reports/`;
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "POST" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"ReportCreateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'ReportCreateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -6482,78 +8442,92 @@ export const ReportsApiFetchParamCreator = function(
       Authorization: string,
       body?: ReportMappingCreateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'reportId' is not null or undefined
       if (reportId === null || reportId === undefined) {
         throw new RequiredError(
-          "reportId",
-          "Required parameter reportId was null or undefined when calling createReportMapping."
+          'reportId',
+          'Required parameter reportId was null or undefined when calling createReportMapping.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling createReportMapping."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling createReportMapping.',
         );
       }
-      const localVarPath = `/reports/{reportId}/datasources/imodelMappings`.replace(
-        `{${"reportId"}}`,
-        encodeURIComponent(String(reportId))
-      );
+      const localVarPath =
+        `/reports/{reportId}/datasources/imodelMappings`.replace(
+          `{${'reportId'}}`,
+          encodeURIComponent(String(reportId)),
+        );
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "POST" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"ReportMappingCreateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'ReportMappingCreateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -6573,30 +8547,30 @@ export const ReportsApiFetchParamCreator = function(
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'reportId' is not null or undefined
       if (reportId === null || reportId === undefined) {
         throw new RequiredError(
-          "reportId",
-          "Required parameter reportId was null or undefined when calling deleteReport."
+          'reportId',
+          'Required parameter reportId was null or undefined when calling deleteReport.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling deleteReport."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling deleteReport.',
         );
       }
       const localVarPath = `/reports/{reportId}`.replace(
-        `{${"reportId"}}`,
-        encodeURIComponent(String(reportId))
+        `{${'reportId'}}`,
+        encodeURIComponent(String(reportId)),
       );
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign(
-        { method: "DELETE" },
-        options
+        { method: 'DELETE' },
+        options,
       );
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
@@ -6604,41 +8578,54 @@ export const ReportsApiFetchParamCreator = function(
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -6661,36 +8648,37 @@ export const ReportsApiFetchParamCreator = function(
       mappingId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'reportId' is not null or undefined
       if (reportId === null || reportId === undefined) {
         throw new RequiredError(
-          "reportId",
-          "Required parameter reportId was null or undefined when calling deleteReportMapping."
+          'reportId',
+          'Required parameter reportId was null or undefined when calling deleteReportMapping.',
         );
       }
       // verify required parameter 'mappingId' is not null or undefined
       if (mappingId === null || mappingId === undefined) {
         throw new RequiredError(
-          "mappingId",
-          "Required parameter mappingId was null or undefined when calling deleteReportMapping."
+          'mappingId',
+          'Required parameter mappingId was null or undefined when calling deleteReportMapping.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling deleteReportMapping."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling deleteReportMapping.',
         );
       }
-      const localVarPath = `/reports/{reportId}/datasources/imodelMappings/{mappingId}`
-        .replace(`{${"reportId"}}`, encodeURIComponent(String(reportId)))
-        .replace(`{${"mappingId"}}`, encodeURIComponent(String(mappingId)));
+      const localVarPath =
+        `/reports/{reportId}/datasources/imodelMappings/{mappingId}`
+          .replace(`{${'reportId'}}`, encodeURIComponent(String(reportId)))
+          .replace(`{${'mappingId'}}`, encodeURIComponent(String(mappingId)));
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign(
-        { method: "DELETE" },
-        options
+        { method: 'DELETE' },
+        options,
       );
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
@@ -6698,41 +8686,54 @@ export const ReportsApiFetchParamCreator = function(
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -6759,82 +8760,95 @@ export const ReportsApiFetchParamCreator = function(
       continuationToken?: string,
       deleted?: boolean,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'projectId' is not null or undefined
       if (projectId === null || projectId === undefined) {
         throw new RequiredError(
-          "projectId",
-          "Required parameter projectId was null or undefined when calling getProjectReports."
+          'projectId',
+          'Required parameter projectId was null or undefined when calling getProjectReports.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getProjectReports."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getProjectReports.',
         );
       }
       const localVarPath = `/reports`;
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (projectId !== undefined) {
-        localVarQueryParameter["projectId"] = projectId;
+        localVarQueryParameter['projectId'] = projectId;
       }
 
       if (top !== undefined) {
-        localVarQueryParameter["$top"] = top;
+        localVarQueryParameter['$top'] = top;
       }
 
       if (continuationToken !== undefined) {
-        localVarQueryParameter["$continuationToken"] = continuationToken;
+        localVarQueryParameter['$continuationToken'] = continuationToken;
       }
 
       if (deleted !== undefined) {
-        localVarQueryParameter["deleted"] = deleted;
+        localVarQueryParameter['deleted'] = deleted;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -6855,69 +8869,82 @@ export const ReportsApiFetchParamCreator = function(
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'reportId' is not null or undefined
       if (reportId === null || reportId === undefined) {
         throw new RequiredError(
-          "reportId",
-          "Required parameter reportId was null or undefined when calling getReport."
+          'reportId',
+          'Required parameter reportId was null or undefined when calling getReport.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getReport."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getReport.',
         );
       }
       const localVarPath = `/reports/{reportId}`.replace(
-        `{${"reportId"}}`,
-        encodeURIComponent(String(reportId))
+        `{${'reportId'}}`,
+        encodeURIComponent(String(reportId)),
       );
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -6942,77 +8969,91 @@ export const ReportsApiFetchParamCreator = function(
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'reportId' is not null or undefined
       if (reportId === null || reportId === undefined) {
         throw new RequiredError(
-          "reportId",
-          "Required parameter reportId was null or undefined when calling getReportMappings."
+          'reportId',
+          'Required parameter reportId was null or undefined when calling getReportMappings.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling getReportMappings."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling getReportMappings.',
         );
       }
-      const localVarPath = `/reports/{reportId}/datasources/imodelMappings`.replace(
-        `{${"reportId"}}`,
-        encodeURIComponent(String(reportId))
-      );
+      const localVarPath =
+        `/reports/{reportId}/datasources/imodelMappings`.replace(
+          `{${'reportId'}}`,
+          encodeURIComponent(String(reportId)),
+        );
       const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: "GET" }, options);
+      const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (top !== undefined) {
-        localVarQueryParameter["$top"] = top;
+        localVarQueryParameter['$top'] = top;
       }
 
       if (continuationToken !== undefined) {
-        localVarQueryParameter["$continuationToken"] = continuationToken;
+        localVarQueryParameter['$continuationToken'] = continuationToken;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
 
       return {
@@ -7035,30 +9076,30 @@ export const ReportsApiFetchParamCreator = function(
       Authorization: string,
       body?: ReportUpdateReportingAPI,
       Accept?: string,
-      options: any = {}
+      options: any = {},
     ): FetchArgs {
       // verify required parameter 'reportId' is not null or undefined
       if (reportId === null || reportId === undefined) {
         throw new RequiredError(
-          "reportId",
-          "Required parameter reportId was null or undefined when calling updateReport."
+          'reportId',
+          'Required parameter reportId was null or undefined when calling updateReport.',
         );
       }
       // verify required parameter 'Authorization' is not null or undefined
       if (Authorization === null || Authorization === undefined) {
         throw new RequiredError(
-          "Authorization",
-          "Required parameter Authorization was null or undefined when calling updateReport."
+          'Authorization',
+          'Required parameter Authorization was null or undefined when calling updateReport.',
         );
       }
       const localVarPath = `/reports/{reportId}`.replace(
-        `{${"reportId"}}`,
-        encodeURIComponent(String(reportId))
+        `{${'reportId'}}`,
+        encodeURIComponent(String(reportId)),
       );
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign(
-        { method: "PATCH" },
-        options
+        { method: 'PATCH' },
+        options,
       );
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
@@ -7066,50 +9107,63 @@ export const ReportsApiFetchParamCreator = function(
       // authentication apiKeyHeader required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("X-Api-Subscription-Key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('X-Api-Subscription-Key')
             : configuration.apiKey;
-        localVarHeaderParameter["X-Api-Subscription-Key"] = localVarApiKeyValue;
+        localVarHeaderParameter['X-Api-Subscription-Key'] = localVarApiKeyValue;
       }
 
       // authentication apiKeyQuery required
       if (configuration && configuration.apiKey) {
         const localVarApiKeyValue =
-          typeof configuration.apiKey === "function"
-            ? configuration.apiKey("subscription-key")
+          typeof configuration.apiKey === 'function'
+            ? configuration.apiKey('subscription-key')
             : configuration.apiKey;
-        localVarQueryParameter["subscription-key"] = localVarApiKeyValue;
+        localVarQueryParameter['subscription-key'] = localVarApiKeyValue;
+      }
+
+      // authentication oauth2Bentley OAuth2 Service required
+      // oauth required
+      if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue =
+          typeof configuration.accessToken === 'function'
+            ? configuration.accessToken('oauth2Bentley OAuth2 Service', [
+                'insights:read insights:modify',
+              ])
+            : configuration.accessToken;
+        localVarHeaderParameter['Authorization'] =
+          'Bearer ' + localVarAccessTokenValue;
       }
 
       if (Authorization !== undefined && Authorization !== null) {
-        localVarHeaderParameter["Authorization"] = String(Authorization);
+        localVarHeaderParameter['Authorization'] = String(Authorization);
       }
 
       if (Accept !== undefined && Accept !== null) {
-        localVarHeaderParameter["Accept"] = String(Accept);
+        localVarHeaderParameter['Accept'] = String(Accept);
       }
 
-      localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
         localVarUrlObj.query,
         localVarQueryParameter,
-        options.query
+        options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
-        options.headers
+        options.headers,
       );
       const needsSerialization =
-        <any>"ReportUpdateReportingAPI" !== "string" ||
-        localVarRequestOptions.headers["Content-Type"] === "application/json";
+        <any>'ReportUpdateReportingAPI' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
-        : body || "";
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -7123,7 +9177,7 @@ export const ReportsApiFetchParamCreator = function(
  * ReportsApi - functional programming interface
  * @export
  */
-export const ReportsApiFp = function(configuration?: Configuration) {
+export const ReportsApiFp = function (configuration?: Configuration) {
   return {
     /**
      * ---    Creates a Report within the context of a Project.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `REPORTINGEDIT` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
@@ -7138,21 +9192,21 @@ export const ReportsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: ReportCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<ReportSingleReportingAPI> {
       const localVarFetchArgs = ReportsApiFetchParamCreator(
-        configuration
+        configuration,
       ).createReport(Authorization, body, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -7177,21 +9231,21 @@ export const ReportsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: ReportMappingCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<ReportMappingSingleReportingAPI> {
       const localVarFetchArgs = ReportsApiFetchParamCreator(
-        configuration
+        configuration,
       ).createReportMapping(reportId, Authorization, body, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -7214,18 +9268,18 @@ export const ReportsApiFp = function(configuration?: Configuration) {
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = ReportsApiFetchParamCreator(
-        configuration
+        configuration,
       ).deleteReport(reportId, Authorization, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response;
@@ -7250,24 +9304,24 @@ export const ReportsApiFp = function(configuration?: Configuration) {
       mappingId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = ReportsApiFetchParamCreator(
-        configuration
+        configuration,
       ).deleteReportMapping(
         reportId,
         mappingId,
         Authorization,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response;
@@ -7296,13 +9350,13 @@ export const ReportsApiFp = function(configuration?: Configuration) {
       continuationToken?: string,
       deleted?: boolean,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<ReportCollectionReportingAPI> {
       const localVarFetchArgs = ReportsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getProjectReports(
         projectId,
         Authorization,
@@ -7310,15 +9364,15 @@ export const ReportsApiFp = function(configuration?: Configuration) {
         continuationToken,
         deleted,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -7341,21 +9395,21 @@ export const ReportsApiFp = function(configuration?: Configuration) {
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<ReportSingleReportingAPI> {
       const localVarFetchArgs = ReportsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getReport(reportId, Authorization, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -7382,28 +9436,28 @@ export const ReportsApiFp = function(configuration?: Configuration) {
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<ReportMappingCollectionReportingAPI> {
       const localVarFetchArgs = ReportsApiFetchParamCreator(
-        configuration
+        configuration,
       ).getReportMappings(
         reportId,
         Authorization,
         top,
         continuationToken,
         Accept,
-        options
+        options,
       );
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -7428,21 +9482,21 @@ export const ReportsApiFp = function(configuration?: Configuration) {
       Authorization: string,
       body?: ReportUpdateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ): (
       fetch?: FetchAPI,
-      basePath?: string
+      basePath?: string,
     ) => Promise<ReportSingleReportingAPI> {
       const localVarFetchArgs = ReportsApiFetchParamCreator(
-        configuration
+        configuration,
       ).updateReport(reportId, Authorization, body, Accept, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH
+        basePath: string = BASE_PATH,
       ) => {
         return fetch(
           basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options
+          localVarFetchArgs.options,
         ).then((response) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
@@ -7459,10 +9513,10 @@ export const ReportsApiFp = function(configuration?: Configuration) {
  * ReportsApi - factory interface
  * @export
  */
-export const ReportsApiFactory = function(
+export const ReportsApiFactory = function (
   configuration?: Configuration,
   fetch?: FetchAPI,
-  basePath?: string
+  basePath?: string,
 ) {
   return {
     /**
@@ -7478,13 +9532,13 @@ export const ReportsApiFactory = function(
       Authorization: string,
       body?: ReportCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return ReportsApiFp(configuration).createReport(
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -7502,14 +9556,14 @@ export const ReportsApiFactory = function(
       Authorization: string,
       body?: ReportMappingCreateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return ReportsApiFp(configuration).createReportMapping(
         reportId,
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -7525,13 +9579,13 @@ export const ReportsApiFactory = function(
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return ReportsApiFp(configuration).deleteReport(
         reportId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -7549,14 +9603,14 @@ export const ReportsApiFactory = function(
       mappingId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return ReportsApiFp(configuration).deleteReportMapping(
         reportId,
         mappingId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -7578,7 +9632,7 @@ export const ReportsApiFactory = function(
       continuationToken?: string,
       deleted?: boolean,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return ReportsApiFp(configuration).getProjectReports(
         projectId,
@@ -7587,7 +9641,7 @@ export const ReportsApiFactory = function(
         continuationToken,
         deleted,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -7603,13 +9657,13 @@ export const ReportsApiFactory = function(
       reportId: string,
       Authorization: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return ReportsApiFp(configuration).getReport(
         reportId,
         Authorization,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -7629,7 +9683,7 @@ export const ReportsApiFactory = function(
       top?: number,
       continuationToken?: string,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return ReportsApiFp(configuration).getReportMappings(
         reportId,
@@ -7637,7 +9691,7 @@ export const ReportsApiFactory = function(
         top,
         continuationToken,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
     /**
@@ -7655,14 +9709,14 @@ export const ReportsApiFactory = function(
       Authorization: string,
       body?: ReportUpdateReportingAPI,
       Accept?: string,
-      options?: any
+      options?: any,
     ) {
       return ReportsApiFp(configuration).updateReport(
         reportId,
         Authorization,
         body,
         Accept,
-        options
+        options,
       )(fetch, basePath);
     },
   };
@@ -7689,13 +9743,13 @@ export class ReportsApi extends BaseAPI {
     Authorization: string,
     body?: ReportCreateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return ReportsApiFp(this.configuration).createReport(
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -7715,14 +9769,14 @@ export class ReportsApi extends BaseAPI {
     Authorization: string,
     body?: ReportMappingCreateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return ReportsApiFp(this.configuration).createReportMapping(
       reportId,
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -7740,13 +9794,13 @@ export class ReportsApi extends BaseAPI {
     reportId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return ReportsApiFp(this.configuration).deleteReport(
       reportId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -7766,14 +9820,14 @@ export class ReportsApi extends BaseAPI {
     mappingId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return ReportsApiFp(this.configuration).deleteReportMapping(
       reportId,
       mappingId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -7797,7 +9851,7 @@ export class ReportsApi extends BaseAPI {
     continuationToken?: string,
     deleted?: boolean,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return ReportsApiFp(this.configuration).getProjectReports(
       projectId,
@@ -7806,7 +9860,7 @@ export class ReportsApi extends BaseAPI {
       continuationToken,
       deleted,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -7824,13 +9878,13 @@ export class ReportsApi extends BaseAPI {
     reportId: string,
     Authorization: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return ReportsApiFp(this.configuration).getReport(
       reportId,
       Authorization,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -7852,7 +9906,7 @@ export class ReportsApi extends BaseAPI {
     top?: number,
     continuationToken?: string,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return ReportsApiFp(this.configuration).getReportMappings(
       reportId,
@@ -7860,7 +9914,7 @@ export class ReportsApi extends BaseAPI {
       top,
       continuationToken,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 
@@ -7880,14 +9934,14 @@ export class ReportsApi extends BaseAPI {
     Authorization: string,
     body?: ReportUpdateReportingAPI,
     Accept?: string,
-    options?: any
+    options?: any,
   ) {
     return ReportsApiFp(this.configuration).updateReport(
       reportId,
       Authorization,
       body,
       Accept,
-      options
+      options,
     )(this.fetch, this.basePath);
   }
 }

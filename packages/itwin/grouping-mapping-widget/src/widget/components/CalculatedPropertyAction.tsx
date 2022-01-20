@@ -19,7 +19,7 @@ import {
   BboxDimension,
   BboxDimensionsDecorator,
 } from "../../decorators/BboxDimensionsDecorator";
-import useValidator from "../hooks/useValidator";
+import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
@@ -156,19 +156,9 @@ const CalculatedPropertyAction = ({
               setPropertyName(event.target.value);
               validator.showMessageFor("name");
             }}
-            message={
-              validator.message(
-                "name",
-                propertyName,
-                "required|NoSpacesInName|NoInvalidChars",
-              ) || "Name cannot contain spaces or special characters."
-            }
+            message={validator.message("name", propertyName, NAME_REQUIREMENTS)}
             status={
-              validator.message(
-                "name",
-                propertyName,
-                "required|NoSpacesInName|NoInvalidChars",
-              )
+              validator.message("name", propertyName, NAME_REQUIREMENTS)
                 ? "negative"
                 : undefined
             }

@@ -131,8 +131,7 @@ const CalculatedPropertyTable = ({
             accessor: "propertyName",
             Cell: (value: CellProps<CalculatedProperty>) => (
               <div
-                role="button"
-                className="iui-anchor"
+                className='iui-anchor'
                 onClick={() => onCalculatedPropertyModify(value)}
               >
                 {value.row.original.propertyName}

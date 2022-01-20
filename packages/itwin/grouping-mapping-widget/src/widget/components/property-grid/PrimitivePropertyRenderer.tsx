@@ -34,7 +34,7 @@ export interface PrimitiveRendererProps extends SharedRendererProps {
  */
 export class PrimitivePropertyRenderer extends React.Component<PrimitiveRendererProps> {
   /** @internal */
-  public override render() {
+  public render() {
     const { indentation, highlight, ...props } = this.props;
     const displayLabel = this.props.propertyRecord.property.displayLabel;
     const offset = CommonPropertyRenderer.getLabelOffset(

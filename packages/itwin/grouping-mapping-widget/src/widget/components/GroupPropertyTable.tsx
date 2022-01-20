@@ -124,8 +124,7 @@ const GroupPropertyTable = ({
             accessor: "propertyName",
             Cell: (value: CellProps<GroupProperty>) => (
               <div
-                role="button"
-                className="iui-anchor"
+                className='iui-anchor'
                 onClick={() => onGroupPropertyModify(value)}
               >
                 {value.row.original.propertyName}

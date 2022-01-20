@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { MappingReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
 import ActionPanel from "./ActionPanel";
-import useValidator from "../hooks/useValidator";
+import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleInputChange, WidgetHeader } from "./utils";
 import "./MappingAction.scss";
 
@@ -69,19 +69,9 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
               handleInputChange(event, values, setValues);
               validator.showMessageFor("name");
             }}
-            message={
-              validator.message(
-                "name",
-                values.name,
-                "required|NoSpacesInName|NoInvalidChars",
-              ) || "Name cannot contain spaces or special characters."
-            }
+            message={validator.message("name", values.name, NAME_REQUIREMENTS)}
             status={
-              validator.message(
-                "name",
-                values.name,
-                "required|NoSpacesInName|NoInvalidChars",
-              )
+              validator.message("name", values.name, NAME_REQUIREMENTS)
                 ? "negative"
                 : undefined
             }

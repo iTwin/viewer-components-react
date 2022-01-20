@@ -9,6 +9,11 @@
   flex-direction: column;
   gap: $iui-baseline;
 
+  .table-toolbar {
+    display: flex;
+    gap: $iui-s;
+  }
+
   button {
     align-self: flex-start;
   }

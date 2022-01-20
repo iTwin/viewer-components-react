@@ -193,25 +193,29 @@ export const PropertyMenu = ({
             </IconButton>
           </div>
           <div className='property-menu-container'>
-            {!hideGroupProps && <GroupPropertyTable
-              iModelId={iModelId}
-              mappingId={mappingId}
-              groupId={group.id ?? ""}
-              onGroupPropertyModify={onGroupPropertyModify}
-              setSelectedGroupProperty={setSelectedGroupProperty}
-              setGroupModifyView={setPropertyMenuView}
-              selectedGroupProperty={selectedGroupProperty}
-            />}
+            {!hideGroupProps && (
+              <GroupPropertyTable
+                iModelId={iModelId}
+                mappingId={mappingId}
+                groupId={group.id ?? ""}
+                onGroupPropertyModify={onGroupPropertyModify}
+                setSelectedGroupProperty={setSelectedGroupProperty}
+                setGroupModifyView={setPropertyMenuView}
+                selectedGroupProperty={selectedGroupProperty}
+              />
+            )}
 
-            {!hideCalculatedProps && <CalculatedPropertyTable
-              iModelId={iModelId}
-              mappingId={mappingId}
-              groupId={group.id ?? ""}
-              onCalculatedPropertyModify={onCalculatedPropertyModify}
-              setSelectedCalculatedProperty={setSelectedCalculatedProperty}
-              setGroupModifyView={setPropertyMenuView}
-              selectedCalculatedProperty={selectedCalculatedProperty}
-            />}
+            {!hideCalculatedProps && (
+              <CalculatedPropertyTable
+                iModelId={iModelId}
+                mappingId={mappingId}
+                groupId={group.id ?? ""}
+                onCalculatedPropertyModify={onCalculatedPropertyModify}
+                setSelectedCalculatedProperty={setSelectedCalculatedProperty}
+                setGroupModifyView={setPropertyMenuView}
+                selectedCalculatedProperty={selectedCalculatedProperty}
+              />
+            )}
           </div>
           <InformationPanel
             className='information-panel'
