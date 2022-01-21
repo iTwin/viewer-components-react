@@ -2,10 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { ContentDataProvider } from "@bentley/presentation-components";
-import { ContentFlags, DescriptorOverrides, Keys, KeySet } from "@bentley/presentation-common";
-import { IModelConnection } from "@bentley/imodeljs-frontend";
-import { Id64String } from "@bentley/bentleyjs-core";
+import { ContentDataProvider } from "@itwin/presentation-components";
+import { ContentFlags, DescriptorOverrides, Keys, KeySet } from "@itwin/presentation-common";
+import { IModelConnection } from "@itwin/core-frontend";
+import { Id64String } from "@itwin/core-bentley";
 
 class RulesetDrivenIdsProvider extends ContentDataProvider {
   constructor(imodel: IModelConnection, rulesetId: string, displayType: string, inputKeys: Keys) {

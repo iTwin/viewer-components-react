@@ -5,8 +5,8 @@
 
 /** @module Common */
 
-import { I18N } from "@bentley/imodeljs-i18n";
-import { getClassName, UiError } from "@bentley/ui-abstract";
+import { getClassName, UiError } from "@itwin/appui-abstract";
+import { Localization } from "@itwin/core-common";
 
 /**
  * Entry point for static initialization required by various
@@ -15,15 +15,15 @@ import { getClassName, UiError } from "@bentley/ui-abstract";
  */
 export class BreakdownTrees {
 
-  private static _i18n?: I18N;
+  private static _i18n?: Localization;
 
   /**
    * Called by IModelApp to initialize the BreakdownTrees
-   * @param i18n The internationalization service created by the IModelApp.
+   * @param localization The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n: I18N): Promise<void> {
-    BreakdownTrees._i18n = i18n;
-    await BreakdownTrees._i18n.registerNamespace(BreakdownTrees.i18nNamespace).readFinished;
+  public static async initialize(localization: Localization): Promise<void> {
+    BreakdownTrees._i18n = localization;
+    await BreakdownTrees._i18n.registerNamespace(BreakdownTrees.i18nNamespace);
     return Promise.resolve();
   }
 

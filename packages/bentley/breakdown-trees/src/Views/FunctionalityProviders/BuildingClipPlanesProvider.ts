@@ -4,12 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-import { NodeKey } from "@bentley/presentation-common";
-import { TreeModelNode } from "@bentley/ui-components";
-import { IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
+import { NodeKey } from "@itwin/presentation-common";
+import { TreeModelNode } from "@itwin/components-react";
+import { IModelApp, IModelConnection } from "@itwin/core-frontend";
 import { ToggledTopFitViewFunctionalityProvider } from "./ToggledTopFitViewFunctionalityProvider";
-import { ClipPrimitive, ClipVector, ConvexClipPlaneSet, Range3d } from "@bentley/geometry-core";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
+import { ClipPrimitive, ClipVector, ConvexClipPlaneSet, Range3d } from "@itwin/core-geometry";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 export class BuildingClipPlanesProvider extends ToggledTopFitViewFunctionalityProvider {
   constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider, setTopView: boolean) {

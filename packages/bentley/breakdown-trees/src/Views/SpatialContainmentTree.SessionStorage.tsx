@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { SpatialContainmentEventHandlers, SpatialContainmentTree } from "./SpatialContainmentTree";
-import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { IModelConnection } from "@itwin/core-frontend";
 
 export interface SessionStorageSpatialContainmentTreeProps {
   iModel: IModelConnection;

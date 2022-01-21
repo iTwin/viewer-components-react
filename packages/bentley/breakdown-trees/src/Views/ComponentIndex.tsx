@@ -5,17 +5,17 @@
 
 
 import * as React from "react";
-import { Ruleset } from "@bentley/presentation-common";
+import { Ruleset } from "@itwin/presentation-common";
 import { ControlledTreeWrapper, populateMapWithCommonMenuItems } from "./TreeWithRuleset";
 import { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders";
-import { IPresentationTreeDataProvider, PresentationTreeDataProvider } from "@bentley/presentation-components";
-import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { IPresentationTreeDataProvider, PresentationTreeDataProvider } from "@itwin/presentation-components";
+import { IModelConnection } from "@itwin/core-frontend";
 import componentIndex from "../assets/ComponentIndex.json";
 import { BreakdownTrees } from "../BreakdownTrees";
 import { GenericOptionItemHandler, OptionItemHandler } from "./OptionItemHandlers";
 import { LoadableRuleSetComponent } from "./LoadableRuleSetComponent";
 import { ToolbarItemKeys } from "./TreeNodeFunctionsToolbar";
-import { BeEvent } from "@bentley/bentleyjs-core";
+import { BeEvent } from "@itwin/core-bentley";
 
 export interface ComponentIndexEventHandlers {
   onZoomToElement: BeEvent<() => void>;

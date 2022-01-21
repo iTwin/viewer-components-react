@@ -4,14 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import {
-  CheckBoxInfo, HighlightableTreeNodeProps, HighlightingEngine, ITreeImageLoader, PropertyValueRendererContext, PropertyValueRendererManager,
-  TreeActions, TreeModel, TreeModelNode, TreeNodeItem,
-  TreeNodeRendererProps, TreeRenderer, TreeRendererProps,
-} from "@bentley/ui-components";
+import { CheckBoxInfo, HighlightableTreeNodeProps, HighlightingEngine, ITreeImageLoader, PropertyValueRendererContext, PropertyValueRendererManager, TreeActions, TreeModel, TreeModelNode, TreeNodeItem, TreeNodeRendererProps, TreeRenderer, TreeRendererProps } from "@itwin/components-react";
 import { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "../FunctionalityProviders";
-import { PropertyRecord } from "@bentley/ui-abstract";
-import { CheckBoxState, ContextMenuItem, GlobalContextMenu, ImageCheckBox, NodeCheckboxProps, NodeCheckboxRenderer, NodeCheckboxRenderProps, TreeNode } from "@bentley/ui-core";
+import { PropertyRecord } from "@itwin/appui-abstract";
+import { CheckBoxState, ContextMenuItem, GlobalContextMenu, ImageCheckBox, NodeCheckboxProps, NodeCheckboxRenderer, NodeCheckboxRenderProps, TreeNode } from "@itwin/core-react";
 import { VisibilityHandler } from "../EventHandlers/VisibilityHandler";
 import styles from "./FunctionalTreeNodeRenderer.module.scss";
 import { ToolbarItemKeys } from "../TreeNodeFunctionsToolbar";

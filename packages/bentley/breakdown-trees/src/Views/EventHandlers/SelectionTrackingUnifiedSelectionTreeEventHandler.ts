@@ -3,11 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { TreeModelNode, TreeModelSource, TreeModelChanges } from "@bentley/ui-components";
-import {
-  useDisposable,
-} from "@bentley/ui-core";
-import {VisibilityTreeEventHandler, VisibilityTreeEventHandlerParams} from "@bentley/ui-framework";
+import { TreeModelChanges, TreeModelNode, TreeModelSource } from "@itwin/components-react";
+import { useDisposable } from "@itwin/core-react";
+import { VisibilityTreeEventHandler, VisibilityTreeEventHandlerParams } from "@itwin/appui-react";
 
 export interface SelectionTrackingUnifiedSelectionTreeEventHandlerParams extends VisibilityTreeEventHandlerParams {
   onNewSelectionSetCallback: (newSelection: TreeModelNode[]) => void;

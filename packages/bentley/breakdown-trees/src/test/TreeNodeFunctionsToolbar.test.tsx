@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as Moq from "typemoq";
-import { TreeModel, TreeModelNode } from "@bentley/ui-components";
+import { TreeModel, TreeModelNode } from "@itwin/components-react";
 import { mount } from "enzyme";
 import React from "react";
 import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";

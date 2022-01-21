@@ -4,13 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-import { TreeModelNode } from "@bentley/ui-components";
-import {
-  IModelApp, ScreenViewport,
-  StandardViewId,
-  ViewManip, ViewState3d
-} from "@bentley/imodeljs-frontend";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
+import { TreeModelNode } from "@itwin/components-react";
+import { IModelApp, ScreenViewport, StandardViewId, ViewManip, ViewState3d } from "@itwin/core-frontend";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
 export class ToggledTopFitViewFunctionalityProvider extends TreeNodeFunctionalityProvider {
   protected isTopViewSet: boolean;

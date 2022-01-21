@@ -7,9 +7,9 @@ import { IconButton } from "./IconButton";
 import * as React from "react";
 import classnames from "classnames";
 import { BreakdownTrees } from "../BreakdownTrees";
-import { Popup, Icon, ContextMenuItem } from "@bentley/ui-core";
+import { ContextMenuItem, Icon, Popup } from "@itwin/core-react";
 import { OptionItemHandler } from "./OptionItemHandlers";
-import { RelativePosition } from "@bentley/ui-abstract";
+import { RelativePosition } from "@itwin/appui-abstract";
 import styles from "./MoreOptionsButton.module.scss";
 
 export interface MoreOptionsButtonProps {

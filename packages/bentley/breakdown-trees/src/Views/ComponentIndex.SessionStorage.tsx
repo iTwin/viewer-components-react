@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { ComponentIndex } from "./ComponentIndex";
-import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { IModelConnection } from "@itwin/core-frontend";
 
 export interface SessionStorageComponentIndexProps {
   iModel: IModelConnection;

@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { ClassificationsTree } from "./ClassificationsTree";
-import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { IModelConnection } from "@itwin/core-frontend";
 
 export interface SessionStorageClassificationsTreeProps {
   iModel: IModelConnection;

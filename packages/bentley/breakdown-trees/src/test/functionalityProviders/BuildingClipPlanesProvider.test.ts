@@ -3,17 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { TreeModelNode, TreeNodeItem } from "@bentley/ui-components";
+import { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
 import { TestUtils } from "../Utils";
-import { Presentation } from "@bentley/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import { BuildingClipPlanesProvider } from "../../Views/FunctionalityProviders";
 import sinon from "sinon";
-import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, ViewState } from "@bentley/imodeljs-frontend";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { ECInstancesNodeKey } from "@bentley/presentation-common";
+import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, ViewState } from "@itwin/core-frontend";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { ECInstancesNodeKey } from "@itwin/presentation-common";
 import { assert } from "chai";
-import { ConvexClipPlaneSet } from "@bentley/geometry-core";
+import { ConvexClipPlaneSet } from "@itwin/core-geometry";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
 
 describe("BuildingClipPlanesProvider", () => {
@@ -31,7 +31,7 @@ describe("BuildingClipPlanesProvider", () => {
     await NoRenderApp.startup();
 
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.i18n.registerNamespace("BreakdownTrees");
+    IModelApp.localization.registerNamespace("BreakdownTrees");
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
     dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey);
 

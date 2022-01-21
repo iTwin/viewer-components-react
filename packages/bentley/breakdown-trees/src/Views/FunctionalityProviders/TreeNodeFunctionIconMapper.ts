@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { NodeKey } from "@bentley/presentation-common";
-import { TreeModelNode } from "@bentley/ui-components";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { NodeKey } from "@itwin/presentation-common";
+import { TreeModelNode } from "@itwin/components-react";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
-import { IModelReadRpcInterface } from "@bentley/imodeljs-common";
+import { IModelReadRpcInterface } from "@itwin/core-common";
 
 
 export interface FunctionIconInfo {

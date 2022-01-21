@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-import { BeButtonEvent, EmphasizeElements, IModelApp, IModelConnection, Tool, Viewport, ViewState3d } from "@bentley/imodeljs-frontend";
-import { ClipPlane, ClipPrimitive, ClipVector, ConvexClipPlaneSet, Plane3dByOriginAndUnitNormal, Point3d, Range3d, Vector3d } from "@bentley/geometry-core";
-import { ColorDef } from "@bentley/imodeljs-common";
+import { BeButtonEvent, EmphasizeElements, IModelApp, IModelConnection, Tool, Viewport, ViewState3d } from "@itwin/core-frontend";
+import { ClipPlane, ClipPrimitive, ClipVector, ConvexClipPlaneSet, Plane3dByOriginAndUnitNormal, Point3d, Range3d, Vector3d } from "@itwin/core-geometry";
+import { ColorDef } from "@itwin/core-common";
 import { DataLink } from "./DataLink";
 import { SpaceLabelDecorator } from "./SpaceLabelDecorator";
 import { SpaceLabelDecoration } from "./SpaceLabelDecoration";
-import { Logger } from "@bentley/bentleyjs-core";
+import { Logger } from "@itwin/core-bentley";
 
 export class SectioningUtil {
   private static _spaceDecorator?: SpaceLabelDecorator = undefined;
@@ -48,9 +48,7 @@ export class SectioningUtil {
 
     // Turn on view clipping
     if (!vp.viewFlags.clipVolume) {
-      const viewFlags = vp.viewFlags.clone();
-      viewFlags.clipVolume = true;
-      vp.viewFlags = viewFlags;
+      vp.viewFlags = vp.viewFlags.with("clipVolume", true);
     }
 
     if (!this._toolChangedRemover) {

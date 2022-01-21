@@ -3,14 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { TreeModelNode } from "@bentley/ui-components";
+import { TreeModelNode } from "@itwin/components-react";
 import { TestUtils } from "../Utils";
-import { Presentation } from "@bentley/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import { ClearSectionsFunctionalityProvider } from "../../Views/FunctionalityProviders";
 import sinon from "sinon";
-import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport } from "@bentley/imodeljs-frontend";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
+import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport } from "@itwin/core-frontend";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { assert } from "chai";
 import { FunctionalityProviderTestUtils, MockStrings } from "./FunctionalityProviderTestUtils";
 import { SectioningUtil } from "../../Views/visibility/SectioningUtil";
@@ -27,7 +27,7 @@ describe("ClearSectionsFunctionalityProvider", () => {
       await IModelApp.shutdown();
     await NoRenderApp.startup();
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.i18n.registerNamespace("BreakdownTrees");
+    IModelApp.localization.registerNamespace("BreakdownTrees");
 
     isolateRoomsForStoriesStub = sinon.stub(SectioningUtil, "isolateRoomsForStories");
     IModelApp.viewManager.setSelectedView(selectedViewMock.object);

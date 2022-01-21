@@ -2,14 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import 'mock-local-storage';
+import "mock-local-storage";
 import { assert } from "chai";
 import * as moq from "typemoq";
 import sinon from "sinon";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { StoryClipPlanesProvider } from '../../Views/FunctionalityProviders';
-import { LabelHandler } from '../../Views/OptionItemHandlers';
-import { SectioningUtil } from '../../Views/visibility/SectioningUtil';
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { StoryClipPlanesProvider } from "../../Views/FunctionalityProviders";
+import { LabelHandler } from "../../Views/OptionItemHandlers";
+import { SectioningUtil } from "../../Views/visibility/SectioningUtil";
 
 (global as any).sessionStorage = window.sessionStorage;
 

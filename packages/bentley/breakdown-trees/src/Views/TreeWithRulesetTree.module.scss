@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "~@bentley/ui-core/lib/ui-core/index";
+@import "~@itwin/core-react/lib/esm/core-react/index";
 
 .customTreeContent {
   height: 100%;
@@ -13,7 +13,6 @@
 }
 
 .customTreeContainer {
-
   height: 100%;
 
   .custom-tree-node {

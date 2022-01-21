@@ -3,8 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "~@bentley/ui-core/lib/ui-core/index";
-@import "~@bentley/ui-core/lib/ui-core/index.scss";
+@import "~@itwin/core-react/lib/esm/core-react/index";
 
 .search-popup {
   display: block;
@@ -304,7 +303,6 @@
     transform: translate(-100%, -50%) scale(1);
   }
 }
-
 
 @keyframes dr-animate-right {
   from {

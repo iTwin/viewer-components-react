@@ -3,13 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "~@bentley/ui-core/lib/ui-core/index";
+@import "~@itwin/core-react/lib/esm/core-react/index";
 
 .search-bar {
   display: flex;
   align-items: center;
   position: relative;
-  width:100%;
+  width: 100%;
 
   // "..." group button
   .search-bar-group-button2 {

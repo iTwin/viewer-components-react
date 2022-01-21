@@ -6,8 +6,8 @@
 
 import * as React from "react";
 import classnames from "classnames";
-import { CommonProps } from "@bentley/ui-core";
-import { RelativePosition } from "@bentley/ui-abstract";
+import { CommonProps } from "@itwin/core-react";
+import { RelativePosition } from "@itwin/appui-abstract";
 import { Popup } from "./Popup";
 import { SearchBox } from "./SearchBox";
 import { IconButton } from "../IconButton";

@@ -4,14 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-import { KeySet, NodeKey } from "@bentley/presentation-common";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { Presentation } from "@bentley/presentation-frontend";
-import { TreeModelNode, TreeNodeItem, DelayLoadedTreeNodeItem } from "@bentley/ui-components";
-import { IModelConnection } from "@bentley/imodeljs-frontend";
+import { KeySet, NodeKey } from "@itwin/presentation-common";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { Presentation } from "@itwin/presentation-frontend";
+import { DelayLoadedTreeNodeItem, TreeModelNode, TreeNodeItem } from "@itwin/components-react";
+import { IModelConnection } from "@itwin/core-frontend";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
 import { RelatedElementIdsProvider } from "../RelatedElementIdsProvider";
-import { BeEvent, Id64String } from "@bentley/bentleyjs-core";
+import { BeEvent, Id64String } from "@itwin/core-bentley";
 
 export class SelectRelatedFunctionalityProvider extends TreeNodeFunctionalityProvider {
   private _rulesetId: string;

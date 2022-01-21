@@ -3,12 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { BeEvent, Id64Array, Id64String } from "@bentley/bentleyjs-core";
-import { EmphasizeElements, Viewport } from "@bentley/imodeljs-frontend";
-import { KeySet, NodeKey } from "@bentley/presentation-common";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { TreeModelNode, TreeModelRootNode, TreeModelSource, TreeNodeItem } from "@bentley/ui-components";
-import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "@bentley/ui-framework";
+import { BeEvent, Id64Array, Id64String } from "@itwin/core-bentley";
+import { EmphasizeElements, Viewport } from "@itwin/core-frontend";
+import { KeySet, NodeKey } from "@itwin/presentation-common";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { TreeModelNode, TreeModelRootNode, TreeModelSource, TreeNodeItem } from "@itwin/components-react";
+import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "@itwin/appui-react";
 import { RelatedElementIdsProvider } from "../RelatedElementIdsProvider";
 
 export class NodeDetails {

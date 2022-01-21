@@ -2,10 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { DelayLoadedTreeNodeItem, TreeModelNode, TreeNodeItem } from "@bentley/ui-components";
-import { ECClassGroupingNodeKey, ECInstancesNodeKey, GroupingNodeKey, InstanceKey, StandardNodeTypes } from "@bentley/presentation-common";
-import { PropertyRecord } from "@bentley/ui-abstract";
-import { CheckBoxState } from "@bentley/ui-core";
+import { DelayLoadedTreeNodeItem, TreeModelNode, TreeNodeItem } from "@itwin/components-react";
+import { ECClassGroupingNodeKey, ECInstancesNodeKey, GroupingNodeKey, InstanceKey, StandardNodeTypes } from "@itwin/presentation-common";
+import { PropertyRecord } from "@itwin/appui-abstract";
+import { CheckBoxState } from "@itwin/core-react";
 
 export const MockStrings = {
   GroupNode: "groupingItem",
@@ -71,6 +71,7 @@ export class FunctionalityProviderTestUtils {
       pathFromRoot,
       groupedInstancesCount: childrenCount,
       className,
+      version: 1
     };
   }
 
@@ -80,6 +81,7 @@ export class FunctionalityProviderTestUtils {
       type: StandardNodeTypes.ECClassGroupingNode,
       pathFromRoot,
       groupedInstancesCount: childrenCount,
+      version: 1
     };
   };
 
@@ -89,6 +91,7 @@ export class FunctionalityProviderTestUtils {
       type: StandardNodeTypes.ECInstancesNode,
       pathFromRoot,
       instanceKeys,
+      version: 1
     };
   };
 

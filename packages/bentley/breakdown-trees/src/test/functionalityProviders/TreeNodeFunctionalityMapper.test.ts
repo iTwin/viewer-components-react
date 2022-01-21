@@ -3,17 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp, IModelConnection, NoRenderApp } from "@bentley/imodeljs-frontend";
+import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
 import { TestUtils } from "../Utils";
-import { Presentation } from "@bentley/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import sinon from "sinon";
-import { TreeModelNode, TreeNodeItem } from "@bentley/ui-components";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { ECInstancesNodeKey, GroupingNodeKey } from "@bentley/presentation-common";
+import { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { ECInstancesNodeKey, GroupingNodeKey } from "@itwin/presentation-common";
 import { assert } from "chai";
-import { IModelReadRpcInterface, IModelRpcProps } from "@bentley/imodeljs-common";
-import { BeEvent } from "@bentley/bentleyjs-core";
+import { IModelReadRpcInterface, IModelRpcProps } from "@itwin/core-common";
+import { BeEvent } from "@itwin/core-bentley";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
 import spatialRules from "../../assets/SpatialBreakdown.json";
 import { ClearSectionsFunctionalityProvider, FunctionIconInfo, SelectRelatedFunctionalityProvider, TreeNodeFunctionIconInfoMapper, ZoomFunctionalityProvider } from "../../Views/FunctionalityProviders";
@@ -31,7 +31,7 @@ describe("TreeNodeFunctionalityMapper", () => {
     await NoRenderApp.startup();
 
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.i18n.registerNamespace("BreakdownTrees");
+    IModelApp.localization.registerNamespace("BreakdownTrees");
 
     const imodelRpcPropsMock = moq.Mock.ofType<IModelRpcProps>();
     connection.setup((x) => x.getRpcProps()).returns(() => imodelRpcPropsMock.object);

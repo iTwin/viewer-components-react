@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "~@bentley/ui-core/lib/ui-core/index";
+@import "~@itwin/core-react/lib/esm/core-react/index";
 
 .bldg-uisnip-core-searchbox {
   @include uicore-font-family;
@@ -30,7 +30,9 @@
     border: 0;
     background: $buic-background-control;
 
-    &::placeholder {                color: $buic-foreground-disabled; }
+    &::placeholder {
+      color: $buic-foreground-disabled;
+    }
 
     &:focus-within,
     &:focus,

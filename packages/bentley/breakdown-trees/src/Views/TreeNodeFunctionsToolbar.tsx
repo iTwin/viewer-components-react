@@ -5,7 +5,7 @@
 
 import { IconButton } from "./IconButton";
 import * as React from "react";
-import { TreeModel, TreeModelNode } from "@bentley/ui-components";
+import { TreeModel, TreeModelNode } from "@itwin/components-react";
 import { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders";
 
 export enum ToolbarItemKeys {

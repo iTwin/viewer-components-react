@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-import { NodeKey } from "@bentley/presentation-common";
-import { TreeModelNode } from "@bentley/ui-components";
-import { IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
+import { NodeKey } from "@itwin/presentation-common";
+import { TreeModelNode } from "@itwin/components-react";
+import { IModelApp, IModelConnection } from "@itwin/core-frontend";
 import { ToggledTopFitViewFunctionalityProvider } from "./ToggledTopFitViewFunctionalityProvider";
-import { GeometricElement3dProps, Placement3d } from "@bentley/imodeljs-common";
-import { ClipVector, ClipPrimitive, ConvexClipPlaneSet } from "@bentley/geometry-core";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
+import { GeometricElement3dProps, Placement3d } from "@itwin/core-common";
+import { ClipPrimitive, ClipVector, ConvexClipPlaneSet } from "@itwin/core-geometry";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 export class SpaceClipPlanesProvider extends ToggledTopFitViewFunctionalityProvider {
   public defaultHeight?: number;

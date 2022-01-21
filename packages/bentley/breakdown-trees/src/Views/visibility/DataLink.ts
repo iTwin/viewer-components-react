@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelConnection } from "@bentley/imodeljs-frontend";
-import { Range3d } from "@bentley/geometry-core";
+import { IModelConnection } from "@itwin/core-frontend";
+import { Range3d } from "@itwin/core-geometry";
 
 export class DataLink {
   public static async queryAllBuildings(iModel: IModelConnection) {

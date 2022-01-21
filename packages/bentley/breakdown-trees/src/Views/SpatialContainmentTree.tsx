@@ -4,21 +4,21 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { Presentation } from "@bentley/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import spatialRulesDefault from "../assets/SpatialBreakdown.json";
 import spatialRulesByType from "../assets/SpatialBreakdownByType.json";
 import spatialRulesByDiscipline from "../assets/SpatialBreakdownByDiscipline.json";
 import spatialRulesByTypeAndDiscipline from "../assets/SpatialBreakdownByTypeAndDiscipline.json";
-import { IModelApp, IModelConnection, SpatialViewState } from "@bentley/imodeljs-frontend";
-import { IPresentationTreeDataProvider, PresentationTreeDataProvider } from "@bentley/presentation-components";
-import { Ruleset } from "@bentley/presentation-common";
-import { populateMapWithCommonMenuItems, ControlledTreeWrapper } from "./TreeWithRuleset";
+import { IModelApp, IModelConnection, SpatialViewState } from "@itwin/core-frontend";
+import { IPresentationTreeDataProvider, PresentationTreeDataProvider } from "@itwin/presentation-components";
+import { Ruleset } from "@itwin/presentation-common";
+import { ControlledTreeWrapper, populateMapWithCommonMenuItems } from "./TreeWithRuleset";
 import { BreakdownTrees } from "../BreakdownTrees";
 import { BuildingClipPlanesProvider, ClearSectionsFunctionalityProvider, CombinedTreeNodeFunctionalityProvider, SpaceClipPlanesProvider, StoryClipPlanesProvider, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders";
-import { ClipAtSpacesHandler, GenericOptionItemHandler, LabelHandler, TopViewHandler, OptionItemHandler } from "./OptionItemHandlers";
+import { ClipAtSpacesHandler, GenericOptionItemHandler, LabelHandler, OptionItemHandler, TopViewHandler } from "./OptionItemHandlers";
 import { LoadableRuleSetComponent } from "./LoadableRuleSetComponent";
 import { ToolbarItemKeys } from "./TreeNodeFunctionsToolbar";
-import { BeEvent } from "@bentley/bentleyjs-core";
+import { BeEvent } from "@itwin/core-bentley";
 
 export interface SpatialContainmentEventHandlers {
   onZoomToElement: BeEvent<() => void>;

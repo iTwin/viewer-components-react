@@ -5,15 +5,15 @@
 
 
 
-import { NodeKey } from "@bentley/presentation-common";
-import { TreeModelNode } from "@bentley/ui-components";
-import { IModelApp, IModelConnection, NotifyMessageDetails, OutputMessagePriority, OutputMessageType } from "@bentley/imodeljs-frontend";
-import { BeEvent, Id64 } from "@bentley/bentleyjs-core";
+import { NodeKey } from "@itwin/presentation-common";
+import { TreeModelNode } from "@itwin/components-react";
+import { IModelApp, IModelConnection, NotifyMessageDetails, OutputMessagePriority, OutputMessageType } from "@itwin/core-frontend";
+import { BeEvent, Id64 } from "@itwin/core-bentley";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
-import { MessageManager, NotifyMessageDetailsType } from "@bentley/ui-framework";
+import { MessageManager, NotifyMessageDetailsType } from "@itwin/appui-react";
 import { DataLink } from "../visibility/DataLink";
 import { BreakdownTrees } from "../../BreakdownTrees";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 export class ZoomFunctionalityProvider extends TreeNodeFunctionalityProvider {
   private _onActionPerformedEvent: BeEvent<() => void>;

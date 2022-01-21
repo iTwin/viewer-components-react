@@ -4,12 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-import { DecorateContext, Decorator, IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
-import { TextOffsetProps, TextOffsetType, TextStyleProps } from "@bentley/measure-tools-react";
-import { ColorDef, ElementProps, GeometricElement3dProps, MassPropertiesOperation, MassPropertiesResponseProps } from "@bentley/imodeljs-common";
+import { DecorateContext, Decorator, IModelApp, IModelConnection } from "@itwin/core-frontend";
+import { TextOffsetProps, TextOffsetType, TextStyleProps } from "@itwin/measure-tools-react";
+import { ColorDef, ElementProps, GeometricElement3dProps, MassPropertiesOperation, MassPropertiesResponseProps } from "@itwin/core-common";
 import { DecorationClickedHandler, SpaceLabelDecoration, SpaceLabelDecorationProps } from "./SpaceLabelDecoration";
-import { assert, Id64Arg } from "@bentley/bentleyjs-core";
-import { Point3d, Range3d } from "@bentley/geometry-core";
+import { assert, Id64Arg } from "@itwin/core-bentley";
+import { Point3d, Range3d } from "@itwin/core-geometry";
 
 export interface SpaceDecorationCreationProps {
   userLabel: string;

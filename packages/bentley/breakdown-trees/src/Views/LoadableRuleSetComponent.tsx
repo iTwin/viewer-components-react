@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { RegisteredRuleset, Ruleset } from "@bentley/presentation-common";
-import { Presentation } from "@bentley/presentation-frontend";
+import { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
+import { Presentation } from "@itwin/presentation-frontend";
 
 export interface LoadedRulesetProps {
   loadedRuleset: Ruleset;

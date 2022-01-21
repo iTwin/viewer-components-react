@@ -3,18 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { TreeModelNode, TreeNodeItem } from "@bentley/ui-components";
+import { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
 import { TestUtils } from "../Utils";
-import { Presentation } from "@bentley/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import sinon from "sinon";
 import { ZoomFunctionalityProvider } from "../../Views/FunctionalityProviders";
-import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport } from "@bentley/imodeljs-frontend";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { ECInstancesNodeKey } from "@bentley/presentation-common";
-import { Code, ElementProps } from "@bentley/imodeljs-common";
+import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport } from "@itwin/core-frontend";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { ECInstancesNodeKey } from "@itwin/presentation-common";
+import { Code, ElementProps } from "@itwin/core-common";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
-import { BeEvent } from "@bentley/bentleyjs-core";
+import { BeEvent } from "@itwin/core-bentley";
 import { DataLink } from "../../Views/visibility/DataLink";
 
 describe("ZoomFunctionalityProvider", () => {
@@ -31,7 +31,7 @@ describe("ZoomFunctionalityProvider", () => {
     await NoRenderApp.startup();
 
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.i18n.registerNamespace("BreakdownTrees");
+    IModelApp.localization.registerNamespace("BreakdownTrees");
 
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
     dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey);

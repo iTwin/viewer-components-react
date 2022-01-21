@@ -4,25 +4,22 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { I18N } from "@bentley/imodeljs-i18n";
 import * as moq from "typemoq";
-import {
-  UiFramework, SyncUiEventDispatcher,
-  ContentControl, ConfigurableCreateInfo, FrameworkReducer,
-} from "@bentley/ui-framework";
-import { UiComponents, TreeNodeItem } from "@bentley/ui-components";
-import { UiCore } from "@bentley/ui-core";
-import { Id64 } from "@bentley/bentleyjs-core";
-import { createStore, combineReducers, Store, AnyAction } from "redux";
-import { IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
-import { Ruleset, ECInstancesNodeKey, InstanceKey, StandardNodeTypes, Node } from "@bentley/presentation-common";
+import { ConfigurableCreateInfo, ContentControl, FrameworkReducer, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
+import { TreeNodeItem, UiComponents } from "@itwin/components-react";
+import { UiCore } from "@itwin/core-react";
+import { Id64 } from "@itwin/core-bentley";
+import { AnyAction, combineReducers, createStore, Store } from "redux";
+import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import { ECInstancesNodeKey, InstanceKey, Node, Ruleset, StandardNodeTypes } from "@itwin/presentation-common";
 import ruleList from "./assets/RulesList.json";
 import faker from "faker";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { PropertyRecord } from "@bentley/ui-abstract";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { PropertyRecord } from "@itwin/appui-abstract";
 import { BreakdownTrees } from "../breakdown-trees-react";
-import { getPropertyRecordAsString } from "@bentley/ui-components/lib/ui-components/common/getPropertyRecordAsString";
+import { getPropertyRecordAsString } from "@itwin/components-react";
 import { TreeWithRulesetControllerBase } from "../Controllers/TreeWithRulesetControllerBase";
+import { Localization } from "@itwin/core-common";
 
 function createAppStore(): Store {
   const rootReducer = combineReducers({
@@ -37,7 +34,7 @@ export class TestContentControl extends ContentControl {
   constructor(info: ConfigurableCreateInfo, options: any) {
     super(info, options);
 
-    this.reactElement = <div />;
+    this.reactNode = <div />;
   }
 }
 
@@ -45,23 +42,20 @@ export class TestUtils {
   private static _uiFrameworkInitialized = false;
   public static store: Store<any, AnyAction>;
 
-  public static get i18n(): I18N {
-    return IModelApp.i18n;
+  public static get localization(): Localization {
+    return IModelApp.localization;
   }
 
-  public static async initializeUiFramework(imodel?: IModelConnection, testAlternateKey = false, _ruleSet: Ruleset = ruleList as Ruleset) {
+  public static async initializeUiFramework(imodel?: IModelConnection, _ruleSet: Ruleset = ruleList as Ruleset) {
     if (!TestUtils._uiFrameworkInitialized) {
       // This is required by our I18n module (specifically the i18next package).
       (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // tslint:disable-line:no-var-requires
       this.store = createAppStore();
 
-      if (testAlternateKey)
-        await UiFramework.initialize(this.store, TestUtils.i18n, "testDifferentFrameworkKey");
-      else
-        await UiFramework.initialize(this.store, TestUtils.i18n);
-      await UiComponents.initialize(TestUtils.i18n);
-      await UiCore.initialize(TestUtils.i18n);
-      await BreakdownTrees.initialize(TestUtils.i18n);
+      await UiFramework.initialize(this.store);
+      await UiComponents.initialize(TestUtils.localization);
+      await UiCore.initialize(TestUtils.localization);
+      await BreakdownTrees.initialize(TestUtils.localization);
       // Set the iModelConnection in the Redux store
       if (imodel)
         UiFramework.setIModelConnection(imodel);
@@ -98,6 +92,7 @@ export const createRandomECInstancesNodeKey = (pathFromRoot?: string[], classNam
     type: StandardNodeTypes.ECInstancesNode,
     pathFromRoot: pathFromRoot || [faker.random.uuid(), faker.random.uuid()],
     instanceKeys,
+    version: 1
   };
 };
 
@@ -159,7 +154,6 @@ export const setupDataProvider = (imodel: IModelConnection, nodes = [createRando
     getNodes,
     getNodeKey,
     getFilteredNodePaths: async () => [],
-    loadHierarchy: async () => { },
     dispose: () => { },
   };
 

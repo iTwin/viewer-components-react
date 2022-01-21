@@ -2,19 +2,19 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { TreeModelNode, TreeNodeItem } from "@bentley/ui-components";
+import { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
 import { TestUtils } from "../Utils";
-import { Presentation, SelectionManager } from "@bentley/presentation-frontend";
+import { Presentation, SelectionManager } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import sinon from "sinon";
-import { IModelApp, IModelConnection, NoRenderApp } from "@bentley/imodeljs-frontend";
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { ECInstancesNodeKey, GroupingNodeKey, RegisteredRuleset } from "@bentley/presentation-common";
+import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { ECInstancesNodeKey, GroupingNodeKey, RegisteredRuleset } from "@itwin/presentation-common";
 import { assert } from "chai";
-import { BeEvent } from "@bentley/bentleyjs-core";
+import { BeEvent } from "@itwin/core-bentley";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
 import spatialRules from "../../assets/SpatialBreakdown.json";
-import { UiFramework } from "@bentley/ui-framework";
+import { UiFramework } from "@itwin/appui-react";
 import { SelectRelatedFunctionalityProvider } from "../../Views/FunctionalityProviders";
 import { RelatedElementIdsProvider } from "../../Views/RelatedElementIdsProvider";
 
@@ -36,7 +36,7 @@ describe("SelectRelatedFunctionalityProvider", () => {
     } catch (error) { }
 
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.i18n.registerNamespace("BreakdownTrees");
+    IModelApp.localization.registerNamespace("BreakdownTrees");
 
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
     dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey);

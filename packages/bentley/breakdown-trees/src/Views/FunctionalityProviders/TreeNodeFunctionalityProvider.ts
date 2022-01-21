@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IPresentationTreeDataProvider } from "@bentley/presentation-components";
-import { TreeModel, TreeModelNode } from "@bentley/ui-components";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { TreeModel, TreeModelNode } from "@itwin/components-react";
 
 export abstract class TreeNodeFunctionalityProvider {
   protected _treeDataProvider: IPresentationTreeDataProvider;

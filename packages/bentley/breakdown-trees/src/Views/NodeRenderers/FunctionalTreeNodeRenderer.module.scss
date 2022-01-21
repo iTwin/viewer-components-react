@@ -3,8 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
-@import "~@bentley/ui-core/lib/ui-core/index";
+@import "~@itwin/core-react/lib/esm/core-react/index";
 .treeNodeLabel {
   height: $uicore-l;
   line-height: $uicore-font-size-small;
@@ -12,7 +11,7 @@
   flex-direction: column;
   justify-content: center;
 }
-.treeNodeWrapper{
+.treeNodeWrapper {
   display: flex;
   flex: $uicore-xxs;
   flex-direction: row;

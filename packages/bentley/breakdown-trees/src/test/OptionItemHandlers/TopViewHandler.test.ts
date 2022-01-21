@@ -2,11 +2,11 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import 'mock-local-storage';
+import "mock-local-storage";
 import { assert } from "chai";
 import * as moq from "typemoq";
-import { TopViewHandler } from '../../Views/OptionItemHandlers';
-import { ToggledTopFitViewFunctionalityProvider } from '../../Views/FunctionalityProviders';
+import { TopViewHandler } from "../../Views/OptionItemHandlers";
+import { ToggledTopFitViewFunctionalityProvider } from "../../Views/FunctionalityProviders";
 
 (global as any).sessionStorage = window.sessionStorage;
 

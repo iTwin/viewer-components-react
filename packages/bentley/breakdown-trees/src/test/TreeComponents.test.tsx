@@ -6,15 +6,15 @@
 import * as React from "react";
 import { Provider } from "react-redux";
 import { mount, shallow } from "enzyme";
-import { IModelApp, NoRenderApp, IModelConnection, SelectionSet } from "@bentley/imodeljs-frontend";
-import { BeEvent } from "@bentley/bentleyjs-core";
+import { IModelApp, IModelConnection, NoRenderApp, SelectionSet } from "@itwin/core-frontend";
+import { BeEvent } from "@itwin/core-bentley";
 import Rules from "../assets/SpatialBreakdown.json";
-import { TestUtils, setupDataProvider, TreeWithRuleSetController } from "./Utils";
+import { setupDataProvider, TestUtils, TreeWithRuleSetController } from "./Utils";
 import * as moq from "typemoq";
-import { RegisteredRuleset, Ruleset } from "@bentley/presentation-common";
-import { Presentation, PresentationManager, RulesetManager, RulesetVariablesManager, IModelHierarchyChangeEventArgs } from "@bentley/presentation-frontend";
+import { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
+import { IModelHierarchyChangeEventArgs, Presentation, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 import { assert } from "chai";
-import { PropertyValueRendererManager, TreeActions, TreeModel, TreeModelNode } from "@bentley/ui-components";
+import { PropertyValueRendererManager, TreeActions, TreeModel, TreeModelNode } from "@itwin/components-react";
 import sinon from "sinon";
 import { TreeNodeFunctionIconInfoMapper } from "../Views/FunctionalityProviders/TreeNodeFunctionIconMapper";
 import { ControlledTreeWrapper } from "../Views/TreeWithRuleset";
@@ -44,7 +44,7 @@ describe("TreeComponent tests.", () => {
     selectionSet.setup((x) => x.elements).returns(() => new Set([]));
     connection.setup((x) => x.selectionSet).returns(() => selectionSet.object);
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.i18n.registerNamespace("BreakdownTrees");
+    IModelApp.localization.registerNamespace("BreakdownTrees");
     controller.setup((x) => x.createDataProvider()).returns(() => setupDataProvider(connection.object));
 
     onHierarchyUpdateEvent = new BeEvent();
