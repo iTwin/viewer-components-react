@@ -24,10 +24,10 @@ export class ToggledTopFitViewFunctionalityProvider extends TreeNodeFunctionalit
     this.isTopViewSet = setTopView;
   }
   private handleTopView() {
-    IModelApp.viewManager.forEachViewport((vp: ScreenViewport) => {
+    for (var vp of IModelApp.viewManager) {
       vp.setStandardRotation(StandardViewId.Top);
       ViewManip.fitView(vp, true);
-    });
+    }
 
     if (IModelApp.viewManager.selectedView?.view.is3d())
       IModelApp.viewManager.selectedView.view.turnCameraOff();

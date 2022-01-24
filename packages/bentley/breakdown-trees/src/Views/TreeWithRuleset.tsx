@@ -7,7 +7,7 @@
 import { useTreeFilteringState } from "./visibility/TreeFilteringState";
 import * as React from "react";
 import { IPresentationTreeDataProvider, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
-import { ControlledTree, HighlightableTreeProps, SelectionMode, TreeModel, TreeModelNode, TreeModelSource, useVisibleTreeNodes } from "@itwin/components-react";
+import { ControlledTree, HighlightableTreeProps, SelectionMode, TreeModel, TreeModelNode, TreeModelSource, useTreeModel } from "@itwin/components-react";
 import styles from "./TreeWithRulesetTree.module.scss";
 import { useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "@itwin/appui-react";
 import { IModelApp, IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -25,6 +25,7 @@ import { BeEvent, IDisposable } from "@itwin/core-bentley";
 import { VisibilityHandler } from "./EventHandlers/VisibilityHandler";
 import classNames from "classnames";
 import "./global.scss";
+import { useResizeObserver } from "@itwin/core-react";
 
 export interface TreeWithRulesetEventHandlers {
   onZoomToElement: BeEvent<() => void>;
@@ -116,9 +117,8 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
   const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
     ruleset: props.loadedRuleset.id,
-    preloadingEnabled: true,
     pagingSize: props.pageSize || 20,
-    dataProvider: props.dataProvider,
+    enableHierarchyAutoUpdate: true
   });
 
   const model: TreeModel = nodeLoader.modelSource.getModel();
@@ -167,7 +167,7 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
     filteredNodeLoader = nodeLoader;
   }
   const filterApplied = filteredNodeLoader !== nodeLoader;
-  const visibleNodes = useVisibleTreeNodes(filteredNodeLoader.modelSource);
+  const treeModel = useTreeModel(filteredNodeLoader.modelSource);
   const viewPort = IModelApp.viewManager.selectedView;
   const visibilityHandler = props.enableVisibility ? useVisibilityHandler(filteredNodeLoader.dataProvider.rulesetId, filteredNodeLoader.dataProvider, filteredNodeLoader.modelSource, viewPort) : undefined;
   const unifiedSelectionEventHandler = useSelectionTrackingUnifiedSelectionTreeEventHandler({ nodeLoader: filteredNodeLoader, collapsedChildrenDisposalEnabled: false, onNewSelectionSetCallback, visibilityHandler });
@@ -181,6 +181,13 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
 
   const nodeRenderer = useNodesWithFunctionsRenderer(props.treeNodeIconMapper, visibilityHandler, model, selectedTreeNodes.length, alterNodeLabel);
 
+  const [height, setHeight] = React.useState(0);
+  const [width, setWidth] = React.useState(0);
+  const handleResize = React.useCallback((w: number, h: number) => {
+    setHeight(h);
+    setWidth(w);
+  }, []);
+  const ref = useResizeObserver<HTMLDivElement>(handleResize);
   return (
     <div className={classNames("custom-tree-component-overwrites", styles.customTreeContent)}>
       <div className={styles.customTreeToolbar}>
@@ -188,16 +195,18 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
         <MoreOptionsButton optionItems={optionHandlerItems} />
       </div>
 
-      <div className={classNames("tree-component-overwrites", styles.customTreeContainer)}>
+      <div ref={ref} className={classNames("tree-component-overwrites", styles.customTreeContainer)}>
         <ControlledTree
-          visibleNodes={visibleNodes}
+          model={treeModel}
           nodeLoader={filteredNodeLoader}
-          treeEvents={unifiedSelectionEventHandler}
+          eventsHandler={unifiedSelectionEventHandler}
           selectionMode={SelectionMode.Extended}
           nodeHighlightingProps={nodeHighlightingProps}
           noDataRenderer={filterApplied ? noFilteredDataRenderer : undefined}
           // pass custom tree renderer that will render each node
           treeRenderer={nodeRenderer}
+          width={width}
+          height={height}
         />
         {overlay}
       </div>

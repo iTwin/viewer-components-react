@@ -7,14 +7,13 @@ import { TestUtils } from "../Utils";
 import { Presentation, SelectionManager } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import sinon from "sinon";
-import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection } from "@itwin/core-frontend";
 import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import { ECInstancesNodeKey, GroupingNodeKey, RegisteredRuleset } from "@itwin/presentation-common";
+import { ECInstancesNodeKey, GroupingNodeKey } from "@itwin/presentation-common";
 import { assert } from "chai";
 import { BeEvent } from "@itwin/core-bentley";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
 import spatialRules from "../../assets/SpatialBreakdown.json";
-import { UiFramework } from "@itwin/appui-react";
 import { SelectRelatedFunctionalityProvider } from "../../Views/FunctionalityProviders";
 import { RelatedElementIdsProvider } from "../../Views/RelatedElementIdsProvider";
 
@@ -26,11 +25,6 @@ describe("SelectRelatedFunctionalityProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
-    if (IModelApp.initialized) {
-      Presentation.terminate();
-      await IModelApp.shutdown();
-    }
-    await NoRenderApp.startup();
     try {
       await Presentation.initialize();
     } catch (error) { }
@@ -54,7 +48,6 @@ describe("SelectRelatedFunctionalityProvider", () => {
   after(async () => {
     TestUtils.terminateUiFramework();
     Presentation.terminate();
-    await IModelApp.shutdown();
   });
 
   it("should perform action for SelectRelatedFunctionalityProvider", async () => {

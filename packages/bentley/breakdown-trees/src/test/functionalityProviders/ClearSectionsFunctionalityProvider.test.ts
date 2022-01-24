@@ -5,11 +5,10 @@
 
 import { TreeModelNode } from "@itwin/components-react";
 import { TestUtils } from "../Utils";
-import { Presentation } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import { ClearSectionsFunctionalityProvider } from "../../Views/FunctionalityProviders";
 import sinon from "sinon";
-import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { assert } from "chai";
 import { FunctionalityProviderTestUtils, MockStrings } from "./FunctionalityProviderTestUtils";
@@ -23,9 +22,6 @@ describe("ClearSectionsFunctionalityProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
-    if (IModelApp.initialized)
-      await IModelApp.shutdown();
-    await NoRenderApp.startup();
     await TestUtils.initializeUiFramework(connection.object);
     IModelApp.localization.registerNamespace("BreakdownTrees");
 
@@ -36,7 +32,6 @@ describe("ClearSectionsFunctionalityProvider", () => {
     isolateRoomsForStoriesStub.restore();
     selectedViewMock.reset();
     TestUtils.terminateUiFramework();
-    await IModelApp.shutdown();
   });
 
   it("should clear a Clipped section and remove section handles", async () => {

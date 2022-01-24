@@ -7,6 +7,7 @@
 
 import { getClassName, UiError } from "@itwin/appui-abstract";
 import { Localization } from "@itwin/core-common";
+import { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
  * Entry point for static initialization required by various
@@ -35,7 +36,7 @@ export class BreakdownTrees {
   }
 
   /** The internationalization service created by the IModelApp. */
-  public static get i18n(): I18N {
+  public static get i18n(): Localization {
     if (!BreakdownTrees._i18n)
       throw new UiError(BreakdownTrees.loggerCategory(this), "BreakdownTrees not initialized");
     return BreakdownTrees._i18n;
@@ -54,8 +55,8 @@ export class BreakdownTrees {
   /** Calls i18n.translateWithNamespace with the "BreakdownTrees" namespace. Do NOT include the namespace in the key.
    * @internal
    */
-  public static translate(key: string | string[]): string {
-    return BreakdownTrees.i18n.translateWithNamespace(BreakdownTrees.i18nNamespace, key);
+  public static translate(key: string | string[], options?: LocalizationOptions): string {
+    return BreakdownTrees.i18n.getLocalizedStringWithNamespace(BreakdownTrees.i18nNamespace, key, options);
   }
 
   /** @internal */

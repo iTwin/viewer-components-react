@@ -6,12 +6,11 @@
 import * as React from "react";
 import * as moq from "typemoq";
 import { ConfigurableCreateInfo, ContentControl, FrameworkReducer, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
-import { TreeNodeItem, UiComponents } from "@itwin/components-react";
-import { UiCore } from "@itwin/core-react";
+import { TreeNodeItem } from "@itwin/components-react";
 import { Id64 } from "@itwin/core-bentley";
 import { AnyAction, combineReducers, createStore, Store } from "redux";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { ECInstancesNodeKey, InstanceKey, Node, Ruleset, StandardNodeTypes } from "@itwin/presentation-common";
+import { ECInstancesNodeKey, InstanceKey, Ruleset, StandardNodeTypes } from "@itwin/presentation-common";
 import ruleList from "./assets/RulesList.json";
 import faker from "faker";
 import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
@@ -53,8 +52,6 @@ export class TestUtils {
       this.store = createAppStore();
 
       await UiFramework.initialize(this.store);
-      await UiComponents.initialize(TestUtils.localization);
-      await UiCore.initialize(TestUtils.localization);
       await BreakdownTrees.initialize(TestUtils.localization);
       // Set the iModelConnection in the Redux store
       if (imodel)
@@ -65,8 +62,6 @@ export class TestUtils {
   }
 
   public static terminateUiFramework() {
-    UiCore.terminate();
-    UiComponents.terminate();
     UiFramework.terminate();
     BreakdownTrees.terminate();
     TestUtils._uiFrameworkInitialized = false;

@@ -5,11 +5,10 @@
 
 import { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
 import { TestUtils } from "../Utils";
-import { Presentation } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import { SpaceClipPlanesProvider } from "../../Views/FunctionalityProviders";
 import sinon from "sinon";
-import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, ViewState } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, ScreenViewport, ViewState } from "@itwin/core-frontend";
 import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { ECInstancesNodeKey } from "@itwin/presentation-common";
 import { assert } from "chai";
@@ -30,9 +29,6 @@ describe("SpaceClipPlanesProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
-    if (IModelApp.initialized)
-      await IModelApp.shutdown();
-    await NoRenderApp.startup();
     await TestUtils.initializeUiFramework(connection.object);
     IModelApp.localization.registerNamespace("BreakdownTrees");
 
@@ -65,7 +61,6 @@ describe("SpaceClipPlanesProvider", () => {
     checkIsSpaceStub.restore();
     createCaptureSpy.restore();
     TestUtils.terminateUiFramework();
-    await IModelApp.shutdown();
   });
   it("should perform action for SpaceClipPlanesProvider", async () => {
     const dummyTreeModelItem: TreeModelNode = FunctionalityProviderTestUtils.createTreeModelNode(MockStrings.IfcWallNode);

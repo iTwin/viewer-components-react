@@ -5,11 +5,10 @@
 
 import { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
 import { TestUtils } from "../Utils";
-import { Presentation } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import { StoryClipPlanesProvider, ToggledTopFitViewFunctionalityProvider } from "../../Views/FunctionalityProviders";
 import sinon from "sinon";
-import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, ViewState } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, ScreenViewport, ViewState } from "@itwin/core-frontend";
 import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { ECInstancesNodeKey } from "@itwin/presentation-common";
 import { assert } from "chai";
@@ -30,11 +29,6 @@ describe("StoryClipPlanesProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
-    if (IModelApp.initialized) {
-      await IModelApp.shutdown();
-    }
-    await NoRenderApp.startup();
-
     await TestUtils.initializeUiFramework(connection.object);
     IModelApp.localization.registerNamespace("BreakdownTrees");
 
@@ -46,7 +40,7 @@ describe("StoryClipPlanesProvider", () => {
     viewStateMock.setup((x) => x.setViewClip(moq.It.isAny()));
     selectedViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
     const viewFlagsMoq = moq.Mock.ofType<ViewFlags>();
-    viewFlagsMoq.setup((x) => x.clone()).returns(() => moq.It.isAnyObject(ViewFlags));
+    viewFlagsMoq.setup((x) => x.with("clipVolume", true)).returns(() => moq.It.isAnyObject(ViewFlags));
     selectedViewMock.setup((x) => x.viewFlags).returns(() => viewFlagsMoq.object);
     IModelApp.viewManager.setSelectedView(selectedViewMock.object);
   });
@@ -55,7 +49,6 @@ describe("StoryClipPlanesProvider", () => {
     selectedViewMock.reset();
     viewStateMock.reset();
     TestUtils.terminateUiFramework();
-    await IModelApp.shutdown();
   });
 
   it("should perform action for StoryClipPlanesProvider", async () => {

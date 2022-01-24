@@ -17,7 +17,7 @@ global.DOMParser = new JSDOM(``, {
   url: "http://localhost"
 }).window.DOMParser;
 
-const frontend = require("@bentley/imodeljs-frontend");
+const frontend = require("@itwin/core-frontend");
 const chai = require("chai");
 const sinonChai = require("sinon-chai");
 const chaiAsPromised = require("chai-as-promised");
@@ -41,7 +41,7 @@ chaiJestSnapshot.addSerializer(require("enzyme-to-json/serializer"));
 
 
 
-const uifwk = require("@bentley/ui-framework");
+const uifwk = require("@itwin/appui-react");
 
 // setup chai
 chai.should();
@@ -53,23 +53,21 @@ try {
   chai.use(require("chai-string"));
 } catch (e) { }
 
-before(function () {
+before(async function () {
   chaiJestSnapshot.resetSnapshotRegistry();
-  let i18nstub = sinon.stub(frontend.IModelApp, "i18n");
+  let i18nstub = sinon.stub(frontend.IModelApp, "localization");
   i18nstub.get(() => ({
     translate: (str) => str,
+    initialize: ([]) => {},
     registerNamespace: (str) => { return { readFinished: Promise.resolve(true) } },
     unregisterNamespace: (str) => { },
-    translateWithNamespace: (ns, key) => { return key; },
-    languageList: () => { return [""]; }
-  }));
-  sinon.stub(frontend.IModelApp, "tools").get(() => ({
-    registerModule: (tool, ns, i18n) => { },
-    create: () => { },
-    run: (tid, args) => { return true; }
+    languageList: () => { return [""]; },
+    getLocalizedStringWithNamespace: (namespace, key) => {return "dummy text"},
+    getLocalizedString: (key) => {return "dummy text"}
   }));
   sinon.stub(uifwk.SyncUiEventDispatcher, "initializeConnectionEvents").returns(undefined);
   sinon.stub(uifwk.SyncUiEventDispatcher, "clearConnectionEvents").returns(undefined);
+  await frontend.NoRenderApp.startup();
 });
 
 after(function () {

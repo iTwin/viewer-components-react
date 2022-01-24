@@ -13,12 +13,11 @@ class RulesetDrivenIdsProvider extends ContentDataProvider {
     this.keys = new KeySet(inputKeys);
   }
   protected shouldConfigureContentDescriptor() { return false; }
-  protected getDescriptorOverrides(): DescriptorOverrides {
-    return {
+  protected getDescriptorOverrides(): Promise<DescriptorOverrides> {
+    return Promise.resolve({
       displayType: this.displayType,
-      contentFlags: ContentFlags.KeysOnly,
-      hiddenFieldNames: [],
-    };
+      contentFlags: ContentFlags.KeysOnly
+    });
   }
   public async getElementIds() {
     const content = await this.getContent();

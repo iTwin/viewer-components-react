@@ -6,14 +6,13 @@
 import * as React from "react";
 import { Provider } from "react-redux";
 import { mount, shallow } from "enzyme";
-import { IModelApp, IModelConnection, NoRenderApp, SelectionSet } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, SelectionSet, ViewState } from "@itwin/core-frontend";
 import { BeEvent } from "@itwin/core-bentley";
 import Rules from "../assets/SpatialBreakdown.json";
 import { setupDataProvider, TestUtils, TreeWithRuleSetController } from "./Utils";
 import * as moq from "typemoq";
 import { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
 import { IModelHierarchyChangeEventArgs, Presentation, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
-import { assert } from "chai";
 import { PropertyValueRendererManager, TreeActions, TreeModel, TreeModelNode } from "@itwin/components-react";
 import sinon from "sinon";
 import { TreeNodeFunctionIconInfoMapper } from "../Views/FunctionalityProviders/TreeNodeFunctionIconMapper";
@@ -27,13 +26,7 @@ describe("TreeComponent tests.", () => {
 
   const connection = moq.Mock.ofType<IModelConnection>();
   const controller = moq.Mock.ofType<TreeWithRuleSetController>();
-  const shutdownIModelApp = async () => {
-    Presentation.terminate();
-    if (IModelApp.initialized)
-      await IModelApp.shutdown();
-  };
   before(async () => {
-    await shutdownIModelApp();
     await NoRenderApp.startup();
     try {
       await Presentation.initialize();
@@ -52,6 +45,12 @@ describe("TreeComponent tests.", () => {
     presentationManagerMock.setup((x) => x.rulesets()).returns(() => rulesetManagerMock.object);
     presentationManagerMock.setup((x) => x.vars(moq.It.isAny())).returns(() => rulesetVariablesManagerMock.object);
     Presentation.setPresentationManager(presentationManagerMock.object);
+
+    const selectedViewMock = moq.Mock.ofType<ScreenViewport>();
+    const viewStateMock = moq.Mock.ofType<ViewState>();
+    viewStateMock.setup((x) => x.isSpatialView()).returns(() => false);
+    selectedViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
+    IModelApp.viewManager.setSelectedView(selectedViewMock.object);
   });
 
 
@@ -66,13 +65,13 @@ describe("TreeComponent tests.", () => {
     rulesetVariablesManagerMock.setup((x) => x.onVariableChanged).returns(() => new BeEvent());
   });
 
-  after(() => {
+  after(async () => {
     (global as any).sessionStorage = undefined;
     TestUtils.terminateUiFramework();
     try {
       Presentation.terminate();
+      await IModelApp.shutdown();
     } catch (error) { }
-    shutdownIModelApp();
   });
 
   it("TreeWithRuleset renders correctly", () => {
@@ -109,30 +108,6 @@ describe("TreeComponent tests.", () => {
       </Provider>
     );
     shallow(wrapper).should.matchSnapshot();
-  });
-
-  it("TreeWithRuleset renders correctly with children", () => {
-    const dataProvider = setupDataProvider(connection.object);
-    const functionIconMapper = new TreeNodeFunctionIconInfoMapper(dataProvider);
-    const wrapper = (
-      <Provider store={TestUtils.store}>
-        <ControlledTreeWrapper
-          dataProvider={dataProvider}
-          setIsDisplayGuids={(_display: boolean) => { }}
-          iModel={connection.object}
-          displayGuids={true}
-          loadedRuleset={Rules as Ruleset} treeNodeIconMapper={functionIconMapper}
-          treeName="TreeWithRulesetTest" optionItems={[]} searchTools={true}
-          enableVisibility={false}
-        />
-      </Provider>
-    );
-    const mountedWrapper = mount(
-      wrapper,
-    );
-    assert(mountedWrapper.exists("SearchBar"), "should contain the SearchBar component");
-    assert(mountedWrapper.exists("SearchBox"), "should contain the SearchBox component");
-    assert(mountedWrapper.exists("ControlledTree"), "should contain the ControlledTree component");
   });
 
   it("TreeNodeWrapper renders correctly", () => {

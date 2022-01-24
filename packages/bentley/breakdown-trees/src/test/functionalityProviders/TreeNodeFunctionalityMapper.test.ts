@@ -3,9 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection } from "@itwin/core-frontend";
 import { TestUtils } from "../Utils";
-import { Presentation } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import sinon from "sinon";
 import { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
@@ -26,10 +25,6 @@ describe("TreeNodeFunctionalityMapper", () => {
   let iModelReadRpcInterfaceStub: sinon.SinonStub;
 
   before(async () => {
-    if (IModelApp.initialized)
-      await IModelApp.shutdown();
-    await NoRenderApp.startup();
-
     await TestUtils.initializeUiFramework(connection.object);
     IModelApp.localization.registerNamespace("BreakdownTrees");
 
@@ -62,7 +57,6 @@ describe("TreeNodeFunctionalityMapper", () => {
   after(async () => {
     iModelReadRpcInterfaceStub.restore();
     TestUtils.terminateUiFramework();
-    await IModelApp.shutdown();
   });
 
 
