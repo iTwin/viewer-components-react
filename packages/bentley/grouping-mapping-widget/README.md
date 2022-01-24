@@ -1,4 +1,4 @@
-# @itwin/grouping-mapping-widget
+# @bentley/grouping-mapping-widget
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 
@@ -16,7 +16,7 @@ This package provides a viewer 'widget'. Documentation on how to add a widget to
 ## Sample usage
 
 ```tsx
-import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
+import { GroupingMappingProvider } from "@bentley/grouping-mapping-widget";
 
 <Viewer
   ...

@@ -1,5 +1,5 @@
 {
-  "name": "@itwin/grouping-mapping-widget",
+  "name": "@bentley/grouping-mapping-widget",
   "version": "0.0.15",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
   "keywords": [
@@ -10,7 +10,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/grouping-mapping-widget"
+    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/bentley/grouping-mapping-widget"
   },
   "license": "MIT",
   "author": {
