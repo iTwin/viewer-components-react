@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { OptionItemHandler } from "./OptionItemHandler";
-import { StoryClipPlanesProvider } from "../FunctionalityProviders";
+import type { StoryClipPlanesProvider } from "../FunctionalityProviders/StoryClipPlanesProvider";
 import { SectioningUtil } from "../visibility/SectioningUtil";
 
 export class LabelHandler extends OptionItemHandler {
@@ -20,8 +20,7 @@ export class LabelHandler extends OptionItemHandler {
     sessionStorage.setItem(LabelHandler.SPACE_LABEL_STORAGE_KEY, String(this.clipSectionProvider.showSpaceLabels));
     SectioningUtil.setSpaceLabelVisible(this.clipSectionProvider.showSpaceLabels);
   }
-  // tslint:disable-next-line:prefer-get
-  public isActive(): boolean {
+  public getIsActive(): boolean {
     return this.clipSectionProvider.showSpaceLabels;
   }
 }

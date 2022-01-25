@@ -18,7 +18,6 @@ describe("GenericOptionItemHandler", () => {
     sessionStorage.clear();
   });
 
-
   it("should get the value on init", async () => {
     let initialCondition = true;
     const setInitialValue = ((initialVal: boolean) => {
@@ -27,7 +26,7 @@ describe("GenericOptionItemHandler", () => {
     });
     const genericHandler = new GenericOptionItemHandler("tests", "generic handler", "anyicon", () => initialCondition, setInitialValue);
     genericHandler._setItemState(initialCondition);
-    const returnValue = genericHandler.isActive();
+    const returnValue = genericHandler.getIsActive();
     assert.isTrue(returnValue);
     assert.equal(sessionStorage.getItem(GENERIC_STORAGE_KEY), String(initialCondition));
   });
@@ -41,7 +40,7 @@ describe("GenericOptionItemHandler", () => {
     const genericHandler = new GenericOptionItemHandler("tests", "generic handler", "anyicon", () => initialCondition, setInitialValue);
     genericHandler._setItemState(initialCondition);
     genericHandler.toggle();
-    const returnValue = genericHandler.isActive();
+    const returnValue = genericHandler.getIsActive();
     assert.isFalse(returnValue);
     assert.equal(sessionStorage.getItem(GENERIC_STORAGE_KEY), "false");
   });

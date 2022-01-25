@@ -5,8 +5,8 @@
 
 import { IconButton } from "./IconButton";
 import * as React from "react";
-import { TreeModel, TreeModelNode } from "@itwin/components-react";
-import { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders";
+import type { TreeModel, TreeModelNode } from "@itwin/components-react";
+import type { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders/TreeNodeFunctionIconMapper";
 
 export enum ToolbarItemKeys {
   zoom = "ZoomToSelectedElements",
@@ -25,22 +25,21 @@ export const TreeNodeFunctionsToolbar: React.FC<TreeNodeFunctionsToolbarProps> =
   const [clickedInfo, setClickedInfo] = React.useState<FunctionIconInfo | undefined>(undefined);
 
   React.useEffect(() => {
-    getToolbarIcons(props.treeNodeIconMapper, props.selectedNodes, setClickedInfo)
-      .then((icons) => setToolbarIcons(icons))
+    getToolbarIcons(props.treeNodeIconMapper, props.selectedNodes, setClickedInfo) // eslint-disable-line @typescript-eslint/no-floating-promises
+      .then((icons) => setToolbarIcons(icons));
   }, [props.treeNodeIconMapper, props.selectedNodes]);
 
-  React.useMemo(() => {
+  React.useMemo(async () => { // eslint-disable-line @typescript-eslint/no-floating-promises
     if (clickedInfo) {
-      clickedInfo.functionalityProvider.performAction(props.selectedNodes, props.treeModel);
+      await clickedInfo.functionalityProvider.performAction(props.selectedNodes, props.treeModel);
       setClickedInfo(undefined);
     }
-  }, [clickedInfo, props.selectedNodes, props.treeModel])
+  }, [clickedInfo, props.selectedNodes, props.treeModel]);
 
   return (<div className="custom-tree-toolbar">
     {toolBarIcons}
   </div>);
 };
-
 
 async function getToolbarIcons(iconMapper: TreeNodeFunctionIconInfoMapper, selectedNodes: TreeModelNode[], setClickedInfo: (info: FunctionIconInfo) => void) {
   const items: React.ReactNode[] = [];
@@ -64,7 +63,7 @@ async function getToolbarIcons(iconMapper: TreeNodeFunctionIconInfoMapper, selec
         icon={info.toolbarIcon}
         className={"toolbar-icon"}
         disabled={info.disabled !== false}
-        onClick={() => { setClickedInfo(info) }}
+        onClick={() => { setClickedInfo(info); }}
         title={info.label}
       />,
     );

@@ -3,14 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { TreeModelChanges, TreeModelNode, TreeModelSource } from "@itwin/components-react";
+import type { TreeModelChanges, TreeModelNode, TreeModelSource } from "@itwin/components-react";
 import { useDisposable } from "@itwin/core-react";
-import { VisibilityTreeEventHandler, VisibilityTreeEventHandlerParams } from "@itwin/appui-react";
+import type { VisibilityTreeEventHandlerParams } from "@itwin/appui-react";
+import { VisibilityTreeEventHandler } from "@itwin/appui-react";
 
 export interface SelectionTrackingUnifiedSelectionTreeEventHandlerParams extends VisibilityTreeEventHandlerParams {
   onNewSelectionSetCallback: (newSelection: TreeModelNode[]) => void;
 }
-
 
 export class SelectionTrackingUnifiedSelectionTreeEventHandler extends VisibilityTreeEventHandler {
   private _onNewSelectionSetCallback: (newSelection: TreeModelNode[]) => void;
@@ -19,10 +19,10 @@ export class SelectionTrackingUnifiedSelectionTreeEventHandler extends Visibilit
     super(params);
     this._onNewSelectionSetCallback = params.onNewSelectionSetCallback;
   }
-  private collectSelectedNodes(modelSource: TreeModelSource) : TreeModelNode[]{
+  private collectSelectedNodes(modelSource: TreeModelSource): TreeModelNode[]{
     const nodeIterator = modelSource.getModel().iterateTreeModelNodes();
-    let selectedNodes: TreeModelNode[] = [];
-    for (let treeNode of nodeIterator){
+    const selectedNodes: TreeModelNode[] = [];
+    for (const treeNode of nodeIterator){
       if (treeNode.isSelected)
         selectedNodes.push(treeNode);
     }

@@ -3,13 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
-import { BeButtonEvent, EmphasizeElements, IModelApp, IModelConnection, Tool, Viewport, ViewState3d } from "@itwin/core-frontend";
-import { ClipPlane, ClipPrimitive, ClipVector, ConvexClipPlaneSet, Plane3dByOriginAndUnitNormal, Point3d, Range3d, Vector3d } from "@itwin/core-geometry";
+import type { BeButtonEvent, IModelConnection, Tool, Viewport } from "@itwin/core-frontend";
+import { EmphasizeElements, IModelApp } from "@itwin/core-frontend";
+import type { Range3d } from "@itwin/core-geometry";
+import { ClipPlane, ClipPrimitive, ClipVector, ConvexClipPlaneSet, Plane3dByOriginAndUnitNormal, Point3d, Vector3d } from "@itwin/core-geometry";
 import { ColorDef } from "@itwin/core-common";
 import { DataLink } from "./DataLink";
 import { SpaceLabelDecorator } from "./SpaceLabelDecorator";
-import { SpaceLabelDecoration } from "./SpaceLabelDecoration";
+import type { SpaceLabelDecoration } from "./SpaceLabelDecoration";
 import { Logger } from "@itwin/core-bentley";
 
 export class SectioningUtil {
@@ -152,7 +153,6 @@ export class SectioningUtil {
 
     planeSet.addPlaneToConvexSet(ClipPlane.createPlane(plane));
   }
-
 
   public static emphasizeRooms(vp: Viewport, roomIds: string[]) {
     const emph = EmphasizeElements.getOrCreate(vp);

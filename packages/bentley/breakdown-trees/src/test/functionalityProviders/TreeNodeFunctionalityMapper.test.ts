@@ -3,20 +3,22 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { TestUtils } from "../Utils";
 import * as moq from "typemoq";
 import sinon from "sinon";
-import { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import { ECInstancesNodeKey, GroupingNodeKey } from "@itwin/presentation-common";
+import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { ECInstancesNodeKey, GroupingNodeKey } from "@itwin/presentation-common";
 import { assert } from "chai";
-import { IModelReadRpcInterface, IModelRpcProps } from "@itwin/core-common";
+import type { IModelRpcProps } from "@itwin/core-common";
+import { IModelReadRpcInterface } from "@itwin/core-common";
 import { BeEvent } from "@itwin/core-bentley";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
 import spatialRules from "../../assets/SpatialBreakdown.json";
-import { ClearSectionsFunctionalityProvider, FunctionIconInfo, SelectRelatedFunctionalityProvider, TreeNodeFunctionIconInfoMapper, ZoomFunctionalityProvider } from "../../Views/FunctionalityProviders";
-
+import type { FunctionIconInfo } from "../../Views/FunctionalityProviders";
+import { ClearSectionsFunctionalityProvider, SelectRelatedFunctionalityProvider, TreeNodeFunctionIconInfoMapper, ZoomFunctionalityProvider } from "../../Views/FunctionalityProviders";
 
 describe("TreeNodeFunctionalityMapper", () => {
   const connection = moq.Mock.ofType<IModelConnection>();
@@ -26,7 +28,7 @@ describe("TreeNodeFunctionalityMapper", () => {
 
   before(async () => {
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.localization.registerNamespace("BreakdownTrees");
+    await IModelApp.localization.registerNamespace("BreakdownTrees");
 
     const imodelRpcPropsMock = moq.Mock.ofType<IModelRpcProps>();
     connection.setup((x) => x.getRpcProps()).returns(() => imodelRpcPropsMock.object);
@@ -44,11 +46,11 @@ describe("TreeNodeFunctionalityMapper", () => {
     dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.UnrelatedNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => unrelatedNodeKey);
     dataProviderMock.setup((x) => x.imodel).returns(() => connection.object);
 
-    iModelReadRPCInterfaceMock.setup((x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.IfcWall)).returns(() => Promise.resolve([MockClassNames.IfcWall, MockClassNames.BaseWall, MockClassNames.PhysicalElement]));
-    iModelReadRPCInterfaceMock.setup((x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.OBDWall)).returns(() => Promise.resolve([MockClassNames.OBDWall, MockClassNames.BaseWall, MockClassNames.PhysicalElement]));
-    iModelReadRPCInterfaceMock.setup((x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.Door)).returns(() => Promise.resolve([MockClassNames.Door, MockClassNames.BaseDoor, MockClassNames.PhysicalElement]));
-    iModelReadRPCInterfaceMock.setup((x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.Window)).returns(() => Promise.resolve([MockClassNames.Window, MockClassNames.BaseWindow, MockClassNames.PhysicalElement]));
-    iModelReadRPCInterfaceMock.setup((x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.UnrelatedClass)).returns(() => Promise.resolve([MockClassNames.UnrelatedClass]));
+    iModelReadRPCInterfaceMock.setup(async (x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.IfcWall)).returns(async () => Promise.resolve([MockClassNames.IfcWall, MockClassNames.BaseWall, MockClassNames.PhysicalElement]));
+    iModelReadRPCInterfaceMock.setup(async (x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.OBDWall)).returns(async () => Promise.resolve([MockClassNames.OBDWall, MockClassNames.BaseWall, MockClassNames.PhysicalElement]));
+    iModelReadRPCInterfaceMock.setup(async (x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.Door)).returns(async () => Promise.resolve([MockClassNames.Door, MockClassNames.BaseDoor, MockClassNames.PhysicalElement]));
+    iModelReadRPCInterfaceMock.setup(async (x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.Window)).returns(async () => Promise.resolve([MockClassNames.Window, MockClassNames.BaseWindow, MockClassNames.PhysicalElement]));
+    iModelReadRPCInterfaceMock.setup(async (x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.UnrelatedClass)).returns(async () => Promise.resolve([MockClassNames.UnrelatedClass]));
 
     iModelReadRpcInterfaceStub = sinon.stub(IModelReadRpcInterface, "getClient");
     iModelReadRpcInterfaceStub.returns(iModelReadRPCInterfaceMock.object);
@@ -59,7 +61,6 @@ describe("TreeNodeFunctionalityMapper", () => {
     TestUtils.terminateUiFramework();
   });
 
-
   it("should insert and query group functionality providers", async () => {
     const functionalityMapper = new TreeNodeFunctionIconInfoMapper(dataProviderMock.object);
     const zoomProviderReference: FunctionIconInfo = { key: "Zoom", label: "Zoom to Element", toolbarIcon: "icon-zoom", functionalityProvider: new ZoomFunctionalityProvider("tests", dataProviderMock.object, new BeEvent()) };
@@ -69,7 +70,7 @@ describe("TreeNodeFunctionalityMapper", () => {
 
     const dummyTreeModelItem: TreeModelNode = FunctionalityProviderTestUtils.createTreeModelNode(MockStrings.GroupNode);
 
-    let returnedProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyTreeModelItem);
+    const returnedProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyTreeModelItem);
     const enabledProvidersList = filterEnabledNodes(returnedProvidersList);
     const indexProvider1 = findItemIndexInArray(zoomProviderReference, enabledProvidersList);
     const indexProvider2 = findItemIndexInArray(zoomProviderReference2, enabledProvidersList);
@@ -78,8 +79,6 @@ describe("TreeNodeFunctionalityMapper", () => {
     assert.isTrue(indexProvider2 >= 0);
     assert.notStrictEqual(indexProvider2, indexProvider1);
   });
-
-
 
   it("should insert and query class-specific functionality providers", async () => {
     const functionalityMapper = new TreeNodeFunctionIconInfoMapper(dataProviderMock.object);
@@ -99,12 +98,12 @@ describe("TreeNodeFunctionalityMapper", () => {
     const dummyUnrelatedNode: TreeModelNode = FunctionalityProviderTestUtils.createTreeModelNode(MockStrings.UnrelatedNode);
     const dummyGroupNode: TreeModelNode = FunctionalityProviderTestUtils.createTreeModelNode(MockStrings.GroupNode);
 
-    let returnedGroupProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyGroupNode);
-    let enabledGroupProvidersList = filterEnabledNodes(returnedGroupProvidersList);
+    const returnedGroupProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyGroupNode);
+    const enabledGroupProvidersList = filterEnabledNodes(returnedGroupProvidersList);
     assert.isEmpty(enabledGroupProvidersList, "no functionality providers should be enabled for grouping node");
 
-    let returnedDoorProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyDoorNode);
-    let enabledDoorProvidersList = filterEnabledNodes(returnedDoorProvidersList);
+    const returnedDoorProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyDoorNode);
+    const enabledDoorProvidersList = filterEnabledNodes(returnedDoorProvidersList);
     const indexDoorProvider1 = findItemIndexInArray(zoomProviderReference, enabledDoorProvidersList);
     const indexDoorProvider2 = findItemIndexInArray(selectAllRelatedReference, enabledDoorProvidersList);
     const indexDoorProvider3 = findItemIndexInArray(clearSectionsReference, enabledDoorProvidersList);
@@ -113,31 +112,30 @@ describe("TreeNodeFunctionalityMapper", () => {
     assert.isTrue(indexDoorProvider2 >= 0, "doornode should have selectAllRelatedProvider");
     assert.isTrue(indexDoorProvider3 >= 0, "doornode should have clearSectionsProvider");
 
-    let returnedWindowProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyWindowNode);
-    let enabledWindowProvidersList = filterEnabledNodes(returnedWindowProvidersList);
+    const returnedWindowProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyWindowNode);
+    const enabledWindowProvidersList = filterEnabledNodes(returnedWindowProvidersList);
     const indexWindowProvider1 = findItemIndexInArray(clearSectionsReference, enabledWindowProvidersList);
     assert.strictEqual(enabledWindowProvidersList?.length, 1, "windownode should have 1 functionalityproviders");
     assert.isTrue(indexWindowProvider1 >= 0, "windownode should have clearSectionsProvider");
 
-
-    let returnedIfcWallProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyIfcWallNode);
-    let enabledIfcWallProvidersList = filterEnabledNodes(returnedIfcWallProvidersList);
+    const returnedIfcWallProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyIfcWallNode);
+    const enabledIfcWallProvidersList = filterEnabledNodes(returnedIfcWallProvidersList);
     const indexIfcWallProvider1 = findItemIndexInArray(zoomProviderReference2, enabledIfcWallProvidersList);
     const indexIfcWallProvider2 = findItemIndexInArray(clearSectionsReference, enabledIfcWallProvidersList);
     assert.strictEqual(enabledIfcWallProvidersList?.length, 2, "ifcwallnode should have 2 functionalityproviders");
     assert.isTrue(indexIfcWallProvider1 >= 0, "ifcwallnode should have zoomProvider2");
     assert.isTrue(indexIfcWallProvider2 >= 0, "ifcwallnode should have clearSectionsReference");
 
-    let returnedOBDWallProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyOBDWallNode);
-    let enabledOBDWallProvidersList = filterEnabledNodes(returnedOBDWallProvidersList);
+    const returnedOBDWallProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyOBDWallNode);
+    const enabledOBDWallProvidersList = filterEnabledNodes(returnedOBDWallProvidersList);
     const indexOBDWallProvider1 = findItemIndexInArray(zoomProviderReference2, enabledOBDWallProvidersList);
     const indexOBDWallProvider2 = findItemIndexInArray(clearSectionsReference, enabledOBDWallProvidersList);
     assert.strictEqual(enabledOBDWallProvidersList?.length, 2, "obdwallnode should have 2 functionalityproviders");
     assert.isTrue(indexOBDWallProvider1 >= 0, "obdwallnode should have zoomProvider2");
     assert.isTrue(indexOBDWallProvider2 >= 0, "obdwallnode should have clearSectionsReference");
 
-    let returnedUnrelatedNodeProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyUnrelatedNode);
-    let enabledUnrelatedProvidersList = filterEnabledNodes(returnedUnrelatedNodeProvidersList);
+    const returnedUnrelatedNodeProvidersList = await functionalityMapper.getFunctionIconInfosFor(dummyUnrelatedNode);
+    const enabledUnrelatedProvidersList = filterEnabledNodes(returnedUnrelatedNodeProvidersList);
     assert.isEmpty(enabledUnrelatedProvidersList, "no functionality providers should be defined for grouping node");
   });
 });

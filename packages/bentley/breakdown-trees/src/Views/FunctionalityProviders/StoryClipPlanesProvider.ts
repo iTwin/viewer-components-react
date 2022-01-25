@@ -4,12 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { NodeKey } from "@itwin/presentation-common";
-import { TreeModelNode } from "@itwin/components-react";
+import type { TreeModelNode } from "@itwin/components-react";
 import { IModelApp, NotifyMessageDetails, OutputMessagePriority, OutputMessageType } from "@itwin/core-frontend";
 import { ToggledTopFitViewFunctionalityProvider } from "./ToggledTopFitViewFunctionalityProvider";
 import { SectioningUtil } from "../visibility/SectioningUtil";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import { MessageManager, NotifyMessageDetailsType } from "@itwin/appui-react";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { NotifyMessageDetailsType } from "@itwin/appui-react";
+import { MessageManager } from "@itwin/appui-react";
 import { BreakdownTrees } from "../../BreakdownTrees";
 
 export class StoryClipPlanesProvider extends ToggledTopFitViewFunctionalityProvider {
@@ -53,7 +54,7 @@ export class StoryClipPlanesProvider extends ToggledTopFitViewFunctionalityProvi
     if (NodeKey.isInstancesNodeKey(elementKey)) {
       const instanceId = elementKey.instanceKeys[0].id;
       if (await this.createSectionPlane(instanceId))
-        super.performAction([node]);
+        await super.performAction([node]);
     }
   }
 

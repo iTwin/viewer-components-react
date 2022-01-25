@@ -3,25 +3,30 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { useTreeFilteringState } from "./visibility/TreeFilteringState";
 import * as React from "react";
-import { IPresentationTreeDataProvider, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
-import { ControlledTree, HighlightableTreeProps, SelectionMode, TreeModel, TreeModelNode, TreeModelSource, useTreeModel } from "@itwin/components-react";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+import type { HighlightableTreeProps, TreeModel, TreeModelNode, TreeModelSource } from "@itwin/components-react";
+import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import styles from "./TreeWithRulesetTree.module.scss";
 import { useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "@itwin/appui-react";
-import { IModelApp, IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { BreakdownTrees } from "../BreakdownTrees";
-import { FunctionIconInfo, SelectRelatedFunctionalityProvider, TreeNodeFunctionIconInfoMapper, ZoomFunctionalityProvider } from "./FunctionalityProviders";
+import type { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders";
+import { SelectRelatedFunctionalityProvider } from "./FunctionalityProviders/SelectRelatedFunctionalityProvider";
+import { ZoomFunctionalityProvider } from "./FunctionalityProviders/ZoomFunctionalityProvider";
 import { SearchBar } from "./SearchBar/SearchBar";
-import { NodeKey, Ruleset } from "@itwin/presentation-common";
+import type { Ruleset } from "@itwin/presentation-common";
+import { NodeKey } from "@itwin/presentation-common";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { OptionItemHandler } from "./OptionItemHandlers";
+import type { OptionItemHandler } from "./OptionItemHandlers/OptionItemHandler";
 import { useSelectionTrackingUnifiedSelectionTreeEventHandler } from "./EventHandlers/SelectionTrackingUnifiedSelectionTreeEventHandler";
 import { useNodesWithFunctionsRenderer } from "./NodeRenderers/FunctionalTreeNodeRenderer";
 import { MoreOptionsButton } from "./MoreOptionsButton";
 import { ToolbarItemKeys, TreeNodeFunctionsToolbar } from "./TreeNodeFunctionsToolbar";
-import { BeEvent, IDisposable } from "@itwin/core-bentley";
+import type { BeEvent, IDisposable } from "@itwin/core-bentley";
 import { VisibilityHandler } from "./EventHandlers/VisibilityHandler";
 import classNames from "classnames";
 import "./global.scss";
@@ -51,7 +56,6 @@ export interface ControlledTreeProps {
   eventHandlers?: TreeWithRulesetEventHandlers;
 }
 
-
 /**
  * Controlled tree wrapper.
  * **Note:** it is required for the tree to use [[PresentationTreeDataProvider]]
@@ -60,7 +64,6 @@ export interface ControlledTreeProps {
 // tslint:disable-next-line:variable-name naming-convention
 export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: ControlledTreeProps) => {
   const [selectedTreeNodes, setSelectedTreeNodes] = React.useState<TreeModelNode[]>([]);
-
 
   const alterNodeLabel = React.useCallback((node: TreeModelNode): PropertyRecord => {
     if (!props.displayGuids) {
@@ -77,73 +80,73 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
   }, [props.displayGuids, props.dataProvider]);
 
   const expandTree = () => {
-    const selectionSet = props.iModel.selectionSet.elements;
-    if (selectionSet.size === 0 || selectionSet.size > 10) {
+    const selectedElemId = props.iModel.selectionSet.elements;
+    if (selectedElemId.size === 0 || selectedElemId.size > 10) {
       return;
     }
-    const model = nodeLoader.modelSource.getModel();
+    const treeModelData = nodeLoader.modelSource.getModel();
     let selectedNodesCount: number = 0;
     // Find corresponding treeNodes from selected elements in view
-    for (const treeNode of model.iterateTreeModelNodes()) {
+    for (const treeNode of treeModelData.iterateTreeModelNodes()) {
       const nodeKey = props.dataProvider.getNodeKey(treeNode.item);
       if (NodeKey.isInstancesNodeKey(nodeKey)) {
-        const mappedInstance = nodeKey.instanceKeys.find((instanceKey) => selectionSet.has(instanceKey.id));
+        const mappedInstance = nodeKey.instanceKeys.find((instanceKey) => selectedElemId.has(instanceKey.id));
         if (mappedInstance) {
           selectedNodesCount++;
-          expandParentNodes(treeNode, model);
+          expandParentNodes(treeNode, treeModelData);
         }
       }
 
-      if (selectionSet.size === selectedNodesCount)
+      if (selectedElemId.size === selectedNodesCount)
         break;
     }
   };
 
-  const expandParentNodes = (treeNode: TreeModelNode, model: TreeModel) => {
+  const expandParentNodes = (treeNode: TreeModelNode, treeModelData: TreeModel) => {
     if (treeNode.parentId) {
-      const parentNode = model.getNode(treeNode.parentId);
+      const parentNode = treeModelData.getNode(treeNode.parentId);
       if (parentNode) {
         if (!parentNode.isExpanded) {
           unifiedSelectionEventHandler.onNodeExpanded({ nodeId: parentNode.id });
         }
-        expandParentNodes(parentNode, model);
+        expandParentNodes(parentNode, treeModelData);
       }
     }
   };
 
   const optionHandlerItems = [...props.optionItems];
-  const onNewSelectionSetCallback = React.useCallback((newSelection: TreeModelNode[]) => { setSelectedTreeNodes(newSelection) }, []);
+  const onNewSelectionSetCallback = React.useCallback((newSelection: TreeModelNode[]) => { setSelectedTreeNodes(newSelection); }, []);
 
   const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
     ruleset: props.loadedRuleset.id,
     pagingSize: props.pageSize || 20,
-    enableHierarchyAutoUpdate: true
+    enableHierarchyAutoUpdate: true,
   });
 
   const model: TreeModel = nodeLoader.modelSource.getModel();
   let overlay: React.ReactNode;
   let filteredNodeLoader: any;
   let nodeHighlightingProps: HighlightableTreeProps | undefined;
-  let noFilteredDataRenderer: any;
   let searchBar: React.ReactNode;
   let isFilteringOn = false;
   const functionsToolbar = <TreeNodeFunctionsToolbar treeNodeIconMapper={props.treeNodeIconMapper} selectedNodes={selectedTreeNodes} treeModel={model} />;
+  const {
+    searchOptions,
+    filterString,
+    activeMatchIndex,
+    onFilterApplied,
+  } = useTreeFilteringState();
+  const noFilteredDataRenderer = React.useCallback(() => {
+    return <VisibilityTreeNoFilteredData
+      title={BreakdownTrees.translate("searchTool.noData")}
+      message={BreakdownTrees.translate("searchTool.noMatchingItem")}
+    />;
+  }, []);
+
+  const filterInfo = { filter: filterString, activeMatchIndex };
+  const treeFiltering = useVisibilityTreeFiltering(nodeLoader, filterInfo, onFilterApplied);
   if (props.searchTools) {
-    const {
-      searchOptions,
-      filterString,
-      activeMatchIndex,
-      onFilterApplied,
-    } = useTreeFilteringState();
-    noFilteredDataRenderer = React.useCallback(() => {
-      return <VisibilityTreeNoFilteredData
-        title={BreakdownTrees.translate("searchTool.noData")}
-        message={BreakdownTrees.translate("searchTool.noMatchingItem")}
-      />;
-    }, []);
-    const filterInfo = { filter: filterString, activeMatchIndex };
-    const treeFiltering = useVisibilityTreeFiltering(nodeLoader, filterInfo, onFilterApplied);
     filteredNodeLoader = treeFiltering.filteredNodeLoader;
     nodeHighlightingProps = treeFiltering.nodeHighlightingProps;
     overlay = treeFiltering.isFiltering ? <div className={styles.filteredTreeOverlay} /> : undefined;
@@ -169,7 +172,7 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
   const filterApplied = filteredNodeLoader !== nodeLoader;
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
   const viewPort = IModelApp.viewManager.selectedView;
-  const visibilityHandler = props.enableVisibility ? useVisibilityHandler(filteredNodeLoader.dataProvider.rulesetId, filteredNodeLoader.dataProvider, filteredNodeLoader.modelSource, viewPort) : undefined;
+  const visibilityHandler = useVisibilityHandler(filteredNodeLoader.dataProvider.rulesetId, filteredNodeLoader.dataProvider, filteredNodeLoader.modelSource, viewPort);
   const unifiedSelectionEventHandler = useSelectionTrackingUnifiedSelectionTreeEventHandler({ nodeLoader: filteredNodeLoader, collapsedChildrenDisposalEnabled: false, onNewSelectionSetCallback, visibilityHandler });
 
   const toolBarSection = props.searchTools ? searchBar : functionsToolbar;
@@ -177,9 +180,9 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
   React.useEffect(() => {
     if (!isFilteringOn)
       expandTree();
-  }, [selectionSet, isFilteringOn]);
+  }, [selectionSet, isFilteringOn]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const nodeRenderer = useNodesWithFunctionsRenderer(props.treeNodeIconMapper, visibilityHandler, model, selectedTreeNodes.length, alterNodeLabel);
+  const nodeRenderer = useNodesWithFunctionsRenderer(props.enableVisibility, props.treeNodeIconMapper, visibilityHandler, model, selectedTreeNodes.length, alterNodeLabel);
 
   const [height, setHeight] = React.useState(0);
   const [width, setWidth] = React.useState(0);
@@ -237,13 +240,13 @@ export function populateMapWithCommonMenuItems(treeName: string, treeFunctionali
   treeFunctionalityMapper.registerForNodesOfClasses(["BisCore:GeometricElement3d"], {
     key: ToolbarItemKeys.zoom,
     label: BreakdownTrees.translate("contextMenu.zoomSelectedLabel"),
-    functionalityProvider: new ZoomFunctionalityProvider(treeName, dataProvider, eventHandlers?.onZoomToElement!),
+    functionalityProvider: new ZoomFunctionalityProvider(treeName, dataProvider, eventHandlers?.onZoomToElement),
     toolbarIcon: "icon-re-center",
   });
   const selectRelatedIcon: FunctionIconInfo = {
     key: ToolbarItemKeys.selectRelated,
     label: BreakdownTrees.translate("contextMenu.selectRelatedLabel"),
-    functionalityProvider: new SelectRelatedFunctionalityProvider(treeName, dataProvider, rulesetId, eventHandlers?.onSelectRelated!),
+    functionalityProvider: new SelectRelatedFunctionalityProvider(treeName, dataProvider, rulesetId, eventHandlers?.onSelectRelated),
     toolbarIcon: "icon-selection",
   };
   treeFunctionalityMapper.registerGlobal(selectRelatedIcon);

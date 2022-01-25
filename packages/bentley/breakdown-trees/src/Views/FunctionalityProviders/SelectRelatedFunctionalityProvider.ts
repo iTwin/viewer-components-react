@@ -3,21 +3,20 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { KeySet, NodeKey } from "@itwin/presentation-common";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
-import { DelayLoadedTreeNodeItem, TreeModelNode, TreeNodeItem } from "@itwin/components-react";
-import { IModelConnection } from "@itwin/core-frontend";
+import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
 import { RelatedElementIdsProvider } from "../RelatedElementIdsProvider";
-import { BeEvent, Id64String } from "@itwin/core-bentley";
+import type { BeEvent, Id64String } from "@itwin/core-bentley";
 
 export class SelectRelatedFunctionalityProvider extends TreeNodeFunctionalityProvider {
   private _rulesetId: string;
-  private _onActionPerformedEvent: BeEvent<() => void>;
+  private _onActionPerformedEvent: BeEvent<() => void> | undefined;
 
-  constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider, rulesetId: string, onActionPerformedEvent: BeEvent<() => void>) {
+  constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider, rulesetId: string, onActionPerformedEvent: BeEvent<() => void> | undefined) {
     super(functionalitySourceName, treeDataProvider);
     this._rulesetId = rulesetId;
     this._onActionPerformedEvent = onActionPerformedEvent;
@@ -51,7 +50,7 @@ export class SelectRelatedFunctionalityProvider extends TreeNodeFunctionalityPro
     }
     return null;
   }
-  private getAllChildNodesFromRule(imodel: IModelConnection, rulesetId: string, instanceId: Id64String) {
+  private async getAllChildNodesFromRule(imodel: IModelConnection, rulesetId: string, instanceId: Id64String) {
     const provider = new RelatedElementIdsProvider(imodel, rulesetId, instanceId);
     return provider.getElementIds();
   }

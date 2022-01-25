@@ -3,19 +3,19 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import * as React from "react";
-import { Ruleset } from "@itwin/presentation-common";
+import type { Ruleset } from "@itwin/presentation-common";
 import { ControlledTreeWrapper, populateMapWithCommonMenuItems } from "./TreeWithRuleset";
-import { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders";
-import { IPresentationTreeDataProvider, PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { IModelConnection } from "@itwin/core-frontend";
+import { TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders/TreeNodeFunctionIconMapper";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { PresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IModelConnection } from "@itwin/core-frontend";
 import componentIndex from "../assets/ComponentIndex.json";
 import { BreakdownTrees } from "../BreakdownTrees";
-import { GenericOptionItemHandler, OptionItemHandler } from "./OptionItemHandlers";
+import type { OptionItemHandler } from "./OptionItemHandlers";
+import { GenericOptionItemHandler } from "./OptionItemHandlers/GenericOptionItemHandler";
 import { LoadableRuleSetComponent } from "./LoadableRuleSetComponent";
-import { ToolbarItemKeys } from "./TreeNodeFunctionsToolbar";
-import { BeEvent } from "@itwin/core-bentley";
+import type { BeEvent } from "@itwin/core-bentley";
 
 export interface ComponentIndexEventHandlers {
   onZoomToElement: BeEvent<() => void>;
@@ -45,15 +45,15 @@ export const ComponentIndex: React.FC<ComponentIndexProps> = (props: ComponentIn
   );
 
   const { functionIconMapper, optionItems, displayGuidHandler } = React.useMemo(() => {
-    const functionIconMapper = props.additionalFunctionIconMapper ?? new TreeNodeFunctionIconInfoMapper(dataProvider);
-    const optionItems: OptionItemHandler[] = [];
+    const functionIconMapperInner = props.additionalFunctionIconMapper ?? new TreeNodeFunctionIconInfoMapper(dataProvider);
+    const optionItemsInner: OptionItemHandler[] = [];
 
-    populateContextMenuItems(treeName, functionIconMapper, dataProvider, props.eventHandlers);
+    populateContextMenuItems(treeName, functionIconMapperInner, dataProvider, props.eventHandlers);
 
-    const displayGuidHandler = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon-label", () => { return props.displayGuids; }, props.setIsDisplayGuids);
-    optionItems.push(displayGuidHandler);
-    return { functionIconMapper, optionItems, displayGuidHandler };
-  }, [dataProvider, props.eventHandlers, props.setIsDisplayGuids, props.displayGuids]);
+    const displayGuidHandlerInner = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon-label", () => { return props.displayGuids; }, props.setIsDisplayGuids);
+    optionItemsInner.push(displayGuidHandlerInner);
+    return { functionIconMapper: functionIconMapperInner, optionItems: optionItemsInner, displayGuidHandler: displayGuidHandlerInner };
+  }, [dataProvider, props.eventHandlers, props.setIsDisplayGuids, props.displayGuids, props.additionalFunctionIconMapper]);
 
   displayGuidHandler._getItemState = () => props.displayGuids;
 
@@ -66,14 +66,14 @@ export const ComponentIndex: React.FC<ComponentIndexProps> = (props: ComponentIn
     displayGuids={props.displayGuids}
     setIsDisplayGuids={props.setIsDisplayGuids}
     enableVisibility={props.enableVisibility ? props.enableVisibility : false}
-  />), [props.iModel.key, props.displayGuids, props.setIsDisplayGuids, props.enableVisibility]);
+  />), [props.iModel, props.displayGuids, props.setIsDisplayGuids, props.enableVisibility, dataProvider, functionIconMapper, optionItems]);
 
   return (
     <LoadableRuleSetComponent ruleSet={componentIndex as Ruleset} >
       {componentIndexTree}
     </LoadableRuleSetComponent>
   );
-}
+};
 
 function populateContextMenuItems(treeName: string, mapper: TreeNodeFunctionIconInfoMapper, dataProvider: IPresentationTreeDataProvider, eventHandlers?: ComponentIndexEventHandlers) {
   populateMapWithCommonMenuItems(treeName, mapper, dataProvider, componentIndex.id, eventHandlers);

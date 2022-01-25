@@ -5,20 +5,24 @@
 
 import * as React from "react";
 import * as moq from "typemoq";
-import { ConfigurableCreateInfo, ContentControl, FrameworkReducer, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
-import { TreeNodeItem } from "@itwin/components-react";
+import type { ConfigurableCreateInfo } from "@itwin/appui-react";
+import { ContentControl, FrameworkReducer, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
+import type { TreeNodeItem } from "@itwin/components-react";
 import { Id64 } from "@itwin/core-bentley";
-import { AnyAction, combineReducers, createStore, Store } from "redux";
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { ECInstancesNodeKey, InstanceKey, Ruleset, StandardNodeTypes } from "@itwin/presentation-common";
+import type { AnyAction, Store } from "redux";
+import { combineReducers, createStore } from "redux";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import type { ECInstancesNodeKey, InstanceKey, Ruleset } from "@itwin/presentation-common";
+import { StandardNodeTypes } from "@itwin/presentation-common";
 import ruleList from "./assets/RulesList.json";
 import faker from "faker";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BreakdownTrees } from "../breakdown-trees-react";
 import { getPropertyRecordAsString } from "@itwin/components-react";
 import { TreeWithRulesetControllerBase } from "../Controllers/TreeWithRulesetControllerBase";
-import { Localization } from "@itwin/core-common";
+import type { Localization } from "@itwin/core-common";
 
 function createAppStore(): Store {
   const rootReducer = combineReducers({
@@ -48,7 +52,7 @@ export class TestUtils {
   public static async initializeUiFramework(imodel?: IModelConnection, _ruleSet: Ruleset = ruleList as Ruleset) {
     if (!TestUtils._uiFrameworkInitialized) {
       // This is required by our I18n module (specifically the i18next package).
-      (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // tslint:disable-line:no-var-requires
+      (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
       this.store = createAppStore();
 
       await UiFramework.initialize(this.store);
@@ -87,7 +91,7 @@ export const createRandomECInstancesNodeKey = (pathFromRoot?: string[], classNam
     type: StandardNodeTypes.ECInstancesNode,
     pathFromRoot: pathFromRoot || [faker.random.uuid(), faker.random.uuid()],
     instanceKeys,
-    version: 1
+    version: 1,
   };
 };
 
@@ -124,26 +128,26 @@ export const setupDataProvider = (imodel: IModelConnection, nodes = [createRando
   const rulesetId = ruleList.id;
   const rootNodes = () => nodes;
   const getNodeKey = (node: any) => node.key;
-  //const getNodeKey = testParentChildPair ? (node: any) => (node as any)[PRESENTATION_TREE_NODE_KEY] : (node: any) => node.key;
+  // const getNodeKey = testParentChildPair ? (node: any) => (node as any)[PRESENTATION_TREE_NODE_KEY] : (node: any) => node.key;
   const getNodes = testParentChildPair ?
     async (parentNode?: TreeNodeItem) => {
       if (parentNode && getPropertyRecordAsString(parentNode.label) === "Parent") {
         const children = [];
         for (let i = 0; i < numberOfChildren; i++) {
           const key = createRandomECInstancesNodeKey([parentNode.id]);
-          children.push({ label: PropertyRecord.fromString("Child" + i), key, id: key.pathFromRoot.join("/"), hasChildren: false });
+          children.push({ label: PropertyRecord.fromString(`Child${i}`), key, id: key.pathFromRoot.join("/"), hasChildren: false });
         }
         return children;
       }
       const rootKey = createRandomECInstancesNodeKey([], "RuleEngine:Tag");
       const roodNode = { label: PropertyRecord.fromString("Parent"), key: rootKey, id: rootKey.pathFromRoot.join("/"), hasChildren: true, autoExpand: true };
       return [roodNode];
-    } : async (p: any) => p ? [] : rootNodes!();
+    } : async (p: any) => p ? [] : rootNodes();
 
   const getNodesCount = testParentChildPair ? async (p: any) => p ? 1 : numberOfChildren : async (p: any) => (p ? 0 : rootNodes().length);
 
   const providerMock: IPresentationTreeDataProvider = {
-    imodel: imodel,
+    imodel,
     rulesetId,
     getNodesCount,
     getNodes,

@@ -3,13 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { TreeModelNode } from "@itwin/components-react";
+import type { TreeModelNode } from "@itwin/components-react";
 import { TestUtils } from "../Utils";
 import * as moq from "typemoq";
 import { ClearSectionsFunctionalityProvider } from "../../Views/FunctionalityProviders";
 import sinon from "sinon";
-import { IModelApp, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { assert } from "chai";
 import { FunctionalityProviderTestUtils, MockStrings } from "./FunctionalityProviderTestUtils";
 import { SectioningUtil } from "../../Views/visibility/SectioningUtil";
@@ -23,10 +24,10 @@ describe("ClearSectionsFunctionalityProvider", () => {
 
   before(async () => {
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.localization.registerNamespace("BreakdownTrees");
+    await IModelApp.localization.registerNamespace("BreakdownTrees");
 
     isolateRoomsForStoriesStub = sinon.stub(SectioningUtil, "isolateRoomsForStories");
-    IModelApp.viewManager.setSelectedView(selectedViewMock.object);
+    await IModelApp.viewManager.setSelectedView(selectedViewMock.object);
   });
   after(async () => {
     isolateRoomsForStoriesStub.restore();
@@ -42,7 +43,7 @@ describe("ClearSectionsFunctionalityProvider", () => {
     sinon.stub(IModelApp, "tools").get(() => ({
       registerModule: sinon.stub(),
       create: sinon.stub(),
-      run: runToolRegistryStub
+      run: runToolRegistryStub,
     }));
     await functionalityProvider.performAction([dummyTreeModelItem]);
 

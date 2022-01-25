@@ -6,7 +6,7 @@ import "mock-local-storage";
 import { assert } from "chai";
 import * as moq from "typemoq";
 import { TopViewHandler } from "../../Views/OptionItemHandlers";
-import { ToggledTopFitViewFunctionalityProvider } from "../../Views/FunctionalityProviders";
+import type { ToggledTopFitViewFunctionalityProvider } from "../../Views/FunctionalityProviders";
 
 (global as any).sessionStorage = window.sessionStorage;
 
@@ -20,16 +20,15 @@ describe("TopViewHandler", () => {
     sessionStorage.clear();
   });
 
-
   it("should get the value from sessionstorage on init", async () => {
     sessionStorage.setItem(topViewStorageKey, "true");
     const topViewHandlerinitTrue = new TopViewHandler([], "tests", "show top view", "anyicon");
-    let setTopViewState = topViewHandlerinitTrue.isActive();
+    let setTopViewState = topViewHandlerinitTrue.getIsActive();
     assert.isTrue(setTopViewState);
 
     sessionStorage.setItem(topViewStorageKey, "false");
     const topViewHandlerinitFalse = new TopViewHandler([], "tests", "show top view", "anyicon");
-    setTopViewState = topViewHandlerinitFalse.isActive();
+    setTopViewState = topViewHandlerinitFalse.getIsActive();
     assert.isFalse(setTopViewState);
   });
 
@@ -37,23 +36,22 @@ describe("TopViewHandler", () => {
     sessionStorage.clear();
     assert.isNull(sessionStorage.getItem(topViewStorageKey));
     const topViewHandler = new TopViewHandler([], "tests", "show top view", "anyicon");
-    let setTopViewState = topViewHandler.isActive();
+    const setTopViewState = topViewHandler.getIsActive();
     assert.isFalse(setTopViewState);
   });
 
   it("should change sessionStorage value when toggled", async () => {
     sessionStorage.setItem(topViewStorageKey, "true");
     const topViewHandler = new TopViewHandler([], "tests", "show top view", "anyicon");
-    assert.isTrue(topViewHandler.isActive());
+    assert.isTrue(topViewHandler.getIsActive());
     topViewHandler.toggle();
-    assert.isFalse(topViewHandler.isActive());
+    assert.isFalse(topViewHandler.getIsActive());
   });
 
   it("should call setTopView on functionality provider when toggled", async () => {
     const fitViewFunctionalityProviderMock = moq.Mock.ofType<ToggledTopFitViewFunctionalityProvider>();
 
     const topViewHandler = new TopViewHandler([fitViewFunctionalityProviderMock.object], "tests", "show top view", "anyicon");
-
 
     fitViewFunctionalityProviderMock.verify((x) => x.setTopView(moq.It.isAny()), moq.Times.once());
     topViewHandler.toggle();

@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
+import type { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 
 export interface LoadedRulesetProps {
@@ -20,16 +20,18 @@ export const LoadableRuleSetComponent: React.FC<LoadableRuleSetComponentProps> =
   const [registeredRuleset, setRegisteredRuleset] = React.useState<RegisteredRuleset | undefined>(undefined);
 
   React.useEffect(() => {
-    Presentation.presentation.rulesets().add(props.ruleSet) // tslint:disable-line:no-floating-promises
+    Presentation.presentation.rulesets().add(props.ruleSet) // eslint-disable-line @typescript-eslint/no-floating-promises
       .then((ruleset: RegisteredRuleset) => {
         setRegisteredRuleset(ruleset);
-      }).catch();  //this is needed for mocha tests where rulesets.add seem to return undefined
-  }, [props.ruleSet.id]);
+      }).catch();  // this is needed for mocha tests where rulesets.add seem to return undefined
+  }, [props.ruleSet]);
 
-  let childWithLoadedRuleset: React.ReactNode;
-
-  if (React.isValidElement(props.children))
-    childWithLoadedRuleset = React.useMemo(() => React.cloneElement(props.children, { loadedRuleset: registeredRuleset }), [registeredRuleset, props.children]);
+  const childWithLoadedRuleset: React.ReactNode = React.useMemo(() => {
+    if (React.isValidElement(props.children))
+      return React.cloneElement(props.children, { loadedRuleset: registeredRuleset });
+    return <div />;
+  },
+  [registeredRuleset, props.children]);
 
   if (registeredRuleset === undefined)
     return (<div />);
@@ -37,4 +39,4 @@ export const LoadableRuleSetComponent: React.FC<LoadableRuleSetComponentProps> =
   return (<>
     {childWithLoadedRuleset}
   </>);
-}
+};

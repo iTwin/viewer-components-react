@@ -3,12 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 /** @module SearchBox */
 
 import * as React from "react";
 import classnames from "classnames";
-import { CommonProps, UiCore } from "@itwin/core-react";
+import type { CommonProps } from "@itwin/core-react";
+import { UiCore } from "@itwin/core-react";
 import { IconButton } from "../IconButton";
 import "./SearchBox.scss";
 
@@ -122,7 +122,7 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
     }
   }
 
-  private _handleIconClick = (_event: React.MouseEvent<HTMLElement>): void => {
+  private _handleIconClick = (): void => {
     // istanbul ignore else
     if (this._inputElement) {
       const clear = this.state.searchText !== "";
@@ -197,6 +197,7 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
         <input
           value={searchText}
           ref={(el) => { this._inputElement = el; }}
+          // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus={autoFocus}
           onChange={this._trackChange}
           onKeyDown={this._handleKeyDown}
@@ -210,7 +211,12 @@ export class SearchBox extends React.PureComponent<SearchBoxProps, SearchBoxStat
           <IconButton className="uisnip-core-searchbox-step-button" icon="icon-chevron-up" disabled={!isPrevEnabled} onClick={this._onPrevClick} title="Previous" />
           <IconButton className="uisnip-core-searchbox-step-button" icon="icon-chevron-down" disabled={!isNextEnabled} onClick={this._onNextClick} title="Next" />
         </div>
-        <span className="uisnip-core-searchbox-step-button icon icon-close" onClick={this._handleIconClick} />
+
+        <span className="uisnip-core-searchbox-step-button icon icon-close"
+          onClick={this._handleIconClick}
+          onKeyDown={this._handleIconClick}
+          role="button"
+          tabIndex={0} />
       </div>
     );
   }

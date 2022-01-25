@@ -3,13 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { NodeKey } from "@itwin/presentation-common";
-import { TreeModelNode } from "@itwin/components-react";
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import type { TreeModelNode } from "@itwin/components-react";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { ToggledTopFitViewFunctionalityProvider } from "./ToggledTopFitViewFunctionalityProvider";
 import { ClipPrimitive, ClipVector, ConvexClipPlaneSet, Range3d } from "@itwin/core-geometry";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 export class BuildingClipPlanesProvider extends ToggledTopFitViewFunctionalityProvider {
   constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider, setTopView: boolean) {
@@ -56,7 +56,7 @@ export class BuildingClipPlanesProvider extends ToggledTopFitViewFunctionalityPr
       if (bldgRange === undefined)
         return;
 
-      const planeSet = ConvexClipPlaneSet.createRange3dPlanes(bldgRange, true, true, true, true, true, true)
+      const planeSet = ConvexClipPlaneSet.createRange3dPlanes(bldgRange, true, true, true, true, true, true);
 
       const clip = ClipVector.createCapture([ClipPrimitive.createCapture(planeSet)]);
       vp.view.setViewClip(clip);
@@ -66,11 +66,11 @@ export class BuildingClipPlanesProvider extends ToggledTopFitViewFunctionalityPr
   }
 
   private async clipViewToBilding(node: TreeModelNode) {
-    const elementKey = this._treeDataProvider.getNodeKey(node.item)
+    const elementKey = this._treeDataProvider.getNodeKey(node.item);
     if (NodeKey.isInstancesNodeKey(elementKey)) {
       const instanceId = elementKey.instanceKeys[0].id;
       await this.createSectionPlanes(instanceId);
-      super.performAction([node]);
+      await super.performAction([node]);
     }
   }
 }

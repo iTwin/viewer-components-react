@@ -17,11 +17,11 @@ export * from "./Views/OptionItemHandlers";
 import spatialRulesDefault from "./assets/SpatialBreakdown.json";
 export { spatialRulesDefault };
 import spatialRulesByType from "./assets/SpatialBreakdownByType.json";
-export { spatialRulesByType }
+export { spatialRulesByType };
 import spatialRulesByDiscipline from "./assets/SpatialBreakdownByDiscipline.json";
-export { spatialRulesByDiscipline }
+export { spatialRulesByDiscipline };
 import spatialRulesByTypeAndDiscipline from "./assets/SpatialBreakdownByTypeAndDiscipline.json";
-export { spatialRulesByTypeAndDiscipline }
+export { spatialRulesByTypeAndDiscipline };
 import classificationRules from "./assets/ClassificationSystems.json";
 export { classificationRules };
 import componentIndex from "./assets/ComponentIndex.json";

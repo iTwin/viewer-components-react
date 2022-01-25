@@ -16,8 +16,7 @@ export class GenericOptionItemHandler extends OptionItemHandler {
     this._setItemState(!this._getItemState());
   }
 
-  // tslint:disable-next-line:prefer-get
-  public isActive(): boolean {
+  public getIsActive(): boolean {
     return this._getItemState();
   }
 }

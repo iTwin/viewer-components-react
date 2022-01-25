@@ -3,22 +3,23 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
-
 import { NodeKey } from "@itwin/presentation-common";
-import { TreeModelNode } from "@itwin/components-react";
-import { IModelApp, IModelConnection, NotifyMessageDetails, OutputMessagePriority, OutputMessageType } from "@itwin/core-frontend";
-import { BeEvent, Id64 } from "@itwin/core-bentley";
+import type { TreeModelNode } from "@itwin/components-react";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp, NotifyMessageDetails, OutputMessagePriority, OutputMessageType } from "@itwin/core-frontend";
+import type { BeEvent } from "@itwin/core-bentley";
+import { Id64 } from "@itwin/core-bentley";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
-import { MessageManager, NotifyMessageDetailsType } from "@itwin/appui-react";
+import type { NotifyMessageDetailsType } from "@itwin/appui-react";
+import { MessageManager } from "@itwin/appui-react";
 import { DataLink } from "../visibility/DataLink";
 import { BreakdownTrees } from "../../BreakdownTrees";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 export class ZoomFunctionalityProvider extends TreeNodeFunctionalityProvider {
-  private _onActionPerformedEvent: BeEvent<() => void>;
+  private _onActionPerformedEvent: BeEvent<() => void> | undefined;
 
-  constructor(sourceName: string, treeDataProvider: IPresentationTreeDataProvider, onActionPerformedEvent: BeEvent<() => void>) {
+  constructor(sourceName: string, treeDataProvider: IPresentationTreeDataProvider, onActionPerformedEvent: BeEvent<() => void> | undefined) {
     super(sourceName, treeDataProvider);
     this._onActionPerformedEvent = onActionPerformedEvent;
   }
@@ -48,7 +49,7 @@ export class ZoomFunctionalityProvider extends TreeNodeFunctionalityProvider {
   }
 
   public async zoomSelected(node: TreeModelNode) {
-    const elementKey = this._treeDataProvider.getNodeKey(node.item)
+    const elementKey = this._treeDataProvider.getNodeKey(node.item);
     if (NodeKey.isInstancesNodeKey(elementKey)) {
       const data = await DataLink.querySpatialIndex(this._treeDataProvider.imodel, elementKey.instanceKeys[0].id);
       if (data.length === 0) {
@@ -64,14 +65,14 @@ export class ZoomFunctionalityProvider extends TreeNodeFunctionalityProvider {
           IModelApp.viewManager.selectedView!.iModel,
           child,
         );
-        await IModelApp.viewManager.selectedView!.zoomToElementProps(elemProps);
+        IModelApp.viewManager.selectedView!.zoomToElementProps(elemProps);
 
       } else {
         const elemProps = await ZoomFunctionalityProvider.getElementProps(
           IModelApp.viewManager.selectedView!.iModel,
           elementKey.instanceKeys[0].id,
         );
-        await IModelApp.viewManager.selectedView!.zoomToElementProps(elemProps);
+        IModelApp.viewManager.selectedView!.zoomToElementProps(elemProps);
       }
     }
 

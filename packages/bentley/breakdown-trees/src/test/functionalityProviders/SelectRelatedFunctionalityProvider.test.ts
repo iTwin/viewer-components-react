@@ -2,14 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
+import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
 import { TestUtils } from "../Utils";
 import { Presentation, SelectionManager } from "@itwin/presentation-frontend";
 import * as moq from "typemoq";
 import sinon from "sinon";
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import { ECInstancesNodeKey, GroupingNodeKey } from "@itwin/presentation-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { ECInstancesNodeKey, GroupingNodeKey } from "@itwin/presentation-common";
 import { assert } from "chai";
 import { BeEvent } from "@itwin/core-bentley";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
@@ -30,7 +31,7 @@ describe("SelectRelatedFunctionalityProvider", () => {
     } catch (error) { }
 
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.localization.registerNamespace("BreakdownTrees");
+    await IModelApp.localization.registerNamespace("BreakdownTrees");
 
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
     dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey);
@@ -63,7 +64,7 @@ describe("SelectRelatedFunctionalityProvider", () => {
     const functionalityProvider = new SelectRelatedFunctionalityProvider("tests", dataProviderMock.object, spatialRules.id, new BeEvent());
     const groupNodeKey = FunctionalityProviderTestUtils.createGroupNodeKey([], 0);
     dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.GroupNode }))).returns((_item: TreeNodeItem): GroupingNodeKey => groupNodeKey);
-    dataProviderMock.setup((x) => x.getNodes(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.GroupNode }))).returns(() => Promise.resolve([]));
+    dataProviderMock.setup(async (x) => x.getNodes(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.GroupNode }))).returns(async () => Promise.resolve([]));
     await functionalityProvider.performAction([dummyTreeModelItem]);
 
     assert.strictEqual(replaceSelectionSpy.callCount, 1);

@@ -9,16 +9,27 @@ import spatialRulesDefault from "../assets/SpatialBreakdown.json";
 import spatialRulesByType from "../assets/SpatialBreakdownByType.json";
 import spatialRulesByDiscipline from "../assets/SpatialBreakdownByDiscipline.json";
 import spatialRulesByTypeAndDiscipline from "../assets/SpatialBreakdownByTypeAndDiscipline.json";
-import { IModelApp, IModelConnection, SpatialViewState } from "@itwin/core-frontend";
-import { IPresentationTreeDataProvider, PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { Ruleset } from "@itwin/presentation-common";
+import type { IModelConnection, SpatialViewState } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { PresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { Ruleset } from "@itwin/presentation-common";
 import { ControlledTreeWrapper, populateMapWithCommonMenuItems } from "./TreeWithRuleset";
 import { BreakdownTrees } from "../BreakdownTrees";
-import { BuildingClipPlanesProvider, ClearSectionsFunctionalityProvider, CombinedTreeNodeFunctionalityProvider, SpaceClipPlanesProvider, StoryClipPlanesProvider, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders";
-import { ClipAtSpacesHandler, GenericOptionItemHandler, LabelHandler, OptionItemHandler, TopViewHandler } from "./OptionItemHandlers";
+import { BuildingClipPlanesProvider } from "./FunctionalityProviders/BuildingClipPlanesProvider";
+import { ClearSectionsFunctionalityProvider } from "./FunctionalityProviders/ClearSectionsFunctionalityProvider";
+import { CombinedTreeNodeFunctionalityProvider } from "./FunctionalityProviders/CombinedTreeNodeFunctionalityProvider";
+import { SpaceClipPlanesProvider } from "./FunctionalityProviders/SpaceClipPlanesProvider";
+import { StoryClipPlanesProvider } from "./FunctionalityProviders/StoryClipPlanesProvider";
+import { TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders/TreeNodeFunctionIconMapper";
+import type { OptionItemHandler } from "./OptionItemHandlers";
+import { ClipAtSpacesHandler } from "./OptionItemHandlers/ClipAtSpacesHandler";
+import { GenericOptionItemHandler } from "./OptionItemHandlers/GenericOptionItemHandler";
+import { LabelHandler } from "./OptionItemHandlers/LabelHandler";
+import { TopViewHandler } from "./OptionItemHandlers/TopViewHandler";
 import { LoadableRuleSetComponent } from "./LoadableRuleSetComponent";
 import { ToolbarItemKeys } from "./TreeNodeFunctionsToolbar";
-import { BeEvent } from "@itwin/core-bentley";
+import type { BeEvent } from "@itwin/core-bentley";
 
 export interface SpatialContainmentEventHandlers {
   onZoomToElement: BeEvent<() => void>;
@@ -40,15 +51,15 @@ export interface SpatialContainmentTreeProps {
   additionalFunctionIconMapper?: TreeNodeFunctionIconInfoMapper;
 }
 
-function updateModelsInRulesetVars() {
+async function updateModelsInRulesetVars() {
   const viewState = IModelApp.viewManager.selectedView?.view as SpatialViewState;
   const modelIds = viewState.modelSelector ? Array.from(viewState.modelSelector.models) : [];
-  Presentation.presentation.vars("ui-framework/SpatialBreakdown").setId64s("displayed_model_ids", modelIds);
+  await Presentation.presentation.vars("ui-framework/SpatialBreakdown").setId64s("displayed_model_ids", modelIds);
 }
 
 const _onModelsChanged = async () => {
-  updateModelsInRulesetVars();
-}
+  await updateModelsInRulesetVars();
+};
 
 export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (props: SpatialContainmentTreeProps) => {
   const treeName = "SpatialContainmentTree";
@@ -67,6 +78,7 @@ export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (pr
   React.useEffect(() => {
     if (IModelApp.viewManager.selectedView?.view.isSpatialView()) {
       IModelApp.viewManager.selectedView.onViewedModelsChanged.addListener(_onModelsChanged);
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       updateModelsInRulesetVars();
     }
 
@@ -74,29 +86,29 @@ export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (pr
       if (IModelApp.viewManager.selectedView?.view.isSpatialView()) {
         IModelApp.viewManager.selectedView.onViewedModelsChanged.removeListener(_onModelsChanged);
       }
-    }
+    };
   });
 
   const dataProvider = React.useMemo(() => {
     const dataProviderInner = new PresentationTreeDataProvider({ imodel: props.iModel, ruleset: spatialRules.id, appendChildrenCountForGroupingNodes: true });
     dataProviderInner.pagingSize = 20; // paging size is now needed for the controlled tree.
     return dataProviderInner;
-  }, [props.iModel.key, props.groupByType, props.groupByDiscipline, spatialRules.id]);
+  }, [props.iModel, spatialRules.id]);
 
   const { functionIconMapper, optionItems, displayGuidHandler, groupByTypeHandler, groupByDisciplineHandler } = React.useMemo(() => {
-    const functionIconMapper = props.additionalFunctionIconMapper ?? new TreeNodeFunctionIconInfoMapper(dataProvider);
-    const optionItems: OptionItemHandler[] = [];
+    const functionIconMapperInner = props.additionalFunctionIconMapper ?? new TreeNodeFunctionIconInfoMapper(dataProvider);
+    const optionItemsInner: OptionItemHandler[] = [];
 
-    populateContextAndOptionMenuItems(treeName, functionIconMapper, optionItems, dataProvider, spatialRules, props.eventHandlers, props.clipHeight, props.clipAtSpaces);
+    populateContextAndOptionMenuItems(treeName, functionIconMapperInner, optionItemsInner, dataProvider, spatialRules, props.eventHandlers, props.clipHeight, props.clipAtSpaces);
 
-    const displayGuidHandler = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon-label", () => props.displayGuids, props.setIsDisplayGuids);
-    optionItems.push(displayGuidHandler);
-    const groupByTypeHandler = new GenericOptionItemHandler("Group By Type", BreakdownTrees.translate("contextMenu.groupByType"), "icon-hierarchy-tree", () => props.groupByType, props.setGroupByType);
-    optionItems.push(groupByTypeHandler);
-    const groupByDisciplineHandler = new GenericOptionItemHandler("Group By Discipline", BreakdownTrees.translate("contextMenu.groupByDiscipline"), "icon-hierarchy-tree", () => props.groupByDiscipline, props.setGroupByDiscipline);
-    optionItems.push(groupByDisciplineHandler);
+    const displayGuidHandlerInner = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon-label", () => props.displayGuids, props.setIsDisplayGuids);
+    optionItemsInner.push(displayGuidHandlerInner);
+    const groupByTypeHandlerInner = new GenericOptionItemHandler("Group By Type", BreakdownTrees.translate("contextMenu.groupByType"), "icon-hierarchy-tree", () => props.groupByType, props.setGroupByType);
+    optionItemsInner.push(groupByTypeHandlerInner);
+    const groupByDisciplineHandlerInner = new GenericOptionItemHandler("Group By Discipline", BreakdownTrees.translate("contextMenu.groupByDiscipline"), "icon-hierarchy-tree", () => props.groupByDiscipline, props.setGroupByDiscipline);
+    optionItemsInner.push(groupByDisciplineHandlerInner);
 
-    return { functionIconMapper, optionItems, displayGuidHandler, groupByTypeHandler, groupByDisciplineHandler };
+    return { functionIconMapper: functionIconMapperInner, optionItems: optionItemsInner, displayGuidHandler: displayGuidHandlerInner, groupByTypeHandler: groupByTypeHandlerInner, groupByDisciplineHandler: groupByDisciplineHandlerInner };
   }, [dataProvider,
     props.eventHandlers,
     props.clipHeight,
@@ -106,19 +118,22 @@ export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (pr
     props.groupByType,
     props.setGroupByType,
     props.groupByDiscipline,
-    props.setGroupByDiscipline]);
+    props.setGroupByDiscipline,
+    props.additionalFunctionIconMapper,
+    spatialRules]);
 
   displayGuidHandler._getItemState = () => props.displayGuids;
   groupByTypeHandler._getItemState = () => props.groupByType;
   groupByDisciplineHandler._getItemState = () => props.groupByDiscipline;
   const containmentTree = React.useMemo(() => <ControlledTreeWrapper iModel={props.iModel} loadedRuleset={spatialRules} dataProvider={dataProvider}
     treeName={treeName} treeNodeIconMapper={functionIconMapper} optionItems={optionItems} searchTools={true}
-    displayGuids={props.displayGuids} setIsDisplayGuids={props.setIsDisplayGuids} enableVisibility={props.enableVisibility ? props.enableVisibility : false} />, [props.iModel, props.displayGuids, props.setIsDisplayGuids, functionIconMapper, props.groupByType]);
+    displayGuids={props.displayGuids} setIsDisplayGuids={props.setIsDisplayGuids} enableVisibility={props.enableVisibility ? props.enableVisibility : false} />,
+  [props.iModel, props.displayGuids, props.setIsDisplayGuids, functionIconMapper, dataProvider, optionItems, props.enableVisibility, spatialRules]);
 
   return (<LoadableRuleSetComponent ruleSet={spatialRules}>
     {containmentTree}
   </LoadableRuleSetComponent>);
-}
+};
 
 function populateContextAndOptionMenuItems(treeName: string, mapper: TreeNodeFunctionIconInfoMapper, optionItems: OptionItemHandler[], dataProvider: IPresentationTreeDataProvider, spatialRules: any, eventHandlers?: SpatialContainmentEventHandlers, clipHeight?: number, clipAtSpaces?: boolean) {
   const combinedFunctionalityProvider = new CombinedTreeNodeFunctionalityProvider(treeName, dataProvider);

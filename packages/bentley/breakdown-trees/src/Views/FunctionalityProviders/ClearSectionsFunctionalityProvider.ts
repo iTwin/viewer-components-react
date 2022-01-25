@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { TreeModelNode } from "@itwin/components-react";
+import type { TreeModelNode } from "@itwin/components-react";
 import { IModelApp, ViewClipClearTool, ViewClipDecorationProvider } from "@itwin/core-frontend";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
 import { SectioningUtil } from "../visibility/SectioningUtil";
@@ -20,7 +20,7 @@ export class ClearSectionsFunctionalityProvider extends TreeNodeFunctionalityPro
     if (vp) {
       await SectioningUtil.isolateRoomsForStories(this._treeDataProvider.imodel, vp);
       // Clear section handles
-      IModelApp.tools.run(ViewClipClearTool.toolId, ViewClipDecorationProvider.create());
+      await IModelApp.tools.run(ViewClipClearTool.toolId, ViewClipDecorationProvider.create());
     }
   }
 }

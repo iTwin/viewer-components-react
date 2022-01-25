@@ -29,8 +29,8 @@
     "cover": "npm test",
     "test": "mocha --opts mocha.opts \"./lib/test/**/*.test.js\"",
     "test:watch": "npm test -- --reporter min --watch-extensions ts,tsx --watch",
-    "lint": "tslint --project . 1>&2",
-    "lintfix": "tslint --fix --project . 1>&2"
+    "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
     "classnames": "^2.3.1",
@@ -49,6 +49,7 @@
     "@itwin/presentation-common": "rc",
     "@itwin/presentation-components": "rc",
     "@itwin/presentation-frontend": "rc",
+    "@itwin/eslint-plugin": "rc",
     "@bentley/product-settings-client": "^2.19.9",
     "@itwin/appui-abstract": "rc",
     "@itwin/components-react": "rc",
@@ -74,6 +75,8 @@
     "@types/chai-spies": "^1.0.0",
     "@types/enzyme": "3.10.5",
     "@types/react-redux": "^7.1.9",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "eslint": "^7.11.0",
     "react-redux": "^7.2.0",
     "redux": "^4.0.4",
     "mocha": "^6.2.2",
@@ -95,8 +98,7 @@
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "rimraf": "^3.0.2",
-    "tslint": "^5.20.0",
-    "typescript": "~4.3.0",
+    "typescript": "^4.4.0",
     "xmlhttprequest": "^1.8.0"
   },
   "peerDependencies": {
@@ -138,5 +140,16 @@
     "branches": 100,
     "functions": 100,
     "lines": 100
+  },
+  "eslintConfig": {
+    "plugins": [
+      "@itwin"
+    ],
+    "extends": "plugin:@itwin/ui",
+    "rules": {
+			"@typescript-eslint/unbound-method": "off",
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/consistent-type-imports": "error"
+    }
   }
 }

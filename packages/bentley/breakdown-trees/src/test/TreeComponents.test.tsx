@@ -6,14 +6,18 @@
 import * as React from "react";
 import { Provider } from "react-redux";
 import { mount, shallow } from "enzyme";
-import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, SelectionSet, ViewState } from "@itwin/core-frontend";
+import type { IModelConnection, ScreenViewport, SelectionSet, ViewState } from "@itwin/core-frontend";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { BeEvent } from "@itwin/core-bentley";
 import Rules from "../assets/SpatialBreakdown.json";
-import { setupDataProvider, TestUtils, TreeWithRuleSetController } from "./Utils";
+import type { TreeWithRuleSetController } from "./Utils";
+import { setupDataProvider, TestUtils } from "./Utils";
 import * as moq from "typemoq";
-import { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
-import { IModelHierarchyChangeEventArgs, Presentation, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
-import { PropertyValueRendererManager, TreeActions, TreeModel, TreeModelNode } from "@itwin/components-react";
+import type { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
+import type { IModelHierarchyChangeEventArgs, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
+import type { TreeActions, TreeModel, TreeModelNode } from "@itwin/components-react";
+import { PropertyValueRendererManager } from "@itwin/components-react";
 import sinon from "sinon";
 import { TreeNodeFunctionIconInfoMapper } from "../Views/FunctionalityProviders/TreeNodeFunctionIconMapper";
 import { ControlledTreeWrapper } from "../Views/TreeWithRuleset";
@@ -37,7 +41,7 @@ describe("TreeComponent tests.", () => {
     selectionSet.setup((x) => x.elements).returns(() => new Set([]));
     connection.setup((x) => x.selectionSet).returns(() => selectionSet.object);
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.localization.registerNamespace("BreakdownTrees");
+    await IModelApp.localization.registerNamespace("BreakdownTrees");
     controller.setup((x) => x.createDataProvider()).returns(() => setupDataProvider(connection.object));
 
     onHierarchyUpdateEvent = new BeEvent();
@@ -50,9 +54,8 @@ describe("TreeComponent tests.", () => {
     const viewStateMock = moq.Mock.ofType<ViewState>();
     viewStateMock.setup((x) => x.isSpatialView()).returns(() => false);
     selectedViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
-    IModelApp.viewManager.setSelectedView(selectedViewMock.object);
+    await IModelApp.viewManager.setSelectedView(selectedViewMock.object);
   });
-
 
   const rulesetManagerMock = moq.Mock.ofType<RulesetManager>();
   const registeredRuleSetMock = moq.Mock.ofType<RegisteredRuleset>();
@@ -128,7 +131,7 @@ describe("TreeComponent tests.", () => {
     propertyValueRenderStub.restore();
   });
   it("ClassificationsTree renders correctly with children", () => {
-    rulesetManagerMock.setup((x) => x.add(moq.It.isAny())).returns(async () => registeredRuleSetMock.object);
+    rulesetManagerMock.setup(async (x) => x.add(moq.It.isAny())).returns(async () => registeredRuleSetMock.object);
     const wrapper = (
       <ClassificationsTree iModel={connection.object} displayGuids={false} setIsDisplayGuids={(_displayGuids: boolean) => { }} />
     );

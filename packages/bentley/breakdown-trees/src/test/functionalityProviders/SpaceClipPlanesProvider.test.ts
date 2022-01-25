@@ -3,20 +3,21 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
+import type { TreeModelNode, TreeNodeItem } from "@itwin/components-react";
 import { TestUtils } from "../Utils";
 import * as moq from "typemoq";
 import { SpaceClipPlanesProvider } from "../../Views/FunctionalityProviders";
 import sinon from "sinon";
-import { IModelApp, IModelConnection, ScreenViewport, ViewState } from "@itwin/core-frontend";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import { ECInstancesNodeKey } from "@itwin/presentation-common";
+import type { IModelConnection, ScreenViewport, ViewState } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import { assert } from "chai";
-import { Code, ElementProps } from "@itwin/core-common";
+import type { ElementProps } from "@itwin/core-common";
+import { Code } from "@itwin/core-common";
 import { ClipVector, Range3d } from "@itwin/core-geometry";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
 import { SectioningUtil } from "../../Views/visibility/SectioningUtil";
-
 
 describe("SpaceClipPlanesProvider", () => {
   let isolateRoomsForStoriesStub: sinon.SinonStub;
@@ -30,7 +31,7 @@ describe("SpaceClipPlanesProvider", () => {
 
   before(async () => {
     await TestUtils.initializeUiFramework(connection.object);
-    IModelApp.localization.registerNamespace("BreakdownTrees");
+    await IModelApp.localization.registerNamespace("BreakdownTrees");
 
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
     dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey);
@@ -43,13 +44,13 @@ describe("SpaceClipPlanesProvider", () => {
 
     selectedViewMock = moq.Mock.ofType<ScreenViewport>();
     iModelElementsMock = moq.Mock.ofType<IModelConnection.Elements>();
-    iModelElementsMock.setup((x) => x.getProps(moq.It.isAny())).returns(() => Promise.resolve([elementProps]));
+    iModelElementsMock.setup(async (x) => x.getProps(moq.It.isAny())).returns(async () => Promise.resolve([elementProps]));
     connection.setup((x) => x.elements).returns(() => iModelElementsMock.object);
     selectedViewMock.setup((x) => x.view).returns(() => viewStateMock.object);
 
-    IModelApp.viewManager.setSelectedView(selectedViewMock.object);
+    await IModelApp.viewManager.setSelectedView(selectedViewMock.object);
 
-    checkIsSpaceStub = sinon.stub(SpaceClipPlanesProvider.prototype, "checkIsSpace" as any).returns(() => Promise.resolve(new Range3d(0, 0, 0, 1, 1, 1)));
+    checkIsSpaceStub = sinon.stub(SpaceClipPlanesProvider.prototype, "checkIsSpace" as any).returns(async () => Promise.resolve(new Range3d(0, 0, 0, 1, 1, 1)));
     createCaptureSpy = sinon.spy(ClipVector, "createCapture");
 
     dataProviderMock.setup((x) => x.imodel).returns(() => connection.object);

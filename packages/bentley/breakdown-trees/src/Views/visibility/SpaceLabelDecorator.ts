@@ -3,12 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
-import { DecorateContext, Decorator, IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { TextOffsetProps, TextOffsetType, TextStyleProps } from "@itwin/measure-tools-react";
-import { ColorDef, ElementProps, GeometricElement3dProps, MassPropertiesOperation, MassPropertiesResponseProps } from "@itwin/core-common";
-import { DecorationClickedHandler, SpaceLabelDecoration, SpaceLabelDecorationProps } from "./SpaceLabelDecoration";
-import { assert, Id64Arg } from "@itwin/core-bentley";
+import type { DecorateContext, Decorator, IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import type { TextOffsetProps, TextStyleProps } from "@itwin/measure-tools-react";
+import { TextOffsetType } from "@itwin/measure-tools-react";
+import type { ElementProps, GeometricElement3dProps, MassPropertiesResponseProps } from "@itwin/core-common";
+import { ColorDef, MassPropertiesOperation } from "@itwin/core-common";
+import type { DecorationClickedHandler, SpaceLabelDecorationProps } from "./SpaceLabelDecoration";
+import { SpaceLabelDecoration } from "./SpaceLabelDecoration";
+import type { Id64Arg } from "@itwin/core-bentley";
+import { assert } from "@itwin/core-bentley";
 import { Point3d, Range3d } from "@itwin/core-geometry";
 
 export interface SpaceDecorationCreationProps {
@@ -85,6 +89,7 @@ export class SpaceLabelDecorator implements Decorator {
       // Compute the min and max z values of the rooms in the storey.
       // We're using the minHeight property to assign the z value of the decorations, so that they appear on the floor.
       let roomOrigin = room.placement?.origin;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       roomOrigin = Array.isArray(roomOrigin) ? roomOrigin : [roomOrigin?.x!, roomOrigin?.y!, roomOrigin?.z!];
       const roomLow = room.placement?.bbox?.low;
       const roomLowZ = Array.isArray(roomLow) ? roomLow[2] : roomLow?.z;

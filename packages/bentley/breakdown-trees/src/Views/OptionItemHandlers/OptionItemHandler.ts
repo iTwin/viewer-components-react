@@ -13,6 +13,5 @@ export abstract class OptionItemHandler {
     this.toolIcon = toolIcon;
   }
   public abstract toggle(): void;
-  // tslint:disable-next-line:prefer-get
-  public abstract isActive(): boolean;
+  public abstract getIsActive(): boolean;
 }

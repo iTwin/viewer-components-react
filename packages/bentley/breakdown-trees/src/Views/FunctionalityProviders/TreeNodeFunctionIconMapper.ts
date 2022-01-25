@@ -3,12 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { NodeKey } from "@itwin/presentation-common";
-import { TreeModelNode } from "@itwin/components-react";
-import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
+import type { TreeModelNode } from "@itwin/components-react";
+import type { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
 import { IModelReadRpcInterface } from "@itwin/core-common";
-
 
 export interface FunctionIconInfo {
   key: string;
@@ -36,7 +35,7 @@ export class TreeNodeFunctionIconInfoMapper {
   }
 
   public getIconIndexByKey(key: string): number {
-    return this._functionIconInfos.findIndex((value: FunctionIconInfo, _index, _array) => { return value.key === key; })
+    return this._functionIconInfos.findIndex((value: FunctionIconInfo, _index, _array) => { return value.key === key; });
   }
 
   private insertOrGetIconIndex(functionIconInfo: FunctionIconInfo): number {
@@ -56,7 +55,7 @@ export class TreeNodeFunctionIconInfoMapper {
 
   public registerForNodesOfClasses(classNames: string[], functionIconInfo: FunctionIconInfo) {
     const iconInfoIndex = this.insertOrGetIconIndex(functionIconInfo);
-    for (let className of classNames) {
+    for (const className of classNames) {
       let mappedArrayInstance = this._TreeNodeClassFunctionIconInfoMap.get(className);
 
       if (mappedArrayInstance === undefined) {
@@ -77,10 +76,9 @@ export class TreeNodeFunctionIconInfoMapper {
       const elementKey = this._treeDataProvider.getNodeKey(node.item);
       if (NodeKey.isGroupingNodeKey(elementKey)) {
         returnedList.push(...this._groupNodeFunctionIconInfos);
-      }
-      else if (NodeKey.isInstancesNodeKey(elementKey)) {
+      } else if (NodeKey.isInstancesNodeKey(elementKey)) {
         const classHierarchyArray = await IModelReadRpcInterface.getClient().getClassHierarchy(this._treeDataProvider.imodel.getRpcProps(), elementKey.instanceKeys[0].className);
-        for (let className of classHierarchyArray) {
+        for (const className of classHierarchyArray) {
           const mappedFunctionalityProviders = this._TreeNodeClassFunctionIconInfoMap.get(className);
           if (mappedFunctionalityProviders)
             returnedList.push(...mappedFunctionalityProviders);
@@ -99,7 +97,7 @@ export class TreeNodeFunctionIconInfoMapper {
   }
 
   public getGlobalFunctionIconInfos(): ReadonlyArray<FunctionIconInfo> {
-    return this._globalFunctionIconInfos.map<FunctionIconInfo>((value, _index, _array) => { return this._functionIconInfos[value] });
+    return this._globalFunctionIconInfos.map<FunctionIconInfo>((value, _index, _array) => { return this._functionIconInfos[value]; });
   }
 
   public getAllFunctionIconInfos(): ReadonlyArray<FunctionIconInfo> {

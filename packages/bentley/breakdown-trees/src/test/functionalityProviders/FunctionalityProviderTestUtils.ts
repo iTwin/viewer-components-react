@@ -2,8 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { DelayLoadedTreeNodeItem, TreeModelNode, TreeNodeItem } from "@itwin/components-react";
-import { ECClassGroupingNodeKey, ECInstancesNodeKey, GroupingNodeKey, InstanceKey, StandardNodeTypes } from "@itwin/presentation-common";
+import type { DelayLoadedTreeNodeItem, TreeModelNode, TreeNodeItem } from "@itwin/components-react";
+import type { ECClassGroupingNodeKey, ECInstancesNodeKey, GroupingNodeKey, InstanceKey} from "@itwin/presentation-common";
+import { StandardNodeTypes } from "@itwin/presentation-common";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { CheckBoxState } from "@itwin/core-react";
 
@@ -13,8 +14,8 @@ export const MockStrings = {
   WindowNode: "windowNode",
   IfcWallNode: "ifcWallNode",
   OBDWallNode: "OBDWallNode",
-  UnrelatedNode: "UnrelatedClass"
-}
+  UnrelatedNode: "UnrelatedClass",
+};
 
 export const MockClassNames = {
   IfcWall: "MockIfcDynamic:IfcWall",
@@ -25,14 +26,14 @@ export const MockClassNames = {
   BaseDoor: "BaseSchema:BaseClassDoor",
   BaseWindow: "BaseSchema:BaseClassWindow",
   PhysicalElement: "BaseSchema:PhysicalElement",
-  UnrelatedClass: "UnrelatedClass"
-}
+  UnrelatedClass: "UnrelatedClass",
+};
 
 export class FunctionalityProviderTestUtils {
   public static createDelayLoadedTreeNodeItem(id: string): DelayLoadedTreeNodeItem {
     const dummyTreeItem: TreeNodeItem = {
       id,
-      label: PropertyRecord.fromString(id)
+      label: PropertyRecord.fromString(id),
     };
 
     return dummyTreeItem;
@@ -41,7 +42,7 @@ export class FunctionalityProviderTestUtils {
   public static createTreeModelNode(id: string): TreeModelNode {
     const dummyTreeItem: TreeNodeItem = {
       id,
-      label: PropertyRecord.fromString(id)
+      label: PropertyRecord.fromString(id),
     };
     return this.createTreeModelNodeFromTreeNodeItem(dummyTreeItem);
   }
@@ -71,7 +72,7 @@ export class FunctionalityProviderTestUtils {
       pathFromRoot,
       groupedInstancesCount: childrenCount,
       className,
-      version: 1
+      version: 1,
     };
   }
 
@@ -81,9 +82,9 @@ export class FunctionalityProviderTestUtils {
       type: StandardNodeTypes.ECClassGroupingNode,
       pathFromRoot,
       groupedInstancesCount: childrenCount,
-      version: 1
+      version: 1,
     };
-  };
+  }
 
   /** mocks a functional node key */
   public static createClassNodeKey(pathFromRoot: string[], instanceKeys: InstanceKey[]): ECInstancesNodeKey {
@@ -91,9 +92,9 @@ export class FunctionalityProviderTestUtils {
       type: StandardNodeTypes.ECInstancesNode,
       pathFromRoot,
       instanceKeys,
-      version: 1
+      version: 1,
     };
-  };
+  }
 
   /** mocks a functional Instance key */
   public static createECInstanceKey(className: string, id: string): InstanceKey {
@@ -101,5 +102,5 @@ export class FunctionalityProviderTestUtils {
       className,
       id,
     };
-  };
+  }
 }

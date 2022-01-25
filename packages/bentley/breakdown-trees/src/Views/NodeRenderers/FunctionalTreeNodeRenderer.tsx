@@ -4,11 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { CheckBoxInfo, HighlightableTreeNodeProps, HighlightingEngine, ITreeImageLoader, PropertyValueRendererContext, PropertyValueRendererManager, TreeActions, TreeModel, TreeModelNode, TreeNodeItem, TreeNodeRendererProps, TreeRenderer, TreeRendererProps } from "@itwin/components-react";
-import { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "../FunctionalityProviders";
-import { PropertyRecord } from "@itwin/appui-abstract";
-import { CheckBoxState, ContextMenuItem, GlobalContextMenu, ImageCheckBox, NodeCheckboxProps, NodeCheckboxRenderer, NodeCheckboxRenderProps, TreeNode } from "@itwin/core-react";
-import { VisibilityHandler } from "../EventHandlers/VisibilityHandler";
+import type { CheckBoxInfo, HighlightableTreeNodeProps, ITreeImageLoader, PropertyValueRendererContext, TreeActions, TreeModel, TreeModelNode, TreeNodeItem, TreeNodeRendererProps, TreeRendererProps } from "@itwin/components-react";
+import { HighlightingEngine, PropertyValueRendererManager, TreeRenderer } from "@itwin/components-react";
+import type { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "../FunctionalityProviders/TreeNodeFunctionIconMapper";
+import type { PropertyRecord } from "@itwin/appui-abstract";
+import type { NodeCheckboxProps, NodeCheckboxRenderProps } from "@itwin/core-react";
+import { CheckBoxState, ContextMenuItem, GlobalContextMenu, ImageCheckBox, TreeNode } from "@itwin/core-react";
+import type { VisibilityHandler } from "../EventHandlers/VisibilityHandler";
 import styles from "./FunctionalTreeNodeRenderer.module.scss";
 import { ToolbarItemKeys } from "../TreeNodeFunctionsToolbar";
 
@@ -17,43 +19,15 @@ import { ToolbarItemKeys } from "../TreeNodeFunctionsToolbar";
  * @alpha
  */
 export const useNodesWithFunctionsRenderer = (
+  enableVisibility: boolean,
   itemsMapper: TreeNodeFunctionIconInfoMapper,
   visibilityHandler: VisibilityHandler | undefined,
   treeModel: TreeModel,
   selectedTreenodeCount: number,
   alterNodeLabel?: (node: TreeModelNode) => PropertyRecord
 ) => {
-  const nodeRenderer = React.useCallback(
-    createFunctionalTreeNodeRenderer(
-      itemsMapper,
-      visibilityHandler,
-      treeModel,
-      selectedTreenodeCount,
-      alterNodeLabel
-    ),
-    [itemsMapper, selectedTreenodeCount, alterNodeLabel]
-  );
-  return React.useCallback(
-    (props: TreeRendererProps) => (
-      <TreeRenderer {...props} nodeRenderer={nodeRenderer} />
-    ),
-    [nodeRenderer]
-  );
-};
-
-
-/**
- * Creates node renderer which renders node with functions available.
- * @alpha
- */
-export const createFunctionalTreeNodeRenderer = (
-  itemsMapper: TreeNodeFunctionIconInfoMapper,
-  visibilityHandler: VisibilityHandler | undefined,
-  treeModel: TreeModel,
-  selectedTreenodeCount: number,
-  alterNodeLabel?: (node: TreeModelNode) => PropertyRecord
-) => {
-  return (props: TreeNodeRendererProps) => (
+  // Creates node renderer which renders node with functions available.
+  const nodeRenderer = React.useCallback((props: TreeNodeRendererProps) => (
     <TreeNodeWrapper
       treeActions={props.treeActions}
       treeModel={treeModel}
@@ -64,9 +38,16 @@ export const createFunctionalTreeNodeRenderer = (
       className={
         visibilityHandler === undefined ? undefined : "with-checkbox"
       }
-      visibilityHandler={visibilityHandler}
+      visibilityHandler={enableVisibility ? visibilityHandler : undefined}
       selectedTreenodeCount={selectedTreenodeCount}
     />
+  ), [alterNodeLabel, enableVisibility, itemsMapper, selectedTreenodeCount, treeModel, visibilityHandler]
+  );
+  return React.useCallback(
+    (props: TreeRendererProps) => (
+      <TreeRenderer {...props} nodeRenderer={nodeRenderer} />
+    ),
+    [nodeRenderer]
   );
 };
 
@@ -103,7 +84,7 @@ export const visibilityTreeNodeCheckboxRenderer = (props: NodeCheckboxRenderProp
     tooltip={props.title}
   />;
 };
-export class TreeNodeWrapper extends React.Component<TreeNodeWrapperProps, { rowContextMenu?: React.ReactNode; }> {
+export class TreeNodeWrapper extends React.Component<TreeNodeWrapperProps, { rowContextMenu?: React.ReactNode }> {
   constructor(props: TreeNodeWrapperProps) {
     super(props);
     this.state = {
@@ -115,7 +96,7 @@ export class TreeNodeWrapper extends React.Component<TreeNodeWrapperProps, { row
   private async _onRowContextMenu(event: any) {
     event.preventDefault();
     event.persist();
-    const renderedContextMenu = await this._renderRowContextMenu(this.props.node, this.props.treeModel, this.props.selectedTreenodeCount, event!.clientX, event!.clientY);
+    const renderedContextMenu = await this._renderRowContextMenu(this.props.node, this.props.treeModel, this.props.selectedTreenodeCount, event.clientX, event.clientY);
     this.setState({
       rowContextMenu: renderedContextMenu,
     });
@@ -134,7 +115,7 @@ export class TreeNodeWrapper extends React.Component<TreeNodeWrapperProps, { row
           name={info.label}
           disabled={info.disabled}
           icon={info.toolbarIcon}
-          onSelect={() => { this._hideContextMenu(); info.functionalityProvider.performAction([node], treeModel); }}
+          onSelect={async () => { this._hideContextMenu(); await info.functionalityProvider.performAction([node], treeModel); }}
         >
           {info.label}
         </ContextMenuItem>,

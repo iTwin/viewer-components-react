@@ -3,10 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
-import { TreeModelNode } from "@itwin/components-react";
-import { IModelApp, ScreenViewport, StandardViewId, ViewManip, ViewState3d } from "@itwin/core-frontend";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { TreeModelNode } from "@itwin/components-react";
+import { IModelApp, StandardViewId, ViewManip } from "@itwin/core-frontend";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
 export class ToggledTopFitViewFunctionalityProvider extends TreeNodeFunctionalityProvider {
   protected isTopViewSet: boolean;
@@ -24,7 +23,7 @@ export class ToggledTopFitViewFunctionalityProvider extends TreeNodeFunctionalit
     this.isTopViewSet = setTopView;
   }
   private handleTopView() {
-    for (var vp of IModelApp.viewManager) {
+    for (const vp of IModelApp.viewManager) {
       vp.setStandardRotation(StandardViewId.Top);
       ViewManip.fitView(vp, true);
     }

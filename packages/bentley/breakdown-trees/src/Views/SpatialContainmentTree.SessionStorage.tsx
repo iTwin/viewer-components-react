@@ -3,8 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { SpatialContainmentEventHandlers, SpatialContainmentTree } from "./SpatialContainmentTree";
-import { IModelConnection } from "@itwin/core-frontend";
+import type { SpatialContainmentEventHandlers} from "./SpatialContainmentTree";
+import { SpatialContainmentTree } from "./SpatialContainmentTree";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 export interface SessionStorageSpatialContainmentTreeProps {
   iModel: IModelConnection;
@@ -31,9 +32,9 @@ export const SessionStorageSpatialContainmentTree: React.FC<SessionStorageSpatia
   }, []);
 
   const setIsDisplayGuids = React.useCallback((value: boolean) => {
-    sessionStorage.setItem(SHOW_GUID_STORAGE_KEY, String(value))
+    sessionStorage.setItem(SHOW_GUID_STORAGE_KEY, String(value));
     setDisplayGuids(value);
   }, []);
 
   return <SpatialContainmentTree iModel={props.iModel} groupByType={groupByType} setGroupByType={setIsGroupByType} groupByDiscipline={groupByDiscipline} setGroupByDiscipline={setIsGroupByDiscipline} displayGuids={displayGuids} setIsDisplayGuids={setIsDisplayGuids} enableVisibility={false} />;
-}
+};

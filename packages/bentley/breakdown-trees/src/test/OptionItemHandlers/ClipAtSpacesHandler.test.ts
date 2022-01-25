@@ -5,7 +5,7 @@
 import "mock-local-storage";
 import { assert } from "chai";
 import * as moq from "typemoq";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { ClipAtSpacesHandler } from "../../Views/OptionItemHandlers";
 import { StoryClipPlanesProvider } from "../../Views/FunctionalityProviders";
 
@@ -30,12 +30,12 @@ describe("ClipAtSpacesHandler", () => {
   it("should get the value from sessionstorage on init", async () => {
     sessionStorage.setItem(clipAtSpaceStorageKey, "true");
     const clipAtSpacesHandler = new ClipAtSpacesHandler(storyClipPlanesFunctionalityProvider, false, "tests", "Clip At Spaces", "anyicon");
-    let clipAtSpace = clipAtSpacesHandler.isActive();
+    let clipAtSpace = clipAtSpacesHandler.getIsActive();
     assert.isTrue(clipAtSpace);
 
     sessionStorage.setItem(clipAtSpaceStorageKey, "false");
     const clipAtSpacesHandlerFalse = new ClipAtSpacesHandler(storyClipPlanesFunctionalityProvider, true, "tests", "Clip At Spaces", "anyicon");
-    clipAtSpace = clipAtSpacesHandlerFalse.isActive();
+    clipAtSpace = clipAtSpacesHandlerFalse.getIsActive();
     assert.isFalse(clipAtSpace);
   });
 
@@ -43,16 +43,16 @@ describe("ClipAtSpacesHandler", () => {
     sessionStorage.clear();
     assert.isNull(sessionStorage.getItem(clipAtSpaceStorageKey));
     const clipAtSpacesHandler = new ClipAtSpacesHandler(storyClipPlanesFunctionalityProvider, true, "tests", "Clip At Spaces", "anyicon");
-    const clipAtSpaces = clipAtSpacesHandler.isActive();
+    const clipAtSpaces = clipAtSpacesHandler.getIsActive();
     assert.isTrue(clipAtSpaces);
   });
 
   it("should change sessionStorage value when toggled", async () => {
     sessionStorage.setItem(clipAtSpaceStorageKey, "true");
     const clipAtSpacesHandler = new ClipAtSpacesHandler(storyClipPlanesFunctionalityProvider, true, "tests", "Clip At Spaces", "anyicon");
-    assert.isTrue(clipAtSpacesHandler.isActive());
+    assert.isTrue(clipAtSpacesHandler.getIsActive());
     clipAtSpacesHandler.toggle();
-    assert.isFalse(clipAtSpacesHandler.isActive());
+    assert.isFalse(clipAtSpacesHandler.getIsActive());
   });
 
   it("should change the value of clipAtSpaces in functionality provider when toggled", async () => {

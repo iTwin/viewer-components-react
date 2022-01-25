@@ -8,7 +8,7 @@ import * as React from "react";
 import classnames from "classnames";
 import { BreakdownTrees } from "../BreakdownTrees";
 import { ContextMenuItem, Icon, Popup } from "@itwin/core-react";
-import { OptionItemHandler } from "./OptionItemHandlers";
+import type { OptionItemHandler } from "./OptionItemHandlers/OptionItemHandler";
 import { RelativePosition } from "@itwin/appui-abstract";
 import styles from "./MoreOptionsButton.module.scss";
 
@@ -36,7 +36,7 @@ export const MoreOptionsButton: React.FC<MoreOptionsButtonProps> = (props: MoreO
           >
             {optionHandler.label}
           </ContextMenuItem>
-          {optionHandler.isActive() && (<Icon iconSpec="icon-checkmark" className={styles.iconCheckmark} />)}
+          {optionHandler.getIsActive() && (<Icon iconSpec="icon-checkmark" className={styles.iconCheckmark} />)}
         </div>,
       );
     });

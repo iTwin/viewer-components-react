@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { Range3d } from "@itwin/core-geometry";
 
 export class DataLink {
@@ -77,8 +77,8 @@ export class DataLink {
   }
 
   public static async queryCategoryIds(iModel: IModelConnection, categoryNames: string[]) {
-    const namesString = categoryNames.map((name: string) => `'` + name + `'`).join(", ");
-    const query = "select * from BisCore.SpatialCategory where CodeValue IN ( " + namesString + ")";
+    const namesString = categoryNames.map((name: string) => `'${  name  }'`).join(", ");
+    const query = `select * from BisCore.SpatialCategory where CodeValue IN ( ${  namesString  })`;
     const rows = await this.executeQuery(iModel, query);
     const ids = rows.map((row) => row.id);
     return ids;

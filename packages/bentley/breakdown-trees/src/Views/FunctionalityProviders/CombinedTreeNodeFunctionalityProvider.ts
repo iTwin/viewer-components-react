@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { NodeKey } from "@itwin/presentation-common";
-import { TreeModel, TreeModelNode } from "@itwin/components-react";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { TreeModel, TreeModelNode } from "@itwin/components-react";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 
@@ -37,7 +37,7 @@ export class CombinedTreeNodeFunctionalityProvider extends TreeNodeFunctionality
         return this._groupNodeFunctionalityProvider.performAction([node], treeModel);
     } else if (NodeKey.isInstancesNodeKey(elementKey)){
       const classHierarchyArray = await IModelReadRpcInterface.getClient().getClassHierarchy(this._treeDataProvider.imodel.getRpcProps(), elementKey.instanceKeys[0].className);
-      for (let className of classHierarchyArray){
+      for (const className of classHierarchyArray){
         const mappedFunctionalityProvider = this._classFunctionalityMap.get(className);
         if (mappedFunctionalityProvider)
           return mappedFunctionalityProvider.performAction([node], treeModel);

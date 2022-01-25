@@ -2,13 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import * as React from "react";
-import { BeEvent, Id64Array, Id64String } from "@itwin/core-bentley";
-import { EmphasizeElements, Viewport } from "@itwin/core-frontend";
+import type { Id64Array, Id64String } from "@itwin/core-bentley";
+import { BeEvent } from "@itwin/core-bentley";
+import type { Viewport } from "@itwin/core-frontend";
+import { EmphasizeElements } from "@itwin/core-frontend";
 import { KeySet, NodeKey } from "@itwin/presentation-common";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import { TreeModelNode, TreeModelRootNode, TreeModelSource, TreeNodeItem } from "@itwin/components-react";
-import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "@itwin/appui-react";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { TreeModelNode, TreeModelRootNode, TreeModelSource, TreeNodeItem } from "@itwin/components-react";
+import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "@itwin/appui-react";
 import { RelatedElementIdsProvider } from "../RelatedElementIdsProvider";
 
 export class NodeDetails {
@@ -50,7 +51,6 @@ class AffectedNodesCache {
   }
 }
 
-
 /** @internal */
 export class VisibilityHandler implements IVisibilityHandler {
   private _props: VisibilityHandlerProps;
@@ -69,7 +69,7 @@ export class VisibilityHandler implements IVisibilityHandler {
 
   public onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
-  public getNodeVisibilityStatus(node: TreeNodeItem) {
+  public async getNodeVisibilityStatus(node: TreeNodeItem) {
     const nodeKey = this._treeDataProvider.getNodeKey(node);
     return this.getVisibilityStatus(node, nodeKey);
   }
@@ -201,7 +201,7 @@ export class VisibilityHandler implements IVisibilityHandler {
     const modelNode = this._modelSource.getModel().getNode(node.id);
     if (modelNode) {
       await this.loadChildren(modelNode, affectedNodeIds, isChecked);
-      this.getAllAncestors(modelNode, affectedParentIds);
+      await this.getAllAncestors(modelNode, affectedParentIds);
     }
     const affectedIds: string[] = affectedNodeIds;
     affectedParentIds.forEach((element) => {
@@ -281,7 +281,7 @@ export class VisibilityHandler implements IVisibilityHandler {
       const parentNode = this._modelSource.getModel().getNode(treeNode.parentId);
       if (parentNode) {
         affectedNodeIds.push(treeNode.parentId);
-        this.getAllAncestors(parentNode, affectedNodeIds);
+        await this.getAllAncestors(parentNode, affectedNodeIds);
       }
     }
   }

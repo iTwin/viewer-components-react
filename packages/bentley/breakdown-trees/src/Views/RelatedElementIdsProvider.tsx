@@ -3,9 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { ContentDataProvider } from "@itwin/presentation-components";
-import { ContentFlags, DescriptorOverrides, Keys, KeySet } from "@itwin/presentation-common";
-import { IModelConnection } from "@itwin/core-frontend";
-import { Id64String } from "@itwin/core-bentley";
+import type { DescriptorOverrides, Keys} from "@itwin/presentation-common";
+import { ContentFlags, KeySet } from "@itwin/presentation-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { Id64String } from "@itwin/core-bentley";
 
 class RulesetDrivenIdsProvider extends ContentDataProvider {
   constructor(imodel: IModelConnection, rulesetId: string, displayType: string, inputKeys: Keys) {
@@ -13,10 +14,10 @@ class RulesetDrivenIdsProvider extends ContentDataProvider {
     this.keys = new KeySet(inputKeys);
   }
   protected shouldConfigureContentDescriptor() { return false; }
-  protected getDescriptorOverrides(): Promise<DescriptorOverrides> {
+  protected async getDescriptorOverrides(): Promise<DescriptorOverrides> {
     return Promise.resolve({
       displayType: this.displayType,
-      contentFlags: ContentFlags.KeysOnly
+      contentFlags: ContentFlags.KeysOnly,
     });
   }
   public async getElementIds() {

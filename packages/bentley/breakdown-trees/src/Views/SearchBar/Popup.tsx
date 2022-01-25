@@ -7,7 +7,7 @@
 
 import * as React from "react";
 import classnames from "classnames";
-import { CommonProps } from "@itwin/core-react";
+import type { CommonProps } from "@itwin/core-react";
 import { RelativePosition } from "@itwin/appui-abstract";
 import "./Popup.scss";
 
@@ -133,7 +133,7 @@ export class Popup extends React.Component<PopupProps, PopupState> {
     document.removeEventListener("click", this._onBodyClick, true);
     document.removeEventListener("keydown", this._onEsc, true);
 
-    // tslint:disable-next-line:tslint-react-set-state-usage
+    // eslint-disable-next-line @itwin/react-set-state-usage
     this.setState({ isShown: false, position: this.props.position }, () => {
       if (this.props.onClose)
         this.props.onClose();

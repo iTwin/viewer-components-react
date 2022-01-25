@@ -3,10 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import * as React from "react";
 import classnames from "classnames";
-import { CommonProps } from "@itwin/core-react";
+import type { CommonProps } from "@itwin/core-react";
 import { RelativePosition } from "@itwin/appui-abstract";
 import { Popup } from "./Popup";
 import { SearchBox } from "./SearchBox";

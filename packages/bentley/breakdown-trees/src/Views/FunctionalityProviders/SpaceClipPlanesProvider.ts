@@ -3,14 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { NodeKey } from "@itwin/presentation-common";
-import { TreeModelNode } from "@itwin/components-react";
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import type { TreeModelNode } from "@itwin/components-react";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { ToggledTopFitViewFunctionalityProvider } from "./ToggledTopFitViewFunctionalityProvider";
-import { GeometricElement3dProps, Placement3d } from "@itwin/core-common";
+import type { GeometricElement3dProps } from "@itwin/core-common";
+import { Placement3d } from "@itwin/core-common";
 import { ClipPrimitive, ClipVector, ConvexClipPlaneSet } from "@itwin/core-geometry";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 export class SpaceClipPlanesProvider extends ToggledTopFitViewFunctionalityProvider {
   public defaultHeight?: number;
@@ -54,8 +55,7 @@ export class SpaceClipPlanesProvider extends ToggledTopFitViewFunctionalityProvi
       if (Math.abs(spaceRange.high.z - spaceRange.low.z) < 0.1 && this.defaultHeight)
         spaceRange.high.z = spaceRange.low.z + this.defaultHeight;
 
-
-      const planeSet = ConvexClipPlaneSet.createRange3dPlanes(spaceRange, true, true, true, true, true, true)
+      const planeSet = ConvexClipPlaneSet.createRange3dPlanes(spaceRange, true, true, true, true, true, true);
 
       const clip = ClipVector.createCapture([ClipPrimitive.createCapture(planeSet)]);
       vp.view.setViewClip(clip);
@@ -64,11 +64,11 @@ export class SpaceClipPlanesProvider extends ToggledTopFitViewFunctionalityProvi
   }
 
   private async clipViewToSpace(node: TreeModelNode) {
-    const elementKey = this._treeDataProvider.getNodeKey(node.item)
+    const elementKey = this._treeDataProvider.getNodeKey(node.item);
     if (NodeKey.isInstancesNodeKey(elementKey)) {
       const instanceId = elementKey.instanceKeys[0].id;
       await this.createSectionPlanes(instanceId);
-      super.performAction([node]);
+      await super.performAction([node]);
     }
   }
 }

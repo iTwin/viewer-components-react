@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { OptionItemHandler } from "./OptionItemHandler";
-import { ToggledTopFitViewFunctionalityProvider } from "../FunctionalityProviders";
+import type { ToggledTopFitViewFunctionalityProvider } from "../FunctionalityProviders/ToggledTopFitViewFunctionalityProvider";
 
 export class TopViewHandler extends OptionItemHandler {
   private static readonly TOP_VIEW_STORAGE_KEY = "top-view-storage-key";
@@ -21,8 +21,7 @@ export class TopViewHandler extends OptionItemHandler {
     sessionStorage.setItem(TopViewHandler.TOP_VIEW_STORAGE_KEY, String(this._flipToTopView));
     this.setTopViewForProviders();
   }
-  // tslint:disable-next-line:prefer-get
-  public isActive(): boolean {
+  public getIsActive(): boolean {
     return this._flipToTopView;
   }
 
