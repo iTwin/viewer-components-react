@@ -2,6 +2,18 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@itwin/property-grid-react_v0.2.0",
+      "date": "Mon, 24 Jan 2022 19:14:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump to official iTwin.js 3.0 release"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@itwin/property-grid-react_v0.1.2",
       "date": "Wed, 19 Jan 2022 17:39:40 GMT",
