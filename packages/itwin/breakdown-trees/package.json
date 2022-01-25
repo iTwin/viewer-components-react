@@ -1,6 +1,6 @@
 {
-  "name": "@bentley/breakdown-trees-react",
-  "version": "0.2.0",
+  "name": "@itwin/breakdown-trees-react",
+  "version": "0.1.0",
   "description": "Package for breakdown trees",
   "keywords": [
     "Bentley",

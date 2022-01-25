@@ -30,8 +30,8 @@
       "shouldPublish": false
     },
     {
-      "packageName": "@bentley/breakdown-trees-react",
-      "projectFolder": "packages/bentley/breakdown-trees",
+      "packageName": "@itwin/breakdown-trees-react",
+      "projectFolder": "packages/itwin/breakdown-trees",
       "versionPolicyName": "breakdown-trees"
     },
     {
