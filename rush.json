@@ -50,8 +50,8 @@
       "versionPolicyName": "imodel-react-hooks"
     },
     {
-      "packageName": "@bentley/grouping-mapping-widget",
-      "projectFolder": "packages/bentley/grouping-mapping-widget",
+      "packageName": "@itwin/grouping-mapping-widget",
+      "projectFolder": "packages/itwin/grouping-mapping-widget",
       "versionPolicyName": "grouping-mapping-widget"
     },
     {
