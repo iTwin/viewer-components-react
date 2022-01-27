@@ -29,7 +29,7 @@ export const TreeNodeFunctionsToolbar: React.FC<TreeNodeFunctionsToolbarProps> =
       .then((icons) => setToolbarIcons(icons));
   }, [props.treeNodeIconMapper, props.selectedNodes]);
 
-  React.useMemo(async () => { // eslint-disable-line @typescript-eslint/no-floating-promises
+  void React.useMemo(async () => {
     if (clickedInfo) {
       await clickedInfo.functionalityProvider.performAction(props.selectedNodes, props.treeModel);
       setClickedInfo(undefined);

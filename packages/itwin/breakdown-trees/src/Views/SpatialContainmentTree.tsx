@@ -127,7 +127,7 @@ export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (pr
   groupByDisciplineHandler._getItemState = () => props.groupByDiscipline;
   const containmentTree = React.useMemo(() => <ControlledTreeWrapper iModel={props.iModel} loadedRuleset={spatialRules} dataProvider={dataProvider}
     treeName={treeName} treeNodeIconMapper={functionIconMapper} optionItems={optionItems} searchTools={true}
-    displayGuids={props.displayGuids} setIsDisplayGuids={props.setIsDisplayGuids} enableVisibility={props.enableVisibility ? props.enableVisibility : false} />,
+    displayGuids={props.displayGuids} setIsDisplayGuids={props.setIsDisplayGuids} enableVisibility={!!props.enableVisibility} />,
   [props.iModel, props.displayGuids, props.setIsDisplayGuids, functionIconMapper, dataProvider, optionItems, props.enableVisibility, spatialRules]);
 
   return (<LoadableRuleSetComponent ruleSet={spatialRules}>

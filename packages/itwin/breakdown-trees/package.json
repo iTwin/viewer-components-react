@@ -147,7 +147,7 @@
     ],
     "extends": "plugin:@itwin/ui",
     "rules": {
-			"@typescript-eslint/unbound-method": "off",
+      "@typescript-eslint/unbound-method": "off",
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error"
     }
