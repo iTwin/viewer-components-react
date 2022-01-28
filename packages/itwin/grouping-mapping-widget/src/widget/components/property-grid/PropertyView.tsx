@@ -9,7 +9,7 @@ import { ActionButtonList } from "@itwin/components-react";
 
 import "./PropertyView.scss";
 import { SharedRendererProps } from "./PropertyRender";
-import { FindSimilarContext } from "../FindSimilarContext";
+import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
 import { useCallback } from "react";
 import { PropertyGridColumnStyleProvider } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
 
@@ -30,7 +30,7 @@ export interface PropertyViewProps extends SharedRendererProps {
  * @public
  */
 export const PropertyView = (props: PropertyViewProps) => {
-  const context = React.useContext(FindSimilarContext);
+  const context = React.useContext(GroupQueryBuilderContext);
 
   const _validatePropertySelection = () => {
     if (context.currentPropertyList.includes(props.propertyRecord)) {
@@ -290,7 +290,7 @@ export const PropertyView = (props: PropertyViewProps) => {
         />
       ) : undefined}
       {props.propertyRecord.value.valueFormat ===
-      PropertyValueFormat.Primitive ? (
+        PropertyValueFormat.Primitive ? (
           <div className='components-property-record-value'>
             <span>
               {props.valueElementRenderer

@@ -9,15 +9,15 @@ import {
   SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";
 import { KeySet } from "@itwin/presentation-common";
-import { FindSimilarApi } from "../../api/FindSimilarApi";
+import { GroupQueryBuilderApi } from "../../api/GroupQueryBuilderApi";
 import { PropertyGridWrapperApp } from "./property-grid/PropertyGridWrapper";
-import { FindSimilarContext } from "./FindSimilarContext";
+import { GroupQueryBuilderContext } from "./GroupQueryBuilderContext";
 import { Button } from "@itwin/itwinui-react";
 import "./FindSimilar.scss";
 
-export const FindSimilarContainer: React.FunctionComponent = () => {
+export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
   const iModelConnection = useActiveIModelConnection();
-  const context = React.useContext(FindSimilarContext);
+  const context = React.useContext(GroupQueryBuilderContext);
 
   const [keysState, setKeysState] = React.useState<KeySet>(new KeySet());
   const [selected, SetSelected] = React.useState<boolean>(false);
@@ -36,10 +36,10 @@ export const FindSimilarContainer: React.FunctionComponent = () => {
     };
 
     if (iModelConnection) {
-      FindSimilarApi.addSelectionListener(_onSelectionChanged);
+      GroupQueryBuilderApi.addSelectionListener(_onSelectionChanged);
     }
     return () => {
-      FindSimilarApi.removeSelectionListener();
+      GroupQueryBuilderApi.removeSelectionListener();
     };
   }, [iModelConnection, context]);
 

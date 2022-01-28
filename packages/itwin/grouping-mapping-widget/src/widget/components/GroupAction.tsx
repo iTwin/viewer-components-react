@@ -18,8 +18,8 @@ import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { FindSimilarContainer } from "./FindSimilarContainer";
-import { FindSimilarContext } from "./FindSimilarContext";
+import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
+import { GroupQueryBuilderContext } from "./GroupQueryBuilderContext";
 import { QueryBuilder } from "./QueryBuilder";
 import {
   clearEmphasizedElements,
@@ -63,8 +63,7 @@ const GroupAction = ({
         selectionProvider: ISelectionProvider,
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-        const query = `SELECT ECInstanceId FROM ${
-          selection.instanceKeys.keys().next().value
+        const query = `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
         }`;
         // Selects all instances of the class
         // const ids = await fetchIdsFromQuery(query, iModelConnection);
@@ -229,7 +228,7 @@ const GroupAction = ({
         </Fieldset>
 
         <Fieldset legend='Group By' className='find-similar'>
-          <FindSimilarContext.Provider
+          <GroupQueryBuilderContext.Provider
             value={{
               currentPropertyList,
               setCurrentPropertyList,
@@ -239,8 +238,8 @@ const GroupAction = ({
               setQueryBuilder,
             }}
           >
-            <FindSimilarContainer />
-          </FindSimilarContext.Provider>
+            <GroupQueryBuilderContainer />
+          </GroupQueryBuilderContext.Provider>
         </Fieldset>
       </div>
       <ActionPanel

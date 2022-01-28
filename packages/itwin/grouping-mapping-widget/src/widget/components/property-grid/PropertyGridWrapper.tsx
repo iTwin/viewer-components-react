@@ -5,10 +5,10 @@
 import * as React from "react";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 
-import { FindSimilarApi, PropertyProps } from "../../../api/FindSimilarApi";
+import { GroupQueryBuilderApi, PropertyProps } from "../../../api/GroupQueryBuilderApi";
 import { PropertyGrid } from "./PropertyGrid";
-import "../FindSimilar.scss";
-import { FindSimilarContext } from "../FindSimilarContext";
+import "../GroupQueryBuilder.scss";
+import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
 
 interface PropertyGridWrapperState {
   dataProvider?: PresentationPropertyDataProvider;
@@ -20,7 +20,7 @@ export class PropertyGridWrapperApp extends React.Component<
 PropertyProps,
 PropertyGridWrapperState
 > {
-  static override contextType = FindSimilarContext;
+  static override contextType = GroupQueryBuilderContext;
   constructor(props: PropertyProps | Readonly<PropertyProps>) {
     super(props);
     this.state = {};
@@ -32,7 +32,7 @@ PropertyGridWrapperState
       return;
     }
 
-    const dataProvider = FindSimilarApi.createPropertyDataProvider(
+    const dataProvider = GroupQueryBuilderApi.createPropertyDataProvider(
       this.props.keys,
       this.props.imodel,
     );

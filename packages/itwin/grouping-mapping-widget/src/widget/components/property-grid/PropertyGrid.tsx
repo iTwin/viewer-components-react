@@ -26,7 +26,7 @@ import { PropertyList, PropertyListProps } from "./PropertyList";
 import "./PropertyGrid.scss";
 
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { FindSimilarContext } from "../FindSimilarContext";
+import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
 
 /** Properties for [[PropertyGrid]] React component
  * @public
@@ -78,7 +78,7 @@ PropertyGridState
   private _isInDataRequest = false;
   private _hasPendingDataRequest = false;
 
-  static override contextType = FindSimilarContext;
+  static override contextType = GroupQueryBuilderContext;
 
   /** @internal */
   constructor(props: PropertyGridProps) {
@@ -129,7 +129,7 @@ PropertyGridState
       this.props.orientation !== prevProps.orientation ||
       this.props.isOrientationFixed !== prevProps.isOrientationFixed ||
       this.props.horizontalOrientationMinWidth !==
-        prevProps.horizontalOrientationMinWidth
+      prevProps.horizontalOrientationMinWidth
     ) {
       this.updateOrientation(this.state.width);
     }

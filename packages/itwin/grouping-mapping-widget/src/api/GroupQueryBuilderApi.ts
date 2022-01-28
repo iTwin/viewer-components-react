@@ -20,7 +20,7 @@ export interface PropertyProps {
 
 /* This class demonstrates the key APIs needed to access formatted property information
    suitable to present to end users. */
-export class FindSimilarApi {
+export class GroupQueryBuilderApi {
   private static selectionListener: SelectionChangesListener;
 
   public static addSelectionListener(listener: SelectionChangesListener) {

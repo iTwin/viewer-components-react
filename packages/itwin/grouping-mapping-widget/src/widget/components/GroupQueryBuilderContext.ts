@@ -16,7 +16,7 @@ export interface PropertySelection {
   queryBuilder: QueryBuilder;
   setQueryBuilder: React.Dispatch<React.SetStateAction<QueryBuilder>>;
 }
-export const FindSimilarContext = React.createContext<PropertySelection>({
+export const GroupQueryBuilderContext = React.createContext<PropertySelection>({
   currentPropertyList: [],
   setCurrentPropertyList: () => [],
   query: "",
