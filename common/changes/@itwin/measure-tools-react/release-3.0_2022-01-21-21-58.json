@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/measure-tools-react",
+      "comment": "Bump to official iTwin.js 3.0 release",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/measure-tools-react"
+}
