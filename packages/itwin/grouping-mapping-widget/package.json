@@ -62,6 +62,8 @@
     "@itwin/core-orbitgt": "^3.0.0",
     "@itwin/core-quantity": "^3.0.0",
     "@itwin/core-react": "^3.0.0",
+    "@itwin/itwinui-react": "^1.29.2",
+    "@itwin/itwinui-icons": "^1.5.1",
     "@itwin/eslint-plugin": "^3.0.0",
     "@itwin/presentation-common": "^3.0.0",
     "@itwin/presentation-components": "^3.0.0",
@@ -94,6 +96,8 @@
     "@itwin/core-react": "^3.0.0",
     "@itwin/presentation-components": "^3.0.0",
     "@itwin/presentation-frontend": "^3.0.0",
+    "@itwin/itwinui-react": "^1.29.2",
+    "@itwin/itwinui-icons": "^1.5.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.0"
