@@ -24,7 +24,7 @@ const ActionPanel = ({
       <div className='action-panel'>
         {isLoading ? (
           <IconButton styleType='high-visibility'>
-            <ProgressRadial indeterminate />
+            <ProgressRadial size="small" indeterminate />
           </IconButton>
         ) : (
           <Button

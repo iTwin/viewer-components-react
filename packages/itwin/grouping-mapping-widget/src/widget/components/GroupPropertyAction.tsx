@@ -281,9 +281,9 @@ const GroupPropertyAction = ({
         ],
       };
       const requestOptions: ContentDescriptorRequestOptions<
-      IModelConnection,
-      KeySet,
-      RulesetVariable
+        IModelConnection,
+        KeySet,
+        RulesetVariable
       > = {
         imodel: iModelConnection,
         keys: keySet,
@@ -512,6 +512,8 @@ const GroupPropertyAction = ({
             onBlur={() => {
               validator.showMessageFor("dataType");
             }}
+            onShow={() => { }}
+            onHide={() => { }}
           />
           <LabeledSelect<string>
             label='Quantity Type'
@@ -519,9 +521,10 @@ const GroupPropertyAction = ({
             options={quantityTypesSelectionOptions}
             value={quantityType}
             onChange={setQuantityType}
+            onShow={() => { }}
+            onHide={() => { }}
           />
         </Fieldset>
-        {/* <Title>Properties</Title> */}
         <Fieldset className='property-selection-container' legend='Properties'>
           {propertyAlert && (
             <Alert type={"negative"}>

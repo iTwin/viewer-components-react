@@ -58,12 +58,12 @@ export const DeleteModal = ({
       >
         <Leading>
           Are you sure you want to delete{" "}
-          <strong>{<MiddleTextTruncation text={`${entityName  }?`} />}</strong>
+          <strong>{<MiddleTextTruncation text={`${entityName}?`} />}</strong>
         </Leading>
         <ModalButtonBar>
           {isLoading ? (
             <IconButton styleType='high-visibility'>
-              <ProgressRadial indeterminate />
+              <ProgressRadial size="small" indeterminate />
             </IconButton>
           ) : (
             <Button styleType='high-visibility' onClick={deleteCallback}>

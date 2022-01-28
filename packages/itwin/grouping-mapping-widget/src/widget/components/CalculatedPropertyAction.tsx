@@ -47,11 +47,11 @@ const CalculatedPropertyAction = ({
   );
   const [type, setType] = useState<string>(property?.type ?? "");
   const [bboxDecorator, setBboxDecorator] = useState<
-  BboxDimensionsDecorator | undefined
+    BboxDimensionsDecorator | undefined
   >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [inferredSpatialData, setInferredSpatialData] = useState<
-  Map<BboxDimension, number> | undefined
+    Map<BboxDimension, number> | undefined
   >();
   const [validator, showValidationMessage] = useValidator();
 
@@ -222,6 +222,8 @@ const CalculatedPropertyAction = ({
                 {getSpatialData(option.value)}
               </div>
             )}
+            onShow={() => { }}
+            onHide={() => { }}
           />
         </Fieldset>
       </div>

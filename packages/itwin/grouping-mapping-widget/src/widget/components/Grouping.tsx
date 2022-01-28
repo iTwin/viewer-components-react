@@ -230,7 +230,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     let colour = "#";
     for (let i = 0; i < 3; i++) {
       const value = (hash >> (i * 8)) & 0xff;
-      colour += (`00${  value.toString(16)}`).substr(-2);
+      colour += (`00${value.toString(16)}`).substr(-2);
     }
     return colour;
   };
@@ -322,7 +322,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           <div className='groups-container'>
             <Button
               startIcon={
-                isLoadingQuery ? <ProgressRadial indeterminate /> : <SvgAdd />
+                isLoadingQuery ? <ProgressRadial size="small" indeterminate /> : <SvgAdd />
               }
               styleType='high-visibility'
               disabled={isLoadingQuery}

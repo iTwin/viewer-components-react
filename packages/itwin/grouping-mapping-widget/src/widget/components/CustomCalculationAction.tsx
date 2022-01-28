@@ -149,6 +149,8 @@ const CustomCalculationAction = ({
             options={quantityTypesSelectionOptions}
             value={quantityType}
             onChange={setQuantityType}
+            onShow={() => { }}
+            onHide={() => { }}
           />
         </Fieldset>
       </div>

@@ -529,6 +529,7 @@ importers:
       '@types/react': ^17.0.19
       '@types/react-dom': ^17.0.9
       '@types/react-redux': ^7.0.1
+      '@types/react-table': ^7.7.0
       '@typescript-eslint/eslint-plugin': ^5.3.1
       '@typescript-eslint/parser': ^5.10.1
       classnames: ^2.3.1
@@ -539,21 +540,26 @@ importers:
       eslint-plugin-react: ^7.25.1
       eslint-plugin-react-hooks: ^4.2.0
       i18next: ^10.2.2
+      immer: ^9.0.7
       ncp: ^2.0.0
       react: ^17.0.2
       react-dom: ^17.0.2
       react-redux: ^7.2.0
       react-spring: ^8.0.27
+      react-table: ^7.7.0
       redux: ^4.0.3
       rimraf: ^3.0.2
       simple-react-validator: ^1.6.1
       typescript: ~4.3.0
     dependencies:
       '@itwin/imodel-browser-react': 0.12.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 1.29.3_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
       cross-fetch: 3.1.5
       i18next: 10.6.0
+      immer: 9.0.12
       react-spring: 8.0.27_react-dom@17.0.2+react@17.0.2
+      react-table: 7.7.0_react@17.0.2
       redux: 4.1.2
       simple-react-validator: 1.6.1
     devDependencies:
@@ -573,7 +579,6 @@ importers:
       '@itwin/core-react': 3.0.0_a598e32a34486c4496492d3a33bbcfa2
       '@itwin/eslint-plugin': 3.0.0_eslint@7.32.0+typescript@4.3.5
       '@itwin/itwinui-icons-react': 1.5.1_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 1.29.3_react-dom@17.0.2+react@17.0.2
       '@itwin/presentation-common': 3.0.0_a8cd2146224cbeff23caf02136468072
       '@itwin/presentation-components': 3.0.0_a327ea1eac86f58bd2a4c4b665936ae7
       '@itwin/presentation-frontend': 3.0.0_0d2564a44167f7b3b5c98c0eeb3ec417
@@ -583,6 +588,7 @@ importers:
       '@types/react': 17.0.38
       '@types/react-dom': 17.0.11
       '@types/react-redux': 7.1.22
+      '@types/react-table': 7.7.9
       '@typescript-eslint/eslint-plugin': 5.10.1_4019987a4691ece20e4d338c6633310d
       '@typescript-eslint/parser': 5.10.1_eslint@7.32.0+typescript@4.3.5
       cpx2: 3.0.2
@@ -5936,6 +5942,7 @@ packages:
 
   /@itwin/itwinui-css/0.44.2:
     resolution: {integrity: sha512-n+ju00BaRaLZe8LqjEcl5i0Um8oKliyTagyz5SHi6IGqQKZilMs1feLsfyqWzNbDYaI4M4Bn4SBWJBFgXtDOjg==}
+    dev: false
 
   /@itwin/itwinui-icons-react/1.5.1_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-QANle8HPvHe7EXR15jVkGKZR4eU0d9P4uBSzxiBxr888iX1f3CXpV04h5Lt2D4TZSPe+A6z6n0nzaIikciBA3g==}
@@ -5989,6 +5996,7 @@ packages:
       react-dom: 17.0.2_react@17.0.2
       react-table: 7.7.0_react@17.0.2
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
+    dev: false
 
   /@itwin/presentation-common/3.0.0_a8cd2146224cbeff23caf02136468072:
     resolution: {integrity: sha512-vaCQ+bVQIOw9fwWFUELqJKZX4/jcKG72EUeZ6RY8qlePvnxHjexBgf60skEtDXgu6oLU8MKJw26vDTK/NBWGSA==}
@@ -9555,7 +9563,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001303
-      electron-to-chromium: 1.4.55
+      electron-to-chromium: 1.4.56
     dev: true
 
   /browserslist/4.1.1:
@@ -9563,7 +9571,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001303
-      electron-to-chromium: 1.4.55
+      electron-to-chromium: 1.4.56
       node-releases: 1.1.77
     dev: true
 
@@ -9572,7 +9580,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001303
-      electron-to-chromium: 1.4.55
+      electron-to-chromium: 1.4.56
       node-releases: 1.1.77
       pkg-up: 3.1.0
     dev: true
@@ -9583,7 +9591,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001303
-      electron-to-chromium: 1.4.55
+      electron-to-chromium: 1.4.56
       escalade: 3.1.1
       node-releases: 2.0.1
       picocolors: 1.0.0
@@ -11772,8 +11780,8 @@ packages:
     resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
     dev: true
 
-  /electron-to-chromium/1.4.55:
-    resolution: {integrity: sha512-AoCDEVElLY8mwe4TuDDkr1jxvSh/Ih5PFlEXCpmwFkq9JOXn4K58CScgBl+R1ghFW9cPJ7VeWo30nAHSRCe6rw==}
+  /electron-to-chromium/1.4.56:
+    resolution: {integrity: sha512-0k/S0FQqRRpJbX7YUjwCcLZ8D42RqGKtaiq90adXBOYgTIWwLA/g3toO8k9yEpqU8iC4QyaWYYWSTBIna8WV4g==}
     dev: true
 
   /elliptic/6.5.4:
@@ -12279,7 +12287,7 @@ packages:
       minimatch: 3.0.4
       object.values: 1.1.5
       read-pkg-up: 2.0.0
-      resolve: 1.15.0
+      resolve: 1.22.0
     dev: true
 
   /eslint-plugin-import/2.23.4_eslint@6.8.0:
@@ -14760,7 +14768,6 @@ packages:
 
   /immer/9.0.12:
     resolution: {integrity: sha512-lk7UNmSbAukB5B6dh9fnh5D0bJTOFKxVg2cyJWTYrWRfhLrLMBquONcUs3aFq507hNoIZEDDh8lb8UtOizSMhA==}
-    dev: true
 
   /immer/9.0.6:
     resolution: {integrity: sha512-G95ivKpy+EvVAnAab4fVa4YGYn24J1SpEktnJX7JJ45Bd7xqME/SCplFzYFmTbrkwZbQ4xJK1xMTUYBkN6pWsQ==}
