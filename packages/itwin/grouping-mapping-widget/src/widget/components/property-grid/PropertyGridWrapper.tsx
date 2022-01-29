@@ -57,14 +57,12 @@ PropertyGridWrapperState
     const dataProvider = this.state.dataProvider;
     return (
       <>
-        <div className={"table-box"}>
-          {dataProvider && <PropertyGrid dataProvider={dataProvider} />}
-          {!dataProvider && (
-            <div className='select-element-hint'>
-              <span>Select an element to see its properties.</span>
-            </div>
-          )}
-        </div>
+        {dataProvider && <PropertyGrid dataProvider={dataProvider} />}
+        {!dataProvider && (
+          <div className='select-element-hint'>
+            <span>Select an element to see its properties.</span>
+          </div>
+        )}
       </>
     );
   }

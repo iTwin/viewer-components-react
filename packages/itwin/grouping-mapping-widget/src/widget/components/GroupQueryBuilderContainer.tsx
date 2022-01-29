@@ -13,7 +13,7 @@ import { GroupQueryBuilderApi } from "../../api/GroupQueryBuilderApi";
 import { PropertyGridWrapperApp } from "./property-grid/PropertyGridWrapper";
 import { GroupQueryBuilderContext } from "./GroupQueryBuilderContext";
 import { Button } from "@itwin/itwinui-react";
-import "./FindSimilar.scss";
+import "./GroupQueryBuilder.scss";
 
 export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
   const iModelConnection = useActiveIModelConnection();

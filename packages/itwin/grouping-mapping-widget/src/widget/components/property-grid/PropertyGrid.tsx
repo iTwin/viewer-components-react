@@ -19,7 +19,6 @@ import {
   ColumnResizeRelatedPropertyListProps,
   ColumnResizingPropertyListPropsSupplier,
 } from "@itwin/components-react/lib/cjs/components-react/propertygrid/component/ColumnResizingPropertyListPropsSupplier";
-import { DelayedSpinner } from "@itwin/components-react/lib/cjs/components-react/common/DelayedSpinner";
 import { Orientation, ResizableContainerObserver } from "@itwin/core-react";
 
 import { PropertyList, PropertyListProps } from "./PropertyList";
@@ -27,6 +26,7 @@ import "./PropertyGrid.scss";
 
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
+import { ProgressRadial } from "@itwin/itwinui-react";
 
 /** Properties for [[PropertyGrid]] React component
  * @public
@@ -246,8 +246,8 @@ PropertyGridState
   public override render() {
     if (this.state.loadStart) {
       return (
-        <div className='components-property-grid-loader'>
-          <DelayedSpinner loadStart={this.state.loadStart} size='small' />
+        <div className='gm-components-property-grid-loader'>
+          <ProgressRadial indeterminate />
         </div>
       );
     }
@@ -343,6 +343,7 @@ interface NestedCategoryBlockProps
   orientation: Orientation;
 }
 const NestedCategoryBlock = (props: NestedCategoryBlockProps) => {
+  const [width, setWidth] = React.useState(1);
   return (
     <PropertyCategoryBlock
       category={props.categorizedRecords.category}
@@ -351,6 +352,7 @@ const NestedCategoryBlock = (props: NestedCategoryBlockProps) => {
       {props.categorizedRecords.records.length ? (
         <ColumnResizingPropertyListPropsSupplier
           orientation={props.orientation}
+          width={width}
         >
           {(partialListProps: ColumnResizeRelatedPropertyListProps) => (
             <PropertyList
@@ -372,6 +374,8 @@ const NestedCategoryBlock = (props: NestedCategoryBlockProps) => {
                 props.isPropertyRightClickSelectionEnabled
               }
               actionButtonRenderers={props.actionButtonRenderers}
+              setWidth={setWidth}
+              width={width}
             />
           )}
         </ColumnResizingPropertyListPropsSupplier>

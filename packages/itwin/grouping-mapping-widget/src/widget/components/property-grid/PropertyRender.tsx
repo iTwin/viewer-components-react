@@ -191,7 +191,7 @@ PropertyRendererState
         // If array is empty, render it as a primitive property
         if (
           this.props.propertyRecord.value.valueFormat ===
-            PropertyValueFormat.Array &&
+          PropertyValueFormat.Array &&
           this.props.propertyRecord.value.items.length === 0
         ) {
           return <PrimitivePropertyRenderer {...primitiveRendererProps} />;

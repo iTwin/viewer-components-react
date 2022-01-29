@@ -2,24 +2,17 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/core-react/lib/cjs/core-react/style/themecolors';
-@import '~@itwin/itwinui-css/scss/style/typography';
+@import "~@itwin/core-react/lib/cjs/core-react/style/themecolors";
+@import "~@itwin/itwinui-css/scss/style/typography";
+@import "~@itwin/itwinui-css/scss/variables";
 
 $text-font-size: $iui-font-size;
 $text-font-color: $buic-text-color;
 
 .components-property-record--horizontal {
-  min-height: 24px;
+  height: 100%;
   display: grid;
-  // Vertical padding fixes visual inconsistency between Firefox and Chrome when property is selected.
-  padding: 1px 9px;
-
-  .components-property-selection-checkbox {
-    font-size: $iui-font-size-small;
-    color: $buic-foreground-muted;
-    margin-right: 5px;
-    margin-bottom: 5px;
-  }
+  padding: 0 8px;
 
   .components-property-record-label {
     font-size: $iui-font-size-small;
@@ -30,35 +23,25 @@ $text-font-color: $buic-text-color;
     min-height: 24px;
     font-size: $text-font-size;
     color: $text-font-color;
-    padding: 0 5px;
+    padding: 0px 5px;
   }
 }
 
 .components-property-record--vertical {
+  height: 100%;
+  padding: 0 8px;
   display: grid;
-
-  .components-property-selection-checkbox {
-    font-size: $iui-font-size-small;
-    color: $buic-foreground-muted;
-    margin-right: 5px;
-    margin-bottom: 5px;
-  }
+  align-content: center;
 
   .components-property-record-label {
     font-size: $iui-font-size-small;
     color: $buic-foreground-muted;
-    margin: 0 9px;
-    padding-top: 5px;
-    padding-bottom: 0;
   }
 
   .components-property-record-value {
-    min-height: 24px;
+    min-height: 22px;
     font-size: $text-font-size;
     color: $text-font-color;
-    margin: 0 9px;
-    padding-top: 0;
-    padding-bottom: 3px;
   }
 }
 
@@ -67,12 +50,11 @@ $text-font-color: $buic-text-color;
   align-items: center;
 }
 
-.components-property-selection-checkbox {
-  @include record-cell;
-}
-
 .components-property-record-label {
   @include record-cell;
+  .components-property-selection-checkbox {
+    margin-right: $iui-s;
+  }
 }
 
 .components-property-record-value {
