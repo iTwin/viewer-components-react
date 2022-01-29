@@ -40,7 +40,9 @@
   },
   "dependencies": {
     "@itwin/imodel-browser-react": "^0.12.1",
+    "@itwin/itwinui-css": "^0.44.1",
     "@itwin/itwinui-react": "^1.29.2",
+    "@itwin/itwinui-icons-react": "^1.5.1",
     "classnames": "^2.3.1",
     "cross-fetch": "^3.1.4",
     "i18next": "^10.2.2",
@@ -97,7 +99,6 @@
     "@itwin/components-react": "^3.0.0",
     "@itwin/core-bentley": "^3.0.0",
     "@itwin/core-react": "^3.0.0",
-    "@itwin/itwinui-icons-react": "^1.5.1",
     "@itwin/presentation-components": "^3.0.0",
     "@itwin/presentation-frontend": "^3.0.0",
     "react": "^17.0.2",
