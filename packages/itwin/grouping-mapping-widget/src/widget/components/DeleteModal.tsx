@@ -12,7 +12,7 @@ import {
   ProgressRadial,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
-import './DeleteModal.scss'
+import "./DeleteModal.scss";
 
 export interface DeleteModalProps {
   entityName: string;

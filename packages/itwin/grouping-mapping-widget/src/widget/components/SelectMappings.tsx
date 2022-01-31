@@ -69,7 +69,7 @@ const SelectMappings = ({
         columns: [
           {
             id: "mappingName",
-            Header: "Mapping",
+            Header: "Mapping Name",
             accessor: "mappingName",
             Filter: tableFilters.TextFilter(),
           },

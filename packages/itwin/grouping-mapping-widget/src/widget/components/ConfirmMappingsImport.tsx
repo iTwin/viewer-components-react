@@ -91,8 +91,17 @@ const ConfirmMappingImport = ({
         <div className='import-progress-container'>
           <div className='import-progress-bar'>
             <div className='import-progress-bar-description'>
-              <Text variant='title'>Importing</Text>
-              <Text>We are currently importing the mappings.</Text>
+              {importCount !== selectedMappings.length ? (
+                <>
+                  <Text variant='title'>Importing</Text>
+                  <Text>We are currently importing the mappings.</Text>
+                </>
+              ) : (
+                <>
+                  <Text variant='title'>Done!</Text>
+                  <Text>Your mapping(s) are ready.</Text>
+                </>
+              )}
             </div>
             <ProgressLinear
               value={(importCount / selectedMappings.length) * 100}

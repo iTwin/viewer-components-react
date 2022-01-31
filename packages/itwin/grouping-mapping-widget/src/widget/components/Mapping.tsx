@@ -110,7 +110,7 @@ export const Mappings = () => {
         columns: [
           {
             id: "mappingName",
-            Header: "Mapping",
+            Header: "Mapping Name",
             accessor: "mappingName",
             Cell: (value: CellProps<{ mappingName: string }>) => (
               <div
