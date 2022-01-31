@@ -41,7 +41,7 @@ const CustomCalculationAction = ({
   const [formula, setFormula] = useState<string>(
     customCalculation?.formula ?? "",
   );
-  const [quantityType, setQuantityType] = useState<string>("Undefined");
+  const [quantityType, setQuantityType] = useState<string>(customCalculation?.quantityType ?? "Undefined");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
