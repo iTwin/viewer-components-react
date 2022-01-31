@@ -12,6 +12,7 @@ import {
   ProgressRadial,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
+import './DeleteModal.scss'
 
 export interface DeleteModalProps {
   entityName: string;
@@ -56,10 +57,14 @@ export const DeleteModal = ({
           setShow(false);
         }}
       >
-        <Leading>
-          Are you sure you want to delete{" "}
-          <strong>{<MiddleTextTruncation text={`${entityName}?`} />}</strong>
-        </Leading>
+        <div className="delete-modal-body-text">
+          <Leading>
+            Are you sure you want to delete
+          </Leading>
+          <strong>
+            {<MiddleTextTruncation text={`${entityName}?`} />}
+          </strong>
+        </div>
         <ModalButtonBar>
           {isLoading ? (
             <IconButton styleType='high-visibility'>
