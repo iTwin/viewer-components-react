@@ -28,7 +28,7 @@ export type CustomCalculation =
 
 const fetchCustomCalculations = async (
   setCustomCalculations: React.Dispatch<
-  React.SetStateAction<CustomCalculation[]>
+    React.SetStateAction<CustomCalculation[]>
   >,
   iModelId: string,
   mappingId: string,
@@ -56,11 +56,11 @@ const useFetchCustomCalculations = (
   groupId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ): [
-  CustomCalculation[],
-  React.Dispatch<React.SetStateAction<CustomCalculation[]>>,
-] => {
+    CustomCalculation[],
+    React.Dispatch<React.SetStateAction<CustomCalculation[]>>,
+  ] => {
   const [CustomCalculations, setCustomCalculations] = useState<
-  CustomCalculation[]
+    CustomCalculation[]
   >([]);
 
   useEffect(() => {
@@ -82,9 +82,9 @@ interface CustomCalculationTableProps {
   groupId: string;
 
   setSelectedCustomCalculation: React.Dispatch<
-  React.SetStateAction<
-  CreateTypeFromInterface<CustomCalculationReportingAPI> | undefined
-  >
+    React.SetStateAction<
+      CreateTypeFromInterface<CustomCalculationReportingAPI> | undefined
+    >
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
   onCustomCalculationModify: (value: CellProps<CustomCalculation>) => void;
@@ -203,7 +203,7 @@ const CustomCalculationTable = ({
         data={customCalculations}
         density='extra-condensed'
         columns={CustomCalculationsColumns}
-        emptyTableContent='No Calculated Properties'
+        emptyTableContent='No Custom Calculations'
         isSortable
         isLoading={isLoading}
       />
