@@ -10,12 +10,12 @@ Each one has it's own folder and README describing the package.
 
 ### iTwin.js@^3 Compatible
 
-| Name                         | Folder                                                    | Changelog                                                        | Version                                                                                                                                    |
-| ---------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| @itwin/tree-widget-react     | [tree-widget](./packages/itwin/tree-widget/)              | [changelog](./packages/itwin/tree-widget/CHANGELOG.md)           | [![npm version](https://badge.fury.io/js/%40itwin%2Ftree-widget-react.svg)](https://badge.fury.io/js/%40itwin%2Ftree-widget-react)         |
-| @itwin/property-grid-react   | [property-grid](./packages/itwin/property-grid)           | [changelog](./packages/itwin/property-grid/CHANGELOG.md)         | [![npm version](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react.svg)](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react)     |
-| @itwin/measure-tools-react   | [measure-tools](./packages/itwin/measure-tools)           | [changelog](./packages/itwin/measure-tools/CHANGELOG.md)         | [![npm version](https://badge.fury.io/js/%40itwin%2Fmeasure-tools-react.svg)](https://badge.fury.io/js/%40itwin%2Fmeasure-tools-react)     |
-| @itwin/breakdown-trees-react | [breakdown-trees](./packages/itwin/breakdown-trees-react) | [changelog](./packages/itwin/breakdown-trees-react/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fbreakdown-trees-react.svg)](https://badge.fury.io/js/%40itwin%2Fbreakdown-trees-react) |
+| Name                       | Folder                                          | Changelog                                                | Version                                                                                                                                |
+| -------------------------- | ----------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| @itwin/tree-widget-react   | [tree-widget](./packages/itwin/tree-widget/)    | [changelog](./packages/itwin/tree-widget/CHANGELOG.md)   | [![npm version](https://badge.fury.io/js/%40itwin%2Ftree-widget-react.svg)](https://badge.fury.io/js/%40itwin%2Ftree-widget-react)     |
+| @itwin/property-grid-react | [property-grid](./packages/itwin/property-grid) | [changelog](./packages/itwin/property-grid/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react.svg)](https://badge.fury.io/js/%40itwin%2Fproperty-grid-react) |
+| @itwin/measure-tools-react | [measure-tools](./packages/itwin/measure-tools) | [changelog](./packages/itwin/measure-tools/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fmeasure-tools-react.svg)](https://badge.fury.io/js/%40itwin%2Fmeasure-tools-react) |
+| @itwin/breakdown-trees-react | [breakdown-trees](./packages/itwin/breakdown-trees) | [changelog](./packages/itwin/breakdown-trees/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fbreakdown-trees-react.svg)](https://badge.fury.io/js/%40itwin%2Fbreakdown-trees-react) |
 
 ### iTwin.js@^2 Compatible
 
