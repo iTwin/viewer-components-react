@@ -371,8 +371,6 @@ importers:
 
   ../../packages/itwin/breakdown-trees:
     specifiers:
-      '@bentley/itwin-client': ^2.19.9
-      '@bentley/product-settings-client': ^2.19.9
       '@bentley/webpack-tools': 1.14.1
       '@itwin/appui-abstract': ^3.0.0
       '@itwin/appui-layout-react': ^3.0.0
@@ -440,8 +438,6 @@ importers:
       classnames: 2.3.1
       i18next: 10.6.0
     devDependencies:
-      '@bentley/itwin-client': 2.19.28
-      '@bentley/product-settings-client': 2.19.28_@bentley+itwin-client@2.19.28
       '@bentley/webpack-tools': 1.14.1_5f8539982158d593e925cf2f1ac79d17
       '@itwin/appui-abstract': 3.0.0_@itwin+core-bentley@3.0.0
       '@itwin/appui-layout-react': 3.0.0_d65e897e88f35abd334eaf7d9029cde7
@@ -3836,22 +3832,6 @@ packages:
       '@bentley/bentleyjs-core': 2.19.28
     dev: true
 
-  /@bentley/itwin-client/2.19.28:
-    resolution: {integrity: sha512-iLIifF+SrO59RxS4ZJ/7Lwspnua6jEzlruE2xEfZCCYNuDGJq3OXLcZOfeTLyZ8xA85sC6fALdP3NIK+4iPIEA==}
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.19.28
-    dependencies:
-      '@xmldom/xmldom': 0.7.5
-      deep-assign: 2.0.0
-      js-base64: 2.6.4
-      lodash: 4.17.21
-      qs: 6.10.3
-      superagent: 5.3.1
-      xpath: 0.0.27
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /@bentley/itwin-client/2.19.28_@bentley+bentleyjs-core@2.19.28:
     resolution: {integrity: sha512-iLIifF+SrO59RxS4ZJ/7Lwspnua6jEzlruE2xEfZCCYNuDGJq3OXLcZOfeTLyZ8xA85sC6fALdP3NIK+4iPIEA==}
     peerDependencies:
@@ -4068,15 +4048,6 @@ packages:
       '@bentley/imodeljs-frontend': 2.19.28_727c7615c785b38ef9dad2e0508e021b
       '@bentley/imodeljs-i18n': 2.19.28_@bentley+bentleyjs-core@2.19.28
       '@bentley/presentation-common': 2.19.28_22fe55567f6d5b2f0d74c1b824d7ac31
-    dev: true
-
-  /@bentley/product-settings-client/2.19.28_@bentley+itwin-client@2.19.28:
-    resolution: {integrity: sha512-5Vc0ZvHday9MqSQ5VgIqCCxhRyGKJLf8VZ8pDM3EAxQlf13XVC+0iNw8nujkysja/jwW/5aWF8js0M/vkPjNjg==}
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.19.28
-      '@bentley/itwin-client': ^2.19.28
-    dependencies:
-      '@bentley/itwin-client': 2.19.28
     dev: true
 
   /@bentley/product-settings-client/2.19.28_b246b79f6ea18b44a6130a6f08e38320:
@@ -20127,6 +20098,7 @@ packages:
   /puppeteer/5.3.1:
     resolution: {integrity: sha512-YTM1RaBeYrj6n7IlRXRYLqJHF+GM7tasbvrNFx6w1S16G76NrPq7oYFKLDO+BQsXNtS8kW2GxWCXjIMPvfDyaQ==}
     engines: {node: '>=10.18.1'}
+    deprecated: Version no longer supported. Upgrade to @latest
     requiresBuild: true
     dependencies:
       debug: 4.3.3
