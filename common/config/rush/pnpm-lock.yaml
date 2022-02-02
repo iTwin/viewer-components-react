@@ -550,7 +550,6 @@ importers:
       typescript: ~4.3.0
     dependencies:
       '@itwin/imodel-browser-react': 0.12.2_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-css': 0.44.2
       '@itwin/itwinui-icons-react': 1.5.1_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.29.3_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
@@ -573,6 +572,7 @@ importers:
       '@itwin/core-quantity': 3.0.0_@itwin+core-bentley@3.0.0
       '@itwin/core-react': 3.0.0_a598e32a34486c4496492d3a33bbcfa2
       '@itwin/eslint-plugin': 3.0.0_eslint@7.32.0+typescript@4.3.5
+      '@itwin/itwinui-css': 0.44.2
       '@itwin/presentation-common': 3.0.0_a8cd2146224cbeff23caf02136468072
       '@itwin/presentation-components': 3.0.0_a327ea1eac86f58bd2a4c4b665936ae7
       '@itwin/presentation-frontend': 3.0.0_0d2564a44167f7b3b5c98c0eeb3ec417
@@ -5987,7 +5987,6 @@ packages:
 
   /@itwin/itwinui-css/0.44.2:
     resolution: {integrity: sha512-n+ju00BaRaLZe8LqjEcl5i0Um8oKliyTagyz5SHi6IGqQKZilMs1feLsfyqWzNbDYaI4M4Bn4SBWJBFgXtDOjg==}
-    dev: false
 
   /@itwin/itwinui-icons-react/1.5.1_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-QANle8HPvHe7EXR15jVkGKZR4eU0d9P4uBSzxiBxr888iX1f3CXpV04h5Lt2D4TZSPe+A6z6n0nzaIikciBA3g==}
@@ -9608,7 +9607,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001305
-      electron-to-chromium: 1.4.61
+      electron-to-chromium: 1.4.62
     dev: true
 
   /browserslist/4.1.1:
@@ -9616,7 +9615,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001305
-      electron-to-chromium: 1.4.61
+      electron-to-chromium: 1.4.62
       node-releases: 1.1.77
     dev: true
 
@@ -9625,7 +9624,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001305
-      electron-to-chromium: 1.4.61
+      electron-to-chromium: 1.4.62
       node-releases: 1.1.77
       pkg-up: 3.1.0
     dev: true
@@ -9636,7 +9635,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001305
-      electron-to-chromium: 1.4.61
+      electron-to-chromium: 1.4.62
       escalade: 3.1.1
       node-releases: 2.0.1
       picocolors: 1.0.0
@@ -11825,8 +11824,8 @@ packages:
     resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
     dev: true
 
-  /electron-to-chromium/1.4.61:
-    resolution: {integrity: sha512-kpzCOOFlx63C9qKRyIDEsKIUgzoe98ump7T4gU+/OLzj8gYkkWf2SIyBjhTSE0keAjMAp3i7C262YtkQOMYrGw==}
+  /electron-to-chromium/1.4.62:
+    resolution: {integrity: sha512-fWc/zAThqZzl7fbuLzar+x6bqZBWHrsBXQOqv//yrgdTLY/G3JGTPOWhPKIhbhynJJhqE9QNzKzlpCINUmUMoA==}
     dev: true
 
   /elliptic/6.5.4:
