@@ -10,7 +10,7 @@ import {
   Text,
 } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
-import { Mapping } from "./Mapping";
+import type { Mapping } from "./Mapping";
 import "./ConfirmMappingsImport.scss";
 import { reportingClientApi } from "../../api/reportingClient";
 import { useActiveIModelConnection } from "@itwin/appui-react";

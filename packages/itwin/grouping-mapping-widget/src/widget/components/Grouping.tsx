@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { CellProps } from "react-table";
+import type { CellProps } from "react-table";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, {
   useCallback,
@@ -11,9 +11,9 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { GroupReportingAPI, MappingReportingAPI } from "../../api/generated/api";
+import type { GroupReportingAPI, MappingReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
-import { CreateTypeFromInterface } from "../utils";
+import type { CreateTypeFromInterface } from "../utils";
 import {
   Button,
   DropdownMenu,
@@ -31,7 +31,7 @@ import {
 } from "@itwin/itwinui-icons-react";
 import DeleteModal from "./DeleteModal";
 import "./Grouping.scss";
-import { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { PropertyMenu } from "./PropertyMenu";
 import {
   clearEmphasizedElements,

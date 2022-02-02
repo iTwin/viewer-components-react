@@ -2,13 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import type {
+  CurvePrimitive,
+  GeometryQuery} from "@itwin/core-geometry";
 import {
   Angle,
   Arc3d,
   Box,
   CurveChainWithDistanceIndex,
-  CurvePrimitive,
-  GeometryQuery,
   IndexedPolyface,
   IndexedPolyfaceVisitor,
   LineSegment3d,
@@ -30,15 +31,16 @@ import {
   QueryBinder,
   QueryRowFormat,
 } from "@itwin/core-common";
-import {
+import type {
   DecorateContext,
   Decorator,
-  GraphicBranch,
   GraphicBuilder,
+  RenderGraphic} from "@itwin/core-frontend";
+import {
+  GraphicBranch,
   GraphicType,
   IModelApp,
   Marker,
-  RenderGraphic,
 } from "@itwin/core-frontend";
 
 export enum BboxDimension {

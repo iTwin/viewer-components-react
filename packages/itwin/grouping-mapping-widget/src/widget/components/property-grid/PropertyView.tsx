@@ -3,12 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
+import type { PropertyRecord} from "@itwin/appui-abstract";
+import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { ElementSeparator, Orientation } from "@itwin/core-react";
 import { ActionButtonList } from "@itwin/components-react";
 
 import "./PropertyView.scss";
-import { SharedRendererProps } from "./PropertyRender";
+import type { SharedRendererProps } from "./PropertyRender";
 import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
 import { useCallback } from "react";
 import { PropertyGridColumnStyleProvider } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";

@@ -2,21 +2,22 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelConnection } from "@itwin/core-frontend";
-import {
+import type { IModelConnection } from "@itwin/core-frontend";
+import type {
   ContentDescriptorRequestOptions,
-  ContentSpecificationTypes,
-  DefaultContentDisplayTypes,
   Field,
   KeySet,
   NestedContentField,
   PropertiesField,
-  PropertyValueFormat,
-  RelationshipMeaning,
   Ruleset,
   RulesetVariable,
+  StructFieldMemberDescription} from "@itwin/presentation-common";
+import {
+  ContentSpecificationTypes,
+  DefaultContentDisplayTypes,
+  PropertyValueFormat,
+  RelationshipMeaning,
   RuleTypes,
-  StructFieldMemberDescription,
 } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
@@ -25,6 +26,8 @@ import {
   SvgChevronUp,
   SvgRemove,
 } from "@itwin/itwinui-icons-react";
+import type {
+  SelectOption} from "@itwin/itwinui-react";
 import {
   Alert,
   ComboBox,
@@ -32,13 +35,12 @@ import {
   IconButton,
   LabeledInput,
   LabeledSelect,
-  SelectOption,
   Small,
   Text,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
+import type {
   ECPropertyReportingAPI,
   GroupPropertyCreateReportingAPI,
 } from "../../api/generated/api";

@@ -2,22 +2,23 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelConnection } from "@itwin/core-frontend";
-import {
+import type { IModelConnection } from "@itwin/core-frontend";
+import type {
   ISelectionProvider,
+  SelectionChangeEventArgs} from "@itwin/presentation-frontend";
+import {
   Presentation,
-  SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
 import { fetchIdsFromQuery, handleInputChange, WidgetHeader } from "./utils";
-import { Group } from "./Grouping";
+import type { Group } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { PropertyRecord } from "@itwin/appui-abstract";
+import type { PropertyRecord } from "@itwin/appui-abstract";
 import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
 import { GroupQueryBuilderContext } from "./GroupQueryBuilderContext";
 import { QueryBuilder } from "./QueryBuilder";

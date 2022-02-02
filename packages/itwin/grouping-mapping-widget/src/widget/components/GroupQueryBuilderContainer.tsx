@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React, { useEffect } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import {
+import type {
   ISelectionProvider,
   SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";

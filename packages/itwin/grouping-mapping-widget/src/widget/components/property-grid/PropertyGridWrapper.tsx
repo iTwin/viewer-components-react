@@ -3,9 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 
-import { GroupQueryBuilderApi, PropertyProps } from "../../../api/GroupQueryBuilderApi";
+import type { PropertyProps } from "../../../api/GroupQueryBuilderApi";
+import { GroupQueryBuilderApi } from "../../../api/GroupQueryBuilderApi";
 import { PropertyGrid } from "./PropertyGrid";
 import "../GroupQueryBuilder.scss";
 import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";

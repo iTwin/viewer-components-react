@@ -35,8 +35,7 @@
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./public/locales/en-PSEUDO",
     "rebuild": "npm run clean && npm run build",
-    "test": "",
-    "test:watch": "npm -s test -- --reporter min --watch-extensions ts,tsx --watch"
+    "test": ""
   },
   "dependencies": {
     "@itwin/imodel-browser-react": "^0.12.1",
@@ -45,11 +44,7 @@
     "@itwin/itwinui-icons-react": "^1.5.1",
     "classnames": "^2.3.1",
     "cross-fetch": "^3.1.4",
-    "i18next": "^10.2.2",
     "immer": "^9.0.7",
-    "react-spring": "^8.0.27",
-    "react-table": "^7.7.0",
-    "redux": "^4.0.3",
     "simple-react-validator": "^1.6.1"
   },
   "devDependencies": {
@@ -68,16 +63,16 @@
     "@itwin/core-quantity": "^3.0.0",
     "@itwin/core-react": "^3.0.0",
     "@itwin/eslint-plugin": "^3.0.0",
-    "@itwin/itwinui-icons-react": "^1.5.1",
     "@itwin/presentation-common": "^3.0.0",
     "@itwin/presentation-components": "^3.0.0",
     "@itwin/presentation-frontend": "^3.0.0",
     "@itwin/webgl-compatibility": "^3.0.0",
     "@types/i18next": "^8.4.2",
-    "@types/node": "^17.0.13",
+    "@types/node": "^14.14.20",
     "@types/react": "^17.0.19",
     "@types/react-dom": "^17.0.9",
     "@types/react-redux": "^7.0.1",
+    "react-table": "^7.7.0",
     "@types/react-table": "^7.7.0",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
     "@typescript-eslint/parser": "^5.10.1",
@@ -86,7 +81,6 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-react": "^7.25.1",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "ncp": "^2.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.0",
@@ -115,7 +109,9 @@
       "deprecation/deprecation": "off",
       "jsx-a11y/click-events-have-key-events": "off",
       "jsx-a11y/interactive-supports-focus": "off",
-      "jsx-a11y/no-static-element-interactions": "off"
+      "jsx-a11y/no-static-element-interactions": "off",
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/consistent-type-imports": "error"
     }
   }
 }

@@ -5,26 +5,29 @@
 import classnames from "classnames";
 import { produce } from "immer";
 import * as React from "react";
-import { DisposeFunc } from "@itwin/core-bentley";
-import { PropertyRecord } from "@itwin/appui-abstract";
-import {
+import type { DisposeFunc } from "@itwin/core-bentley";
+import type { PropertyRecord } from "@itwin/appui-abstract";
+import type {
   CommonPropertyGridProps,
   PropertyCategory,
+  PropertyData} from "@itwin/components-react";
+import {
   PropertyCategoryBlock,
-  PropertyData,
   PropertyGridCommons,
   PropertyGridEventsRelatedPropsSupplier,
 } from "@itwin/components-react";
+import type {
+  ColumnResizeRelatedPropertyListProps} from "@itwin/components-react/lib/cjs/components-react/propertygrid/component/ColumnResizingPropertyListPropsSupplier";
 import {
-  ColumnResizeRelatedPropertyListProps,
   ColumnResizingPropertyListPropsSupplier,
 } from "@itwin/components-react/lib/cjs/components-react/propertygrid/component/ColumnResizingPropertyListPropsSupplier";
 import { Orientation, ResizableContainerObserver } from "@itwin/core-react";
 
-import { PropertyList, PropertyListProps } from "./PropertyList";
+import type { PropertyListProps } from "./PropertyList";
+import { PropertyList } from "./PropertyList";
 import "./PropertyGrid.scss";
 
-import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
 import { ProgressRadial } from "@itwin/itwinui-react";
 

@@ -3,16 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
+import type {
+  SelectOption} from "@itwin/itwinui-react";
 import {
   Fieldset,
   LabeledInput,
   LabeledSelect,
   MenuItem,
-  SelectOption,
   Small,
 } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
-import { CalculatedPropertyCreateReportingAPI } from "../../api/generated/api";
+import type { CalculatedPropertyCreateReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
 import ActionPanel from "./ActionPanel";
 import {
@@ -23,7 +24,7 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
-import { CalculatedProperty } from "./CalculatedPropertyTable";
+import type { CalculatedProperty } from "./CalculatedPropertyTable";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;

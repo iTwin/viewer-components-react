@@ -4,8 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
 
-import {
-  BASE_PATH,
+import type {
   CalculatedPropertyCreateReportingAPI,
   CalculatedPropertyUpdateReportingAPI,
   CustomCalculationCreateReportingAPI,
@@ -18,8 +17,10 @@ import {
   MappingCopyReportingAPI,
   MappingCreateReportingAPI,
   MappingReportingAPI,
+  MappingUpdateReportingAPI} from "./generated/api";
+import {
+  BASE_PATH,
   MappingsApi,
-  MappingUpdateReportingAPI,
 } from "./generated/api";
 
 const ACCEPT = "application/vnd.bentley.itwin-platform.v1+json";

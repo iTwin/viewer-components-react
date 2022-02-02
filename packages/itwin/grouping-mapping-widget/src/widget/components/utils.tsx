@@ -6,11 +6,11 @@ import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
 import { Text } from "@itwin/itwinui-react";
 import "./utils.scss";
 import React from "react";
-import {
+import type {
   ISelectionProvider,
   SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";
-import { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { QueryRowFormat } from "@itwin/core-common";
 
 export const onSelectionChanged = (

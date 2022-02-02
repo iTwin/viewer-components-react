@@ -3,12 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useRef, useState } from "react";
-import { Modal, StepProperties, Wizard } from "@itwin/itwinui-react";
+import type { StepProperties} from "@itwin/itwinui-react";
+import { Modal, Wizard } from "@itwin/itwinui-react";
 import SelectProject from "./SelectProject";
 import "./MappingImportWizardModal.scss";
 import SelectIModel from "./SelectIModel";
 import SelectMappings from "./SelectMappings";
-import { Mapping } from "./Mapping";
+import type { Mapping } from "./Mapping";
 import ConfirmMappingImport from "./ConfirmMappingsImport";
 
 interface MappingImportWizardModalProps {

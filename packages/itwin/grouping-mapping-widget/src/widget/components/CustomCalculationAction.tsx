@@ -15,8 +15,8 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { WidgetHeader } from "./utils";
 import "./CalculatedPropertyAction.scss";
-import { CustomCalculation } from "./CustomCalculationTable";
-import { CustomCalculationCreateReportingAPI } from "../../api/generated/api";
+import type { CustomCalculation } from "./CustomCalculationTable";
+import type { CustomCalculationCreateReportingAPI } from "../../api/generated/api";
 import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
 

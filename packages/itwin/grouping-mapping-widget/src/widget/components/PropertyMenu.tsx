@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useCallback, useEffect, useState } from "react";
@@ -15,14 +15,16 @@ import {
   visualizeElementsByKeys,
   zoomToElements,
 } from "./viewerUtils";
-import { Group } from "./Grouping";
+import type { Group } from "./Grouping";
 import "./PropertyMenu.scss";
 import GroupPropertyAction from "./GroupPropertyAction";
 import CalculatedPropertyAction from "./CalculatedPropertyAction";
-import GroupPropertyTable, { GroupProperty } from "./GroupPropertyTable";
-import CalculatedPropertyTable, {
+import type { GroupProperty } from "./GroupPropertyTable";
+import GroupPropertyTable from "./GroupPropertyTable";
+import type {
   CalculatedProperty,
 } from "./CalculatedPropertyTable";
+import CalculatedPropertyTable from "./CalculatedPropertyTable";
 import {
   IconButton,
   InformationPanel,
@@ -34,10 +36,11 @@ import {
   Text,
 } from "@itwin/itwinui-react";
 import DatabaseInfoIcon from "../icons/DatabaseInfo";
-import { CellProps } from "react-table";
-import CustomCalculationTable, {
+import type { CellProps } from "react-table";
+import type {
   CustomCalculation,
 } from "./CustomCalculationTable";
+import CustomCalculationTable from "./CustomCalculationTable";
 import CustomCalculationAction from "./CustomCalculationAction";
 import { KeySet } from "@itwin/presentation-common";
 

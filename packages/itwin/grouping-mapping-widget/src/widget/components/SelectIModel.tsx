@@ -2,9 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import {
+import type {
   ApiOverrides,
-  IModelFull,
+  IModelFull} from "@itwin/imodel-browser-react";
+import {
   IModelGrid,
 } from "@itwin/imodel-browser-react";
 import { Button } from "@itwin/itwinui-react";

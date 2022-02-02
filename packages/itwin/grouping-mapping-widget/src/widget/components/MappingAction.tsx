@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import React, { useState } from "react";
-import { MappingReportingAPI } from "../../api/generated/api";
+import type { MappingReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";

@@ -2,11 +2,12 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { InstanceKey, PropertiesField } from "@itwin/presentation-common";
-import {
+import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import type { InstanceKey, PropertiesField } from "@itwin/presentation-common";
+import type {
   Primitives,
-  PropertyRecord,
+  PropertyRecord} from "@itwin/appui-abstract";
+import {
   PropertyValueFormat,
 } from "@itwin/appui-abstract";
 import "core-js/features/string/virtual";

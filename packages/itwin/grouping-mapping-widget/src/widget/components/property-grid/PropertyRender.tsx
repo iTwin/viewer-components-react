@@ -3,21 +3,23 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
-import { Orientation, RatioChangeResult } from "@itwin/core-react";
-import {
+import type { PropertyRecord} from "@itwin/appui-abstract";
+import { PropertyValueFormat } from "@itwin/appui-abstract";
+import type { Orientation, RatioChangeResult } from "@itwin/core-react";
+import type {
   ActionButtonRenderer,
-  EditorContainer,
   PrimitiveRendererProps,
   PropertyUpdatedArgs,
-  PropertyValueRendererManager,
+  PropertyValueRendererManager} from "@itwin/components-react";
+import {
+  EditorContainer,
   UiComponents,
 } from "@itwin/components-react";
 
 import { NonPrimitivePropertyRenderer } from "./NonPrimitivePropertyRenderer";
 import { PrimitivePropertyRenderer } from "./PrimitivePropertyRenderer";
-import { PropertyGridColumnInfo } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
-import { HighlightingComponentProps } from "@itwin/components-react/lib/cjs/components-react/common/HighlightingComponentProps";
+import type { PropertyGridColumnInfo } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
+import type { HighlightingComponentProps } from "@itwin/components-react/lib/cjs/components-react/common/HighlightingComponentProps";
 import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
 
 /** Properties shared by all renderers and PropertyView

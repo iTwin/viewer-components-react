@@ -2,16 +2,17 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { KeySet } from "@itwin/presentation-common";
+import type { KeySet } from "@itwin/presentation-common";
+import type {
+  SelectionChangesListener} from "@itwin/presentation-frontend";
 import {
   Presentation,
-  SelectionChangesListener,
 } from "@itwin/presentation-frontend";
 import {
   DEFAULT_PROPERTY_GRID_RULESET,
   PresentationPropertyDataProvider,
 } from "@itwin/presentation-components";
-import { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 export interface PropertyProps {
   keys: KeySet;

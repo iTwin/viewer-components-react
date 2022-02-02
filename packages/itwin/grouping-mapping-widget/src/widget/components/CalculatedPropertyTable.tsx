@@ -16,11 +16,11 @@ import {
   Table,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { CalculatedPropertyReportingAPI } from "../../api/generated/api";
+import type { CalculatedPropertyReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
-import { CreateTypeFromInterface } from "../utils";
+import type { CreateTypeFromInterface } from "../utils";
 import { PropertyMenuView } from "./PropertyMenu";
-import { CellProps } from "react-table";
+import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 
 export type CalculatedProperty =

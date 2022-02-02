@@ -8,9 +8,11 @@
 
 import classnames from "classnames";
 import * as React from "react";
-import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
-import { CommonProps, Orientation, RatioChangeResult } from "@itwin/core-react";
-import {
+import type { PropertyRecord} from "@itwin/appui-abstract";
+import { PropertyValueFormat } from "@itwin/appui-abstract";
+import type { CommonProps, RatioChangeResult } from "@itwin/core-react";
+import { Orientation } from "@itwin/core-react";
+import type {
   ActionButtonRenderer,
   PropertyCategory,
   PropertyUpdatedArgs,
@@ -18,7 +20,7 @@ import {
 } from "@itwin/components-react";
 
 import { PropertyRenderer } from "./PropertyRender";
-import { PropertyGridColumnInfo } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
+import type { PropertyGridColumnInfo } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
 
 /** Properties of [[PropertyList]] React component
  * @public

@@ -19,10 +19,10 @@ import {
   MenuItem,
   Table,
 } from "@itwin/itwinui-react";
-import { CellProps } from "react-table";
+import type { CellProps } from "react-table";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { MappingReportingAPI } from "../../api/generated/api";
-import { CreateTypeFromInterface } from "../utils";
+import type { MappingReportingAPI } from "../../api/generated/api";
+import type { CreateTypeFromInterface } from "../utils";
 import { onSelectionChanged, WidgetHeader } from "./utils";
 import "./Mapping.scss";
 import { reportingClientApi } from "../../api/reportingClient";

@@ -9,7 +9,7 @@ import { NonPrimitivePropertyLabelRenderer } from "@itwin/components-react";
 
 import { PropertyRenderer } from "./PropertyRender";
 import { PropertyView } from "./PropertyView";
-import { PrimitiveRendererProps } from "./PrimitivePropertyRenderer";
+import type { PrimitiveRendererProps } from "./PrimitivePropertyRenderer";
 import "./NonPrimitivePropertyRenderer.scss";
 
 /** Properties of [[NonPrimitivePropertyRenderer]] React component

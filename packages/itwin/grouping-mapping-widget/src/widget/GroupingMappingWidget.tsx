@@ -2,12 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import {
+import type {
   AbstractWidgetProps,
+  UiItemsProvider} from "@itwin/appui-abstract";
+import {
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
-  UiItemsProvider,
 } from "@itwin/appui-abstract";
 
 import * as React from "react";
@@ -18,7 +19,7 @@ export class GroupingMappingProvider implements UiItemsProvider {
 
   public provideWidgets(
     _stageId: string,
-    _stageUsage: string,
+    stageUsage: string,
     location: StagePanelLocation,
     section?: StagePanelSection
   ): ReadonlyArray<AbstractWidgetProps> {
@@ -26,7 +27,7 @@ export class GroupingMappingProvider implements UiItemsProvider {
     if (
       location === StagePanelLocation.Left &&
       section === StagePanelSection.Start &&
-      _stageUsage === StageUsage.General
+      stageUsage === StageUsage.General
     ) {
       const GroupingMappingWidget: AbstractWidgetProps = {
         id: "GroupingMappingWidget",

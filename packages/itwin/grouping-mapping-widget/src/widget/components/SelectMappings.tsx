@@ -2,17 +2,18 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import type {
+  TablePaginatorRendererProps} from "@itwin/itwinui-react";
 import {
   Button,
   Table,
   tableFilters,
   TablePaginator,
-  TablePaginatorRendererProps,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { MappingReportingAPI } from "../../api/generated/api";
+import type { MappingReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
-import { Mapping } from "./Mapping";
+import type { Mapping } from "./Mapping";
 import "./SelectMapping.scss";
 
 const fetchMappings = async (
