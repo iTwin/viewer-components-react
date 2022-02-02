@@ -5,7 +5,7 @@
 import { IModelApp } from "@itwin/core-frontend";
 import type {
   ApiOverrides,
-  IModelFull
+  IModelFull,
 } from "@itwin/imodel-browser-react";
 import {
   IModelGrid,
@@ -14,8 +14,6 @@ import { Button } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { getUrlPrefix } from "../../api/reportingClient";
 import "./SelectIModel.scss";
-
-
 
 const useFetchAccessToken = () => {
   const [accessToken, setAccessToken] = useState<string>("");

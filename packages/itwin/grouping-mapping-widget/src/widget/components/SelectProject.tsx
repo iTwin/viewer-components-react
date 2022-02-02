@@ -5,7 +5,7 @@
 import { IModelApp } from "@itwin/core-frontend";
 import type {
   ApiOverrides,
-  ProjectFull
+  ProjectFull,
 } from "@itwin/imodel-browser-react";
 import {
   ProjectGrid,
@@ -40,7 +40,6 @@ interface SelectProjectProps {
   onSelect: (project: ProjectFull) => void;
   onCancel: () => void;
 }
-
 
 const useFetchAccessToken = () => {
   const [accessToken, setAccessToken] = useState<string>("");
