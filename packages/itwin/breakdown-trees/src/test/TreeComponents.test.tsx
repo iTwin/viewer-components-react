@@ -157,7 +157,7 @@ describe("TreeComponent tests.", () => {
       <SpatialContainmentTree iModel={connection.object} displayGuids={false} setIsDisplayGuids={(_displayGuids: boolean) => { }}
         groupByType={true} groupByDiscipline={false} setGroupByType={(_groupByType: boolean) => { }} setGroupByDiscipline={(_groupByDiscipline: boolean) => { }} />
     );
-    mount(wrapper).should.matchSnapshot(true);
+    mount(wrapper).should.matchSnapshot();
   });
 
   it("SpatialContainmentTree by Discipline renders correctly with children", () => {

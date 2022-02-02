@@ -2,9 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
-@import "~@bentley/ui-core/lib/ui-core/index.scss";
-@import "~@bentley/ui-ninezone/lib/ui-ninezone/footer/_variables";
+@import "~@itwin/core-react/lib/esm/core-react/index";
+@import "~@itwin/appui-layout-react/lib/cjs/appui-layout-react/footer/_variables";
 
 .visibility-icon-button {
   display: inline-block;

@@ -102,7 +102,6 @@
   "peerDependencies": {
     "@itwin/core-bentley": "^3.0.0",
     "@itwin/core-geometry": "^3.0.0",
-    "@bentley/imodelhub-client": "^2.19.9",
     "@itwin/core-common": "^3.0.0",
     "@itwin/core-frontend": "^3.0.0",
     "@itwin/core-i18n": "^3.0.0",

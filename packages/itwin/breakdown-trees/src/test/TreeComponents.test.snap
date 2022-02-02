@@ -9,7 +9,7 @@ exports[`TreeComponent tests. ClassificationsTree renders correctly with childre
   <LoadableRuleSetComponent
     ruleSet={
       Object {
-        "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+        "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
         "id": "ui-framework/ClassificationSystems",
         "rules": Array [
           Object {
@@ -264,7 +264,7 @@ exports[`TreeComponent tests. ComponentIndex renders correctly with children 1`]
   <LoadableRuleSetComponent
     ruleSet={
       Object {
-        "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+        "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
         "id": "ComponentIndex",
         "rules": Array [
           Object {
@@ -1068,7 +1068,7 @@ exports[`TreeComponent tests. SpatialContainmentTree by Discipline renders corre
   <LoadableRuleSetComponent
     ruleSet={
       Object {
-        "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+        "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
         "id": "ui-framework/SpatialBreakdownByDiscipline",
         "rules": Array [
           Object {
@@ -1486,7 +1486,7 @@ exports[`TreeComponent tests. SpatialContainmentTree by Type and Discipline rend
   <LoadableRuleSetComponent
     ruleSet={
       Object {
-        "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+        "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
         "id": "ui-framework/SpatialBreakdownByTypeAndDiscipline",
         "rules": Array [
           Object {
@@ -1992,7 +1992,7 @@ exports[`TreeComponent tests. SpatialContainmentTree by Type renders correctly w
   <LoadableRuleSetComponent
     ruleSet={
       Object {
-        "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+        "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
         "id": "ui-framework/SpatialBreakdownByType",
         "rules": Array [
           Object {
@@ -2459,7 +2459,7 @@ exports[`TreeComponent tests. SpatialContainmentTree renders correctly with chil
   <LoadableRuleSetComponent
     ruleSet={
       Object {
-        "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+        "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
         "id": "ui-framework/SpatialBreakdown",
         "rules": Array [
           Object {
@@ -2943,7 +2943,7 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
     iModel={null}
     loadedRuleset={
       Object {
-        "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+        "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
         "id": "ui-framework/SpatialBreakdown",
         "rules": Array [
           Object {
@@ -7521,7 +7521,7 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
     iModel={null}
     loadedRuleset={
       Object {
-        "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
+        "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
         "id": "ui-framework/SpatialBreakdown",
         "rules": Array [
           Object {
