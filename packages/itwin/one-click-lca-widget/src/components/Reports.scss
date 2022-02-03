@@ -1,0 +1,38 @@
+@import "~@itwin/itwinui-css/scss/variables";
+
+.scrollable-table {
+  overflow-y: scroll;
+  max-height: 90%;
+}
+
+.reports-table {
+  :hover {
+    cursor: pointer;
+  }
+}
+
+.searchbox-container {
+  display: inline-flex;
+  justify-content: right;
+}
+
+.reports-container {
+  display: flex;
+  flex-direction: column;
+  gap: $iui-baseline;
+  margin-bottom: $iui-line-height;
+  max-height: 80%;
+}
+
+.button-center {
+  align-self: center;
+}
+
+.oclca-container {
+  display: flex;
+  flex-direction: column;
+  padding: $iui-baseline $iui-m;
+  box-sizing: border-box;
+  height: 100%;
+  overflow: auto;
+}

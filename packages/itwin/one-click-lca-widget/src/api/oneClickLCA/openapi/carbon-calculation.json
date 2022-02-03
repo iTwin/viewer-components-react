@@ -1,0 +1,464 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Carbon Calculation",
+    "description": "Access carbon footprint calculation from imodels report data.",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "https://dev-api.bentley.com/insights/carbon-calculation"
+    }
+  ],
+  "paths": {
+    "/oneclicklca/jobs/{jobId}": {
+      "get": {
+        "tags": ["One Click LCA"],
+        "summary": "Get One Click LCA job status",
+        "description": "---\r\n\r\nQueries One Click LCA job status.\r\n\r\n### Authentication\r\n\r\nRequires `Authorization` header with valid Bearer token for scope `insights:read`.\r\n\r\nFor more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.\r\n\r\n### Authorization\r\n\r\nUser must have `REPORTINGVIEW` permission(s) assigned at the Project level. \r\n\r\nAlternatively the user should be an Organization Administrator for the Organization that owns a given Project.\r\n\r\nAn Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.\r\n\r\n---\r\n",
+        "operationId": "get-oneclicklca-job-status",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "The Job Id.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "OAuth access token with scope `insights:read`",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Setting to `application/vnd.bentley.itwin-platform.v1+json` is recommended.",
+            "schema": {
+              "enum": ["application/vnd.bentley.itwin-platform.v1+json"],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusResponse"
+                },
+                "example": {
+                  "job": {
+                    "id": "f7dc5506-84c4-4505-9995-66d81e6fd907_9c317475-4c02-487a-9377-418deecaea05",
+                    "fileToken": "9c3174754c02",
+                    "status": "Queued",
+                    "_links": {
+                      "report": {
+                        "href": "https://api.bentley.com/insights/reporting/reports/f7dc5506-84c4-4505-9995-66d81e6fd907"
+                      },
+                      "oneclicklca": {
+                        "href": "https://www.oneclicklcaapp.com/app/sec/importMapper/index?applicationId=IFC&importMapperId=IFCFromSimpleBIM&importFilePath=9c3174754c02"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "This response indicates that request lacks valid authentication credentials. Access token might not been provided, issued by the wrong issuer, does not have required scopes or request headers were malformed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "statusCode": 401,
+                  "message": "Access denied due to invalid access_token. Make sure to provide a valid token for this API endpoint."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Specified Job was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorContainer"
+                },
+                "example": {
+                  "error": {
+                    "code": "JobNotFound",
+                    "message": "Requested Job is not available.",
+                    "target": "jobId"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "This response indicates that the user has sent too many requests in a given amount of time.",
+            "headers": {
+              "retry-after": {
+                "description": "The number of requests exceeds the rate-limit for the client subscription.",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "code": "TooManyRequests",
+                  "message": "More requests were received than the subscription rate-limit allows."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oneclicklca/jobs": {
+      "post": {
+        "tags": ["One Click LCA"],
+        "summary": "Create One Click LCA job",
+        "description": "---\r\n\r\nUploads report data to One Click LCA.\r\n\r\n### Authentication\r\n\r\nRequires `Authorization` header with valid Bearer token for scope `insights:modify`.\r\n\r\nFor more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.\r\n\r\n### Authorization\r\n\r\nUser must have `REPORTINGVIEW` permission(s) assigned at the Project level. \r\n\r\nAlternatively the user should be an Organization Administrator for the Organization that owns a given Project.\r\n\r\nAn Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.\r\n\r\n---\r\n",
+        "operationId": "create-oneclicklca-job",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "OAuth access token with scope `insights:modify`",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Setting to `application/vnd.bentley.itwin-platform.v1+json` is recommended.",
+            "schema": {
+              "enum": ["application/vnd.bentley.itwin-platform.v1+json"],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobCreate"
+              },
+              "example": {
+                "reportId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                "token": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobCreationResponse"
+                },
+                "example": {
+                  "job": {
+                    "id": "f7dc5506-84c4-4505-9995-66d81e6fd907_9c317475-4c02-487a-9377-418deecaea05",
+                    "_links": {
+                      "report": {
+                        "href": "https://api.bentley.com/insights/reporting/reports/f7dc5506-84c4-4505-9995-66d81e6fd907"
+                      },
+                      "job": {
+                        "href": "https://api.bentley.com/insights/carbon-calculation/oneclicklca/jobs/f7dc5506-84c4-4505-9995-66d81e6fd907_9c317475-4c02-487a-9377-418deecaea05"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "This response indicates that request lacks valid authentication credentials. Access token might not been provided, issued by the wrong issuer, does not have required scopes or request headers were malformed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "statusCode": 401,
+                  "message": "Access denied due to invalid access_token. Make sure to provide a valid token for this API endpoint."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user has insufficient permissions for the requested operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorContainer"
+                },
+                "example": {
+                  "error": {
+                    "code": "InsufficientPermissions",
+                    "message": "The user has insufficient permissions for the requested operation."
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The 422 (Unprocessable Entity) status code indicates that the request cannot be processed by the server due to a client error (e.g. malformed request syntax).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorContainer"
+                },
+                "example": {
+                  "error": {
+                    "code": "InvalidInsightsRequest",
+                    "message": "Error message."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "This response indicates that the user has sent too many requests in a given amount of time.",
+            "headers": {
+              "retry-after": {
+                "description": "The number of requests exceeds the rate-limit for the client subscription.",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "code": "TooManyRequests",
+                  "message": "More requests were received than the subscription rate-limit allows."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "JobCreate": {
+        "title": "One Click LCA Job (create)",
+        "required": ["reportId", "token"],
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "description": "Report identifier used to upload report data to One Click LCA."
+          },
+          "token": {
+            "type": "string",
+            "description": "One Click LCA token. To get this token need to register on One Click LCA website: https://oneclicklcaapp.com/. After an account is created in One Click LCA you have to send POST request to the endpoint: https://www.oneclicklcaapp.com/app/api/login. The request should contain a JSON body with a username and password."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Properties of One Click LCA job to be created."
+      },
+      "JobCreationResponse": {
+        "title": "One Click LCA job response",
+        "type": "object",
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/JobCreation"
+          }
+        },
+        "description": "Container for One Click LCA job object."
+      },
+      "JobCreation": {
+        "title": "One Click LCA job",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "One Click LCA job id."
+          },
+          "_links": {
+            "$ref": "#/components/schemas/JobLinks"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Representation of One Click LCA job."
+      },
+      "JobLinks": {
+        "title": "One Click LCA job links",
+        "type": "object",
+        "properties": {
+          "report": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "job": {
+            "$ref": "#/components/schemas/Link"
+          }
+        },
+        "description": "URLs for getting related data."
+      },
+      "Link": {
+        "title": "Link",
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "description": "Hyperlink to the specific entity."
+          }
+        },
+        "description": "Hyperlink container."
+      },
+      "JobStatusResponse": {
+        "title": "One Click LCA job status response",
+        "type": "object",
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/JobStatus"
+          }
+        },
+        "description": "Container for One Click LCA job object."
+      },
+      "JobStatus": {
+        "title": "One Click LCA job status",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Globally Unique Identifier of the One Click LCA job."
+          },
+          "fileToken": {
+            "type": "string",
+            "description": "Unique Identifier used in One Click LCA webpage to reach uploaded report data."
+          },
+          "status": {
+            "enum": ["Queued", "Running", "Succeeded", "Failed"],
+            "description": "Indicates state of the One Click LCA job."
+          },
+          "_links": {
+            "$ref": "#/components/schemas/JobStatusLinks"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Representation of One Click LCA job status."
+      },
+      "JobStatusLinks": {
+        "title": "One Click LCA job status links",
+        "type": "object",
+        "properties": {
+          "report": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "oneclicklca": {
+            "$ref": "#/components/schemas/Link"
+          }
+        },
+        "description": "URLs for getting related data."
+      },
+      "ErrorContainer": {
+        "title": "Error Response",
+        "required": ["error"],
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        },
+        "description": "Gives details for an error that occurred while handling the request. Note that clients MUST NOT assume that every failed request will produce an object of this schema, or that all of the properties in the response will be non-null, as the error may have prevented this response from being constructed."
+      },
+      "Error": {
+        "required": ["code", "message"],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "One of a server-defined set of error codes."
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable representation of the error."
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetails"
+            },
+            "description": "Optional array of more specific errors."
+          }
+        },
+        "description": "Contains error information and an optional array of more specific errors."
+      },
+      "ErrorDetails": {
+        "title": "Error Details",
+        "required": ["code", "message"],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "One of a server-defined set of error codes."
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable representation of the error."
+          }
+        },
+        "description": "Contains error information."
+      },
+      "ErrorResponse": {
+        "title": "Error Response",
+        "required": ["error"],
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        },
+        "description": "Gives details for an error that occurred while handling the request. Note that clients MUST NOT assume that every failed request will produce an object of this schema, or that all of the properties in the response will be non-null, as the error may have prevented this response from being constructed."
+      }
+    },
+    "securitySchemes": {
+      "apiKeyHeader": {
+        "type": "apiKey",
+        "name": "X-Api-Subscription-Key",
+        "in": "header"
+      },
+      "apiKeyQuery": {
+        "type": "apiKey",
+        "name": "subscription-key",
+        "in": "query"
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKeyHeader": []
+    },
+    {
+      "apiKeyQuery": []
+    }
+  ]
+}
