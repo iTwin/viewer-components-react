@@ -19,7 +19,11 @@
   "main": "lib/breakdown-trees-react.js",
   "typings": "lib/breakdown-trees-react",
   "scripts": {
-    "build": "npm run copy:assets && tsc --sourceMap 1>&2",
+    "build": "npm run copy:assets && npm run -s build:cjs && npm run -s build:esm && tsc --sourceMap 1>&2",
+    "build:cjs": "tsc 1>&2 --outDir lib/cjs && npm run -s copy:cjs",
+    "build:esm": "tsc 1>&2 --outDir lib/esm --module ES2020 && npm run -s copy:esm",
+    "copy:cjs": "cpx \"./src/**/*.*css\" ./lib/cjs",
+    "copy:esm": "cpx \"./src/**/*.*css\" ./lib/esm",
     "build-prod": "tsc 1>&2 && npm run copy:assets",
     "rebuild": "npm run clean && npm run build",
     "makegraph": "depcruise --exclude \"(node_modules|src/test)\" --output-type dot src > graphs/dependencygraph.svg",
