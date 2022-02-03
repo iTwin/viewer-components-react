@@ -10,7 +10,9 @@
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
   "gitPolicy": {
-    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
+    "allowedEmailRegExps": [
+      "[^@]+@users\\.noreply\\.github\\.com"
+    ],
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
   "repository": {
@@ -30,9 +32,9 @@
       "shouldPublish": false
     },
     {
-      "packageName": "@bentley/breakdown-trees-react",
-      "projectFolder": "packages/bentley/breakdown-trees",
-      "versionPolicyName": "breakdown-trees"
+      "packageName": "@itwin/breakdown-trees-react",
+      "projectFolder": "packages/itwin/breakdown-trees",
+      "versionPolicyName": "itwin-breakdown-trees"
     },
     {
       "packageName": "@bentley/geo-tools-react",

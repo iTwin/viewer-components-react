@@ -34,7 +34,7 @@
     "lockedMajor": 0
   },
   {
-    "policyName": "breakdown-trees",
+    "policyName": "itwin-breakdown-trees",
     "definitionName": "individualVersion",
     "lockedMajor": 0
   }
