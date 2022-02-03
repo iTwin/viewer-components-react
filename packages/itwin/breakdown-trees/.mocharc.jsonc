@@ -1,0 +1,26 @@
+{
+  "require": [
+    "ts-node/register",
+    "src/test/scripts/copy-test-setup.js",
+    "raf/polyfill",
+    "source-map-support/register",
+    "jsdom-global/register",
+    "mock-local-storage",
+    "ignore-styles"
+  ],
+  "check-leaks": true,
+  "global": [
+    "sessionStorage"
+  ],
+  "timeout": "60000",
+  "file": [
+    "lib/test/setup.js"
+  ],
+  "ignore": [
+    "lib/test/coverage/**/*"
+  ],
+  "reporter": "node_modules/@itwin/build-tools/mocha-reporter",
+  "reporter-option": [
+    "mochaFile=lib/test/junit_results.xml"
+  ]
+}
