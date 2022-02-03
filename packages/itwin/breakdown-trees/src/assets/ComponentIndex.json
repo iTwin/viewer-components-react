@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-  "id": "ComponentIndex",
+  "id": "itwin-breakdown-trees/ComponentIndex",
   "rules": [
     {
       "ruleType": "RootNodes",

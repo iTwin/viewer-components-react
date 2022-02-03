@@ -10,7 +10,7 @@ exports[`TreeComponent tests. ClassificationsTree renders correctly with childre
     ruleSet={
       Object {
         "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-        "id": "ui-framework/ClassificationSystems",
+        "id": "itwin-breakdown-trees/ClassificationSystems",
         "rules": Array [
           Object {
             "ruleType": "RootNodes",
@@ -265,7 +265,7 @@ exports[`TreeComponent tests. ComponentIndex renders correctly with children 1`]
     ruleSet={
       Object {
         "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-        "id": "ComponentIndex",
+        "id": "itwin-breakdown-trees/ComponentIndex",
         "rules": Array [
           Object {
             "ruleType": "RootNodes",
@@ -1069,7 +1069,7 @@ exports[`TreeComponent tests. SpatialContainmentTree by Discipline renders corre
     ruleSet={
       Object {
         "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-        "id": "ui-framework/SpatialBreakdownByDiscipline",
+        "id": "itwin-breakdown-trees/SpatialBreakdownByDiscipline",
         "rules": Array [
           Object {
             "ruleType": "RootNodes",
@@ -1487,7 +1487,7 @@ exports[`TreeComponent tests. SpatialContainmentTree by Type and Discipline rend
     ruleSet={
       Object {
         "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-        "id": "ui-framework/SpatialBreakdownByTypeAndDiscipline",
+        "id": "itwin-breakdown-trees/SpatialBreakdownByTypeAndDiscipline",
         "rules": Array [
           Object {
             "ruleType": "RootNodes",
@@ -1993,7 +1993,7 @@ exports[`TreeComponent tests. SpatialContainmentTree by Type renders correctly w
     ruleSet={
       Object {
         "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-        "id": "ui-framework/SpatialBreakdownByType",
+        "id": "itwin-breakdown-trees/SpatialBreakdownByType",
         "rules": Array [
           Object {
             "ruleType": "RootNodes",
@@ -2460,7 +2460,7 @@ exports[`TreeComponent tests. SpatialContainmentTree renders correctly with chil
     ruleSet={
       Object {
         "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-        "id": "ui-framework/SpatialBreakdown",
+        "id": "itwin-breakdown-trees/SpatialBreakdown",
         "rules": Array [
           Object {
             "ruleType": "RootNodes",
@@ -2944,7 +2944,7 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
     loadedRuleset={
       Object {
         "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-        "id": "ui-framework/SpatialBreakdown",
+        "id": "itwin-breakdown-trees/SpatialBreakdown",
         "rules": Array [
           Object {
             "ruleType": "RootNodes",
@@ -7522,7 +7522,7 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
     loadedRuleset={
       Object {
         "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-        "id": "ui-framework/SpatialBreakdown",
+        "id": "itwin-breakdown-trees/SpatialBreakdown",
         "rules": Array [
           Object {
             "ruleType": "RootNodes",

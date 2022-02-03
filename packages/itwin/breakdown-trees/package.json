@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/bentley/breakdown-trees"
+    "url": "https://github.com/iTwin/viewer-components-react/tree/master/packages/itwin/breakdown-trees"
   },
   "license": "MIT",
   "author": {
@@ -43,8 +43,6 @@
     "@itwin/core-common": "^3.0.0",
     "@itwin/core-frontend": "^3.0.0",
     "@itwin/core-i18n": "^3.0.0",
-    "@itwin/core-markup": "^3.0.0",
-    "@itwin/core-quantity": "^3.0.0",
     "@itwin/presentation-common": "^3.0.0",
     "@itwin/presentation-components": "^3.0.0",
     "@itwin/presentation-frontend": "^3.0.0",
@@ -54,8 +52,6 @@
     "@itwin/core-react": "^3.0.0",
     "@itwin/appui-react": "^3.0.0",
     "@itwin/appui-layout-react": "^3.0.0",
-    "@itwin/webgl-compatibility": "^3.0.0",
-    "@bentley/webpack-tools": "1.14.1",
     "@itwin/measure-tools-react": "workspace:*",
     "@testing-library/react": "^11.2.6",
     "@types/i18next": "^8.4.2",
@@ -104,9 +100,6 @@
     "@itwin/core-geometry": "^3.0.0",
     "@itwin/core-common": "^3.0.0",
     "@itwin/core-frontend": "^3.0.0",
-    "@itwin/core-i18n": "^3.0.0",
-    "@itwin/core-markup": "^3.0.0",
-    "@itwin/core-quantity": "^3.0.0",
     "@itwin/presentation-common": "^3.0.0",
     "@itwin/presentation-components": "^3.0.0",
     "@itwin/presentation-frontend": "^3.0.0",
@@ -115,8 +108,6 @@
     "@itwin/core-react": "^3.0.0",
     "@itwin/appui-react": "^3.0.0",
     "@itwin/appui-layout-react": "^3.0.0",
-    "@itwin/webgl-compatibility": "^3.0.0",
-    "@bentley/webpack-tools": "1.14.1",
     "@itwin/measure-tools-react": "workspace:^0.2.0",
     "react-redux": "^7.2.0",
     "react": "^16.14.0",

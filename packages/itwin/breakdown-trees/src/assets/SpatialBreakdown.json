@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-  "id": "ui-framework/SpatialBreakdown",
+  "id": "itwin-breakdown-trees/SpatialBreakdown",
   "rules": [
     {
       "ruleType": "RootNodes",

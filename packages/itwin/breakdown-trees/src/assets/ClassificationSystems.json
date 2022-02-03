@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-  "id": "ui-framework/ClassificationSystems",
+  "id": "itwin-breakdown-trees/ClassificationSystems",
   "rules": [
     {
       "ruleType": "RootNodes",
