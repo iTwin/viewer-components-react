@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelApp } from "@itwin/core-frontend";
 import type {
   ApiOverrides,
   ProjectFull,
@@ -23,8 +22,9 @@ import {
   LabeledInput,
   Tab,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { getUrlPrefix } from "../../api/reportingClient";
+import useFetchAccessToken from "../hooks/useFetchAccessToken";
 import "./SelectProject.scss";
 
 const tabsWithIcons = [
@@ -40,21 +40,6 @@ interface SelectProjectProps {
   onSelect: (project: ProjectFull) => void;
   onCancel: () => void;
 }
-
-const useFetchAccessToken = () => {
-  const [accessToken, setAccessToken] = useState<string>("");
-
-  useEffect(() => {
-    const fetchAccessToken = async () => {
-      const accessToken = await IModelApp.authorizationClient?.getAccessToken();
-      setAccessToken(accessToken ?? "");
-    };
-    void fetchAccessToken();
-  }, []);
-
-  return accessToken;
-};
-
 const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
   const accessToken = useFetchAccessToken();
   const [projectType, setProjectType] = useState<number>(0);
