@@ -27,11 +27,11 @@
     "build-prod": "tsc 1>&2 && npm run copy:assets",
     "rebuild": "npm run clean && npm run build",
     "makegraph": "depcruise --exclude \"(node_modules|src/test)\" --output-type dot src > graphs/dependencygraph.svg",
-    "copy:assets": "cpx \"./src/assets/**/*\" ./lib/assets && cpx \"./src/**/*.scss\" ./lib && cpx \"./public/**/*\" ./lib/public",
+    "copy:assets": "cpx \"./src/assets/**/*\" ./lib/assets && cpx \"./public/**/*\" ./lib/public",
     "build:watch": "tsc -w",
     "clean": "rimraf lib",
     "cover": "npm test",
-    "test": "mocha \"./lib/test/**/*.test.js\"",
+    "test": "mocha \"./lib/cjs/test/**/*.test.js\"",
     "test:watch": "npm test -- --reporter min --watch-extensions ts,tsx --watch",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix"
