@@ -25,6 +25,7 @@ import { TreeNodeWrapper } from "../Views/NodeRenderers/FunctionalTreeNodeRender
 import { ClassificationsTree } from "../Views/ClassificationsTree";
 import { ComponentIndex } from "../Views/ComponentIndex";
 import { SpatialContainmentTree } from "../Views/SpatialContainmentTree";
+import { expect } from "chai";
 
 describe("TreeComponent tests.", () => {
 
@@ -135,21 +136,21 @@ describe("TreeComponent tests.", () => {
     const wrapper = (
       <ClassificationsTree iModel={connection.object} displayGuids={false} setIsDisplayGuids={(_displayGuids: boolean) => { }} />
     );
-    mount(wrapper).should.matchSnapshot();
+    expect(wrapper).matchSnapshot();
   });
 
   it("ComponentIndex renders correctly with children", () => {
     const wrapper = (
       <ComponentIndex iModel={connection.object} displayGuids={false} setIsDisplayGuids={(_displayGuids: boolean) => { }} />
     );
-    mount(wrapper).should.matchSnapshot();
+    expect(wrapper).matchSnapshot();
   });
   it("SpatialContainmentTree renders correctly with children", () => {
     const wrapper = (
       <SpatialContainmentTree iModel={connection.object} displayGuids={false} setIsDisplayGuids={(_displayGuids: boolean) => { }}
         groupByType={false} groupByDiscipline={false} setGroupByType={(_groupByType: boolean) => { }} setGroupByDiscipline={(_groupByDiscipline: boolean) => { }} />
     );
-    mount(wrapper).should.matchSnapshot();
+    expect(wrapper).matchSnapshot();
   });
 
   it("SpatialContainmentTree by Type renders correctly with children", () => {
@@ -157,7 +158,7 @@ describe("TreeComponent tests.", () => {
       <SpatialContainmentTree iModel={connection.object} displayGuids={false} setIsDisplayGuids={(_displayGuids: boolean) => { }}
         groupByType={true} groupByDiscipline={false} setGroupByType={(_groupByType: boolean) => { }} setGroupByDiscipline={(_groupByDiscipline: boolean) => { }} />
     );
-    mount(wrapper).should.matchSnapshot();
+    expect(wrapper).matchSnapshot();
   });
 
   it("SpatialContainmentTree by Discipline renders correctly with children", () => {
@@ -165,7 +166,7 @@ describe("TreeComponent tests.", () => {
       <SpatialContainmentTree iModel={connection.object} displayGuids={false} setIsDisplayGuids={(_displayGuids: boolean) => { }}
         groupByType={false} groupByDiscipline={true} setGroupByType={(_groupByType: boolean) => { }} setGroupByDiscipline={(_groupByDiscipline: boolean) => { }} />
     );
-    mount(wrapper).should.matchSnapshot();
+    expect(wrapper).matchSnapshot();
   });
 
   it("SpatialContainmentTree by Type and Discipline renders correctly with children", () => {
@@ -173,7 +174,7 @@ describe("TreeComponent tests.", () => {
       <SpatialContainmentTree iModel={connection.object} displayGuids={false} setIsDisplayGuids={(_displayGuids: boolean) => { }}
         groupByType={true} groupByDiscipline={true} setGroupByType={(_groupByType: boolean) => { }} setGroupByDiscipline={(_groupByDiscipline: boolean) => { }} />
     );
-    mount(wrapper).should.matchSnapshot();
+    expect(wrapper).matchSnapshot();
   });
 
 });

@@ -35,7 +35,7 @@ m._load = (request, parent, isMain) => {
 
 // setup enzyme (testing utils for React)
 enzyme.configure({
-  adapter: new (require("enzyme-adapter-react-16/build"))()
+  adapter: new (require("@wojtekmaj/enzyme-adapter-react-17/build"))()
 });
 chaiJestSnapshot.addSerializer(require("enzyme-to-json/serializer"));
 
@@ -58,12 +58,12 @@ before(async function () {
   let i18nstub = sinon.stub(frontend.IModelApp, "localization");
   i18nstub.get(() => ({
     translate: (str) => str,
-    initialize: ([]) => {},
+    initialize: ([]) => { },
     registerNamespace: (str) => { return { readFinished: Promise.resolve(true) } },
     unregisterNamespace: (str) => { },
     languageList: () => { return [""]; },
-    getLocalizedStringWithNamespace: (namespace, key) => {return "dummy text"},
-    getLocalizedString: (key) => {return "dummy text"}
+    getLocalizedStringWithNamespace: (namespace, key) => { return "dummy text" },
+    getLocalizedString: (key) => { return "dummy text" }
   }));
   sinon.stub(uifwk.SyncUiEventDispatcher, "initializeConnectionEvents").returns(undefined);
   sinon.stub(uifwk.SyncUiEventDispatcher, "clearConnectionEvents").returns(undefined);
