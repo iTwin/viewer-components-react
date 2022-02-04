@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
 import { OneClickLCAApi, BASE_PATH } from "./generated";
 import { JobCreateCarbonCalculationAPI } from "./generated/api";
@@ -59,21 +59,15 @@ class OneClickLCAClient {
   }
 
   public async createOneclicklcaJob(job: JobCreateCarbonCalculationAPI) {
-    const _accessToken = await IModelApp.authorizationClient?.getAccessToken() ?? "";
-    return this._oclcaApi.createOneclicklcaJob(
-      _accessToken,
-      job,
-      ACCEPT
-    );
+    const _accessToken =
+      (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+    return this._oclcaApi.createOneclicklcaJob(_accessToken, job, ACCEPT);
   }
 
   public async getOneclicklcaJobStatus(jobId: string) {
-    const _accessToken = await IModelApp.authorizationClient?.getAccessToken() ?? "";
-    return this._oclcaApi.getOneclicklcaJobStatus(
-      jobId,
-      _accessToken,
-      ACCEPT
-    );
+    const _accessToken =
+      (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+    return this._oclcaApi.getOneclicklcaJobStatus(jobId, _accessToken, ACCEPT);
   }
 }
 

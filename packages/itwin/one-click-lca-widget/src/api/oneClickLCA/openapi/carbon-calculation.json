@@ -13,7 +13,9 @@
   "paths": {
     "/oneclicklca/jobs/{jobId}": {
       "get": {
-        "tags": ["One Click LCA"],
+        "tags": [
+          "One Click LCA"
+        ],
         "summary": "Get One Click LCA job status",
         "description": "---\r\n\r\nQueries One Click LCA job status.\r\n\r\n### Authentication\r\n\r\nRequires `Authorization` header with valid Bearer token for scope `insights:read`.\r\n\r\nFor more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.\r\n\r\n### Authorization\r\n\r\nUser must have `REPORTINGVIEW` permission(s) assigned at the Project level. \r\n\r\nAlternatively the user should be an Organization Administrator for the Organization that owns a given Project.\r\n\r\nAn Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.\r\n\r\n---\r\n",
         "operationId": "get-oneclicklca-job-status",
@@ -41,7 +43,9 @@
             "in": "header",
             "description": "Setting to `application/vnd.bentley.itwin-platform.v1+json` is recommended.",
             "schema": {
-              "enum": ["application/vnd.bentley.itwin-platform.v1+json"],
+              "enum": [
+                "application/vnd.bentley.itwin-platform.v1+json"
+              ],
               "type": "string"
             }
           }
@@ -131,7 +135,9 @@
     },
     "/oneclicklca/jobs": {
       "post": {
-        "tags": ["One Click LCA"],
+        "tags": [
+          "One Click LCA"
+        ],
         "summary": "Create One Click LCA job",
         "description": "---\r\n\r\nUploads report data to One Click LCA.\r\n\r\n### Authentication\r\n\r\nRequires `Authorization` header with valid Bearer token for scope `insights:modify`.\r\n\r\nFor more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.\r\n\r\n### Authorization\r\n\r\nUser must have `REPORTINGVIEW` permission(s) assigned at the Project level. \r\n\r\nAlternatively the user should be an Organization Administrator for the Organization that owns a given Project.\r\n\r\nAn Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.\r\n\r\n---\r\n",
         "operationId": "create-oneclicklca-job",
@@ -150,7 +156,9 @@
             "in": "header",
             "description": "Setting to `application/vnd.bentley.itwin-platform.v1+json` is recommended.",
             "schema": {
-              "enum": ["application/vnd.bentley.itwin-platform.v1+json"],
+              "enum": [
+                "application/vnd.bentley.itwin-platform.v1+json"
+              ],
               "type": "string"
             }
           }
@@ -269,7 +277,10 @@
     "schemas": {
       "JobCreate": {
         "title": "One Click LCA Job (create)",
-        "required": ["reportId", "token"],
+        "required": [
+          "reportId",
+          "token"
+        ],
         "type": "object",
         "properties": {
           "reportId": {
@@ -356,7 +367,12 @@
             "description": "Unique Identifier used in One Click LCA webpage to reach uploaded report data."
           },
           "status": {
-            "enum": ["Queued", "Running", "Succeeded", "Failed"],
+            "enum": [
+              "Queued",
+              "Running",
+              "Succeeded",
+              "Failed"
+            ],
             "description": "Indicates state of the One Click LCA job."
           },
           "_links": {
@@ -381,7 +397,9 @@
       },
       "ErrorContainer": {
         "title": "Error Response",
-        "required": ["error"],
+        "required": [
+          "error"
+        ],
         "type": "object",
         "properties": {
           "error": {
@@ -391,7 +409,10 @@
         "description": "Gives details for an error that occurred while handling the request. Note that clients MUST NOT assume that every failed request will produce an object of this schema, or that all of the properties in the response will be non-null, as the error may have prevented this response from being constructed."
       },
       "Error": {
-        "required": ["code", "message"],
+        "required": [
+          "code",
+          "message"
+        ],
         "type": "object",
         "properties": {
           "code": {
@@ -414,7 +435,10 @@
       },
       "ErrorDetails": {
         "title": "Error Details",
-        "required": ["code", "message"],
+        "required": [
+          "code",
+          "message"
+        ],
         "type": "object",
         "properties": {
           "code": {
@@ -430,7 +454,9 @@
       },
       "ErrorResponse": {
         "title": "Error Response",
-        "required": ["error"],
+        "required": [
+          "error"
+        ],
         "type": "object",
         "properties": {
           "error": {

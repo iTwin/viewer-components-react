@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable */
 //@ts-nocheck
 // tslint:disable
@@ -18,13 +18,11 @@
  */
 
 import * as url from "url";
-import isomorphicFetch from 'cross-fetch';
+import isomorphicFetch from "cross-fetch";
 import { Configuration } from "./configuration";
 
-export const BASE_PATH = "https://api.bentley.com/insights/carbon-calculation".replace(
-  /\/+$/,
-  ""
-);
+export const BASE_PATH =
+  "https://api.bentley.com/insights/carbon-calculation".replace(/\/+$/, "");
 
 /**
  *
@@ -310,7 +308,7 @@ export interface LinkCarbonCalculationAPI {
  * OneClickLCAApi - fetch parameter creator
  * @export
  */
-export const OneClickLCAApiFetchParamCreator = function(
+export const OneClickLCAApiFetchParamCreator = function (
   configuration?: Configuration
 ) {
   return {
@@ -485,7 +483,7 @@ export const OneClickLCAApiFetchParamCreator = function(
  * OneClickLCAApi - functional programming interface
  * @export
  */
-export const OneClickLCAApiFp = function(configuration?: Configuration) {
+export const OneClickLCAApiFp = function (configuration?: Configuration) {
   return {
     /**
      * ---    Uploads report data to One Click LCA.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:modify`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level.     Alternatively the user should be an Organization Administrator for the Organization that owns a given Project.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ---
@@ -568,7 +566,7 @@ export const OneClickLCAApiFp = function(configuration?: Configuration) {
  * OneClickLCAApi - factory interface
  * @export
  */
-export const OneClickLCAApiFactory = function(
+export const OneClickLCAApiFactory = function (
   configuration?: Configuration,
   fetch?: FetchAPI,
   basePath?: string

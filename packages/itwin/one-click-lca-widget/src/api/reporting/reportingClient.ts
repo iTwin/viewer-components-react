@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
 import { BASE_PATH, ReportsApi } from "./generated";
 
@@ -23,7 +23,8 @@ class ReportingClient {
   }
 
   public async getReports(projectId: string) {
-    const _accessToken = await IModelApp.authorizationClient?.getAccessToken() ?? "";
+    const _accessToken =
+      (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
     return this._reportsApi.getProjectReports(
       projectId,
       _accessToken,

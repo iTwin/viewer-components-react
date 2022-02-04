@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 /* eslint-disable */
 //@ts-nocheck
 // tslint:disable
@@ -95,7 +95,7 @@ export interface LinkReportingAPI {
  * @export
  * @interface ReportLinksReportingAPI
  */
- export interface ReportLinksReportingAPI {
+export interface ReportLinksReportingAPI {
   /**
    *
    * @type {LinkReportingAPI}
@@ -144,7 +144,7 @@ export interface ReportReportingAPI {
  * ReportsApi - fetch parameter creator
  * @export
  */
-export const ReportsApiFetchParamCreator = function(
+export const ReportsApiFetchParamCreator = function (
   configuration?: Configuration
 ) {
   return {
@@ -257,7 +257,7 @@ export const ReportsApiFetchParamCreator = function(
  * ReportsApi - functional programming interface
  * @export
  */
-export const ReportsApiFp = function(configuration?: Configuration) {
+export const ReportsApiFp = function (configuration?: Configuration) {
   return {
     /**
      * ---    Gets all Reports within the context of a Project.    ### Authentication    Requires `Authorization` header with valid Bearer token for scope `insights:read`.    For more documentation on authorization and how to get access token visit [OAUTH2 Authorization](https://developer.bentley.com/apis/overview/authorization/) page.    ### Authorization    User must have `REPORTINGVIEW` permission(s) assigned at the Project level. iModel specific permissions may also be applied at the iModel level if iModel level permissions are enabled.    Alternatively the user should be an Organization Administrator for the Organization that owns a given Project or iModel.    An Organization Administrator must have at least one of the following roles assigned in User Management: Account Administrator, Co-Administrator, or CONNECT Services Administrator. For more information about User Management please visit our Bentley Communities [Licensing, Cloud, and Web Services](https://communities.bentley.com/communities/other_communities/licensing_cloud_and_web_services/w/wiki/50711/user-management-2-0) wiki page.    ### Rate limits    All iTwin Platform API operations have a rate limit. For more documentation on that visit [Rate limits and quotas](https://developer.bentley.com/apis/overview/rate-limits/) page.    ---
@@ -317,7 +317,7 @@ export const ReportsApiFp = function(configuration?: Configuration) {
  * ReportsApi - factory interface
  * @export
  */
-export const ReportsApiFactory = function(
+export const ReportsApiFactory = function (
   configuration?: Configuration,
   fetch?: FetchAPI,
   basePath?: string
