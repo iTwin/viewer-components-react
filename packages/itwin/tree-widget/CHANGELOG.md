@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 24 Jan 2022 19:14:37 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Feb 2022 00:43:35 GMT and should not be manually modified.
+
+## 0.2.1
+Fri, 04 Feb 2022 00:43:35 GMT
+
+### Patches
+
+- Update scss to be pulled from cjs dir
 
 ## 0.2.0
 Mon, 24 Jan 2022 19:14:37 GMT
