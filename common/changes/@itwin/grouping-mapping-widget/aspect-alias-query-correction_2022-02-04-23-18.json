@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed aspect element id's not being picked up by extractor",
+      "comment": "Fixed aspect element id's in group queries not being picked up by extractor",
       "type": "patch"
     }
   ],
