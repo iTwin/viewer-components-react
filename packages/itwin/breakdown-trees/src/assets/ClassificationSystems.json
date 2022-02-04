@@ -1,0 +1,240 @@
+{
+  "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
+  "id": "itwin-breakdown-trees/ClassificationSystems",
+  "rules": [
+    {
+      "ruleType": "RootNodes",
+      "specifications": [
+        {
+          "specType": "InstanceNodesOfSpecificClasses",
+          "classes": [
+            {
+              "schemaName": "ClassificationSystems",
+              "classNames": [
+                "ClassificationSystem"
+              ]
+            }
+          ],
+          "arePolymorphic": true,
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"ClassificationSystem\", \"ClassificationSystems\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "ClassificationSystems",
+            "classNames": [
+              "ClassificationSystemOwnsClassificationTable"
+            ]
+          },
+          "relatedClasses": {
+            "schemaName": "ClassificationSystems",
+            "classNames": [
+              "ClassificationTable"
+            ]
+          },
+          "requiredDirection": "Forward",
+          "groupByClass": false,
+          "groupByLabel": false,
+          "doNotSort": true
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"ClassificationTable\", \"ClassificationSystems\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "BisCore",
+            "classNames": [
+              "ModelModelsElement"
+            ]
+          },
+          "relatedClasses": {
+            "schemaName": "BisCore",
+            "classNames": [
+              "Model"
+            ]
+          },
+          "requiredDirection": "Backward",
+          "groupByClass": false,
+          "groupByLabel": false,
+          "hideNodesInHierarchy": true
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"Model\", \"BisCore\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "BisCore",
+            "classNames": [
+              "ModelContainsElements"
+            ]
+          },
+          "relatedClasses": {
+            "schemaName": "ClassificationSystems",
+            "classNames": [
+              "Classification"
+            ]
+          },
+          "requiredDirection": "Forward",
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"Classification\", \"ClassificationSystems\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "ClassificationSystems",
+            "classNames": [
+              "ClassificationOwnsSubClassifications"
+            ]
+          },
+          "relatedClasses": {
+            "schemaName": "ClassificationSystems",
+            "classNames": [
+              "Classification"
+            ]
+          },
+          "requiredDirection": "Forward",
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"TypeDefinitionElement\", \"BisCore\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "BisCore",
+            "classNames": [
+              "GeometricElement3dHasTypeDefinition"
+            ]
+          },
+          "relatedClasses": {
+            "schemaName": "BisCore",
+            "classNames": [
+              "PhysicalElement"
+            ]
+          },
+          "requiredDirection": "Backward",
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "ChildNodes",
+      "condition": "ParentNode.IsOfClass(\"Classification\", \"ClassificationSystems\")",
+      "specifications": [
+        {
+          "specType": "RelatedInstanceNodes",
+          "relationships": {
+            "schemaName": "ClassificationSystems",
+            "classNames": [
+              "ElementHasClassifications"
+            ]
+          },
+          "relatedClasses": {
+            "schemaName": "BisCore",
+            "classNames": [
+              "Element"
+            ]
+          },
+          "requiredDirection": "Backward",
+          "groupByClass": false,
+          "groupByLabel": false
+        }
+      ]
+    },
+    {
+      "ruleType": "Content",
+      "condition": "ContentDisplayType = \"RelatedElementsRequest\"",
+      "specifications": [
+        {
+          "specType": "ContentRelatedInstances",
+          "relationshipPaths": [
+            [
+              {
+                "relationship": {
+                  "schemaName": "ClassificationSystems",
+                  "className": "ClassificationSystemOwnsClassificationTable"
+                },
+                "direction": "Forward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "BisCore",
+                  "className": "ModelModelsElement"
+                },
+                "direction": "Backward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "BisCore",
+                  "className": "ModelContainsElements"
+                },
+                "targetClass": {
+                  "schemaName": "ClassificationSystems",
+                  "className": "Classification"
+                },
+                "direction": "Forward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "ClassificationSystems",
+                  "className": "ClassificationOwnsSubClassifications"
+                },
+                "direction": "Forward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "ClassificationSystems",
+                  "className": "ElementHasClassifications"
+                },
+                "direction": "Backward",
+                "count": "*"
+              },
+              {
+                "relationship": {
+                  "schemaName": "BisCore",
+                  "className": "GeometricElement3dHasTypeDefinition"
+                },
+                "targetClass": {
+                  "schemaName": "BisCore",
+                  "className": "PhysicalElement"
+                },
+                "direction": "Backward",
+                "count": "*"
+              }
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

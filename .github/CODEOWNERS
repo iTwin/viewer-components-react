@@ -19,6 +19,12 @@
 /packages/itwin/measure-tools  @itwin/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
 /common/changes/@itwin/measure-tools-react  @itwin/viewer-components-reviewers @simnorm @a-gagnon @bsy-nicholasw
 
+/packages/itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @Guillar1
+/common/changes/@itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @Guillar1
+
+/packages/itwin/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty
+/common/changes/@itwin/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty
+
 /packages/bentley/imodel-content-tree  @itwin/viewer-components-reviewers @grigasp
 /common/changes/@bentley/imodel-content-tree-react  @itwin/viewer-components-reviewers @grigasp
 
@@ -28,5 +34,4 @@
 /packages/bentley/geo-tools  @itwin/viewer-components-reviewers @mdastous-bentley
 /common/changes/@bentley/geo-tools-react  @itwin/viewer-components-reviewers @mdastous-bentley
 
-/packages/bentley/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty
-/common/changes/@bentley/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty
+

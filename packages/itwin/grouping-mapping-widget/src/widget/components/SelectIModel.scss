@@ -1,0 +1,20 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+.imodel-grid-container {
+  display: flex;
+  flex-direction: column;
+  height: 66vh;
+
+  .imodel-grid {
+    overflow: auto;
+    flex-grow: 1;
+
+    .search-input {
+      margin-left: auto;
+    }
+  }
+}

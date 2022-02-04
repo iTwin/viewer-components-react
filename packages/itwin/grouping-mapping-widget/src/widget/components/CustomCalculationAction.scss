@@ -1,0 +1,16 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+.custom-calculation-action-container {
+  overflow-x: auto;
+  height: 100%;
+
+  .details-form {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline;
+  }
+}

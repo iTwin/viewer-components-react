@@ -1,0 +1,86 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+@import "~@itwin/core-react/lib/esm/core-react/index";
+
+.bldg-uisnip-core-searchbox {
+  @include uicore-font-family;
+  display: flex;
+  align-items: center;
+  position: relative;
+  //default values (height, width, font-size, color)
+  height: 34px;
+  width: 12em;
+  font-size: $uicore-font-size;
+  color: $buic-text-color;
+  background: $buic-background-control;
+  border: 1px solid $buic-inputs-border;
+
+  input {
+    padding: 0 $uicore-s;
+    height: 100%;
+    width: 100%;
+    flex: 1;
+    margin-right: $uicore-s;
+    color: inherit;
+    font-size: inherit;
+    box-sizing: border-box;
+    border: 0;
+    background: $buic-background-control;
+
+    &::placeholder {
+      color: $buic-foreground-disabled;
+    }
+
+    &:focus-within,
+    &:focus,
+    &:active,
+    &[disabled],
+    &[disabled]:hover,
+    &[disabled]:active,
+    &[disabled]:focus {
+      border: 0;
+      outline: none;
+      outline-width: 0;
+      box-shadow: none;
+    }
+  }
+
+  .uisnip-core-searchbox-stepping-container {
+    display: flex;
+    align-items: center;
+    right: 32px;
+    height: 100%;
+
+    .uisnip-core-searchbox-stepping-count {
+      font-size: 12px;
+      margin-right: $uicore-xs;
+      position: relative;
+      word-wrap: none;
+    }
+
+    .uisnip-core-searchbox-separator {
+      height: 75%;
+      width: 1px;
+      margin: 0 $uicore-s;
+      background: $buic-inputs-border;
+    }
+  }
+
+  .uisnip-core-searchbox-step-button {
+    height: 100%;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: $uicore-font-size-small;
+    cursor: pointer;
+
+    &:hover {
+      color: $buic-accessory-primary;
+    }
+  }
+}

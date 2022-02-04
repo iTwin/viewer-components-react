@@ -1,0 +1,24 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+.find-similar-container {
+  color: var(--buic-foreground-body);
+}
+
+.button-container {
+  text-align: right;
+}
+
+.reset-button {
+  margin-left: 10px;
+}
+
+.select-element-hint {
+  display: flex;
+  height: 300px;
+  justify-content: center;
+  align-items: center;
+}
