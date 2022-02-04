@@ -5,8 +5,7 @@
     "jsx": "react",
     "preserveSymlinks": true,
     "esModuleInterop": true,
-    "lib": ["ES2015"]
   },
-  "include": ["./src/**/*.ts*"],
+  "include": ["src"],
   "exclude": ["lib", "node_modules"]
 }

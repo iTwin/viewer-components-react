@@ -1,8 +1,6 @@
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
- *
- * This code is for demonstration purposes and should not be considered production ready.
  *--------------------------------------------------------------------------------------------*/
 import {
   AbstractWidgetProps,
@@ -12,7 +10,7 @@ import {
   UiItemsProvider,
 } from "@itwin/appui-abstract";
 import * as React from "react";
-import OneClickLCA from "./components/OneClickLCA";
+import OneClickLCA from "../components/OneClickLCA";
 
 export class OneClickLCAProvider implements UiItemsProvider {
   public readonly id = "OneClickLCAProvider";

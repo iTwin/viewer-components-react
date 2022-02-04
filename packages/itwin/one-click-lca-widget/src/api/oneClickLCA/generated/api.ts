@@ -1,6 +1,9 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 /* eslint-disable */
 //@ts-nocheck
-/// <reference path="./custom.d.ts" />
 // tslint:disable
 /**
  * Carbon Calculation
@@ -15,7 +18,7 @@
  */
 
 import * as url from "url";
-import * as isomorphicFetch from "isomorphic-fetch";
+import isomorphicFetch from 'cross-fetch';
 import { Configuration } from "./configuration";
 
 export const BASE_PATH = "https://api.bentley.com/insights/carbon-calculation".replace(

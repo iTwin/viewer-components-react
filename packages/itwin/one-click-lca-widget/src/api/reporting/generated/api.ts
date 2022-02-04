@@ -1,6 +1,9 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 /* eslint-disable */
 //@ts-nocheck
-/// <reference path="./custom.d.ts" />
 // tslint:disable
 /**
  * Reporting
@@ -15,7 +18,7 @@
  */
 
 import * as url from "url";
-import * as isomorphicFetch from "isomorphic-fetch";
+import * as isomorphicFetch from "cross-fetch";
 import { Configuration } from "./configuration";
 
 export const BASE_PATH = "https://api.bentley.com/insights/reporting".replace(
@@ -75,6 +78,32 @@ export class RequiredError extends Error {
   }
 }
 /**
+ * Hyperlink container.
+ * @export
+ * @interface LinkReportingAPI
+ */
+export interface LinkReportingAPI {
+  /**
+   * Hyperlink to the specific entity.
+   * @type {string}
+   * @memberof LinkReportingAPI
+   */
+  href?: string;
+}
+/**
+ * Contains contextual hyperlinks to related data.
+ * @export
+ * @interface ReportLinksReportingAPI
+ */
+ export interface ReportLinksReportingAPI {
+  /**
+   *
+   * @type {LinkReportingAPI}
+   * @memberof ReportLinksReportingAPI
+   */
+  project?: LinkReportingAPI;
+}
+/**
  * Defines a unit of data that can be exposed as an OData feed. The contents of a Report are defined in Report Mappings.
  * @export
  * @interface ReportReportingAPI
@@ -111,7 +140,6 @@ export interface ReportReportingAPI {
    */
   _links?: ReportLinksReportingAPI;
 }
-
 /**
  * ReportsApi - fetch parameter creator
  * @export

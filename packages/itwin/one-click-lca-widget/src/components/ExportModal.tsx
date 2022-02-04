@@ -1,8 +1,6 @@
 /*---------------------------------------------------------------------------------------------
  * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
- *
- * This code is for demonstration purposes and should not be considered production ready.
  *--------------------------------------------------------------------------------------------*/
 import "./ExportModal.scss";
 import React from "react";
@@ -12,6 +10,7 @@ import {
   Button,
   LabeledInput,
   Modal,
+  ProgressLinear,
   ProgressRadial,
   Text,
 } from "@itwin/itwinui-react";
@@ -27,7 +26,6 @@ import {
   JobCreationCarbonCalculationAPI,
   LinkCarbonCalculationAPI,
 } from "../api/oneClickLCA/generated";
-import { ProgressBar } from "@itwin/core-react";
 
 interface ExportProps {
   isOpen: boolean;
@@ -165,7 +163,7 @@ const ExportModal = (props: ExportProps) => {
         case OCLCAJobStatus.Queued:
           return (
             <>
-              <div className="calculation-status-container">
+              <div className="progress-radial-container">
                 <ProgressRadial indeterminate size="small" value={50} />
                 <Text variant="leading" className="status-text">
                   Export queued
@@ -176,8 +174,8 @@ const ExportModal = (props: ExportProps) => {
         case OCLCAJobStatus.Running:
           return (
             <>
-              <div className="calculation-status-container">
-                <ProgressBar indeterminate={true} />
+              <div className="progress-linear-container">
+                <ProgressLinear indeterminate />
                 <Text variant="leading" className="status-text">
                   Export running
                 </Text>
@@ -188,7 +186,7 @@ const ExportModal = (props: ExportProps) => {
           return (
             <>
               {jobLink && (
-                <div className="calculation-status-container">
+                <div className="progress-radial-container">
                   <ProgressRadial status="positive" size="small" value={50} />
                   <a
                     className="report-button"
@@ -205,7 +203,7 @@ const ExportModal = (props: ExportProps) => {
         case OCLCAJobStatus.Failed:
           return (
             <>
-              <div className="calculation-status-container">
+              <div className="progress-radial-container">
                 <ProgressRadial status="negative" size="small" value={100} />
                 <Text variant="leading" className="status-text">
                   Export failed
@@ -259,7 +257,7 @@ const ExportModal = (props: ExportProps) => {
           <div className="signin">
             <img
               className="signin-icon"
-              src="../svg/oneClickLCA.png"
+              src="../logo/oneClickLCALogo.png"
               alt="One Click LCA® software"
               data-height-percentage="80"
               data-actual-width="1200"
@@ -276,7 +274,7 @@ const ExportModal = (props: ExportProps) => {
                 <LabeledInput
                   label={EMAIL_LABEL}
                   value={email}
-                  onChange={(v) => setEmail(v.target as string)}
+                  onChange={(v) => setEmail(v.target.value)}
                   type="email"
                   status={emailError ? "negative" : undefined}
                   message={emailError ? "Invalid email address." : ""}
@@ -287,7 +285,7 @@ const ExportModal = (props: ExportProps) => {
                 <LabeledInput
                   label={PASSWORD_LABEL}
                   value={password}
-                  onChange={(e) => setPassword(e.target as string)}
+                  onChange={(e) => setPassword(e.target.value)}
                   type={passwordIsVisible ? "text" : "password"}
                   svgIcon={
                     <div onClick={() => showPassword(!passwordIsVisible)}>
@@ -327,7 +325,7 @@ const ExportModal = (props: ExportProps) => {
         )}
         {isSignedIn && !jobStatus && (
           <>
-            <div className="calculation-status-container">
+            <div className="progress-radial-container">
               <ProgressRadial indeterminate size="large" value={50} />
             </div>
           </>

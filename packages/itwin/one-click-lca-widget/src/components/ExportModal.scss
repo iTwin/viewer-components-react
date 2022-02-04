@@ -67,10 +67,19 @@
   margin: $iui-s;
 }
 
-.calculation-status-container {
+.progress-radial-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: $iui-l;
+  height: $iui-3xl;
+  place-content: space-evenly;
+}
+
+.progress-linear-container {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
   margin: $iui-l;
   height: $iui-3xl;
   place-content: space-evenly;
