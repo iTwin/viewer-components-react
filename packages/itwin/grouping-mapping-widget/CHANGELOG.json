@@ -1,0 +1,17 @@
+{
+  "name": "@itwin/grouping-mapping-widget",
+  "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.2.0",
+      "date": "Fri, 04 Feb 2022 00:43:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "ADDED: Grouping and Mapping Widget first commit to the VCR repository. This is a UI Provider that interfaces with the iTwin Reporting Platform APIs."
+          }
+        ]
+      }
+    }
+  ]
+}
