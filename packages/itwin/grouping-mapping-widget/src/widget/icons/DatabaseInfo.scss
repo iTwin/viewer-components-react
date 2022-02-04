@@ -1,0 +1,12 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/icon/index';
+
+.database-info-icon {
+  @include iui-icons-default();
+  @include themed {
+    fill: t(iui-icons-color-actionable);
+  }
+}

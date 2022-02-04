@@ -1,0 +1,36 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+.group-property-action-container {
+  display: flex;
+  flex-direction: column;
+  overflow-x: auto;
+  height: 100%;
+
+  .property-options {
+    display: inherit;
+    flex-direction: inherit;
+    gap: $iui-baseline;
+    margin-bottom: $iui-baseline * 4;
+  }
+
+  .property-selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline;
+
+    .property-select-item {
+      .selection-and-reorder {
+        display: flex;
+        gap: $iui-s;
+      }
+    }
+  }
+}
+
+.iui-text-leading {
+  margin: 0;
+}

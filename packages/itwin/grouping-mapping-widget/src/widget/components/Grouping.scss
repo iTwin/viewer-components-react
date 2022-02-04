@@ -1,0 +1,15 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+.groups-container {
+  display: flex;
+  flex-direction: column;
+  gap: $iui-baseline;
+
+  button {
+    align-self: flex-start;
+  }
+}
