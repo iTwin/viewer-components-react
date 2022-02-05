@@ -389,7 +389,7 @@ export class QueryBuilder {
     const baseClass = this.query.classes[0];
     const baseClassName = baseClass.className;
     const baseIdName = baseClass.isAspect
-      ? `${baseClassName}.Element.id AS ECInstanceId`
+      ? `${baseClassName}.Element.id ECInstanceId`
       : `${baseClassName}.ECInstanceId`;
 
     let queryString = `SELECT ${baseIdName} FROM ${baseClassName}`;
