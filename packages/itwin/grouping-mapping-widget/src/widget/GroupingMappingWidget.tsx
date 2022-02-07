@@ -6,7 +6,7 @@ import type {
   AbstractWidgetProps,
   UiItemsProvider} from "@itwin/appui-abstract";
 import {
-  AbstractZoneLocation
+  AbstractZoneLocation,
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
