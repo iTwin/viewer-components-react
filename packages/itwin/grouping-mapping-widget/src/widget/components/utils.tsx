@@ -102,9 +102,9 @@ export const fetchIdsFromQuery = async (
       ids.push(value.id);
     } else if (Object.keys(value).includes("element.id")) {
       ids.push(value["element.id"]);
+    } else if (Object.keys(value).includes("eCInstanceId")) {
+      ids.push(value.eCInstanceId);
     }
-    // eslint-disable-next-line dot-notation
-    ids.push(value.id);
   }
   return ids;
 };
