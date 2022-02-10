@@ -11,7 +11,8 @@ import type {
   PropertiesField,
   Ruleset,
   RulesetVariable,
-  StructFieldMemberDescription} from "@itwin/presentation-common";
+  StructFieldMemberDescription,
+} from "@itwin/presentation-common";
 import {
   ContentSpecificationTypes,
   DefaultContentDisplayTypes,
@@ -27,7 +28,8 @@ import {
   SvgRemove,
 } from "@itwin/itwinui-icons-react";
 import type {
-  SelectOption} from "@itwin/itwinui-react";
+  SelectOption,
+} from "@itwin/itwinui-react";
 import {
   Alert,
   ComboBox,
@@ -47,7 +49,7 @@ import type {
 import { reportingClientApi } from "../../api/reportingClient";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { WidgetHeader } from "./utils";
+import { handleError, WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
 
 interface GroupPropertyActionProps {
@@ -397,7 +399,8 @@ const GroupPropertyAction = ({
           groupProperty
         );
       await returnFn();
-    } catch {
+    } catch (error: any) {
+      handleError(error.status);
       setIsLoading(false);
     }
   };
