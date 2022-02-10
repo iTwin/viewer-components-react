@@ -35,7 +35,6 @@ import {
   ProgressRadial,
   Text,
 } from "@itwin/itwinui-react";
-import DatabaseInfoIcon from "../icons/DatabaseInfo";
 import type { CellProps } from "react-table";
 import type {
   CustomCalculation,
@@ -43,6 +42,7 @@ import type {
 import CustomCalculationTable from "./CustomCalculationTable";
 import CustomCalculationAction from "./CustomCalculationAction";
 import { KeySet } from "@itwin/presentation-common";
+import { SvgProperties } from "@itwin/itwinui-icons-react";
 
 interface PropertyModifyProps {
   iModelId: string;
@@ -231,7 +231,7 @@ export const PropertyMenu = ({
               styleType='borderless'
               onClick={() => setIsInformationPanelOpen(true)}
             >
-              <DatabaseInfoIcon />
+              <SvgProperties />
             </IconButton>
           </div>
           <div className='property-menu-container'>
@@ -283,8 +283,7 @@ export const PropertyMenu = ({
             <InformationPanelHeader
               onClose={() => setIsInformationPanelOpen(false)}
             >
-              <Text variant='subheading'>{`${
-                group.groupName ?? ""
+              <Text variant='subheading'>{`${group.groupName ?? ""
               } Information`}</Text>
             </InformationPanelHeader>
             <InformationPanelBody>
