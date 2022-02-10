@@ -6,6 +6,7 @@ import type {
   AbstractWidgetProps,
   UiItemsProvider} from "@itwin/appui-abstract";
 import {
+  AbstractZoneLocation,
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
@@ -21,13 +22,15 @@ export class GroupingMappingProvider implements UiItemsProvider {
     _stageId: string,
     stageUsage: string,
     location: StagePanelLocation,
-    section?: StagePanelSection
+    section?: StagePanelSection,
+    zonelocation?: AbstractZoneLocation
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
     if (
-      location === StagePanelLocation.Left &&
+      (location === StagePanelLocation.Left &&
       section === StagePanelSection.Start &&
-      stageUsage === StageUsage.General
+      stageUsage === StageUsage.General) ||
+      zonelocation === AbstractZoneLocation.CenterLeft
     ) {
       const GroupingMappingWidget: AbstractWidgetProps = {
         id: "GroupingMappingWidget",
