@@ -5,10 +5,12 @@
 
 import "./GeoAddressSearch.scss";
 
-import { AutoSuggest, AutoSuggestData, CommonProps, WebFontIcon } from "@bentley/ui-core";
-import { AddressProvider, BingAddressProvider } from "../AddressProvider";
+import type { AutoSuggestData, CommonProps} from "@itwin/core-react";
+import { AutoSuggest, WebFontIcon } from "@itwin/core-react";
+import type { AddressProvider} from "../AddressProvider";
+import { BingAddressProvider } from "../AddressProvider";
 import * as React from "react";
-import * as ReactAutosuggest from "react-autosuggest";
+import type * as ReactAutosuggest from "react-autosuggest";
 import { IModelGeoView } from "../IModelGeoView";
 import { GeoTools } from "../GeoTools";
 
@@ -28,6 +30,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
 
   const onSuggestionSelected = (selected: AutoSuggestData) => {
     setInputValue(selected.label);
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     IModelGeoView.locateAddress(selected.label);
   };
 
@@ -37,9 +40,10 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
     const viewBBox = IModelGeoView.getFrustumLonLatBBox();
     if (viewBBox) {
       const addresses = await addressProvider.getAddresses(value, viewBBox);
+
       addresses.forEach((addr) => { data.push({ value: addr.addressLine, label: addr.formattedAddress }); });
     }
-    return data;
+    return Promise.resolve(data);
   };
 
   const clearValue = () => {
@@ -49,6 +53,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   /** Handler for Enter key. */
   const onPressEnter = (_e: React.KeyboardEvent<HTMLInputElement>) => {
     if (inputValue)
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       IModelGeoView.locateAddress(inputValue);
   };
 
@@ -81,6 +86,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   }), []);
 
   return (
+
     <div className="geotools-geoaddresssearch__container">
       <div className="geotools-geoaddresssearch__autosuggest">
         <AutoSuggest
@@ -96,12 +102,12 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
         />
       </div>
 
-      <div className="geotools-geoaddresssearch__button" onClick={clearValue}>
+      <button className="geotools-geoaddresssearch__button" onClick={clearValue}>
         {(!inputValue || inputValue === "") ?
           <WebFontIcon iconName="icon-search" iconSize="small" style={{ opacity: 0.5 }} />
           : <WebFontIcon iconName="icon-close" iconSize="small" />
         }
-      </div>
+      </button>
     </div>
   );
 }

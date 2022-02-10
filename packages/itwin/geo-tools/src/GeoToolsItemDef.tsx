@@ -8,13 +8,11 @@
  */
 import * as React from "react";
 
-import { ToolbarPopupContext } from "@bentley/ui-components";
-import { CustomItemDef, PopupButton } from "@bentley/ui-framework";
+import { ToolbarPopupContext } from "@itwin/components-react";
+import { CustomItemDef } from "@itwin/appui-react";
 import { GeoAddressSearch } from "./components/GeoAddressSearch";
 import geoSearchSvg from "./icons/geosearch.svg?sprite";
-import { IconSpecUtilities } from "@bentley/ui-abstract";
-
-/* eslint-disable deprecation/deprecation */
+import { IconSpecUtilities } from "@itwin/appui-abstract";
 
 /** Utility Class that provides definitions of tools. These definitions can be used to populate the UI.
  * @public
@@ -33,12 +31,7 @@ export class GeoToolsItemDef {
           <GeoAddressSearch />
         )}
       </ToolbarPopupContext.Consumer>,
-      // DEPRECATED way (still used by DR)
-      reactElement: (
-        <PopupButton iconSpec={GeoToolsItemDef.iconSpec} labelKey="GeoTools:geoAddressSearch.label">
-          <GeoAddressSearch />
-        </PopupButton>
-      ),
+
     });
   }
 }
