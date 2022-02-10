@@ -78,13 +78,13 @@ export const PropertyMenu = ({
     PropertyMenuView.DEFAULT,
   );
   const [selectedGroupProperty, setSelectedGroupProperty] = useState<
-    GroupProperty | undefined
+  GroupProperty | undefined
   >(undefined);
   const [selectedCalculatedProperty, setSelectedCalculatedProperty] = useState<
-    CalculatedProperty | undefined
+  CalculatedProperty | undefined
   >(undefined);
   const [selectedCustomCalculation, setSelectedCustomCalculation] = useState<
-    CustomCalculation | undefined
+  CustomCalculation | undefined
   >(undefined);
   const [isInformationPanelOpen, setIsInformationPanelOpen] =
     useState<boolean>(false);
@@ -284,7 +284,7 @@ export const PropertyMenu = ({
               onClose={() => setIsInformationPanelOpen(false)}
             >
               <Text variant='subheading'>{`${group.groupName ?? ""
-                } Information`}</Text>
+              } Information`}</Text>
             </InformationPanelHeader>
             <InformationPanelBody>
               <div className='information-body'>
