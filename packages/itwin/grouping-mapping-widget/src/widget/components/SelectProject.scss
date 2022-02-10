@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
+@import "~@itwin/itwinui-css/scss/variables";
 
 .select-project-grid-container {
   display: flex;
@@ -32,7 +32,7 @@
   }
   .select-project-action-panel {
     display: flex;
-    justify-content: right;
+    justify-content: center;
     padding: $iui-baseline * 2 $iui-m $iui-baseline;
   }
 }
