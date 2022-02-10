@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Improved error handling and import wizard resets now when canceling",
+      "comment": "Improved error handling and small tweaks to import mapping wizard",
       "type": "patch"
     }
   ],
