@@ -6,6 +6,7 @@
 import type { LocalizationOptions } from "@itwin/core-i18n";
 import { getClassName, UiError } from "@itwin/appui-abstract";
 import type { Localization } from "@itwin/core-common";
+import { IModelApp } from "@itwin/core-frontend";
 
 /**
  * Entry point for static initialization required by various components used in the package.
@@ -18,8 +19,8 @@ export class GeoTools {
    * Called by IModelApp to initialize GeoTools
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n: Localization): Promise<void> {
-    GeoTools._i18n = i18n;
+  public static async initialize(i18n?: Localization): Promise<void> {
+    GeoTools._i18n = i18n ?? IModelApp.localization;
     return GeoTools._i18n.registerNamespace(GeoTools.i18nNamespace);
   }
 
