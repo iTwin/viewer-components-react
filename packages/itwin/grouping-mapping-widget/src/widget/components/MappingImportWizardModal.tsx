@@ -129,7 +129,6 @@ export const MappingImportWizardModal = ({
                       onCancel={onClose}
                       onFinish={async () => {
                         await onClose();
-                        setCurrentStep(0);
                         setImporting(false);
                       }}
                     />
