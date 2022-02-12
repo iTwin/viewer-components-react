@@ -11,7 +11,7 @@ import type {
   PropertiesField,
   Ruleset,
   RulesetVariable,
-  StructFieldMemberDescription
+  StructFieldMemberDescription,
 } from "@itwin/presentation-common";
 import {
   ContentSpecificationTypes,
@@ -28,7 +28,7 @@ import {
   SvgRemove,
 } from "@itwin/itwinui-icons-react";
 import type {
-  SelectOption
+  SelectOption,
 } from "@itwin/itwinui-react";
 import {
   Alert,
@@ -289,9 +289,9 @@ const GroupPropertyAction = ({
         ],
       };
       const requestOptions: ContentDescriptorRequestOptions<
-        IModelConnection,
-        KeySet,
-        RulesetVariable
+      IModelConnection,
+      KeySet,
+      RulesetVariable
       > = {
         imodel: iModelConnection,
         keys: keySet,
