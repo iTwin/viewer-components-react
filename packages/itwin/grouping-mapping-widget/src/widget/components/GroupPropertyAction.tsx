@@ -11,7 +11,8 @@ import type {
   PropertiesField,
   Ruleset,
   RulesetVariable,
-  StructFieldMemberDescription} from "@itwin/presentation-common";
+  StructFieldMemberDescription,
+} from "@itwin/presentation-common";
 import {
   ContentSpecificationTypes,
   DefaultContentDisplayTypes,
@@ -27,7 +28,8 @@ import {
   SvgRemove,
 } from "@itwin/itwinui-icons-react";
 import type {
-  SelectOption} from "@itwin/itwinui-react";
+  SelectOption,
+} from "@itwin/itwinui-react";
 import {
   Alert,
   ComboBox,
@@ -172,23 +174,8 @@ const extractProperties = (
 
         switch (nestedContentField.relationshipMeaning) {
           case RelationshipMeaning.SameInstance: {
-            // Some elements don't have a path to primary class..
-            // Most likely a simple struct property
-            if (!nestedContentField.pathToPrimaryClass) {
-              const columnName = (property as PropertiesField).properties[0]
-                .property.name;
-              const className = (property as PropertiesField).properties[0]
-                .property.classInfo.name;
-              extractStructProperties(
-                navigation
-                  ? `${navigation.navigationName}.${columnName}`
-                  : columnName,
-                navigation ? navigation.rootClassName : className,
-                classToPropertiesMapping,
-                property.type.members
-              );
-              // Check for aspects. Ignore them if coming from navigation.
-            } else if (
+            // Check for aspects. Ignore them if coming from navigation.
+            if (
               !navigation &&
               (nestedContentField.pathToPrimaryClass[0].relationshipInfo
                 .name === "BisCore:ElementOwnsUniqueAspect" ||
@@ -228,6 +215,25 @@ const extractProperties = (
               );
             }
             break;
+          }
+          default: {
+            // Some elements don't have a path to primary class or relationship meaning..
+            // Most likely a simple struct property
+            if (!nestedContentField.pathToPrimaryClass) {
+              const columnName = (property as PropertiesField).properties[0]
+                .property.name;
+              const className = (property as PropertiesField).properties[0]
+                .property.classInfo.name;
+              extractStructProperties(
+                navigation
+                  ? `${navigation.navigationName}.${columnName}`
+                  : columnName,
+                navigation ? navigation.rootClassName : className,
+                classToPropertiesMapping,
+                property.type.members
+              );
+
+            }
           }
         }
       }
