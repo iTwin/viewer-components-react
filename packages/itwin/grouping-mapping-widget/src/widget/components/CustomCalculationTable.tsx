@@ -126,7 +126,7 @@ const CustomCalculationTable = ({
         columns: [
           {
             id: "propertyName",
-            Header: "Calculated Property",
+            Header: "Custom Calculation",
             accessor: "propertyName",
             Cell: (value: CellProps<CustomCalculation>) => (
               <div
