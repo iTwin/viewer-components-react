@@ -10,9 +10,7 @@
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
   "gitPolicy": {
-    "allowedEmailRegExps": [
-      "[^@]+@users\\.noreply\\.github\\.com"
-    ],
+    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
   "repository": {
@@ -39,7 +37,7 @@
     {
       "packageName": "@itwin/geo-tools-react",
       "projectFolder": "packages/itwin/geo-tools",
-      "versionPolicyName": "geo-tools"
+      "versionPolicyName": "itwin-geo-tools"
     },
     {
       "packageName": "@bentley/imodel-content-tree-react",
