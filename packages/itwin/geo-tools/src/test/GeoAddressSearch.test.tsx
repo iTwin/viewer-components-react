@@ -4,15 +4,18 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import { mount, ReactWrapper } from "enzyme";
+import { mount } from "enzyme";
+import { fireEvent, render } from "@testing-library/react";
 import * as React from "react";
 import * as sinon from "sinon";
 import { BingAddressProvider } from "../AddressProvider";
 import { GeoAddressSearch, IModelGeoView } from "../geo-tools";
 import TestUtils from "./TestUtils";
 import { stubObject } from "ts-sinon";
-import { Point2d, Range2d } from "@bentley/geometry-core";
-import { SpecialKey } from "@bentley/ui-abstract";
+import { Point2d, Range2d } from "@itwin/core-geometry";
+import { SpecialKey } from "@itwin/appui-abstract";
+import { MockRender } from "@itwin/core-frontend";
+import { EmptyLocalization } from "@itwin/core-common";
 
 describe("GeoAddressSearch", () => {
 
@@ -24,22 +27,23 @@ describe("GeoAddressSearch", () => {
   const providerStub = stubObject<BingAddressProvider>(new BingAddressProvider());
 
   let getFrustumLonLatBBoxStub: sinon.SinonStub<[], Range2d | undefined>;
-  let locateAddressStub: sinon.SinonStub<[string], boolean>;
-
-  const getInputElement = (wrapper: ReactWrapper): HTMLInputElement => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    return wrapper.getDOMNode() as HTMLInputElement;
-  };
+  let locateAddressStub: sinon.SinonStub<[string], Promise<boolean> >;
 
   before(async () => {
+    await MockRender.App.startup({localization: new EmptyLocalization()});
     await TestUtils.initializeGeoTools();
   });
 
   beforeEach(() => {
-    locateAddressStub = sinon.stub(IModelGeoView, "locateAddress").callsFake((_address: string): boolean => {
-      return true;
+    locateAddressStub = sinon.stub(IModelGeoView, "locateAddress").callsFake(async (_address: string) => {
+      return Promise.resolve(true);
     });
     providerStub.getAddresses.returns(Promise.resolve([options[0]]));
+
+    // providerStub.getAddresses.callsFake(async (_query: string, _viewLatLongBBox: Range2d)=>{
+    //   console.log(`getAddresses called`);
+    //   return Promise.resolve([options[0], options[1]]);
+    // })
     getFrustumLonLatBBoxStub = sinon.stub(IModelGeoView, "getFrustumLonLatBBox").callsFake(() => {
       return Range2d.createArray([Point2d.create(0, 0), Point2d.create(1, 1)]);
     });
@@ -105,33 +109,23 @@ describe("GeoAddressSearch", () => {
     wrapper.unmount();
   });
 
-  it("should invoke locateAddress when option clicked", async () => {
-    const outerNode = document.createElement("div");
-    document.body.appendChild(outerNode);
+  it("should support getSuggestions prop", async () => {
+    const { container } = render(<div><GeoAddressSearch provider={providerStub} /></div>);
 
-    const wrapper = mount(<GeoAddressSearch provider={providerStub} />, { attachTo: outerNode });
+    const input = container.querySelector("input");
+    expect(input).not.to.be.null;
 
-    const geoAddrSearch = wrapper.find(GeoAddressSearch);
-    expect(geoAddrSearch.length).to.eq(1);
-
-    const input = geoAddrSearch.find("input[type='text']");
-    expect(input.length).to.eq(1);
-
-    const inputNode = getInputElement(input);
-    inputNode.focus();
-
-    input.simulate("change", { target: { value: "addrLine1" } });
+    const inputNode: HTMLElement = input!;
+    fireEvent.focusIn(inputNode);
+    fireEvent.change(inputNode, { target: { value: "abc" } });
     await TestUtils.flushAsyncOperations();
-    wrapper.update();
 
-    const li = wrapper.find("li");
-    expect(li.length).to.eq(1);
+    const li = container.querySelectorAll("li");
+    expect(li).not.to.be.null;
+    expect(li?.length).to.eq(1);
 
-    li.simulate("click");
+    fireEvent.click(li[0]);
     locateAddressStub.calledOnce.should.true;
-
-    wrapper.unmount();
-    document.body.removeChild(outerNode);
   });
 
   it("should invoke getAddress when enter is pressed", async () => {

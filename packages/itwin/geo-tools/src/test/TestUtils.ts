@@ -3,21 +3,22 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { I18N } from "@bentley/imodeljs-i18n";
+import type { Localization } from "@itwin/core-common";
+import { IModelApp } from "@itwin/core-frontend";
 import { GeoTools } from "../GeoTools";
 
 // cSpell:ignore buttongroup
 
 /** @internal */
 export class TestUtils {
-  private static _i18n?: I18N;
+  private static _localization: Localization;
   private static _uiComponentsInitialized = false;
 
-  public static get i18n(): I18N {
-    if (!TestUtils._i18n) {
-      TestUtils._i18n = new I18N();
+  public static get localization(): Localization {
+    if (!TestUtils._localization) {
+      TestUtils._localization = IModelApp.localization;
     }
-    return TestUtils._i18n;
+    return TestUtils._localization;
   }
 
   public static async initializeGeoTools() {
@@ -25,7 +26,7 @@ export class TestUtils {
       // This is required by our I18n module (specifically the i18next package).
       (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
 
-      await GeoTools.initialize(TestUtils.i18n);
+      await GeoTools.initialize(TestUtils.localization);
       TestUtils._uiComponentsInitialized = true;
     }
   }

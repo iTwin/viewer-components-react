@@ -2,11 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
-import { ClientRequestContext } from "@bentley/bentleyjs-core";
-import { Angle, Range2d } from "@bentley/geometry-core";
-import { request, RequestOptions, Response } from "@bentley/itwin-client";
-import { IModelApp } from "@bentley/imodeljs-frontend";
+import { Angle, Range2d } from "@itwin/core-geometry";
+import { IModelApp } from "@itwin/core-frontend";
 
 export interface AddressData {
   addressLine: string;
@@ -22,8 +19,6 @@ export class BingAddressProvider implements AddressProvider {
   private _maxResults = 10;
   private _entityTypes = ["Address,Place"];
   private _bingKey: string;
-
-  protected _requestContext = new ClientRequestContext("");
 
   constructor(radius?: number, maxResults?: number, entityTypes?: string[]) {
     if (radius !== undefined) {
@@ -64,11 +59,14 @@ export class BingAddressProvider implements AddressProvider {
    * Latitudes(Y) values are kept between -PI and +PI while
    */
   public async getAddresses(query: string, viewLatLongBBox: Range2d): Promise<AddressData[]> {
-    const requestUrl = this.getUrl(query, viewLatLongBBox);
-    const requestOptions: RequestOptions = { method: "GET", responseType: "json" };
+    const url = this.getUrl(query, viewLatLongBBox);
+
     try {
-      const locationResponse: Response = await request(this._requestContext, requestUrl, requestOptions);
-      const value = locationResponse.body.resourceSets[0].resources[0].value;
+      const response = await fetch(url, {method: "GET"});
+      const json: any = await response.json();
+      // Response format documented here:
+      // https://docs.microsoft.com/en-us/bingmaps/rest-services/autosuggest#response-format
+      const value = json.resourceSets[0].resources[0].value;
 
       const addresses: AddressData[] = [];
       if (Array.isArray(value)) {
