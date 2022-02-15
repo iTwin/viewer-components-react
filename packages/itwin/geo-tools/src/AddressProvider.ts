@@ -64,6 +64,8 @@ export class BingAddressProvider implements AddressProvider {
     try {
       const response = await fetch(url, {method: "GET"});
       const json: any = await response.json();
+      // Response format documented here:
+      // https://docs.microsoft.com/en-us/bingmaps/rest-services/autosuggest#response-format
       const value = json.resourceSets[0].resources[0].value;
 
       const addresses: AddressData[] = [];
