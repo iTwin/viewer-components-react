@@ -5,7 +5,8 @@
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
   ISelectionProvider,
-  SelectionChangeEventArgs} from "@itwin/presentation-frontend";
+  SelectionChangeEventArgs,
+} from "@itwin/presentation-frontend";
 import {
   Presentation,
 } from "@itwin/presentation-frontend";
@@ -13,7 +14,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
-import { fetchIdsFromQuery, handleInputChange, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, handleError, handleInputChange, WidgetHeader } from "./utils";
 import type { Group } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -66,15 +67,6 @@ const GroupAction = ({
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
         const query = `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
         }`;
-        // Selects all instances of the class
-        // const ids = await fetchIdsFromQuery(query, iModelConnection);
-        // const keySet = await manufactureKeys(ids, iModelConnection);
-        // Presentation.selection.replaceSelection(
-        //   "GroupingMappingWidget",
-        //   iModelConnection,
-        //   keySet
-        // );
-        // setSelectionInstanceKeys(selection.instanceKeys);
         setSimpleQuery(query);
       },
     );
@@ -133,7 +125,8 @@ const GroupAction = ({
         iModelConnection,
       );
       await goBack();
-    } catch {
+    } catch (error: any) {
+      handleError(error.status);
       setIsLoading(false);
     }
   }, [

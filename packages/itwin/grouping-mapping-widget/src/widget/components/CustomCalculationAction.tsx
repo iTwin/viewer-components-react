@@ -13,7 +13,7 @@ import React, { useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { WidgetHeader } from "./utils";
+import { handleError, WidgetHeader } from "./utils";
 import "./CalculatedPropertyAction.scss";
 import type { CustomCalculation } from "./CustomCalculationTable";
 import type { CustomCalculationCreateReportingAPI } from "../../api/generated/api";
@@ -75,7 +75,6 @@ const CustomCalculationAction = ({
           newCustomCalculation,
         );
       await returnFn();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       // error instanceof Response refuses to be true when it should be.
       if (error.status === 422) {
@@ -87,6 +86,8 @@ const CustomCalculationAction = ({
         ) {
           setFormulaErrorMessage(erroredResponse.error.message);
         }
+      } else {
+        handleError(error.status);
       }
       setIsLoading(false);
     }

@@ -49,7 +49,7 @@ import type {
 import { reportingClientApi } from "../../api/reportingClient";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { WidgetHeader } from "./utils";
+import { handleError, WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
 
 interface GroupPropertyActionProps {
@@ -403,7 +403,8 @@ const GroupPropertyAction = ({
           groupProperty
         );
       await returnFn();
-    } catch {
+    } catch (error: any) {
+      handleError(error.status);
       setIsLoading(false);
     }
   };

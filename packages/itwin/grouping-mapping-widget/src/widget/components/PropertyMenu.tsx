@@ -34,6 +34,7 @@ import {
   LabeledTextarea,
   ProgressRadial,
   Text,
+  toaster,
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
 import type {
@@ -94,21 +95,26 @@ export const PropertyMenu = ({
 
   useEffect(() => {
     const initialize = async () => {
-      const ids = await fetchIdsFromQuery(group.query ?? "", iModelConnection);
-      const keys = await manufactureKeys(ids, iModelConnection);
-      setKeySet(keys);
-      Presentation.selection.clearSelection(
-        "GroupingMappingWidget",
-        iModelConnection,
-      );
-      clearEmphasizedElements();
-      const resolvedIds = await visualizeElementsByKeys(keys, "red");
-      await zoomToElements(resolvedIds);
-      setResolvedHiliteIds(resolvedIds);
-      setIsLoading(false);
+      try {
+        const ids = await fetchIdsFromQuery(group.query ?? "", iModelConnection);
+        const keys = await manufactureKeys(ids, iModelConnection);
+        setKeySet(keys);
+        Presentation.selection.clearSelection(
+          "GroupingMappingWidget",
+          iModelConnection,
+        );
+        clearEmphasizedElements();
+        const resolvedIds = await visualizeElementsByKeys(keys, "red");
+        await zoomToElements(resolvedIds);
+        setResolvedHiliteIds(resolvedIds);
+        setIsLoading(false);
+      } catch {
+        toaster.negative(`Could not load ${group.groupName}.`);
+        await goBack();
+      }
     };
     void initialize();
-  }, [iModelConnection, group.query]);
+  }, [iModelConnection, group.query, goBack, group.groupName]);
 
   const onGroupPropertyModify = useCallback(
     (value: CellProps<GroupProperty>) => {

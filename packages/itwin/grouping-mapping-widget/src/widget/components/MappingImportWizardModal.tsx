@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useRef, useState } from "react";
-import type { StepProperties} from "@itwin/itwinui-react";
+import type { StepProperties } from "@itwin/itwinui-react";
 import { Modal, Wizard } from "@itwin/itwinui-react";
 import SelectProject from "./SelectProject";
 import "./MappingImportWizardModal.scss";
@@ -51,6 +51,7 @@ export const MappingImportWizardModal = ({
 
   const onClose = async () => {
     setShow(false);
+    setCurrentStep(0);
     await onFinish();
   };
 
@@ -128,7 +129,6 @@ export const MappingImportWizardModal = ({
                       onCancel={onClose}
                       onFinish={async () => {
                         await onClose();
-                        setCurrentStep(0);
                         setImporting(false);
                       }}
                     />
