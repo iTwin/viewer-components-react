@@ -4,7 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
 import type {
-  SelectOption} from "@itwin/itwinui-react";
+  SelectOption,
+} from "@itwin/itwinui-react";
 import {
   Fieldset,
   LabeledInput,
@@ -21,7 +22,7 @@ import {
   BboxDimensionsDecorator,
 } from "../../decorators/BboxDimensionsDecorator";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { WidgetHeader } from "./utils";
+import { handleError, WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
 import type { CalculatedProperty } from "./CalculatedPropertyTable";
@@ -119,7 +120,8 @@ const CalculatedPropertyAction = ({
           calculatedProperty,
         );
       await returnFn();
-    } catch {
+    } catch (error: any) {
+      handleError(error.status);
       setIsLoading(false);
     }
   };

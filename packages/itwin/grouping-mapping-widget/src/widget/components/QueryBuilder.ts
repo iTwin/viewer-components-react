@@ -6,7 +6,8 @@ import type { PresentationPropertyDataProvider } from "@itwin/presentation-compo
 import type { InstanceKey, PropertiesField } from "@itwin/presentation-common";
 import type {
   Primitives,
-  PropertyRecord} from "@itwin/appui-abstract";
+  PropertyRecord,
+} from "@itwin/appui-abstract";
 import {
   PropertyValueFormat,
 } from "@itwin/appui-abstract";
@@ -84,7 +85,7 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
 
@@ -299,7 +300,7 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
 
@@ -388,7 +389,7 @@ export class QueryBuilder {
     const baseClass = this.query.classes[0];
     const baseClassName = baseClass.className;
     const baseIdName = baseClass.isAspect
-      ? `${baseClassName}.Element.id`
+      ? `${baseClassName}.Element.id ECInstanceId`
       : `${baseClassName}.ECInstanceId`;
 
     let queryString = `SELECT ${baseIdName} FROM ${baseClassName}`;

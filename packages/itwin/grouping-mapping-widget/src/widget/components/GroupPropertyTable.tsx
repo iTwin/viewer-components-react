@@ -22,6 +22,7 @@ import type { CreateTypeFromInterface } from "../utils";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import { PropertyMenuView } from "./PropertyMenu";
+import { handleError } from "./utils";
 
 export type GroupProperty = CreateTypeFromInterface<GroupPropertyReportingAPI>;
 
@@ -40,8 +41,8 @@ const fetchGroupProperties = async (
       groupId,
     );
     setGroupProperties(groupProperties.properties ?? []);
-  } catch {
-    // TODO Toaster
+  } catch (error: any) {
+    handleError(error.status);
   } finally {
     setIsLoading(false);
   }

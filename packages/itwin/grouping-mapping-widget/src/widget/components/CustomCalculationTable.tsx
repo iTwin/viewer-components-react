@@ -22,6 +22,7 @@ import type { CreateTypeFromInterface } from "../utils";
 import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
+import { handleError } from "./utils";
 
 export type CustomCalculation =
   CreateTypeFromInterface<CustomCalculationReportingAPI>;
@@ -43,8 +44,8 @@ const fetchCustomCalculations = async (
       groupId,
     );
     setCustomCalculations(customCalculations.customCalculations ?? []);
-  } catch {
-    // TODO Toaster
+  } catch (error: any) {
+    handleError(error.status);
   } finally {
     setIsLoading(false);
   }
@@ -126,7 +127,7 @@ const CustomCalculationTable = ({
         columns: [
           {
             id: "propertyName",
-            Header: "Calculated Property",
+            Header: "Custom Calculation",
             accessor: "propertyName",
             Cell: (value: CellProps<CustomCalculation>) => (
               <div

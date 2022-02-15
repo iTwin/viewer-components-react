@@ -8,7 +8,7 @@ import type { MappingReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleInputChange, WidgetHeader } from "./utils";
+import { handleError, handleInputChange, WidgetHeader } from "./utils";
 import "./MappingAction.scss";
 
 interface MappingActionProps {
@@ -43,7 +43,8 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
           description: values.description,
         });
       await returnFn();
-    } catch {
+    } catch (error: any) {
+      handleError(error.status);
       setIsLoading(false);
     }
   };
