@@ -37,8 +37,8 @@
       "versionPolicyName": "itwin-breakdown-trees"
     },
     {
-      "packageName": "@bentley/geo-tools-react",
-      "projectFolder": "packages/bentley/geo-tools",
+      "packageName": "@itwin/geo-tools-react",
+      "projectFolder": "packages/itwin/geo-tools",
       "versionPolicyName": "geo-tools"
     },
     {
