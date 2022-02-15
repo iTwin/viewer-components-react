@@ -1,7 +1,8 @@
 [
   {
     "policyName": "deprecated",
-    "definitionName": "individualVersion"
+    "definitionName": "individualVersion",
+    "exemptFromRushChange": true
   },
   {
     "policyName": "itwin-tree-widget",
