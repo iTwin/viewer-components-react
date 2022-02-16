@@ -393,6 +393,7 @@ importers:
       '@itwin/core-react': ^3.0.0
       '@itwin/eslint-plugin': ^3.0.0
       '@itwin/imodel-components-react': ^3.0.0
+      '@itwin/itwinui-icons-react': ^1.8.0
       '@itwin/presentation-common': ^3.0.0
       '@itwin/presentation-frontend': ^3.0.0
       '@itwin/webgl-compatibility': ^3.0.0
@@ -438,6 +439,7 @@ importers:
       typescript: ~4.4.0
       xmlhttprequest: ^1.8.0
     dependencies:
+      '@itwin/itwinui-icons-react': 1.8.0_react-dom@17.0.2+react@17.0.2
       i18next: 10.6.0
       react-autosuggest: 10.1.0_react@17.0.2
     devDependencies:
