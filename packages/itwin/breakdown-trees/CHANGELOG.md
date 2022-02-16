@@ -1,6 +1,18 @@
-# Change Log - @bentley/breakdown-trees-react
+# Change Log - @itwin/breakdown-trees-react
 
-This log was last generated on Fri, 10 Dec 2021 15:33:50 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Feb 2022 15:51:36 GMT and should not be manually modified.
+
+## 0.3.0
+Tue, 15 Feb 2022 15:51:36 GMT
+
+### Minor changes
+
+- Updated to iTwin.js 3.0
+
+### Patches
+
+- Add license.md
+- Fix test script
 
 ## 0.2.0
 Fri, 10 Dec 2021 15:33:50 GMT
