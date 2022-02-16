@@ -5,6 +5,7 @@
 import "./ExportModal.scss";
 import React from "react";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { IModelApp } from "@itwin/core-frontend";
 import {
   Alert,
   Button,
@@ -19,13 +20,10 @@ import {
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
 import {
-  OCLCAJobStatus,
-  oneClickLCAClientApi,
-} from "../api/oneClickLCA/oneClickLCAClient";
-import {
   JobCreationCarbonCalculationAPI,
   LinkCarbonCalculationAPI,
-} from "../api/oneClickLCA/generated";
+  OneClickLCAClient,
+} from "@itwin/insights-client";
 
 interface ExportProps {
   isOpen: boolean;
@@ -38,6 +36,13 @@ interface OclcaTokenCache {
   exp: number;
 }
 
+enum OCLCAJobStatus {
+  Queued = "Queued",
+  Running = "Running",
+  Succeeded = "Succeeded",
+  Failed = "Failed",
+}
+
 const ExportModal = (props: ExportProps) => {
   const MILI_SECONDS = 1000;
   const EMAIL_LABEL = "Email";
@@ -46,6 +51,7 @@ const ExportModal = (props: ExportProps) => {
   const SIGNIN_PROMPT = "Sign in to One Click LCA.";
   const SIGNIN_ERROR = "Incorrect email or password.";
   const PIN_INTERVAL = 1000;
+  const oneClickLCAClientApi = new OneClickLCAClient();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -87,9 +93,11 @@ const ExportModal = (props: ExportProps) => {
   const pinStatus = useCallback(
     (job: JobCreationCarbonCalculationAPI) => {
       const intervalId = setInterval(async () => {
-        if (job.id) {
+        const token =
+          (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+        if (job.id && token) {
           let currentJobStatus =
-            await oneClickLCAClientApi.getOneclicklcaJobStatus(job?.id);
+            await oneClickLCAClientApi.getOneclicklcaJobStatus(token, job?.id);
           if (currentJobStatus.job?.status) {
             if (currentJobStatus.job?.status === OCLCAJobStatus.Succeeded) {
               setJobLink(currentJobStatus?.job._links?.oneclicklca);
@@ -107,11 +115,16 @@ const ExportModal = (props: ExportProps) => {
 
   const runJob = useCallback(
     async (token: string) => {
+      const accessToken =
+        (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       if (props.reportId && token) {
-        let jobCreated = await oneClickLCAClientApi.createOneclicklcaJob({
-          reportId: props.reportId,
-          token: token,
-        });
+        let jobCreated = await oneClickLCAClientApi.createOneclicklcaJob(
+          accessToken,
+          {
+            reportId: props.reportId,
+            token: token,
+          }
+        );
         if (jobCreated?.job?.id) {
           pinStatus(jobCreated?.job);
         } else {
