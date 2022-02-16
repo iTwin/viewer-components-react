@@ -3,7 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type {
-  TablePaginatorRendererProps} from "@itwin/itwinui-react";
+  TablePaginatorRendererProps,
+} from "@itwin/itwinui-react";
 import {
   Button,
   Table,
@@ -15,6 +16,7 @@ import type { MappingReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
 import type { Mapping } from "./Mapping";
 import "./SelectMapping.scss";
+import { handleError } from "./utils";
 
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<MappingReportingAPI[]>>,
@@ -25,7 +27,8 @@ const fetchMappings = async (
     setIsLoading(true);
     const mappings = await reportingClientApi.getMappings(iModelId);
     setMappings(mappings);
-  } catch {
+  } catch (error: any) {
+    handleError(error.status);
   } finally {
     setIsLoading(false);
   }

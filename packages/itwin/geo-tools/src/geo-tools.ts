@@ -5,6 +5,7 @@
 
 export * from "./components/GeoAddressSearch";
 export * from "./GeoToolsItemDef";
-export { GeoTools } from "./GeoTools";
+export * from "./GeoTools";
 export * from "./AddressProvider";
 export * from "./IModelGeoView";
+export * from "./GeoToolsUiItemsProvider";

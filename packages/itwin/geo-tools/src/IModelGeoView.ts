@@ -3,9 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Range2d, Range3d } from "@bentley/geometry-core";
-import { CartographicRange } from "@bentley/imodeljs-common";
-import { IModelApp, ViewGlobeLocationTool } from "@bentley/imodeljs-frontend";
+import type { Range2d} from "@itwin/core-geometry";
+import { Range3d } from "@itwin/core-geometry";
+import { CartographicRange } from "@itwin/core-common";
+import { IModelApp, ViewGlobeLocationTool } from "@itwin/core-frontend";
 
 export class IModelGeoView {
   public static getFrustumLonLatBBox(): Range2d | undefined {
@@ -32,10 +33,10 @@ export class IModelGeoView {
     return range.getLongitudeLatitudeBoundingBox();
   }
 
-  public static locateAddress(address: string): boolean {
+  public static async locateAddress(address: string): Promise<boolean> {
     const vp = IModelApp.viewManager?.selectedView;
     if (vp === undefined) {
-      return false;
+      return Promise.resolve(false);
     }
 
     const locationTool = new ViewGlobeLocationTool(vp);

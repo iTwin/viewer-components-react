@@ -3,24 +3,25 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as i18next from "i18next";
-import { I18N } from "@bentley/imodeljs-i18n";
-import { getClassName, UiError } from "@bentley/ui-abstract";
+import type { LocalizationOptions } from "@itwin/core-i18n";
+import { getClassName, UiError } from "@itwin/appui-abstract";
+import type { Localization } from "@itwin/core-common";
+import { IModelApp } from "@itwin/core-frontend";
 
 /**
  * Entry point for static initialization required by various components used in the package.
  * @public
  */
 export class GeoTools {
-  private static _i18n?: I18N;
+  private static _i18n?: Localization;
 
   /**
    * Called by IModelApp to initialize GeoTools
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n: I18N): Promise<void> {
-    GeoTools._i18n = i18n;
-    return GeoTools._i18n.registerNamespace(GeoTools.i18nNamespace).readFinished;
+  public static async initialize(i18n?: Localization): Promise<void> {
+    GeoTools._i18n = i18n ?? IModelApp.localization;
+    return GeoTools._i18n.registerNamespace(GeoTools.i18nNamespace);
   }
 
   /** Unregisters the GeoTools internationalization service namespace */
@@ -31,7 +32,7 @@ export class GeoTools {
   }
 
   /** The internationalization service created by the IModelApp. */
-  public static get i18n(): I18N {
+  public static get i18n(): Localization {
     if (!GeoTools._i18n)
       throw new UiError(GeoTools.loggerCategory(this), "GeoTools not initialized");
     return GeoTools._i18n;
@@ -50,9 +51,9 @@ export class GeoTools {
    */
   public static translate(
     key: string | string[],
-    options?: i18next.TranslationOptions
+    options?: LocalizationOptions
   ): string {
-    return GeoTools.i18n.translateWithNamespace(GeoTools.i18nNamespace, key, options);
+    return GeoTools.i18n.getLocalizedStringWithNamespace(GeoTools.i18nNamespace, key, options);
   }
 
   public static loggerCategory(obj: any): string {

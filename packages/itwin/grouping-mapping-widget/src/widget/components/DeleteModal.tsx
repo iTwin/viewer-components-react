@@ -13,6 +13,7 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import "./DeleteModal.scss";
+import { handleError } from "./utils";
 
 export interface DeleteModalProps {
   entityName: string;
@@ -37,10 +38,8 @@ export const DeleteModal = ({
       await onDelete();
       setShow(false);
       await refresh();
-    } catch (err) {
-      // toaster.negative(`${err.response?.data ?? 'Failed to revoke key.'}`, {
-      //   hasCloseButton: true,
-      // });
+    } catch (error: any) {
+      handleError(error.status);
     } finally {
       setIsLoading(false);
     }
