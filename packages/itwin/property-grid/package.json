@@ -81,6 +81,7 @@
     "@itwin/appui-react": "^3.0.0",
     "@itwin/components-react": "^3.0.0",
     "@itwin/core-bentley": "^3.0.0",
+    "@itwin/core-frontend": "^3.0.0",
     "@itwin/core-react": "^3.0.0",
     "@itwin/presentation-components": "^3.0.0",
     "@itwin/presentation-frontend": "^3.0.0",
