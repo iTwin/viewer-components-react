@@ -115,7 +115,7 @@ export const fetchIdsFromQuery = async (
 };
 
 export const handleError = (errorStatus: number) => {
-  let errorMessage = `Error ${errorStatus}: `;
+  let errorMessage = '';
   switch (errorStatus) {
     case 401:
       errorMessage += `You are unauthorized to do this operation.`;
