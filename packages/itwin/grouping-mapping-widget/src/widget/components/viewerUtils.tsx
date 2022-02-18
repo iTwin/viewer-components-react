@@ -98,7 +98,7 @@ export const visualizeElements = (
 };
 
 export const zoomToElements = async (elementIds: string[]) => {
-  if (!IModelApp.viewManager.selectedView || elementIds.length > 0) {
+  if (!IModelApp.viewManager.selectedView || elementIds.length === 0) {
     return;
   }
 
