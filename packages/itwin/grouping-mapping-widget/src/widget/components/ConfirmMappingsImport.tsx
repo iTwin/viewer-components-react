@@ -8,7 +8,6 @@ import {
   MiddleTextTruncation,
   ProgressLinear,
   Text,
-  toaster,
 } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
 import type { Mapping } from "./Mapping";
