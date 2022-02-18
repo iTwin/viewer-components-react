@@ -87,8 +87,7 @@ const ConfirmMappingImport = ({
         );
         setImportCount((importCount) => importCount + 1);
       }
-    }
-    catch (error: any) {
+    } catch (error: any) {
       handleError(error);
       setErrored(true);
     }

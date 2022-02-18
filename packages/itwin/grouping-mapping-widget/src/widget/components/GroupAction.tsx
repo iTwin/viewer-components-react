@@ -52,7 +52,7 @@ const GroupAction = ({
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
-    PropertyRecord[]
+  PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
@@ -66,7 +66,7 @@ const GroupAction = ({
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
         const query = `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-          }`;
+        }`;
         setSimpleQuery(query);
       },
     );
@@ -89,9 +89,8 @@ const GroupAction = ({
           iModelConnection,
         );
         await zoomToElements(resolvedHiliteIds);
-      }
-      catch {
-        toaster.negative("Sorry, we have failed to generate a valid query. 😔")
+      } catch {
+        toaster.negative("Sorry, we have failed to generate a valid query. 😔");
       }
     };
 
