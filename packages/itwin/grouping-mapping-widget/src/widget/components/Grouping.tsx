@@ -314,6 +314,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     instance?: TableInstance,
   ): TableState => {
     switch (action.type) {
+      case "singleRowSelected":
+        action.value = true;
       case actions.toggleRowSelected: {
         const newSelectedRows = {
           ...selectedRows,
