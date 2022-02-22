@@ -12,7 +12,8 @@ import { BingAddressProvider } from "../AddressProvider";
 import type * as ReactAutosuggest from "react-autosuggest";
 import { IModelGeoView } from "../IModelGeoView";
 import { GeoTools } from "../GeoTools";
-import React, { ReactNode, useCallback, useMemo, useState } from "react";
+import type { ReactNode} from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 export interface GeoAddressSearchProps extends CommonProps {
   /** Address provider object */
