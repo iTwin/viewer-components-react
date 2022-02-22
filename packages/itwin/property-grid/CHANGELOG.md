@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Fri, 04 Feb 2022 00:43:35 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Feb 2022 17:30:48 GMT and should not be manually modified.
+
+## 0.3.0
+Thu, 17 Feb 2022 17:30:48 GMT
+
+### Minor changes
+
+- Update init to be lazy, make arg optional
 
 ## 0.2.1
 Fri, 04 Feb 2022 00:43:35 GMT

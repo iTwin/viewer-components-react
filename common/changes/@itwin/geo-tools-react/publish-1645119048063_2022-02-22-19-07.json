@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/geo-tools-react",
-      "comment": "Migrated GeoTools package to iTwin 3.0.",
-      "type": "minor"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@itwin/geo-tools-react"
