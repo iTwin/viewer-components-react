@@ -1,6 +1,14 @@
-# Change Log - @bentley/geo-tools-react
+# Change Log - @itwin/geo-tools-react
 
-This log was last generated on Thu, 16 Sep 2021 17:55:54 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Feb 2022 17:30:48 GMT and should not be manually modified.
+
+## 0.2.0
+Thu, 17 Feb 2022 17:30:48 GMT
+
+### Minor changes
+
+- Migrated GeoTools package to iTwin 3.0.
+- Add UiItemsProvider
 
 ## 0.1.7
 Thu, 16 Sep 2021 17:55:54 GMT
