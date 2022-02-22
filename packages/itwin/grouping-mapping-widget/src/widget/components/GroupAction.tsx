@@ -11,7 +11,7 @@ import {
   Presentation,
 } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Button, Fieldset, InputGroup, LabeledInput, LabeledTextarea, Radio, Small } from "@itwin/itwinui-react";
+import { Button, Fieldset, InputGroup, LabeledInput, LabeledTextarea, Radio, Small, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
 import { fetchIdsFromQuery, handleError, handleInputChange, WidgetHeader } from "./utils";
