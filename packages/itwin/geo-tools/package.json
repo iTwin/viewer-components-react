@@ -41,7 +41,7 @@
   "dependencies": {
     "@itwin/itwinui-icons-react": "^1.8.0",
     "i18next": "^10.2.2",
-    "react-autosuggest": "^10.0.2"
+    "react-autosuggest": "^10.1.0"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^3.0.0",
@@ -71,7 +71,7 @@
     "@types/mocha": "^8.2.2",
     "@types/node": "10.14.1",
     "@types/react": "^17.0.19",
-    "@types/react-autosuggest": "^10.0.0",
+    "@types/react-autosuggest": "10.1.2",
     "@types/react-dom": "^17.0.9",
     "@types/sinon": "^9.0.0",
     "@types/sinon-chai": "^3.2.0",

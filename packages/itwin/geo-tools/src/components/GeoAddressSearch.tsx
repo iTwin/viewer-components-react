@@ -5,14 +5,14 @@
 
 import "./GeoAddressSearch.scss";
 
-import type { AutoSuggestData, CommonProps} from "@itwin/core-react";
+import type { AutoSuggestData, CommonProps } from "@itwin/core-react";
 import { AutoSuggest, WebFontIcon } from "@itwin/core-react";
-import type { AddressProvider} from "../AddressProvider";
+import type { AddressProvider } from "../AddressProvider";
 import { BingAddressProvider } from "../AddressProvider";
-import * as React from "react";
 import type * as ReactAutosuggest from "react-autosuggest";
 import { IModelGeoView } from "../IModelGeoView";
 import { GeoTools } from "../GeoTools";
+import React, { ReactNode, useCallback, useMemo, useState } from "react";
 
 export interface GeoAddressSearchProps extends CommonProps {
   /** Address provider object */
@@ -23,10 +23,10 @@ export interface GeoAddressSearchProps extends CommonProps {
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function GeoAddressSearch(props: GeoAddressSearchProps) {
-  const [inputValue, setInputValue] = React.useState("");
+  const [inputValue, setInputValue] = useState("");
 
-  // `React.useMemo' is used avoid creating new object on each render cycle
-  const addressProvider = React.useMemo(() => (props.provider ?? new BingAddressProvider()), [props.provider]);
+  // `useMemo' is used avoid creating new object on each render cycle
+  const addressProvider = useMemo(() => (props.provider ?? new BingAddressProvider()), [props.provider]);
 
   const onSuggestionSelected = (selected: AutoSuggestData) => {
     setInputValue(selected.label);
@@ -51,14 +51,14 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   };
 
   /** Handler for Enter key. */
-  const onPressEnter = (_e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onPressEnter = (_e: any) => {
     if (inputValue)
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       IModelGeoView.locateAddress(inputValue);
   };
 
   /** Handler for Escape key. */
-  const onPressEscape = (_e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onPressEscape = (_e: any) => {
     clearValue();
   };
 
@@ -72,7 +72,7 @@ export function GeoAddressSearch(props: GeoAddressSearchProps) {
   /** We implement a custom render mainly to hook on the onChange callback, which is not exposed
    * by AutoSuggest.
    */
-  const renderInput = React.useCallback(((inputProps: ReactAutosuggest.InputProps<AutoSuggestData>): React.ReactNode => {
+  const renderInput = useCallback(((inputProps: ReactAutosuggest.InputProps<AutoSuggestData>): ReactNode => {
     const { onChange, ...otherProps } = inputProps;
     return (
       <input type="text"

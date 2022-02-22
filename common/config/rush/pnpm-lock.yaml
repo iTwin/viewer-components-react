@@ -241,7 +241,7 @@ importers:
       '@types/mocha': ^8.2.2
       '@types/node': 10.14.1
       '@types/react': ^17.0.19
-      '@types/react-autosuggest': ^10.0.0
+      '@types/react-autosuggest': 10.1.2
       '@types/react-dom': ^17.0.9
       '@types/sinon': ^9.0.0
       '@types/sinon-chai': ^3.2.0
@@ -262,7 +262,7 @@ importers:
       nyc: ^14.0.0
       raf: ^3.4.0
       react: ^17.0.2
-      react-autosuggest: ^10.0.2
+      react-autosuggest: ^10.1.0
       react-dom: ^17.0.2
       react-redux: ^7.2.6
       react-test-renderer: ^17.0.2
@@ -306,7 +306,7 @@ importers:
       '@types/mocha': 8.2.3
       '@types/node': 10.14.1
       '@types/react': 17.0.39
-      '@types/react-autosuggest': 10.1.5
+      '@types/react-autosuggest': 10.1.2
       '@types/react-dom': 17.0.11
       '@types/sinon': 9.0.11
       '@types/sinon-chai': 3.2.8
@@ -2868,7 +2868,7 @@ packages:
       lodash: 4.17.21
       resolve: 1.8.1
       source-map: 0.6.1
-      typescript: 4.4.4
+      typescript: 3.7.7
     dev: true
 
   /@microsoft/node-core-library/3.18.2:
@@ -3292,8 +3292,8 @@ packages:
   /@types/prop-types/15.7.4:
     resolution: {integrity: sha512-rZ5drC/jWjrArrS8BR6SIr4cWpW09RNTYt9AMZo3Jwwif+iacXAqgVjm0B0Bv/S1jhDXKHqRVNCbACkJ89RAnQ==}
 
-  /@types/react-autosuggest/10.1.5:
-    resolution: {integrity: sha512-qfMzrp6Is0VYRF5a97Bv/+P2F9ZtFY4YE2825yyWV4VxCpvcfvQHEqGNkDFIPme7t3B2BpQ784QBllYAxemERQ==}
+  /@types/react-autosuggest/10.1.2:
+    resolution: {integrity: sha512-K23lmXhC3Bbd8y/jm5+wYrw/NAeN4U/wlHTgAEBIwLOyQKFCFYA3ONKte9P21L+RGIXRP8UlzHOSRtmIZw5Nqw==}
     dependencies:
       '@types/react': 17.0.39
     dev: true
