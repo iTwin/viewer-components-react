@@ -67,11 +67,17 @@ const CalculatedPropertyAction = ({
   }, []);
 
   useEffect(() => {
+    if (ids.length === 0) {
+      return;
+    }
     visualizeElements([ids[0]], "red");
     void zoomToElements([ids[0]]);
   }, [ids]);
 
   useEffect(() => {
+    if (ids.length === 0) {
+      return;
+    }
     const setContext = async () => {
       if (bboxDecorator) {
         await bboxDecorator.setContext(ids[0]);
@@ -91,7 +97,6 @@ const CalculatedPropertyAction = ({
     }
   }, [bboxDecorator, inferredSpatialData, type]);
 
-  // TODO ERRORED STATE
   const onSave = async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
@@ -125,6 +130,7 @@ const CalculatedPropertyAction = ({
       setIsLoading(false);
     }
   };
+
   const getSpatialData = (value: string) =>
     inferredSpatialData?.has(
       BboxDimension[value as keyof typeof BboxDimension],
@@ -135,6 +141,7 @@ const CalculatedPropertyAction = ({
           ?.toPrecision(4)}m`}
       </div>
     );
+
   return (
     <>
       <WidgetHeader

@@ -16,6 +16,7 @@ import { reportingClientApi } from "../../api/reportingClient";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SvgStatusSuccessHollow } from "@itwin/itwinui-icons-react";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
+import { handleError } from "./utils";
 
 interface ConfirmMappingImportProps {
   sourceiModelId: string;
@@ -43,6 +44,7 @@ const ConfirmMappingImport = ({
   const [importCount, setImportCount] = useState<number>(0);
   const [currentlyImporting, setCurrentlyImporting] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
+  const [errored, setErrored] = useState<boolean>(false);
 
   useEffect(() => {
     setSelectedMappings((selectedMappings) =>
@@ -71,17 +73,22 @@ const ConfirmMappingImport = ({
       return;
     }
     setImporting(true);
-    for (const selectedMapping of selectedMappings) {
-      setCurrentlyImporting(selectedMapping.mappingName ?? "");
-      await reportingClientApi.copyMapping(
-        sourceiModelId,
-        selectedMapping.id ?? "",
-        {
-          targetIModelId: iModelId,
-          mappingName: selectedMapping.mappingName ?? "",
-        },
-      );
-      setImportCount((importCount) => importCount + 1);
+    try {
+      for (const selectedMapping of selectedMappings) {
+        setCurrentlyImporting(selectedMapping.mappingName ?? "");
+        await reportingClientApi.copyMapping(
+          sourceiModelId,
+          selectedMapping.id ?? "",
+          {
+            targetIModelId: iModelId,
+            mappingName: selectedMapping.mappingName ?? "",
+          },
+        );
+        setImportCount((importCount) => importCount + 1);
+      }
+    } catch (error: any) {
+      handleError(error);
+      setErrored(true);
     }
   };
 
@@ -91,17 +98,22 @@ const ConfirmMappingImport = ({
         <div className='import-progress-container'>
           <div className='import-progress-bar'>
             <div className='import-progress-bar-description'>
-              {importCount !== selectedMappings.length ? (
-                <>
-                  <Text variant='title'>Importing</Text>
-                  <Text>We are currently importing the mappings.</Text>
-                </>
-              ) : (
-                <>
-                  <Text variant='title'>Done!</Text>
-                  <Text>Your mapping(s) are ready.</Text>
-                </>
-              )}
+              {
+                !errored ? importCount !== selectedMappings.length ? (
+                  <>
+                    <Text variant='title'>Importing</Text>
+                    <Text>We are currently importing the mappings.</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text variant='title'>Done!</Text>
+                    <Text>Your mapping(s) are ready.</Text>
+                  </>
+                ) :
+                  <>
+                    <Text variant='title'>Error!</Text>
+                    <Text>Sorry, there was an error importing some or all mappings.</Text>
+                  </>}
             </div>
             <ProgressLinear
               value={(importCount / selectedMappings.length) * 100}
@@ -117,14 +129,26 @@ const ConfirmMappingImport = ({
                   ]
               }
               status={
-                importCount === selectedMappings.length ? "positive" : undefined
+                !errored ?
+                  importCount === selectedMappings.length ? "positive" : undefined : "negative"
               }
             />
           </div>
-          <div className='finish-bar'>
+          <div className='import-action-panel'>
+            <Button
+              disabled={!errored && importCount !== selectedMappings.length}
+              onClick={() => {
+                setImporting(false);
+                setImportCount(0);
+                setCurrentlyImporting("");
+                setErrored(false);
+              }}
+            >
+              Back
+            </Button>
             <Button
               styleType='high-visibility'
-              disabled={importCount !== selectedMappings.length}
+              disabled={!errored && importCount !== selectedMappings.length}
               onClick={() => onFinish()}
             >
               Close

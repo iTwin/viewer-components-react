@@ -97,6 +97,10 @@ export const PropertyMenu = ({
     const initialize = async () => {
       try {
         const ids = await fetchIdsFromQuery(group.query ?? "", iModelConnection);
+        if (ids.length === 0) {
+          toaster.warning("The query is valid but produced no results.");
+          await goBack();
+        }
         const keys = await manufactureKeys(ids, iModelConnection);
         setKeySet(keys);
         Presentation.selection.clearSelection(
