@@ -11,7 +11,7 @@ import {
   Presentation,
 } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Fieldset, LabeledInput, Small, toaster } from "@itwin/itwinui-react";
+import { Button, Fieldset, InputGroup, LabeledInput, LabeledTextarea, Radio, Small } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
 import { fetchIdsFromQuery, handleError, handleInputChange, WidgetHeader } from "./utils";
@@ -52,11 +52,20 @@ const GroupAction = ({
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
-  PropertyRecord[]
+    PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
+  const [groupByType, setGroupByType] = React.useState("Selection");
+  const [searchInput, setSearchInput] = React.useState("");
+
+  const changeGroupByType = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const {
+      target: { value },
+    } = event;
+    setGroupByType(value);
+  };
 
   useEffect(() => {
     const removeListener = Presentation.selection.selectionChange.addListener(
@@ -66,7 +75,7 @@ const GroupAction = ({
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
         const query = `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-        }`;
+          }`;
         setSimpleQuery(query);
       },
     );
@@ -224,20 +233,46 @@ const GroupAction = ({
             }}
           />
         </Fieldset>
-
-        <Fieldset legend='Group By' className='find-similar'>
-          <GroupQueryBuilderContext.Provider
-            value={{
-              currentPropertyList,
-              setCurrentPropertyList,
-              query,
-              setQuery,
-              queryBuilder,
-              setQueryBuilder,
-            }}
-          >
-            <GroupQueryBuilderContainer />
-          </GroupQueryBuilderContext.Provider>
+        <Fieldset legend='Group By' className='query-builder-container'>
+          <InputGroup
+            required>
+            <Radio
+              name={"groupby"}
+              onChange={changeGroupByType}
+              defaultChecked
+              value={"Selection"}
+              label={"Selection"}
+            />
+            <Radio
+              name={"groupby"}
+              onChange={changeGroupByType}
+              value={"Search"}
+              label={"Search"}
+            />
+          </InputGroup>
+          {groupByType === "Selection" ?
+            <GroupQueryBuilderContext.Provider
+              value={{
+                currentPropertyList,
+                setCurrentPropertyList,
+                query,
+                setQuery,
+                queryBuilder,
+                setQueryBuilder,
+              }}
+            >
+              <GroupQueryBuilderContainer />
+            </GroupQueryBuilderContext.Provider> :
+            <>
+              <LabeledTextarea
+                label='Search'
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)} />
+              <div className="search-apply">
+                <Button>Apply</Button>
+              </div>
+            </>
+          }
         </Fieldset>
       </div>
       <ActionPanel

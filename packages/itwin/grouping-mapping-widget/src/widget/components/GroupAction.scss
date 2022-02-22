@@ -16,4 +16,13 @@
     flex-direction: column;
     gap: $iui-baseline;
   }
+
+  .query-builder-container {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline;
+    > .search-apply {
+      justify-self: right;
+    }
+  }
 }
