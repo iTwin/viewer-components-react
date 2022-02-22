@@ -264,6 +264,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 row.query ?? "",
                 iModelConnection,
               );
+              if (ids.length === 0) {
+                toaster.warning(`${row.groupName}'s query is valid but produced no results.`);
+              }
               const hiliteIds = await visualizeElementsById(
                 ids,
                 stringToColor(row.id ?? ""),
@@ -279,7 +282,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 delete selectedRowIds[index];
                 return selectedRowIds;
               });
-              toaster.negative(`Could not load ${row.groupName}.`);
+              toaster.negative(`Could not load ${row.groupName}. Query could not be resolved.`);
 
             }
           }

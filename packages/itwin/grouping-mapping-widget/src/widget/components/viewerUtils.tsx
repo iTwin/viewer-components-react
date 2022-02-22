@@ -4,13 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 import type {
   IModelConnection,
-  ViewChangeOptions} from "@itwin/core-frontend";
+  ViewChangeOptions,
+} from "@itwin/core-frontend";
 import {
   EmphasizeElements,
   IModelApp,
 } from "@itwin/core-frontend";
 import type {
-  ElementProps} from "@itwin/core-common";
+  ElementProps,
+} from "@itwin/core-common";
 import {
   ColorDef,
   FeatureOverrideType,
@@ -96,7 +98,7 @@ export const visualizeElements = (
 };
 
 export const zoomToElements = async (elementIds: string[]) => {
-  if (!IModelApp.viewManager.selectedView) {
+  if (!IModelApp.viewManager.selectedView || elementIds.length === 0) {
     return;
   }
 

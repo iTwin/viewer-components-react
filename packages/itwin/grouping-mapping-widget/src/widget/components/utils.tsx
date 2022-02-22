@@ -88,34 +88,28 @@ export const fetchIdsFromQuery = async (
   if (query === "") {
     return [];
   }
-  try {
-    const ids: string[] = [];
-    const rowIterator = iModelConnection.query(query, undefined, {
-      rowFormat: QueryRowFormat.UseJsPropertyNames,
-    });
-    while (true) {
-      const { done, value } = await rowIterator.next();
-      if (done) {
-        break;
-      }
-      if (Object.keys(value).includes("id")) {
-        ids.push(value.id);
-      } else if (Object.keys(value).includes("element.id")) {
-        ids.push(value["element.id"]);
-      } else if (Object.keys(value).includes("eCInstanceId")) {
-        ids.push(value.eCInstanceId);
-      }
+  const ids: string[] = [];
+  const rowIterator = iModelConnection.query(query, undefined, {
+    rowFormat: QueryRowFormat.UseJsPropertyNames,
+  });
+  while (true) {
+    const { done, value } = await rowIterator.next();
+    if (done) {
+      break;
     }
-    return ids;
-  } catch (error) {
-    toaster.negative("Failed to resolve query.");
-    throw (error);
-
+    if (Object.keys(value).includes("id")) {
+      ids.push(value.id);
+    } else if (Object.keys(value).includes("element.id")) {
+      ids.push(value["element.id"]);
+    } else if (Object.keys(value).includes("eCInstanceId")) {
+      ids.push(value.eCInstanceId);
+    }
   }
+  return ids;
 };
 
 export const handleError = (errorStatus: number) => {
-  let errorMessage = `Error ${errorStatus}: `;
+  let errorMessage = "Error! ";
   switch (errorStatus) {
     case 401:
       errorMessage += `You are unauthorized to do this operation.`;
