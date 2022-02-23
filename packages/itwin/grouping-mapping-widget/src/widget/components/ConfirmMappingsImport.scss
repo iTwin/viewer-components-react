@@ -47,13 +47,6 @@
       }
     }
   }
-
-  .finish-bar {
-    display: flex;
-    justify-content: right;
-    padding: $iui-baseline * 2 $iui-m $iui-baseline;
-    gap: $iui-s;
-  }
 }
 
 .rename-confirm-container {

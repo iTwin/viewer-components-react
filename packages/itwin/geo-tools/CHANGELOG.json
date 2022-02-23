@@ -1,6 +1,21 @@
 {
-  "name": "@bentley/geo-tools-react",
+  "name": "@itwin/geo-tools-react",
   "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@itwin/geo-tools-react_v0.2.0",
+      "date": "Thu, 17 Feb 2022 17:30:48 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Migrated GeoTools package to iTwin 3.0."
+          },
+          {
+            "comment": "Add UiItemsProvider"
+          }
+        ]
+      }
+    },
     {
       "version": "0.1.7",
       "tag": "@bentley/geo-tools-react_v0.1.7",

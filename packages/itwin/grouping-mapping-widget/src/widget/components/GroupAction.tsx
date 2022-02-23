@@ -11,7 +11,7 @@ import {
   Presentation,
 } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, Small, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
 import { fetchIdsFromQuery, handleError, handleInputChange, WidgetHeader } from "./utils";
@@ -77,17 +77,21 @@ const GroupAction = ({
 
   useEffect(() => {
     const reemphasize = async () => {
-      clearEmphasizedElements();
-      if (!query || query === "") {
-        return;
+      try {
+        clearEmphasizedElements();
+        if (!query || query === "") {
+          return;
+        }
+        const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
+        const resolvedHiliteIds = await visualizeElementsById(
+          ids,
+          "red",
+          iModelConnection,
+        );
+        await zoomToElements(resolvedHiliteIds);
+      } catch {
+        toaster.negative("Sorry, we have failed to generate a valid query. 😔");
       }
-      const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
-      const resolvedHiliteIds = await visualizeElementsById(
-        ids,
-        "red",
-        iModelConnection,
-      );
-      await zoomToElements(resolvedHiliteIds);
     };
 
     void reemphasize();
