@@ -108,23 +108,25 @@ export const FeatureOverrideReactProvider = ({
   );
 
   useEffect(() => {
-    const attach = () =>
-      IModelApp.viewManager.forEachViewport((vp) => {
+    const attach = () => {
+      for (const vp of IModelApp.viewManager) {
         if (!viewFilter || viewFilter(vp)) {
-          vp.featureOverrideProvider = impl;
+          // to do
+          // vp.featureOverrideProviders = impl;
         }
-      });
+      }
+    };
     attach();
     const unsubViewOpen = IModelApp.viewManager.onViewOpen.addListener(attach);
     return unsubViewOpen;
   }, [impl, viewFilter]);
 
   const invalidate = useCallback(() => {
-    IModelApp.viewManager.forEachViewport((v) => {
-      if (!viewFilter || viewFilter(v)) {
-        v.setFeatureOverrideProviderChanged();
+    for (const vp of IModelApp.viewManager) {
+      if (!viewFilter || viewFilter(vp)) {
+        vp.setFeatureOverrideProviderChanged();
       }
-    });
+    }
   }, [viewFilter]);
 
   const state = useMemo<FeatureSymbologyContext>(

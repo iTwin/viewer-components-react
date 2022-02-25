@@ -78,9 +78,11 @@ export const IModelJsViewProvider = ({
   const enqueueViewInvalidation = useCallback(
     () =>
       setTimeout(() => {
-        IModelApp.viewManager.forEachViewport((vp) => {
-          if (viewFilter?.(vp) ?? true) vp.invalidateDecorations();
-        })
+        for (const vp of IModelApp.viewManager) {
+          if (viewFilter?.(vp) ?? true) {
+            vp.invalidateDecorations();
+          }
+        }
       }),
     []
   );
