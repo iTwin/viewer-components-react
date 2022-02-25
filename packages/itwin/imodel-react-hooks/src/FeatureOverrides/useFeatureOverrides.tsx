@@ -4,13 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-import { Logger } from "@bentley/bentleyjs-core";
-import {
-  FeatureOverrideProvider,
-  FeatureSymbology,
-  IModelApp,
-  Viewport,
-} from "@bentley/imodeljs-frontend";
+import { Logger } from "@itwin/core-bentley";
+import { FeatureOverrideProvider, FeatureSymbology, IModelApp, Viewport } from "@itwin/core-frontend";
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useCallback } from "react";
 

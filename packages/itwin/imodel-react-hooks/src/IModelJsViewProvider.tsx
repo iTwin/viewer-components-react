@@ -3,12 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import {
-  DecorateContext,
-  Decorator,
-  IModelApp,
-  Viewport,
-} from "@bentley/imodeljs-frontend";
+import { DecorateContext, Decorator, IModelApp, Viewport } from "@itwin/core-frontend";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { IModelJsMarker } from "./Marker";

@@ -3,9 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point2d, Range1dProps, WritableXAndY } from "@bentley/geometry-core";
-import { ColorDef } from "@bentley/imodeljs-common";
-import { Marker, MarkerImage } from "@bentley/imodeljs-frontend";
+import { Point2d, Range1dProps, WritableXAndY } from "@itwin/core-geometry";
+import { ColorDef } from "@itwin/core-common";
+import { Marker, MarkerImage } from "@itwin/core-frontend";
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 import ReactDOM from "react-dom";
 

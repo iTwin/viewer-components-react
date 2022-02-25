@@ -4,9 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 
-import { Point2d } from "@bentley/geometry-core";
-import { ColorDef } from "@bentley/imodeljs-common";
-import { Marker } from "@bentley/imodeljs-frontend";
+import { Point2d } from "@itwin/core-geometry";
+import { ColorDef } from "@itwin/core-common";
+import { Marker } from "@itwin/core-frontend";
 
 import { UseMarkerOptions } from "./useMarker";
 

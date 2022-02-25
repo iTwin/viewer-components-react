@@ -3,15 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp, Viewport } from "@bentley/imodeljs-frontend";
+import { IModelApp, Viewport } from "@itwin/core-frontend";
 import { render } from "@testing-library/react";
 import React from "react";
 
-import {
-  FeatureOverrideReactProvider,
-  FeatureSymbologyContext,
-  useFeatureOverrides,
-} from "./useFeatureOverrides";
+import { FeatureOverrideReactProvider, FeatureSymbologyContext, useFeatureOverrides } from "./useFeatureOverrides";
 
 jest.mock("@bentley/bentleyjs-core");
 
