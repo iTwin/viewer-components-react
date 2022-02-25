@@ -111,8 +111,7 @@ export const FeatureOverrideReactProvider = ({
     const attach = () => {
       for (const vp of IModelApp.viewManager) {
         if (!viewFilter || viewFilter(vp)) {
-          // to do
-          // vp.featureOverrideProviders = impl;
+          vp.addFeatureOverrideProvider(impl);
         }
       }
     };
