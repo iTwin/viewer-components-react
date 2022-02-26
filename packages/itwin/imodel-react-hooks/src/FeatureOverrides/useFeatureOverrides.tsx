@@ -116,8 +116,16 @@ export const FeatureOverrideReactProvider = ({
       }
     };
     attach();
-    const unsubViewOpen = IModelApp.viewManager.onViewOpen.addListener(attach);
-    return unsubViewOpen;
+
+    IModelApp.viewManager.onViewOpen.addListener(attach);
+    return () => {
+      for (const vp of IModelApp.viewManager) {
+        if (!viewFilter || viewFilter(vp)) {
+          vp.dropFeatureOverrideProvider(impl);
+        }
+      }
+      IModelApp.viewManager.onViewOpen.removeListener(attach);
+    }
   }, [impl, viewFilter]);
 
   const invalidate = useCallback(() => {
