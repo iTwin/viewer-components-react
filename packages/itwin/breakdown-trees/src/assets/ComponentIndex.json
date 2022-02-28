@@ -12,20 +12,22 @@
               "schemaName": "SpatialComposition",
               "classNames": [
                 "CompositeElement"
-              ]
+              ],
+              "arePolymorphic": true
             }
           ],
-          "arePolymorphic": true,
           "relatedInstances": [
             {
-              "relationship": {
-                "schemaName": "BisCore",
-                "className": "ModelContainsElements"
-              },
-              "requiredDirection": "Backward",
-              "class": {
-                "schemaName": "BisCore",
-                "className": "Model"
+              "relationshipPath": {
+                "relationship": {
+                  "schemaName": "BisCore",
+                  "className": "ModelContainsElements"
+                },
+                "targetClass": {
+                  "schemaName": "BisCore",
+                  "className": "Model"
+                },
+                "direction": "Backward"
               },
               "isRequired": true,
               "alias": "model"
@@ -52,9 +54,9 @@
                     "schemaName": "BisCore",
                     "classNames": [
                       "GeometricElement3d"
-                    ]
+                    ],
+                    "arePolymorphic": true
                   },
-                  "arePolymorphic": true,
                   "doNotSort": true,
                   "groupByClass": false,
                   "groupByLabel": false,
@@ -298,9 +300,9 @@
                     "schemaName": "BisCore",
                     "classNames": [
                       "GeometricElement3d"
-                    ]
+                    ],
+                    "arePolymorphic": true
                   },
-                  "arePolymorphic": true,
                   "doNotSort": true,
                   "groupByClass": true,
                   "groupByLabel": false,
@@ -357,20 +359,20 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "SpatialComposition",
-            "classNames": [
-              "CompositeComposesSubComposites"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "BuildingSpatial",
-            "classNames": [
-              "Building"
-            ]
-          },
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "SpatialComposition",
+                "className": "CompositeComposesSubComposites"
+              },
+              "targetClass": {
+                "schemaName": "BuildingSpatial",
+                "className": "Building"
+              },
+              "direction": "Forward"
+            }
+          ],
           "doNotSort": false,
-          "requiredDirection": "Forward",
           "groupByClass": false,
           "groupByLabel": false
         }
@@ -722,9 +724,9 @@
                     "schemaName": "BisCore",
                     "classNames": [
                       "GeometricElement3d"
-                    ]
+                    ],
+                    "arePolymorphic": true
                   },
-                  "arePolymorphic": true,
                   "instanceFilter": "this.ECInstanceId = parent.ECInstanceId",
                   "doNotSort": true,
                   "groupByClass": false,
