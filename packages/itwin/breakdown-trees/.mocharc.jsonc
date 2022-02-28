@@ -17,7 +17,7 @@
     "lib/cjs/test/setup.js"
   ],
   "ignore": [
-    "lib/cjs/test/coverage/**/*"
+    "lib/test/coverage/**/*"
   ],
   "reporter": "node_modules/@itwin/build-tools/mocha-reporter",
   "reporter-option": [
