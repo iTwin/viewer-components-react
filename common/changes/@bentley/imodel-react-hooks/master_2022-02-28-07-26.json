@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/imodel-react-hooks",
+      "comment": "#797363 added @bentley/telemetry-client to resolve module not found issue",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/imodel-react-hooks"
+}
