@@ -12,20 +12,22 @@
               "schemaName": "SpatialComposition",
               "classNames": [
                 "CompositeElement"
-              ]
+              ],
+              "arePolymorphic": true
             }
           ],
-          "arePolymorphic": true,
           "relatedInstances": [
             {
-              "relationship": {
-                "schemaName": "BisCore",
-                "className": "ModelContainsElements"
-              },
-              "requiredDirection": "Backward",
-              "class": {
-                "schemaName": "BisCore",
-                "className": "Model"
+              "relationshipPath": {
+                "relationship": {
+                  "schemaName": "BisCore",
+                  "className": "ModelContainsElements"
+                },
+                "direction": "Backward",
+                "targetClass": {
+                  "schemaName": "BisCore",
+                  "className": "Model"
+                }
               },
               "isRequired": true,
               "alias": "model"
@@ -43,20 +45,20 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "BisCore",
-            "classNames": [
-              "PhysicalSystemServicesSpatialElements"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "DistributionSystems",
-            "classNames": [
-              "DistributionSystem"
-            ]
-          },
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "BisCore",
+                "className": "PhysicalSystemServicesSpatialElements"
+              },
+              "targetClass": {
+                "schemaName": "DistributionSystems",
+                "className": "DistributionSystem"
+              },
+              "direction": "Backward"
+            }
+          ],
           "doNotSort": true,
-          "requiredDirection": "Backward",
           "groupByClass": false,
           "groupByLabel": false
         }
@@ -68,20 +70,20 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "DistributionSystems",
-            "classNames": [
-              "DistributionSystemGroupsDistributionElements"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "Biscore",
-            "classNames": [
-              "SpatialElement"
-            ]
-          },
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "DistributionSystems",
+                "className": "DistributionSystemGroupsDistributionElements"
+              },
+              "targetClass": {
+                "schemaName": "Biscore",
+                "className": "SpatialElement"
+              },
+              "direction": "Forward"
+            }
+          ],
           "doNotSort": true,
-          "requiredDirection": "Forward",
           "groupByClass": false,
           "groupByLabel": false
         }
@@ -93,20 +95,20 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "SpatialComposition",
-            "classNames": [
-              "CompositeComposesSubComposites"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "SpatialComposition",
-            "classNames": [
-              "CompositeElement"
-            ]
-          },
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "SpatialComposition",
+                "className": "CompositeComposesSubComposites"
+              },
+              "targetClass": {
+                "schemaName": "SpatialComposition",
+                "className": "CompositeElement"
+              },
+              "direction": "Forward"
+            }
+          ],
           "doNotSort": true,
-          "requiredDirection": "Forward",
           "groupByClass": false,
           "groupByLabel": false
         }
@@ -118,19 +120,19 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "SpatialComposition",
-            "classNames": [
-              "CompositeOverlapsSpatialElements"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "BisCore",
-            "classNames": [
-              "SpatialElement"
-            ]
-          },
-          "requiredDirection": "Forward",
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "SpatialComposition",
+                "className": "CompositeOverlapsSpatialElements"
+              },
+              "targetClass": {
+                "schemaName": "BisCore",
+                "className": "SpatialElement"
+              },
+              "direction": "Forward"
+            }
+          ],
           "groupByClass": true,
           "hideNodesInHierarchy": true,
           "groupByLabel": false
@@ -208,9 +210,9 @@
                     "schemaName": "BisCore",
                     "classNames": [
                       "GeometricElement3d"
-                    ]
+                    ],
+                    "arePolymorphic": true
                   },
-                  "arePolymorphic": true,
                   "instanceFilter": "this.ECInstanceId = parent.ECInstanceId",
                   "doNotSort": true,
                   "groupByClass": false,
@@ -228,19 +230,19 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "SpatialComposition",
-            "classNames": [
-              "SpatialOrganizerReferencesSpatialElements"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "BisCore",
-            "classNames": [
-              "SpatialElement"
-            ]
-          },
-          "requiredDirection": "Forward",
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "SpatialComposition",
+                "className": "SpatialOrganizerReferencesSpatialElements"
+              },
+              "targetClass": {
+                "schemaName": "BisCore",
+                "className": "SpatialElement"
+              },
+              "direction": "Forward"
+            }
+          ],
           "groupByClass": true,
           "groupByLabel": false
         }
@@ -252,19 +254,19 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "SpatialComposition",
-            "classNames": [
-              "SpatialOrganizerHoldsSpatialElements"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "BisCore",
-            "classNames": [
-              "SpatialElement"
-            ]
-          },
-          "requiredDirection": "Forward",
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "SpatialComposition",
+                "className": "SpatialOrganizerHoldsSpatialElements"
+              },
+              "targetClass": {
+                "schemaName": "BisCore",
+                "className": "SpatialElement"
+              },
+              "direction": "Forward"
+            }
+          ],
           "groupByClass": true,
           "groupByLabel": false
         }
