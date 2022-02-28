@@ -1,0 +1,26 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+
+
+.geotools-geoaddresssearch__container {
+  width: 300px
+}
+
+.geotools-geoaddresssearch__button {
+  background-color: transparent;
+  position: absolute;
+  top: 6px;
+  right: 5px;
+  border: none;
+  z-index: 1;   // Make it display over the input
+}
+
+.geotools-geoaddresssearch__autosuggest {
+  width: 100%;
+  .uicore-autosuggest__input {
+    padding: 1.3px 30px 1.3px 5px;    //right padding avoid input text to be overlaid with the button
+  }
+}
+

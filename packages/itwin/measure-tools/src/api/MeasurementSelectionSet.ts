@@ -3,15 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeUiEvent, Id64, Id64Arg, Id64String } from "@itwin/core-bentley";
-import {
-  IModelConnection, SelectAddEvent, SelectionSetEvent, SelectionSetEventType, SelectRemoveEvent, SelectReplaceEvent,
+import type { Id64Arg, Id64String } from "@itwin/core-bentley";
+import { BeUiEvent, Id64 } from "@itwin/core-bentley";
+import type {
+  IModelConnection, SelectAddEvent, SelectionSetEvent, SelectRemoveEvent, SelectReplaceEvent} from "@itwin/core-frontend";
+import { SelectionSetEventType,
 } from "@itwin/core-frontend";
 import { SessionStateActionId, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
 import { Measurement } from "./Measurement";
 import { MeasurementSyncUiEventId } from "./MeasurementEnums";
 import { ShimFunctions } from "./ShimFunctions";
-import { UiSyncEventArgs } from "@itwin/appui-abstract";
+import type { UiSyncEventArgs } from "@itwin/appui-abstract";
 
 export interface MeasurementSelectAddEvent {
   type: SelectionSetEventType.Add;

@@ -3,10 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@itwin/core-geometry";
+import type { Point3d } from "@itwin/core-geometry";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
-import { LocationMeasurement, LocationMeasurementProps } from "../measurements/LocationMeasurement";
-import { MeasurementProps } from "../api/MeasurementProps";
+import type { LocationMeasurementProps } from "../measurements/LocationMeasurement";
+import { LocationMeasurement } from "../measurements/LocationMeasurement";
+import type { MeasurementProps } from "../api/MeasurementProps";
 
 // Properties of LocationMeasurementProps that are NOT inherited from MeasurementProps
 // We don't want to expose anything from the MeasurementProps for addLocation

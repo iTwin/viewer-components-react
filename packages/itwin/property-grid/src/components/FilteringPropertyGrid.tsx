@@ -3,24 +3,29 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import "./PropertyGrid.scss";
-import { IDisposable } from "@itwin/core-bentley";
-import {
+import type { IDisposable } from "@itwin/core-bentley";
+import type {
   IPresentationPropertyDataProvider,
+} from "@itwin/presentation-components";
+import {
   usePropertyDataProviderWithUnifiedSelection,
 } from "@itwin/presentation-components";
-import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
-import {
-  FilteredType,
-  FilteringPropertyDataProvider,
+import type { PropertyRecord } from "@itwin/appui-abstract";
+import { PropertyValueFormat } from "@itwin/appui-abstract";
+import type {
   IPropertyDataProvider,
   PropertyCategory,
   PropertyData,
-  PropertyDataChangeEvent,
   PropertyDataFiltererBase,
   PropertyDataFilterResult,
+  VirtualizedPropertyGridWithDataProviderProps,
+} from "@itwin/components-react";
+import {
+  FilteredType,
+  FilteringPropertyDataProvider,
+  PropertyDataChangeEvent,
   PropertyRecordDataFiltererBase,
   VirtualizedPropertyGridWithDataProvider,
-  VirtualizedPropertyGridWithDataProviderProps,
 } from "@itwin/components-react";
 import { FillCentered, useDisposable } from "@itwin/core-react";
 

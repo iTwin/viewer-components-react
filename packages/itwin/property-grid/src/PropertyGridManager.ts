@@ -4,8 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { getClassName, UiError } from "@itwin/appui-abstract";
-import { Localization } from "@itwin/core-common";
-import { LocalizationOptions } from "@itwin/core-i18n";
+import { IModelApp } from "@itwin/core-frontend";
+import type { Localization } from "@itwin/core-common";
+import type { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
  * Entry point for static initialization required by various components used in the package.
@@ -13,13 +14,17 @@ import { LocalizationOptions } from "@itwin/core-i18n";
  */
 export class PropertyGridManager {
   private static _i18n?: Localization;
+  private static _initialized?: boolean;
 
   /**
    * Called by IModelApp to initialize PropertyGridManager
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n: Localization): Promise<void> {
-    PropertyGridManager._i18n = i18n;
+  public static async initialize(i18n?: Localization): Promise<void> {
+    if (this._initialized) return;
+
+    this._initialized = true;
+    PropertyGridManager._i18n = i18n ?? IModelApp.localization;
     return PropertyGridManager._i18n.registerNamespace(
       PropertyGridManager.i18nNamespace
     );

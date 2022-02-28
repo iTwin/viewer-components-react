@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { IModelApp } from "@itwin/core-frontend";
-import { Measurement, WidgetValue } from "./Measurement";
+import type { Measurement, WidgetValue } from "./Measurement";
 
 export class MeasurementPropertyHelper {
   public static buildNameProperty(name: string): WidgetValue {

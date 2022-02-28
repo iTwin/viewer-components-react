@@ -4,13 +4,16 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGrid.scss";
-import { Field, InstanceKey, KeySet } from "@itwin/presentation-common";
+import type { Field, InstanceKey } from "@itwin/presentation-common";
+import { KeySet } from "@itwin/presentation-common";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
-import { PropertyRecord } from "@itwin/appui-abstract";
-import {
+import type { PropertyRecord } from "@itwin/appui-abstract";
+import type {
   PropertyData,
   PropertyDataFiltererBase,
   PropertyGridContextMenuArgs,
+} from "@itwin/components-react";
+import {
   PropertyValueRendererManager,
   VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
@@ -22,17 +25,18 @@ import {
   useOptionalDisposable,
   useResizeObserver,
 } from "@itwin/core-react";
+import type { ConfigurableCreateInfo } from "@itwin/appui-react";
 import {
-  ConfigurableCreateInfo,
   UiFramework,
   useActiveIModelConnection,
   WidgetControl,
 } from "@itwin/appui-react";
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
-import {
+import type {
   ContextMenuItemInfo,
   OnSelectEventArgs,
   PropertyGridProps,

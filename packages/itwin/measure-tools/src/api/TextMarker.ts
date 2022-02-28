@@ -3,13 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@itwin/core-bentley";
-import { Angle, AxisIndex, LineString3d, Matrix3d, Point2d, Point3d, PolygonOps, Transform, Vector3d, XAndY, XYAndZ } from "@itwin/core-geometry";
+import type { Id64String } from "@itwin/core-bentley";
+import type { Vector3d, XAndY, XYAndZ } from "@itwin/core-geometry";
+import { Angle, AxisIndex, LineString3d, Matrix3d, Point2d, Point3d, PolygonOps, Transform } from "@itwin/core-geometry";
 import { ColorDef, Hilite } from "@itwin/core-common";
+import type { BeButtonEvent, CanvasDecoration, DecorateContext, Viewport } from "@itwin/core-frontend";
 import {
-  BeButton, BeButtonEvent, CanvasDecoration, DecorateContext, IModelApp, SelectionMode, SelectionTool, Viewport,
+  BeButton, IModelApp, SelectionMode, SelectionTool,
 } from "@itwin/core-frontend";
-import { IconAlignment, IconStyleProps, StyleSet, TextOffsetProps, TextOffsetType, TextStyleProps, WellKnownTextStyleType } from "./GraphicStyle";
+import type { IconStyleProps, TextOffsetProps, TextStyleProps } from "./GraphicStyle";
+import { IconAlignment, StyleSet, TextOffsetType, WellKnownTextStyleType } from "./GraphicStyle";
 
 /**
  * TextEntry for the TextMarker

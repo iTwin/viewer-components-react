@@ -3,17 +3,21 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@itwin/core-bentley";
-import { Geometry, IModelJson, Point3d, PointString3d, XYZProps } from "@itwin/core-geometry";
-import { Cartographic, CartographicProps, GeometryStreamProps } from "@itwin/core-common";
-import { BeButtonEvent, DecorateContext, GraphicType, IModelApp } from "@itwin/core-frontend";
+import type { Id64String } from "@itwin/core-bentley";
+import type { XYZProps } from "@itwin/core-geometry";
+import { Geometry, IModelJson, Point3d, PointString3d } from "@itwin/core-geometry";
+import type { CartographicProps, GeometryStreamProps } from "@itwin/core-common";
+import { Cartographic } from "@itwin/core-common";
+import type { BeButtonEvent, DecorateContext} from "@itwin/core-frontend";
+import { GraphicType, IModelApp } from "@itwin/core-frontend";
 import { FormatterUtils } from "../api/FormatterUtils";
 import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
-import { Measurement, MeasurementEqualityOptions, MeasurementPickContext, MeasurementSerializer, MeasurementWidgetData } from "../api/Measurement";
+import type { MeasurementEqualityOptions, MeasurementWidgetData } from "../api/Measurement";
+import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement";
 import { WellKnownViewType } from "../api/MeasurementEnums";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
-import { MeasurementProps } from "../api/MeasurementProps";
+import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
 

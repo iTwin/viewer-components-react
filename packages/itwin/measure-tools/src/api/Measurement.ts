@@ -3,13 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@itwin/core-bentley";
-import { GeometryStreamProps } from "@itwin/core-common";
-import { BeButton, BeButtonEvent, DecorateContext, HitDetail, IModelApp } from "@itwin/core-frontend";
-import { FormatterSpec } from "@itwin/core-quantity";
+import type { Id64String } from "@itwin/core-bentley";
+import type { GeometryStreamProps } from "@itwin/core-common";
+import type { DecorateContext, HitDetail} from "@itwin/core-frontend";
+import { BeButton, BeButtonEvent, IModelApp } from "@itwin/core-frontend";
+import type { FormatterSpec } from "@itwin/core-quantity";
 import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementPreferences } from "./MeasurementPreferences";
-import { MeasurementProps } from "./MeasurementProps";
+import type { MeasurementProps } from "./MeasurementProps";
 import { MeasurementViewTarget } from "./MeasurementViewTarget";
 import { ShimFunctions } from "./ShimFunctions";
 

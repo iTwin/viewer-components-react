@@ -1,0 +1,38 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+.select-project-grid-container {
+  display: flex;
+  flex-direction: column;
+
+  > .iui-tabs-wrapper {
+    height: 66vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .search-input {
+    margin-left: auto;
+  }
+
+  .project-grid {
+    overflow: auto;
+    flex-grow: 1;
+  }
+
+  .grid-holding-tab {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    gap: $iui-baseline;
+    flex-grow: 1;
+  }
+  .select-project-action-panel {
+    display: flex;
+    justify-content: center;
+    padding: $iui-baseline * 2 $iui-m $iui-baseline;
+  }
+}

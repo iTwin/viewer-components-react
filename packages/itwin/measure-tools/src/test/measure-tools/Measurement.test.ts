@@ -8,7 +8,8 @@ import { Measurement } from "../../api/Measurement";
 import { WellKnownMeasurementStyle, WellKnownViewType } from "../../api/MeasurementEnums";
 import { MeasurementManager } from "../../api/MeasurementManager";
 import { MeasurementPreferences } from "../../api/MeasurementPreferences";
-import { DistanceMeasurement, DistanceMeasurementProps } from "../../measurements/DistanceMeasurement";
+import type { DistanceMeasurementProps } from "../../measurements/DistanceMeasurement";
+import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
 import { DistanceMeasurementSubClass } from "./MeasurementSerialization.test";
 
 describe("Measurement tests", () => {

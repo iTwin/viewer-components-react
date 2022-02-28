@@ -3,12 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeUiEvent, GuidString, Logger } from "@itwin/core-bentley";
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
+import type { GuidString } from "@itwin/core-bentley";
+import { BeUiEvent, Logger } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { TelemetryEvent } from "@itwin/core-telemetry";
 import { UiFramework } from "@itwin/appui-react";
 import { MeasureToolsLoggerCategory } from "./MeasureToolsLoggerCategory";
-import { RpcActivity } from "@itwin/core-common";
+import type { RpcActivity } from "@itwin/core-common";
 
 /** Each feature has a human-readable name that should be unique, but also a GUID. */
 export interface Feature {
@@ -23,7 +25,7 @@ export interface Feature {
 export class FeatureTracking {
   private static _enabled: boolean = true;
 
-  /** Feature tracking notiication event. */
+  /** Feature tracking notification event. */
   public static readonly onFeature: BeUiEvent<Feature> = new BeUiEvent<Feature>();
 
   /**
