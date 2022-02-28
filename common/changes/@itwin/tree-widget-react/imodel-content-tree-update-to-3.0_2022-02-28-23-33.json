@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "Add `IModelContentTree`",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/tree-widget-react"
+}
