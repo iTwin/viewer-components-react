@@ -22,8 +22,8 @@
 /packages/itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @Guillar1
 /common/changes/@itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @Guillar1
 
-/packages/itwin/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty
-/common/changes/@itwin/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty
+/packages/itwin/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty @DanishMehmood-bit
+/common/changes/@itwin/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty @DanishMehmood-bit
 
 /packages/itwin/geo-tools  @itwin/viewer-components-reviewers @mdastous-bentley
 /common/changes/@itwin/geo-tools-react  @itwin/viewer-components-reviewers @mdastous-bentley
