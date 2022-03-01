@@ -73,7 +73,7 @@ export const IModelJsViewProvider = ({
   useEffect(() => {
     const removeDecorator = IModelApp.viewManager.addDecorator(decoratorInstance);
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    return removeDecorator();
+    return () => removeDecorator();
   }, [decoratorInstance]);
 
   const enqueueViewInvalidation = useCallback(
