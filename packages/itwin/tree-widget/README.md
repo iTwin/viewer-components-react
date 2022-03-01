@@ -27,7 +27,7 @@ import { UiItemsManager } from "@itwin/appui-abstract";
 import { TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
 ...
 UiItemsManager.register(
-  new TreeWidgetUiItemsProvider({ ...TreeWidgetControlOptions })
+  new TreeWidgetUiItemsProvider({ ...TreeWidgetOptions })
 );
 ```
 

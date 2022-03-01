@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import classNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
-import { IModelConnection } from "@itwin/core-frontend";
-import { Ruleset } from "@itwin/presentation-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { Ruleset } from "@itwin/presentation-common";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
 import IMODEL_CONTENT_RULESET from "../rulesets/IModelContent.json";
@@ -35,7 +35,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
   const eventHandler = useTreeEventsHandler(useMemo(() => ({ nodeLoader, modelSource: nodeLoader.modelSource, collapsedChildrenDisposalEnabled: true }), [nodeLoader]));
 
   return (
-    <div ref={ref} {...divProps} className={classNames("imodel-content-tree", className)}>
+    <div ref={ref} style={{ width: "100%", height: "100%" }} {...divProps} className={classNames("imodel-content-tree", className)}>
       <ControlledTree
         width={width}
         height={height}
@@ -47,4 +47,4 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
       />
     </div>
   );
-}
+};
