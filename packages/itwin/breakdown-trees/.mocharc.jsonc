@@ -14,7 +14,7 @@
   ],
   "timeout": "60000",
   "file": [
-    "lib/test/setup.js"
+    "lib/cjs/test/setup.js"
   ],
   "ignore": [
     "lib/test/coverage/**/*"

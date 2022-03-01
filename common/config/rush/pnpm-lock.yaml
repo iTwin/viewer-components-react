@@ -220,6 +220,7 @@ importers:
       '@bentley/geometry-core': ^2.0.0
       '@bentley/imodeljs-common': ^2.0.0
       '@bentley/imodeljs-frontend': ^2.0.0
+      '@bentley/telemetry-client': ^2.0.0
       '@testing-library/react': ^9.1.4
       '@types/jest': ^24.9.0
       '@types/react': ~16.9.35
@@ -237,7 +238,8 @@ importers:
       '@bentley/bentleyjs-core': 2.19.28
       '@bentley/geometry-core': 2.19.28_@bentley+bentleyjs-core@2.19.28
       '@bentley/imodeljs-common': 2.19.28_5a3fc1123493d2bcc353bf0895e717a3
-      '@bentley/imodeljs-frontend': 2.19.28_d26012af4793eb61da7aaac2c7528a28
+      '@bentley/imodeljs-frontend': 2.19.28_6639144b98b9138aff2f0e72530ce6db
+      '@bentley/telemetry-client': 2.19.28
       '@testing-library/react': 9.5.0_react-dom@16.14.0+react@16.14.0
       '@types/jest': 24.9.1
       '@types/react': 16.9.56
@@ -2371,6 +2373,42 @@ packages:
       semver: 5.7.1
     dev: true
 
+  /@bentley/imodeljs-frontend/2.19.28_6639144b98b9138aff2f0e72530ce6db:
+    resolution: {integrity: sha512-0zg1yFqBlaISmQ07F7t2p896MYExIhMdONHjU+AJ1N5rFzRzT8H/oh5YziWr6YRGaXioyOWQ1aWRFDbxe2+eww==}
+    peerDependencies:
+      '@bentley/bentleyjs-core': ^2.19.28
+      '@bentley/frontend-authorization-client': ^2.19.28
+      '@bentley/geometry-core': ^2.19.28
+      '@bentley/imodelhub-client': ^2.19.28
+      '@bentley/imodeljs-common': ^2.19.28
+      '@bentley/imodeljs-i18n': ^2.19.28
+      '@bentley/imodeljs-quantity': ^2.19.28
+      '@bentley/itwin-client': ^2.19.28
+      '@bentley/orbitgt-core': ^2.19.28
+      '@bentley/product-settings-client': ^2.19.28
+      '@bentley/rbac-client': ^2.19.28
+      '@bentley/telemetry-client': ^2.19.28
+      '@bentley/ui-abstract': ^2.19.28
+      '@bentley/webgl-compatibility': ^2.19.28
+    dependencies:
+      '@bentley/bentleyjs-core': 2.19.28
+      '@bentley/context-registry-client': 2.19.28_@bentley+bentleyjs-core@2.19.28
+      '@bentley/extension-client': 2.19.28_@bentley+geometry-core@2.19.28
+      '@bentley/geometry-core': 2.19.28_@bentley+bentleyjs-core@2.19.28
+      '@bentley/imodeljs-common': 2.19.28_5a3fc1123493d2bcc353bf0895e717a3
+      '@bentley/reality-data-client': 2.19.28
+      '@bentley/telemetry-client': 2.19.28
+      '@bentley/usage-logging-client': 2.19.28_43e7c26313b9a05d255dbf2517af271d
+      fuse.js: 3.6.1
+      js-base64: 2.6.4
+      oidc-client: 1.11.5
+      semver: 5.7.1
+      wms-capabilities: 0.4.0
+      xml-js: 1.6.11
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /@bentley/imodeljs-frontend/2.19.28_727c7615c785b38ef9dad2e0508e021b:
     resolution: {integrity: sha512-0zg1yFqBlaISmQ07F7t2p896MYExIhMdONHjU+AJ1N5rFzRzT8H/oh5YziWr6YRGaXioyOWQ1aWRFDbxe2+eww==}
     peerDependencies:
@@ -2439,41 +2477,6 @@ packages:
       '@bentley/imodeljs-common': 2.19.28_@bentley+bentleyjs-core@2.19.28
       '@bentley/reality-data-client': 2.19.28
       '@bentley/ui-abstract': 2.19.28_@bentley+bentleyjs-core@2.19.28
-      '@bentley/usage-logging-client': 2.19.28
-      fuse.js: 3.6.1
-      js-base64: 2.6.4
-      oidc-client: 1.11.5
-      semver: 5.7.1
-      wms-capabilities: 0.4.0
-      xml-js: 1.6.11
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-  /@bentley/imodeljs-frontend/2.19.28_d26012af4793eb61da7aaac2c7528a28:
-    resolution: {integrity: sha512-0zg1yFqBlaISmQ07F7t2p896MYExIhMdONHjU+AJ1N5rFzRzT8H/oh5YziWr6YRGaXioyOWQ1aWRFDbxe2+eww==}
-    peerDependencies:
-      '@bentley/bentleyjs-core': ^2.19.28
-      '@bentley/frontend-authorization-client': ^2.19.28
-      '@bentley/geometry-core': ^2.19.28
-      '@bentley/imodelhub-client': ^2.19.28
-      '@bentley/imodeljs-common': ^2.19.28
-      '@bentley/imodeljs-i18n': ^2.19.28
-      '@bentley/imodeljs-quantity': ^2.19.28
-      '@bentley/itwin-client': ^2.19.28
-      '@bentley/orbitgt-core': ^2.19.28
-      '@bentley/product-settings-client': ^2.19.28
-      '@bentley/rbac-client': ^2.19.28
-      '@bentley/telemetry-client': ^2.19.28
-      '@bentley/ui-abstract': ^2.19.28
-      '@bentley/webgl-compatibility': ^2.19.28
-    dependencies:
-      '@bentley/bentleyjs-core': 2.19.28
-      '@bentley/context-registry-client': 2.19.28_@bentley+bentleyjs-core@2.19.28
-      '@bentley/extension-client': 2.19.28_@bentley+geometry-core@2.19.28
-      '@bentley/geometry-core': 2.19.28_@bentley+bentleyjs-core@2.19.28
-      '@bentley/imodeljs-common': 2.19.28_5a3fc1123493d2bcc353bf0895e717a3
-      '@bentley/reality-data-client': 2.19.28
       '@bentley/usage-logging-client': 2.19.28
       fuse.js: 3.6.1
       js-base64: 2.6.4
@@ -2785,6 +2788,14 @@ packages:
     dependencies:
       '@bentley/bentleyjs-core': 2.19.28
       '@bentley/itwin-client': 2.19.28_@bentley+bentleyjs-core@2.19.28
+    dev: true
+
+  /@bentley/telemetry-client/2.19.28:
+    resolution: {integrity: sha512-U5LkTf05s+C5a4Pjvs3FEkZ0oxMfNb35a7VgsLrgICVEhZPxPYL92KpU92txjhbugl/fFjdzDUu/TUBHf245QA==}
+    peerDependencies:
+      '@bentley/itwin-client': ^2.19.28
+    dependencies:
+      '@bentley/bentleyjs-core': 2.19.28
     dev: true
 
   /@bentley/ui-abstract/2.19.28_4c0e02035dbe833b0b62a8cdd7b868a2:
@@ -3191,6 +3202,16 @@ packages:
       '@bentley/telemetry-client': ^2.19.28
     dependencies:
       '@bentley/bentleyjs-core': 2.19.28
+    dev: true
+
+  /@bentley/usage-logging-client/2.19.28_43e7c26313b9a05d255dbf2517af271d:
+    resolution: {integrity: sha512-AMGl4kqTDwqYn2PpTuz7ApmNpmXgG2j3hIcTFNqxK1f6TnfG0bxp6cHjVqtoNwY2vsYQq+fV/wEEFL6hM9VZ7Q==}
+    peerDependencies:
+      '@bentley/itwin-client': ^2.19.28
+      '@bentley/telemetry-client': ^2.19.28
+    dependencies:
+      '@bentley/bentleyjs-core': 2.19.28
+      '@bentley/telemetry-client': 2.19.28
     dev: true
 
   /@bentley/usage-logging-client/2.19.28_@bentley+itwin-client@2.19.28:
@@ -3820,7 +3841,7 @@ packages:
     dev: true
 
   /@itwin/core-bentley/3.0.0-dev.185:
-    resolution: {integrity: sha512-W+R80ZFC+d+0bXp7wGht7oDuCou2l/gHHP+uvy0lZUY3WnPq71LCAKpCzrUVcGusM41bCumoavWnW/xGAt/0hg==}
+    resolution: {integrity: sha1-LLUSBQv4r9zpk5+lcmfOAayualo=}
     dev: true
 
   /@itwin/core-common/3.0.0_162f3d5152e7671a08a264c69178e997:

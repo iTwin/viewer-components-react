@@ -12,10 +12,10 @@
               "schemaName": "ClassificationSystems",
               "classNames": [
                 "ClassificationSystem"
-              ]
+              ],
+              "arePolymorphic": true
             }
           ],
-          "arePolymorphic": true,
           "groupByClass": false,
           "groupByLabel": false
         }
@@ -27,19 +27,19 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "ClassificationSystems",
-            "classNames": [
-              "ClassificationSystemOwnsClassificationTable"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "ClassificationSystems",
-            "classNames": [
-              "ClassificationTable"
-            ]
-          },
-          "requiredDirection": "Forward",
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "ClassificationSystems",
+                "className": "ClassificationSystemOwnsClassificationTable"
+              },
+              "targetClass": {
+                "schemaName": "ClassificationSystems",
+                "className": "ClassificationTable"
+              },
+              "direction": "Forward"
+            }
+          ],
           "groupByClass": false,
           "groupByLabel": false,
           "doNotSort": true
@@ -52,19 +52,19 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "BisCore",
-            "classNames": [
-              "ModelModelsElement"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "BisCore",
-            "classNames": [
-              "Model"
-            ]
-          },
-          "requiredDirection": "Backward",
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "BisCore",
+                "className": "ModelModelsElement"
+              },
+              "targetClass": {
+                "schemaName": "BisCore",
+                "className": "Model"
+              },
+              "direction": "Backward"
+            }
+          ],
           "groupByClass": false,
           "groupByLabel": false,
           "hideNodesInHierarchy": true
@@ -77,19 +77,19 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "BisCore",
-            "classNames": [
-              "ModelContainsElements"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "ClassificationSystems",
-            "classNames": [
-              "Classification"
-            ]
-          },
-          "requiredDirection": "Forward",
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "BisCore",
+                "className": "ModelContainsElements"
+              },
+              "targetClass": {
+                "schemaName": "ClassificationSystems",
+                "className": "Classification"
+              },
+              "direction": "Forward"
+            }
+          ],
           "groupByClass": false,
           "groupByLabel": false
         }
@@ -101,19 +101,19 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "ClassificationSystems",
-            "classNames": [
-              "ClassificationOwnsSubClassifications"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "ClassificationSystems",
-            "classNames": [
-              "Classification"
-            ]
-          },
-          "requiredDirection": "Forward",
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "ClassificationSystems",
+                "className": "ClassificationOwnsSubClassifications"
+              },
+              "targetClass": {
+                "schemaName": "ClassificationSystems",
+                "className": "Classification"
+              },
+              "direction": "Forward"
+            }
+          ],
           "groupByClass": false,
           "groupByLabel": false
         }
@@ -125,19 +125,19 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "BisCore",
-            "classNames": [
-              "GeometricElement3dHasTypeDefinition"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "BisCore",
-            "classNames": [
-              "PhysicalElement"
-            ]
-          },
-          "requiredDirection": "Backward",
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "BisCore",
+                "className": "GeometricElement3dHasTypeDefinition"
+              },
+              "targetClass": {
+                "schemaName": "BisCore",
+                "className": "PhysicalElement"
+              },
+              "direction": "Backward"
+            }
+          ],
           "groupByClass": false,
           "groupByLabel": false
         }
@@ -149,19 +149,19 @@
       "specifications": [
         {
           "specType": "RelatedInstanceNodes",
-          "relationships": {
-            "schemaName": "ClassificationSystems",
-            "classNames": [
-              "ElementHasClassifications"
-            ]
-          },
-          "relatedClasses": {
-            "schemaName": "BisCore",
-            "classNames": [
-              "Element"
-            ]
-          },
-          "requiredDirection": "Backward",
+          "relationshipPaths": [
+            {
+              "relationship": {
+                "schemaName": "ClassificationSystems",
+                "className": "ElementHasClassifications"
+              },
+              "targetClass": {
+                "schemaName": "BisCore",
+                "className": "Element"
+              },
+              "direction": "Backward"
+            }
+          ],
           "groupByClass": false,
           "groupByLabel": false
         }
