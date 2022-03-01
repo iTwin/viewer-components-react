@@ -21,8 +21,22 @@
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
-    > .search-apply {
-      justify-self: right;
+
+    .radio-group-tile {
+      display: flex;
+      justify-content: center;
+    }
+
+    .search-form {
+      display: flex;
+      flex-direction: column;
+      gap: $iui-baseline;
+      margin-top: $iui-baseline;
+      > .search-actions {
+        display: flex;
+        justify-content: end;
+        gap: $iui-s;
+      }
     }
   }
 }

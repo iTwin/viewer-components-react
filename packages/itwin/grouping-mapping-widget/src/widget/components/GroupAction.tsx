@@ -11,7 +11,7 @@ import {
   Presentation,
 } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Button, Fieldset, InputGroup, LabeledInput, LabeledTextarea, Radio, Small, toaster } from "@itwin/itwinui-react";
+import { Button, Fieldset, IconButton, RadioTileGroup, LabeledInput, LabeledTextarea, ProgressRadial, Radio, RadioTile, Small, toaster, Tooltip, Text } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
 import { fetchIdsFromQuery, handleError, handleInputChange, WidgetHeader } from "./utils";
@@ -28,6 +28,7 @@ import {
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
+import { SvgCursor, SvgInfo, SvgSearch } from "@itwin/itwinui-icons-react";
 
 interface GroupActionProps {
   iModelId: string;
@@ -65,6 +66,11 @@ const GroupAction = ({
       target: { value },
     } = event;
     setGroupByType(value);
+    Presentation.selection.clearSelection(
+      "GroupingMappingWidget",
+      iModelConnection,
+    );
+    setQuery("");
   };
 
   useEffect(() => {
@@ -74,8 +80,8 @@ const GroupAction = ({
         selectionProvider: ISelectionProvider,
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-        const query = `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-          }`;
+        const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
+          }` : "";
         setSimpleQuery(query);
       },
     );
@@ -91,6 +97,8 @@ const GroupAction = ({
         if (!query || query === "") {
           return;
         }
+
+        setIsLoading(true);
         const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
         const resolvedHiliteIds = await visualizeElementsById(
           ids,
@@ -100,6 +108,8 @@ const GroupAction = ({
         await zoomToElements(resolvedHiliteIds);
       } catch {
         toaster.negative("Sorry, we have failed to generate a valid query. 😔");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -112,6 +122,57 @@ const GroupAction = ({
       iModelConnection,
     );
   }, [iModelConnection]);
+
+  const isWrappedInQuotes = (text: string) => {
+    return text.startsWith(`"`) && text.endsWith(`"`)
+  }
+  // Temporary until ECViews become available for use.
+  const generateSearchQuery = (searchQuery: string[]) => {
+    const generatedSearchQuery = searchQuery.length > 0 ? `SELECT
+      be.ecinstanceid
+    FROM
+      generic.physicalobject be
+      JOIN
+        biscore.geometricelement3disincategory ce
+        ON be.ecinstanceid = ce.sourceecinstanceid
+      JOIN
+        bis.ELEMENT de
+        ON ce.targetecinstanceid = de.ecinstanceid
+    WHERE
+      (${searchQuery.map((token, index) =>
+      `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+      de.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
+    ).join(" ")}
+      )
+    UNION
+    SELECT
+      de.ecinstanceid
+    FROM
+      biscore.geometricelement3d AS de
+      JOIN
+        ecdbmeta.ecclassdef AS be
+        ON de.ecclassid = be.ecinstanceid
+    WHERE
+      (${searchQuery.map((token, index) =>
+      `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+      be.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
+    ).join(" ")}
+      )
+    UNION
+    SELECT
+      be.ecinstanceid
+    FROM
+      generic.physicalobject be
+    WHERE
+      (${searchQuery.map((token, index) =>
+      `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+      be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
+    ).join(" ")}
+      )` : "";
+    console.log(generatedSearchQuery.trim())
+    setQuery(generatedSearchQuery.trim());
+
+  };
 
   const save = useCallback(async () => {
     if (!validator.allValid()) {
@@ -234,22 +295,25 @@ const GroupAction = ({
           />
         </Fieldset>
         <Fieldset legend='Group By' className='query-builder-container'>
-          <InputGroup
+          <RadioTileGroup
+            className="radio-group-tile"
             required>
-            <Radio
+            <RadioTile
               name={"groupby"}
+              icon={<SvgCursor />}
               onChange={changeGroupByType}
               defaultChecked
               value={"Selection"}
               label={"Selection"}
             />
-            <Radio
+            <RadioTile
+              icon={<SvgSearch />}
               name={"groupby"}
               onChange={changeGroupByType}
               value={"Search"}
               label={"Search"}
             />
-          </InputGroup>
+          </RadioTileGroup>
           {groupByType === "Selection" ?
             <GroupQueryBuilderContext.Provider
               value={{
@@ -263,18 +327,26 @@ const GroupAction = ({
             >
               <GroupQueryBuilderContainer />
             </GroupQueryBuilderContext.Provider> :
-            <>
+            <div className="search-form">
+              <Text>Generate a query by searching with words. Words wrapped in double quotes will be considered a required search criteria.</Text>
               <LabeledTextarea
-                label='Search'
+                label="Search"
+                required
                 value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)} />
-              <div className="search-apply">
-                <Button>Apply</Button>
+                onChange={(event) => setSearchInput(event.target.value)}
+                disabled={isLoading}
+                placeholder={`ex: wall curtain "panel" facade`} />
+              <div className="search-actions">
+                <Button disabled={isLoading} onClick={() => generateSearchQuery(searchInput ? searchInput.split(" ") : [])}>Apply</Button>
+                <Button disabled={isLoading} onClick={() => {
+                  setQuery("");
+                  setSearchInput("")
+                }}>Clear</Button>
               </div>
-            </>
+            </div>
           }
         </Fieldset>
-      </div>
+      </div >
       <ActionPanel
         onSave={async () => {
           await save();
