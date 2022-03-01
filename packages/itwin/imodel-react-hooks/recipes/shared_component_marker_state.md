@@ -10,9 +10,9 @@ You'll also need some stable accessors that return the current state (which is b
 
 ```tsx
 import React from "react";
-import { Marker, Decorator, DecorateContext } from "@bentley/imodeljs-frontend";
-import { Point3d, Point2d } from "@bentley/geometry-core";
-import { ExpandableBlock, LabeledInput } from "@bentley/ui-core";
+import { Marker, Decorator, DecorateContext } from "@itwin/core-frontend";
+import { Point3d, Point2d } from "@itwin/core-geometry";
+import { ExpandableBlock, LabeledInput } from "@itwin/itwinui-react";
 import myPinImageUrl from "pin_image.svg";
 
 interface PinProps {
@@ -129,9 +129,9 @@ we can reference all of our React state anywhere in the marker logic naturally.
 
 ```tsx
 import React from "react";
-import { useMarker } from "@bentley/imodel-react-hooks";
-import { Point3d, Point2d } from "@bentley/geometry-core";
-import { ExpandableBlock, LabeledInput } from "@bentley/ui-core";
+import { useMarker } from "@itwin/imodel-react-hooks";
+import { Point3d, Point2d } from "@itwin/core-geometry";
+import { ExpandableBlock, LabeledInput } from "@itwin/itwinui-react";
 import myPinImageUrl from "pin_image.svg";
 
 interface PinProps {
@@ -190,7 +190,7 @@ class MyMarker extends Marker {
 We provide a small `getSuper(this)` utility, which works like the `super` keyword.
 
 ```tsx
-import { getSuper } from "@bentley/imodel-react-hooks";
+import { getSuper } from "@itwin/imodel-react-hooks";
 
 useMarker({
   onMouseEnter() {

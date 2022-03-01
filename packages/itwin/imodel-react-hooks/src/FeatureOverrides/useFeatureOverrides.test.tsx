@@ -11,7 +11,7 @@ import { FeatureOverrideReactProvider, FeatureSymbologyContext, useFeatureOverri
 
 jest.mock("@bentley/bentleyjs-core");
 
-jest.mock("@bentley/imodeljs-frontend", () => ({
+jest.mock("@itwin/core-frontend", () => ({
   IModelApp: {
     viewManager: {
       __vp: {
@@ -30,7 +30,7 @@ jest.mock("@bentley/imodeljs-frontend", () => ({
       },
     },
   },
-  FeatureOverrideProvider: class FeatureOverrideProvider {},
+  FeatureOverrideProvider: class FeatureOverrideProvider { },
 }));
 
 const register = jest.fn();

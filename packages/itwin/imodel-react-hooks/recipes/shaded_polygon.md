@@ -11,9 +11,9 @@ With `useMarker`, you simply pass your implementation for the method override as
 
 ```tsx
 import React from "react";
-import { useMarker } from "@bentley/imodel-react-hooks";
-import { IModelApp } from "@bentley/imodeljs-frontend";
-import { Point3d } from "@bentley/geometry-core";
+import { useMarker } from "@itwin/imodel-react-hooks";
+import { IModelApp } from "@itwin/core-frontend";
+import { Point3d } from "@itwin/core-geometry";
 
 interface Props {
   breakPt: Point3d;

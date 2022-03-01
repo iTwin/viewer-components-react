@@ -12,7 +12,7 @@ don't want to rerender often.
 
 ```tsx
 import React, { useState } from "react";
-import { Point2d, Point3d } from "@bentley/geometry-core";
+import { Point2d, Point3d } from "@itwin/core-geometry";
 
 const MyJsxMarker = (props: { worldLocation: Point3d }) => {
   const [isHovered, setIsHovered] = useState(false);

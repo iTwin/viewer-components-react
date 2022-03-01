@@ -13,8 +13,8 @@ import { IModelJsMarker, useMarker } from "./useMarker";
 
 jest.mock("@bentley/bentleyjs-core");
 
-jest.mock("@bentley/imodeljs-frontend", () => {
-  const actual = jest.requireActual("@bentley/imodeljs-frontend");
+jest.mock("@itwin/core-frontend", () => {
+  const actual = jest.requireActual("@itwin/core-frontend");
   return {
     ...actual,
     IModelApp: {
