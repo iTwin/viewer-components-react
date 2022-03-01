@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/breakdown-trees-react",
-      "comment": "Fix test script",
+      "comment": "#797363 updated tree schemas",
       "type": "patch"
     }
   ],

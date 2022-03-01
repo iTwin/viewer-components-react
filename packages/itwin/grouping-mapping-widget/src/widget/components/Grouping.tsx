@@ -2,7 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { CellProps } from "react-table";
+import type {
+  ActionType,
+  CellProps,
+  TableInstance,
+  TableState,
+} from "react-table";
+import {
+  actions,
+} from "react-table";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, {
   useCallback,
@@ -21,6 +29,7 @@ import {
   MenuItem,
   ProgressRadial,
   Table,
+  toaster,
 } from "@itwin/itwinui-react";
 import {
   SvgAdd,
@@ -39,7 +48,7 @@ import {
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { fetchIdsFromQuery, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, handleError, WidgetHeader } from "./utils";
 import GroupAction from "./GroupAction";
 
 export type Group = CreateTypeFromInterface<GroupReportingAPI>;
@@ -66,7 +75,8 @@ const fetchGroups = async (
     setIsLoading(true);
     const groups = await reportingClientApi.getGroups(iModelId, mappingId);
     setGroups(groups.groups ?? []);
-  } catch {
+  } catch (error: any) {
+    handleError(error.status);
   } finally {
     setIsLoading(false);
   }
@@ -101,6 +111,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     setIsLoading,
   );
   const hilitedElements = useRef<Map<string, string[]>>(new Map());
+  const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
 
   const refresh = useCallback(async () => {
@@ -248,26 +259,96 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             visualizeElements(hilitedIds, stringToColor(row.id ?? ""));
             allIds = allIds.concat(hilitedIds);
           } else {
-            const ids: string[] = await fetchIdsFromQuery(
-              row.query ?? "",
-              iModelConnection,
-            );
-            const hiliteIds = await visualizeElementsById(
-              ids,
-              stringToColor(row.id ?? ""),
-              iModelConnection,
-            );
-            hilitedElements.current.set(row.query ?? "", hiliteIds);
+            try {
+              const ids: string[] = await fetchIdsFromQuery(
+                row.query ?? "",
+                iModelConnection,
+              );
+              if (ids.length === 0) {
+                toaster.warning(`${row.groupName}'s query is valid but produced no results.`);
+              }
+              const hiliteIds = await visualizeElementsById(
+                ids,
+                stringToColor(row.id ?? ""),
+                iModelConnection,
+              );
+              hilitedElements.current.set(row.query ?? "", hiliteIds);
 
-            allIds = allIds.concat(ids);
+              allIds = allIds.concat(ids);
+            } catch {
+              const index = groups.findIndex((group) => group.id === row.id);
+              setSelectedRows((rowIds) => {
+                const selectedRowIds = { ...rowIds };
+                delete selectedRowIds[index];
+                return selectedRowIds;
+              });
+              toaster.negative(`Could not load ${row.groupName}. Query could not be resolved.`);
+
+            }
           }
         }
         await zoomToElements(allIds);
         setLoadingQuery(false);
       }
     },
-    [iModelConnection],
+    [iModelConnection, groups],
   );
+
+  const controlledState = useCallback(
+    (state) => {
+      return {
+        ...state,
+        selectedRowIds: { ...selectedRows },
+      };
+    },
+    [selectedRows],
+  );
+
+  const propertyMenuGoBack = useCallback(async () => {
+    clearEmphasizedElements();
+    setGroupsView(GroupsView.GROUPS);
+    await refresh();
+  }, [refresh]);
+
+  const tableStateReducer = (
+    newState: TableState,
+    action: ActionType,
+    _previousState: TableState,
+    instance?: TableInstance,
+  ): TableState => {
+    switch (action.type) {
+      case actions.toggleRowSelected: {
+        const newSelectedRows = {
+          ...selectedRows,
+        };
+        if (action.value) {
+          newSelectedRows[action.id] = true;
+        } else {
+          delete newSelectedRows[action.id];
+        }
+        setSelectedRows(newSelectedRows);
+        newState.selectedRowIds = newSelectedRows;
+        break;
+      }
+      case actions.toggleAllRowsSelected: {
+        if (!instance?.rowsById) {
+          break;
+        }
+        const newSelectedRows = {} as Record<string, boolean>;
+        if (action.value) {
+          Object.keys(instance.rowsById).forEach(
+            (id) => (newSelectedRows[id] = true),
+          );
+        }
+        setSelectedRows(newSelectedRows);
+        newState.selectedRowIds = newSelectedRows;
+        break;
+      }
+      default:
+        break;
+    }
+    return newState;
+  };
 
   switch (groupsView) {
     case GroupsView.ADD:
@@ -301,11 +382,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           iModelId={iModelId}
           mappingId={mapping.id ?? ""}
           group={selectedGroup}
-          goBack={async () => {
-            clearEmphasizedElements();
-            setGroupsView(GroupsView.GROUPS);
-            await refresh();
-          }}
+          goBack={propertyMenuGoBack}
         />
       ) : null;
     default:
@@ -340,6 +417,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               onSelect={onSelect}
               isLoading={isLoading}
               isRowDisabled={() => isLoadingQuery}
+              stateReducer={tableStateReducer}
+              useControlledState={controlledState}
             />
           </div>
           <DeleteModal

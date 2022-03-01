@@ -2,11 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/icon/index';
 
-.database-info-icon {
-  @include iui-icons-default();
-  @include themed {
-    fill: t(iui-icons-color-actionable);
-  }
-}
+const fs = require("fs");
+const path = require("path");
+fs.copyFileSync(path.join(__dirname, "setup-tests.js"), path.join(process.cwd(), "lib", "cjs", "test", "setup.js"));

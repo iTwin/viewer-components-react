@@ -3,24 +3,24 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+
 .geotools-geoaddresssearch__container {
-  display: flex;        // Thats important bit that allow the input field and button to be aligned
-  margin-top: 4.4px;
   width: 300px
 }
 
 .geotools-geoaddresssearch__button {
   background-color: transparent;
-  margin-top: 8px;
-  position: relative;
-  right: 20px;        // Move the button inside the input field
-  width: 0px;         // Otherwise  a gap of the size of the button appears on the right.
+  position: absolute;
+  top: 6px;
+  right: 5px;
+  border: none;
+  z-index: 1;   // Make it display over the input
 }
 
 .geotools-geoaddresssearch__autosuggest {
   width: 100%;
   .uicore-autosuggest__input {
-    padding: 1.3px 20px 1.3px 5px;    //right padding avoid input text to be overlaid with the button
+    padding: 1.3px 30px 1.3px 5px;    //right padding avoid input text to be overlaid with the button
   }
 }
 

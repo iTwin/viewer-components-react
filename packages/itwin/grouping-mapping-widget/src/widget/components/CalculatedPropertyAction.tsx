@@ -4,7 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
 import type {
-  SelectOption} from "@itwin/itwinui-react";
+  SelectOption,
+} from "@itwin/itwinui-react";
 import {
   Fieldset,
   LabeledInput,
@@ -21,7 +22,7 @@ import {
   BboxDimensionsDecorator,
 } from "../../decorators/BboxDimensionsDecorator";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { WidgetHeader } from "./utils";
+import { handleError, WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
 import type { CalculatedProperty } from "./CalculatedPropertyTable";
@@ -66,11 +67,17 @@ const CalculatedPropertyAction = ({
   }, []);
 
   useEffect(() => {
+    if (ids.length === 0) {
+      return;
+    }
     visualizeElements([ids[0]], "red");
     void zoomToElements([ids[0]]);
   }, [ids]);
 
   useEffect(() => {
+    if (ids.length === 0) {
+      return;
+    }
     const setContext = async () => {
       if (bboxDecorator) {
         await bboxDecorator.setContext(ids[0]);
@@ -90,7 +97,6 @@ const CalculatedPropertyAction = ({
     }
   }, [bboxDecorator, inferredSpatialData, type]);
 
-  // TODO ERRORED STATE
   const onSave = async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
@@ -119,10 +125,12 @@ const CalculatedPropertyAction = ({
           calculatedProperty,
         );
       await returnFn();
-    } catch {
+    } catch (error: any) {
+      handleError(error.status);
       setIsLoading(false);
     }
   };
+
   const getSpatialData = (value: string) =>
     inferredSpatialData?.has(
       BboxDimension[value as keyof typeof BboxDimension],
@@ -133,6 +141,7 @@ const CalculatedPropertyAction = ({
           ?.toPrecision(4)}m`}
       </div>
     );
+
   return (
     <>
       <WidgetHeader

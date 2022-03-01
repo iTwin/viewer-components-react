@@ -6,7 +6,8 @@ import type { PresentationPropertyDataProvider } from "@itwin/presentation-compo
 import type { InstanceKey, PropertiesField } from "@itwin/presentation-common";
 import type {
   Primitives,
-  PropertyRecord} from "@itwin/appui-abstract";
+  PropertyRecord,
+} from "@itwin/appui-abstract";
 import {
   PropertyValueFormat,
 } from "@itwin/appui-abstract";
@@ -84,7 +85,7 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
 
@@ -299,7 +300,7 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
 
@@ -391,7 +392,7 @@ export class QueryBuilder {
       ? `${baseClassName}.Element.id`
       : `${baseClassName}.ECInstanceId`;
 
-    let queryString = `SELECT ${baseIdName} FROM ${baseClassName}`;
+    let queryString = `SELECT ${baseIdName}${baseClass.isAspect ? " ECInstanceId" : ""} FROM ${baseClassName}`;
 
     if (this.query.classes.length > 1) {
       for (let i = 1; i < this.query.classes.length; i++) {

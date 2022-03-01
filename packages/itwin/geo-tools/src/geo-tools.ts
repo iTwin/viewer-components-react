@@ -3,6 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-const fs = require("fs");
-const path = require("path");
-fs.copyFileSync(path.join(__dirname, "setup-tests.js"), path.join(process.cwd(), "lib", "test", "setup.js"));
+export * from "./components/GeoAddressSearch";
+export * from "./GeoToolsItemDef";
+export * from "./GeoTools";
+export * from "./AddressProvider";
+export * from "./IModelGeoView";
+export * from "./GeoToolsUiItemsProvider";

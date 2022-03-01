@@ -23,7 +23,7 @@ import type { CellProps } from "react-table";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { MappingReportingAPI } from "../../api/generated/api";
 import type { CreateTypeFromInterface } from "../utils";
-import { onSelectionChanged, WidgetHeader } from "./utils";
+import { handleError, onSelectionChanged, WidgetHeader } from "./utils";
 import "./Mapping.scss";
 import { reportingClientApi } from "../../api/reportingClient";
 import DeleteModal from "./DeleteModal";
@@ -50,7 +50,8 @@ const fetchMappings = async (
     setIsLoading(true);
     const mappings = await reportingClientApi.getMappings(iModelId);
     setMappings(mappings);
-  } catch {
+  } catch (error: any) {
+    handleError(error.status);
   } finally {
     setIsLoading(false);
   }

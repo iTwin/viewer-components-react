@@ -1,7 +1,8 @@
 [
   {
     "policyName": "deprecated",
-    "definitionName": "individualVersion"
+    "definitionName": "individualVersion",
+    "exemptFromRushChange": true
   },
   {
     "policyName": "itwin-tree-widget",
@@ -29,7 +30,7 @@
     "lockedMajor": 0
   },
   {
-    "policyName": "geo-tools",
+    "policyName": "itwin-geo-tools",
     "definitionName": "individualVersion",
     "lockedMajor": 0
   },

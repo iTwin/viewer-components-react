@@ -2,6 +2,33 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.2.1",
+      "date": "Tue, 15 Feb 2022 15:51:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed aspect element id's in group queries not being picked up by extractor"
+          },
+          {
+            "comment": "Improved error handling and small tweaks to import mapping wizard"
+          },
+          {
+            "comment": "This adds a check for AbstractZoneLocation.CenterLeft (4) in GroupinngMappingWidget so that the widget will be returned when called by UiItemsProviders in UI 1.0 contexts. This does not affect UI 2.0 uses."
+          },
+          {
+            "comment": "Fixed property menu overflow"
+          },
+          {
+            "comment": "Changed property menu icon"
+          },
+          {
+            "comment": "Fixed missing struct properties in group properties"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@itwin/grouping-mapping-widget_v0.2.0",
       "date": "Fri, 04 Feb 2022 00:43:35 GMT",
