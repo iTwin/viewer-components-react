@@ -31,7 +31,8 @@
     "clean": "rimraf lib .rush/temp/package-deps*.json",
     "rebuild": "npm run clean && npm run build",
     "cover": "",
-    "lint": "",
+    "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
+    "lint:fix": "npm run lint -- --fix",
     "start": "",
     "test": "jest"
   },
@@ -59,6 +60,7 @@
     "@itwin/core-geometry": "^3.0.0",
     "@itwin/core-common": "^3.0.0",
     "@itwin/core-frontend": "^3.0.0",
+    "@itwin/eslint-plugin": "^3.0.0",
     "@testing-library/react": "^9.1.4",
     "@types/jest": "^24.9.0",
     "@types/react": "^17.0.19",
@@ -76,9 +78,18 @@
   "peerDependencies": {
     "@itwin/core-bentley": "^3.0.0",
     "@itwin/core-geometry": "^3.0.0",
-    "@itwin/core-common": "^3.0.0",
     "@itwin/core-frontend": "^3.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
+  },
+  "eslintConfig": {
+    "plugins": [
+      "@itwin"
+    ],
+    "extends": "plugin:@itwin/ui",
+    "rules": {
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/consistent-type-imports": "error"
+    }
   }
 }

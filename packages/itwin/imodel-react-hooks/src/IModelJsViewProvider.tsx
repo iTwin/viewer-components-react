@@ -3,11 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { DecorateContext, Decorator, IModelApp, Viewport } from "@itwin/core-frontend";
+import type { DecorateContext, Decorator, Viewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { IModelJsMarker } from "./Marker";
-import { makeContextWithProviderRequired } from "./utils";
+import type { IModelJsMarker } from "./Marker/useMarker";
+import { makeContextWithProviderRequired } from "./utils/react-context";
 
 /**
  * @internal the MarkerDecorationContext is for internal use only and
@@ -129,7 +130,7 @@ export const IModelJsViewProvider = ({
     ]
   );
 
-  //clear order list before rendering?
+  // clear order list before rendering?
 
   return (
     <MarkerDecorationContext.Provider value={contextState}>

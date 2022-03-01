@@ -3,13 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { Logger } from "@itwin/core-bentley";
-import { FeatureOverrideProvider, FeatureSymbology, IModelApp, Viewport } from "@itwin/core-frontend";
+import type { FeatureOverrideProvider, FeatureSymbology, Viewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useCallback } from "react";
 
-import { useOnMountInRenderOrder } from "../utils";
+import { useOnMountInRenderOrder } from "../utils/basic-hooks";
 import { makeContextWithProviderRequired } from "../utils/react-context";
 
 export type FeatureOverrider = (
@@ -35,7 +35,7 @@ export interface FeatureSymbologyContext {
 
 /** @internal only exported for testing right now */
 export const FeatureSymbologyContext = makeContextWithProviderRequired<
-  FeatureSymbologyContext
+FeatureSymbologyContext
 >("FeatureSymbologyContext");
 
 /** useFeatureOverrides allows components to declare and override features in a cascade,
@@ -125,7 +125,7 @@ export const FeatureOverrideReactProvider = ({
         }
       }
       IModelApp.viewManager.onViewOpen.removeListener(attach);
-    }
+    };
   }, [impl, viewFilter]);
 
   const invalidate = useCallback(() => {
