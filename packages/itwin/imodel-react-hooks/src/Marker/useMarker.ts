@@ -3,14 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point2d, Range1dProps, WritableXAndY } from "@bentley/geometry-core";
-import { ColorDef } from "@bentley/imodeljs-common";
-import { Marker, MarkerImage } from "@bentley/imodeljs-frontend";
-import React, { useContext, useEffect, useMemo, useRef } from "react";
+import type { Range1dProps, WritableXAndY } from "@itwin/core-geometry";
+import { Point2d } from "@itwin/core-geometry";
+import type { ColorDef } from "@itwin/core-common";
+import type { MarkerImage } from "@itwin/core-frontend";
+import { Marker } from "@itwin/core-frontend";
+import type React from "react";
+import { useContext, useEffect, useMemo, useRef } from "react";
 import ReactDOM from "react-dom";
 
 import { MarkerDecorationContext } from "../IModelJsViewProvider";
-import { Rebind } from "../utils";
+import type { Rebind } from "../utils/types";
 import { useOnMountInRenderOrder } from "../utils/basic-hooks";
 
 export class IModelJsMarker extends Marker {
@@ -29,15 +32,15 @@ type MakeRequired<T, K extends keyof T> = Partial<Omit<T, K>> & Pick<T, K>;
  * Protected fields are exposed as optional public fields here
  */
 export type UseMarkerOptions<T extends {} = {}> = Omit<
-  MakeRequired<Rebind<Marker, Marker & T>, "worldLocation">,
-  | "_scaleFactor"
-  | "_scaleFactorRange"
-  | "_isHilited"
-  | "_hiliteColor"
-  | "image"
-  | "size"
-  | "imageSize"
-  | "imageOffset"
+MakeRequired<Rebind<Marker, Marker & T>, "worldLocation">,
+| "_scaleFactor"
+| "_scaleFactorRange"
+| "_isHilited"
+| "_hiliteColor"
+| "image"
+| "size"
+| "imageSize"
+| "imageOffset"
 > & {
   /** Establish a range of scale factors to increases and decrease the size of this Marker based on its distance from the camera.
    * @param range The minimum and maximum scale factors to be applied to the size of this Marker based on its distance from the camera. `range.Low` is the scale factor

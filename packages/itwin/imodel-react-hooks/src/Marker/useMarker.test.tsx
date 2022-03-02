@@ -3,22 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@bentley/geometry-core";
-import { Viewport } from "@bentley/imodeljs-frontend";
+import { Point3d } from "@itwin/core-geometry";
+import { Viewport } from "@itwin/core-frontend";
 import { render } from "@testing-library/react";
 import React, { useContext } from "react";
 
-import {
-  IModelJsViewProvider,
-  MarkerDecoration,
-  MarkerDecorationContext,
-} from "../IModelJsViewProvider";
+import { IModelJsViewProvider, MarkerDecoration, MarkerDecorationContext } from "../IModelJsViewProvider";
 import { IModelJsMarker, useMarker } from "./useMarker";
 
 jest.mock("@bentley/bentleyjs-core");
 
-jest.mock("@bentley/imodeljs-frontend", () => {
-  const actual = jest.requireActual("@bentley/imodeljs-frontend");
+jest.mock("@itwin/core-frontend", () => {
+  const actual = jest.requireActual("@itwin/core-frontend");
   return {
     ...actual,
     IModelApp: {

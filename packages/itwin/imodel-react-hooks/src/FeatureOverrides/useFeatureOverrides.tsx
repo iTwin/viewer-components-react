@@ -3,18 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
-import { Logger } from "@bentley/bentleyjs-core";
-import {
-  FeatureOverrideProvider,
-  FeatureSymbology,
-  IModelApp,
-  Viewport,
-} from "@bentley/imodeljs-frontend";
+import type { FeatureOverrideProvider, FeatureSymbology, Viewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useCallback } from "react";
 
-import { useOnMountInRenderOrder } from "../utils";
+import { useOnMountInRenderOrder } from "../utils/basic-hooks";
 import { makeContextWithProviderRequired } from "../utils/react-context";
 
 export type FeatureOverrider = (
@@ -113,23 +107,32 @@ export const FeatureOverrideReactProvider = ({
   );
 
   useEffect(() => {
-    const attach = () =>
-      IModelApp.viewManager.forEachViewport((vp) => {
+    const attach = () => {
+      for (const vp of IModelApp.viewManager) {
         if (!viewFilter || viewFilter(vp)) {
-          vp.featureOverrideProvider = impl;
+          vp.addFeatureOverrideProvider(impl);
         }
-      });
+      }
+    };
     attach();
-    const unsubViewOpen = IModelApp.viewManager.onViewOpen.addListener(attach);
-    return unsubViewOpen;
+
+    IModelApp.viewManager.onViewOpen.addListener(attach);
+    return () => {
+      for (const vp of IModelApp.viewManager) {
+        if (!viewFilter || viewFilter(vp)) {
+          vp.dropFeatureOverrideProvider(impl);
+        }
+      }
+      IModelApp.viewManager.onViewOpen.removeListener(attach);
+    };
   }, [impl, viewFilter]);
 
   const invalidate = useCallback(() => {
-    IModelApp.viewManager.forEachViewport((v) => {
-      if (!viewFilter || viewFilter(v)) {
-        v.setFeatureOverrideProviderChanged();
+    for (const vp of IModelApp.viewManager) {
+      if (!viewFilter || viewFilter(vp)) {
+        vp.setFeatureOverrideProviderChanged();
       }
-    });
+    }
   }, [viewFilter]);
 
   const state = useMemo<FeatureSymbologyContext>(
