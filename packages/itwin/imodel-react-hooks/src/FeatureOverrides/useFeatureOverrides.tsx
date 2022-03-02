@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Logger } from "@itwin/core-bentley";
 import type { FeatureOverrideProvider, FeatureSymbology, Viewport } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import React, { useContext, useEffect, useMemo, useRef } from "react";
@@ -35,7 +34,7 @@ export interface FeatureSymbologyContext {
 
 /** @internal only exported for testing right now */
 export const FeatureSymbologyContext = makeContextWithProviderRequired<
-FeatureSymbologyContext
+  FeatureSymbologyContext
 >("FeatureSymbologyContext");
 
 /** useFeatureOverrides allows components to declare and override features in a cascade,

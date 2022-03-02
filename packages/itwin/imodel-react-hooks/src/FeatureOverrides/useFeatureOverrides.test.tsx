@@ -9,8 +9,6 @@ import React from "react";
 
 import { FeatureOverrideReactProvider, FeatureSymbologyContext, useFeatureOverrides } from "./useFeatureOverrides";
 
-jest.mock("@itwin/core-bentley");
-
 jest.mock("@itwin/core-frontend", () => ({
   IModelApp: {
     viewManager: {
