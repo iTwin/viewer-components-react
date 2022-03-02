@@ -1,6 +1,17 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Wed, 19 Jan 2022 17:39:40 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Mar 2022 21:38:51 GMT and should not be manually modified.
+
+## 0.6.0
+Wed, 02 Mar 2022 21:38:51 GMT
+
+### Minor changes
+
+- Bump to official iTwin.js 3.0 release
+
+### Patches
+
+- Update license year
 
 ## 0.1.2
 Wed, 19 Jan 2022 17:39:40 GMT

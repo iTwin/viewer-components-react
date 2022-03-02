@@ -1,6 +1,14 @@
 # Change Log - @itwin/breakdown-trees-react
 
-This log was last generated on Thu, 17 Feb 2022 17:30:48 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Mar 2022 21:38:51 GMT and should not be manually modified.
+
+## 0.3.2
+Wed, 02 Mar 2022 21:38:51 GMT
+
+### Patches
+
+- update types for react & react-dom to ^17.x
+- #797363 updated tree schemas
 
 ## 0.3.1
 Thu, 17 Feb 2022 17:30:48 GMT

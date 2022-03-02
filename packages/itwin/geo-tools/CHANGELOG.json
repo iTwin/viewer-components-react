@@ -2,6 +2,18 @@
   "name": "@itwin/geo-tools-react",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@itwin/geo-tools-react_v0.2.1",
+      "date": "Wed, 02 Mar 2022 21:38:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update React & React-dom to match same major"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@itwin/geo-tools-react_v0.2.0",
       "date": "Thu, 17 Feb 2022 17:30:48 GMT",

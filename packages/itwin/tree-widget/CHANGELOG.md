@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 04 Feb 2022 00:43:35 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Mar 2022 21:38:51 GMT and should not be manually modified.
+
+## 0.3.0
+Wed, 02 Mar 2022 21:38:51 GMT
+
+### Minor changes
+
+- Add `IModelContentTree`
 
 ## 0.2.1
 Fri, 04 Feb 2022 00:43:35 GMT
