@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/geo-tools-react",
+      "comment": "Update React & React-dom to match same major",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/geo-tools-react"
+}

@@ -18,18 +18,6 @@
   },
   "projects": [
     {
-      "packageName": "@bentley/imodel-select-react",
-      "projectFolder": "packages/archive/imodel-select",
-      "versionPolicyName": "deprecated",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "@bentley/markup-frontstage-react",
-      "projectFolder": "packages/archive/markup-frontstage",
-      "versionPolicyName": "deprecated",
-      "shouldPublish": false
-    },
-    {
       "packageName": "@itwin/breakdown-trees-react",
       "projectFolder": "packages/itwin/breakdown-trees",
       "versionPolicyName": "itwin-breakdown-trees"
@@ -40,19 +28,14 @@
       "versionPolicyName": "itwin-geo-tools"
     },
     {
-      "packageName": "@bentley/imodel-content-tree-react",
-      "projectFolder": "packages/bentley/imodel-content-tree",
-      "versionPolicyName": "imodel-content-tree"
-    },
-    {
-      "packageName": "@bentley/imodel-react-hooks",
-      "projectFolder": "packages/bentley/imodel-react-hooks",
-      "versionPolicyName": "imodel-react-hooks"
-    },
-    {
       "packageName": "@itwin/grouping-mapping-widget",
       "projectFolder": "packages/itwin/grouping-mapping-widget",
       "versionPolicyName": "grouping-mapping-widget"
+    },
+    {
+      "packageName": "@itwin/imodel-react-hooks",
+      "projectFolder": "packages/itwin/imodel-react-hooks",
+      "versionPolicyName": "itwin-imodel-react-hooks"
     },
     {
       "packageName": "@itwin/measure-tools-react",
