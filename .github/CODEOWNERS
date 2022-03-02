@@ -28,8 +28,5 @@
 /packages/itwin/geo-tools  @itwin/viewer-components-reviewers @mdastous-bentley
 /common/changes/@itwin/geo-tools-react  @itwin/viewer-components-reviewers @mdastous-bentley
 
-/packages/bentley/imodel-content-tree  @itwin/viewer-components-reviewers @grigasp
-/common/changes/@bentley/imodel-content-tree-react  @itwin/viewer-components-reviewers @grigasp
-
 /packages/itwin/imodel-react-hooks  @itwin/viewer-components-reviewers @michaelbelousov
 /common/changes/@itwin/imodel-react-hooks  @itwin/viewer-components-reviewers @michaelbelousov

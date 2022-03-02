@@ -1,11 +1,11 @@
 {
-  "$schema": "../../node_modules/@bentley/presentation-common/Ruleset.schema.json",
-  "id": "imodel-content-tree/Default",
-  "supportedSchemas": {
-    "schemaNames": [
-      "BisCore"
-    ]
-  },
+  "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
+  "id": "tree-widget-react/imodel-content",
+  "requiredSchemas": [
+    {
+      "name": "BisCore"
+    }
+  ],
   "rules": [
     {
       "ruleType": "RootNodes",
@@ -16,13 +16,11 @@
           "classes": [
             {
               "schemaName": "BisCore",
-              "classNames": [
-                "Subject"
-              ]
+              "classNames": ["Subject"],
+              "arePolymorphic": false
             }
           ],
           "instanceFilter": "this.Parent = NULL",
-          "arePolymorphic": false,
           "groupByClass": false,
           "groupByLabel": false
         }
@@ -81,11 +79,9 @@
           "specType": "InstanceNodesOfSpecificClasses",
           "classes": {
             "schemaName": "BisCore",
-            "classNames": [
-              "Model"
-            ]
+            "classNames": ["Model"],
+            "arePolymorphic": true
           },
-          "arePolymorphic": true,
           "relatedInstances": [
             {
               "relationshipPath": {
@@ -111,11 +107,9 @@
           "specType": "InstanceNodesOfSpecificClasses",
           "classes": {
             "schemaName": "BisCore",
-            "classNames": [
-              "Model"
-            ]
+            "classNames": ["Model"],
+            "arePolymorphic": true
           },
-          "arePolymorphic": true,
           "relatedInstances": [
             {
               "relationshipPath": {
