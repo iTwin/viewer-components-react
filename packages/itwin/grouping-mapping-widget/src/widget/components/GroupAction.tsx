@@ -11,7 +11,7 @@ import {
   Presentation,
 } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Button, Fieldset, IconButton, RadioTileGroup, LabeledInput, LabeledTextarea, ProgressRadial, Radio, RadioTile, Small, toaster, Tooltip, Text } from "@itwin/itwinui-react";
+import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
 import { fetchIdsFromQuery, handleError, handleInputChange, WidgetHeader } from "./utils";
@@ -28,7 +28,7 @@ import {
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { SvgCursor, SvgInfo, SvgSearch } from "@itwin/itwinui-icons-react";
+import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
 
 interface GroupActionProps {
   iModelId: string;
@@ -53,7 +53,7 @@ const GroupAction = ({
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
-    PropertyRecord[]
+  PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
@@ -81,7 +81,7 @@ const GroupAction = ({
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
         const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-          }` : "";
+        }` : "";
         setSimpleQuery(query);
       },
     );
@@ -124,8 +124,8 @@ const GroupAction = ({
   }, [iModelConnection]);
 
   const isWrappedInQuotes = (text: string) => {
-    return text.startsWith(`"`) && text.endsWith(`"`)
-  }
+    return text.startsWith(`"`) && text.endsWith(`"`);
+  };
   // Temporary until ECViews become available for use.
   const generateSearchQuery = (searchQuery: string[]) => {
     const generatedSearchQuery = searchQuery.length > 0 ? `SELECT
@@ -140,9 +140,9 @@ const GroupAction = ({
         ON ce.targetecinstanceid = de.ecinstanceid
     WHERE
       (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+    `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       de.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")}
+  ).join(" ")}
       )
     UNION
     SELECT
@@ -154,9 +154,9 @@ const GroupAction = ({
         ON de.ecclassid = be.ecinstanceid
     WHERE
       (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+    `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       be.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")}
+  ).join(" ")}
       )
     UNION
     SELECT
@@ -165,11 +165,10 @@ const GroupAction = ({
       generic.physicalobject be
     WHERE
       (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+    `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")}
+  ).join(" ")}
       )` : "";
-    console.log(generatedSearchQuery.trim())
     setQuery(generatedSearchQuery.trim());
 
   };
@@ -340,7 +339,7 @@ const GroupAction = ({
                 <Button disabled={isLoading} onClick={() => generateSearchQuery(searchInput ? searchInput.split(" ") : [])}>Apply</Button>
                 <Button disabled={isLoading} onClick={() => {
                   setQuery("");
-                  setSearchInput("")
+                  setSearchInput("");
                 }}>Clear</Button>
               </div>
             </div>
