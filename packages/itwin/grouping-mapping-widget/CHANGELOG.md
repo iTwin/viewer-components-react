@@ -1,6 +1,14 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 15 Feb 2022 15:51:36 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Mar 2022 21:38:51 GMT and should not be manually modified.
+
+## 0.2.2
+Wed, 02 Mar 2022 21:38:51 GMT
+
+### Patches
+
+- Added more error handling and reduced verbosity
+- Fixed invalid query generated from aspects
 
 ## 0.2.1
 Tue, 15 Feb 2022 15:51:36 GMT
