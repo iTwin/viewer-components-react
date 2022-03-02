@@ -235,9 +235,9 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
             "ruleType": "RootNodes",
             "specifications": Array [
               Object {
-                "arePolymorphic": true,
                 "classes": Array [
                   Object {
+                    "arePolymorphic": true,
                     "classNames": Array [
                       "CompositeElement",
                     ],
@@ -250,16 +250,18 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
                 "relatedInstances": Array [
                   Object {
                     "alias": "model",
-                    "class": Object {
-                      "className": "Model",
-                      "schemaName": "BisCore",
-                    },
                     "isRequired": true,
-                    "relationship": Object {
-                      "className": "ModelContainsElements",
-                      "schemaName": "BisCore",
+                    "relationshipPath": Object {
+                      "direction": "Backward",
+                      "relationship": Object {
+                        "className": "ModelContainsElements",
+                        "schemaName": "BisCore",
+                      },
+                      "targetClass": Object {
+                        "className": "Model",
+                        "schemaName": "BisCore",
+                      },
                     },
-                    "requiredDirection": "Backward",
                   },
                 ],
                 "specType": "InstanceNodesOfSpecificClasses",
@@ -274,19 +276,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
                 "doNotSort": true,
                 "groupByClass": false,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "DistributionSystem",
-                  ],
-                  "schemaName": "DistributionSystems",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "PhysicalSystemServicesSpatialElements",
-                  ],
-                  "schemaName": "BisCore",
-                },
-                "requiredDirection": "Backward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Backward",
+                    "relationship": Object {
+                      "className": "PhysicalSystemServicesSpatialElements",
+                      "schemaName": "BisCore",
+                    },
+                    "targetClass": Object {
+                      "className": "DistributionSystem",
+                      "schemaName": "DistributionSystems",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -299,19 +301,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
                 "doNotSort": true,
                 "groupByClass": false,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "SpatialElement",
-                  ],
-                  "schemaName": "Biscore",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "DistributionSystemGroupsDistributionElements",
-                  ],
-                  "schemaName": "DistributionSystems",
-                },
-                "requiredDirection": "Forward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Forward",
+                    "relationship": Object {
+                      "className": "DistributionSystemGroupsDistributionElements",
+                      "schemaName": "DistributionSystems",
+                    },
+                    "targetClass": Object {
+                      "className": "SpatialElement",
+                      "schemaName": "Biscore",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -324,19 +326,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
                 "doNotSort": true,
                 "groupByClass": false,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "CompositeElement",
-                  ],
-                  "schemaName": "SpatialComposition",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "CompositeComposesSubComposites",
-                  ],
-                  "schemaName": "SpatialComposition",
-                },
-                "requiredDirection": "Forward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Forward",
+                    "relationship": Object {
+                      "className": "CompositeComposesSubComposites",
+                      "schemaName": "SpatialComposition",
+                    },
+                    "targetClass": Object {
+                      "className": "CompositeElement",
+                      "schemaName": "SpatialComposition",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -348,19 +350,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
               Object {
                 "groupByClass": true,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "SpatialElement",
-                  ],
-                  "schemaName": "BisCore",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "CompositeOverlapsSpatialElements",
-                  ],
-                  "schemaName": "SpatialComposition",
-                },
-                "requiredDirection": "Forward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Forward",
+                    "relationship": Object {
+                      "className": "CompositeOverlapsSpatialElements",
+                      "schemaName": "SpatialComposition",
+                    },
+                    "targetClass": Object {
+                      "className": "SpatialElement",
+                      "schemaName": "BisCore",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -372,19 +374,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
               Object {
                 "groupByClass": true,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "SpatialElement",
-                  ],
-                  "schemaName": "BisCore",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "SpatialOrganizerReferencesSpatialElements",
-                  ],
-                  "schemaName": "SpatialComposition",
-                },
-                "requiredDirection": "Forward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Forward",
+                    "relationship": Object {
+                      "className": "SpatialOrganizerReferencesSpatialElements",
+                      "schemaName": "SpatialComposition",
+                    },
+                    "targetClass": Object {
+                      "className": "SpatialElement",
+                      "schemaName": "BisCore",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -396,19 +398,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly 1`] = `
               Object {
                 "groupByClass": true,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "SpatialElement",
-                  ],
-                  "schemaName": "BisCore",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "SpatialOrganizerHoldsSpatialElements",
-                  ],
-                  "schemaName": "SpatialComposition",
-                },
-                "requiredDirection": "Forward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Forward",
+                    "relationship": Object {
+                      "className": "SpatialOrganizerHoldsSpatialElements",
+                      "schemaName": "SpatialComposition",
+                    },
+                    "targetClass": Object {
+                      "className": "SpatialElement",
+                      "schemaName": "BisCore",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -4813,9 +4815,9 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
             "ruleType": "RootNodes",
             "specifications": Array [
               Object {
-                "arePolymorphic": true,
                 "classes": Array [
                   Object {
+                    "arePolymorphic": true,
                     "classNames": Array [
                       "CompositeElement",
                     ],
@@ -4828,16 +4830,18 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
                 "relatedInstances": Array [
                   Object {
                     "alias": "model",
-                    "class": Object {
-                      "className": "Model",
-                      "schemaName": "BisCore",
-                    },
                     "isRequired": true,
-                    "relationship": Object {
-                      "className": "ModelContainsElements",
-                      "schemaName": "BisCore",
+                    "relationshipPath": Object {
+                      "direction": "Backward",
+                      "relationship": Object {
+                        "className": "ModelContainsElements",
+                        "schemaName": "BisCore",
+                      },
+                      "targetClass": Object {
+                        "className": "Model",
+                        "schemaName": "BisCore",
+                      },
                     },
-                    "requiredDirection": "Backward",
                   },
                 ],
                 "specType": "InstanceNodesOfSpecificClasses",
@@ -4852,19 +4856,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
                 "doNotSort": true,
                 "groupByClass": false,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "DistributionSystem",
-                  ],
-                  "schemaName": "DistributionSystems",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "PhysicalSystemServicesSpatialElements",
-                  ],
-                  "schemaName": "BisCore",
-                },
-                "requiredDirection": "Backward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Backward",
+                    "relationship": Object {
+                      "className": "PhysicalSystemServicesSpatialElements",
+                      "schemaName": "BisCore",
+                    },
+                    "targetClass": Object {
+                      "className": "DistributionSystem",
+                      "schemaName": "DistributionSystems",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -4877,19 +4881,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
                 "doNotSort": true,
                 "groupByClass": false,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "SpatialElement",
-                  ],
-                  "schemaName": "Biscore",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "DistributionSystemGroupsDistributionElements",
-                  ],
-                  "schemaName": "DistributionSystems",
-                },
-                "requiredDirection": "Forward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Forward",
+                    "relationship": Object {
+                      "className": "DistributionSystemGroupsDistributionElements",
+                      "schemaName": "DistributionSystems",
+                    },
+                    "targetClass": Object {
+                      "className": "SpatialElement",
+                      "schemaName": "Biscore",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -4902,19 +4906,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
                 "doNotSort": true,
                 "groupByClass": false,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "CompositeElement",
-                  ],
-                  "schemaName": "SpatialComposition",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "CompositeComposesSubComposites",
-                  ],
-                  "schemaName": "SpatialComposition",
-                },
-                "requiredDirection": "Forward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Forward",
+                    "relationship": Object {
+                      "className": "CompositeComposesSubComposites",
+                      "schemaName": "SpatialComposition",
+                    },
+                    "targetClass": Object {
+                      "className": "CompositeElement",
+                      "schemaName": "SpatialComposition",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -4926,19 +4930,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
               Object {
                 "groupByClass": true,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "SpatialElement",
-                  ],
-                  "schemaName": "BisCore",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "CompositeOverlapsSpatialElements",
-                  ],
-                  "schemaName": "SpatialComposition",
-                },
-                "requiredDirection": "Forward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Forward",
+                    "relationship": Object {
+                      "className": "CompositeOverlapsSpatialElements",
+                      "schemaName": "SpatialComposition",
+                    },
+                    "targetClass": Object {
+                      "className": "SpatialElement",
+                      "schemaName": "BisCore",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -4950,19 +4954,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
               Object {
                 "groupByClass": true,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "SpatialElement",
-                  ],
-                  "schemaName": "BisCore",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "SpatialOrganizerReferencesSpatialElements",
-                  ],
-                  "schemaName": "SpatialComposition",
-                },
-                "requiredDirection": "Forward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Forward",
+                    "relationship": Object {
+                      "className": "SpatialOrganizerReferencesSpatialElements",
+                      "schemaName": "SpatialComposition",
+                    },
+                    "targetClass": Object {
+                      "className": "SpatialElement",
+                      "schemaName": "BisCore",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],
@@ -4974,19 +4978,19 @@ exports[`TreeComponent tests. TreeWithRuleset renders correctly with visibility 
               Object {
                 "groupByClass": true,
                 "groupByLabel": false,
-                "relatedClasses": Object {
-                  "classNames": Array [
-                    "SpatialElement",
-                  ],
-                  "schemaName": "BisCore",
-                },
-                "relationships": Object {
-                  "classNames": Array [
-                    "SpatialOrganizerHoldsSpatialElements",
-                  ],
-                  "schemaName": "SpatialComposition",
-                },
-                "requiredDirection": "Forward",
+                "relationshipPaths": Array [
+                  Object {
+                    "direction": "Forward",
+                    "relationship": Object {
+                      "className": "SpatialOrganizerHoldsSpatialElements",
+                      "schemaName": "SpatialComposition",
+                    },
+                    "targetClass": Object {
+                      "className": "SpatialElement",
+                      "schemaName": "BisCore",
+                    },
+                  },
+                ],
                 "specType": "RelatedInstanceNodes",
               },
             ],

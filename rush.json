@@ -28,16 +28,6 @@
       "versionPolicyName": "itwin-geo-tools"
     },
     {
-      "packageName": "@bentley/imodel-content-tree-react",
-      "projectFolder": "packages/bentley/imodel-content-tree",
-      "versionPolicyName": "imodel-content-tree"
-    },
-    {
-      "packageName": "@bentley/imodel-react-hooks",
-      "projectFolder": "packages/bentley/imodel-react-hooks",
-      "versionPolicyName": "imodel-react-hooks"
-    },
-    {
       "packageName": "@itwin/grouping-mapping-widget",
       "projectFolder": "packages/itwin/grouping-mapping-widget",
       "versionPolicyName": "grouping-mapping-widget"

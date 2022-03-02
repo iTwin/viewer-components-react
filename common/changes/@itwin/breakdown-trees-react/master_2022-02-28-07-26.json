@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/breakdown-trees-react",
+      "comment": "#797363 updated tree schemas",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/breakdown-trees-react"
+}
