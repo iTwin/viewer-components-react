@@ -345,7 +345,7 @@ const GroupAction = ({
             </div>
           }
         </Fieldset>
-      </div >
+      </div>
       <ActionPanel
         onSave={async () => {
           await save();

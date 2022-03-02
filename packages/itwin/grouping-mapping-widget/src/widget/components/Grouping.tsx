@@ -419,7 +419,6 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               isRowDisabled={() => isLoadingQuery}
               stateReducer={tableStateReducer}
               useControlledState={controlledState}
-              selectRowOnClick={false}
             />
           </div>
           <DeleteModal
