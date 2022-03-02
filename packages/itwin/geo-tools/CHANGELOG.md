@@ -1,6 +1,13 @@
 # Change Log - @itwin/geo-tools-react
 
-This log was last generated on Thu, 17 Feb 2022 17:30:48 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Mar 2022 21:38:51 GMT and should not be manually modified.
+
+## 0.2.1
+Wed, 02 Mar 2022 21:38:51 GMT
+
+### Patches
+
+- Update React & React-dom to match same major
 
 ## 0.2.0
 Thu, 17 Feb 2022 17:30:48 GMT
