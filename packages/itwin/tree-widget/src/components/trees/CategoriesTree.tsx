@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React, { useCallback } from "react";
 import { IModelApp } from "@itwin/core-frontend";
-import { CategoryTree, getCategories, toggleAllCategories } from "@itwin/appui-react";
+import { CategoryTree, getCategories, toggleAllCategories, useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
 import { TreeHeaderComponent } from "../header/TreeHeader";
@@ -13,6 +13,9 @@ import type { CategoriesTreeComponentProps } from "../../types";
 import { AutoSizer } from "./AutoSizer";
 
 export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
+  const iModel = useActiveIModelConnection();
+  const viewport = useActiveViewport();
+
   const {
     searchOptions,
     filterString,
@@ -22,38 +25,38 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
   } = useTreeFilteringState();
 
   const showAll = useCallback(async () => {
+    if (!iModel) return;
+
     return toggleAllCategories(
       IModelApp.viewManager,
-      props.iModel,
+      iModel,
       true,
       undefined,
       true,
       filteredProvider
     );
-  }, [props.iModel, filteredProvider]);
+  }, [iModel, filteredProvider]);
 
   const hideAll = useCallback(async () => {
+    if (!iModel) return;
     return toggleAllCategories(
       IModelApp.viewManager,
-      props.iModel,
+      iModel,
       false,
       undefined,
       true,
       filteredProvider
     );
-  }, [props.iModel, filteredProvider]);
+  }, [iModel, filteredProvider]);
 
   const invert = useCallback(async () => {
-    const activeView = IModelApp.viewManager.getFirstOpenView();
-    if (!activeView) {
-      return;
-    }
+    if (!iModel || !viewport) return;
 
-    const ids = await getCategories(props.iModel, activeView, filteredProvider);
+    const ids = await getCategories(iModel, viewport, filteredProvider);
     const enabled: string[] = [];
     const disabled: string[] = [];
     for (const id of ids) {
-      if (activeView.view.viewsCategory(id)) {
+      if (viewport.view.viewsCategory(id)) {
         enabled.push(id);
       } else {
         disabled.push(id);
@@ -62,7 +65,7 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
     // Disable enabled
     CategoryVisibilityHandler.enableCategory(
       IModelApp.viewManager,
-      props.iModel,
+      iModel,
       enabled,
       false,
       true
@@ -70,14 +73,14 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
     // Enable disabled
     CategoryVisibilityHandler.enableCategory(
       IModelApp.viewManager,
-      props.iModel,
+      iModel,
       disabled,
       true,
       true
     );
-  }, [props.iModel, filteredProvider]);
+  }, [iModel, viewport, filteredProvider]);
 
-  return (
+  return (!(iModel && viewport) ? null : (
     <>
       <TreeHeaderComponent
         searchOptions={searchOptions}
@@ -91,11 +94,12 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
             {...props}
             filterInfo={{ filter: filterString, activeMatchIndex }}
             onFilterApplied={onFilterApplied}
+            iModel={iModel}
             width={width}
             height={height}
           />
         )}
       </AutoSizer>
     </>
-  );
+  ));
 }

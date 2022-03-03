@@ -7,7 +7,6 @@ import type { SelectableContentDefinition } from "@itwin/components-react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
 export interface CategoriesTreeComponentProps {
-  iModel: IModelConnection;
   allViewports?: boolean;
   activeView?: Viewport;
 }
@@ -39,7 +38,7 @@ export type AdditionalSpatialTreeProps = Omit<
 >;
 
 interface CommonTreeProps {
-  iModelConnection?: IModelConnection;
+  activeView?: Viewport;
 }
 
 export interface HiddenTrees {
@@ -49,7 +48,6 @@ export interface HiddenTrees {
 }
 
 export interface TreeWidgetOptions extends CommonTreeProps {
-  activeView?: Viewport;
   enableElementsClassGrouping?: boolean;
   allViewports?: boolean;
   additionalTrees?: SelectableContentDefinition[];
@@ -57,11 +55,6 @@ export interface TreeWidgetOptions extends CommonTreeProps {
     modelsTree?: ModelsTreeProps;
     categoriesTree?: CategoryTreeProps;
     spatialTree?: AdditionalSpatialTreeProps;
-  };
-  treeReplacements?: {
-    modelsTree?: () => React.ReactNode;
-    categoriesTree?: () => React.ReactNode;
-    spatialTree?: () => React.ReactNode;
   };
   hiddenTrees?: HiddenTrees;
 }

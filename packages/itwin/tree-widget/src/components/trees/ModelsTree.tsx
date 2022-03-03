@@ -5,7 +5,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import { ClassGroupingOption, ModelsTree, useActiveViewport } from "@itwin/appui-react";
+import { ClassGroupingOption, ModelsTree, useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./ModelsTree.scss";
 import type {
@@ -22,8 +22,6 @@ interface TreeViewModelInfo {
 }
 
 export const ModelsTreeComponent = (props: ModelTreeProps) => {
-  const { iModel } = props;
-
   const [is2dToggleActive, setIs2dToggleActive] = useState<boolean>(false);
   const [is3dToggleActive, setIs3dToggleActive] = useState<boolean>(false);
   const [icon2dToggle, setIcon2dToggle] = useState<string>("icon-visibility");
@@ -33,6 +31,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
   const [available3dModels, setAvailable3dModels] = useState<string[]>([]);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
 
+  const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
   const { searchOptions, filterString, activeMatchIndex, onFilterApplied } =
@@ -47,7 +46,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
       from: "BisCore.GeometricModel3d",
       wantPrivate: false,
     };
-    const modelProps = await iModel.models.queryProps(queryParams);
+    const modelProps = await iModel?.models.queryProps(queryParams) ?? [];
     return modelProps
       .map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection }))
       .filter(({ id }) => id) as TreeViewModelInfo[];
@@ -144,6 +143,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
                 ? ClassGroupingOption.YesWithCounts
                 : ClassGroupingOption.No
             }
+            iModel={iModel}
             width={width}
             height={height}
           />

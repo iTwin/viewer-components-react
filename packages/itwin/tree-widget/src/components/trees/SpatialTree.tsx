@@ -2,18 +2,22 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { SpatialContainmentTree } from "@itwin/appui-react";
+import type { SpatialContainmentTreeProps } from "@itwin/appui-react";
+import { SpatialContainmentTree, useActiveIModelConnection } from "@itwin/appui-react";
 import React from "react";
-import type { SpatialTreeProps } from "../../types";
 import { AutoSizer } from "./AutoSizer";
 
 export const SpatialTreeComponent = (
-  props: SpatialTreeProps
+  props: Omit<
+    SpatialContainmentTreeProps,
+    "iModel" | "width" | "height"
+  >
 ) => {
+  const iModel = useActiveIModelConnection();
 
-  return (
+  return !iModel ? null : (
     <AutoSizer>
-      {({ width, height }) => <SpatialContainmentTree {...props} width={width} height={height} />}
+      {({ width, height }) => <SpatialContainmentTree {...props} width={width} height={height} iModel={iModel} />}
     </AutoSizer>
   );
 };
