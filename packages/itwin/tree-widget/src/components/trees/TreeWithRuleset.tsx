@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useCallback, useState } from "react";
+import React from "react";
 import type { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
 import type {
   IPresentationTreeDataProvider,
@@ -20,7 +20,7 @@ import {
 import { Presentation } from "@itwin/presentation-frontend";
 import "./TreeWithRulesetTree.scss";
 import type { IModelConnection } from "@itwin/core-frontend";
-import { useResizeObserver } from "@itwin/core-react";
+import { AutoSizer } from "./AutoSizer";
 
 export interface ControlledTreeProps {
   iModel: IModelConnection;
@@ -43,7 +43,7 @@ export interface TreeState {
 export abstract class TreeWithRuleset<
   T extends TreeProps,
   S extends TreeState
-> extends React.Component<T, S> {
+  > extends React.Component<T, S> {
   private _ruleset?: RegisteredRuleset;
   /** @internal */
   public async componentDidMount() {
@@ -82,8 +82,8 @@ export abstract class TreeWithRuleset<
 }
 
 export class SimpleTreeWithRuleset extends TreeWithRuleset<
-TreeProps,
-TreeState
+  TreeProps,
+  TreeState
 > {
   constructor(props: TreeProps) {
     super(props);
@@ -126,19 +126,11 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (
     collapsedChildrenDisposalEnabled: true,
   });
 
-  const [height, setHeight] = useState(0);
-  const [width, setWidth] = useState(0);
-  const handleResize = useCallback((w: number, h: number) => {
-    setHeight(h);
-    setWidth(w);
-  }, []);
-  const ref = useResizeObserver<HTMLDivElement>(handleResize);
-
   const treeModel = useTreeModel(modelSource);
 
   return (
-    <div ref={ref} style={{ width: "100%", height: "100%" }}>
-      {width && height && (
+    <AutoSizer>
+      {({ width, height }) => (
         <ControlledTree
           model={treeModel}
           nodeLoader={nodeLoader}
@@ -148,7 +140,7 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (
           height={height}
         />
       )}
-    </div>
+    </AutoSizer>
   );
 };
 

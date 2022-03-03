@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import React, { useCallback, useEffect, useState } from "react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { Viewport } from "@itwin/core-frontend";
 import { ClassGroupingOption, ModelsTree, useActiveViewport } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./ModelsTree.scss";
@@ -13,14 +13,8 @@ import type {
   ModelQueryParams,
 } from "@itwin/core-common";
 import { TreeHeaderComponent } from "../header/TreeHeader";
-import { useResizeObserver } from "@itwin/core-react";
-
-export interface ModelTreeProps {
-  iModel: IModelConnection;
-  allViewports?: boolean;
-  activeView?: Viewport;
-  enableElementsClassGrouping?: boolean;
-}
+import type { ModelTreeProps } from "../../types";
+import { AutoSizer } from "./AutoSizer";
 
 interface TreeViewModelInfo {
   id: string;
@@ -43,14 +37,6 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
 
   const { searchOptions, filterString, activeMatchIndex, onFilterApplied } =
     useTreeFilteringState();
-
-  const [height, setHeight] = useState(0);
-  const [width, setWidth] = useState(0);
-  const handleResize = useCallback((w: number, h: number) => {
-    setHeight(h);
-    setWidth(w);
-  }, []);
-  const ref = useResizeObserver<HTMLDivElement>(handleResize);
 
   const queryModels = useCallback(async (
     vp: Viewport | undefined
@@ -146,25 +132,23 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
         toggle3D={viewToggle3D}
         toggle3DIcon={icon3dToggle}
       />
-      <div className="tree-widget-models-tree-container">
-        <div ref={ref} style={{ width: "100%", height: "100%" }}>
-          {width && height && (
-            <ModelsTree
-              {...props}
-              filterInfo={{ filter: filterString, activeMatchIndex }}
-              onFilterApplied={onFilterApplied}
-              activeView={viewport}
-              enableElementsClassGrouping={
-                props.enableElementsClassGrouping
-                  ? ClassGroupingOption.YesWithCounts
-                  : ClassGroupingOption.No
-              }
-              width={width}
-              height={height}
-            />
-          )}
-        </div>
-      </div>
+      <AutoSizer>
+        {({ width, height }) => (
+          <ModelsTree
+            {...props}
+            filterInfo={{ filter: filterString, activeMatchIndex }}
+            onFilterApplied={onFilterApplied}
+            activeView={viewport}
+            enableElementsClassGrouping={
+              props.enableElementsClassGrouping
+                ? ClassGroupingOption.YesWithCounts
+                : ClassGroupingOption.No
+            }
+            width={width}
+            height={height}
+          />
+        )}
+      </AutoSizer>
     </>
   ));
 };

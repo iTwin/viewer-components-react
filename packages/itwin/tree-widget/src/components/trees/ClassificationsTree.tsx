@@ -5,13 +5,9 @@
 import * as React from "react";
 import type { Ruleset } from "@itwin/presentation-common";
 import { SimpleTreeWithRuleset } from "./TreeWithRuleset";
-import type { IModelConnection } from "@itwin/core-frontend";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import classificationRules from "../rulesets/ClassificationSystems.json";
-
-export interface ClassificationsTreeComponentProps {
-  iModel: IModelConnection;
-}
+import type { ClassificationsTreeComponentProps } from "../../types";
 
 export function ClassificationsTreeComponent(
   props: ClassificationsTreeComponentProps

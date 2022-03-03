@@ -20,10 +20,10 @@ import { SpatialTreeComponent } from "./trees/SpatialTree";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
-import type { TreeWidgetControlOptions } from "./TreeWidgetControl";
+import type { TreeWidgetControlOptions } from "../types";
 
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
-  public readonly id = "TreeWidgetUiitemsProvider";
+  public readonly id = "TreeWidgetUiItemsProvider";
 
   private _imodel?: IModelConnection;
   private _activeView?: Viewport;
@@ -37,7 +37,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   private _categoriesTreeReplacement?: () => React.ReactNode;
   private _spatialTreeReplacement?: () => React.ReactNode;
 
-  constructor(props?: Partial<TreeWidgetControlOptions>) {
+  constructor(props?: TreeWidgetControlOptions) {
     this._imodel = props?.iModelConnection;
     this._activeView = props?.activeView;
     this._enableElementsClassGrouping = props?.enableElementsClassGrouping;

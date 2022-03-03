@@ -2,21 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useCallback, useState } from "react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import React, { useCallback } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import { CategoryTree, getCategories, toggleAllCategories } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
 import { TreeHeaderComponent } from "../header/TreeHeader";
 import { CategoryVisibilityHandler } from "@itwin/appui-react";
-import { useResizeObserver } from "@itwin/core-react";
-
-export interface CategoriesTreeComponentProps {
-  iModel: IModelConnection;
-  allViewports?: boolean;
-  activeView?: Viewport;
-}
+import type { CategoriesTreeComponentProps } from "../../types";
+import { AutoSizer } from "./AutoSizer";
 
 export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
   const {
@@ -26,14 +20,6 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
     onFilterApplied,
     filteredProvider,
   } = useTreeFilteringState();
-
-  const [height, setHeight] = useState(0);
-  const [width, setWidth] = useState(0);
-  const handleResize = useCallback((w: number, h: number) => {
-    setHeight(h);
-    setWidth(w);
-  }, []);
-  const ref = useResizeObserver<HTMLDivElement>(handleResize);
 
   const showAll = useCallback(async () => {
     return toggleAllCategories(
@@ -99,8 +85,8 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
         hideAll={hideAll}
         invert={invert}
       />
-      <div ref={ref} style={{ width: "100%", height: "100%" }}>
-        {width && height && (
+      <AutoSizer>
+        {({ width, height }) => (
           <CategoryTree
             {...props}
             filterInfo={{ filter: filterString, activeMatchIndex }}
@@ -109,7 +95,7 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
             height={height}
           />
         )}
-      </div>
+      </AutoSizer>
     </>
   );
 }
