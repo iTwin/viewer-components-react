@@ -17,16 +17,10 @@ Each one has it's own folder and README describing the package.
 | @itwin/measure-tools-react     | [measure-tools](./packages/itwin/measure-tools)                     | [changelog](./packages/itwin/measure-tools/CHANGELOG.md)           | [![npm version](https://badge.fury.io/js/%40itwin%2Fmeasure-tools-react.svg)](https://badge.fury.io/js/%40itwin%2Fmeasure-tools-react)         |
 | @itwin/breakdown-trees-react   | [breakdown-trees](./packages/itwin/breakdown-trees)                 | [changelog](./packages/itwin/breakdown-trees/CHANGELOG.md)         | [![npm version](https://badge.fury.io/js/%40itwin%2Fbreakdown-trees-react.svg)](https://badge.fury.io/js/%40itwin%2Fbreakdown-trees-react)     |
 | @itwin/grouping-mapping-widget | [grouping-mapping-widget](./packages/itwin/grouping-mapping-widget) | [changelog](./packages/itwin/grouping-mapping-widget/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fgrouping-mapping-widget.svg)](https://badge.fury.io/js/%40itwin%2Fgrouping-mapping-widget) |
+| @itwin/geo-tools-react         | [geo-tools](./packages/itwin/geo-tools)                             | [changelog](./packages/itwin/geo-tools/CHANGELOG.md)               | [![npm version](https://badge.fury.io/js/%40itwin%2Fgeo-tools-react.svg)](https://badge.fury.io/js/%40itwin%2Fgeo-tools-react)                 |
+| @itwin/imodel-react-hooks      | [imodel-react-hooks](./packages/itwin/imodel-react-hooks)           | [changelog](./packages/itwin/imodel-react-hooks/CHANGELOG.md)      | [![npm version](https://badge.fury.io/js/%40itwin%2Fimodel-react-hooks.svg)](https://badge.fury.io/js/%40itwin%2Fimodel-react-hooks)           |
 
-### iTwin.js@^2 Compatible
-
-| Name                               | Folder                                                        | Changelog                                                        | Version                                                                                                                                                |
-| ---------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| @bentley/imodel-content-tree-react | [imodel-content-tree](./packages/bentley/imodel-content-tree) | [changelog](./packages/bentley/imodel-content-tree/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-content-tree-react.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-content-tree-react) |
-| @bentley/imodel-react-hooks        | [imodel-react-hooks](./packages/bentley/imodel-react-hooks)   | [changelog](./packages/bentley/imodel-react-hooks/CHANGELOG.md)  | [![npm version](https://badge.fury.io/js/%40bentley%2Fimodel-react-hooks.svg)](https://badge.fury.io/js/%40bentley%2Fimodel-react-hooks)               |
-| @bentley/geo-tools-react           | [geo-tools](./packages/bentley/geo-tools)                     | [changelog](./packages/bentley/geo-tools/CHANGELOG.md)           | [![npm version](https://badge.fury.io/js/%40bentley%2Fgeo-tools-react.svg)](https://badge.fury.io/js/%40bentley%2Fgeo-tools-react)                     |
-
-### Archived
+## Archived
 
 The following packages have been deprecated and will no longer be maintained:
 | Name | Folder | Changelog | Version | Replacement |

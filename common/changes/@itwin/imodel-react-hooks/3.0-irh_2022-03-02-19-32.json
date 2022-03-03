@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/imodel-react-hooks",
+      "comment": "Update to iTwin.js 3.0",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/imodel-react-hooks"
+}
