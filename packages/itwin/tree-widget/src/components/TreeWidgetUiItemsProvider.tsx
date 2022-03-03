@@ -20,7 +20,7 @@ import { SpatialTreeComponent } from "./trees/SpatialTree";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
-import type { TreeWidgetControlOptions } from "../types";
+import type { HiddenTrees, TreeWidgetOptions } from "../types";
 
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   public readonly id = "TreeWidgetUiItemsProvider";
@@ -36,8 +36,9 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   private _modelsTreeReplacement?: () => React.ReactNode;
   private _categoriesTreeReplacement?: () => React.ReactNode;
   private _spatialTreeReplacement?: () => React.ReactNode;
+  private _hiddenTrees?: HiddenTrees;
 
-  constructor(props?: TreeWidgetControlOptions) {
+  constructor(props?: TreeWidgetOptions) {
     this._imodel = props?.iModelConnection;
     this._activeView = props?.activeView;
     this._enableElementsClassGrouping = props?.enableElementsClassGrouping;
@@ -49,6 +50,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
     this._modelsTreeReplacement = props?.treeReplacements?.modelsTree;
     this._categoriesTreeReplacement = props?.treeReplacements?.categoriesTree;
     this._spatialTreeReplacement = props?.treeReplacements?.spatialTree;
+    this._hiddenTrees = props?.hiddenTrees;
   }
 
   public provideWidgets(
@@ -64,60 +66,59 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       location === StagePanelLocation.Right &&
       imodel !== undefined
     ) {
-      const modelsTreeComponent = (
-        <ModelsTreeComponent
-          iModel={this._imodel ?? imodel}
-          allViewports={this._allViewports}
-          activeView={this._activeView}
-          enableElementsClassGrouping={this._enableElementsClassGrouping}
-          {...this._modelsTreeProps}
-        />
-      );
+      const trees: SelectableContentDefinition[] = [];
 
-      const categoriesTreeComponent = (
-        <CategoriesTreeComponent
-          iModel={this._imodel ?? imodel}
-          allViewports={this._allViewports}
-          activeView={this._activeView}
-          {...this._categoriesTreeProps}
-        />
-      );
-
-      const spatialContainmentComponent = (
-        <SpatialTreeComponent
-          iModel={this._imodel ?? imodel}
-          enableElementsClassGrouping={
-            this._enableElementsClassGrouping
-              ? ClassGroupingOption.Yes
-              : ClassGroupingOption.No
-          }
-          {...this._spatialTreeProps}
-        />
-      );
-
-      const trees: SelectableContentDefinition[] = [
-        {
+      if (!this._hiddenTrees?.modelsTree) {
+        trees.push({
           label: TreeWidget.translate("modeltree"),
           id: "model-tree",
           render: this._modelsTreeReplacement
-            ? this._modelsTreeReplacement
-            : () => modelsTreeComponent,
-        },
-        {
+            ? () => (
+              <ModelsTreeComponent
+                iModel={this._imodel ?? imodel}
+                allViewports={this._allViewports}
+                activeView={this._activeView}
+                enableElementsClassGrouping={this._enableElementsClassGrouping}
+                {...this._modelsTreeProps}
+              />
+            ) : () => modelsTreeComponent,
+        });
+      }
+
+      if (!this._hiddenTrees?.categoriesTree) {
+        trees.push({
           label: TreeWidget.translate("categories"),
           id: "categories-tree",
           render: this._categoriesTreeReplacement
-            ? this._categoriesTreeReplacement
-            : () => categoriesTreeComponent,
-        },
-        {
+            ? () => (
+              <CategoriesTreeComponent
+                iModel={this._imodel ?? imodel}
+                allViewports={this._allViewports}
+                activeView={this._activeView}
+                {...this._categoriesTreeProps}
+              />
+            ) : () => categoriesTreeComponent,
+        });
+      }
+
+      if (!this._hiddenTrees?.spatialTree) {
+        trees.push({
           label: TreeWidget.translate("containment"),
           id: "spatial-containment-tree",
           render: this._spatialTreeReplacement
-            ? this._spatialTreeReplacement
-            : () => spatialContainmentComponent,
-        },
-      ];
+            ? () => (
+              <SpatialTreeComponent
+                iModel={this._imodel ?? imodel}
+                enableElementsClassGrouping={
+                  this._enableElementsClassGrouping
+                    ? ClassGroupingOption.Yes
+                    : ClassGroupingOption.No
+                }
+                {...this._spatialTreeProps}
+              />
+            ) : () => spatialContainmentComponent,
+        });
+      }
 
       if (this._additionalTrees) {
         trees.push(...this._additionalTrees);
