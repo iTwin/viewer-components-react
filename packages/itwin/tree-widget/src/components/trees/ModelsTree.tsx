@@ -5,7 +5,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import { ClassGroupingOption, ModelsTree, useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
+import { ModelsTree, useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./ModelsTree.scss";
 import type {
@@ -135,17 +135,12 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
         {({ width, height }) => (
           <ModelsTree
             {...props}
-            filterInfo={{ filter: filterString, activeMatchIndex }}
-            onFilterApplied={onFilterApplied}
-            activeView={viewport}
-            enableElementsClassGrouping={
-              props.enableElementsClassGrouping
-                ? ClassGroupingOption.YesWithCounts
-                : ClassGroupingOption.No
-            }
             iModel={iModel}
+            activeView={viewport}
             width={width}
             height={height}
+            filterInfo={{ filter: filterString, activeMatchIndex }}
+            onFilterApplied={onFilterApplied}
           />
         )}
       </AutoSizer>

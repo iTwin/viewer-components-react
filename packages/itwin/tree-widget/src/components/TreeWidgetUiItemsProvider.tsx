@@ -18,33 +18,15 @@ import { TreeWidgetComponent } from "./TreeWidgetComponent";
 import { CategoriesTreeComponent } from "./trees/CategoriesTree";
 import { ModelsTreeComponent } from "./trees/ModelsTree";
 import { SpatialTreeComponent } from "./trees/SpatialTree";
-import type { Viewport } from "@itwin/core-frontend";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
-import type { HiddenTrees, TreeWidgetOptions } from "../types";
+import type { TreeWidgetOptions } from "../types";
 
+export const TreeWidgetId = "tree-widget-react:trees";
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   public readonly id = "TreeWidgetUiItemsProvider";
 
-  private _activeView?: Viewport;
-  private _enableElementsClassGrouping?: boolean;
-  private _allViewports?: boolean;
-  private _additionalTrees?: SelectableContentDefinition[];
-  private _modelsTreeProps?: {};
-  private _categoriesTreeProps?: {};
-  private _spatialTreeProps?: {};
-  private _hiddenTrees?: HiddenTrees;
-
-  constructor(props?: TreeWidgetOptions) {
-    this._activeView = props?.activeView;
-    this._enableElementsClassGrouping = props?.enableElementsClassGrouping;
-    this._allViewports = props?.allViewports;
-    this._additionalTrees = props?.additionalTrees;
-    this._modelsTreeProps = props?.additionalProps?.modelsTree;
-    this._categoriesTreeProps = props?.additionalProps?.categoriesTree;
-    this._spatialTreeProps = props?.additionalProps?.spatialTree;
-    this._hiddenTrees = props?.hiddenTrees;
-  }
+  constructor(private _treeWidgetOptions?: TreeWidgetOptions) { }
 
   public provideWidgets(
     _stageId: string,
@@ -59,58 +41,56 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
     ) {
       const trees: SelectableContentDefinition[] = [];
 
-      if (!this._hiddenTrees?.modelsTree) {
+      if (!this._treeWidgetOptions?.hiddenTrees?.modelsTree) {
         trees.push({
           label: TreeWidget.translate("modeltree"),
           id: "model-tree",
           render: () => (
             <ModelsTreeComponent
-              allViewports={this._allViewports}
-              activeView={this._activeView}
-              enableElementsClassGrouping={this._enableElementsClassGrouping}
-              {...this._modelsTreeProps}
+              enableElementsClassGrouping={
+                this._treeWidgetOptions?.enableElementsClassGrouping
+                  ? ClassGroupingOption.YesWithCounts
+                  : ClassGroupingOption.No
+              }
+              {...this._treeWidgetOptions?.additionalProps?.modelsTree}
             />
           ),
         });
       }
 
-      if (!this._hiddenTrees?.categoriesTree) {
+      if (!this._treeWidgetOptions?.hiddenTrees?.categoriesTree) {
         trees.push({
           label: TreeWidget.translate("categories"),
           id: "categories-tree",
           render: () => (
-            <CategoriesTreeComponent
-              allViewports={this._allViewports}
-              activeView={this._activeView}
-              {...this._categoriesTreeProps}
-            />
+            <CategoriesTreeComponent {...this._treeWidgetOptions?.additionalProps?.categoriesTree} />
           ),
         });
       }
 
-      if (!this._hiddenTrees?.spatialTree) {
+      if (!this._treeWidgetOptions?.hiddenTrees?.spatialTree) {
         trees.push({
           label: TreeWidget.translate("containment"),
           id: "spatial-containment-tree",
           render: () => (
             <SpatialTreeComponent
               enableElementsClassGrouping={
-                this._enableElementsClassGrouping
-                  ? ClassGroupingOption.Yes
+                this._treeWidgetOptions?.enableElementsClassGrouping
+                  ? ClassGroupingOption.YesWithCounts
                   : ClassGroupingOption.No
               }
-              {...this._spatialTreeProps}
+              {...this._treeWidgetOptions?.additionalProps?.spatialTree}
             />
           ),
         });
       }
 
-      if (this._additionalTrees) {
-        trees.push(...this._additionalTrees);
+      if (this._treeWidgetOptions?.additionalTrees) {
+        trees.push(...this._treeWidgetOptions.additionalTrees);
       }
 
       widgets.push({
-        id: "tree",
+        id: TreeWidgetId,
         label: TreeWidget.translate("treeview"),
         getWidgetContent: () => <TreeWidgetComponent trees={trees} />,
       });

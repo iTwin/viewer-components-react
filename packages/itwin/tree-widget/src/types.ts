@@ -4,12 +4,7 @@ import type {
   SpatialContainmentTreeProps,
 } from "@itwin/appui-react";
 import type { SelectableContentDefinition } from "@itwin/components-react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-
-export interface CategoriesTreeComponentProps {
-  allViewports?: boolean;
-  activeView?: Viewport;
-}
+import type { IModelConnection } from "@itwin/core-frontend";
 
 export interface ClassificationsTreeComponentProps {
   iModel: IModelConnection;
@@ -20,26 +15,30 @@ export interface IModelContentTreeProps
   iModel: IModelConnection;
 }
 
-// export interface ModelTreeProps {
-//   iModel: IModelConnection;
-//   allViewports?: boolean;
-//   activeView?: Viewport;
-//   enableElementsClassGrouping?: boolean;
-// }
-
 export type ModelTreeProps = Omit<
   ModelsTreeProps,
-  "iModel" | "width" | "height"
+  | "iModel"
+  | "activeView"
+  | "width"
+  | "height"
+  | "filterInfo"
+  | "onFilterApplied"
 >;
 
-export type AdditionalSpatialTreeProps = Omit<
+export type CategoriesTreeProps = Omit<
+  CategoryTreeProps,
+  | "iModel"
+  | "activeView"
+  | "width"
+  | "height"
+  | "filterInfo"
+  | "onFilterApplied"
+>;
+
+export type SpatialTreeProps = Omit<
   SpatialContainmentTreeProps,
   "iModel" | "width" | "height"
 >;
-
-interface CommonTreeProps {
-  activeView?: Viewport;
-}
 
 export interface HiddenTrees {
   modelsTree?: boolean;
@@ -47,14 +46,13 @@ export interface HiddenTrees {
   spatialTree?: boolean;
 }
 
-export interface TreeWidgetOptions extends CommonTreeProps {
+export interface TreeWidgetOptions {
   enableElementsClassGrouping?: boolean;
-  allViewports?: boolean;
   additionalTrees?: SelectableContentDefinition[];
   additionalProps?: {
-    modelsTree?: ModelsTreeProps;
-    categoriesTree?: CategoryTreeProps;
-    spatialTree?: AdditionalSpatialTreeProps;
+    modelsTree?: ModelTreeProps;
+    categoriesTree?: CategoriesTreeProps;
+    spatialTree?: SpatialTreeProps;
   };
   hiddenTrees?: HiddenTrees;
 }

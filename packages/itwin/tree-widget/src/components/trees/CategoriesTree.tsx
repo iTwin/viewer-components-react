@@ -9,10 +9,10 @@ import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
 import { TreeHeaderComponent } from "../header/TreeHeader";
 import { CategoryVisibilityHandler } from "@itwin/appui-react";
-import type { CategoriesTreeComponentProps } from "../../types";
+import type { CategoriesTreeProps } from "../../types";
 import { AutoSizer } from "./AutoSizer";
 
-export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
+export function CategoriesTreeComponent(props: CategoriesTreeProps) {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
@@ -92,11 +92,11 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
         {({ width, height }) => (
           <CategoryTree
             {...props}
-            filterInfo={{ filter: filterString, activeMatchIndex }}
-            onFilterApplied={onFilterApplied}
             iModel={iModel}
             width={width}
             height={height}
+            filterInfo={{ filter: filterString, activeMatchIndex }}
+            onFilterApplied={onFilterApplied}
           />
         )}
       </AutoSizer>
