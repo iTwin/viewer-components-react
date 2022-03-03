@@ -38,10 +38,10 @@
     "test": ""
   },
   "dependencies": {
+    "@itwin/insights-client": "^0.1.0",
     "@itwin/itwinui-css": "^0.44.1",
     "@itwin/itwinui-icons-react": "^1.5.1",
-    "@itwin/itwinui-react": "^1.29.2",
-    "@itwin/insights-client": "^0.1.0"
+    "@itwin/itwinui-react": "^1.29.2"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^3.0.0",
@@ -62,11 +62,13 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-react": "^7.25.1",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "file-loader": "^6.2.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.6",
     "rimraf": "^3.0.2",
-    "typescript": "~4.3.0"
+    "typescript": "~4.3.0",
+    "webpack": "^5.69.1"
   },
   "peerDependencies": {
     "@itwin/appui-abstract": "^3.0.0",

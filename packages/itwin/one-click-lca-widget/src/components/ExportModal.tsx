@@ -20,10 +20,12 @@ import {
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
 import {
-  JobCreationCarbonCalculationAPI,
-  LinkCarbonCalculationAPI,
+  JobCreation,
+  JobStatus,
+  Link,
   OneClickLCAClient,
 } from "@itwin/insights-client";
+import logo from "../../public/logo/oneClickLCALogo.png";
 
 interface ExportProps {
   isOpen: boolean;
@@ -34,13 +36,6 @@ interface ExportProps {
 interface OclcaTokenCache {
   token: string;
   exp: number;
-}
-
-enum OCLCAJobStatus {
-  Queued = "Queued",
-  Running = "Running",
-  Succeeded = "Succeeded",
-  Failed = "Failed",
 }
 
 const ExportModal = (props: ExportProps) => {
@@ -60,8 +55,8 @@ const ExportModal = (props: ExportProps) => {
   const [emailError, setEmailError] = useState(false);
   const [cache, cacheToken] = useState<OclcaTokenCache>();
 
-  const [jobStatus, setJobStatus] = useState<OCLCAJobStatus>();
-  const [jobLink, setJobLink] = useState<LinkCarbonCalculationAPI>();
+  const [jobStatus, setJobStatus] = useState<JobStatus.StatusEnum>();
+  const [jobLink, setJobLink] = useState<Link>();
 
   const isValidEmail = useCallback(() => {
     return /\S+@\S+\.\S+/.test(email);
@@ -91,7 +86,7 @@ const ExportModal = (props: ExportProps) => {
   }, [setEmail, setPassword, showPassword, showSigninError]);
 
   const pinStatus = useCallback(
-    (job: JobCreationCarbonCalculationAPI) => {
+    (job: JobCreation) => {
       const intervalId = setInterval(async () => {
         const token =
           (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
@@ -99,10 +94,12 @@ const ExportModal = (props: ExportProps) => {
           let currentJobStatus =
             await oneClickLCAClientApi.getOneclicklcaJobStatus(token, job?.id);
           if (currentJobStatus.job?.status) {
-            if (currentJobStatus.job?.status === OCLCAJobStatus.Succeeded) {
+            if (
+              currentJobStatus.job?.status === JobStatus.StatusEnum.Succeeded
+            ) {
               setJobLink(currentJobStatus?.job._links?.oneclicklca);
             }
-            setJobStatus(currentJobStatus.job?.status as OCLCAJobStatus);
+            setJobStatus(currentJobStatus.job?.status as JobStatus.StatusEnum);
           } else {
             throw new Error("failed to get job status");
           }
@@ -118,17 +115,21 @@ const ExportModal = (props: ExportProps) => {
       const accessToken =
         (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       if (props.reportId && token) {
-        let jobCreated = await oneClickLCAClientApi.createOneclicklcaJob(
-          accessToken,
-          {
-            reportId: props.reportId,
-            token: token,
+        try {
+          let jobCreated = await oneClickLCAClientApi.createOneclicklcaJob(
+            accessToken,
+            {
+              reportId: props.reportId,
+              token: token,
+            }
+          );
+          if (jobCreated?.job?.id) {
+            pinStatus(jobCreated?.job);
+          } else {
+            throw new Error("Failed to create job");
           }
-        );
-        if (jobCreated?.job?.id) {
-          pinStatus(jobCreated?.job);
-        } else {
-          throw new Error("Failed to create job");
+        } catch (e) {
+          throw new Error("Failed to create one click lca job." + e);
         }
       } else {
         throw new Error("No reportId or accessToken");
@@ -171,9 +172,9 @@ const ExportModal = (props: ExportProps) => {
   }, [props, resetSignin]);
 
   const getStatusComponent = useCallback(
-    (jobStatus: string, jobLink: string | undefined) => {
+    (jobStatus: JobStatus.StatusEnum, jobLink: string | undefined) => {
       switch (jobStatus) {
-        case OCLCAJobStatus.Queued:
+        case JobStatus.StatusEnum.Queued:
           return (
             <>
               <div className="progress-radial-container">
@@ -184,7 +185,7 @@ const ExportModal = (props: ExportProps) => {
               </div>
             </>
           );
-        case OCLCAJobStatus.Running:
+        case JobStatus.StatusEnum.Running:
           return (
             <>
               <div className="progress-linear-container">
@@ -195,7 +196,7 @@ const ExportModal = (props: ExportProps) => {
               </div>
             </>
           );
-        case OCLCAJobStatus.Succeeded:
+        case JobStatus.StatusEnum.Succeeded:
           return (
             <>
               {jobLink && (
@@ -213,7 +214,7 @@ const ExportModal = (props: ExportProps) => {
               )}
             </>
           );
-        case OCLCAJobStatus.Failed:
+        case JobStatus.StatusEnum.Failed:
           return (
             <>
               <div className="progress-radial-container">
@@ -239,8 +240,8 @@ const ExportModal = (props: ExportProps) => {
 
   useEffect(() => {
     if (
-      jobStatus === OCLCAJobStatus.Succeeded ||
-      jobStatus === OCLCAJobStatus.Failed
+      jobStatus === JobStatus.StatusEnum.Succeeded ||
+      jobStatus === JobStatus.StatusEnum.Failed
     ) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -270,7 +271,7 @@ const ExportModal = (props: ExportProps) => {
           <div className="signin">
             <img
               className="signin-icon"
-              src="../logo/oneClickLCALogo.png"
+              src={logo}
               alt="One Click LCA® software"
               data-height-percentage="80"
               data-actual-width="1200"

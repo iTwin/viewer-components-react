@@ -8,7 +8,7 @@ import { SearchBox } from "@itwin/core-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Table } from "@itwin/itwinui-react";
-import { ReportReportingAPI, ReportingClient } from "@itwin/insights-client";
+import { Report, ReportingClient } from "@itwin/insights-client";
 import { WidgetHeader } from "./utils";
 import ExportModal from "./ExportModal";
 import "./Reports.scss";
@@ -17,17 +17,16 @@ type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
 };
 
-type Reporting = CreateTypeFromInterface<ReportReportingAPI>;
+type Reporting = CreateTypeFromInterface<Report>;
 
 const Reports = () => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
   const reportingClientApi = new ReportingClient();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [reports, setReports] = useState<ReportReportingAPI[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [buttonIsDisabled, disableButton] = useState<boolean>(true);
-  const [filteredReports, setFilteredReports] =
-    useState<ReportReportingAPI[]>(reports);
+  const [filteredReports, setFilteredReports] = useState<Report[]>(reports);
   const [selectedReport, setSelectedReport] = useState<Reporting>();
 
   const [modalIsOpen, openModal] = useState(false);
