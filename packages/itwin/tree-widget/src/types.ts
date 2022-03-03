@@ -40,19 +40,15 @@ export type SpatialTreeProps = Omit<
   "iModel" | "width" | "height"
 >;
 
-export interface HiddenTrees {
-  modelsTree?: boolean;
-  categoriesTree?: boolean;
-  spatialTree?: boolean;
-}
-
 export interface TreeWidgetOptions {
   enableElementsClassGrouping?: boolean;
   additionalTrees?: SelectableContentDefinition[];
-  additionalProps?: {
-    modelsTree?: ModelTreeProps;
-    categoriesTree?: CategoriesTreeProps;
-    spatialTree?: SpatialTreeProps;
+  modelsTreeProps?: ModelTreeProps;
+  categoriesTreeProps?: CategoriesTreeProps;
+  spatialTreeProps?: SpatialTreeProps;
+  hiddenTrees?: {
+    modelsTree?: boolean;
+    categoriesTree?: boolean;
+    spatialTree?: boolean;
   };
-  hiddenTrees?: HiddenTrees;
 }
