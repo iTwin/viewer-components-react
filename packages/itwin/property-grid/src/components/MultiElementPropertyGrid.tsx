@@ -117,8 +117,8 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
         {items.map((component, idx) => (
           <div key={component.key} className={classnames({
             "property-grid-react-animated-tab": true,
-            "animate-right": idx > content,
-            "animate-left": idx < content,
+            "property-grid-react-animated-tab-animate-right": idx > content,
+            "property-grid-react-animated-tab-animate-left": idx < content,
           })} >
             { component }
           </div>
