@@ -476,14 +476,12 @@ importers:
       react: ^17.0.2
       react-dom: ^17.0.2
       react-redux: ^7.2.0
-      react-spring: ^8.0.27
       redux: ^4.0.3
       rimraf: ^3.0.2
       typescript: ~4.3.0
     dependencies:
       classnames: 2.3.1
       i18next: 10.6.0
-      react-spring: 8.0.27_react-dom@17.0.2+react@17.0.2
       redux: 4.1.2
     devDependencies:
       '@itwin/appui-abstract': 3.0.1_@itwin+core-bentley@3.0.1
@@ -1957,7 +1955,7 @@ packages:
       lodash: 4.17.21
       resolve: 1.8.1
       source-map: 0.6.1
-      typescript: 4.4.4
+      typescript: 3.7.7
     dev: true
 
   /@microsoft/node-core-library/3.18.2:
@@ -9322,18 +9320,6 @@ packages:
       react-is: 17.0.2
     dev: true
 
-  /react-spring/8.0.27_react-dom@17.0.2+react@17.0.2:
-    resolution: {integrity: sha512-nDpWBe3ZVezukNRandTeLSPcwwTMjNVu1IDq9qA/AMiUqHuRN4BeSWvKr3eIxxg1vtiYiOLy4FqdfCP5IoP77g==}
-    peerDependencies:
-      react: '>= 16.8.0'
-      react-dom: '>= 16.8.0'
-    dependencies:
-      '@babel/runtime': 7.17.2
-      prop-types: 15.8.1
-      react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
-    dev: false
-
   /react-table/7.7.0_react@17.0.2:
     resolution: {integrity: sha512-jBlj70iBwOTvvImsU9t01LjFjy4sXEtclBovl3mTiqjz23Reu0DKnRza4zlLtOPACx6j2/7MrQIthIK1Wi+LIA==}
     peerDependencies:
@@ -10816,6 +10802,12 @@ packages:
       circular-json: 0.3.3
       lodash: 4.17.21
       postinstall-build: 5.0.3
+    dev: true
+
+  /typescript/3.7.7:
+    resolution: {integrity: sha512-MmQdgo/XenfZPvVLtKZOq9jQQvzaUAUpcKW8Z43x9B2fOm4S5g//tPtMweZUIP+SoBqrVPEIm+dJeQ9dfO0QdA==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
     dev: true
 
   /typescript/3.9.10:
