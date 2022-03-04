@@ -116,9 +116,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
 
     if (idx === content) {
       style = { transform: "translate(0,0)" };
-    } else if (idx === MultiElementPropertyContent.PropertyGrid ||
-        (idx === MultiElementPropertyContent.ElementList  && content === MultiElementPropertyContent.SingleElementPropertyGrid)
-    ) {
+    } else if (idx < content) {
       style = { transform: "translate(-100%,0)" };
     } else {
       style = { transform: "translate(100%,0)" };
