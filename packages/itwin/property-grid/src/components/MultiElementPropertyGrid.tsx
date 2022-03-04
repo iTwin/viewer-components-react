@@ -17,6 +17,7 @@ import type { PropertyGridProps } from "../types";
 import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
 import React, { useEffect, useMemo, useState } from "react";
+import classnames from "classnames";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
@@ -110,24 +111,15 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
     />
   );
 
-  // since css animation requires all react components be rendered - just move non-active components to the side
-  const getAnimationStyle = (idx: MultiElementPropertyContent.PropertyGrid) => {
-    let style: React.CSSProperties = {};
-
-    if (idx < content) {
-      style = { transform: "translate(-100%,0)" };
-    } else if (idx > content) {
-      style = { transform: "translate(100%,0)" };
-    }
-
-    return style;
-  };
-
   return (
     <div className="property-grid-react-transition-container">
       <div className="property-grid-react-transition-container-inner">
         {items.map((component, idx) => (
-          <div className="property-grid-react-animated-tab" style={getAnimationStyle(idx)} key={component.key}>
+          <div key={component.key} className={classnames({
+            "property-grid-react-animated-tab": true,
+            "animate-right": idx > content,
+            "animate-left": idx < content,
+          })} >
             { component }
           </div>
         ))}
