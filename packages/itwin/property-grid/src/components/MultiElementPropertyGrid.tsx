@@ -112,13 +112,11 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
 
   // since css animation requires all react components be rendered - just move non-active components to the side
   const getAnimationStyle = (idx: MultiElementPropertyContent.PropertyGrid) => {
-    let style: React.CSSProperties;
+    let style: React.CSSProperties = {};
 
-    if (idx === content) {
-      style = { transform: "translate(0,0)" };
-    } else if (idx < content) {
+    if (idx < content) {
       style = { transform: "translate(-100%,0)" };
-    } else {
+    } else if (idx > content) {
       style = { transform: "translate(100%,0)" };
     }
 
