@@ -33,6 +33,11 @@
       "versionPolicyName": "grouping-mapping-widget"
     },
     {
+      "packageName": "@itwin/imodel-react-hooks",
+      "projectFolder": "packages/itwin/imodel-react-hooks",
+      "versionPolicyName": "itwin-imodel-react-hooks"
+    },
+    {
       "packageName": "@itwin/measure-tools-react",
       "projectFolder": "packages/itwin/measure-tools",
       "versionPolicyName": "itwin-measure-tools"

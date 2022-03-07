@@ -3,16 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import {
-  DecorateContext,
-  Decorator,
-  IModelApp,
-  Viewport,
-} from "@bentley/imodeljs-frontend";
+import type { DecorateContext, Decorator, Viewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { IModelJsMarker } from "./Marker";
-import { makeContextWithProviderRequired } from "./utils";
+import type { IModelJsMarker } from "./Marker/useMarker";
+import { makeContextWithProviderRequired } from "./utils/react-context";
 
 /**
  * @internal the MarkerDecorationContext is for internal use only and
@@ -75,17 +71,19 @@ export const IModelJsViewProvider = ({
   }, [viewFilter]);
 
   useEffect(() => {
-    IModelApp.viewManager.addDecorator(decoratorInstance);
+    const removeDecorator = IModelApp.viewManager.addDecorator(decoratorInstance);
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    () => () => IModelApp.viewManager.dropDecorator(decoratorInstance);
+    return () => removeDecorator();
   }, [decoratorInstance]);
 
   const enqueueViewInvalidation = useCallback(
     () =>
       setTimeout(() => {
-        IModelApp.viewManager.forEachViewport((vp) => {
-          if (viewFilter?.(vp) ?? true) vp.invalidateDecorations();
-        })
+        for (const vp of IModelApp.viewManager) {
+          if (viewFilter?.(vp) ?? true) {
+            vp.invalidateDecorations();
+          }
+        }
       }),
     []
   );
@@ -132,7 +130,7 @@ export const IModelJsViewProvider = ({
     ]
   );
 
-  //clear order list before rendering?
+  // clear order list before rendering?
 
   return (
     <MarkerDecorationContext.Provider value={contextState}>

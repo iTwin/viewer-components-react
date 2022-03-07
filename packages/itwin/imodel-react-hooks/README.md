@@ -28,7 +28,7 @@ Otherwise, try this pattern for integrating any class into your React state:
 ```tsx
 import React, { useContext } from "react";
 import { UserContext, UserContextType } from "./MyApplicationsContexts";
-import { PrimitiveTool, BeButtonEvent } from "@bentley/imodeljs-frontend";
+import { PrimitiveTool, BeButtonEvent } from "@itwin/core-frontend";
 
 const ToolProvider = () => {
   const userContext = useContext(UserContext);
@@ -70,9 +70,9 @@ heavy-duty markers, and other iModel.js subclass-style APIs should prefer this t
 
 ```tsx
 import React from "react";
-import { IModelJsViewProvider, useMarker } from "@bentley/imodel-react-hooks";
+import { IModelJsViewProvider, useMarker } from "@itwin/imodel-react-hooks";
 import mySvgUrl from "my.svg";
-import { Point2d } from "@bentley/geometry-core";
+import { Point2d } from "@itwin/core-geometry";
 
 const MyPin = (props) => {
   const [clicked, setClicked] = React.useState(false);
@@ -122,9 +122,9 @@ See examples in the [Recipes](recipes) folder.
 
 ### `IModelJsViewProvider`
 
-| Property   | Type                         | Description | Default                                                         |
-| ---------- | ---------------------------- | ----------- | --------------------------------------------------------------- |
-| viewFilter | `((vp: Viewport) => boolean) \| undefined`  | Filter which vps marker decorations are allowed to be drawn in. | Draw markers in all vps that can be invalidated |
+| Property   | Type                                       | Description                                                     | Default                                         |
+| ---------- | ------------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------- |
+| viewFilter | `((vp: Viewport) => boolean) \| undefined` | Filter which vps marker decorations are allowed to be drawn in. | Draw markers in all vps that can be invalidated |
 
 ### `useMarker(options: UseMarkerOptions): void`
 
@@ -133,16 +133,16 @@ The options come from the fields of the
 
 There are however, a few deviations:
 
-| Name in Marker | Type in Marker | Name in useMarker | Type in useMarker   | Note                   |
-| -------------- | -------------- | ----------------- | ------------------- | ---------------------- |
-| \_scaleFactor  | `Range1dProps` | scaleFactor       | `Range1dProps \| undefined`             | \_scaleFactor as an option, so you can set it without subclassing (since it's protected) |
-| \_isHilited    | `boolean`      | isHilited         | `boolean \| undefined`             | \_isHilited as an option, so you can set it without subclassing (since it's protected) |
-| \_hiliteColor  | `ColorDef`     | hiliteColor       | `ColorDef \| undefined`             | \_hiliteColor as an option, so you can set it without subclassing (since it's protected) |
-| image          | `boolean`      | image             | `string \| MarkerImage \| Promise<MarkerImage>` | replacement for `Marker.setImage` and `Marker.setImageUrl`, accepts urls, loaded images, and promises to images and invalidates the view when the promise resolves |
-| N/A            | N/A            | jsxElement        | `React.ReactElement \| undefined`             | like htmlElement, but the JSX Element will create the htmlElement for you (used to override the htmlElement) |
-| size           | `Point2d`      | size              | `Point2d \| {x: number, y: number} \| [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
-| imageSize      | `Point2d`      | imageSize         | `Point2d \| {x: number, y: number} \| [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
-| imageOffset    | `Point2d`      | imageOffset       | `Point2d \| {x: number, y: number} \| [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you. |
+| Name in Marker | Type in Marker | Name in useMarker | Type in useMarker                                       | Note                                                                                                                                                               |
+| -------------- | -------------- | ----------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| \_scaleFactor  | `Range1dProps` | scaleFactor       | `Range1dProps \| undefined`                             | \_scaleFactor as an option, so you can set it without subclassing (since it's protected)                                                                           |
+| \_isHilited    | `boolean`      | isHilited         | `boolean \| undefined`                                  | \_isHilited as an option, so you can set it without subclassing (since it's protected)                                                                             |
+| \_hiliteColor  | `ColorDef`     | hiliteColor       | `ColorDef \| undefined`                                 | \_hiliteColor as an option, so you can set it without subclassing (since it's protected)                                                                           |
+| image          | `boolean`      | image             | `string \| MarkerImage \| Promise<MarkerImage>`         | replacement for `Marker.setImage` and `Marker.setImageUrl`, accepts urls, loaded images, and promises to images and invalidates the view when the promise resolves |
+| N/A            | N/A            | jsxElement        | `React.ReactElement \| undefined`                       | like htmlElement, but the JSX Element will create the htmlElement for you (used to override the htmlElement)                                                       |
+| size           | `Point2d`      | size              | `Point2d \| {x: number, y: number} \| [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you.                                     |
+| imageSize      | `Point2d`      | imageSize         | `Point2d \| {x: number, y: number} \| [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you.                                     |
+| imageOffset    | `Point2d`      | imageOffset       | `Point2d \| {x: number, y: number} \| [number, number]` | for simpler code, useMarker can convert json point representations (arrays or objects containing an `x` and `y` prop) for you.                                     |
 
 ### How it works
 
@@ -155,8 +155,8 @@ import React, { useState } from "react";
 import {
   FeatureOverrideReactProvider,
   useFeatureOverrides,
-} from "@bentley/imodel-react-hooks";
-import { FeatureSymbology } from "@bentley/imodeljs-frontend";
+} from "@itwin/imodel-react-hooks";
+import { FeatureSymbology } from "@itwin/core-frontend";
 import { RgbColor } from "@bentley/imodeljs-common";
 import { myAppState, C } from "./appState";
 
@@ -227,13 +227,13 @@ There are no recipes for this hook yet, but there is room for one to be contribu
 
 ### `useFeatureOverrides(options: UseFeatureOverridesOpts, deps: any[]): void`
 
-| Option           | Type                                                                  | Note                                                                                             |
-| ---------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| overrider        | `(overrides: FeatureSymbology.Overrides, viewport: Viewport) => void` | the code to run in the `FeatureOverrideProvider.addFeatureOverrides` function for this component |
-| completeOverride | `boolean \| undefined`                                                                                       | whether to skip previous components in the component tree and go straight to this one, useful for performance savings when you're overriding everything and allowing earlier components to add overrides would be redundant. |
+| Option           | Type                                                                  | Note                                                                                                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| overrider        | `(overrides: FeatureSymbology.Overrides, viewport: Viewport) => void` | the code to run in the `FeatureOverrideProvider.addFeatureOverrides` function for this component                                                                                                                             |
+| completeOverride | `boolean \| undefined`                                                | whether to skip previous components in the component tree and go straight to this one, useful for performance savings when you're overriding everything and allowing earlier components to add overrides would be redundant. |
 
 ### `FeatureOverrideReactProvider`
 
-| Property   | Type                               | Description | Default                                                                      |
-| ---------- | ---------------------------------- | ----------- | ---------------------------------------------------------------------------- |
-| viewFilter | `((viewport: Viewport) => boolean) \| undefined`  | A predicate function which filters which viewports to apply the overrides in | apply overrides in every viewport |
+| Property   | Type                                             | Description                                                                  | Default                           |
+| ---------- | ------------------------------------------------ | ---------------------------------------------------------------------------- | --------------------------------- |
+| viewFilter | `((viewport: Viewport) => boolean) \| undefined` | A predicate function which filters which viewports to apply the overrides in | apply overrides in every viewport |

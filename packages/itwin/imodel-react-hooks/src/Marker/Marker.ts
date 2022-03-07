@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
-import { useMarker, UseMarkerOptions } from "./useMarker";
+import type { UseMarkerOptions } from "./useMarker";
+import { useMarker } from "./useMarker";
 
 // NOTE: if useMarker starts returning the marker instance (e.g. for eventual clustering impl)
 // the equivalent for the Marker component should be a ref which we can do with useImperativeHandle

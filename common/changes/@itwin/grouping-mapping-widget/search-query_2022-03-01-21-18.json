@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Added more error handling and reduced verbosity",
+      "comment": "Added ability to search for elements using search terms",
       "type": "patch"
     }
   ],

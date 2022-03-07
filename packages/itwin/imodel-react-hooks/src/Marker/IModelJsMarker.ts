@@ -3,12 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import { Point2d } from "@itwin/core-geometry";
+import type { ColorDef } from "@itwin/core-common";
+import { Marker } from "@itwin/core-frontend";
 
-import { Point2d } from "@bentley/geometry-core";
-import { ColorDef } from "@bentley/imodeljs-common";
-import { Marker } from "@bentley/imodeljs-frontend";
-
-import { UseMarkerOptions } from "./useMarker";
+import type { UseMarkerOptions } from "./useMarker";
 
 /** mapping from protected interface implemented by derived Marker types to public hook interface*/
 const hookChangedInterfaceMapping = {

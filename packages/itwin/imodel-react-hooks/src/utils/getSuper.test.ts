@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-
 import { getSuper } from "./getSuper";
 
 describe("function getSuper", () => {
@@ -16,7 +15,7 @@ describe("function getSuper", () => {
     }
 
     class B extends A {
-      f() {
+      override f() {
         super.f();
       }
     }
@@ -27,7 +26,7 @@ describe("function getSuper", () => {
     innerCall.mockClear();
 
     class C extends A {
-      f() {
+      override f() {
         getSuper(this).f();
       }
     }
