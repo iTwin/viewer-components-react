@@ -7,7 +7,7 @@ import type { Ruleset } from "@itwin/presentation-common";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
 import IMODEL_CONTENT_RULESET from "../rulesets/IModelContent.json";
-import { AutoSizer } from "./AutoSizer";
+import { AutoSizer } from "../utils/AutoSizer";
 import classNames from "classnames";
 import type { IModelContentTreeProps } from "../../types";
 

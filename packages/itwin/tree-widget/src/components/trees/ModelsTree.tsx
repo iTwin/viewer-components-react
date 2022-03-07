@@ -14,7 +14,7 @@ import type {
 } from "@itwin/core-common";
 import { TreeHeaderComponent } from "../header/TreeHeader";
 import type { ModelTreeProps } from "../../types";
-import { AutoSizer } from "./AutoSizer";
+import { AutoSizer } from "../utils/AutoSizer";
 
 interface TreeViewModelInfo {
   id: string;

@@ -10,7 +10,7 @@ import "./CategoriesTree.scss";
 import { TreeHeaderComponent } from "../header/TreeHeader";
 import { CategoryVisibilityHandler } from "@itwin/appui-react";
 import type { CategoriesTreeProps } from "../../types";
-import { AutoSizer } from "./AutoSizer";
+import { AutoSizer } from "../utils/AutoSizer";
 
 export function CategoriesTreeComponent(props: CategoriesTreeProps) {
   const iModel = useActiveIModelConnection();
