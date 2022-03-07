@@ -9,10 +9,12 @@ import type {
   UiItemsProvider,
 } from "@itwin/appui-abstract";
 import {
+  AbstractZoneLocation,
   StagePanelLocation,
+
   StageUsage,
 } from "@itwin/appui-abstract";
-import { ClassGroupingOption } from "@itwin/appui-react";
+import { ClassGroupingOption, UiFramework } from "@itwin/appui-react";
 import React from "react";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
 import { CategoriesTreeComponent } from "./trees/CategoriesTree";
@@ -32,12 +34,15 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
     _stageId: string,
     stageUsage: string,
     location: StagePanelLocation,
-    _section: StagePanelSection | undefined
+    section?: StagePanelSection,
+    // eslint-disable-next-line deprecation/deprecation
+    zoneLocation?: AbstractZoneLocation,
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
     if (
-      stageUsage === StageUsage.General &&
-      location === StagePanelLocation.Right
+      // eslint-disable-next-line deprecation/deprecation
+      (!section && stageUsage === StageUsage.General && zoneLocation === AbstractZoneLocation.CenterRight) ||
+      (stageUsage === StageUsage.General && location === StagePanelLocation.Right && UiFramework.uiVersion !== "1")
     ) {
       const trees: SelectableContentDefinition[] = [];
 
