@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { IModelConnection } from "@itwin/core-frontend";
-import {
+import type {
   ContentDescriptorRequestOptions,
   Field,
   KeySet,
@@ -102,7 +102,6 @@ const extractPrimitive = (
     classToPropertiesMapping.set(className, []);
   }
 
-
   // Gets property name. Appends path if from navigation.
   const propertyName = navigation
     ? `${navigation.navigationName}.${propertiesField.properties[0].property.name}`
@@ -114,9 +113,8 @@ const extractPrimitive = (
 
   // Ignore hardcoded BisCore navigation properties
   if (propertiesField.type.typeName === "navigation") {
-    return
-  }
-  else {
+    return;
+  } else {
     classToPropertiesMapping.get(className)?.push({
       name: propertyName,
       label,
@@ -299,9 +297,9 @@ const GroupPropertyAction = ({
           }],
       };
       const requestOptions: ContentDescriptorRequestOptions<
-        IModelConnection,
-        KeySet,
-        RulesetVariable
+      IModelConnection,
+      KeySet,
+      RulesetVariable
       > = {
         imodel: iModelConnection,
         keys: keySet,
