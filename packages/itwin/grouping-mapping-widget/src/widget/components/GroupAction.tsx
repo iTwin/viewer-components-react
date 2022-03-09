@@ -14,7 +14,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
-import { fetchIdsFromQuery, handleError, handleInputChange, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { Group } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -309,8 +309,8 @@ const GroupAction = ({
               icon={<SvgSearch />}
               name={"groupby"}
               onChange={changeGroupByType}
-              value={"Search"}
-              label={"Search"}
+              value={"Query Keywords"}
+              label={"Query Keywords"}
             />
           </RadioTileGroup>
           {groupByType === "Selection" ?
@@ -327,15 +327,18 @@ const GroupAction = ({
               <GroupQueryBuilderContainer />
             </GroupQueryBuilderContext.Provider> :
             <div className="search-form">
-              <Text>Generate a query by searching with words. Words wrapped in double quotes will be considered a required search criteria.</Text>
+              <Text>Generate a query by keywords. Keywords wrapped in double quotes will be considered a required criteria.</Text>
               <LabeledTextarea
-                label="Search"
+                label="Query Keywords"
                 required
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
                 disabled={isLoading}
                 placeholder={`ex: wall curtain "panel" facade`} />
               <div className="search-actions">
+                {isLoading &&
+                  <LoadingSpinner />
+                }
                 <Button disabled={isLoading} onClick={() => generateSearchQuery(searchInput ? searchInput.split(" ") : [])}>Apply</Button>
                 <Button disabled={isLoading} onClick={() => {
                   setQuery("");
