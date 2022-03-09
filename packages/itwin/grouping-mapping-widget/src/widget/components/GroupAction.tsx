@@ -14,7 +14,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
-import { fetchIdsFromQuery, handleError, handleInputChange, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { Group } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -336,6 +336,9 @@ const GroupAction = ({
                 disabled={isLoading}
                 placeholder={`ex: wall curtain "panel" facade`} />
               <div className="search-actions">
+                {isLoading &&
+                  <LoadingSpinner />
+                }
                 <Button disabled={isLoading} onClick={() => generateSearchQuery(searchInput ? searchInput.split(" ") : [])}>Apply</Button>
                 <Button disabled={isLoading} onClick={() => {
                   setQuery("");

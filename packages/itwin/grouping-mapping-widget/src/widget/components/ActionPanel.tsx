@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Button, IconButton, ProgressRadial } from "@itwin/itwinui-react";
+import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
 import "./ActionPanel.scss";
 
@@ -22,20 +22,14 @@ const ActionPanel = ({
   return (
     <div id='action' className='action-panel-container'>
       <div className='action-panel'>
-        {isLoading ? (
-          <IconButton styleType='high-visibility'>
-            <ProgressRadial size="small" indeterminate />
-          </IconButton>
-        ) : (
-          <Button
-            disabled={disabled}
-            styleType='high-visibility'
-            id='save-app'
-            onClick={onSave}
-          >
-            Save
-          </Button>
-        )}
+        <Button
+          disabled={disabled || isLoading}
+          styleType='high-visibility'
+          id='save-app'
+          onClick={onSave}
+        >
+          Save
+        </Button>
         <Button
           styleType='default'
           type='button'
