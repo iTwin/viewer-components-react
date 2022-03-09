@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "remove react-spring dependency, and replaced grid animation with css",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
