@@ -6,7 +6,6 @@ import * as React from "react";
 import { Orientation } from "@itwin/core-react";
 import { PrimitivePropertyLabelRenderer } from "@itwin/components-react";
 import type { HighlightingComponentProps } from "@itwin/components-react/lib/cjs/components-react/common/HighlightingComponentProps";
-import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
 import { HighlightedText } from "@itwin/components-react/lib/cjs/components-react/common/HighlightedText";
 
 import { PropertyView } from "./PropertyView";
