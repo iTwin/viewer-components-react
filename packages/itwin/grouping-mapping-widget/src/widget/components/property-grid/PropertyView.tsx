@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import type { PropertyRecord} from "@itwin/appui-abstract";
+import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { ElementSeparator, Orientation } from "@itwin/core-react";
 import { ActionButtonList } from "@itwin/components-react";
@@ -33,6 +33,7 @@ export interface PropertyViewProps extends SharedRendererProps {
  */
 export const PropertyView = (props: PropertyViewProps) => {
   const context = React.useContext(GroupQueryBuilderContext);
+  const [isCheckboxLoading, setIsCheckboxLoading] = React.useState(false);
 
   const _validatePropertySelection = () => {
     if (context.currentPropertyList.includes(props.propertyRecord)) {
@@ -92,6 +93,9 @@ export const PropertyView = (props: PropertyViewProps) => {
         !context.currentPropertyList.includes(prop) &&
         prop.value.valueFormat === PropertyValueFormat.Primitive
       ) {
+        if (prop.value.displayValue) {
+          setIsCheckboxLoading(true);
+        }
         context.setCurrentPropertyList(
           context.currentPropertyList.concat(prop)
         );
@@ -194,6 +198,11 @@ export const PropertyView = (props: PropertyViewProps) => {
     }
   }, [context.currentPropertyList, props.propertyRecord]);
 
+  React.useEffect(() => {
+    if (!context.isRendering)
+      setIsCheckboxLoading(false);
+  }, [context.isRendering]);
+
   const _onPropertySelectionChanged = () => {
     setIsPropertySelected(!isPropertySelected);
   };
@@ -275,6 +284,8 @@ export const PropertyView = (props: PropertyViewProps) => {
             className='components-property-selection-checkbox'
             checked={isPropertySelected}
             onChange={_onPropertySelectionChanged}
+            disabled={context.isLoading || context.isRendering}
+            isLoading={isCheckboxLoading}
           />
         )}
         {props.labelElement}

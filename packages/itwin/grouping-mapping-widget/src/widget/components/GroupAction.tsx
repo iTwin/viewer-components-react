@@ -52,6 +52,7 @@ const GroupAction = ({
   const [simpleQuery, setSimpleQuery] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isRendering, setIsRendering] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
   PropertyRecord[]
   >([]);
@@ -98,7 +99,7 @@ const GroupAction = ({
           return;
         }
 
-        setIsLoading(true);
+        setIsRendering(true);
         const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
         const resolvedHiliteIds = await visualizeElementsById(
           ids,
@@ -109,7 +110,7 @@ const GroupAction = ({
       } catch {
         toaster.negative("Sorry, we have failed to generate a valid query. 😔");
       } finally {
-        setIsLoading(false);
+        setIsRendering(false);
       }
     };
 
@@ -304,6 +305,7 @@ const GroupAction = ({
               defaultChecked
               value={"Selection"}
               label={"Selection"}
+              disabled={isLoading || isRendering}
             />
             <RadioTile
               icon={<SvgSearch />}
@@ -311,6 +313,7 @@ const GroupAction = ({
               onChange={changeGroupByType}
               value={"Query Keywords"}
               label={"Query Keywords"}
+              disabled={isLoading || isRendering}
             />
           </RadioTileGroup>
           {groupByType === "Selection" ?
@@ -322,6 +325,8 @@ const GroupAction = ({
                 setQuery,
                 queryBuilder,
                 setQueryBuilder,
+                isLoading,
+                isRendering,
               }}
             >
               <GroupQueryBuilderContainer />
@@ -333,14 +338,14 @@ const GroupAction = ({
                 required
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                disabled={isLoading}
+                disabled={isLoading || isRendering}
                 placeholder={`ex: wall curtain "panel" facade`} />
               <div className="search-actions">
-                {isLoading &&
+                {isRendering &&
                   <LoadingSpinner />
                 }
-                <Button disabled={isLoading} onClick={() => generateSearchQuery(searchInput ? searchInput.split(" ") : [])}>Apply</Button>
-                <Button disabled={isLoading} onClick={() => {
+                <Button disabled={isLoading || isRendering} onClick={() => generateSearchQuery(searchInput ? searchInput.split(" ") : [])}>Apply</Button>
+                <Button disabled={isLoading || isRendering} onClick={() => {
                   setQuery("");
                   setSearchInput("");
                 }}>Clear</Button>
@@ -361,7 +366,7 @@ const GroupAction = ({
           await goBack();
         }}
         disabled={
-          !(details.groupName && details.description && (query || simpleQuery))
+          !(details.groupName && details.description && (query || simpleQuery) && !isRendering && !isLoading)
         }
         isLoading={isLoading}
       />
