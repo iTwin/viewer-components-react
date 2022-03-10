@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed overlapping seperator in group by selection pane",
+      "comment": "Fixed overlapping seperator in group by selection pane and polished loading spinners",
       "type": "patch"
     }
   ],

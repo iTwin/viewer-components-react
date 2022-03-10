@@ -58,6 +58,18 @@ $text-font-color: $buic-text-color;
     position: absolute;
     z-index: 1;
   }
+  // Radial does not respect checkbox positioning, have to force it.
+  > .iui-progress-indicator-radial {
+    position: absolute;
+  }
+  .components-property-selection-loading {
+    display: flex;
+    width: $iui-m;
+    height: $iui-m;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 }
 
 .components-property-record-value {

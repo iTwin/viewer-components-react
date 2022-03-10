@@ -5,6 +5,7 @@
 import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
 import "./ActionPanel.scss";
+import { LoadingSpinner } from "./utils";
 
 export interface ActionPanelProps {
   onSave: () => void;
@@ -22,6 +23,9 @@ const ActionPanel = ({
   return (
     <div id='action' className='action-panel-container'>
       <div className='action-panel'>
+        {isLoading &&
+          <LoadingSpinner />
+        }
         <Button
           disabled={disabled || isLoading}
           styleType='high-visibility'
@@ -35,7 +39,7 @@ const ActionPanel = ({
           type='button'
           id='cancel'
           onClick={onCancel}
-          disabled={isLoading}
+          disabled={disabled || isLoading}
         >
           Cancel
         </Button>

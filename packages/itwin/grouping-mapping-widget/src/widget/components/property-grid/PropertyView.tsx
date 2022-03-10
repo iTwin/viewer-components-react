@@ -13,7 +13,7 @@ import type { SharedRendererProps } from "./PropertyRender";
 import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
 import { useCallback } from "react";
 import { PropertyGridColumnStyleProvider } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
-import { Checkbox } from "@itwin/itwinui-react";
+import { Checkbox, ProgressRadial } from "@itwin/itwinui-react";
 
 /** Properties of [[PropertyView]] React component
  * @public
@@ -33,6 +33,7 @@ export interface PropertyViewProps extends SharedRendererProps {
  */
 export const PropertyView = (props: PropertyViewProps) => {
   const context = React.useContext(GroupQueryBuilderContext);
+  const [isCheckboxLoading, setIsCheckboxLoading] = React.useState(false);
 
   const _validatePropertySelection = () => {
     if (context.currentPropertyList.includes(props.propertyRecord)) {
@@ -87,6 +88,7 @@ export const PropertyView = (props: PropertyViewProps) => {
 
   const _addSelectedProperty = useCallback(
     async (prop: PropertyRecord) => {
+      setIsCheckboxLoading(true);
       // TODO: roof selected item/category value is an object but format is primitive(needs further exploration)
       if (
         !context.currentPropertyList.includes(prop) &&
@@ -194,6 +196,11 @@ export const PropertyView = (props: PropertyViewProps) => {
     }
   }, [context.currentPropertyList, props.propertyRecord]);
 
+  React.useEffect(() => {
+    if (!context.isRendering)
+      setIsCheckboxLoading(false);
+  }, [context.isRendering]);
+
   const _onPropertySelectionChanged = () => {
     setIsPropertySelected(!isPropertySelected);
   };
@@ -275,6 +282,8 @@ export const PropertyView = (props: PropertyViewProps) => {
             className='components-property-selection-checkbox'
             checked={isPropertySelected}
             onChange={_onPropertySelectionChanged}
+            disabled={context.isLoading || context.isRendering}
+            isLoading={isCheckboxLoading}
           />
         )}
         {props.labelElement}
