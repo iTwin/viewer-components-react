@@ -4,12 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 import {
   Button,
-  IconButton,
   Leading,
   MiddleTextTruncation,
   Modal,
-  ModalButtonBar,
-  ProgressRadial,
+  ModalButtonBar
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import "./DeleteModal.scss";

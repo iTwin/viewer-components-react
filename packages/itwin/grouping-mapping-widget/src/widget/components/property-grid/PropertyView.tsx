@@ -13,7 +13,7 @@ import type { SharedRendererProps } from "./PropertyRender";
 import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
 import { useCallback } from "react";
 import { PropertyGridColumnStyleProvider } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
-import { Checkbox, ProgressRadial } from "@itwin/itwinui-react";
+import { Checkbox } from "@itwin/itwinui-react";
 
 /** Properties of [[PropertyView]] React component
  * @public
@@ -278,14 +278,14 @@ export const PropertyView = (props: PropertyViewProps) => {
       <div className='components-property-record-label'>
         {props.propertyRecord.value.valueFormat ===
           PropertyValueFormat.Primitive && (
-          <Checkbox
-            className='components-property-selection-checkbox'
-            checked={isPropertySelected}
-            onChange={_onPropertySelectionChanged}
-            disabled={context.isLoading || context.isRendering}
-            isLoading={isCheckboxLoading}
-          />
-        )}
+            <Checkbox
+              className='components-property-selection-checkbox'
+              checked={isPropertySelected}
+              onChange={_onPropertySelectionChanged}
+              disabled={context.isLoading || context.isRendering}
+              isLoading={isCheckboxLoading}
+            />
+          )}
         {props.labelElement}
       </div>
       {needElementSeparator ? (
@@ -302,14 +302,14 @@ export const PropertyView = (props: PropertyViewProps) => {
       ) : undefined}
       {props.propertyRecord.value.valueFormat ===
         PropertyValueFormat.Primitive ? (
-          <div className='components-property-record-value'>
-            <span>
-              {props.valueElementRenderer
-                ? props.valueElementRenderer()
-                : props.valueElement}
-            </span>
-          </div>
-        ) : undefined}
+        <div className='components-property-record-value'>
+          <span>
+            {props.valueElementRenderer
+              ? props.valueElementRenderer()
+              : props.valueElement}
+          </span>
+        </div>
+      ) : undefined}
       {props.actionButtonRenderers ? (
         <ActionButtonList
           orientation={props.orientation}
