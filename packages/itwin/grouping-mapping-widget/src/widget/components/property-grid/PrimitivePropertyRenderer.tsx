@@ -63,7 +63,7 @@ export class PrimitivePropertyRenderer extends React.Component<PrimitiveRenderer
         {...props}
         labelElement={
           <PrimitivePropertyLabelRenderer
-            //Added offset to account for checkbox
+            // Added offset to account for checkbox
             offset={24}
             renderColon={this.props.orientation === Orientation.Horizontal}
             tooltip={displayLabel}
