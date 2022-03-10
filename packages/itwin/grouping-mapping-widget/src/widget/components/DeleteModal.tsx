@@ -7,7 +7,7 @@ import {
   Leading,
   MiddleTextTruncation,
   Modal,
-  ModalButtonBar
+  ModalButtonBar,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import "./DeleteModal.scss";
