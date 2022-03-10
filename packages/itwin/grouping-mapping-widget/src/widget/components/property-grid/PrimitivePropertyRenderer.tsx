@@ -46,7 +46,7 @@ export class PrimitivePropertyRenderer extends React.Component<PrimitiveRenderer
 
     const activeMatchIndex =
       this.props.propertyRecord.property.name ===
-      highlight?.activeHighlight?.highlightedItemIdentifier
+        highlight?.activeHighlight?.highlightedItemIdentifier
         ? highlight.activeHighlight.highlightIndex
         : undefined;
     const label = highlight
@@ -62,7 +62,7 @@ export class PrimitivePropertyRenderer extends React.Component<PrimitiveRenderer
         {...props}
         labelElement={
           <PrimitivePropertyLabelRenderer
-            offset={offset}
+            offset={offset + 24}
             renderColon={this.props.orientation === Orientation.Horizontal}
             tooltip={displayLabel}
           >

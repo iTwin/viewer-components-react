@@ -52,9 +52,11 @@ $text-font-color: $buic-text-color;
 
 .components-property-record-label {
   @include record-cell;
+  position: relative;
   .components-property-selection-checkbox {
-    margin-right: $iui-s;
     flex-shrink: 0;
+    position: absolute;
+    z-index: 1;
   }
 }
 
