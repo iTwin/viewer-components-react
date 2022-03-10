@@ -36,14 +36,6 @@ export class PrimitivePropertyRenderer extends React.Component<PrimitiveRenderer
   public override render() {
     const { indentation, highlight, ...props } = this.props;
     const displayLabel = this.props.propertyRecord.property.displayLabel;
-    const offset = CommonPropertyRenderer.getLabelOffset(
-      indentation,
-      props.orientation,
-      props.width,
-      props.columnRatio,
-      props.columnInfo?.minLabelWidth,
-    );
-
     const activeMatchIndex =
       this.props.propertyRecord.property.name ===
         highlight?.activeHighlight?.highlightedItemIdentifier
@@ -63,7 +55,7 @@ export class PrimitivePropertyRenderer extends React.Component<PrimitiveRenderer
         labelElement={
           <PrimitivePropertyLabelRenderer
             // Added label offset to account for checkbox
-            offset={offset + 24}
+            offset={24}
             renderColon={this.props.orientation === Orientation.Horizontal}
             tooltip={displayLabel}
           >
