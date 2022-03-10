@@ -33,7 +33,7 @@ export interface PrimitiveRendererProps extends SharedRendererProps {
 export class PrimitivePropertyRenderer extends React.Component<PrimitiveRendererProps> {
   /** @internal */
   public override render() {
-    const { indentation, highlight, ...props } = this.props;
+    const { highlight, ...props } = this.props;
     const displayLabel = this.props.propertyRecord.property.displayLabel;
     // TODO Refactor this to consider checkbox.
     // const offset = CommonPropertyRenderer.getLabelOffset(
