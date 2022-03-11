@@ -180,7 +180,7 @@ PropertyRendererState
 
   /** @internal */
   public override render() {
-    const { children, propertyValueRendererManager, isEditing, onEditCommit, onEditCancel, ...props } = this.props; // eslint-disable-line @typescript-eslint/no-unused-vars
+    const { ...props } = this.props;
     const primitiveRendererProps: PrimitiveRendererProps = {
       ...props,
       valueElement: this.state.displayValue,
