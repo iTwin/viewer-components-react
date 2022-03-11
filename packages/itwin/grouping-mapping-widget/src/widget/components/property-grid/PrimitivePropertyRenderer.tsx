@@ -6,7 +6,6 @@ import * as React from "react";
 import { Orientation } from "@itwin/core-react";
 import { PrimitivePropertyLabelRenderer } from "@itwin/components-react";
 import type { HighlightingComponentProps } from "@itwin/components-react/lib/cjs/components-react/common/HighlightingComponentProps";
-import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
 import { HighlightedText } from "@itwin/components-react/lib/cjs/components-react/common/HighlightedText";
 
 import { PropertyView } from "./PropertyView";
@@ -34,19 +33,20 @@ export interface PrimitiveRendererProps extends SharedRendererProps {
 export class PrimitivePropertyRenderer extends React.Component<PrimitiveRendererProps> {
   /** @internal */
   public override render() {
-    const { indentation, highlight, ...props } = this.props;
+    const { highlight, ...props } = this.props;
     const displayLabel = this.props.propertyRecord.property.displayLabel;
-    const offset = CommonPropertyRenderer.getLabelOffset(
-      indentation,
-      props.orientation,
-      props.width,
-      props.columnRatio,
-      props.columnInfo?.minLabelWidth,
-    );
+    // TODO Refactor this to consider checkbox.
+    // const offset = CommonPropertyRenderer.getLabelOffset(
+    //   indentation,
+    //   props.orientation,
+    //   props.width,
+    //   props.columnRatio,
+    //   props.columnInfo?.minLabelWidth,
+    // );
 
     const activeMatchIndex =
       this.props.propertyRecord.property.name ===
-      highlight?.activeHighlight?.highlightedItemIdentifier
+        highlight?.activeHighlight?.highlightedItemIdentifier
         ? highlight.activeHighlight.highlightIndex
         : undefined;
     const label = highlight
@@ -62,7 +62,8 @@ export class PrimitivePropertyRenderer extends React.Component<PrimitiveRenderer
         {...props}
         labelElement={
           <PrimitivePropertyLabelRenderer
-            offset={offset}
+            // Added offset to account for checkbox
+            offset={24}
             renderColon={this.props.orientation === Orientation.Horizontal}
             tooltip={displayLabel}
           >

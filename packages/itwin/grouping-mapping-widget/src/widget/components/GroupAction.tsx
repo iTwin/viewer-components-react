@@ -14,7 +14,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
-import { fetchIdsFromQuery, handleError, handleInputChange, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { Group } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -52,6 +52,7 @@ const GroupAction = ({
   const [simpleQuery, setSimpleQuery] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isRendering, setIsRendering] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
   PropertyRecord[]
   >([]);
@@ -98,7 +99,7 @@ const GroupAction = ({
           return;
         }
 
-        setIsLoading(true);
+        setIsRendering(true);
         const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
         const resolvedHiliteIds = await visualizeElementsById(
           ids,
@@ -109,7 +110,7 @@ const GroupAction = ({
       } catch {
         toaster.negative("Sorry, we have failed to generate a valid query. 😔");
       } finally {
-        setIsLoading(false);
+        setIsRendering(false);
       }
     };
 
@@ -304,13 +305,15 @@ const GroupAction = ({
               defaultChecked
               value={"Selection"}
               label={"Selection"}
+              disabled={isLoading || isRendering}
             />
             <RadioTile
               icon={<SvgSearch />}
               name={"groupby"}
               onChange={changeGroupByType}
-              value={"Search"}
-              label={"Search"}
+              value={"Query Keywords"}
+              label={"Query Keywords"}
+              disabled={isLoading || isRendering}
             />
           </RadioTileGroup>
           {groupByType === "Selection" ?
@@ -322,22 +325,27 @@ const GroupAction = ({
                 setQuery,
                 queryBuilder,
                 setQueryBuilder,
+                isLoading,
+                isRendering,
               }}
             >
               <GroupQueryBuilderContainer />
             </GroupQueryBuilderContext.Provider> :
             <div className="search-form">
-              <Text>Generate a query by searching with words. Words wrapped in double quotes will be considered a required search criteria.</Text>
+              <Text>Generate a query by keywords. Keywords wrapped in double quotes will be considered a required criteria.</Text>
               <LabeledTextarea
-                label="Search"
+                label="Query Keywords"
                 required
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                disabled={isLoading}
+                disabled={isLoading || isRendering}
                 placeholder={`ex: wall curtain "panel" facade`} />
               <div className="search-actions">
-                <Button disabled={isLoading} onClick={() => generateSearchQuery(searchInput ? searchInput.split(" ") : [])}>Apply</Button>
-                <Button disabled={isLoading} onClick={() => {
+                {isRendering &&
+                  <LoadingSpinner />
+                }
+                <Button disabled={isLoading || isRendering} onClick={() => generateSearchQuery(searchInput ? searchInput.split(" ") : [])}>Apply</Button>
+                <Button disabled={isLoading || isRendering} onClick={() => {
                   setQuery("");
                   setSearchInput("");
                 }}>Clear</Button>
@@ -358,7 +366,7 @@ const GroupAction = ({
           await goBack();
         }}
         disabled={
-          !(details.groupName && details.description && (query || simpleQuery))
+          !(details.groupName && details.description && (query || simpleQuery) && !isRendering && !isLoading)
         }
         isLoading={isLoading}
       />

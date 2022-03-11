@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/expandable/list";
-@import "~@itwin/core-react/lib/cjs/core-react/scrollbar";
+@import '~@itwin/core-react/lib/cjs/core-react/expandable/list';
+@import '~@itwin/core-react/lib/cjs/core-react/scrollbar';
 
 .gm-components-property-grid-loader {
   display: flex;
@@ -61,7 +61,7 @@
   @include components-property-list;
 
   display: grid;
-  grid-row-gap: 1px; // A gap of 10px is too wasteful
+  grid-row-gap: 0px;
   overflow: hidden;
 }
 
