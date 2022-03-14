@@ -111,11 +111,16 @@ const extractPrimitive = (
     ? `${propertiesField.label} (${navigation?.navigationName})`
     : propertiesField.label;
 
-  classToPropertiesMapping.get(className)?.push({
-    name: propertyName,
-    label,
-    type: propertiesField.properties[0].property.type,
-  });
+  // Ignore hardcoded BisCore navigation properties
+  if (propertiesField.type.typeName === "navigation") {
+    return;
+  } else {
+    classToPropertiesMapping.get(className)?.push({
+      name: propertyName,
+      label,
+      type: propertiesField.properties[0].property.type,
+    });
+  }
 };
 
 const extractStructProperties = (
@@ -213,6 +218,19 @@ const extractProperties = (
                   rootClassName: className,
                 }
               );
+              // Hardcoded BisCore navigation properties for the type definition.
+              classToPropertiesMapping.get(className)?.push({
+                name: "TypeDefinition.Model.ModeledElement.UserLabel",
+                label: "Model UserLabel (TypeDefinition)",
+                type: "string",
+              });
+
+              classToPropertiesMapping.get(className)?.push({
+                name: "TypeDefinition.Model.ModeledElement.CodeValue",
+                label: "Model CodeValue (TypeDefinition)",
+                type: "string",
+              });
+
             }
             break;
           }
@@ -274,19 +292,9 @@ const GroupPropertyAction = ({
             specifications: [
               {
                 specType: ContentSpecificationTypes.SelectedNodeInstances,
-                // relationshipPaths: [
-                //   {
-                //     relationship: {
-                //       schemaName: "BisCore",
-                //       className: "ElementMultiAspect",
-                //     },
-                //     direction: RelationshipDirection.Forward,
-                //   },
-                // ],
               },
             ],
-          },
-        ],
+          }],
       };
       const requestOptions: ContentDescriptorRequestOptions<
       IModelConnection,
@@ -314,6 +322,33 @@ const GroupPropertyAction = ({
       const classToPropertiesMapping = new Map<string, Property[]>();
 
       extractProperties(properties, classToPropertiesMapping);
+
+      const rootClassName = keySet.instanceKeys.keys().next().value;
+
+      // Hardcoded BisCore navigation properties.
+      classToPropertiesMapping.get(rootClassName)?.push({
+        name: "Model.ModeledElement.UserLabel",
+        label: "Model UserLabel",
+        type: "string",
+      });
+
+      classToPropertiesMapping.get(rootClassName)?.push({
+        name: "Model.ModeledElement.CodeValue",
+        label: "Model CodeValue",
+        type: "string",
+      });
+
+      classToPropertiesMapping.get(rootClassName)?.push({
+        name: "Category.CodeValue",
+        label: "Category CodeValue",
+        type: "string",
+      });
+
+      classToPropertiesMapping.get(rootClassName)?.push({
+        name: "Category.UserLabel",
+        label: "Category UserLabel",
+        type: "string",
+      });
 
       setClassToPropertiesMapping(classToPropertiesMapping);
 
