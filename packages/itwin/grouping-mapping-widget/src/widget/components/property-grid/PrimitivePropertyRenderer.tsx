@@ -10,6 +10,7 @@ import { HighlightedText } from "@itwin/components-react/lib/cjs/components-reac
 
 import { PropertyView } from "./PropertyView";
 import type { SharedRendererProps } from "./PropertyRender";
+import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
 
 /** Properties of [[PrimitivePropertyRenderer]] React component
  * @public
@@ -33,16 +34,15 @@ export interface PrimitiveRendererProps extends SharedRendererProps {
 export class PrimitivePropertyRenderer extends React.Component<PrimitiveRendererProps> {
   /** @internal */
   public override render() {
-    const { highlight, ...props } = this.props;
+    const { highlight, indentation, ...props } = this.props;
     const displayLabel = this.props.propertyRecord.property.displayLabel;
-    // TODO Refactor this to consider checkbox.
-    // const offset = CommonPropertyRenderer.getLabelOffset(
-    //   indentation,
-    //   props.orientation,
-    //   props.width,
-    //   props.columnRatio,
-    //   props.columnInfo?.minLabelWidth,
-    // );
+    const offset = CommonPropertyRenderer.getLabelOffset(
+      indentation,
+      props.orientation,
+      props.width,
+      props.columnRatio,
+      props.columnInfo?.minLabelWidth,
+    );
 
     const activeMatchIndex =
       this.props.propertyRecord.property.name ===
@@ -59,11 +59,11 @@ export class PrimitivePropertyRenderer extends React.Component<PrimitiveRenderer
 
     return (
       <PropertyView
-        {...props}
+        {...this.props}
         labelElement={
           <PrimitivePropertyLabelRenderer
             // Added offset to account for checkbox
-            offset={24}
+            offset={offset + 24}
             renderColon={this.props.orientation === Orientation.Horizontal}
             tooltip={displayLabel}
           >

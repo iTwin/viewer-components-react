@@ -12,6 +12,7 @@ import {
   PropertyValueFormat,
 } from "@itwin/appui-abstract";
 import "core-js/features/string/virtual";
+import { toaster } from "@itwin/itwinui-react";
 
 export interface Query {
   classes: QueryClass[];
@@ -49,13 +50,16 @@ export class QueryBuilder {
     this.dataProvider = provider;
   }
 
-  public async addProperty(prop: PropertyRecord) {
+  public async addProperty(prop: PropertyRecord): Promise<boolean> {
     // TODO: only handle primitive properties now
     if (
-      prop.value?.valueFormat !== PropertyValueFormat.Primitive ||
-      prop.value.value === undefined
+      prop.value?.valueFormat !== PropertyValueFormat.Primitive
     ) {
-      return;
+      toaster.warning("Only primitive types are supported for now.");
+      return false;
+    }
+    if (prop.value.value === undefined) {
+      return false;
     }
 
     function replaceAll(str: string, match: string, replacement: string) {
@@ -74,7 +78,8 @@ export class QueryBuilder {
       prop,
     )) as PropertiesField;
     if (propertyField === undefined) {
-      return;
+      toaster.negative("Error. Failed to fetch field for this property record.");
+      return false;
     }
 
     // get the special cases
@@ -122,6 +127,7 @@ export class QueryBuilder {
         false,
       );
     }
+    return true;
   }
 
   private _needsQuote(propertyField: PropertiesField): boolean {
