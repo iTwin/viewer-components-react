@@ -96,7 +96,6 @@ export const PropertyView = (props: PropertyViewProps) => {
         !context.currentPropertyList.includes(prop) &&
         prop.value.valueFormat === PropertyValueFormat.Primitive
       ) {
-        setIsCheckboxLoading(true);
 
         if (!(await context.queryBuilder.addProperty(prop))) {
           setIsCheckboxLoading(false);
@@ -182,6 +181,7 @@ export const PropertyView = (props: PropertyViewProps) => {
   React.useEffect(() => {
     if (props?.propertyRecord) {
       if (isPropertySelected) {
+        setIsCheckboxLoading(true);
         _addNestedProperties(props.propertyRecord);
       } else {
         _removeNestedProperties(props.propertyRecord);
