@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import type { PropertyRecord} from "@itwin/appui-abstract";
+import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { ElementSeparator, Orientation } from "@itwin/core-react";
 import { ActionButtonList } from "@itwin/components-react";
@@ -14,6 +14,7 @@ import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
 import { useCallback } from "react";
 import { PropertyGridColumnStyleProvider } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
 import { Checkbox } from "@itwin/itwinui-react";
+import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
 
 /** Properties of [[PropertyView]] React component
  * @public
@@ -25,6 +26,8 @@ export interface PropertyViewProps extends SharedRendererProps {
   valueElement?: React.ReactNode;
   /** Render callback for property value. If specified, `valueElement` is ignored. */
   valueElementRenderer?: () => React.ReactNode;
+  /** Multiplier of how much the property is indented to the right */
+  indentation?: number;
 }
 
 /**
@@ -33,6 +36,7 @@ export interface PropertyViewProps extends SharedRendererProps {
  */
 export const PropertyView = (props: PropertyViewProps) => {
   const context = React.useContext(GroupQueryBuilderContext);
+  const [isCheckboxLoading, setIsCheckboxLoading] = React.useState(false);
 
   const _validatePropertySelection = () => {
     if (context.currentPropertyList.includes(props.propertyRecord)) {
@@ -92,10 +96,15 @@ export const PropertyView = (props: PropertyViewProps) => {
         !context.currentPropertyList.includes(prop) &&
         prop.value.valueFormat === PropertyValueFormat.Primitive
       ) {
+
+        if (!(await context.queryBuilder.addProperty(prop))) {
+          setIsCheckboxLoading(false);
+          setIsPropertySelected(false);
+          return;
+        }
         context.setCurrentPropertyList(
           context.currentPropertyList.concat(prop)
         );
-        await context.queryBuilder.addProperty(prop);
         context.setQuery(context.queryBuilder.buildQueryString());
       }
     },
@@ -172,6 +181,7 @@ export const PropertyView = (props: PropertyViewProps) => {
   React.useEffect(() => {
     if (props?.propertyRecord) {
       if (isPropertySelected) {
+        setIsCheckboxLoading(true);
         _addNestedProperties(props.propertyRecord);
       } else {
         _removeNestedProperties(props.propertyRecord);
@@ -185,14 +195,9 @@ export const PropertyView = (props: PropertyViewProps) => {
   ]);
 
   React.useEffect(() => {
-    if (props?.propertyRecord) {
-      if (context.currentPropertyList.includes(props.propertyRecord)) {
-        setIsPropertySelected(true);
-      } else {
-        setIsPropertySelected(false);
-      }
-    }
-  }, [context.currentPropertyList, props.propertyRecord]);
+    if (!context.isRendering)
+      setIsCheckboxLoading(false);
+  }, [context.isRendering]);
 
   const _onPropertySelectionChanged = () => {
     setIsPropertySelected(!isPropertySelected);
@@ -253,6 +258,14 @@ export const PropertyView = (props: PropertyViewProps) => {
     props.columnInfo
   );
 
+  const offset = CommonPropertyRenderer.getLabelOffset(
+    props.indentation,
+    props.orientation,
+    props.width,
+    props.columnRatio,
+    props.columnInfo?.minLabelWidth,
+  );
+
   return (
     <div
       style={columnsStyleProvider.getStyle(
@@ -272,9 +285,12 @@ export const PropertyView = (props: PropertyViewProps) => {
         {props.propertyRecord.value.valueFormat ===
           PropertyValueFormat.Primitive && (
           <Checkbox
+            style={{ marginLeft: offset }}
             className='components-property-selection-checkbox'
             checked={isPropertySelected}
             onChange={_onPropertySelectionChanged}
+            disabled={context.isLoading || context.isRendering || (props.propertyRecord.value.value === undefined)}
+            isLoading={isCheckboxLoading}
           />
         )}
         {props.labelElement}

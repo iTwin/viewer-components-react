@@ -4,16 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 import {
   Button,
-  IconButton,
   Leading,
   MiddleTextTruncation,
   Modal,
   ModalButtonBar,
-  ProgressRadial,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import "./DeleteModal.scss";
-import { handleError } from "./utils";
+import { handleError, LoadingSpinner } from "./utils";
 
 export interface DeleteModalProps {
   entityName: string;
@@ -65,15 +63,13 @@ export const DeleteModal = ({
           </strong>
         </div>
         <ModalButtonBar>
-          {isLoading ? (
-            <IconButton styleType='high-visibility'>
-              <ProgressRadial size="small" indeterminate />
-            </IconButton>
-          ) : (
-            <Button styleType='high-visibility' onClick={deleteCallback}>
-              Delete
-            </Button>
-          )}
+          {isLoading &&
+            <div className="loading-delete">
+              <LoadingSpinner />
+            </div>}
+          <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>
+            Delete
+          </Button>
           <Button
             styleType='default'
             onClick={() => {
