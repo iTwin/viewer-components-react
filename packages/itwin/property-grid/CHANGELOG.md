@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 17 Feb 2022 17:30:48 GMT and should not be manually modified.
+This log was last generated on Mon, 14 Mar 2022 19:46:44 GMT and should not be manually modified.
+
+## 0.3.1
+Mon, 14 Mar 2022 19:46:44 GMT
+
+### Patches
+
+- remove react-spring dependency, and replaced grid animation with css
 
 ## 0.3.0
 Thu, 17 Feb 2022 17:30:48 GMT
