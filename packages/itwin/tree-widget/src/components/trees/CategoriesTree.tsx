@@ -80,26 +80,30 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
     );
   }, [iModel, viewport, filteredProvider]);
 
-  return (!(iModel && viewport) ? null : (
+  return (
     <>
-      <TreeHeaderComponent
-        searchOptions={searchOptions}
-        showAll={showAll}
-        hideAll={hideAll}
-        invert={invert}
-      />
-      <AutoSizer>
-        {({ width, height }) => (
-          <CategoryTree
-            {...props}
-            iModel={iModel}
-            width={width}
-            height={height}
-            filterInfo={{ filter: filterString, activeMatchIndex }}
-            onFilterApplied={onFilterApplied}
+      {iModel && viewport &&
+        <>
+          <TreeHeaderComponent
+            searchOptions={searchOptions}
+            showAll={showAll}
+            hideAll={hideAll}
+            invert={invert}
           />
-        )}
-      </AutoSizer>
+          <AutoSizer>
+            {({ width, height }) => (
+              <CategoryTree
+                {...props}
+                iModel={iModel}
+                width={width}
+                height={height}
+                filterInfo={{ filter: filterString, activeMatchIndex }}
+                onFilterApplied={onFilterApplied}
+              />
+            )}
+          </AutoSizer>
+        </>
+      }
     </>
-  ));
+  );
 }

@@ -6,10 +6,6 @@ import type {
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 
-export interface ClassificationsTreeComponentProps {
-  iModel: IModelConnection;
-}
-
 export interface IModelContentTreeProps
   extends Omit<React.AllHTMLAttributes<HTMLDivElement>, "children"> {
   iModel: IModelConnection;
@@ -46,7 +42,7 @@ export interface TreeWidgetOptions {
   modelsTreeProps?: ModelTreeProps;
   categoriesTreeProps?: CategoriesTreeProps;
   spatialTreeProps?: SpatialTreeProps;
-  hiddenTrees?: {
+  hideTrees?: {
     modelsTree?: boolean;
     categoriesTree?: boolean;
     spatialTree?: boolean;

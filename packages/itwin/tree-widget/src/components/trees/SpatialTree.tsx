@@ -11,9 +11,13 @@ export const SpatialTreeComponent = (
   props: SpatialTreeProps) => {
   const iModel = useActiveIModelConnection();
 
-  return !iModel ? null : (
-    <AutoSizer>
-      {({ width, height }) => <SpatialContainmentTree {...props} width={width} height={height} iModel={iModel} />}
-    </AutoSizer>
+  return (
+    <>
+      {iModel &&
+        <AutoSizer>
+          {({ width, height }) => <SpatialContainmentTree {...props} width={width} height={height} iModel={iModel} />}
+        </AutoSizer>
+      }
+    </>
   );
 };

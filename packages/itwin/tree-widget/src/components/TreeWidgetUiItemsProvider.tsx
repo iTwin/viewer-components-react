@@ -11,7 +11,6 @@ import type {
 import {
   AbstractZoneLocation,
   StagePanelLocation,
-
   StageUsage,
 } from "@itwin/appui-abstract";
 import { ClassGroupingOption, UiFramework } from "@itwin/appui-react";
@@ -46,7 +45,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
     ) {
       const trees: SelectableContentDefinition[] = [];
 
-      if (!this._treeWidgetOptions?.hiddenTrees?.modelsTree) {
+      if (!this._treeWidgetOptions?.hideTrees?.modelsTree) {
         trees.push({
           label: TreeWidget.translate("modeltree"),
           id: "model-tree",
@@ -63,7 +62,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
         });
       }
 
-      if (!this._treeWidgetOptions?.hiddenTrees?.categoriesTree) {
+      if (!this._treeWidgetOptions?.hideTrees?.categoriesTree) {
         trees.push({
           label: TreeWidget.translate("categories"),
           id: "categories-tree",
@@ -73,7 +72,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
         });
       }
 
-      if (!this._treeWidgetOptions?.hiddenTrees?.spatialTree) {
+      if (!this._treeWidgetOptions?.hideTrees?.spatialTree) {
         trees.push({
           label: TreeWidget.translate("containment"),
           id: "spatial-containment-tree",

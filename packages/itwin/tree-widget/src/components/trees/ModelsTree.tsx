@@ -119,31 +119,35 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     viewport?.invalidateScene();
   }, [is3dToggleActive, viewport, available3dModels]);
 
-  return (!(iModel && viewport) ? null : (
+  return (
     <>
-      <TreeHeaderComponent
-        searchOptions={searchOptions}
-        showAll={showAll}
-        hideAll={hideAll}
-        invert={invert}
-        toggle2D={viewToggle2D}
-        toggle2DIcon={icon2dToggle}
-        toggle3D={viewToggle3D}
-        toggle3DIcon={icon3dToggle}
-      />
-      <AutoSizer>
-        {({ width, height }) => (
-          <ModelsTree
-            {...props}
-            iModel={iModel}
-            activeView={viewport}
-            width={width}
-            height={height}
-            filterInfo={{ filter: filterString, activeMatchIndex }}
-            onFilterApplied={onFilterApplied}
+      {iModel && viewport &&
+        <>
+          <TreeHeaderComponent
+            searchOptions={searchOptions}
+            showAll={showAll}
+            hideAll={hideAll}
+            invert={invert}
+            toggle2D={viewToggle2D}
+            toggle2DIcon={icon2dToggle}
+            toggle3D={viewToggle3D}
+            toggle3DIcon={icon3dToggle}
           />
-        )}
-      </AutoSizer>
+          <AutoSizer>
+            {({ width, height }) => (
+              <ModelsTree
+                {...props}
+                iModel={iModel}
+                activeView={viewport}
+                width={width}
+                height={height}
+                filterInfo={{ filter: filterString, activeMatchIndex }}
+                onFilterApplied={onFilterApplied}
+              />
+            )}
+          </AutoSizer>
+        </>
+      }
     </>
-  ));
+  );
 };
