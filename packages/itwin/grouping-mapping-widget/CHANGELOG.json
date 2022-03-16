@@ -2,6 +2,30 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.2.3",
+      "tag": "@itwin/grouping-mapping-widget_v0.2.3",
+      "date": "Mon, 14 Mar 2022 19:46:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed a crash that happened with some categories in group by selection pane"
+          },
+          {
+            "comment": "Fixed overlapping seperator in group by selection pane and polished loading spinners"
+          },
+          {
+            "comment": "Added basic support for categories and models in group properties."
+          },
+          {
+            "comment": "Package updates"
+          },
+          {
+            "comment": "Added ability to search for elements using search terms"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@itwin/grouping-mapping-widget_v0.2.2",
       "date": "Wed, 02 Mar 2022 21:38:51 GMT",
