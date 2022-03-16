@@ -9,6 +9,7 @@ import type { Localization } from "@itwin/core-common";
 import type {
   AbstractWidgetProps, CommonToolbarItem, UiItemsProvider,
 } from "@itwin/appui-abstract";
+import { WidgetState } from "@itwin/appui-abstract";
 import {
   ConditionalBooleanValue, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
   ToolbarOrientation, ToolbarUsage,
@@ -63,7 +64,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         return [
           ToolbarItemUtilities.createGroupButton(
             "measure-tools-toolbar",
-            100,
+            500,
             "icon-measure",
             IModelApp.localization.getLocalizedString(
               "MeasureTools:MeasurementGroupButton.tooltip",
@@ -85,7 +86,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         );
         return [
           ToolbarHelper.createToolbarItemFromItemDef(
-            10,
+            100,
             MeasureToolDefinitions.clearMeasurementsToolCommand,
             {
               isHidden,
@@ -114,6 +115,12 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         id: "measure-tools-property-widget",
         label: IModelApp.localization.getLocalizedString("MeasureTools:Generic.measurements"),
         getWidgetContent: () => <MeasurementPropertyWidget />, // eslint-disable-line react/display-name
+        defaultState: WidgetState.Hidden,
+        stateFunc: () => MeasurementUIEvents.isClearMeasurementButtonVisible ? WidgetState.Open : WidgetState.Hidden,
+        syncEventIds: [
+          MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
+          MeasurementSyncUiEventId.DynamicMeasurementChanged,
+        ],
       });
     }
     return widgets;
