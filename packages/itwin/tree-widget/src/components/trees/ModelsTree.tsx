@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import React, { useCallback, useEffect, useState } from "react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import { ClassGroupingOption, ModelsTree, useActiveViewport } from "@itwin/appui-react";
+import type { Viewport } from "@itwin/core-frontend";
+import { ModelsTree, useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./ModelsTree.scss";
 import type {
@@ -13,14 +13,8 @@ import type {
   ModelQueryParams,
 } from "@itwin/core-common";
 import { TreeHeaderComponent } from "../header/TreeHeader";
-import { useResizeObserver } from "@itwin/core-react";
-
-export interface ModelTreeProps {
-  iModel: IModelConnection;
-  allViewports?: boolean;
-  activeView?: Viewport;
-  enableElementsClassGrouping?: boolean;
-}
+import type { ModelTreeProps } from "../../types";
+import { AutoSizer } from "../utils/AutoSizer";
 
 interface TreeViewModelInfo {
   id: string;
@@ -28,8 +22,6 @@ interface TreeViewModelInfo {
 }
 
 export const ModelsTreeComponent = (props: ModelTreeProps) => {
-  const { iModel } = props;
-
   const [is2dToggleActive, setIs2dToggleActive] = useState<boolean>(false);
   const [is3dToggleActive, setIs3dToggleActive] = useState<boolean>(false);
   const [icon2dToggle, setIcon2dToggle] = useState<string>("icon-visibility");
@@ -39,18 +31,11 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
   const [available3dModels, setAvailable3dModels] = useState<string[]>([]);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
 
+  const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
   const { searchOptions, filterString, activeMatchIndex, onFilterApplied } =
     useTreeFilteringState();
-
-  const [height, setHeight] = useState(0);
-  const [width, setWidth] = useState(0);
-  const handleResize = useCallback((w: number, h: number) => {
-    setHeight(h);
-    setWidth(w);
-  }, []);
-  const ref = useResizeObserver<HTMLDivElement>(handleResize);
 
   const queryModels = useCallback(async (
     vp: Viewport | undefined
@@ -61,7 +46,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
       from: "BisCore.GeometricModel3d",
       wantPrivate: false,
     };
-    const modelProps = await iModel.models.queryProps(queryParams);
+    const modelProps = await iModel?.models.queryProps(queryParams) ?? [];
     return modelProps
       .map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection }))
       .filter(({ id }) => id) as TreeViewModelInfo[];
@@ -134,37 +119,35 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     viewport?.invalidateScene();
   }, [is3dToggleActive, viewport, available3dModels]);
 
-  return (!(iModel && viewport) ? null : (
+  return (
     <>
-      <TreeHeaderComponent
-        searchOptions={searchOptions}
-        showAll={showAll}
-        hideAll={hideAll}
-        invert={invert}
-        toggle2D={viewToggle2D}
-        toggle2DIcon={icon2dToggle}
-        toggle3D={viewToggle3D}
-        toggle3DIcon={icon3dToggle}
-      />
-      <div className="tree-widget-models-tree-container">
-        <div ref={ref} style={{ width: "100%", height: "100%" }}>
-          {width && height && (
-            <ModelsTree
-              {...props}
-              filterInfo={{ filter: filterString, activeMatchIndex }}
-              onFilterApplied={onFilterApplied}
-              activeView={viewport}
-              enableElementsClassGrouping={
-                props.enableElementsClassGrouping
-                  ? ClassGroupingOption.YesWithCounts
-                  : ClassGroupingOption.No
-              }
-              width={width}
-              height={height}
-            />
-          )}
-        </div>
-      </div>
+      {iModel && viewport &&
+        <>
+          <TreeHeaderComponent
+            searchOptions={searchOptions}
+            showAll={showAll}
+            hideAll={hideAll}
+            invert={invert}
+            toggle2D={viewToggle2D}
+            toggle2DIcon={icon2dToggle}
+            toggle3D={viewToggle3D}
+            toggle3DIcon={icon3dToggle}
+          />
+          <AutoSizer>
+            {({ width, height }) => (
+              <ModelsTree
+                {...props}
+                iModel={iModel}
+                activeView={viewport}
+                width={width}
+                height={height}
+                filterInfo={{ filter: filterString, activeMatchIndex }}
+                onFilterApplied={onFilterApplied}
+              />
+            )}
+          </AutoSizer>
+        </>
+      }
     </>
-  ));
+  );
 };
