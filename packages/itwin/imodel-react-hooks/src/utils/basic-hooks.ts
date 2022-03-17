@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import { useEffect, useMemo, useRef } from "react";
 
@@ -25,20 +25,23 @@ export function useOnMountInRenderOrder(effect: () => void | (() => void)) {
 
 /** run code on component mount */
 export function useOnMount(impl: () => void) {
-  useEffect(() => void impl(), [impl]);
+  useEffect(() => void impl(), []);
 }
 
 /** run something on component unmount */
 export function useOnUnmount(impl: () => void) {
-  useEffect(() => () => impl(), [impl]);
+  useEffect(() => () => impl(), []);
 }
 
 /** create a stable object reference on intialization */
 export function useStable<T>(make: () => T) {
-  // can't use memo since it's only for expensive computations, react will (eventually)
-  // selectively recreate the object breaking the contract.
-  const value = useMemo(make, [make]);
-  return useRef(value).current;
+  const valueRef = useRef<T>(undefined as any);
+  const hasMade = useRef(false);
+  if (!hasMade.current) {
+    valueRef.current = make();
+    hasMade.current = true;
+  }
+  return valueRef.current;
 }
 
 /**

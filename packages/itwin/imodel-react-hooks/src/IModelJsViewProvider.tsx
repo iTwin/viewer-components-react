@@ -14,7 +14,7 @@ import { makeContextWithProviderRequired } from "./utils/react-context";
  * @internal the MarkerDecorationContext is for internal use only and
  * does not guarantee a stable api
  */
-export interface IMarkerDecorationContext {
+export interface MarkerDecorationContextType {
   decoration: Decorator;
   register: (m: IModelJsMarker) => void;
   unregister: (m: IModelJsMarker) => void;
@@ -22,7 +22,7 @@ export interface IMarkerDecorationContext {
   enqueueViewInvalidation: () => void;
 }
 
-export const MarkerDecorationContext = makeContextWithProviderRequired<IMarkerDecorationContext>(
+export const MarkerDecorationContext = makeContextWithProviderRequired<MarkerDecorationContextType>(
   "MarkerDecorationContext"
 );
 
