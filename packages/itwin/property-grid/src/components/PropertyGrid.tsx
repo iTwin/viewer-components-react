@@ -25,11 +25,9 @@ import {
   useOptionalDisposable,
   useResizeObserver,
 } from "@itwin/core-react";
-import type { ConfigurableCreateInfo } from "@itwin/appui-react";
 import {
   UiFramework,
   useActiveIModelConnection,
-  WidgetControl,
 } from "@itwin/appui-react";
 import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -457,11 +455,3 @@ export const PropertyGrid = ({
     </div>
   );
 };
-
-export class PropertyGridWidgetControl extends WidgetControl {
-  constructor(info: ConfigurableCreateInfo, options: any) {
-    super(info, options);
-
-    this.reactNode = <PropertyGrid {...options} />;
-  }
-}
