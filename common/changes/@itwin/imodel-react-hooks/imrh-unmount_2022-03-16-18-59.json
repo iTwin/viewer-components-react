@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/imodel-react-hooks",
+      "comment": "Fix dependency lists of hooks",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/imodel-react-hooks"
+}
