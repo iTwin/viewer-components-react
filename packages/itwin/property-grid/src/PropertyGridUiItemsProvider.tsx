@@ -10,7 +10,9 @@ import {
   StagePanelSection,
   StageUsage,
   WidgetState,
+  AbstractZoneLocation
 } from "@itwin/appui-abstract";
+import { UiFramework } from "@itwin/appui-react";
 import * as React from "react";
 
 import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid";
@@ -31,13 +33,23 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     _stageId: string,
     stageUsage: string,
     location: StagePanelLocation,
-    section?: StagePanelSection | undefined
+    section?: StagePanelSection | undefined,
+    // eslint-disable-next-line deprecation/deprecation
+    zoneLocation?: AbstractZoneLocation
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
     if (
-      stageUsage === StageUsage.General &&
-      location === StagePanelLocation.Right &&
-      section === StagePanelSection.End
+      (
+        stageUsage === StageUsage.General &&
+        location === StagePanelLocation.Right &&
+        section === StagePanelSection.End &&
+        UiFramework.uiVersion !== "1"
+      ) ||
+      (
+        !section &&
+        stageUsage === StageUsage.General &&
+        zoneLocation === AbstractZoneLocation.CenterRight
+      )
     ) {
       widgets.push({
         id: "vcr:PropertyGrid",
