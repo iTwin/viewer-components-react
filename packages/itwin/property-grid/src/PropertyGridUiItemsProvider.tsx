@@ -57,6 +57,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
         label: PropertyGridManager.translate("widget-label"),
         getWidgetContent: () => <MultiElementPropertyGrid {...this._props} />,
         defaultState: WidgetState.Closed,
+        icon: "icon-info",
       });
     }
 
