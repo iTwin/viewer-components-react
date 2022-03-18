@@ -2,12 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+/* eslint-disable react/display-name */
 import type {
   AbstractWidgetProps,
   StagePanelSection,
   UiItemsProvider,
 } from "@itwin/appui-abstract";
 import {
+  AbstractZoneLocation,
   StagePanelLocation,
   StageUsage,
 } from "@itwin/appui-abstract";
@@ -17,117 +19,85 @@ import { TreeWidgetComponent } from "./TreeWidgetComponent";
 import { CategoriesTreeComponent } from "./trees/CategoriesTree";
 import { ModelsTreeComponent } from "./trees/ModelsTree";
 import { SpatialTreeComponent } from "./trees/SpatialTree";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
-import type { TreeWidgetControlOptions } from "./TreeWidgetControl";
+import type { TreeWidgetOptions } from "../types";
 
+export const TreeWidgetId = "tree-widget-react:trees";
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
-  public readonly id = "TreeWidgetUiitemsProvider";
+  public readonly id = "TreeWidgetUiItemsProvider";
 
-  private _imodel?: IModelConnection;
-  private _activeView?: Viewport;
-  private _enableElementsClassGrouping?: boolean;
-  private _allViewports?: boolean;
-  private _additionalTrees?: SelectableContentDefinition[];
-  private _modelsTreeProps?: {};
-  private _categoriesTreeProps?: {};
-  private _spatialTreeProps?: {};
-  private _modelsTreeReplacement?: () => React.ReactNode;
-  private _categoriesTreeReplacement?: () => React.ReactNode;
-  private _spatialTreeReplacement?: () => React.ReactNode;
-
-  constructor(props?: Partial<TreeWidgetControlOptions>) {
-    this._imodel = props?.iModelConnection;
-    this._activeView = props?.activeView;
-    this._enableElementsClassGrouping = props?.enableElementsClassGrouping;
-    this._allViewports = props?.allViewports;
-    this._additionalTrees = props?.additionalTrees;
-    this._modelsTreeProps = props?.additionalProps?.modelsTree;
-    this._categoriesTreeProps = props?.additionalProps?.categoriesTree;
-    this._spatialTreeProps = props?.additionalProps?.spatialTree;
-    this._modelsTreeReplacement = props?.treeReplacements?.modelsTree;
-    this._categoriesTreeReplacement = props?.treeReplacements?.categoriesTree;
-    this._spatialTreeReplacement = props?.treeReplacements?.spatialTree;
-  }
+  constructor(private _treeWidgetOptions?: TreeWidgetOptions) { }
 
   public provideWidgets(
     _stageId: string,
     stageUsage: string,
     location: StagePanelLocation,
-    _section: StagePanelSection | undefined
+    section?: StagePanelSection,
+    // eslint-disable-next-line deprecation/deprecation
+    zoneLocation?: AbstractZoneLocation,
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
-    const imodel = UiFramework.getIModelConnection();
     if (
-      stageUsage === StageUsage.General &&
-      location === StagePanelLocation.Right &&
-      imodel !== undefined
+      // eslint-disable-next-line deprecation/deprecation
+      (!section && stageUsage === StageUsage.General && zoneLocation === AbstractZoneLocation.CenterRight) ||
+      (stageUsage === StageUsage.General && location === StagePanelLocation.Right && UiFramework.uiVersion !== "1")
     ) {
-      const modelsTreeComponent = (
-        <ModelsTreeComponent
-          iModel={this._imodel ?? imodel}
-          allViewports={this._allViewports}
-          activeView={this._activeView}
-          enableElementsClassGrouping={this._enableElementsClassGrouping}
-          {...this._modelsTreeProps}
-        />
-      );
+      const trees: SelectableContentDefinition[] = [];
 
-      const categoriesTreeComponent = (
-        <CategoriesTreeComponent
-          iModel={this._imodel ?? imodel}
-          allViewports={this._allViewports}
-          activeView={this._activeView}
-          {...this._categoriesTreeProps}
-        />
-      );
-
-      const spatialContainmentComponent = (
-        <SpatialTreeComponent
-          iModel={this._imodel ?? imodel}
-          enableElementsClassGrouping={
-            this._enableElementsClassGrouping
-              ? ClassGroupingOption.Yes
-              : ClassGroupingOption.No
-          }
-          {...this._spatialTreeProps}
-        />
-      );
-
-      const trees: SelectableContentDefinition[] = [
-        {
+      if (!this._treeWidgetOptions?.hideTrees?.modelsTree) {
+        trees.push({
           label: TreeWidget.translate("modeltree"),
           id: "model-tree",
-          render: this._modelsTreeReplacement
-            ? this._modelsTreeReplacement
-            : () => modelsTreeComponent,
-        },
-        {
+          render: () => (
+            <ModelsTreeComponent
+              enableElementsClassGrouping={
+                this._treeWidgetOptions?.enableElementsClassGrouping
+                  ? ClassGroupingOption.YesWithCounts
+                  : ClassGroupingOption.No
+              }
+              {...this._treeWidgetOptions?.modelsTreeProps}
+            />
+          ),
+        });
+      }
+
+      if (!this._treeWidgetOptions?.hideTrees?.categoriesTree) {
+        trees.push({
           label: TreeWidget.translate("categories"),
           id: "categories-tree",
-          render: this._categoriesTreeReplacement
-            ? this._categoriesTreeReplacement
-            : () => categoriesTreeComponent,
-        },
-        {
+          render: () => (
+            <CategoriesTreeComponent {...this._treeWidgetOptions?.categoriesTreeProps} />
+          ),
+        });
+      }
+
+      if (!this._treeWidgetOptions?.hideTrees?.spatialTree) {
+        trees.push({
           label: TreeWidget.translate("containment"),
           id: "spatial-containment-tree",
-          render: this._spatialTreeReplacement
-            ? this._spatialTreeReplacement
-            : () => spatialContainmentComponent,
-        },
-      ];
+          render: () => (
+            <SpatialTreeComponent
+              enableElementsClassGrouping={
+                this._treeWidgetOptions?.enableElementsClassGrouping
+                  ? ClassGroupingOption.YesWithCounts
+                  : ClassGroupingOption.No
+              }
+              {...this._treeWidgetOptions?.spatialTreeProps}
+            />
+          ),
+        });
+      }
 
-      if (this._additionalTrees) {
-        trees.push(...this._additionalTrees);
+      if (this._treeWidgetOptions?.additionalTrees) {
+        trees.push(...this._treeWidgetOptions.additionalTrees);
       }
 
       widgets.push({
-        id: "tree",
+        id: TreeWidgetId,
         label: TreeWidget.translate("treeview"),
-        // eslint-disable-next-line react/display-name
         getWidgetContent: () => <TreeWidgetComponent trees={trees} />,
+        icon: "icon-hierarchy-tree",
       });
     }
 

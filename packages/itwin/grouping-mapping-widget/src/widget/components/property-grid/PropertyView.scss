@@ -2,9 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/style/themecolors";
-@import "~@itwin/itwinui-css/scss/style/typography";
-@import "~@itwin/itwinui-css/scss/variables";
+@import '~@itwin/core-react/lib/cjs/core-react/style/themecolors';
+@import '~@itwin/itwinui-css/scss/style/typography';
+@import '~@itwin/itwinui-css/scss/variables';
 
 $text-font-size: $iui-font-size;
 $text-font-color: $buic-text-color;
@@ -52,8 +52,23 @@ $text-font-color: $buic-text-color;
 
 .components-property-record-label {
   @include record-cell;
+  position: relative;
   .components-property-selection-checkbox {
-    margin-right: $iui-s;
+    flex-shrink: 0;
+    position: absolute;
+    z-index: 1;
+  }
+  // Radial does not respect checkbox positioning, have to force it.
+  > .iui-progress-indicator-radial {
+    position: absolute;
+  }
+  .components-property-selection-loading {
+    display: flex;
+    width: $iui-m;
+    height: $iui-m;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 }
 

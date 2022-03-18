@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
-import { Text, toaster } from "@itwin/itwinui-react";
+import { ProgressRadial, Text, toaster } from "@itwin/itwinui-react";
 import "./utils.scss";
 import React from "react";
 import type {
@@ -143,4 +143,12 @@ export const handleError = (errorStatus: number) => {
   }
   toaster.negative(errorMessage);
 
+};
+
+export const LoadingSpinner = () => {
+  return (
+    <div className="gm-loading-spinner">
+      <ProgressRadial size="small" indeterminate />
+    </div>
+  );
 };

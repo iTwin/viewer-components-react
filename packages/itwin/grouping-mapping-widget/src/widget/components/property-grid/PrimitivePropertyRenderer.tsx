@@ -6,11 +6,11 @@ import * as React from "react";
 import { Orientation } from "@itwin/core-react";
 import { PrimitivePropertyLabelRenderer } from "@itwin/components-react";
 import type { HighlightingComponentProps } from "@itwin/components-react/lib/cjs/components-react/common/HighlightingComponentProps";
-import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
 import { HighlightedText } from "@itwin/components-react/lib/cjs/components-react/common/HighlightedText";
 
 import { PropertyView } from "./PropertyView";
 import type { SharedRendererProps } from "./PropertyRender";
+import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
 
 /** Properties of [[PrimitivePropertyRenderer]] React component
  * @public
@@ -34,7 +34,7 @@ export interface PrimitiveRendererProps extends SharedRendererProps {
 export class PrimitivePropertyRenderer extends React.Component<PrimitiveRendererProps> {
   /** @internal */
   public override render() {
-    const { indentation, highlight, ...props } = this.props;
+    const { highlight, indentation, ...props } = this.props;
     const displayLabel = this.props.propertyRecord.property.displayLabel;
     const offset = CommonPropertyRenderer.getLabelOffset(
       indentation,
@@ -46,7 +46,7 @@ export class PrimitivePropertyRenderer extends React.Component<PrimitiveRenderer
 
     const activeMatchIndex =
       this.props.propertyRecord.property.name ===
-      highlight?.activeHighlight?.highlightedItemIdentifier
+        highlight?.activeHighlight?.highlightedItemIdentifier
         ? highlight.activeHighlight.highlightIndex
         : undefined;
     const label = highlight
@@ -59,10 +59,11 @@ export class PrimitivePropertyRenderer extends React.Component<PrimitiveRenderer
 
     return (
       <PropertyView
-        {...props}
+        {...this.props}
         labelElement={
           <PrimitivePropertyLabelRenderer
-            offset={offset}
+            // Added offset to account for checkbox
+            offset={offset + 24}
             renderColon={this.props.orientation === Orientation.Horizontal}
             tooltip={displayLabel}
           >

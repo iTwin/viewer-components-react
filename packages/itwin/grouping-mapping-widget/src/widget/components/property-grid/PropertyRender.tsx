@@ -3,14 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import type { PropertyRecord} from "@itwin/appui-abstract";
+import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import type { Orientation, RatioChangeResult } from "@itwin/core-react";
 import type {
   ActionButtonRenderer,
   PrimitiveRendererProps,
   PropertyUpdatedArgs,
-  PropertyValueRendererManager} from "@itwin/components-react";
+  PropertyValueRendererManager,
+} from "@itwin/components-react";
 import {
   EditorContainer,
   UiComponents,
@@ -188,17 +189,17 @@ PropertyRendererState
 
     switch (this.props.propertyRecord.value.valueFormat) {
       case PropertyValueFormat.Primitive:
-        return <PrimitivePropertyRenderer {...primitiveRendererProps} />;
+        return (
+          <PrimitivePropertyRenderer {...primitiveRendererProps} />
+        );
       case PropertyValueFormat.Array:
         // If array is empty, render it as a primitive property
-        if (
-          this.props.propertyRecord.value.valueFormat ===
-          PropertyValueFormat.Array &&
-          this.props.propertyRecord.value.items.length === 0
-        ) {
-          return <PrimitivePropertyRenderer {...primitiveRendererProps} />;
-        }
-        break;
+        if (this.props.propertyRecord.value.valueFormat === PropertyValueFormat.Array
+          && this.props.propertyRecord.value.items.length === 0)
+          return (
+            <PrimitivePropertyRenderer {...primitiveRendererProps} />
+          );
+      // eslint-disable-next-line no-fallthrough
       case PropertyValueFormat.Struct:
         return (
           <NonPrimitivePropertyRenderer
@@ -207,6 +208,5 @@ PropertyRendererState
           />
         );
     }
-    return;
   }
 }

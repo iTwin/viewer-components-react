@@ -2,6 +2,18 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@itwin/tree-widget-react_v0.4.0",
+      "date": "Fri, 18 Mar 2022 13:31:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove deprecated WidgetControl, update UiItemsProvider init"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@itwin/tree-widget-react_v0.3.0",
       "date": "Wed, 02 Mar 2022 21:38:51 GMT",

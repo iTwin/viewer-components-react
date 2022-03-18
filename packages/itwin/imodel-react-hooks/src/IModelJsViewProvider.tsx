@@ -14,7 +14,7 @@ import { makeContextWithProviderRequired } from "./utils/react-context";
  * @internal the MarkerDecorationContext is for internal use only and
  * does not guarantee a stable api
  */
-export interface MarkerDecorationContext {
+export interface MarkerDecorationContextType {
   decoration: Decorator;
   register: (m: IModelJsMarker) => void;
   unregister: (m: IModelJsMarker) => void;
@@ -22,7 +22,7 @@ export interface MarkerDecorationContext {
   enqueueViewInvalidation: () => void;
 }
 
-export const MarkerDecorationContext = makeContextWithProviderRequired<MarkerDecorationContext>(
+export const MarkerDecorationContext = makeContextWithProviderRequired<MarkerDecorationContextType>(
   "MarkerDecorationContext"
 );
 
@@ -61,19 +61,11 @@ export const IModelJsViewProvider = ({
 
   const decoratorInstance = useMemo(
     () => new MarkerDecoration(markers.current, viewFilter),
-    [markers]
+    [viewFilter]
   );
 
   useEffect(() => {
-    if (viewFilter) {
-      decoratorInstance.viewFilter = viewFilter;
-    }
-  }, [viewFilter]);
-
-  useEffect(() => {
-    const removeDecorator = IModelApp.viewManager.addDecorator(decoratorInstance);
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    return () => removeDecorator();
+    return IModelApp.viewManager.addDecorator(decoratorInstance);
   }, [decoratorInstance]);
 
   const enqueueViewInvalidation = useCallback(
@@ -85,7 +77,7 @@ export const IModelJsViewProvider = ({
           }
         }
       }),
-    []
+    [viewFilter]
   );
 
   const register = useCallback((toAdd: IModelJsMarker) => {
@@ -111,7 +103,7 @@ export const IModelJsViewProvider = ({
       markers.current.splice(index, 1);
       enqueueViewInvalidation();
     }
-  }, []);
+  }, [enqueueViewInvalidation]);
 
   const contextState = useMemo(
     () => ({

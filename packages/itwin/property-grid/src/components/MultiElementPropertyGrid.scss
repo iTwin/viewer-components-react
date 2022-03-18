@@ -22,9 +22,18 @@
 }
 
 .property-grid-react-animated-tab {
+  transition: transform 400ms ease-out;
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
   width: 100%;
+}
+
+.property-grid-react-animated-tab-animate-right {
+  transform: translate(100%, 0);
+}
+
+.property-grid-react-animated-tab-animate-left {
+  transform: translate(-100%, 0);
 }

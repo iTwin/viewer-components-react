@@ -1,6 +1,17 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 02 Mar 2022 21:38:51 GMT and should not be manually modified.
+This log was last generated on Mon, 14 Mar 2022 19:46:44 GMT and should not be manually modified.
+
+## 0.2.3
+Mon, 14 Mar 2022 19:46:44 GMT
+
+### Patches
+
+- Fixed a crash that happened with some categories in group by selection pane
+- Fixed overlapping seperator in group by selection pane and polished loading spinners
+- Added basic support for categories and models in group properties.
+- Package updates
+- Added ability to search for elements using search terms
 
 ## 0.2.2
 Wed, 02 Mar 2022 21:38:51 GMT
