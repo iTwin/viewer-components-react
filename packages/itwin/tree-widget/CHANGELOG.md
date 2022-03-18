@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Wed, 02 Mar 2022 21:38:51 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Mar 2022 13:31:19 GMT and should not be manually modified.
+
+## 0.4.0
+Fri, 18 Mar 2022 13:31:19 GMT
+
+### Minor changes
+
+- Remove deprecated WidgetControl, update UiItemsProvider init
 
 ## 0.3.0
 Wed, 02 Mar 2022 21:38:51 GMT
