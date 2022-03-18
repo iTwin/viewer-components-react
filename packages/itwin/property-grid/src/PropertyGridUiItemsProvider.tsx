@@ -6,11 +6,11 @@
 
 import type { AbstractWidgetProps, UiItemsProvider } from "@itwin/appui-abstract";
 import {
+  AbstractZoneLocation,
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
   WidgetState,
-  AbstractZoneLocation
 } from "@itwin/appui-abstract";
 import { UiFramework } from "@itwin/appui-react";
 import * as React from "react";
@@ -48,6 +48,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
       (
         !section &&
         stageUsage === StageUsage.General &&
+        // eslint-disable-next-line deprecation/deprecation
         zoneLocation === AbstractZoneLocation.CenterRight
       )
     ) {
