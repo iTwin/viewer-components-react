@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import { AxisOrder, Matrix3d, Vector3d } from "@itwin/core-geometry";
 import type {
@@ -26,8 +26,8 @@ import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 import { MeasureTools } from "../MeasureTools";
 
 export class MeasureAreaTool extends MeasurementToolBase<
-  AreaMeasurement,
-  MeasureAreaToolModel
+AreaMeasurement,
+MeasureAreaToolModel
 > {
   public static override toolId = "MeasureTools.MeasureArea";
   public static override iconSpec = "icon-measure-2d";
