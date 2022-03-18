@@ -7,10 +7,8 @@ import "./MultiElementPropertyGrid.scss";
 
 import type { InstanceKey } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
-import type { ConfigurableCreateInfo } from "@itwin/appui-react";
 import {
   useActiveIModelConnection,
-  WidgetControl,
 } from "@itwin/appui-react";
 
 import type { PropertyGridProps } from "../types";
@@ -127,11 +125,3 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
     </div>
   );
 };
-
-export class MultiElementPropertyGridWidgetControl extends WidgetControl {
-  constructor(info: ConfigurableCreateInfo, options: PropertyGridProps) {
-    super(info, options);
-
-    this.reactNode = <MultiElementPropertyGrid {...options} />;
-  }
-}

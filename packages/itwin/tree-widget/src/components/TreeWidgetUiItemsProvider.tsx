@@ -97,6 +97,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
         id: TreeWidgetId,
         label: TreeWidget.translate("treeview"),
         getWidgetContent: () => <TreeWidgetComponent trees={trees} />,
+        icon: "icon-hierarchy-tree",
       });
     }
 
