@@ -13,6 +13,7 @@ import { Orientation } from "@itwin/core-react";
 import type { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
+import { MeasureTools } from "../MeasureTools";
 
 export function useSpecificWidgetDef(id: string) {
   const frontstageDef = useActiveFrontstageDef();
@@ -69,7 +70,7 @@ export const MeasurementPropertyWidget = () => {
     ) {
       const catIndex = dataProvider.addCategory({
         expand: true,
-        label: IModelApp.localization.getLocalizedString("MeasureTools:Generic.cumulativeTotals"),
+        label: MeasureTools.localization.getLocalizedString("MeasureTools:Generic.cumulativeTotals"),
         name: "cumulativeTotals",
       });
       for (const entry of orderedAggrPropEntries) {

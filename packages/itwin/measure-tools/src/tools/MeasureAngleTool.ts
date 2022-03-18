@@ -3,21 +3,30 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type {
-  BeButtonEvent, ToolAssistanceInstruction,
+  BeButtonEvent,
+  ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
-  EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
+  EventHandled,
+  IModelApp,
+  ToolAssistance,
+  ToolAssistanceImage,
+  ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
 import type { Feature } from "../api/FeatureTracking";
 import { MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { AngleMeasurement } from "../measurements/AngleMeasurement";
+import { MeasureTools } from "../MeasureTools";
 import { MeasureAngleToolModel } from "../toolmodels/MeasureAngleToolModel";
 
 /** Tool for measuring angles using start, center and end point */
-export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, MeasureAngleToolModel> {
+export class MeasureAngleTool extends MeasurementToolBase<
+  AngleMeasurement,
+  MeasureAngleToolModel
+> {
   protected createToolModel(): MeasureAngleToolModel {
     return new MeasureAngleToolModel();
   }
@@ -26,13 +35,19 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
   // TODO: Change icon once UX team provides icon
   public static override iconSpec = "icon-angle-measure";
   public static get label() {
-    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.flyover");
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureAngle.flyover"
+    );
   }
   public static override get flyover() {
-    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.flyover");
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureAngle.flyover"
+    );
   }
 
-  protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureAngle; }
+  protected override get feature(): Feature | undefined {
+    return MeasureToolsFeatures.Tools_MeasureAngle;
+  }
 
   constructor() {
     super();
@@ -40,27 +55,26 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
 
   public async onRestartTool(): Promise<void> {
     const tool = new MeasureAngleTool();
-    if (await tool.run())
-      return;
+    if (await tool.run()) return;
 
     return this.exitTool();
   }
 
   /** Show tool assistance messages to user */
   public showPrompt() {
-    const identifyStartMessage = IModelApp.localization.getLocalizedString(
-      "MeasureTools:tools.MeasureAngle.identifyStart",
+    const identifyStartMessage = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureAngle.identifyStart"
     );
-    const identifyCenterMessage = IModelApp.localization.getLocalizedString(
-      "MeasureTools:tools.MeasureAngle.identifyCenter",
+    const identifyCenterMessage = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureAngle.identifyCenter"
     );
-    const identifyEndMessage = IModelApp.localization.getLocalizedString(
-      "MeasureTools:tools.MeasureAngle.identifyEnd",
+    const identifyEndMessage = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureAngle.identifyEnd"
     );
     let currentMsg = "";
     if (
       this.toolModel.currentState ===
-      MeasureAngleToolModel.State.SetMeasurementViewport ||
+        MeasureAngleToolModel.State.SetMeasurementViewport ||
       this.toolModel.currentState === MeasureAngleToolModel.State.SetStartPoint
     ) {
       currentMsg = identifyStartMessage;
@@ -76,7 +90,7 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
 
     const mainInstruction = ToolAssistance.createInstruction(
       this.iconSpec,
-      currentMsg,
+      currentMsg
     );
     const mouseInstructions: ToolAssistanceInstruction[] = [];
     mouseInstructions.push(
@@ -84,24 +98,24 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
         ToolAssistanceImage.LeftClick,
         identifyStartMessage,
         false,
-        ToolAssistanceInputMethod.Mouse,
-      ),
+        ToolAssistanceInputMethod.Mouse
+      )
     );
     mouseInstructions.push(
       ToolAssistance.createInstruction(
         ToolAssistanceImage.LeftClick,
         identifyCenterMessage,
         false,
-        ToolAssistanceInputMethod.Mouse,
-      ),
+        ToolAssistanceInputMethod.Mouse
+      )
     );
     mouseInstructions.push(
       ToolAssistance.createInstruction(
         ToolAssistanceImage.LeftClick,
         identifyEndMessage,
         false,
-        ToolAssistanceInputMethod.Mouse,
-      ),
+        ToolAssistanceInputMethod.Mouse
+      )
     );
 
     if (undefined === this.toolModel.dynamicMeasurement) {
@@ -115,13 +129,13 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
     sections.push(
       ToolAssistance.createSection(
         mouseInstructions,
-        ToolAssistance.inputsLabel,
-      ),
+        ToolAssistance.inputsLabel
+      )
     );
 
     const instructions = ToolAssistance.createInstructions(
       mainInstruction,
-      sections,
+      sections
     );
     IModelApp.notifications.setToolAssistance(instructions);
   }
@@ -146,7 +160,9 @@ export class MeasureAngleTool extends MeasurementToolBase<AngleMeasurement, Meas
   }
 
   /** Process mouse presses */
-  public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
+  public override async onDataButtonDown(
+    ev: BeButtonEvent
+  ): Promise<EventHandled> {
     if (!ev.viewport) return EventHandled.No;
 
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);

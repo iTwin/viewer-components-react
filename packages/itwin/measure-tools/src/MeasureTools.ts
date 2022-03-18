@@ -13,88 +13,88 @@ import { MeasurementManager } from "./api/MeasurementManager";
 import { MeasureRadiusTool } from "./tools/MeasureRadiusTool";
 import { MeasureAngleTool } from "./tools/MeasureAngleTool";
 import { MeasurePerpendicularTool } from "./tools/MeasurePerpendicularTool";
+import type { Localization } from "@itwin/core-common";
 
 export interface FeatureFlags {
-  enableDistanceTool?: boolean;
-  enableAreaTool?: boolean;
-  enableLocationTool?: boolean;
-  enableRadiusTool?: boolean;
-  enableAngleTool?: boolean;
-  enablePerpendicularTool?: boolean;
-  enableToggleDisplayAxesTool?: boolean;
+  hideDistanceTool?: boolean;
+  hideAreaTool?: boolean;
+  hideLocationTool?: boolean;
+  hideRadiusTool?: boolean;
+  hideAngleTool?: boolean;
+  hidePerpendicularTool?: boolean;
+  hideToggleDisplayAxesTool?: boolean;
 }
 
 export interface StartupOptions {
+  localization?: Localization;
   featureFlags?: FeatureFlags;
 }
 
 export class MeasureTools {
   private static _isInitialized = false;
-  private static _i18nNamespace: any;
-  private static _featureFlags: FeatureFlags;
-
-  public static get i18nNamespace(): any {
-    return MeasureTools._i18nNamespace;
-  }
+  private static _i18nNamespace: "MeasureTools";
+  private static _localization: Localization;
+  private static _featureFlags?: FeatureFlags;
 
   public static get isInitialized(): boolean {
     return MeasureTools._isInitialized;
   }
 
-  public static get featureFlags(): FeatureFlags {
+  public static get localization(): Localization {
+    return MeasureTools._localization;
+  }
+
+  public static get featureFlags(): FeatureFlags | undefined {
     return MeasureTools._featureFlags;
   }
 
   public static async startup(options?: StartupOptions): Promise<void> {
-    if (MeasureTools.isInitialized)
-      return;
+    if (MeasureTools.isInitialized) return;
 
-    MeasureTools._isInitialized = true;
+    MeasureTools._localization =
+      options?.localization ?? IModelApp.localization;
+    await MeasureTools._localization.registerNamespace(
+      MeasureTools._i18nNamespace
+    );
 
-    // Setup tools and i18n
-    const measureToolsNamespace = "MeasureTools";
-    await IModelApp.localization.registerNamespace(measureToolsNamespace);
-
-    const featureFlags = {
-      enableDistanceTool: true,
-      enableAreaTool: true,
-      enableLocationTool: true,
-      enableRadiusTool: true,
-      enableAngleTool: true,
-      enablePerpendicularTool: true,
-      enableToggleDisplayAxesTool: true,
-      ...options?.featureFlags,
-    };
-
-    if (featureFlags.enableDistanceTool) {
-      IModelApp.tools.register(MeasureDistanceTool, measureToolsNamespace);
-    }
-    if (featureFlags.enableAreaTool) {
-      IModelApp.tools.register(MeasureAreaTool, measureToolsNamespace);
-    }
-    if (featureFlags.enableLocationTool) {
-      IModelApp.tools.register(MeasureLocationTool, measureToolsNamespace);
-    }
-    if (featureFlags.enableRadiusTool) {
-      IModelApp.tools.register(MeasureRadiusTool, measureToolsNamespace);
-    }
-    if (featureFlags.enableAngleTool) {
-      IModelApp.tools.register(MeasureAngleTool, measureToolsNamespace);
-    }
-    if (featureFlags.enablePerpendicularTool) {
-      IModelApp.tools.register(MeasurePerpendicularTool, measureToolsNamespace);
-    }
-    if (featureFlags.enableToggleDisplayAxesTool) {
-      IModelApp.tools.register(ToggleDisplayMeasurementAxesTool, measureToolsNamespace);
-    }
-    if (Object.values(featureFlags).some(Boolean)) {
-      IModelApp.tools.register(ClearMeasurementsTool, measureToolsNamespace);
-    }
-
-    MeasureTools._i18nNamespace = measureToolsNamespace;
+    const { featureFlags } = options ?? {};
     MeasureTools._featureFlags = featureFlags;
+
+    const toolsToRegister = [];
+    if (!featureFlags?.hideDistanceTool) {
+      toolsToRegister.push(MeasureDistanceTool);
+    }
+    if (!featureFlags?.hideDistanceTool) {
+      toolsToRegister.push(MeasureDistanceTool);
+    }
+    if (!featureFlags?.hideAreaTool) {
+      toolsToRegister.push(MeasureAreaTool);
+    }
+    if (!featureFlags?.hideLocationTool) {
+      toolsToRegister.push(MeasureLocationTool);
+    }
+    if (!featureFlags?.hideRadiusTool) {
+      toolsToRegister.push(MeasureRadiusTool);
+    }
+    if (!featureFlags?.hideAngleTool) {
+      toolsToRegister.push(MeasureAngleTool);
+    }
+    if (!featureFlags?.hidePerpendicularTool) {
+      toolsToRegister.push(MeasurePerpendicularTool);
+    }
+    if (!featureFlags?.hideToggleDisplayAxesTool) {
+      toolsToRegister.push(ToggleDisplayMeasurementAxesTool);
+    }
+    if (toolsToRegister.length > 0) {
+      toolsToRegister.push(ClearMeasurementsTool);
+    }
+
+    for (const tool of toolsToRegister) {
+      tool.register(MeasureTools._i18nNamespace);
+    }
 
     // Register measurement decoration
     MeasurementManager.instance.startDecorator();
+    MeasureTools._isInitialized = true;
   }
 }

@@ -4,8 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { IModelApp } from "@itwin/core-frontend";
-import type { Localization } from "@itwin/core-common";
 import type {
   AbstractWidgetProps, CommonToolbarItem, UiItemsProvider,
 } from "@itwin/appui-abstract";
@@ -26,11 +24,6 @@ import { UiFramework } from "@itwin/appui-react";
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  public static localization: Localization;
-
-  public constructor(localization?: Localization) {
-    MeasureToolsUiItemsProvider.localization = localization ?? IModelApp.localization;
-  }
 
   public provideToolbarButtonItems(
     _stageId: string,
@@ -43,24 +36,24 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       toolbarUsage === ToolbarUsage.ContentManipulation
     ) {
       const featureFlags = MeasureTools.featureFlags;
+      const tools: ToolItemDef[] = [];
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
-        const tools: ToolItemDef[] = [];
-        if (featureFlags.enableDistanceTool) {
+        if (!featureFlags?.hideDistanceTool) {
           tools.push(MeasureToolDefinitions.measureDistanceToolCommand);
         }
-        if (featureFlags.enableAreaTool) {
+        if (!featureFlags?.hideAreaTool) {
           tools.push(MeasureToolDefinitions.measureAreaToolCommand);
         }
-        if (featureFlags.enableLocationTool) {
+        if (!featureFlags?.hideLocationTool) {
           tools.push(MeasureToolDefinitions.measureLocationToolCommand);
         }
-        if (featureFlags.enableRadiusTool) {
+        if (!featureFlags?.hideRadiusTool) {
           tools.push(MeasureToolDefinitions.measureRadiusToolCommand);
         }
-        if (featureFlags.enableAngleTool) {
+        if (!featureFlags?.hideAngleTool) {
           tools.push(MeasureToolDefinitions.measureAngleToolCommand);
         }
-        if (featureFlags.enablePerpendicularTool) {
+        if (!featureFlags?.hidePerpendicularTool) {
           tools.push(MeasureToolDefinitions.measurePerpendicularToolCommand);
         }
         return [
@@ -68,15 +61,16 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
             "measure-tools-toolbar",
             500,
             "icon-measure",
-            IModelApp.localization.getLocalizedString(
+            MeasureTools.localization.getLocalizedString(
               "MeasureTools:MeasurementGroupButton.tooltip",
             ),
             ToolbarHelper.constructChildToolbarItems(tools),
           ),
         ];
       }
+
       if (
-        Object.values(featureFlags).some(Boolean) &&
+        tools.length > 0 &&
         toolbarOrientation === ToolbarOrientation.Horizontal
       ) {
         const isHidden = new ConditionalBooleanValue(
@@ -126,7 +120,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     ) {
       widgets.push({
         id: MeasurementPropertyWidgetId,
-        label: IModelApp.localization.getLocalizedString("MeasureTools:Generic.measurements"),
+        label: MeasureTools.localization.getLocalizedString("MeasureTools:Generic.measurements"),
         getWidgetContent: () => <MeasurementPropertyWidget />, // eslint-disable-line react/display-name
         defaultState: WidgetState.Hidden,
         icon: "icon-measure",

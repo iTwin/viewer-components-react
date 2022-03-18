@@ -19,6 +19,7 @@ import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { ShimFunctions } from "../api/ShimFunctions";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
 import { PopupToolbar } from "./PopupToolbar";
+import { MeasureTools } from "../MeasureTools";
 
 /** Props for MeasurementActionItemDef, when the toolbar button is clicked, it passes the measurement that your execute function will handle. */
 export interface MeasurementActionItemProps extends ItemProps {
@@ -73,8 +74,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "delete",
       iconSpec: "icon-measure-clear",
-      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Measurements.clearMeasurement"),
-      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Measurements.clearMeasurement"),
+      label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Measurements.clearMeasurement"),
+      tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Measurements.clearMeasurement"),
       execute: (arg: Measurement[]) => {
         MeasurementManager.instance.dropMeasurement(arg);
         FeatureTracking.notifyFeature(MeasureToolsFeatures.MeasurementActions_Delete);
@@ -87,8 +88,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "open-properties",
       iconSpec: "icon-properties",
-      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.properties"),
-      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.properties"),
+      label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.properties"),
+      tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.properties"),
       execute: (args: Measurement[]) => {
         MeasurementSelectionSet.global.add(args);
       },
@@ -100,8 +101,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "unlock",
       iconSpec: "icon-lock-unlocked",
-      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.unlock"),
-      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.unlock"),
+      label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.unlock"),
+      tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.unlock"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -122,8 +123,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "lock",
       iconSpec: "icon-lock",
-      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.lock"),
-      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.lock"),
+      label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.lock"),
+      tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.lock"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -143,8 +144,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "hide-measurements",
       iconSpec: "icon-visibility-hide",
-      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideMeasurements"),
-      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideMeaurements"),
+      label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideMeasurements"),
+      tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideMeaurements"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -163,8 +164,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "display-measurements",
       iconSpec: "icon-visibility",
-      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayMeasurements"),
-      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayMeasurements"),
+      label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayMeasurements"),
+      tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayMeasurements"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -183,8 +184,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "display-labels",
       iconSpec: "icon-layers",
-      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayLabels"),
-      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayLabels"),
+      label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayLabels"),
+      tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayLabels"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -203,8 +204,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "hide-labels",
       iconSpec: "icon-layers-hide",
-      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideLabels"),
-      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideLabels"),
+      label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideLabels"),
+      tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideLabels"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -223,8 +224,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "display-rise-run",
       iconSpec: "icon-measure-2d-show",
-      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayMeasurementAxes"),
-      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayMeasurementAxes"),
+      label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayMeasurementAxes"),
+      tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.displayMeasurementAxes"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {
@@ -243,8 +244,8 @@ export class MeasurementActionDefinitions {
     return new MeasurementActionItemDef({
       id: "hide-rise-run",
       iconSpec: "icon-measure-2d-hide",
-      label: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideMeasurementAxes"),
-      tooltip: () => IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideMeasurementAxes"),
+      label: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideMeasurementAxes"),
+      tooltip: () => MeasureTools.localization.getLocalizedString("MeasureTools:Generic.hideMeasurementAxes"),
       execute: (args: Measurement[]) => {
 
         args.forEach((m) => {

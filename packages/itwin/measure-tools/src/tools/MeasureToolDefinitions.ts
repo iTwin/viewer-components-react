@@ -15,6 +15,7 @@ import { MeasureLocationTool } from "./MeasureLocationTool";
 import { MeasurePerpendicularTool } from "./MeasurePerpendicularTool";
 import { MeasureRadiusTool } from "./MeasureRadiusTool";
 import { ToggleDisplayMeasurementAxesTool } from "./ToggleDisplayMeasurementAxesTool";
+import { MeasureTools } from "../MeasureTools";
 
 export class MeasureToolDefinitions {
   public static get measureDistanceToolCommand() {
@@ -23,7 +24,9 @@ export class MeasureToolDefinitions {
       iconSpec: MeasureDistanceTool.iconSpec,
       label: () => MeasureDistanceTool.flyover,
       tooltip: () => MeasureDistanceTool.description,
-      execute: () => { void IModelApp.tools.run(MeasureDistanceTool.toolId); },
+      execute: () => {
+        void IModelApp.tools.run(MeasureDistanceTool.toolId);
+      },
     });
   }
 
@@ -33,7 +36,9 @@ export class MeasureToolDefinitions {
       iconSpec: MeasureAreaTool.iconSpec,
       label: () => MeasureAreaTool.flyover,
       tooltip: () => MeasureAreaTool.description,
-      execute: () => { void IModelApp.tools.run(MeasureAreaTool.toolId); },
+      execute: () => {
+        void IModelApp.tools.run(MeasureAreaTool.toolId);
+      },
     });
   }
 
@@ -43,7 +48,9 @@ export class MeasureToolDefinitions {
       iconSpec: MeasureLocationTool.iconSpec,
       label: () => MeasureLocationTool.flyover,
       tooltip: () => MeasureLocationTool.description,
-      execute: () => { void IModelApp.tools.run(MeasureLocationTool.toolId); },
+      execute: () => {
+        void IModelApp.tools.run(MeasureLocationTool.toolId);
+      },
     });
   }
 
@@ -54,7 +61,9 @@ export class MeasureToolDefinitions {
       isVisible: MeasurementUIEvents.isClearMeasurementButtonVisible,
       label: () => ClearMeasurementsTool.flyover,
       tooltip: () => ClearMeasurementsTool.description,
-      execute: () => { void IModelApp.tools.run(ClearMeasurementsTool.toolId); },
+      execute: () => {
+        void IModelApp.tools.run(ClearMeasurementsTool.toolId);
+      },
     });
   }
 
@@ -63,9 +72,25 @@ export class MeasureToolDefinitions {
       toolId: ToggleDisplayMeasurementAxesTool.toolId,
       iconSpec: ToggleDisplayMeasurementAxesTool.iconSpec,
       isVisible: MeasurementUIEvents.isToggleMeasurementAxesButtonVisible,
-      label: () => (MeasurementPreferences.current.displayMeasurementAxes) ? IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideMeasurementAxes") : IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayMeasurementAxes"),
-      tooltip: () => (MeasurementPreferences.current.displayMeasurementAxes) ? IModelApp.localization.getLocalizedString("MeasureTools:Generic.hideMeasurementAxes") : IModelApp.localization.getLocalizedString("MeasureTools:Generic.displayMeasurementAxes"),
-      execute: () => { void IModelApp.tools.run(ToggleDisplayMeasurementAxesTool.toolId); },
+      label: () =>
+        MeasurementPreferences.current.displayMeasurementAxes
+          ? MeasureTools.localization.getLocalizedString(
+              "MeasureTools:Generic.hideMeasurementAxes"
+            )
+          : MeasureTools.localization.getLocalizedString(
+              "MeasureTools:Generic.displayMeasurementAxes"
+            ),
+      tooltip: () =>
+        MeasurementPreferences.current.displayMeasurementAxes
+          ? MeasureTools.localization.getLocalizedString(
+              "MeasureTools:Generic.hideMeasurementAxes"
+            )
+          : MeasureTools.localization.getLocalizedString(
+              "MeasureTools:Generic.displayMeasurementAxes"
+            ),
+      execute: () => {
+        void IModelApp.tools.run(ToggleDisplayMeasurementAxesTool.toolId);
+      },
     });
   }
 
@@ -75,7 +100,9 @@ export class MeasureToolDefinitions {
       iconSpec: MeasureRadiusTool.iconSpec,
       label: () => MeasureRadiusTool.flyover,
       tooltip: () => MeasureRadiusTool.description,
-      execute: () => { void IModelApp.tools.run(MeasureRadiusTool.toolId); },
+      execute: () => {
+        void IModelApp.tools.run(MeasureRadiusTool.toolId);
+      },
     });
   }
 
@@ -85,7 +112,9 @@ export class MeasureToolDefinitions {
       iconSpec: MeasureAngleTool.iconSpec,
       label: () => MeasureAngleTool.flyover,
       tooltip: () => MeasureAngleTool.description,
-      execute: () => { void IModelApp.tools.run(MeasureAngleTool.toolId); },
+      execute: () => {
+        void IModelApp.tools.run(MeasureAngleTool.toolId);
+      },
     });
   }
 
@@ -95,7 +124,9 @@ export class MeasureToolDefinitions {
       iconSpec: MeasurePerpendicularTool.iconSpec,
       label: () => MeasurePerpendicularTool.flyover,
       tooltip: () => MeasurePerpendicularTool.description,
-      execute: () => { void IModelApp.tools.run(MeasurePerpendicularTool.toolId); },
+      execute: () => {
+        void IModelApp.tools.run(MeasurePerpendicularTool.toolId);
+      },
     });
   }
 }
