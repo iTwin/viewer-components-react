@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type {
   BeButtonEvent,
   ToolAssistanceInstruction,
@@ -24,14 +24,14 @@ import { MeasureRadiusToolModel } from "../toolmodels/MeasureRadiusToolModel";
 
 /** Tool for measuring radius using 3-points */
 export class MeasureRadiusTool extends MeasurementToolBase<
-RadiusMeasurement,
-MeasureRadiusToolModel
+  RadiusMeasurement,
+  MeasureRadiusToolModel
 > {
   protected createToolModel(): MeasureRadiusToolModel {
     return new MeasureRadiusToolModel();
   }
 
-  public static override toolId = "MeasureRadius";
+  public static override toolId = "MeasureTools.MeasureRadius";
   // TODO: Change icon once UX team provides icon
   public static override iconSpec = "icon-three-points-circular-arc";
   public static get label() {

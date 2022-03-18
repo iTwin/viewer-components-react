@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type {
   BeButtonEvent,
   ToolAssistanceInstruction,
@@ -24,14 +24,14 @@ import { MeasureAngleToolModel } from "../toolmodels/MeasureAngleToolModel";
 
 /** Tool for measuring angles using start, center and end point */
 export class MeasureAngleTool extends MeasurementToolBase<
-AngleMeasurement,
-MeasureAngleToolModel
+  AngleMeasurement,
+  MeasureAngleToolModel
 > {
   protected createToolModel(): MeasureAngleToolModel {
     return new MeasureAngleToolModel();
   }
 
-  public static override toolId = "MeasureAngle";
+  public static override toolId = "MeasureTools.MeasureAngle";
   // TODO: Change icon once UX team provides icon
   public static override iconSpec = "icon-angle-measure";
   public static get label() {

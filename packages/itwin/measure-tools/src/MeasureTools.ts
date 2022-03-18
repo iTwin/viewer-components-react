@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { IModelApp } from "@itwin/core-frontend";
 import { MeasureDistanceTool } from "./tools/MeasureDistanceTool";
@@ -32,7 +32,7 @@ export interface StartupOptions {
 
 export class MeasureTools {
   private static _isInitialized = false;
-  private static _i18nNamespace: "MeasureTools";
+  private static _i18nNamespace = "MeasureTools";
   private static _localization: Localization;
   private static _featureFlags?: FeatureFlags;
 

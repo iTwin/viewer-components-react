@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import { GeoServiceStatus } from "@itwin/core-bentley";
 import type { CurvePrimitive } from "@itwin/core-geometry";
@@ -36,10 +36,10 @@ import { MeasureTools } from "../MeasureTools";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
-LocationMeasurement,
-MeasureLocationToolModel
+  LocationMeasurement,
+  MeasureLocationToolModel
 > {
-  public static override toolId = "MeasureLocation";
+  public static override toolId = "MeasureTools.MeasureLocation";
   public static override iconSpec = "icon-measure-location";
 
   protected override get feature(): Feature | undefined {

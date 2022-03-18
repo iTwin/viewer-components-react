@@ -31,13 +31,10 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     toolbarUsage: ToolbarUsage,
     toolbarOrientation: ToolbarOrientation,
   ): CommonToolbarItem[] {
-    if (
-      stageUsage === StageUsage.General &&
-      toolbarUsage === ToolbarUsage.ContentManipulation
-    ) {
+    if (stageUsage === StageUsage.General && toolbarUsage === ToolbarUsage.ContentManipulation) {
       const featureFlags = MeasureTools.featureFlags;
-      const tools: ToolItemDef[] = [];
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
+        const tools: ToolItemDef[] = [];
         if (!featureFlags?.hideDistanceTool) {
           tools.push(MeasureToolDefinitions.measureDistanceToolCommand);
         }
@@ -69,10 +66,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         ];
       }
 
-      if (
-        tools.length > 0 &&
-        toolbarOrientation === ToolbarOrientation.Horizontal
-      ) {
+      if (Object.values(featureFlags ?? { a: true }).some(Boolean) && toolbarOrientation === ToolbarOrientation.Horizontal) {
         const isHidden = new ConditionalBooleanValue(
           () => !MeasurementUIEvents.isClearMeasurementButtonVisible,
           [

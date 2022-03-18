@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import type { Vector3d } from "@itwin/core-geometry";
 import {
@@ -32,10 +32,10 @@ import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel
 import { MeasureTools } from "../MeasureTools";
 
 export class MeasurePerpendicularTool extends MeasurementToolBase<
-DistanceMeasurement,
-MeasureDistanceToolModel
+  DistanceMeasurement,
+  MeasureDistanceToolModel
 > {
-  public static override toolId = "MeasurePerpendicular";
+  public static override toolId = "MeasureTools.MeasurePerpendicular";
   public static override iconSpec = "icon-measure-perpendicular";
 
   protected _firstSurface?: Plane3dByOriginAndUnitNormal;
