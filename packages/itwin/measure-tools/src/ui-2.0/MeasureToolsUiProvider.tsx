@@ -20,7 +20,9 @@ import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";
 import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions";
-import { MeasurementPropertyWidget } from "./MeasurementPropertyWidget";
+import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget";
+import { AbstractZoneLocation } from "@itwin/appui-abstract";
+import { UiFramework } from "@itwin/appui-react";
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
@@ -104,23 +106,30 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     stageUsage: string,
     location: StagePanelLocation,
     section?: StagePanelSection | undefined,
+    // eslint-disable-next-line deprecation/deprecation
+    zoneLocation?: AbstractZoneLocation
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
     if (
-      stageUsage === StageUsage.General &&
-      location === StagePanelLocation.Right &&
-      section === StagePanelSection.Start
+      (
+        stageUsage === StageUsage.General &&
+        location === StagePanelLocation.Right &&
+        section === StagePanelSection.Start &&
+        UiFramework.uiVersion !== "1"
+      ) ||
+      (
+        !section &&
+        stageUsage === StageUsage.General &&
+        // eslint-disable-next-line deprecation/deprecation
+        zoneLocation === AbstractZoneLocation.CenterRight
+      )
     ) {
       widgets.push({
-        id: "measure-tools-property-widget",
+        id: MeasurementPropertyWidgetId,
         label: IModelApp.localization.getLocalizedString("MeasureTools:Generic.measurements"),
         getWidgetContent: () => <MeasurementPropertyWidget />, // eslint-disable-line react/display-name
         defaultState: WidgetState.Hidden,
-        stateFunc: () => MeasurementUIEvents.isClearMeasurementButtonVisible ? WidgetState.Open : WidgetState.Hidden,
-        syncEventIds: [
-          MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
-          MeasurementSyncUiEventId.DynamicMeasurementChanged,
-        ],
+        icon: "icon-measure",
       });
     }
     return widgets;
