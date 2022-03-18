@@ -33,26 +33,27 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   ): CommonToolbarItem[] {
     if (stageUsage === StageUsage.General && toolbarUsage === ToolbarUsage.ContentManipulation) {
       const featureFlags = MeasureTools.featureFlags;
+      const tools: ToolItemDef[] = [];
+      if (!featureFlags?.hideDistanceTool) {
+        tools.push(MeasureToolDefinitions.measureDistanceToolCommand);
+      }
+      if (!featureFlags?.hideAreaTool) {
+        tools.push(MeasureToolDefinitions.measureAreaToolCommand);
+      }
+      if (!featureFlags?.hideLocationTool) {
+        tools.push(MeasureToolDefinitions.measureLocationToolCommand);
+      }
+      if (!featureFlags?.hideRadiusTool) {
+        tools.push(MeasureToolDefinitions.measureRadiusToolCommand);
+      }
+      if (!featureFlags?.hideAngleTool) {
+        tools.push(MeasureToolDefinitions.measureAngleToolCommand);
+      }
+      if (!featureFlags?.hidePerpendicularTool) {
+        tools.push(MeasureToolDefinitions.measurePerpendicularToolCommand);
+      }
+
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
-        const tools: ToolItemDef[] = [];
-        if (!featureFlags?.hideDistanceTool) {
-          tools.push(MeasureToolDefinitions.measureDistanceToolCommand);
-        }
-        if (!featureFlags?.hideAreaTool) {
-          tools.push(MeasureToolDefinitions.measureAreaToolCommand);
-        }
-        if (!featureFlags?.hideLocationTool) {
-          tools.push(MeasureToolDefinitions.measureLocationToolCommand);
-        }
-        if (!featureFlags?.hideRadiusTool) {
-          tools.push(MeasureToolDefinitions.measureRadiusToolCommand);
-        }
-        if (!featureFlags?.hideAngleTool) {
-          tools.push(MeasureToolDefinitions.measureAngleToolCommand);
-        }
-        if (!featureFlags?.hidePerpendicularTool) {
-          tools.push(MeasureToolDefinitions.measurePerpendicularToolCommand);
-        }
         return [
           ToolbarItemUtilities.createGroupButton(
             "measure-tools-toolbar",
@@ -66,7 +67,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         ];
       }
 
-      if (Object.values(featureFlags ?? { a: true }).some(Boolean) && toolbarOrientation === ToolbarOrientation.Horizontal) {
+      if (tools.length > 0 && toolbarOrientation === ToolbarOrientation.Horizontal) {
         const isHidden = new ConditionalBooleanValue(
           () => !MeasurementUIEvents.isClearMeasurementButtonVisible,
           [
