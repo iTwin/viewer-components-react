@@ -35,10 +35,13 @@ export function useOnUnmount(impl: () => void) {
 
 /** create a stable object reference on intialization */
 export function useStable<T>(make: () => T) {
-  // can't use memo since it's only for expensive computations, react will (eventually)
-  // selectively recreate the object breaking the contract.
-  const value = useMemo(make, []);
-  return useRef(value).current;
+  const valueRef = useRef<T>(undefined as any);
+  const hasMade = useRef(false);
+  if (!hasMade.current) {
+    valueRef.current = make();
+    hasMade.current = true;
+  }
+  return valueRef.current;
 }
 
 /**
