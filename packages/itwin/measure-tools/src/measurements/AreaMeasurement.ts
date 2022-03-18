@@ -134,9 +134,9 @@ export class AreaMeasurement extends Measurement {
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
     if (this.isDynamic) return false;
 
-    this.onDecorationButtonEvent(
+    void this.onDecorationButtonEvent(
       MeasurementPickContext.createFromSourceId("Invalid", ev)
-    ).catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    );
 
     return true;
   }

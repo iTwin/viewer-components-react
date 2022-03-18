@@ -26,8 +26,8 @@ import { MeasureAreaToolModel } from "../toolmodels/MeasureAreaToolModel";
 import { MeasureTools } from "../MeasureTools";
 
 export class MeasureAreaTool extends MeasurementToolBase<
-  AreaMeasurement,
-  MeasureAreaToolModel
+AreaMeasurement,
+MeasureAreaToolModel
 > {
   public static override toolId = "MeasureArea";
   public static override iconSpec = "icon-measure-2d";

@@ -188,12 +188,11 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
  * for sending input events to the model.
  */
 export abstract class MeasurementToolBase<
-    T extends Measurement,
-    ToolModel extends MeasurementToolModel<T>
-  >
+  T extends Measurement,
+  ToolModel extends MeasurementToolModel<T>
+>
   extends PrimitiveToolBase
-  implements MeasurementTool
-{
+  implements MeasurementTool {
   private _toolModel: ToolModel;
   private _selectionHolder: SelectionHolder;
 

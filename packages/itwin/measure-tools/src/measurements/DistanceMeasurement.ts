@@ -461,10 +461,11 @@ export class DistanceMeasurement extends Measurement {
   }
 
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
-    if (!this._isDynamic)
-      this.onDecorationButtonEvent(
+    if (!this._isDynamic) {
+      void this.onDecorationButtonEvent(
         MeasurementPickContext.createFromSourceId("Invalid", ev)
-      ).catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+      );
+    }
 
     return true;
   }

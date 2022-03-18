@@ -24,8 +24,8 @@ import { MeasureRadiusToolModel } from "../toolmodels/MeasureRadiusToolModel";
 
 /** Tool for measuring radius using 3-points */
 export class MeasureRadiusTool extends MeasurementToolBase<
-  RadiusMeasurement,
-  MeasureRadiusToolModel
+RadiusMeasurement,
+MeasureRadiusToolModel
 > {
   protected createToolModel(): MeasureRadiusToolModel {
     return new MeasureRadiusToolModel();

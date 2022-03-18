@@ -32,8 +32,8 @@ import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel
 import { MeasureTools } from "../MeasureTools";
 
 export class MeasurePerpendicularTool extends MeasurementToolBase<
-  DistanceMeasurement,
-  MeasureDistanceToolModel
+DistanceMeasurement,
+MeasureDistanceToolModel
 > {
   public static override toolId = "MeasurePerpendicular";
   public static override iconSpec = "icon-measure-perpendicular";

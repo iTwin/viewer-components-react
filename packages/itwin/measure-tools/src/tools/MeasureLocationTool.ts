@@ -36,8 +36,8 @@ import { MeasureTools } from "../MeasureTools";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
-  LocationMeasurement,
-  MeasureLocationToolModel
+LocationMeasurement,
+MeasureLocationToolModel
 > {
   public static override toolId = "MeasureLocation";
   public static override iconSpec = "icon-measure-location";

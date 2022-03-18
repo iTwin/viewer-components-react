@@ -17,7 +17,7 @@ import type {
 } from "@itwin/core-common";
 import { Cartographic } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
-import { GraphicType, IModelApp } from "@itwin/core-frontend";
+import { GraphicType } from "@itwin/core-frontend";
 import { FormatterUtils } from "../api/FormatterUtils";
 import {
   StyleSet,
@@ -102,8 +102,8 @@ export class LocationMeasurement extends Measurement {
   }
   public set location(pt: Point3d) {
     this._location.setFrom(pt);
-    this.createTextMarker().catch();
-  } // eslint-disable-line @typescript-eslint/no-floating-promises
+    void this.createTextMarker();
+  }
 
   public get geoLocation(): Cartographic | undefined {
     return this._geoLocation;
@@ -258,7 +258,7 @@ export class LocationMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<
-    MeasurementWidgetData | undefined
+  MeasurementWidgetData | undefined
   > {
     const fCoordinates = await FormatterUtils.formatCoordinates(this._location);
 
@@ -341,9 +341,10 @@ export class LocationMeasurement extends Measurement {
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
     if (this._isDynamic) return false;
 
-    this.onDecorationButtonEvent(
+    void this.onDecorationButtonEvent(
       MeasurementPickContext.createFromSourceId("Invalid", ev)
-    ).catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
+    );
+
     return true;
   }
 

@@ -75,19 +75,19 @@ export class MeasureToolDefinitions {
       label: () =>
         MeasurementPreferences.current.displayMeasurementAxes
           ? MeasureTools.localization.getLocalizedString(
-              "MeasureTools:Generic.hideMeasurementAxes"
-            )
+            "MeasureTools:Generic.hideMeasurementAxes"
+          )
           : MeasureTools.localization.getLocalizedString(
-              "MeasureTools:Generic.displayMeasurementAxes"
-            ),
+            "MeasureTools:Generic.displayMeasurementAxes"
+          ),
       tooltip: () =>
         MeasurementPreferences.current.displayMeasurementAxes
           ? MeasureTools.localization.getLocalizedString(
-              "MeasureTools:Generic.hideMeasurementAxes"
-            )
+            "MeasureTools:Generic.hideMeasurementAxes"
+          )
           : MeasureTools.localization.getLocalizedString(
-              "MeasureTools:Generic.displayMeasurementAxes"
-            ),
+            "MeasureTools:Generic.displayMeasurementAxes"
+          ),
       execute: () => {
         void IModelApp.tools.run(ToggleDisplayMeasurementAxesTool.toolId);
       },

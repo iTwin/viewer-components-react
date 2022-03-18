@@ -6,7 +6,6 @@
 import * as React from "react";
 import type { XAndY } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
-import { IModelApp } from "@itwin/core-frontend";
 import { RelativePosition } from "@itwin/appui-abstract";
 import type { ItemProps } from "@itwin/appui-react";
 import { ActionButtonItemDef, ActionItemButton, CursorInformation, CursorPopupManager } from "@itwin/appui-react";

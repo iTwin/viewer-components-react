@@ -25,8 +25,8 @@ import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
-  DistanceMeasurement,
-  MeasureDistanceToolModel
+DistanceMeasurement,
+MeasureDistanceToolModel
 > {
   public static override toolId = "MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
