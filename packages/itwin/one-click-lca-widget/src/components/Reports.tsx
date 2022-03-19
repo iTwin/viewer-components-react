@@ -1,9 +1,8 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
-import React from "react";
-import { useMemo, useState, useEffect } from "react";
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+import React, { useEffect, useMemo, useState } from "react";
 import { SearchBox } from "@itwin/core-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
@@ -21,7 +20,7 @@ type Reporting = CreateTypeFromInterface<Report>;
 
 const Reports = () => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  const reportingClientApi = new ReportingClient();
+  const reportingClientApi = useMemo(() => new ReportingClient(), []);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reports, setReports] = useState<Report[]>([]);
@@ -88,17 +87,31 @@ const Reports = () => {
   );
 
   useEffect(() => {
-    IModelApp.authorizationClient?.getAccessToken().then((token) => {
-      reportingClientApi.getReports(token, projectId).then((data) => {
-        if (data) {
-          const fetchedReports = data.reports ?? [];
-          setReports(fetchedReports);
-          setFilteredReports(fetchedReports);
-          setIsLoading(false);
-        }
+    if (!IModelApp.authorizationClient)
+      throw new Error(
+        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
+      );
+    IModelApp.authorizationClient
+      .getAccessToken()
+      .then((token: string) => {
+        reportingClientApi
+          .getReports(token, projectId)
+          .then((data) => {
+            if (data) {
+              const fetchedReports = data.reports ?? [];
+              setReports(fetchedReports);
+              setFilteredReports(fetchedReports);
+              setIsLoading(false);
+            }
+          })
+          .catch((err) => {
+            throw new Error(err);
+          });
+      })
+      .catch((err) => {
+        throw new Error(err);
       });
-    });
-  }, [projectId]);
+  }, [projectId, reportingClientApi]);
 
   return (
     <>

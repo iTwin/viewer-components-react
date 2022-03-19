@@ -1,10 +1,15 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import "./ExportModal.scss";
-import React from "react";
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import {
   Alert,
@@ -40,13 +45,8 @@ interface OclcaTokenCache {
 
 const ExportModal = (props: ExportProps) => {
   const MILI_SECONDS = 1000;
-  const EMAIL_LABEL = "Email";
-  const PASSWORD_LABEL = "Password";
-  const SIGNIN_BUTTON_LABEL = "Sign In";
-  const SIGNIN_PROMPT = "Sign in to One Click LCA.";
-  const SIGNIN_ERROR = "Incorrect email or password.";
   const PIN_INTERVAL = 1000;
-  const oneClickLCAClientApi = new OneClickLCAClient();
+  const oneClickLCAClientApi = useMemo(() => new OneClickLCAClient(), []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -91,7 +91,7 @@ const ExportModal = (props: ExportProps) => {
         const token =
           (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
         if (job.id && token) {
-          let currentJobStatus =
+          const currentJobStatus =
             await oneClickLCAClientApi.getOneclicklcaJobStatus(token, job?.id);
           if (currentJobStatus.job?.status) {
             if (
@@ -99,7 +99,7 @@ const ExportModal = (props: ExportProps) => {
             ) {
               setJobLink(currentJobStatus?.job._links?.oneclicklca);
             }
-            setJobStatus(currentJobStatus.job?.status as JobStatus.StatusEnum);
+            setJobStatus(currentJobStatus.job?.status);
           } else {
             throw new Error("failed to get job status");
           }
@@ -107,7 +107,7 @@ const ExportModal = (props: ExportProps) => {
       }, PIN_INTERVAL);
       intervalRef.current = intervalId;
     },
-    [setJobLink, setJobStatus]
+    [setJobLink, setJobStatus, oneClickLCAClientApi]
   );
 
   const runJob = useCallback(
@@ -116,11 +116,11 @@ const ExportModal = (props: ExportProps) => {
         (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       if (props.reportId && token) {
         try {
-          let jobCreated = await oneClickLCAClientApi.createOneclicklcaJob(
+          const jobCreated = await oneClickLCAClientApi.createOneclicklcaJob(
             accessToken,
             {
               reportId: props.reportId,
-              token: token,
+              token,
             }
           );
           if (jobCreated?.job?.id) {
@@ -129,13 +129,13 @@ const ExportModal = (props: ExportProps) => {
             throw new Error("Failed to create job");
           }
         } catch (e) {
-          throw new Error("Failed to create one click lca job." + e);
+          throw new Error(`Failed to create one click lca job.${e}`);
         }
       } else {
         throw new Error("No reportId or accessToken");
       }
     },
-    [props, pinStatus]
+    [props, pinStatus, oneClickLCAClientApi]
   );
 
   const signin = useCallback(
@@ -158,7 +158,14 @@ const ExportModal = (props: ExportProps) => {
       }
       startSigningIn(false);
     },
-    [email, password, resetSignin, cacheToken, showSigninError]
+    [
+      email,
+      password,
+      resetSignin,
+      cacheToken,
+      showSigninError,
+      oneClickLCAClientApi,
+    ]
   );
 
   const onClose = useCallback(() => {
@@ -172,8 +179,8 @@ const ExportModal = (props: ExportProps) => {
   }, [props, resetSignin]);
 
   const getStatusComponent = useCallback(
-    (jobStatus: JobStatus.StatusEnum, jobLink: string | undefined) => {
-      switch (jobStatus) {
+    (status: JobStatus.StatusEnum, link: string | undefined) => {
+      switch (status) {
         case JobStatus.StatusEnum.Queued:
           return (
             <>
@@ -199,12 +206,12 @@ const ExportModal = (props: ExportProps) => {
         case JobStatus.StatusEnum.Succeeded:
           return (
             <>
-              {jobLink && (
+              {link && (
                 <div className="progress-radial-container">
                   <ProgressRadial status="positive" size="small" value={50} />
                   <a
                     className="report-button"
-                    href={jobLink}
+                    href={link}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -226,7 +233,7 @@ const ExportModal = (props: ExportProps) => {
             </>
           );
         default:
-          throw new Error("Job status is invalid " + jobStatus);
+          throw new Error(`Job status is invalid ${status}`);
       }
     },
     []
@@ -234,7 +241,9 @@ const ExportModal = (props: ExportProps) => {
 
   useEffect(() => {
     if (props.isOpen && isSignedIn && cache?.token) {
-      runJob(cache.token);
+      runJob(cache.token).catch((err) => {
+        throw new Error(err);
+      });
     }
   }, [props.isOpen, isSignedIn, cache, runJob]);
 
@@ -257,7 +266,7 @@ const ExportModal = (props: ExportProps) => {
       setEmailError(false);
       return;
     }
-  }, [email]);
+  }, [email, isValidEmail]);
 
   return (
     <>
@@ -278,15 +287,15 @@ const ExportModal = (props: ExportProps) => {
               data-actual-height="600"
             />
             <form onSubmit={signin} className="signin-form">
-              <div className="signin-prompt">{SIGNIN_PROMPT}</div>
+              <div className="signin-prompt">Sign in to One Click LCA.</div>
               {signinError && (
                 <Alert type="negative" className="signin-error">
-                  {SIGNIN_ERROR}
+                  Incorrect email or password.
                 </Alert>
               )}
               <div className="signin-input">
                 <LabeledInput
-                  label={EMAIL_LABEL}
+                  label="Email"
                   value={email}
                   onChange={(v) => setEmail(v.target.value)}
                   type="email"
@@ -297,18 +306,18 @@ const ExportModal = (props: ExportProps) => {
               </div>
               <div className="signin-input">
                 <LabeledInput
-                  label={PASSWORD_LABEL}
+                  label="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type={passwordIsVisible ? "text" : "password"}
                   svgIcon={
-                    <div onClick={() => showPassword(!passwordIsVisible)}>
-                      {passwordIsVisible ? (
-                        <SvgVisibilityHide />
-                      ) : (
-                        <SvgVisibilityShow />
-                      )}
-                    </div>
+                    passwordIsVisible ? (
+                      <SvgVisibilityHide
+                        onClick={() => showPassword(!passwordIsVisible)}
+                      />
+                    ) : (
+                      <SvgVisibilityShow />
+                    )
                   }
                   iconDisplayStyle="inline"
                   required
@@ -330,7 +339,7 @@ const ExportModal = (props: ExportProps) => {
                       value={50}
                     />
                   ) : (
-                    SIGNIN_BUTTON_LABEL
+                    "Sign In"
                   )}
                 </Button>
               </div>
