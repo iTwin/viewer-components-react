@@ -54,7 +54,7 @@ const GroupAction = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
-  PropertyRecord[]
+    PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
@@ -82,7 +82,7 @@ const GroupAction = ({
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
         const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-        }` : "";
+          }` : "";
         setSimpleQuery(query);
       },
     );
@@ -141,9 +141,9 @@ const GroupAction = ({
         ON ce.targetecinstanceid = de.ecinstanceid
     WHERE
       (${searchQuery.map((token, index) =>
-    `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+      `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       de.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-  ).join(" ")}
+    ).join(" ")}
       )
     UNION
     SELECT
@@ -155,9 +155,9 @@ const GroupAction = ({
         ON de.ecclassid = be.ecinstanceid
     WHERE
       (${searchQuery.map((token, index) =>
-    `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+      `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       be.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-  ).join(" ")}
+    ).join(" ")}
       )
     UNION
     SELECT
@@ -166,9 +166,9 @@ const GroupAction = ({
       generic.physicalobject be
     WHERE
       (${searchQuery.map((token, index) =>
-    `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+      `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-  ).join(" ")}
+    ).join(" ")}
       )` : "";
     setQuery(generatedSearchQuery.trim());
 
@@ -215,6 +215,8 @@ const GroupAction = ({
     simpleQuery,
     validator,
   ]);
+
+  const isBlockingActions = !(details.groupName && details.description && (query || simpleQuery) && !isRendering && !isLoading);
 
   return (
     <>
@@ -365,9 +367,10 @@ const GroupAction = ({
           );
           await goBack();
         }}
-        disabled={
-          !(details.groupName && details.description && (query || simpleQuery) && !isRendering && !isLoading)
+        isSavingDisabled={
+          isBlockingActions
         }
+        isCancelDisabled={isBlockingActions}
         isLoading={isLoading}
       />
     </>

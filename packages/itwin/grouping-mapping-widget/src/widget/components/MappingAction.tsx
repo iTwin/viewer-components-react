@@ -117,7 +117,7 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
       <ActionPanel
         onSave={onSave}
         onCancel={returnFn}
-        disabled={!(values.name && values.description)}
+        isSavingDisabled={!(values.name && values.description)}
         isLoading={isLoading}
       />
     </>

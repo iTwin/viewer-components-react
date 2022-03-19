@@ -10,14 +10,16 @@ import { LoadingSpinner } from "./utils";
 export interface ActionPanelProps {
   onSave: () => void;
   onCancel: () => void;
-  disabled?: boolean;
+  isCancelDisabled?: boolean
+  isSavingDisabled?: boolean;
   isLoading?: boolean;
 }
 
 const ActionPanel = ({
   onSave,
   onCancel,
-  disabled = false,
+  isCancelDisabled = false,
+  isSavingDisabled = false,
   isLoading = false,
 }: ActionPanelProps): JSX.Element => {
   return (
@@ -27,7 +29,7 @@ const ActionPanel = ({
           <LoadingSpinner />
         }
         <Button
-          disabled={disabled || isLoading}
+          disabled={isSavingDisabled || isLoading}
           styleType='high-visibility'
           id='save-app'
           onClick={onSave}
@@ -39,7 +41,7 @@ const ActionPanel = ({
           type='button'
           id='cancel'
           onClick={onCancel}
-          disabled={disabled || isLoading}
+          disabled={isCancelDisabled || isLoading}
         >
           Cancel
         </Button>

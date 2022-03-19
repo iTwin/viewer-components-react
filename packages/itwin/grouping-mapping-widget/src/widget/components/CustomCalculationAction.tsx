@@ -158,7 +158,7 @@ const CustomCalculationAction = ({
       <ActionPanel
         onSave={onSave}
         onCancel={returnFn}
-        disabled={!(formula && propertyName)}
+        isSavingDisabled={!(formula && propertyName)}
         isLoading={isLoading}
       />
     </>
