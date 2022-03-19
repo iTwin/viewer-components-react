@@ -10,7 +10,7 @@ import { LoadingSpinner } from "./utils";
 export interface ActionPanelProps {
   onSave: () => void;
   onCancel: () => void;
-  isCancelDisabled?: boolean
+  isCancelDisabled?: boolean;
   isSavingDisabled?: boolean;
   isLoading?: boolean;
 }
