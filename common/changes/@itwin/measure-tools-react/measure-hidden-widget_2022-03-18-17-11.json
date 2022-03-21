@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/measure-tools-react",
       "comment": "Hide Measurement widget until measurement is selected\"",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/measure-tools-react"
