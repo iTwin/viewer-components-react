@@ -15,7 +15,10 @@ module.exports = {
   },
   resolve: {
     fallback: {
-      "path": require.resolve("path-browserify")
+      os: require.resolve("os-browserify/browser"),
+      url: require.resolve("url"),
+      path: require.resolve("path-browserify"),
+      timers: require.resolve("timers-browserify"),
     }
   },
   devtool: "nosources-source-map",
@@ -46,7 +49,7 @@ module.exports = {
   },
   stats: "errors-only",
   optimization: {
-    nodeEnv: "production"
+    nodeEnv: "development"
   },
   externals: {
     electron: "commonjs electron",

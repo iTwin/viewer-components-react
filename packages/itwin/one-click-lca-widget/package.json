@@ -1,7 +1,6 @@
 {
   "name": "@itwin/one-click-lca-widget-react",
   "version": "0.1.0",
-  "type": "commonjs",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Carbon Calculation.",
   "keywords": [
     "Bentley",
@@ -37,7 +36,8 @@
     "rebuild": "npm run clean && npm run build",
     "test": "npm run build && npm run webpack:tests && npm run certa",
     "webpack:tests": "webpack --config webpack.config.js 1>&2",
-    "certa": "certa --testBundle lib/test/webpack/bundled-tests.js -c certa.json -r chrome"
+    "certa": "certa -c certa.json -r chrome",
+    "cover": "nyc npm test"
   },
   "dependencies": {
     "@itwin/insights-client": "^0.1.0",
@@ -51,6 +51,7 @@
     "@itwin/build-tools": "^3.0.0",
     "@itwin/certa": "^3.0.0",
     "@itwin/core-frontend": "^3.0.0",
+    "@itwin/core-common": "^3.0.0",
     "@itwin/core-react": "^3.0.0",
     "@itwin/eslint-plugin": "^3.0.0",
     "@types/mocha": "^9.1.0",
@@ -74,12 +75,17 @@
     "react-dom": "^17.0.2",
     "rimraf": "^3.0.2",
     "typescript": "~4.3.0",
-    "url-loader": "^4.1.1",
-    "null-loader": "^4.0.1",
+    "glob": "^7.2.0",
+    "url": "^0.11.0",
+    "nyc": "^15.1.0",
+    "mocha": "^8.3.2",
     "webpack": "^5.69.1",
     "webpack-cli": "^4.9.2",
-    "glob": "^7.2.0",
+    "url-loader": "^4.1.1",
+    "null-loader": "^4.0.1",
+    "os-browserify": "^0.3.0",
     "path-browserify": "1.0.1",
+    "timers-browserify": "^2.0.12",
     "source-map-loader": "^3.0.1"
   },
   "peerDependencies": {
@@ -87,8 +93,17 @@
     "@itwin/appui-react": "^3.0.0",
     "@itwin/core-react": "^3.0.0",
     "@itwin/core-frontend": "^3.0.0",
+    "@itwin/core-common": "^3.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
+  },
+  "nyc": {
+    "nycrc-path": "./node_modules/@itwin/build-tools/.nycrc",
+    "check-coverage": true,
+    "statements": 20,
+    "branches": 20,
+    "functions": 20,
+    "lines": 20
   },
   "eslintConfig": {
     "plugins": [
