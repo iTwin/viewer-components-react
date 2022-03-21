@@ -102,7 +102,7 @@ export class LocationMeasurement extends Measurement {
   }
   public set location(pt: Point3d) {
     this._location.setFrom(pt);
-    void this.createTextMarker();
+    this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   public get geoLocation(): Cartographic | undefined {
@@ -341,9 +341,10 @@ export class LocationMeasurement extends Measurement {
   private handleTextMarkerButtonEvent(ev: BeButtonEvent): boolean {
     if (this._isDynamic) return false;
 
-    void this.onDecorationButtonEvent(
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.onDecorationButtonEvent(
       MeasurementPickContext.createFromSourceId("Invalid", ev)
-    );
+    ).catch();
 
     return true;
   }
