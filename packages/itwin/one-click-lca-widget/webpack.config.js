@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-const path = require("path");
 const glob = require("glob");
+const path = require("path");
 
 module.exports = {
   mode: "development",
@@ -13,12 +13,14 @@ module.exports = {
     filename: "bundled-tests.js",
     devtoolModuleFilenameTemplate: "file:///[absolute-resource-path]"
   },
+  resolve: {
+    fallback: {
+      "path": require.resolve("path-browserify")
+    }
+  },
   devtool: "nosources-source-map",
   module: {
     noParse: [
-      // Don't parse draco_*_nodejs.js modules for `require` calls.  There are
-      // requires for fs that cause it to fail even though the fs dependency
-      // is not used.
       /draco_decoder_nodejs.js$/,
       /draco_encoder_nodejs.js$/
     ],
