@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "remove react-spring dependency, and replaced grid animation with css",
+      "comment": "remove widget control and add temporary support for ui 1.0",
       "type": "patch"
     }
   ],
