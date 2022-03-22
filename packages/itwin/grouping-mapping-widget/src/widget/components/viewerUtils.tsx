@@ -56,6 +56,7 @@ export const visualizeElementsByKeys = async (
     return [];
   }
 
+
   const vp = IModelApp.viewManager.selectedView;
 
   const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
