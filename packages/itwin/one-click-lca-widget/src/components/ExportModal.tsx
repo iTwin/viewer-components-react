@@ -132,35 +132,32 @@ const ExportModal = (props: ExportProps) => {
     [props, pinStatus, oneClickLCAClientApi]
   );
 
-  const signin = useCallback(
-    async (e) => {
-      e.preventDefault();
-      startSigningIn(true);
-      const result = await oneClickLCAClientApi.getOneclicklcaAccessToken(
-        email,
-        password
-      );
-      if (result && result.access_token && result.expires_in) {
-        cacheToken({
-          token: result.access_token,
-          exp: Date.now() + result.expires_in * MILI_SECONDS,
-        });
-        resetSignin();
-        setIsSignedIn(true);
-      } else {
-        showSigninError(true);
-      }
-      startSigningIn(false);
-    },
-    [
+  const signin = useCallback(async () => {
+    startSigningIn(true);
+    const result = await oneClickLCAClientApi.getOneclicklcaAccessToken(
       email,
-      password,
-      resetSignin,
-      cacheToken,
-      showSigninError,
-      oneClickLCAClientApi,
-    ]
-  );
+      password
+    );
+    console.log(result);
+    if (result && result.access_token && result.expires_in) {
+      cacheToken({
+        token: result.access_token,
+        exp: Date.now() + result.expires_in * MILI_SECONDS,
+      });
+      resetSignin();
+      setIsSignedIn(true);
+    } else {
+      showSigninError(true);
+    }
+    startSigningIn(false);
+  }, [
+    email,
+    password,
+    resetSignin,
+    cacheToken,
+    showSigninError,
+    oneClickLCAClientApi,
+  ]);
 
   const onClose = useCallback(() => {
     resetSignin();
@@ -280,7 +277,7 @@ const ExportModal = (props: ExportProps) => {
               data-actual-width="1200"
               data-actual-height="600"
             />
-            <form onSubmit={signin} className="signin-form">
+            <form className="signin-form">
               <div className="signin-prompt">Sign in to One Click LCA.</div>
               {signinError && (
                 <Alert type="negative" className="signin-error">
@@ -320,7 +317,8 @@ const ExportModal = (props: ExportProps) => {
 
               <div className="signin-button-container">
                 <Button
-                  type="submit"
+                  onClick={signin}
+                  onKeyDown={signin}
                   className="signin-button"
                   styleType="cta"
                   disabled={!isValidSignin()}
