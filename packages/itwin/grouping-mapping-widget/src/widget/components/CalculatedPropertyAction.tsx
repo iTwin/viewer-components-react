@@ -220,7 +220,7 @@ const CalculatedPropertyAction = ({
             onChange={setType}
             itemRenderer={(option: SelectOption<string>) => (
               <MenuItem>
-                <div className='menu-item'>
+                <div className='gr-cp-menu-item'>
                   <div>{option.label}</div>
                   {getSpatialData(option.value)}
                 </div>
@@ -240,7 +240,7 @@ const CalculatedPropertyAction = ({
       <ActionPanel
         onSave={onSave}
         onCancel={returnFn}
-        disabled={!(type && propertyName)}
+        isSavingDisabled={!(type && propertyName)}
         isLoading={isLoading}
       />
     </>
