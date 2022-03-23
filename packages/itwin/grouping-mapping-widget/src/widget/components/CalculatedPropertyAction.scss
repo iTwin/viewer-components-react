@@ -13,15 +13,15 @@
     flex-direction: column;
     gap: $iui-baseline;
 
-    .menu-item {
-      display: flex;
-      justify-content: space-between;
-    }
-
     .select-item {
       display: flex;
       justify-content: space-between;
       width: 100%;
     }
   }
+}
+
+.gr-cp-menu-item {
+  display: flex;
+  justify-content: space-between;
 }

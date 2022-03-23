@@ -216,6 +216,8 @@ const GroupAction = ({
     validator,
   ]);
 
+  const isBlockingActions = !(details.groupName && details.description && (query || simpleQuery) && !isRendering && !isLoading);
+
   return (
     <>
       <WidgetHeader
@@ -365,9 +367,10 @@ const GroupAction = ({
           );
           await goBack();
         }}
-        disabled={
-          !(details.groupName && details.description && (query || simpleQuery) && !isRendering && !isLoading)
+        isSavingDisabled={
+          isBlockingActions
         }
+        isCancelDisabled={isBlockingActions}
         isLoading={isLoading}
       />
     </>

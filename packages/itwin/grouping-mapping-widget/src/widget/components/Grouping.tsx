@@ -261,7 +261,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           } else {
             try {
               const ids: string[] = await fetchIdsFromQuery(
-                row.query ?? "",
+                query,
                 iModelConnection,
               );
               if (ids.length === 0) {
@@ -272,7 +272,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 stringToColor(row.id ?? ""),
                 iModelConnection,
               );
-              hilitedElements.current.set(row.query ?? "", hiliteIds);
+              hilitedElements.current.set(query, hiliteIds);
 
               allIds = allIds.concat(ids);
             } catch {
