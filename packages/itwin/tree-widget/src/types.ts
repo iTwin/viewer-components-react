@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import { StagePanelLocation, StagePanelSection } from "@itwin/appui-abstract";
 import type {
   CategoryTreeProps,
   ModelsTreeProps,
@@ -16,31 +17,33 @@ export interface IModelContentTreeProps
 }
 
 export type ModelTreeProps = Omit<
-ModelsTreeProps,
-| "iModel"
-| "activeView"
-| "width"
-| "height"
-| "filterInfo"
-| "onFilterApplied"
+  ModelsTreeProps,
+  | "iModel"
+  | "activeView"
+  | "width"
+  | "height"
+  | "filterInfo"
+  | "onFilterApplied"
 >;
 
 export type CategoriesTreeProps = Omit<
-CategoryTreeProps,
-| "iModel"
-| "activeView"
-| "width"
-| "height"
-| "filterInfo"
-| "onFilterApplied"
+  CategoryTreeProps,
+  | "iModel"
+  | "activeView"
+  | "width"
+  | "height"
+  | "filterInfo"
+  | "onFilterApplied"
 >;
 
 export type SpatialTreeProps = Omit<
-SpatialContainmentTreeProps,
-"iModel" | "width" | "height"
+  SpatialContainmentTreeProps,
+  "iModel" | "width" | "height"
 >;
 
 export interface TreeWidgetOptions {
+  defaultPanelLocation?: StagePanelLocation,
+  defaultPanelSection?: StagePanelSection,
   enableElementsClassGrouping?: boolean;
   additionalTrees?: SelectableContentDefinition[];
   modelsTreeProps?: ModelTreeProps;
