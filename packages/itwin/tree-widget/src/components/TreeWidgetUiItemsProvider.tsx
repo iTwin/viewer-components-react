@@ -3,10 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 /* eslint-disable react/display-name */
-import {
+import type {
   AbstractWidgetProps,
-  StagePanelSection,
   UiItemsProvider,
+} from "@itwin/appui-abstract";
+import {
+  StagePanelSection,
 } from "@itwin/appui-abstract";
 import {
   AbstractZoneLocation,
