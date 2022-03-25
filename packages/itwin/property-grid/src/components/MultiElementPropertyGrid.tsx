@@ -3,11 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./MultiElementPropertyGrid.scss";
+import './MultiElementPropertyGrid.scss';
 
 import type { InstanceKey } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
+  useActiveFrontstageDef,
   useActiveIModelConnection,
 } from "@itwin/appui-react";
 
@@ -16,12 +17,21 @@ import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
 import React, { useEffect, useMemo, useState } from "react";
 import classnames from "classnames";
+import { WidgetState } from '@itwin/appui-abstract';
+import { Id64 } from '@itwin/core-bentley';
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
   ElementList = 1,
   SingleElementPropertyGrid = 2,
 }
+
+function useSpecificWidgetDef(id: string) {
+  const frontstageDef = useActiveFrontstageDef();
+  return frontstageDef?.findWidgetDef(id);
+}
+
+export const MultiElementPropertyGridId = "vcr:PropertyGrid";
 
 export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   const iModelConnection = useActiveIModelConnection();
@@ -32,6 +42,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   const [moreThanOneElement, setMoreThanOneElement] = useState(false);
   const [selectedInstanceKey, setSelectedInstanceKey] =
     useState<InstanceKey>();
+  const widgetDef = useSpecificWidgetDef(MultiElementPropertyGridId);
 
   useEffect(() => {
     const onSelectionChange = () => {
@@ -108,6 +119,14 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
       key={"SingleElementPropertyGrid"}
     />
   );
+
+  useEffect(() => {
+    if (instanceKeys.some(key => !Id64.isTransient(key.id))) {
+      widgetDef?.setWidgetState(WidgetState.Open)
+    } else {
+      widgetDef?.setWidgetState(WidgetState.Hidden)
+    }
+  }, [widgetDef, instanceKeys]);
 
   return (
     <div className="property-grid-react-transition-container">

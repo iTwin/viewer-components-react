@@ -124,7 +124,7 @@ export const FilteringPropertyGridWithUnifiedSelection = (
     ),
   }), []);
 
-  const { isOverLimit, numSelectedElements } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider as IPresentationPropertyDataProvider });
+  const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider as IPresentationPropertyDataProvider });
 
   const filteringDataProvider = useDisposable(useCallback(
     () => new FilteringPropertyDataProvider(
@@ -141,11 +141,10 @@ export const FilteringPropertyGridWithUnifiedSelection = (
 
   return (
     <>
-      {(isOverLimit || !numSelectedElements) ? (
+      {isOverLimit ? (
         <FillCentered style={{ flexDirection: "column" }}>
-          {!numSelectedElements && <i className="property-grid-react-filtering-pg-icon icon icon-info" />}
           <div className="property-grid-react-filtering-pg-label">
-            {isOverLimit ? localizations.tooManySelected : localizations.noneSelected}
+            { localizations.tooManySelected }
           </div>
         </FillCentered>
       ) : (
