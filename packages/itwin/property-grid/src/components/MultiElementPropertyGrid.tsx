@@ -31,7 +31,7 @@ function useSpecificWidgetDef(id: string) {
   return frontstageDef?.findWidgetDef(id);
 }
 
-export const MultiElementPropertyGridId = "vcr:PropertyGrid";
+export const MultiElementPropertyGridId = "vcr:MultiElementPropertyGrid";
 
 export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   const iModelConnection = useActiveIModelConnection();
