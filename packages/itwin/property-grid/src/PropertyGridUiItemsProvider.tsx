@@ -38,11 +38,13 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     zoneLocation?: AbstractZoneLocation
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
+    const preferredLocation = this._props?.defaultPanelLocation ?? StagePanelLocation.Right;
+    const preferredPanelSection = this._props?.defaultPanelSection ?? StagePanelSection.End;
     if (
       (
         stageUsage === StageUsage.General &&
-        location === StagePanelLocation.Right &&
-        section === StagePanelSection.End &&
+        location === preferredLocation &&
+        section === preferredPanelSection &&
         UiFramework.uiVersion !== "1"
       ) ||
       (
