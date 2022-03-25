@@ -177,54 +177,46 @@ const ExportModal = (props: ExportProps) => {
       switch (status) {
         case JobStatus.StatusEnum.Queued:
           return (
-            <>
-              <div className="progress-radial-container">
-                <ProgressRadial indeterminate size="small" value={50} />
-                <Text variant="leading" className="status-text">
-                  Export queued
-                </Text>
-              </div>
-            </>
+            <div className="progress-radial-container">
+              <ProgressRadial indeterminate size="small" value={50} />
+              <Text variant="leading" className="status-text">
+                Export queued
+              </Text>
+            </div>
           );
         case JobStatus.StatusEnum.Running:
           return (
-            <>
-              <div className="progress-linear-container">
-                <ProgressLinear indeterminate />
-                <Text variant="leading" className="status-text">
-                  Export running
-                </Text>
-              </div>
-            </>
+            <div className="progress-linear-container">
+              <ProgressLinear indeterminate />
+              <Text variant="leading" className="status-text">
+                Export running
+              </Text>
+            </div>
           );
         case JobStatus.StatusEnum.Succeeded:
           return (
-            <>
-              {link && (
-                <div className="progress-radial-container">
-                  <ProgressRadial status="positive" size="small" value={50} />
-                  <a
-                    className="report-button"
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button styleType="cta">Open in One Click LCA</Button>
-                  </a>
-                </div>
-              )}
-            </>
+            link && (
+              <div className="progress-radial-container">
+                <ProgressRadial status="positive" size="small" value={50} />
+                <a
+                  className="report-button"
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button styleType="cta">Open in One Click LCA</Button>
+                </a>
+              </div>
+            )
           );
         case JobStatus.StatusEnum.Failed:
           return (
-            <>
-              <div className="progress-radial-container">
-                <ProgressRadial status="negative" size="small" value={100} />
-                <Text variant="leading" className="status-text">
-                  Export failed
-                </Text>
-              </div>
-            </>
+            <div className="progress-radial-container">
+              <ProgressRadial status="negative" size="small" value={100} />
+              <Text variant="leading" className="status-text">
+                Export failed
+              </Text>
+            </div>
           );
         default:
           throw new Error(`Job status is invalid ${status}`);
@@ -263,95 +255,89 @@ const ExportModal = (props: ExportProps) => {
   }, [email, isValidEmail]);
 
   return (
-    <>
-      <Modal
-        isOpen={props.isOpen}
-        onClose={onClose}
-        title={null}
-        closeOnExternalClick={false}
-      >
-        {!isSignedIn && (
-          <div className="signin">
-            <img
-              className="signin-icon"
-              src={logo}
-              alt="One Click LCA® software"
-              data-height-percentage="80"
-              data-actual-width="1200"
-              data-actual-height="600"
-            />
-            <form onSubmit={signin} className="signin-form">
-              <div className="signin-prompt">Sign in to One Click LCA.</div>
-              {signinError && (
-                <Alert type="negative" className="signin-error">
-                  Incorrect email or password.
-                </Alert>
-              )}
-              <div className="signin-input">
-                <LabeledInput
-                  label="Email"
-                  value={email}
-                  onChange={(v) => setEmail(v.target.value)}
-                  type="email"
-                  status={emailError ? "negative" : undefined}
-                  message={emailError ? "Invalid email address." : ""}
-                  required
-                />
-              </div>
-              <div className="signin-input">
-                <LabeledInput
-                  label="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  type={passwordIsVisible ? "text" : "password"}
-                  svgIcon={
-                    passwordIsVisible ? (
-                      <SvgVisibilityHide
-                        onClick={() => showPassword(!passwordIsVisible)}
-                      />
-                    ) : (
-                      <SvgVisibilityShow />
-                    )
-                  }
-                  iconDisplayStyle="inline"
-                  required
-                />
-              </div>
-
-              <div className="signin-button-container">
-                <Button
-                  className="signin-button"
-                  type="submit"
-                  styleType="cta"
-                  disabled={!isValidSignin()}
-                >
-                  {isSigningIn ? (
-                    <ProgressRadial
-                      className="signin-wait"
-                      indeterminate
-                      size="small"
-                      value={50}
+    <Modal
+      isOpen={props.isOpen}
+      onClose={onClose}
+      title={null}
+      closeOnExternalClick={false}
+    >
+      {!isSignedIn && (
+        <div className="signin">
+          <img
+            className="signin-icon"
+            src={logo}
+            alt="One Click LCA® software"
+            data-height-percentage="80"
+            data-actual-width="1200"
+            data-actual-height="600"
+          />
+          <form onSubmit={signin} className="signin-form">
+            <div className="signin-prompt">Sign in to One Click LCA.</div>
+            {signinError && (
+              <Alert type="negative" className="signin-error">
+                Incorrect email or password.
+              </Alert>
+            )}
+            <div className="signin-input">
+              <LabeledInput
+                label="Email"
+                value={email}
+                onChange={(v) => setEmail(v.target.value)}
+                type="email"
+                status={emailError ? "negative" : undefined}
+                message={emailError ? "Invalid email address." : ""}
+                required
+              />
+            </div>
+            <div className="signin-input">
+              <LabeledInput
+                label="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type={passwordIsVisible ? "text" : "password"}
+                svgIcon={
+                  passwordIsVisible ? (
+                    <SvgVisibilityHide
+                      onClick={() => showPassword(!passwordIsVisible)}
                     />
                   ) : (
-                    "Sign In"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </div>
-        )}
-        {isSignedIn && !jobStatus && (
-          <>
-            <div className="progress-radial-container">
-              <ProgressRadial indeterminate size="large" value={50} />
+                    <SvgVisibilityShow />
+                  )
+                }
+                iconDisplayStyle="inline"
+                required
+              />
             </div>
-          </>
-        )}
-        {isSignedIn &&
-          jobStatus &&
-          getStatusComponent(jobStatus, jobLink?.href)}
-      </Modal>
-    </>
+
+            <div className="signin-button-container">
+              <Button
+                className="signin-button"
+                type="submit"
+                styleType="cta"
+                disabled={!isValidSignin()}
+              >
+                {isSigningIn ? (
+                  <ProgressRadial
+                    className="signin-wait"
+                    indeterminate
+                    size="small"
+                    value={50}
+                  />
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
+      {isSignedIn && !jobStatus && (
+        <div className="progress-radial-container">
+          <ProgressRadial indeterminate size="large" value={50} />
+        </div>
+      )}
+      {isSignedIn && jobStatus && getStatusComponent(jobStatus, jobLink?.href)}
+    </Modal>
   );
 };
 
