@@ -41,7 +41,6 @@
   },
   "dependencies": {
     "@itwin/insights-client": "^0.1.0",
-    "@itwin/itwinui-css": "^0.44.1",
     "@itwin/itwinui-icons-react": "^1.5.1",
     "@itwin/itwinui-react": "^1.29.2"
   },
