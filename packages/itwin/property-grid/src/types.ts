@@ -13,7 +13,7 @@ import type { ContextMenuItemProps, Orientation } from "@itwin/core-react";
 import type { FavoritePropertiesScope } from "@itwin/presentation-frontend";
 import type {
   StagePanelLocation,
-  StagePanelSection
+  StagePanelSection,
 } from "@itwin/appui-abstract";
 
 export type ContextMenuItemInfo = ContextMenuItemProps &

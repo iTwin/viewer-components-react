@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import './MultiElementPropertyGrid.scss';
+import "./MultiElementPropertyGrid.scss";
 
 import type { InstanceKey } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
@@ -17,8 +17,8 @@ import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
 import React, { useEffect, useMemo, useState } from "react";
 import classnames from "classnames";
-import { WidgetState } from '@itwin/appui-abstract';
-import { Id64 } from '@itwin/core-bentley';
+import { WidgetState } from "@itwin/appui-abstract";
+import { Id64 } from "@itwin/core-bentley";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
@@ -121,10 +121,10 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   );
 
   useEffect(() => {
-    if (instanceKeys.some(key => !Id64.isTransient(key.id))) {
-      widgetDef?.setWidgetState(WidgetState.Open)
+    if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
+      widgetDef?.setWidgetState(WidgetState.Open);
     } else {
-      widgetDef?.setWidgetState(WidgetState.Hidden)
+      widgetDef?.setWidgetState(WidgetState.Hidden);
     }
   }, [widgetDef, instanceKeys]);
 
