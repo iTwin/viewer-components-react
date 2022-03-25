@@ -141,9 +141,9 @@ export const MeasurementPropertyWidget = () => {
 
   React.useEffect(() => {
     if (lastSelectedCount) {
-      setTimeout(() => widgetDef?.setWidgetState(WidgetState.Open));
+      widgetDef?.setWidgetState(WidgetState.Open);
     } else {
-      setTimeout(() => widgetDef?.setWidgetState(WidgetState.Hidden));
+      widgetDef?.setWidgetState(WidgetState.Hidden);
     }
   }, [widgetDef, lastSelectedCount]);
 
