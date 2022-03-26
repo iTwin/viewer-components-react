@@ -1,0 +1,26 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+.extraction-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $iui-s;
+  .extraction-status-container {
+    display: flex;
+    gap: $iui-s;
+    align-items: center;
+    .extraction-status {
+      display: flex;
+      gap: $iui-xs;
+      align-items: center;
+      .status-icon {
+        width: $iui-icons-default;
+        height: $iui-icons-default;
+      }
+    }
+  }
+}

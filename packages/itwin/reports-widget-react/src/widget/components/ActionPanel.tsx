@@ -1,0 +1,56 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+import { IModelApp } from "@itwin/core-frontend";
+import { Button } from "@itwin/itwinui-react";
+import * as React from "react";
+import "./ActionPanel.scss";
+import { LoadingSpinner } from "./utils";
+
+export interface ActionPanelProps {
+  actionLabel: string;
+  onAction: () => Promise<void>;
+  onCancel: () => void;
+  isCancelDisabled?: boolean;
+  isSavingDisabled?: boolean;
+  isLoading?: boolean;
+}
+
+const ActionPanel = ({
+  actionLabel,
+  onAction,
+  onCancel,
+  isCancelDisabled = false,
+  isSavingDisabled = false,
+  isLoading = false,
+}: ActionPanelProps): JSX.Element => {
+  return (
+    <div id='action' className='action-panel-container'>
+      <div className='action-panel'>
+        {isLoading &&
+          <LoadingSpinner />
+        }
+        <Button
+          disabled={isSavingDisabled || isLoading}
+          styleType='high-visibility'
+          id='save-app'
+          onClick={onAction}
+        >
+          {actionLabel}
+        </Button>
+        <Button
+          styleType='default'
+          type='button'
+          id='cancel'
+          onClick={onCancel}
+          disabled={isCancelDisabled || isLoading}
+        >
+          {IModelApp.localization.getLocalizedString("ReportsWidget:Cancel")}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default ActionPanel;

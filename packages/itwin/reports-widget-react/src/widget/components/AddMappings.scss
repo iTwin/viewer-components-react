@@ -1,0 +1,15 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+.add-mappings-container {
+  overflow-x: auto;
+  height: 100%;
+  display: flex;
+  .add-mappings-table {
+    flex-grow: 1;
+    overflow: auto;
+  }
+}
