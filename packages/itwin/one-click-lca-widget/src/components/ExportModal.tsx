@@ -25,7 +25,6 @@ import {
   OneClickLCAClient,
 } from "@itwin/insights-client";
 import logo from "../../public/logo/oneClickLCALogo.png";
-import { Timer } from "@itwin/core-react";
 
 interface ExportProps {
   isOpen: boolean;
