@@ -3,36 +3,51 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type {
-  BeButtonEvent, ToolAssistanceInstruction,
+  BeButtonEvent,
+  ToolAssistanceInstruction,
   ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
-  EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
+  EventHandled,
+  IModelApp,
+  ToolAssistance,
+  ToolAssistanceImage,
+  ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
 import type { Feature } from "../api/FeatureTracking";
 import { MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { RadiusMeasurement } from "../measurements/RadiusMeasurement";
+import { MeasureTools } from "../MeasureTools";
 import { MeasureRadiusToolModel } from "../toolmodels/MeasureRadiusToolModel";
 
 /** Tool for measuring radius using 3-points */
-export class MeasureRadiusTool extends MeasurementToolBase<RadiusMeasurement, MeasureRadiusToolModel> {
+export class MeasureRadiusTool extends MeasurementToolBase<
+RadiusMeasurement,
+MeasureRadiusToolModel
+> {
   protected createToolModel(): MeasureRadiusToolModel {
     return new MeasureRadiusToolModel();
   }
 
-  public static override toolId = "MeasureRadius";
+  public static override toolId = "MeasureTools.MeasureRadius";
   // TODO: Change icon once UX team provides icon
   public static override iconSpec = "icon-three-points-circular-arc";
   public static get label() {
-    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.measureRadius");
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureRadius.measureRadius"
+    );
   }
   public static override get flyover() {
-    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.measureRadius");
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureRadius.measureRadius"
+    );
   }
 
-  protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureRadius; }
+  protected override get feature(): Feature | undefined {
+    return MeasureToolsFeatures.Tools_MeasureRadius;
+  }
 
   constructor() {
     super();
@@ -40,27 +55,26 @@ export class MeasureRadiusTool extends MeasurementToolBase<RadiusMeasurement, Me
 
   public async onRestartTool(): Promise<void> {
     const tool = new MeasureRadiusTool();
-    if (await tool.run())
-      return;
+    if (await tool.run()) return;
 
     return this.exitTool();
   }
 
   /** Show tool assistance messages to user */
   public showPrompt() {
-    const identifyStartMessage = IModelApp.localization.getLocalizedString(
-      "MeasureTools:tools.MeasureRadius.identifyStart",
+    const identifyStartMessage = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureRadius.identifyStart"
     );
-    const identifyCenterMessage = IModelApp.localization.getLocalizedString(
-      "MeasureTools:tools.MeasureRadius.identifyMidpoint",
+    const identifyCenterMessage = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureRadius.identifyMidpoint"
     );
-    const identifyEndMessage = IModelApp.localization.getLocalizedString(
-      "MeasureTools:tools.MeasureRadius.identifyEnd",
+    const identifyEndMessage = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureRadius.identifyEnd"
     );
     let currentMsg = "";
     if (
       this.toolModel.currentState ===
-      MeasureRadiusToolModel.State.SetMeasurementViewport ||
+        MeasureRadiusToolModel.State.SetMeasurementViewport ||
       this.toolModel.currentState === MeasureRadiusToolModel.State.SetStartPoint
     ) {
       currentMsg = identifyStartMessage;
@@ -76,7 +90,7 @@ export class MeasureRadiusTool extends MeasurementToolBase<RadiusMeasurement, Me
 
     const mainInstruction = ToolAssistance.createInstruction(
       this.iconSpec,
-      currentMsg,
+      currentMsg
     );
     const mouseInstructions: ToolAssistanceInstruction[] = [];
     mouseInstructions.push(
@@ -84,24 +98,24 @@ export class MeasureRadiusTool extends MeasurementToolBase<RadiusMeasurement, Me
         ToolAssistanceImage.LeftClick,
         identifyStartMessage,
         false,
-        ToolAssistanceInputMethod.Mouse,
-      ),
+        ToolAssistanceInputMethod.Mouse
+      )
     );
     mouseInstructions.push(
       ToolAssistance.createInstruction(
         ToolAssistanceImage.LeftClick,
         identifyCenterMessage,
         false,
-        ToolAssistanceInputMethod.Mouse,
-      ),
+        ToolAssistanceInputMethod.Mouse
+      )
     );
     mouseInstructions.push(
       ToolAssistance.createInstruction(
         ToolAssistanceImage.LeftClick,
         identifyEndMessage,
         false,
-        ToolAssistanceInputMethod.Mouse,
-      ),
+        ToolAssistanceInputMethod.Mouse
+      )
     );
 
     if (undefined === this.toolModel.dynamicMeasurement) {
@@ -115,13 +129,13 @@ export class MeasureRadiusTool extends MeasurementToolBase<RadiusMeasurement, Me
     sections.push(
       ToolAssistance.createSection(
         mouseInstructions,
-        ToolAssistance.inputsLabel,
-      ),
+        ToolAssistance.inputsLabel
+      )
     );
 
     const instructions = ToolAssistance.createInstructions(
       mainInstruction,
-      sections,
+      sections
     );
     IModelApp.notifications.setToolAssistance(instructions);
   }
@@ -146,7 +160,9 @@ export class MeasureRadiusTool extends MeasurementToolBase<RadiusMeasurement, Me
   }
 
   /** Process mouse presses */
-  public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
+  public override async onDataButtonDown(
+    ev: BeButtonEvent
+  ): Promise<EventHandled> {
     if (!ev.viewport) return EventHandled.No;
 
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);

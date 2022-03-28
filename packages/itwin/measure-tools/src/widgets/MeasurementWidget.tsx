@@ -9,15 +9,16 @@ import "./MeasurementWidget.scss";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
-import type { PropertyDescription, PropertyValue} from "@itwin/appui-abstract";
+import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import { PropertyRecord, PropertyValueFormat, WidgetState } from "@itwin/appui-abstract";
 import { PropertyGrid, SimplePropertyDataProvider } from "@itwin/components-react";
 import { Orientation } from "@itwin/core-react";
-import type { ConfigurableCreateInfo} from "@itwin/appui-react";
+import type { ConfigurableCreateInfo } from "@itwin/appui-react";
 import { WidgetControl } from "@itwin/appui-react";
 import type { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
+import { MeasureTools } from "../MeasureTools";
 
 export interface MeasurementWidgetOptions {
   iModelConnection?: IModelConnection;
@@ -124,7 +125,7 @@ export class MeasurementWidget extends WidgetControl {
 
     // Want to show if either: two types or one type with at least two instances
     if (data.length > 1 && (orderedAggrPropEntries.length >= 2 || (orderedAggrPropEntries.length === 1 && hasAtLeastTwoInstances))) {
-      const catIndex = this._dataProvider.addCategory({ expand: true, label: IModelApp.localization.getLocalizedString("MeasureTools:Generic.cumulativeTotals"), name: "cumulativeTotals" });
+      const catIndex = this._dataProvider.addCategory({ expand: true, label: MeasureTools.localization.getLocalizedString("MeasureTools:Generic.cumulativeTotals"), name: "cumulativeTotals" });
       for (const entry of orderedAggrPropEntries) {
         const label = entry.label;
         const aggrProp = entry.prop;

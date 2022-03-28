@@ -5,8 +5,10 @@
 /* eslint-disable react/display-name */
 import type {
   AbstractWidgetProps,
-  StagePanelSection,
   UiItemsProvider,
+} from "@itwin/appui-abstract";
+import {
+  StagePanelSection,
 } from "@itwin/appui-abstract";
 import {
   AbstractZoneLocation,
@@ -38,10 +40,13 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
     zoneLocation?: AbstractZoneLocation,
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
+    const preferredLocation = this._treeWidgetOptions?.defaultPanelLocation ?? StagePanelLocation.Right;
+    const preferredPanelSection = this._treeWidgetOptions?.defaultPanelSection ?? StagePanelSection.Start;
     if (
       // eslint-disable-next-line deprecation/deprecation
       (!section && stageUsage === StageUsage.General && zoneLocation === AbstractZoneLocation.CenterRight) ||
-      (stageUsage === StageUsage.General && location === StagePanelLocation.Right && UiFramework.uiVersion !== "1")
+      (stageUsage === StageUsage.General && location === preferredLocation && section === preferredPanelSection
+         && UiFramework.uiVersion !== "1")
     ) {
       const trees: SelectableContentDefinition[] = [];
 

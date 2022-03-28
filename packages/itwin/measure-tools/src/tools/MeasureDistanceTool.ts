@@ -5,24 +5,35 @@
 
 import type {
   BeButtonEvent,
-  ToolAssistanceInstruction, ToolAssistanceSection,
+  ToolAssistanceInstruction,
+  ToolAssistanceSection,
 } from "@itwin/core-frontend";
 import {
-  AccuDrawHintBuilder, EventHandled, IModelApp, ToolAssistance, ToolAssistanceImage, ToolAssistanceInputMethod,
+  AccuDrawHintBuilder,
+  EventHandled,
+  IModelApp,
+  ToolAssistance,
+  ToolAssistanceImage,
+  ToolAssistanceInputMethod,
 } from "@itwin/core-frontend";
 import type { Feature } from "../api/FeatureTracking";
 import { MeasureToolsFeatures } from "../api/FeatureTracking";
 import { MeasurementToolBase } from "../api/MeasurementTool";
 import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
+import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
 
-export class MeasureDistanceTool extends MeasurementToolBase<DistanceMeasurement, MeasureDistanceToolModel> {
-
-  public static override toolId = "MeasureDistance";
+export class MeasureDistanceTool extends MeasurementToolBase<
+DistanceMeasurement,
+MeasureDistanceToolModel
+> {
+  public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
 
-  protected override get feature(): Feature | undefined { return MeasureToolsFeatures.Tools_MeasureDistance; }
+  protected override get feature(): Feature | undefined {
+    return MeasureToolsFeatures.Tools_MeasureDistance;
+  }
 
   constructor() {
     super();
@@ -30,8 +41,7 @@ export class MeasureDistanceTool extends MeasurementToolBase<DistanceMeasurement
 
   public async onRestartTool(): Promise<void> {
     const tool = new MeasureDistanceTool();
-    if (await tool.run())
-      return;
+    if (await tool.run()) return;
 
     return this.exitTool();
   }
@@ -41,18 +51,24 @@ export class MeasureDistanceTool extends MeasurementToolBase<DistanceMeasurement
     AccuDrawHintBuilder.deactivate();
   }
 
-  public override async onDataButtonDown(ev: BeButtonEvent): Promise<EventHandled> {
-    if (!ev.viewport)
-      return EventHandled.No;
+  public override async onDataButtonDown(
+    ev: BeButtonEvent
+  ): Promise<EventHandled> {
+    if (!ev.viewport) return EventHandled.No;
 
     const viewType = MeasurementViewTarget.classifyViewport(ev.viewport);
 
-    if (MeasureDistanceToolModel.State.SetMeasurementViewport === this.toolModel.currentState) {
+    if (
+      MeasureDistanceToolModel.State.SetMeasurementViewport ===
+      this.toolModel.currentState
+    ) {
       this.toolModel.setMeasurementViewport(viewType);
       this.toolModel.setStartPoint(viewType, ev.point);
       this._sendHintsToAccuDraw(ev);
       this.updateToolAssistance();
-    } else if (MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState) {
+    } else if (
+      MeasureDistanceToolModel.State.SetEndPoint === this.toolModel.currentState
+    ) {
       this.toolModel.setEndPoint(viewType, ev.point, false);
       await this.onReinitialize();
     }
@@ -70,7 +86,10 @@ export class MeasureDistanceTool extends MeasurementToolBase<DistanceMeasurement
   }
 
   public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
-    if (undefined === ev.viewport || MeasureDistanceToolModel.State.SetEndPoint !== this.toolModel.currentState)
+    if (
+      undefined === ev.viewport ||
+      MeasureDistanceToolModel.State.SetEndPoint !== this.toolModel.currentState
+    )
       return;
     const type = MeasurementViewTarget.classifyViewport(ev.viewport);
     this.toolModel.setEndPoint(type, ev.point, true);
@@ -82,29 +101,64 @@ export class MeasureDistanceTool extends MeasurementToolBase<DistanceMeasurement
   }
 
   protected override updateToolAssistance(): void {
-
     let promptMainInstruction: string;
-    if (MeasureDistanceToolModel.State.SetEndPoint !== this.toolModel.currentState)
-      promptMainInstruction = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.mainInstruction");
+    if (
+      MeasureDistanceToolModel.State.SetEndPoint !== this.toolModel.currentState
+    )
+      promptMainInstruction = MeasureTools.localization.getLocalizedString(
+        "MeasureTools:tools.MeasureDistance.mainInstruction"
+      );
     else
-      promptMainInstruction = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureDistance.mainInstruction2");
+      promptMainInstruction = MeasureTools.localization.getLocalizedString(
+        "MeasureTools:tools.MeasureDistance.mainInstruction2"
+      );
 
-    const promptClickTap = IModelApp.localization.getLocalizedString("MeasureTools:tools.GenericPrompts.acceptPoint");
+    const promptClickTap = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.GenericPrompts.acceptPoint"
+    );
 
     let promptRightClick: string;
     if (undefined !== this.toolModel.dynamicMeasurement)
-      promptRightClick = IModelApp.localization.getLocalizedString("MeasureTools:tools.GenericPrompts.clearCurrentMeasurement");
+      promptRightClick = MeasureTools.localization.getLocalizedString(
+        "MeasureTools:tools.GenericPrompts.clearCurrentMeasurement"
+      );
     else
-      promptRightClick = IModelApp.localization.getLocalizedString("MeasureTools:tools.GenericPrompts.restart");
+      promptRightClick = MeasureTools.localization.getLocalizedString(
+        "MeasureTools:tools.GenericPrompts.restart"
+      );
 
-    const mainInstruction = ToolAssistance.createInstruction(this.iconSpec, promptMainInstruction);
+    const mainInstruction = ToolAssistance.createInstruction(
+      this.iconSpec,
+      promptMainInstruction
+    );
     const mouseInstructions: ToolAssistanceInstruction[] = [];
     const touchInstructions: ToolAssistanceInstruction[] = [];
 
     if (!ToolAssistance.createTouchCursorInstructions(touchInstructions))
-      touchInstructions.push(ToolAssistance.createInstruction(ToolAssistanceImage.OneTouchTap, promptClickTap, false, ToolAssistanceInputMethod.Touch));
-    mouseInstructions.push(ToolAssistance.createInstruction(ToolAssistanceImage.LeftClick, promptClickTap, false, ToolAssistanceInputMethod.Mouse));
-    mouseInstructions.push(ToolAssistance.createInstruction(ToolAssistanceImage.RightClick, promptRightClick, false, ToolAssistanceInputMethod.Mouse));
+      touchInstructions.push(
+        ToolAssistance.createInstruction(
+          ToolAssistanceImage.OneTouchTap,
+          promptClickTap,
+          false,
+          ToolAssistanceInputMethod.Touch
+        )
+      );
+    mouseInstructions.push(
+      ToolAssistance.createInstruction(
+        ToolAssistanceImage.LeftClick,
+        promptClickTap,
+        false,
+        ToolAssistanceInputMethod.Mouse
+      )
+    );
+    mouseInstructions.push(
+      ToolAssistance.createInstruction(
+        ToolAssistanceImage.RightClick,
+        promptRightClick,
+        false,
+        ToolAssistanceInputMethod.Mouse
+      )
+    );
 
     if (undefined === this.toolModel.dynamicMeasurement) {
       if (this.toolModel.canUndo)
@@ -114,10 +168,19 @@ export class MeasureDistanceTool extends MeasurementToolBase<DistanceMeasurement
     }
 
     const sections: ToolAssistanceSection[] = [
-      ToolAssistance.createSection(mouseInstructions, ToolAssistance.inputsLabel),
-      ToolAssistance.createSection(touchInstructions, ToolAssistance.inputsLabel),
+      ToolAssistance.createSection(
+        mouseInstructions,
+        ToolAssistance.inputsLabel
+      ),
+      ToolAssistance.createSection(
+        touchInstructions,
+        ToolAssistance.inputsLabel
+      ),
     ];
-    const instructions = ToolAssistance.createInstructions(mainInstruction, sections);
+    const instructions = ToolAssistance.createInstructions(
+      mainInstruction,
+      sections
+    );
     IModelApp.notifications.setToolAssistance(instructions);
   }
 }

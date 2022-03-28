@@ -5,18 +5,40 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
-import { Arc3d, IModelJson, Point3d, Ray3d, Vector3d } from "@itwin/core-geometry";
+import {
+  Arc3d,
+  IModelJson,
+  Point3d,
+  Ray3d,
+  Vector3d,
+} from "@itwin/core-geometry";
 import type { GeometryStreamProps } from "@itwin/core-common";
-import type { BeButtonEvent, DecorateContext, Viewport } from "@itwin/core-frontend";
+import type {
+  BeButtonEvent,
+  DecorateContext,
+  Viewport,
+} from "@itwin/core-frontend";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
-import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
-import type { MeasurementEqualityOptions, MeasurementWidgetData } from "../api/Measurement";
-import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement";
+import {
+  StyleSet,
+  WellKnownGraphicStyleType,
+  WellKnownTextStyleType,
+} from "../api/GraphicStyle";
+import type {
+  MeasurementEqualityOptions,
+  MeasurementWidgetData,
+} from "../api/Measurement";
+import {
+  Measurement,
+  MeasurementPickContext,
+  MeasurementSerializer,
+} from "../api/Measurement";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
 import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
 import { ViewHelper } from "../api/ViewHelper";
+import { MeasureTools } from "../MeasureTools";
 
 export interface RadiusMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
@@ -45,7 +67,7 @@ export class RadiusMeasurementSerializer extends MeasurementSerializer {
 
 export class RadiusMeasurement extends Measurement {
   public static override readonly serializer = Measurement.registerSerializer(
-    new RadiusMeasurementSerializer(),
+    new RadiusMeasurementSerializer()
   );
 
   private _arc: Arc3d | undefined;
@@ -72,14 +94,21 @@ export class RadiusMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
-  public get startPointRef(): Point3d | undefined { return this._startPoint; }
-  public get midPointRef(): Point3d | undefined { return this._midPoint; }
-  public get endPointRef(): Point3d | undefined { return this._endPoint; }
+  public get startPointRef(): Point3d | undefined {
+    return this._startPoint;
+  }
+  public get midPointRef(): Point3d | undefined {
+    return this._midPoint;
+  }
+  public get endPointRef(): Point3d | undefined {
+    return this._endPoint;
+  }
 
-  public get arcRef(): Arc3d | undefined { return this._arc; }
+  public get arcRef(): Arc3d | undefined {
+    return this._arc;
+  }
   public get radius(): number | undefined {
-    if (this._arc)
-      return this._arc.circularRadius();
+    if (this._arc) return this._arc.circularRadius();
 
     return undefined;
   }
@@ -98,7 +127,7 @@ export class RadiusMeasurement extends Measurement {
       const arc = this._createArcFrom(
         this._midPoint,
         this._startPoint,
-        this._endPoint,
+        this._endPoint
       );
 
       if (arc !== undefined && arc instanceof Arc3d) {
@@ -110,12 +139,9 @@ export class RadiusMeasurement extends Measurement {
 
   public override readFromJSON(props: RadiusMeasurementProps) {
     super.readFromJSON(props);
-    if (props.startPoint)
-      this._startPoint = Point3d.fromJSON(props.startPoint);
-    if (props.midPoint)
-      this._midPoint = Point3d.fromJSON(props.midPoint);
-    if (props.endPoint)
-      this._endPoint = Point3d.fromJSON(props.endPoint);
+    if (props.startPoint) this._startPoint = Point3d.fromJSON(props.startPoint);
+    if (props.midPoint) this._midPoint = Point3d.fromJSON(props.midPoint);
+    if (props.endPoint) this._endPoint = Point3d.fromJSON(props.endPoint);
 
     this._updateArc();
   }
@@ -128,12 +154,9 @@ export class RadiusMeasurement extends Measurement {
     super.writeToJSON(json);
 
     const jsonDist = json as RadiusMeasurementProps;
-    if (this._startPoint)
-      jsonDist.startPoint = this._startPoint.toJSON();
-    if (this._endPoint)
-      jsonDist.endPoint = this._endPoint.toJSON();
-    if (this._midPoint)
-      jsonDist.midPoint = this._midPoint.toJSON();
+    if (this._startPoint) jsonDist.startPoint = this._startPoint.toJSON();
+    if (this._endPoint) jsonDist.endPoint = this._endPoint.toJSON();
+    if (this._midPoint) jsonDist.midPoint = this._midPoint.toJSON();
   }
 
   /**
@@ -142,29 +165,34 @@ export class RadiusMeasurement extends Measurement {
    * @param opts Options for equality testing.
    * @returns true if the other measurement is equal, false if some property is not the same or if the measurement is not of the same type.
    */
-  public override equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
-    if (!super.equals(other, opts))
-      return false;
+  public override equals(
+    other: Measurement,
+    opts?: MeasurementEqualityOptions
+  ): boolean {
+    if (!super.equals(other, opts)) return false;
 
-    const equalsPointOrUndef = (a: Point3d | undefined, b: Point3d | undefined, tolerance?: number): boolean => {
-      if (a === undefined && b === undefined)
-        return true;
-      if (a === undefined && b !== undefined)
-        return false;
-      if (a !== undefined && b === undefined)
-        return false;
+    const equalsPointOrUndef = (
+      a: Point3d | undefined,
+      b: Point3d | undefined,
+      tolerance?: number
+    ): boolean => {
+      if (a === undefined && b === undefined) return true;
+      if (a === undefined && b !== undefined) return false;
+      if (a !== undefined && b === undefined) return false;
       if (a !== undefined && b !== undefined)
         return a?.isAlmostEqual(b, tolerance);
       return false;
     };
 
     // Compare data (ignore isDynamic)
-    const tol = (opts) ? opts.tolerance : undefined;
+    const tol = opts ? opts.tolerance : undefined;
     const otherDist = other as RadiusMeasurement;
-    if (otherDist === undefined
-      || !equalsPointOrUndef(this._startPoint, otherDist._startPoint, tol)
-      || !equalsPointOrUndef(this._midPoint, otherDist._midPoint, tol)
-      || !equalsPointOrUndef(this._endPoint, otherDist._endPoint, tol))
+    if (
+      otherDist === undefined ||
+      !equalsPointOrUndef(this._startPoint, otherDist._startPoint, tol) ||
+      !equalsPointOrUndef(this._midPoint, otherDist._midPoint, tol) ||
+      !equalsPointOrUndef(this._endPoint, otherDist._endPoint, tol)
+    )
       return false;
 
     return true;
@@ -179,7 +207,9 @@ export class RadiusMeasurement extends Measurement {
 
     if (other instanceof RadiusMeasurement) {
       this._isDynamic = other._isDynamic;
-      this._startPoint = other._startPoint ? other._startPoint.clone() : undefined;
+      this._startPoint = other._startPoint
+        ? other._startPoint.clone()
+        : undefined;
       this._midPoint = other._midPoint ? other._midPoint.clone() : undefined;
       this._endPoint = other._endPoint ? other._endPoint.clone() : undefined;
       this._updateArc();
@@ -207,7 +237,8 @@ export class RadiusMeasurement extends Measurement {
 
     if (
       pickContext.buttonEvent &&
-      this._textMarker && this.displayLabels &&
+      this._textMarker &&
+      this.displayLabels &&
       this._textMarker.pick(pickContext.buttonEvent.viewPoint)
     )
       return true;
@@ -216,16 +247,17 @@ export class RadiusMeasurement extends Measurement {
   }
 
   public override async getDecorationToolTip(
-    _pickContext: MeasurementPickContext,
+    _pickContext: MeasurementPickContext
   ): Promise<HTMLElement | string> {
-    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.measurement");
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureRadius.measurement"
+    );
   }
 
   public override getDecorationGeometry(
-    _pickContext: MeasurementPickContext,
+    _pickContext: MeasurementPickContext
   ): GeometryStreamProps | undefined {
-    if (this.isDynamic)
-      return undefined;
+    if (this.isDynamic) return undefined;
 
     if (this._arc !== undefined) {
       const geometry = [IModelJson.Writer.toIModelJson(this._arc)];
@@ -250,7 +282,7 @@ export class RadiusMeasurement extends Measurement {
 
   private _createInViewArc(
     viewport: Viewport,
-    offset: number,
+    offset: number
   ): Arc3d | undefined {
     if (this._arc !== undefined) {
       const viewPoints = [
@@ -270,11 +302,11 @@ export class RadiusMeasurement extends Measurement {
         // If center is not shown but the arc points are shown, draw another arc
         const startViewPoint = ViewHelper.closestIntersectionWithViewPlanes(
           rect,
-          Ray3d.createStartEnd(viewPoints[1], viewPoints[0]),
+          Ray3d.createStartEnd(viewPoints[1], viewPoints[0])
         );
         const endViewPoint = ViewHelper.closestIntersectionWithViewPlanes(
           rect,
-          Ray3d.createStartEnd(viewPoints[2], viewPoints[0]),
+          Ray3d.createStartEnd(viewPoints[2], viewPoints[0])
         );
         if (endViewPoint !== undefined && startViewPoint !== undefined) {
           const start = viewport.viewToWorld(startViewPoint);
@@ -284,16 +316,16 @@ export class RadiusMeasurement extends Measurement {
           const radius = Math.max(radiusStart, radiusEnd);
           const startToCenter = Vector3d.createStartEnd(
             this._arc.center,
-            this._arc.startPoint(),
+            this._arc.startPoint()
           );
           const endToCenter = Vector3d.createStartEnd(
             this._arc.center,
-            this._arc.endPoint(),
+            this._arc.endPoint()
           );
           const newStart = this._arc.center.clone();
           // Add a offset scaling of radius to show points inside viewport and not on end
           newStart.addInPlace(
-            startToCenter.scaleToLength(radius * (1 + offset))!,
+            startToCenter.scaleToLength(radius * (1 + offset))!
           );
           const newEnd = this._arc.center.clone();
           newEnd.addInPlace(endToCenter.scaleToLength(radius * (1 + offset))!);
@@ -312,11 +344,13 @@ export class RadiusMeasurement extends Measurement {
     super.decorate(context);
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
-    const style = styleTheme.getGraphicStyle(WellKnownGraphicStyleType.DistanceMeasurement)!;
+    const style = styleTheme.getGraphicStyle(
+      WellKnownGraphicStyleType.DistanceMeasurement
+    )!;
     const builder = context.createGraphicBuilder(
       GraphicType.WorldOverlay,
       undefined,
-      this._getSnapId(),
+      this._getSnapId()
     );
 
     if (this._startPoint !== undefined && this._arc === undefined) {
@@ -369,9 +403,10 @@ export class RadiusMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const lengthSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-      QuantityType.LengthEngineering,
-    );
+    const lengthSpec =
+      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+        QuantityType.LengthEngineering
+      );
 
     const radius = this._arc?.circularRadius() ?? 0.0;
     const diameter = radius * 2;
@@ -380,52 +415,72 @@ export class RadiusMeasurement extends Measurement {
 
     const fRadius = IModelApp.quantityFormatter.formatQuantity(
       radius,
-      lengthSpec,
+      lengthSpec
     );
     const fDiameter = IModelApp.quantityFormatter.formatQuantity(
       diameter,
-      lengthSpec,
+      lengthSpec
     );
     const fCircumference = IModelApp.quantityFormatter.formatQuantity(
       circumference,
-      lengthSpec,
+      lengthSpec
     );
     const fArcLength = IModelApp.quantityFormatter.formatQuantity(
       length,
-      lengthSpec,
+      lengthSpec
     );
 
-    let title = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.measurement");
+    let title = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureRadius.measurement"
+    );
     title += ` [${fRadius}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push({
-      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.radius"),
+      label: MeasureTools.localization.getLocalizedString(
+        "MeasureTools:tools.MeasureRadius.radius"
+      ),
       name: "RadiusMeasurement_Radius",
       value: fRadius,
-      aggregatableValue: (lengthSpec !== undefined) ? { value: radius, formatSpec: lengthSpec } : undefined,
+      aggregatableValue:
+        lengthSpec !== undefined
+          ? { value: radius, formatSpec: lengthSpec }
+          : undefined,
     });
     data.properties.push({
-      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.diameter"),
+      label: MeasureTools.localization.getLocalizedString(
+        "MeasureTools:tools.MeasureRadius.diameter"
+      ),
       name: "RadiusMeasurement_Diameter",
       value: fDiameter,
-      aggregatableValue: (lengthSpec !== undefined) ? { value: length, formatSpec: lengthSpec } : undefined,
+      aggregatableValue:
+        lengthSpec !== undefined
+          ? { value: length, formatSpec: lengthSpec }
+          : undefined,
     });
     data.properties.push({
-      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureRadius.arcLength"),
+      label: MeasureTools.localization.getLocalizedString(
+        "MeasureTools:tools.MeasureRadius.arcLength"
+      ),
       name: "RadiusMeasurement_ArcLength",
       value: fArcLength,
-      aggregatableValue: (lengthSpec !== undefined) ? { value: length, formatSpec: lengthSpec } : undefined,
+      aggregatableValue:
+        lengthSpec !== undefined
+          ? { value: length, formatSpec: lengthSpec }
+          : undefined,
     });
     data.properties.push({
-      label: IModelApp.localization.getLocalizedString(
-        "MeasureTools:tools.MeasureRadius.circleCircumference",
+      label: MeasureTools.localization.getLocalizedString(
+        "MeasureTools:tools.MeasureRadius.circleCircumference"
       ),
       name: "RadiusMeasurement_CircleCircumference",
       value: fCircumference,
-      aggregatableValue: (lengthSpec !== undefined) ? { value: circumference, formatSpec: lengthSpec } : undefined,
+      aggregatableValue:
+        lengthSpec !== undefined
+          ? { value: circumference, formatSpec: lengthSpec }
+          : undefined,
     });
 
     return data;
@@ -443,7 +498,7 @@ export class RadiusMeasurement extends Measurement {
         inViewArc.startPoint(),
         0.5,
         inViewArc.endPoint(),
-        0.5,
+        0.5
       );
     }
 
@@ -452,38 +507,42 @@ export class RadiusMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._arc !== undefined) {
-      const lengthSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.LengthEngineering,
-      );
+      const lengthSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.LengthEngineering
+        );
       const radius = this._arc.circularRadius()!;
       const fRadius = IModelApp.quantityFormatter.formatQuantity(
         radius,
-        lengthSpec,
+        lengthSpec
       );
       const point = this._arc.center;
       const styleTheme = StyleSet.getOrDefault(this.activeStyle);
 
-      const tStyle = styleTheme.getTextStyle(WellKnownTextStyleType.DistanceMeasurement)!;
+      const tStyle = styleTheme.getTextStyle(
+        WellKnownTextStyleType.DistanceMeasurement
+      )!;
       this._textMarker = TextMarker.createStyled(
         [`R: ${fRadius}`],
         point,
-        tStyle,
+        tStyle
       );
       this._textMarker.transientHiliteId = this.transientId;
       this._textMarker.pickable = !this.isDynamic;
       this._textMarker.setMouseButtonHandler(
-        this._handleTextMarkerButtonEvent.bind(this),
+        this._handleTextMarkerButtonEvent.bind(this)
       );
     }
   }
 
   private updateMarkerStyle() {
-    if (!this._textMarker)
-      return;
+    if (!this._textMarker) return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
 
-    const tStyle = styleTheme.getTextStyle(WellKnownTextStyleType.DistanceMeasurement)!;
+    const tStyle = styleTheme.getTextStyle(
+      WellKnownTextStyleType.DistanceMeasurement
+    )!;
     this._textMarker.applyStyle(tStyle);
   }
 
@@ -503,7 +562,7 @@ export class RadiusMeasurement extends Measurement {
     if (!this.isDynamic)
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.onDecorationButtonEvent(
-        MeasurementPickContext.createFromSourceId("Invalid", ev),
+        MeasurementPickContext.createFromSourceId("Invalid", ev)
       ).catch();
     return true;
   }
@@ -516,7 +575,7 @@ export class RadiusMeasurement extends Measurement {
     startPoint: Point3d,
     midPoint?: Point3d,
     endPoint?: Point3d,
-    viewType?: string,
+    viewType?: string
   ) {
     const measurement = new RadiusMeasurement({
       startPoint,
