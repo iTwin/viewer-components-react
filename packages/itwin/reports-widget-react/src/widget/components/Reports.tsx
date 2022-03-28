@@ -27,7 +27,7 @@ import {
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { CreateTypeFromInterface } from "./utils";
+import { CreateTypeFromInterface } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
@@ -36,6 +36,7 @@ import { ReportingClient } from "../../reporting/reportingClient";
 import { IModelApp } from "@itwin/core-frontend";
 import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
+import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -101,14 +102,6 @@ export const Reports = () => {
   const addReport = async () => {
     setReportsView(ReportsView.ADDING);
   };
-
-  const pageSizeList = useMemo(() => [10, 25, 50], []);
-  const paginator = useCallback(
-    (props: TablePaginatorRendererProps) => (
-      <TablePaginator {...props} pageSizeList={pageSizeList} />
-    ),
-    [pageSizeList]
-  );
 
   const reportsColumns = useMemo(
     () => [
@@ -222,7 +215,7 @@ export const Reports = () => {
               emptyTableContent={IModelApp.localization.getLocalizedString("ReportsWidget:NoReportsAvailable")}
               isSortable
               isLoading={isLoading}
-              paginatorRenderer={paginator}
+              paginatorRenderer={LocalizedTablePaginator}
             />
           </div>
           <DeleteModal

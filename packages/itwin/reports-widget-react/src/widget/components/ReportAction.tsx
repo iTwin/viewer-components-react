@@ -59,14 +59,14 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         returnFn={returnFn}
       />
       <div className='details-form-container'>
-        <Fieldset legend='Report Details' className='details-form'>
+        <Fieldset legend={IModelApp.localization.getLocalizedString("ReportsWidget:ReportDetails")} className='details-form'>
           <Small className='field-legend'>
             {IModelApp.localization.getLocalizedString("ReportsWidget:MandatoryFields")}
           </Small>
           <LabeledInput
             id='name'
             name='name'
-            label='Name'
+            label={IModelApp.localization.getLocalizedString("ReportsWidget:Name")}
             value={values.name}
             required
             onChange={(event) => {

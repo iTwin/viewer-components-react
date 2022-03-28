@@ -18,6 +18,7 @@ import type { Mapping } from "../../reporting";
 import { ReportingClient } from "../../reporting/reportingClient";
 import ActionPanel from "./ActionPanel";
 import "./AddMappings.scss";
+import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import type { ReportMappingAndMapping } from "./ReportMappings";
 import type { CreateTypeFromInterface } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
@@ -96,14 +97,6 @@ const AddMappings = ({
     []
   );
 
-  const pageSizeList = useMemo(() => [10, 25, 50], []);
-  const paginator = useCallback(
-    (props: TablePaginatorRendererProps) => (
-      <TablePaginator {...props} pageSizeList={pageSizeList} />
-    ),
-    [pageSizeList]
-  );
-
   const onSave = async () => {
     try {
       setIsLoading(true);
@@ -137,7 +130,7 @@ const AddMappings = ({
           onSelect={(selectData: Mapping[] | undefined) => {
             selectData && setSelectedMappings(selectData);
           }}
-          paginatorRenderer={paginator}
+          paginatorRenderer={LocalizedTablePaginator}
         />
       </div>
       <ActionPanel

@@ -38,6 +38,7 @@ import { ReportingClient } from "../../reporting/reportingClient";
 import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import AddMappings from "./AddMappings";
+import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
@@ -167,14 +168,6 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
 
   const odataFeedUrl = `https://${process.env.IMJS_URL_PREFIX}api.bentley.com/insights/reporting/odata/${report.id}`;
 
-  const pageSizeList = useMemo(() => [10, 25, 50], []);
-  const paginator = useCallback(
-    (props: TablePaginatorRendererProps) => (
-      <TablePaginator {...props} pageSizeList={pageSizeList} />
-    ),
-    [pageSizeList]
-  );
-
   switch (reportMappingsView) {
     case ReportMappingsView.ADDING:
       return <AddMappings reportId={report.id ?? ""} existingMappings={reportMappings} returnFn={refresh} />;
@@ -219,7 +212,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
               emptyTableContent={IModelApp.localization.getLocalizedString("ReportsWidget:NoReportMappingsAvailable")}
               isSortable
               isLoading={isLoading}
-              paginatorRenderer={paginator}
+              paginatorRenderer={LocalizedTablePaginator}
             />
           </div>
           <DeleteModal
