@@ -2,9 +2,10 @@
   "extends": "./node_modules/@itwin/build-tools/tsconfig-base.json",
   "compilerOptions": {
     "skipLibCheck": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "preserveSymlinks": true,
     "esModuleInterop": true,
+    "allowJs": true,
   },
   "include": [
     "./src/**/*.ts*"
