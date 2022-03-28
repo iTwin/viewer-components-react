@@ -25,6 +25,7 @@ import {
   OneClickLCAClient,
 } from "@itwin/insights-client";
 import logo from "../../public/logo/oneClickLCALogo.png";
+import { Timer } from "@itwin/core-react";
 
 interface ExportProps {
   isOpen: boolean;
@@ -66,7 +67,7 @@ const ExportModal = (props: ExportProps) => {
 
   const [isSignedIn, setIsSignedIn] = useState(validateSignin());
   const [isSigningIn, startSigningIn] = useState(false);
-  const intervalRef = useRef<NodeJS.Timer>();
+  const intervalRef = useRef<number>();
 
   const isValidSignin = useCallback(() => {
     return isValidEmail() && isValidPassword();
@@ -81,7 +82,7 @@ const ExportModal = (props: ExportProps) => {
 
   const pinStatus = useCallback(
     (job: JobCreation) => {
-      const intervalId = setInterval(async () => {
+      const intervalId = window.setInterval(async () => {
         const token =
           (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
         if (job.id && token) {
@@ -167,7 +168,7 @@ const ExportModal = (props: ExportProps) => {
     setJobStatus(undefined);
     setJobLink(undefined);
     if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+      window.clearInterval(intervalRef.current);
     }
     props.close();
   }, [props, resetSignin]);
@@ -177,18 +178,18 @@ const ExportModal = (props: ExportProps) => {
       switch (status) {
         case JobStatus.StatusEnum.Queued:
           return (
-            <div className="progress-radial-container">
+            <div className="oclca-progress-radial-container">
               <ProgressRadial indeterminate size="small" value={50} />
-              <Text variant="leading" className="status-text">
+              <Text variant="leading" className="oclca-status-text">
                 Export queued
               </Text>
             </div>
           );
         case JobStatus.StatusEnum.Running:
           return (
-            <div className="progress-linear-container">
+            <div className="oclca-progress-linear-container">
               <ProgressLinear indeterminate />
-              <Text variant="leading" className="status-text">
+              <Text variant="leading" className="oclca-status-text">
                 Export running
               </Text>
             </div>
@@ -196,10 +197,10 @@ const ExportModal = (props: ExportProps) => {
         case JobStatus.StatusEnum.Succeeded:
           return (
             link && (
-              <div className="progress-radial-container">
+              <div className="oclca-progress-radial-container">
                 <ProgressRadial status="positive" size="small" value={50} />
                 <a
-                  className="report-button"
+                  className="oclca-report-button"
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -211,9 +212,9 @@ const ExportModal = (props: ExportProps) => {
           );
         case JobStatus.StatusEnum.Failed:
           return (
-            <div className="progress-radial-container">
+            <div className="oclca-progress-radial-container">
               <ProgressRadial status="negative" size="small" value={100} />
-              <Text variant="leading" className="status-text">
+              <Text variant="leading" className="oclca-status-text">
                 Export failed
               </Text>
             </div>
@@ -239,7 +240,7 @@ const ExportModal = (props: ExportProps) => {
       jobStatus === JobStatus.StatusEnum.Failed
     ) {
       if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+        window.clearInterval(intervalRef.current);
       }
     }
   }, [jobStatus]);
@@ -262,23 +263,23 @@ const ExportModal = (props: ExportProps) => {
       closeOnExternalClick={false}
     >
       {!isSignedIn && (
-        <div className="signin">
+        <div className="oclca-signin">
           <img
-            className="signin-icon"
+            className="oclca-signin-icon"
             src={logo}
             alt="One Click LCA® software"
             data-height-percentage="80"
             data-actual-width="1200"
             data-actual-height="600"
           />
-          <form onSubmit={signin} className="signin-form">
-            <div className="signin-prompt">Sign in to One Click LCA.</div>
+          <form onSubmit={signin} className="oclca-signin-form">
+            <div className="oclca-signin-prompt">Sign in to One Click LCA.</div>
             {signinError && (
-              <Alert type="negative" className="signin-error">
+              <Alert type="negative" className="oclca-signin-error">
                 Incorrect email or password.
               </Alert>
             )}
-            <div className="signin-input">
+            <div className="oclca-signin-input">
               <LabeledInput
                 label="Email"
                 value={email}
@@ -289,7 +290,7 @@ const ExportModal = (props: ExportProps) => {
                 required
               />
             </div>
-            <div className="signin-input">
+            <div className="oclca-signin-input">
               <LabeledInput
                 label="Password"
                 value={password}
@@ -309,16 +310,16 @@ const ExportModal = (props: ExportProps) => {
               />
             </div>
 
-            <div className="signin-button-container">
+            <div className="oclca-signin-button-container">
               <Button
-                className="signin-button"
+                className="oclca-signin-button"
                 type="submit"
                 styleType="cta"
                 disabled={!isValidSignin()}
               >
                 {isSigningIn ? (
                   <ProgressRadial
-                    className="signin-wait"
+                    className="oclca-signin-wait"
                     indeterminate
                     size="small"
                     value={50}
@@ -332,7 +333,7 @@ const ExportModal = (props: ExportProps) => {
         </div>
       )}
       {isSignedIn && !jobStatus && (
-        <div className="progress-radial-container">
+        <div className="oclca-progress-radial-container">
           <ProgressRadial indeterminate size="large" value={50} />
         </div>
       )}

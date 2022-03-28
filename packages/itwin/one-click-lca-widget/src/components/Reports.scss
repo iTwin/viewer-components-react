@@ -4,39 +4,41 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.scrollable-table {
-  overflow-y: scroll;
-  max-height: 90%;
-}
-
-.reports-table {
-  :hover {
-    cursor: pointer;
+.oclca {
+  &-scrollable-table {
+    overflow-y: scroll;
+    max-height: 90%;
   }
-}
 
-.searchbox-container {
-  display: inline-flex;
-  justify-content: right;
-}
+  &-reports-table {
+    :hover {
+      cursor: pointer;
+    }
+  }
 
-.reports-container {
-  display: flex;
-  flex-direction: column;
-  gap: $iui-baseline;
-  margin-bottom: $iui-line-height;
-  max-height: 80%;
-}
+  &-searchbox-container {
+    display: inline-flex;
+    justify-content: right;
+  }
 
-.button-center {
-  align-self: center;
-}
+  &-reports-container {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline;
+    margin-bottom: $iui-line-height;
+    max-height: 80%;
+  }
 
-.oclca-container {
-  display: flex;
-  flex-direction: column;
-  padding: $iui-baseline $iui-m;
-  box-sizing: border-box;
-  height: 100%;
-  overflow: auto;
+  &-button-center {
+    align-self: center;
+  }
+
+  &-container {
+    display: flex;
+    flex-direction: column;
+    padding: $iui-baseline $iui-m;
+    box-sizing: border-box;
+    height: 100%;
+    overflow: auto;
+  }
 }

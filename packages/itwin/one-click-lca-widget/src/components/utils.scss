@@ -6,17 +6,17 @@
 @import "~@itwin/itwinui-css/scss/icon/index";
 @import "~@itwin/itwinui-css/scss/button/index";
 
-.widget-header-container {
+.oclca-widget-header-container {
   display: flex;
   margin-bottom: $iui-baseline * 3;
-  .chevron {
+  .oclca-chevron {
     @include iui-icons-large();
     cursor: pointer;
     align-self: center;
     margin-right: $iui-s;
   }
 
-  .chevron-disabled {
+  .oclca-chevron-disabled {
     @include iui-icons-large();
     @include themed {
       fill: t(iui-icons-color-actionable-disabled);
@@ -27,7 +27,7 @@
     margin-right: $iui-s;
   }
 
-  .title {
+  .oclca-title {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

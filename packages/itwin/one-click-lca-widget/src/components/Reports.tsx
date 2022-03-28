@@ -116,16 +116,16 @@ const Reports = () => {
   return (
     <>
       <WidgetHeader title="Reports" />
-      <div className="reports-container">
-        <div className="searchbox-container">
+      <div className="oclca-reports-container">
+        <div className="oclca-searchbox-container">
           <SearchBox
             onValueChanged={onSearchBoxValueChanged}
             placeholder={"Search reports"}
           />
         </div>
-        <div className="scrollable-table">
+        <div className="oclca-scrollable-table">
           <Table<Reporting>
-            className="reports-table"
+            className="oclca-reports-table"
             data={filteredReports}
             density="extra-condensed"
             columns={reportsColumns}
@@ -143,7 +143,7 @@ const Reports = () => {
         onClick={() => openModal(true)}
         styleType="cta"
         disabled={buttonIsDisabled}
-        className="button-center"
+        className="oclca-button-center"
       >
         One Click LCA Export
       </Button>

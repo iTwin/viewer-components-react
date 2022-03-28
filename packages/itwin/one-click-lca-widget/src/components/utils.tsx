@@ -19,17 +19,17 @@ export const WidgetHeader = ({
   returnFn,
 }: WidgetHeaderProps) => {
   return (
-    <div className="widget-header-container">
+    <div className="oclca-widget-header-container">
       {returnFn && (
         <div
-          className={disabled ? "chevron-disabled" : "chevron"}
+          className={disabled ? "oclca-chevron-disabled" : "oclca-chevron"}
           onClick={disabled ? undefined : returnFn}
           onKeyUp={disabled ? undefined : returnFn}
         >
           <SvgChevronLeft />
         </div>
       )}
-      <Text className="title" variant="title">
+      <Text className="oclca-title" variant="title">
         {title}
       </Text>
     </div>

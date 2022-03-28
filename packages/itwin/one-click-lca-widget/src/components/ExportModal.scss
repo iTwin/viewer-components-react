@@ -4,83 +4,82 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.signin {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 4 * $iui-baseline;
-  padding-top: 2 * $iui-baseline;
-
-  &-icon {
-    width: 2 * $iui-icons-3xl;
-    height: 1 * $iui-icons-3xl;
-  }
-
-  &-prompt {
-    margin: $iui-l 0;
-    font-size: medium;
+.oclca {
+  &-signin {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-bottom: 4 * $iui-baseline;
+    padding-top: 2 * $iui-baseline;
+
+    &-icon {
+      width: 2 * $iui-icons-3xl;
+      height: 1 * $iui-icons-3xl;
+    }
+
+    &-prompt {
+      margin: $iui-l 0;
+      font-size: medium;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    &-form {
+      width: 70%;
+    }
+
+    &-input {
+      width: 100%;
+      margin: $iui-xs 0;
+    }
+
+    &-button-container {
+      margin: $iui-sm 0;
+    }
+
+    &-button {
+      width: 100%;
+    }
+
+    &-error {
+      height: $iui-xl;
+      font-size: small;
+    }
+
+    &-wait {
+      vertical-align: middle;
+      line-height: normal;
+    }
   }
-  &-form {
-    width: 70%;
+
+  &-report-button {
+    margin: $iui-l;
+    text-decoration: none;
+    :hover {
+      cursor: pointer;
+    }
   }
 
-  &-input {
-    width: 100%;
-    margin: $iui-xs 0;
+  &-status-text {
+    margin: $iui-s;
   }
 
-  &-button-container {
-    margin: $iui-sm 0;
+  &-progress-radial-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: $iui-l;
+    height: $iui-3xl;
+    place-content: space-evenly;
   }
 
-  &-button {
-    width: 100%;
+  &-progress-linear-container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin: $iui-l;
+    height: $iui-3xl;
+    place-content: space-evenly;
   }
-
-  &-error {
-    height: $iui-xl;
-    font-size: small;
-  }
-
-  &-wait {
-    vertical-align: middle;
-    line-height: normal;
-  }
-}
-
-.iui-text-leading {
-  margin: 10px;
-}
-
-.report-button {
-  margin: $iui-l;
-  text-decoration: none;
-  :hover {
-    cursor: pointer;
-  }
-}
-
-.status-text {
-  margin: $iui-s;
-}
-
-.progress-radial-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: $iui-l;
-  height: $iui-3xl;
-  place-content: space-evenly;
-}
-
-.progress-linear-container {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  margin: $iui-l;
-  height: $iui-3xl;
-  place-content: space-evenly;
 }
