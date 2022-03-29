@@ -3,7 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import "./ExportModal.scss";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import {
   Alert,
@@ -18,12 +24,8 @@ import {
   SvgVisibilityHide,
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
-import {
-  JobCreation,
-  JobStatus,
-  Link,
-  OneClickLCAClient,
-} from "@itwin/insights-client";
+import type { JobCreation, Link } from "@itwin/insights-client";
+import { JobStatus, OneClickLCAClient } from "@itwin/insights-client";
 import logo from "../../public/logo/oneClickLCALogo.png";
 
 interface ExportProps {

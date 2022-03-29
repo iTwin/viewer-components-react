@@ -2,14 +2,17 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import {
+import type {
   AbstractWidgetProps,
+  UiItemsProvider,
+} from "@itwin/appui-abstract";
+import {
   StagePanelLocation,
   StagePanelSection,
   StageUsage,
-  UiItemsProvider,
 } from "@itwin/appui-abstract";
 import OneClickLCA from "../components/OneClickLCA";
+import React from "react";
 
 export class OneClickLCAProvider implements UiItemsProvider {
   public readonly id = "OneClickLCAProvider";
