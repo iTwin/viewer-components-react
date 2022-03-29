@@ -28,7 +28,7 @@
   "CopiedToClipboard": "Copied to clipboard!",
   "Status": "Status:",
   "MandatoryFields": "Asterisk * indicates mandatory fields.",
-  "GeneratedODataFeedURL": "Generated OData Feed URL",
+  "ODataFeedURL": "OData Feed URL",
   "FilterToCurrentIModel": "Filter to current iModel",
   "ITwinReports": "iTwin Reports",
   "ReportName": "Report Name",

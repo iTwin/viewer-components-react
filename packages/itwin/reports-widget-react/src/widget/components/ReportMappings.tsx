@@ -177,7 +177,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           <WidgetHeader title={report.displayName ?? ""} returnFn={goBack} />
           <div className="report-mappings-container">
             <LabeledInput
-              label={IModelApp.localization.getLocalizedString("ReportsWidget:GeneratedODataFeedURL")}
+              label={IModelApp.localization.getLocalizedString("ReportsWidget:ODataFeedURL")}
               className="odata-url-input"
               readOnly={true}
               value={odataFeedUrl}
