@@ -1,8 +1,8 @@
-# @itwin/one-click-LCA-widget
+# @itwin/oclca-widget
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 The One Click CLA widget is a UI component for iTwin Viewer applications that simplifies how users (and developers) interface with the [Carbon Calculation One Click LCA APIs](https://developer.bentley.com/apis/carbon-calculation/overview/).
-The one-click-lca-widget package provides a UiProvider class - `OneClickLCAProvider` - which can be passed into the `uiProviders` prop of the iTwin Viewer's `<Viewer />` component.
+The oclca-widget package provides a UiProvider class - `OneClickLCAProvider` - which can be passed into the `uiProviders` prop of the iTwin Viewer's `<Viewer />` component.
 
 ## Getting Started
 
@@ -18,10 +18,9 @@ Users must have the `imodels_read` and `insights_view` [permissions](https://dev
 ## Sample usage
 
 ```tsx
-import { OneClickLCAProvider } from "@itwin/one-click-lca-widget";
+import { OneClickLCAProvider } from "@itwin/oclca-widget";
 <Viewer
   ...
   uiProviders={[new OneClickLCAProvider()]}
 />
 ```
-

@@ -33,7 +33,7 @@
       "versionPolicyName": "grouping-mapping-widget"
     },
     {
-      "packageName": "@itwin/one-click-lca-widget-react",
+      "packageName": "@itwin/oclca-react",
       "projectFolder": "packages/itwin/one-click-lca-widget",
       "versionPolicyName": "one-click-lca-widget"
     },
