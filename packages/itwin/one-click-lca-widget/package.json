@@ -95,6 +95,10 @@
     "plugins": [
       "@itwin"
     ],
-    "extends": "plugin:@itwin/ui"
+    "extends": "plugin:@itwin/ui",
+    "rules": {
+      "no-duplicate-imports": "off",
+      "@typescript-eslint/consistent-type-imports": "error"
+    }
   }
 }

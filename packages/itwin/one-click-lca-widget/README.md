@@ -25,9 +25,3 @@ import { OneClickLCAProvider } from "@itwin/one-click-lca-widget";
 />
 ```
 
-## Environment Variables
-
-```
-# ---- Optional URL prefix for dev/qa environments (eg. "dev-") ----
-IMJS_URL_PREFIX=""
-```
