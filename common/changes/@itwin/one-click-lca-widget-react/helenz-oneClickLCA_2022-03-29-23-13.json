@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/one-click-lca-widget-react",
+      "comment": "Initial publish",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/one-click-lca-widget-react"
+}
