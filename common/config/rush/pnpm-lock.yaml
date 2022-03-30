@@ -510,8 +510,8 @@ importers:
       '@types/react': ^17.0.38
       '@types/react-dom': ^17.0.11
       '@types/react-table': ^7.7.0
-      '@typescript-eslint/eslint-plugin': ^5.3.1
-      '@typescript-eslint/parser': ^5.10.1
+      '@typescript-eslint/eslint-plugin': ^5.17.0
+      '@typescript-eslint/parser': ^5.17.0
       cpx2: ^3.0.0
       eslint: ^7.32.0
       eslint-plugin-node: ^11.1.0
@@ -3242,7 +3242,7 @@ packages:
   /@types/cheerio/0.22.31:
     resolution: {integrity: sha512-Kt7Cdjjdi2XWSfrZ53v4Of0wG3ZcmaegFXjMmz9tfNrZSkzzo36G0AL1YqSdcIA78Etjt6E609pt5h1xnQkPUw==}
     dependencies:
-      '@types/node': 17.0.23
+      '@types/node': 14.18.12
     dev: true
 
   /@types/enzyme/3.10.5:
@@ -5272,7 +5272,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001322
-      electron-to-chromium: 1.4.100
+      electron-to-chromium: 1.4.101
       escalade: 3.1.1
       node-releases: 2.0.2
       picocolors: 1.0.0
@@ -6547,8 +6547,8 @@ packages:
     resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
     dev: true
 
-  /electron-to-chromium/1.4.100:
-    resolution: {integrity: sha512-pNrSE2naf8fizl6/Uxq8UbKb8hU9EiYW4OzCYswosXoLV5NTMOUVKECNzDaHiUubsPq/kAckOzZd7zd8S8CHVw==}
+  /electron-to-chromium/1.4.101:
+    resolution: {integrity: sha512-XJH+XmJjACx1S7ASl/b//KePcda5ocPnFH2jErztXcIS8LpP0SE6rX8ZxiY5/RaDPnaF1rj0fPaHfppzb0e2Aw==}
     dev: true
 
   /elliptic/6.5.4:
