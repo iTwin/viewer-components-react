@@ -502,6 +502,7 @@ importers:
       '@itwin/insights-client': ^0.1.0
       '@itwin/itwinui-icons-react': ^1.5.1
       '@itwin/itwinui-react': ^1.29.2
+      '@testing-library/dom': ^8.12.0
       '@testing-library/jest-dom': ^5.16.3
       '@testing-library/react': ^12.1.4
       '@types/i18next': ^8.4.2
@@ -510,6 +511,7 @@ importers:
       '@types/react': ^17.0.38
       '@types/react-dom': ^17.0.11
       '@types/react-table': ^7.7.0
+      '@types/testing-library__jest-dom': ^5.14.3
       '@typescript-eslint/eslint-plugin': ^5.17.0
       '@typescript-eslint/parser': ^5.17.0
       cpx2: ^3.0.0
@@ -538,6 +540,7 @@ importers:
       '@itwin/core-frontend': 3.1.0_85ef898ec71889e60a4d08d5184beb78
       '@itwin/core-react': 3.1.0_f6cc970ce6f6c2089e30846dc915fc56
       '@itwin/eslint-plugin': 3.1.0_eslint@7.32.0+typescript@4.3.5
+      '@testing-library/dom': 8.12.0
       '@testing-library/jest-dom': 5.16.3
       '@testing-library/react': 12.1.4_react-dom@17.0.2+react@17.0.2
       '@types/i18next': 8.4.6
@@ -546,6 +549,7 @@ importers:
       '@types/react': 17.0.43
       '@types/react-dom': 17.0.14
       '@types/react-table': 7.7.10
+      '@types/testing-library__jest-dom': 5.14.3
       '@typescript-eslint/eslint-plugin': 5.17.0_dd7d924c547e25185e08025ddbaf8e87
       '@typescript-eslint/parser': 5.17.0_eslint@7.32.0+typescript@4.3.5
       cpx2: 3.0.2
