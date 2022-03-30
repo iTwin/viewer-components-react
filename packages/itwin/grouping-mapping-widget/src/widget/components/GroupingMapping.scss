@@ -10,11 +10,6 @@
   width: 100%;
 }
 
-.iui-modal > .iui-modal-dialog {
-  // Will remove when fullscreen modal releases.
-  box-sizing: unset;
-}
-
 .group-mapping-container {
   display: flex;
   flex-direction: column;
