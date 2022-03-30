@@ -5,17 +5,39 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYZProps } from "@itwin/core-geometry";
-import { Angle, AngleSweep, Arc3d, AxisOrder, IModelJson, Matrix3d, Point3d, PointString3d, Vector3d } from "@itwin/core-geometry";
+import {
+  Angle,
+  AngleSweep,
+  Arc3d,
+  AxisOrder,
+  IModelJson,
+  Matrix3d,
+  Point3d,
+  PointString3d,
+  Vector3d,
+} from "@itwin/core-geometry";
 import type { GeometryStreamProps } from "@itwin/core-common";
-import type { BeButtonEvent, DecorateContext} from "@itwin/core-frontend";
+import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
 import { GraphicType, IModelApp, QuantityType } from "@itwin/core-frontend";
-import { StyleSet, WellKnownGraphicStyleType, WellKnownTextStyleType } from "../api/GraphicStyle";
-import type { MeasurementEqualityOptions, MeasurementWidgetData } from "../api/Measurement";
-import { Measurement, MeasurementPickContext, MeasurementSerializer } from "../api/Measurement";
+import {
+  StyleSet,
+  WellKnownGraphicStyleType,
+  WellKnownTextStyleType,
+} from "../api/GraphicStyle";
+import type {
+  MeasurementEqualityOptions,
+  MeasurementWidgetData,
+} from "../api/Measurement";
+import {
+  Measurement,
+  MeasurementPickContext,
+  MeasurementSerializer,
+} from "../api/Measurement";
 import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
 import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
+import { MeasureTools } from "../MeasureTools";
 
 export interface AngleMeasurementProps extends MeasurementProps {
   startPoint?: XYZProps;
@@ -44,7 +66,7 @@ export class AngleMeasurementSerializer extends MeasurementSerializer {
 
 export class AngleMeasurement extends Measurement {
   public static override readonly serializer = Measurement.registerSerializer(
-    new AngleMeasurementSerializer(),
+    new AngleMeasurementSerializer()
   );
 
   private _startPoint: Point3d | undefined;
@@ -70,14 +92,22 @@ export class AngleMeasurement extends Measurement {
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
-  public get startPointRef(): Point3d | undefined { return this._startPoint; }
-  public get centerRef(): Point3d | undefined { return this._center; }
-  public get endPointRef(): Point3d | undefined { return this._endPoint; }
+  public get startPointRef(): Point3d | undefined {
+    return this._startPoint;
+  }
+  public get centerRef(): Point3d | undefined {
+    return this._center;
+  }
+  public get endPointRef(): Point3d | undefined {
+    return this._endPoint;
+  }
 
   public get angle(): number | undefined {
-    if (this._startPoint === undefined ||
+    if (
+      this._startPoint === undefined ||
       this._center === undefined ||
-      this._endPoint === undefined)
+      this._endPoint === undefined
+    )
       return undefined;
 
     const v1 = Vector3d.createStartEnd(this._center, this._startPoint);
@@ -90,12 +120,9 @@ export class AngleMeasurement extends Measurement {
 
   public override readFromJSON(props: AngleMeasurementProps) {
     super.readFromJSON(props);
-    if (props.startPoint)
-      this._startPoint = Point3d.fromJSON(props.startPoint);
-    if (props.center)
-      this._center = Point3d.fromJSON(props.center);
-    if (props.endPoint)
-      this._endPoint = Point3d.fromJSON(props.endPoint);
+    if (props.startPoint) this._startPoint = Point3d.fromJSON(props.startPoint);
+    if (props.center) this._center = Point3d.fromJSON(props.center);
+    if (props.endPoint) this._endPoint = Point3d.fromJSON(props.endPoint);
 
     this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
@@ -108,12 +135,9 @@ export class AngleMeasurement extends Measurement {
     super.writeToJSON(json);
 
     const jsonDist = json as AngleMeasurementProps;
-    if (this._startPoint)
-      jsonDist.startPoint = this._startPoint.toJSON();
-    if (this._endPoint)
-      jsonDist.endPoint = this._endPoint.toJSON();
-    if (this._center)
-      jsonDist.center = this._center.toJSON();
+    if (this._startPoint) jsonDist.startPoint = this._startPoint.toJSON();
+    if (this._endPoint) jsonDist.endPoint = this._endPoint.toJSON();
+    if (this._center) jsonDist.center = this._center.toJSON();
   }
 
   /**
@@ -122,29 +146,34 @@ export class AngleMeasurement extends Measurement {
    * @param opts Options for equality testing.
    * @returns true if the other measurement is equal, false if some property is not the same or if the measurement is not of the same type.
    */
-  public override equals(other: Measurement, opts?: MeasurementEqualityOptions): boolean {
-    if (!super.equals(other, opts))
-      return false;
+  public override equals(
+    other: Measurement,
+    opts?: MeasurementEqualityOptions
+  ): boolean {
+    if (!super.equals(other, opts)) return false;
 
-    const equalsPointOrUndef = (a: Point3d | undefined, b: Point3d | undefined, tolerance?: number): boolean => {
-      if (a === undefined && b === undefined)
-        return true;
-      if (a === undefined && b !== undefined)
-        return false;
-      if (a !== undefined && b === undefined)
-        return false;
+    const equalsPointOrUndef = (
+      a: Point3d | undefined,
+      b: Point3d | undefined,
+      tolerance?: number
+    ): boolean => {
+      if (a === undefined && b === undefined) return true;
+      if (a === undefined && b !== undefined) return false;
+      if (a !== undefined && b === undefined) return false;
       if (a !== undefined && b !== undefined)
         return a?.isAlmostEqual(b, tolerance);
       return false;
     };
 
     // Compare data (ignore isDynamic)
-    const tol = (opts) ? opts.tolerance : undefined;
+    const tol = opts ? opts.tolerance : undefined;
     const otherDist = other as AngleMeasurement;
-    if (otherDist === undefined
-      || !equalsPointOrUndef(this._startPoint, otherDist._startPoint, tol)
-      || !equalsPointOrUndef(this._center, otherDist._center, tol)
-      || !equalsPointOrUndef(this._endPoint, otherDist._endPoint, tol))
+    if (
+      otherDist === undefined ||
+      !equalsPointOrUndef(this._startPoint, otherDist._startPoint, tol) ||
+      !equalsPointOrUndef(this._center, otherDist._center, tol) ||
+      !equalsPointOrUndef(this._endPoint, otherDist._endPoint, tol)
+    )
       return false;
 
     return true;
@@ -159,7 +188,9 @@ export class AngleMeasurement extends Measurement {
 
     if (other instanceof AngleMeasurement) {
       this._isDynamic = other._isDynamic;
-      this._startPoint = other._startPoint ? other._startPoint.clone() : undefined;
+      this._startPoint = other._startPoint
+        ? other._startPoint.clone()
+        : undefined;
       this._center = other._center ? other._center.clone() : undefined;
       this._endPoint = other._endPoint ? other._endPoint.clone() : undefined;
       this.createTextMarker().catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -187,7 +218,8 @@ export class AngleMeasurement extends Measurement {
 
     if (
       pickContext.buttonEvent &&
-      this._textMarker && this.displayLabels &&
+      this._textMarker &&
+      this.displayLabels &&
       this._textMarker.pick(pickContext.buttonEvent.viewPoint)
     )
       return true;
@@ -196,19 +228,24 @@ export class AngleMeasurement extends Measurement {
   }
 
   public override async getDecorationToolTip(
-    _pickContext: MeasurementPickContext,
+    _pickContext: MeasurementPickContext
   ): Promise<HTMLElement | string> {
-    return IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.measurement");
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureAngle.measurement"
+    );
   }
 
   public override getDecorationGeometry(
-    _pickContext: MeasurementPickContext,
+    _pickContext: MeasurementPickContext
   ): GeometryStreamProps | undefined {
     // No need to snap to the geometry during dynamics
-    if (this._isDynamic)
-      return undefined;
+    if (this._isDynamic) return undefined;
 
-    const geometry = [IModelJson.Writer.toIModelJson(PointString3d.create(this._startPoint, this._center, this._endPoint))];
+    const geometry = [
+      IModelJson.Writer.toIModelJson(
+        PointString3d.create(this._startPoint, this._center, this._endPoint)
+      ),
+    ];
     return geometry;
   }
 
@@ -225,8 +262,16 @@ export class AngleMeasurement extends Measurement {
     if (this._textMarker) this._textMarker.transientHiliteId = this.transientId;
   }
 
-  private _createDecorationArc(p0: Point3d, center: Point3d, p1: Point3d): Arc3d | undefined {
-    if (center.isAlmostEqual(p0) || center.isAlmostEqual(p1) || p0.isAlmostEqual(p1))
+  private _createDecorationArc(
+    p0: Point3d,
+    center: Point3d,
+    p1: Point3d
+  ): Arc3d | undefined {
+    if (
+      center.isAlmostEqual(p0) ||
+      center.isAlmostEqual(p1) ||
+      p0.isAlmostEqual(p1)
+    )
       return undefined;
 
     const v1 = Vector3d.createStartEnd(center, p0);
@@ -236,45 +281,70 @@ export class AngleMeasurement extends Measurement {
     const length = Math.min(v1.magnitude(), v2.magnitude()) / 2.0;
     const matrix = Matrix3d.createRigidFromColumns(v1, v2, AxisOrder.XYZ);
     const angle = this.angle;
-    if (matrix === undefined || angle === undefined)
-      return undefined;
+    if (matrix === undefined || angle === undefined) return undefined;
 
     const startAngle = Angle.createRadians(0);
     const sweepAngle = Angle.createRadians(angle);
-    return Arc3d.createScaledXYColumns(center, matrix, length, length, AngleSweep.createStartSweep(startAngle, sweepAngle));
+    return Arc3d.createScaledXYColumns(
+      center,
+      matrix,
+      length,
+      length,
+      AngleSweep.createStartSweep(startAngle, sweepAngle)
+    );
   }
 
   public override decorate(context: DecorateContext): void {
     super.decorate(context);
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
-    const style = styleTheme.getGraphicStyle(WellKnownGraphicStyleType.DistanceMeasurement)!;
+    const style = styleTheme.getGraphicStyle(
+      WellKnownGraphicStyleType.DistanceMeasurement
+    )!;
     const builder = context.createGraphicBuilder(
       GraphicType.WorldOverlay,
       undefined,
-      this._getSnapId(),
+      this._getSnapId()
     );
 
-    if (this._startPoint !== undefined &&
+    if (
+      this._startPoint !== undefined &&
       this._center === undefined &&
-      this._endPoint === undefined) {
+      this._endPoint === undefined
+    ) {
       style.addStyledPointString(builder, [this._startPoint], true);
-    } else if (this._startPoint !== undefined &&
+    } else if (
+      this._startPoint !== undefined &&
       this._center !== undefined &&
-      this._endPoint === undefined) {
-      style.addStyledLineString(builder, [this._startPoint, this._center], true);
-    } else if (this._startPoint !== undefined &&
+      this._endPoint === undefined
+    ) {
+      style.addStyledLineString(
+        builder,
+        [this._startPoint, this._center],
+        true
+      );
+    } else if (
+      this._startPoint !== undefined &&
       this._center !== undefined &&
-      this._endPoint !== undefined) {
-      style.addStyledLineString(builder, [this._startPoint, this._center], true);
+      this._endPoint !== undefined
+    ) {
+      style.addStyledLineString(
+        builder,
+        [this._startPoint, this._center],
+        true
+      );
       style.addStyledLineString(builder, [this._center, this._endPoint], true);
 
-      const arc = this._createDecorationArc(this._startPoint, this._center, this._endPoint);
-      if (arc !== undefined)
-        style.addStyledArc(builder, arc, true);
+      const arc = this._createDecorationArc(
+        this._startPoint,
+        this._center,
+        this._endPoint
+      );
+      if (arc !== undefined) style.addStyledArc(builder, arc, true);
 
       if (this._textMarker && this.displayLabels) {
-        const textLocation = arc !== undefined ? arc.fractionToPoint(0.5) : this._center;
+        const textLocation =
+          arc !== undefined ? arc.fractionToPoint(0.5) : this._center;
         this._textMarker.worldLocation = textLocation;
         this._textMarker.addDecoration(context);
       }
@@ -284,28 +354,33 @@ export class AngleMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<MeasurementWidgetData> {
-    const angleSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-      QuantityType.Angle,
-    );
+    const angleSpec =
+      await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+        QuantityType.Angle
+      );
 
     const angle = this.angle ? this.angle : 0;
 
-    const fAngle = IModelApp.quantityFormatter.formatQuantity(
-      angle,
-      angleSpec,
-    );
+    const fAngle = IModelApp.quantityFormatter.formatQuantity(angle, angleSpec);
 
-    let title = IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.measurement");
+    let title = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureAngle.measurement"
+    );
     title += ` [${fAngle}]`;
 
     const data: MeasurementWidgetData = { title, properties: [] };
     MeasurementPropertyHelper.tryAddNameProperty(this, data.properties);
 
     data.properties.push({
-      label: IModelApp.localization.getLocalizedString("MeasureTools:tools.MeasureAngle.angle"),
+      label: MeasureTools.localization.getLocalizedString(
+        "MeasureTools:tools.MeasureAngle.angle"
+      ),
       name: "AngleMeasurement_Angle",
       value: fAngle,
-      aggregatableValue: (angleSpec !== undefined) ? { value: angle, formatSpec: angleSpec } : undefined,
+      aggregatableValue:
+        angleSpec !== undefined
+          ? { value: angle, formatSpec: angleSpec }
+          : undefined,
     });
 
     return data;
@@ -313,37 +388,41 @@ export class AngleMeasurement extends Measurement {
 
   private async createTextMarker(): Promise<void> {
     if (this._center !== undefined && this.angle !== undefined) {
-      const angleSpec = await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
-        QuantityType.Angle,
-      );
+      const angleSpec =
+        await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
+          QuantityType.Angle
+        );
       const angle = this.angle;
       const fAngle = IModelApp.quantityFormatter.formatQuantity(
         angle,
-        angleSpec,
+        angleSpec
       );
       const styleTheme = StyleSet.getOrDefault(this.activeStyle);
 
-      const tStyle = styleTheme.getTextStyle(WellKnownTextStyleType.DistanceMeasurement)!;
+      const tStyle = styleTheme.getTextStyle(
+        WellKnownTextStyleType.DistanceMeasurement
+      )!;
       this._textMarker = TextMarker.createStyled(
         [fAngle],
         this._center,
-        tStyle,
+        tStyle
       );
       this._textMarker.transientHiliteId = this.transientId;
       this._textMarker.pickable = !this.isDynamic;
       this._textMarker.setMouseButtonHandler(
-        this._handleTextMarkerButtonEvent.bind(this),
+        this._handleTextMarkerButtonEvent.bind(this)
       );
     }
   }
 
   private updateMarkerStyle() {
-    if (!this._textMarker)
-      return;
+    if (!this._textMarker) return;
 
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
 
-    const tStyle = styleTheme.getTextStyle(WellKnownTextStyleType.DistanceMeasurement)!;
+    const tStyle = styleTheme.getTextStyle(
+      WellKnownTextStyleType.DistanceMeasurement
+    )!;
     this._textMarker.applyStyle(tStyle);
   }
 
@@ -359,7 +438,7 @@ export class AngleMeasurement extends Measurement {
     if (!this.isDynamic)
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.onDecorationButtonEvent(
-        MeasurementPickContext.createFromSourceId("Invalid", ev),
+        MeasurementPickContext.createFromSourceId("Invalid", ev)
       ).catch();
     return true;
   }
@@ -372,7 +451,7 @@ export class AngleMeasurement extends Measurement {
     startPoint: Point3d,
     center?: Point3d,
     endPoint?: Point3d,
-    viewType?: string,
+    viewType?: string
   ) {
     const measurement = new AngleMeasurement({
       startPoint,

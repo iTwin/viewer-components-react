@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 
 import type { Viewport } from "@itwin/core-frontend";
 import type { Feature } from "../api/FeatureTracking";
@@ -10,7 +10,7 @@ import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { PrimitiveToolBase } from "../api/MeasurementTool";
 
 export class ToggleDisplayMeasurementAxesTool extends PrimitiveToolBase {
-  public static override toolId = "ToggleDisplayMeasurementAxes";
+  public static override toolId = "MeasureTools.ToggleDisplayMeasurementAxes";
 
   public static override get iconSpec(): string {
     if (MeasurementPreferences.current.displayMeasurementAxes)
@@ -20,7 +20,9 @@ export class ToggleDisplayMeasurementAxesTool extends PrimitiveToolBase {
   }
 
   // Ignore built-in feature tracking on the tool, since we want to add a toggle state to the tracking so we will call it ourselves
-  protected override get feature(): Feature | undefined { return undefined; }
+  protected override get feature(): Feature | undefined {
+    return undefined;
+  }
 
   constructor() {
     super();
@@ -30,7 +32,10 @@ export class ToggleDisplayMeasurementAxesTool extends PrimitiveToolBase {
     return false;
   }
 
-  public override isCompatibleViewport(_vp: Viewport | undefined, _isSelectedViewChange: boolean): boolean {
+  public override isCompatibleViewport(
+    _vp: Viewport | undefined,
+    _isSelectedViewChange: boolean
+  ): boolean {
     return true;
   }
 
@@ -39,15 +44,17 @@ export class ToggleDisplayMeasurementAxesTool extends PrimitiveToolBase {
 
     const isEnabled = !MeasurementPreferences.current.displayMeasurementAxes;
     MeasurementPreferences.current.displayMeasurementAxes = isEnabled;
-    FeatureTracking.notifyToggledFeature(MeasureToolsFeatures.Tools_ToggleDisplayMeasurementAxes, isEnabled);
+    FeatureTracking.notifyToggledFeature(
+      MeasureToolsFeatures.Tools_ToggleDisplayMeasurementAxes,
+      isEnabled
+    );
 
     await this.exitTool();
   }
 
   public async onRestartTool(): Promise<void> {
     const tool = new ToggleDisplayMeasurementAxesTool();
-    if (await tool.run())
-      return;
+    if (await tool.run()) return;
 
     return this.exitTool();
   }

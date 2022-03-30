@@ -6,12 +6,21 @@ import * as React from "react";
 import type { Id64String } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
-import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
+import { PropertyRecord, PropertyValueFormat, WidgetState } from "@itwin/appui-abstract";
+import { useActiveFrontstageDef } from "@itwin/appui-react";
 import { PropertyGrid, SimplePropertyDataProvider } from "@itwin/components-react";
 import { Orientation } from "@itwin/core-react";
 import type { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
+import { MeasureTools } from "../MeasureTools";
+
+export function useSpecificWidgetDef(id: string) {
+  const frontstageDef = useActiveFrontstageDef();
+  return frontstageDef?.findWidgetDef(id);
+}
+
+export const MeasurementPropertyWidgetId = "measure-tools-property-widget";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const MeasurementPropertyWidget = () => {
@@ -61,7 +70,7 @@ export const MeasurementPropertyWidget = () => {
     ) {
       const catIndex = dataProvider.addCategory({
         expand: true,
-        label: IModelApp.localization.getLocalizedString("MeasureTools:Generic.cumulativeTotals"),
+        label: MeasureTools.localization.getLocalizedString("MeasureTools:Generic.cumulativeTotals"),
         name: "cumulativeTotals",
       });
       for (const entry of orderedAggrPropEntries) {
@@ -127,6 +136,16 @@ export const MeasurementPropertyWidget = () => {
       /* no op */
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const widgetDef = useSpecificWidgetDef(MeasurementPropertyWidgetId);
+
+  React.useEffect(() => {
+    if (lastSelectedCount) {
+      widgetDef?.setWidgetState(WidgetState.Open);
+    } else {
+      widgetDef?.setWidgetState(WidgetState.Hidden);
+    }
+  }, [widgetDef, lastSelectedCount]);
 
   return <PropertyGrid dataProvider={dataProvider} orientation={Orientation.Vertical} />;
 };

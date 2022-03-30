@@ -11,6 +11,10 @@ import type {
 import type { PropertyGridContextMenuArgs } from "@itwin/components-react";
 import type { ContextMenuItemProps, Orientation } from "@itwin/core-react";
 import type { FavoritePropertiesScope } from "@itwin/presentation-frontend";
+import type {
+  StagePanelLocation,
+  StagePanelSection,
+} from "@itwin/appui-abstract";
 
 export type ContextMenuItemInfo = ContextMenuItemProps &
 React.Attributes & { label: string };
@@ -28,6 +32,8 @@ export interface PropertyGridProps {
   favoritePropertiesScope?: FavoritePropertiesScope;
   enableCopyingPropertyText?: boolean;
   enableNullValueToggle?: boolean;
+  defaultPanelLocation?: StagePanelLocation;
+  defaultPanelSection?: StagePanelSection;
   /** If true, enables property category group nesting  */
   enablePropertyGroupNesting?: boolean;
   additionalContextMenuOptions?: ContextMenuItemInfo[];
