@@ -12,6 +12,8 @@
   ],
   "exclude": [
     "lib",
-    "node_modules"
+    "node_modules",
+    "src/test/*",
+    "__mocks__"
   ]
 }
