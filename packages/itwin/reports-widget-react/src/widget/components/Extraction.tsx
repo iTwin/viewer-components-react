@@ -22,8 +22,11 @@ enum ExtractionStates {
   Failed
 }
 
-export const Extraction = () => {
-  const iModelId = useActiveIModelConnection()?.iModelId as string;
+interface ExtractionProps {
+  iModelId: string
+}
+
+export const Extraction = ({ iModelId }: ExtractionProps) => {
   const [jobId, setJobId] = useState<string>("");
   const [state, setState] = useState<ExtractionStates>(ExtractionStates.None);
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -135,24 +138,26 @@ export const Extraction = () => {
   }
 
   return (
-    <ExpandableBlock
-      title={IModelApp.localization.getLocalizedString("ReportsWidget:Extraction")}>
-      <div className="extraction-container">
-        <span className="extraction-status-container">
-          <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Status")}</Text>{status(state)}
-          <IconButton styleType='borderless' onClick={async (_) => {
-            await navigator.clipboard.writeText(jobId);
-            toaster.positive(IModelApp.localization.getLocalizedString("ReportsWidget:CopiedToClipboard"));
-          }}
-            disabled={!jobId}
-            title={IModelApp.localization.getLocalizedString("ReportsWidget:CopyJobId")}>
-            <SvgCopy />
-          </IconButton>
-        </span>
-        <Button onClick={async () => runExtraction()} disabled={isRunning} startIcon={<SvgCaretRight />}>
-          {IModelApp.localization.getLocalizedString("ReportsWidget:Run")}
-        </Button>
-      </div>
-    </ExpandableBlock>
+    <div className="extraction-container">
+      <Button onClick={async () => runExtraction()} disabled={isRunning} startIcon={<SvgCaretRight />}>
+        {IModelApp.localization.getLocalizedString("ReportsWidget:RunExtraction")}
+      </Button>
+      <span className="extraction-status-container">
+        {state !== ExtractionStates.None &&
+          <>
+            <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Status")}</Text>
+            {status(state)}
+            <IconButton styleType='borderless' onClick={async (_) => {
+              await navigator.clipboard.writeText(jobId);
+              toaster.positive(IModelApp.localization.getLocalizedString("ReportsWidget:CopiedToClipboard"));
+            }}
+              disabled={!jobId}
+              title={IModelApp.localization.getLocalizedString("ReportsWidget:CopyJobId")}>
+              <SvgCopy />
+            </IconButton>
+          </>
+        }
+      </span>
+    </div>
   );
 };

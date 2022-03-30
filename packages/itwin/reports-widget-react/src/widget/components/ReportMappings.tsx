@@ -9,7 +9,8 @@ import {
   SvgDelete,
   SvgMore,
 } from "@itwin/itwinui-icons-react";
-import type {
+import {
+  ProgressRadial,
   TablePaginatorRendererProps,
 } from "@itwin/itwinui-react";
 import {
@@ -39,10 +40,20 @@ import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import AddMappings from "./AddMappings";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
+import { IModelReportMappings } from "./IModelReportMappings";
+import { GetSingleIModelParams, IModelsClient } from "@itwin/imodels-client-management";
+import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
-export type ReportMappingAndMapping = ReportMappingType & { mappingName: string, mappingDescription: string };
+export type ReportMappingAndMapping = ReportMappingType & { mappingName: string, mappingDescription: string, iModelName: string };
+
+const groupBy = <T, K extends keyof T>(value: T[], key: K) =>
+  value.reduce((acc, curr) => {
+    if (acc.get(curr[key])) return acc;
+    acc.set(curr[key], value.filter(elem => elem[key] === curr[key]));
+    return acc;
+  }, new Map<T[K], T[]>());
 
 enum ReportMappingsView {
   REPORTMAPPINGS = "reportmappings",
@@ -59,10 +70,26 @@ const fetchReportMappings = async (
     const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
     const reportingClientApi = new ReportingClient();
     const reportMappings = await reportingClientApi.getReportMappings(accessToken, reportId);
+    const iModelsClient: IModelsClient = new IModelsClient();
+    const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
+    const iModelNames = new Map<string, string>();
     const reportMappingsAndMapping = await Promise.all(reportMappings.mappings?.map(async (reportMapping) => {
-      const mapping = await reportingClientApi.getMapping(accessToken, reportMapping.mappingId ?? "", reportMapping.imodelId ?? "");
+      const iModelId = reportMapping.imodelId ?? ""
+      let iModelName = "";
+      const mapping = await reportingClientApi.getMapping(accessToken, reportMapping.mappingId ?? "", iModelId);
+
+      if (iModelNames.has(iModelId)) {
+        iModelName = iModelNames.get(iModelId) ?? ""
+      }
+      else {
+        const getSingleParams: GetSingleIModelParams = { authorization: authorization, iModelId: iModelId }
+        const iModel = await iModelsClient.iModels.getSingle(getSingleParams)
+        iModelName = iModel.displayName;
+        iModelNames.set(iModelId, iModelName);
+      }
       const reportMappingAndMapping: ReportMappingAndMapping = {
         ...reportMapping,
+        iModelName: iModelName,
         mappingName: mapping.mapping?.mappingName ?? "",
         mappingDescription: mapping.mapping?.description ?? "",
       };
@@ -98,21 +125,21 @@ interface ReportMappingsProps {
 }
 
 export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
-  const iModelId = useActiveIModelConnection()?.iModelId as string;
-  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [showOpenediModel, setShowOpenediModel] = useState(true);
   const [reportMappingsView, setReportMappingsView] = useState<ReportMappingsView>(
     ReportMappingsView.REPORTMAPPINGS
   );
   const [selectedReportMapping, setSelectedReportMapping] = useState<
-    ReportMapping | undefined
+    ReportMappingAndMapping | undefined
   >(undefined);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reportMappings, setReportMappings] = useFetchReportMappings(report.id ?? "", setIsLoading);
 
+
+  const iModels = useMemo(() => groupBy(reportMappings, "imodelId"), [reportMappings])
+
   const refresh = useCallback(async () => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
-    setSelectedReportMapping(undefined);
     setReportMappings([]);
     await fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading);
   }, [report.id, setReportMappings]);
@@ -120,51 +147,6 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   const addMapping = async () => {
     setReportMappingsView(ReportMappingsView.ADDING);
   };
-
-  const filteredReportMappings = useMemo(() => reportMappings.filter((reportMapping) => reportMapping.imodelId === iModelId), [reportMappings, iModelId]);
-
-  const reportMappingsColumns = useMemo(
-    () => [
-      {
-        Header: "Table",
-        columns: [
-          {
-            id: "mappingName",
-            Header: IModelApp.localization.getLocalizedString("ReportsWidget:MappingName"),
-            accessor: "mappingName",
-            Filter: tableFilters.TextFilter(),
-          }, {
-            id: "mappingDescription",
-            Header: IModelApp.localization.getLocalizedString("ReportsWidget:Description"),
-            accessor: "mappingDescription",
-            Filter: tableFilters.TextFilter(),
-          },
-          {
-            id: "remove",
-            Header: "",
-            width: 80,
-            Cell: (value: CellProps<ReportMapping>) => {
-              return (
-                <IconButton onClick={() => {
-                  setSelectedReportMapping(value.row.original);
-                  setShowDeleteModal(true);
-                }} styleType="borderless"
-                  title="Remove">
-                  <SvgDelete
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                    }}
-                  />
-                </IconButton>
-              );
-            },
-          },
-        ],
-      },
-    ],
-    []
-  );
 
   const odataFeedUrl = `https://${process.env.IMJS_URL_PREFIX}api.bentley.com/insights/reporting/odata/${report.id}`;
 
@@ -199,24 +181,27 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
               >
                 {IModelApp.localization.getLocalizedString("ReportsWidget:AddMapping")}
               </Button>
-              <div className="filter-toggle">
-                <Checkbox checked={showOpenediModel} onChange={() => setShowOpenediModel((showOpenediModel) => !showOpenediModel)} />
-                <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:FilterToCurrentIModel")}</Text>
-              </div>
             </div>
-            <Table<ReportMappingAndMapping>
-              data={showOpenediModel ? filteredReportMappings : reportMappings}
-              className='report-mappings-table'
-              density="extra-condensed"
-              columns={reportMappingsColumns}
-              emptyTableContent={IModelApp.localization.getLocalizedString("ReportsWidget:NoReportMappingsAvailable")}
-              isSortable
-              isLoading={isLoading}
-              paginatorRenderer={LocalizedTablePaginator}
-            />
+            <div className="imodels-list">
+              {isLoading ?
+                <div className='rw-loading-overlay'>
+                  <Text>Loading Mappings</Text>
+                  <ProgressRadial indeterminate />
+                  <Text>Please wait...</Text>
+                </div> : Array.from(iModels.keys()).map((iModelId) =>
+                  iModelId &&
+                  <IModelReportMappings
+                    key={iModelId}
+                    iModelId={iModelId}
+                    setSelectedReportMapping={setSelectedReportMapping}
+                    setShowDeleteModal={setShowDeleteModal}
+                    reportMappings={iModels.get(iModelId) ?? []}
+                    isLoading={isLoading}
+                  />)}
+            </div>
           </div>
           <DeleteModal
-            entityName={selectedReportMapping?.mappingId ?? ""}
+            entityName={selectedReportMapping?.mappingName ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {

@@ -4,6 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
+.rw-loading-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: $iui-baseline;
+  height: 100%;
+}
+
 .report-mappings-container {
   display: flex;
   flex-direction: column;
@@ -14,19 +23,19 @@
     display: flex;
     justify-content: space-between;
     gap: $iui-s;
-    .filter-toggle {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: $iui-s;
-    }
   }
 
-  .report-mappings-table {
-    flex-grow: 1;
-    overflow: auto;
-  }
   .odata-url-input {
     margin-bottom: $iui-baseline * 2;
+  }
+
+  .imodels-list {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline;
+    flex-grow: 1;
+    color: var(--buic-foreground-body);
+    background-color: var(--buic-background-control);
+    padding: $iui-baseline $iui-m;
   }
 }

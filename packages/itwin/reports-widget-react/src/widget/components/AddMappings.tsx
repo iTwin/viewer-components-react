@@ -118,7 +118,7 @@ const AddMappings = ({
       <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsWidget:AddMappings")} />
       <div className='add-mappings-container'>
         <Table<MappingType>
-          data={mappings}
+          data={isLoading ? [] : mappings}
           columns={mappingsColumns}
           className='add-mappings-table'
           density="extra-condensed"
