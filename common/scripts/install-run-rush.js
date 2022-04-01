@@ -1,5 +1,8 @@
 "use strict";
-// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 // See the @microsoft/rush package's LICENSE file for license information.
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -16,7 +19,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -42,7 +45,7 @@ function _getRushVersion() {
         console.log(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
         return rushPreviewVersion;
     }
-    const rushJsonFolder = install_run_1.findRushJsonFolder();
+    const rushJsonFolder = (0, install_run_1.findRushJsonFolder)();
     const rushJsonPath = path.join(rushJsonFolder, install_run_1.RUSH_JSON_FILENAME);
     try {
         const rushJsonContents = fs.readFileSync(rushJsonPath, 'utf-8');
@@ -76,10 +79,10 @@ function _run() {
         }
         process.exit(1);
     }
-    install_run_1.runWithErrorAndStatusCode(() => {
+    (0, install_run_1.runWithErrorAndStatusCode)(() => {
         const version = _getRushVersion();
         console.log(`The rush.json configuration requests Rush version ${version}`);
-        return install_run_1.installAndRun(PACKAGE_NAME, version, bin, packageBinArgs);
+        return (0, install_run_1.installAndRun)(PACKAGE_NAME, version, bin, packageBinArgs);
     });
 }
 _run();
