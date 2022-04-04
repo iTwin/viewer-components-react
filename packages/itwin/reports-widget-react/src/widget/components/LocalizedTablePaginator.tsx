@@ -4,15 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { IModelApp } from "@itwin/core-frontend";
-import { TablePaginator, TablePaginatorRendererProps } from "@itwin/itwinui-react";
+import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
+import { TablePaginator } from "@itwin/itwinui-react";
 import React, { useMemo } from "react";
-
-
 
 export const LocalizedTablePaginator = (props: TablePaginatorRendererProps) => {
   const pageSizeList = useMemo(() => [10, 25, 50], []);
   const paginationLocalization = useMemo(() => ({
-    pageSizeLabel: (size: number) => IModelApp.localization.getLocalizedString("ReportsWidget:Table.SizePerPage", { size: size }),
+    pageSizeLabel: (size: number) => IModelApp.localization.getLocalizedString("ReportsWidget:Table.SizePerPage", { size }),
     rangeLabel: (
       startIndex: number,
       endIndex: number,
@@ -26,7 +25,7 @@ export const LocalizedTablePaginator = (props: TablePaginatorRendererProps) => {
     nextPage: IModelApp.localization.getLocalizedString("ReportsWidget:Table.NextPage"),
     goToPageLabel: (page: number) => IModelApp.localization.getLocalizedString("ReportsWidget:Table.GoToPage", { page }),
     rowsPerPageLabel: IModelApp.localization.getLocalizedString("ReportsWidget:Table.RowsPerPage"),
-  }), [])
+  }), []);
 
-  return < TablePaginator {...props} pageSizeList={pageSizeList} localization={paginationLocalization} />
-}
+  return < TablePaginator {...props} pageSizeList={pageSizeList} localization={paginationLocalization} />;
+};

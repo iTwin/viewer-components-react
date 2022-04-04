@@ -6,7 +6,6 @@ import { IModelApp } from "@itwin/core-frontend";
 import { useState } from "react";
 import SimpleReactValidator from "simple-react-validator";
 
-
 export const NAME_REQUIREMENTS =
   "required|NoDuplicateUnderscore|OnlyBeginsWithLetterOrUnderscore|FollowedByLettersUnderscoresAndDigits|CharLimit";
 

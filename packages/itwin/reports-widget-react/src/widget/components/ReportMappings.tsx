@@ -41,7 +41,8 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import AddMappings from "./AddMappings";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import { IModelReportMappings } from "./IModelReportMappings";
-import { GetSingleIModelParams, IModelsClient } from "@itwin/imodels-client-management";
+import type { GetSingleIModelParams} from "@itwin/imodels-client-management";
+import { IModelsClient } from "@itwin/imodels-client-management";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
@@ -51,7 +52,7 @@ export type ReportMappingAndMapping = ReportMappingType & { mappingName: string,
 const groupBy = <T, K extends keyof T>(value: T[], key: K) =>
   value.reduce((acc, curr) => {
     if (acc.get(curr[key])) return acc;
-    acc.set(curr[key], value.filter(elem => elem[key] === curr[key]));
+    acc.set(curr[key], value.filter((elem) => elem[key] === curr[key]));
     return acc;
   }, new Map<T[K], T[]>());
 
@@ -74,22 +75,21 @@ const fetchReportMappings = async (
     const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
     const iModelNames = new Map<string, string>();
     const reportMappingsAndMapping = await Promise.all(reportMappings.mappings?.map(async (reportMapping) => {
-      const iModelId = reportMapping.imodelId ?? ""
+      const iModelId = reportMapping.imodelId ?? "";
       let iModelName = "";
       const mapping = await reportingClientApi.getMapping(accessToken, reportMapping.mappingId ?? "", iModelId);
 
       if (iModelNames.has(iModelId)) {
-        iModelName = iModelNames.get(iModelId) ?? ""
-      }
-      else {
-        const getSingleParams: GetSingleIModelParams = { authorization: authorization, iModelId: iModelId }
-        const iModel = await iModelsClient.iModels.getSingle(getSingleParams)
+        iModelName = iModelNames.get(iModelId) ?? "";
+      } else {
+        const getSingleParams: GetSingleIModelParams = { authorization, iModelId };
+        const iModel = await iModelsClient.iModels.getSingle(getSingleParams);
         iModelName = iModel.displayName;
         iModelNames.set(iModelId, iModelName);
       }
       const reportMappingAndMapping: ReportMappingAndMapping = {
         ...reportMapping,
-        iModelName: iModelName,
+        iModelName,
         mappingName: mapping.mapping?.mappingName ?? "",
         mappingDescription: mapping.mapping?.description ?? "",
       };
@@ -108,9 +108,9 @@ const useFetchReportMappings = (
   reportId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): [
-    ReportMappingAndMapping[],
-    React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>
-  ] => {
+  ReportMappingAndMapping[],
+  React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>
+] => {
   const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
   useEffect(() => {
     void fetchReportMappings(setReportMappings, reportId, setIsLoading);
@@ -129,14 +129,13 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     ReportMappingsView.REPORTMAPPINGS
   );
   const [selectedReportMapping, setSelectedReportMapping] = useState<
-    ReportMappingAndMapping | undefined
+  ReportMappingAndMapping | undefined
   >(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reportMappings, setReportMappings] = useFetchReportMappings(report.id ?? "", setIsLoading);
 
-
-  const iModels = useMemo(() => groupBy(reportMappings, "imodelId"), [reportMappings])
+  const iModels = useMemo(() => groupBy(reportMappings, "imodelId"), [reportMappings]);
 
   const refresh = useCallback(async () => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);

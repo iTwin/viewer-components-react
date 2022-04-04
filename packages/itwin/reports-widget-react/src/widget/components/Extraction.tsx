@@ -23,7 +23,7 @@ enum ExtractionStates {
 }
 
 interface ExtractionProps {
-  iModelId: string
+  iModelId: string;
 }
 
 export const Extraction = ({ iModelId }: ExtractionProps) => {
@@ -67,13 +67,11 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
         }
       }, 5000);
       setIntervalId(newIntervalId);
-    }
-    else if (intervalId && !isRunning) {
+    } else if (intervalId && !isRunning) {
       clearInterval(intervalId);
-      setIntervalId(undefined)
+      setIntervalId(undefined);
     }
   }, [isRunning, intervalId, jobId]);
-
 
   const status = (state: ExtractionStates) => {
     switch (state) {
@@ -83,7 +81,7 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
             <ProgressRadial size="x-small" indeterminate />
             <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Checking")}</Text>
           </div>
-        )
+        );
       case ExtractionStates.Queued:
         return (
           <div className="extraction-status">
@@ -94,7 +92,7 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
             </div>
             <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Queued")}</Text>
           </div>
-        )
+        );
       case ExtractionStates.Running:
         return (
           <div className="extraction-status">
@@ -105,7 +103,7 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
             </div>
             <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Running")}</Text>
           </div>
-        )
+        );
       case ExtractionStates.Succeeded:
         return (
           <div className="extraction-status">
@@ -116,7 +114,7 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
             </div>
             <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Success")}</Text>
           </div>
-        )
+        );
       case ExtractionStates.Failed:
         return (
           <div className="extraction-status">
@@ -127,15 +125,15 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
             </div>
             <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Failed")}</Text>
           </div>
-        )
+        );
       default:
         return (
           <div className="extraction-status">
             <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:NotStarted")}</Text>
           </div>
-        )
+        );
     }
-  }
+  };
 
   return (
     <div className="extraction-container">
@@ -151,8 +149,8 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
               await navigator.clipboard.writeText(jobId);
               toaster.positive(IModelApp.localization.getLocalizedString("ReportsWidget:CopiedToClipboard"));
             }}
-              disabled={!jobId}
-              title={IModelApp.localization.getLocalizedString("ReportsWidget:CopyJobId")}>
+            disabled={!jobId}
+            title={IModelApp.localization.getLocalizedString("ReportsWidget:CopyJobId")}>
               <SvgCopy />
             </IconButton>
           </>

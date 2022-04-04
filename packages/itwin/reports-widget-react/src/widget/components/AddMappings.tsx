@@ -4,6 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
+import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
+import type { MinimalIModel } from "@itwin/imodels-client-management";
+import { GetIModelListParams, IModelsClient, toArray } from "@itwin/imodels-client-management";
 import type {
   TablePaginatorRendererProps,
 } from "@itwin/itwinui-react";
@@ -20,6 +23,7 @@ import ActionPanel from "./ActionPanel";
 import "./AddMappings.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import type { ReportMappingAndMapping } from "./ReportMappings";
+import { SelectIModel } from "./SelectIModel";
 import type { CreateTypeFromInterface } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 
@@ -44,7 +48,7 @@ const fetchMappings = async (
 };
 
 const useFetchMappings = (
-  iModelId: string,
+  selectedIModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): [
     Mapping[],
@@ -52,8 +56,10 @@ const useFetchMappings = (
   ] => {
   const [mappings, setMappings] = useState<Mapping[]>([]);
   useEffect(() => {
-    void fetchMappings(setMappings, iModelId, setIsLoading);
-  }, [iModelId, setIsLoading]);
+    if (selectedIModelId) {
+      void fetchMappings(setMappings, selectedIModelId, setIsLoading);
+    }
+  }, [selectedIModelId, setIsLoading]);
 
   return [mappings, setMappings];
 };
@@ -69,10 +75,10 @@ const AddMappings = ({
   existingMappings,
   returnFn,
 }: AddMappingsProps) => {
-  const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [mappings] = useFetchMappings(iModelId, setIsLoading);
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
+  const [selectedIModelId, setSelectediModelId] = useState<string>("");
+  const [mappings] = useFetchMappings(selectedIModelId, setIsLoading);
 
   const mappingsColumns = useMemo(
     () => [
@@ -99,11 +105,12 @@ const AddMappings = ({
 
   const onSave = async () => {
     try {
+      if (!selectedIModelId) return;
       setIsLoading(true);
       const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       const reportingClientApi = new ReportingClient();
       for (const mapping of selectedMappings) {
-        await reportingClientApi.createReportMapping(accessToken, reportId, { imodelId: iModelId, mappingId: mapping.id ?? "" });
+        await reportingClientApi.createReportMapping(accessToken, reportId, { imodelId: selectedIModelId, mappingId: mapping.id ?? "" });
       }
 
       await returnFn();
@@ -117,6 +124,7 @@ const AddMappings = ({
     <>
       <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsWidget:AddMappings")} />
       <div className='add-mappings-container'>
+        <SelectIModel selectedIModelId={selectedIModelId} setSelectedIModelId={setSelectediModelId} />
         <Table<MappingType>
           data={isLoading ? [] : mappings}
           columns={mappingsColumns}

@@ -12,7 +12,7 @@ import {
   SvgMore,
 } from "@itwin/itwinui-icons-react";
 import type {
-  TablePaginatorRendererProps
+  TablePaginatorRendererProps,
 } from "@itwin/itwinui-react";
 import {
   Button,
@@ -27,7 +27,7 @@ import {
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { CreateTypeFromInterface } from "./utils";
+import type { CreateTypeFromInterface } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
@@ -49,10 +49,11 @@ enum ReportsView {
 
 const fetchReports = async (
   setReports: React.Dispatch<React.SetStateAction<Report[]>>,
-  iTwinId: string,
+  iTwinId: string | undefined,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
   try {
+    if (!iTwinId) return;
     setIsLoading(true);
     const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
     const reportingClientApi = new ReportingClient();
@@ -66,12 +67,12 @@ const fetchReports = async (
 };
 
 const useFetchReports = (
-  iTwinId: string,
+  iTwinId: string | undefined,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): [
-    Report[],
-    React.Dispatch<React.SetStateAction<Report[]>>
-  ] => {
+  Report[],
+  React.Dispatch<React.SetStateAction<Report[]>>
+] => {
   const [reports, setReports] = useState<Report[]>([]);
   useEffect(() => {
     void fetchReports(setReports, iTwinId, setIsLoading);
@@ -81,13 +82,13 @@ const useFetchReports = (
 };
 
 export const Reports = () => {
-  const iTwinId = useActiveIModelConnection()?.iTwinId as string;
+  const iTwinId = useActiveIModelConnection()?.iTwinId;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [reportsView, setReportsView] = useState<ReportsView>(
     ReportsView.REPORTS
   );
   const [selectedReport, setSelectedReport] = useState<
-    Report | undefined
+  Report | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reports, setReports] = useFetchReports(iTwinId, setIsLoading);
@@ -182,15 +183,15 @@ export const Reports = () => {
 
   switch (reportsView) {
     case ReportsView.ADDING:
-      return <ReportAction iTwinId={iTwinId} returnFn={refresh} />;
+      return iTwinId ? <ReportAction iTwinId={iTwinId ?? ""} returnFn={refresh} /> : null;
     case ReportsView.MODIFYING:
-      return (
+      return iTwinId ?
         <ReportAction
           iTwinId={iTwinId}
           report={selectedReport}
           returnFn={refresh}
         />
-      );
+        : null;
     case ReportsView.REPORTSMAPPING:
       return selectedReport ? <ReportMappings report={selectedReport} goBack={refresh} /> : null;
     default:

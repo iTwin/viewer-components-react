@@ -2,29 +2,30 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelApp } from "@itwin/core-frontend"
-import { SvgAdd, SvgDelete, SvgMore } from "@itwin/itwinui-icons-react"
-import { Button, Checkbox, DropdownMenu, ExpandableBlock, IconButton, MenuItem, Table, tableFilters } from "@itwin/itwinui-react"
-import React, { useMemo, useState } from "react"
-import { CellProps } from "react-table"
-import { ReportMapping, ReportingClient } from "../../reporting"
-import DeleteModal from "./DeleteModal"
-import { Extraction } from "./Extraction"
-import { LocalizedTablePaginator } from "./LocalizedTablePaginator"
-import { ReportMappingAndMapping } from "./ReportMappings"
-import './IModelReportMappings.scss'
-import { useActiveIModelConnection } from "@itwin/appui-react"
+import { IModelApp } from "@itwin/core-frontend";
+import { SvgAdd, SvgDelete, SvgMore } from "@itwin/itwinui-icons-react";
+import { Button, Checkbox, DropdownMenu, ExpandableBlock, IconButton, MenuItem, Table, tableFilters } from "@itwin/itwinui-react";
+import React, { useMemo, useState } from "react";
+import type { CellProps } from "react-table";
+import { ReportMapping } from "../../reporting/generated/api";
+import { ReportingClient } from "../../reporting/reportingClient";
+import DeleteModal from "./DeleteModal";
+import { Extraction } from "./Extraction";
+import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
+import type { ReportMappingAndMapping } from "./ReportMappings";
+import "./IModelReportMappings.scss";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 
 interface IModelReportMappingsProps {
-  iModelId: string,
+  iModelId: string;
   reportMappings: ReportMappingAndMapping[];
-  isLoading: boolean,
-  setSelectedReportMapping: React.Dispatch<React.SetStateAction<ReportMappingAndMapping | undefined>>
-  setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>
+  isLoading: boolean;
+  setSelectedReportMapping: React.Dispatch<React.SetStateAction<ReportMappingAndMapping | undefined>>;
+  setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const IModelReportMappings = ({ iModelId, reportMappings, isLoading, setSelectedReportMapping, setShowDeleteModal }: IModelReportMappingsProps) => {
-  const openedIModelId = useActiveIModelConnection()?.iModelId as string;
+  const openedIModelId = useActiveIModelConnection()?.iModelId;
 
   const reportMappingsColumns = useMemo(
     () => [
@@ -78,12 +79,12 @@ export const IModelReportMappings = ({ iModelId, reportMappings, isLoading, setS
         ],
       },
     ],
-    []
+    [setSelectedReportMapping, setShowDeleteModal]
   );
 
   return (
     <>
-      <ExpandableBlock title={openedIModelId === iModelId ? "(Viewing) " + reportMappings[0].iModelName : reportMappings[0].iModelName}>
+      <ExpandableBlock title={openedIModelId === iModelId ? `(Viewing) ${reportMappings[0].iModelName}` : reportMappings[0].iModelName}>
         <div className="imodel-report-mappings-container">
           <Extraction iModelId={iModelId} />
           <Table<ReportMappingAndMapping>
@@ -100,5 +101,5 @@ export const IModelReportMappings = ({ iModelId, reportMappings, isLoading, setS
       </ExpandableBlock>
 
     </>
-  )
-}
+  );
+};

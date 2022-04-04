@@ -29,11 +29,11 @@
   "Status": "$tátús:",
   "MandatoryFields": "Àstérîsk * ïñdí¢átès mãñdåtòrÿ fîëlds.",
   "ODataFeedURL": "ÒÐâtã Fèéd ÛR£",
-  "FilterToCurrentIModel": "Fìltér tô çürréñt ïMôdél",
   "ITwinReports": "ìTwíñ Rëpörts",
   "ReportName": "Rèpórt Ñãmè",
   "Modify": "Mòdífý",
   "ReportDetails": "Rèpórt Ðëtäíls",
+  "SelectIModel": "$élêçt äñ îMódèl",
   "Validators": {
     "NoDuplicateUnderscore": "Rèmóvê dûplìçàtë \"_\"",
     "OnlyBeginsWithLetterOrUnderscore": "Ñámê çäñ òñlý stãrt wîth å lèttér ôr µñdérs¢órè.",
