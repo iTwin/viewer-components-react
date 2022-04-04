@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "Fixed group by selection spinners being triggered by mistake and package updates",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}

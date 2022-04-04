@@ -181,7 +181,9 @@ export const PropertyView = (props: PropertyViewProps) => {
   React.useEffect(() => {
     if (props?.propertyRecord) {
       if (isPropertySelected) {
-        setIsCheckboxLoading(true);
+        if (context.isRendering) {
+          setIsCheckboxLoading(true);
+        }
         _addNestedProperties(props.propertyRecord);
       } else {
         _removeNestedProperties(props.propertyRecord);
@@ -192,6 +194,7 @@ export const PropertyView = (props: PropertyViewProps) => {
     _removeNestedProperties,
     isPropertySelected,
     props.propertyRecord,
+    context.isRendering,
   ]);
 
   React.useEffect(() => {
