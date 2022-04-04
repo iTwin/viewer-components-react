@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/breakdown-trees-react",
-      "comment": "Fix for Search Popup styling issues",
+      "comment": "Fix for Search Popup styling issues. Remove unused dependencies",
       "type": "patch"
     }
   ],
