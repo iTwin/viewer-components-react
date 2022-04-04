@@ -95,7 +95,7 @@
     "nyc": "^15.1.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
-    "react-redux": "^7.2.0",
+    "react-redux": "7.2.6",
     "redux": "^4.0.4",
     "rimraf": "^3.0.2",
     "sinon": "^7.5.0",
@@ -120,7 +120,7 @@
     "@itwin/presentation-frontend": "^3.0.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
-    "react-redux": "^7.2.0"
+    "react-redux": "7.2.6"
   },
   "nyc": {
     "extends": "./node_modules/@itwin/build-tools/.nycrc",
