@@ -58,6 +58,7 @@
     "@itwin/core-quantity": "^3.0.0",
     "@itwin/core-react": "^3.0.0",
     "@itwin/eslint-plugin": "^3.0.0",
+    "@itwin/imodel-components-react": "^3.0.0",
     "@itwin/presentation-common": "^3.0.0",
     "@itwin/presentation-components": "^3.0.0",
     "@itwin/presentation-frontend": "^3.0.0",
