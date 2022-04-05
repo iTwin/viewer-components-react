@@ -30,19 +30,14 @@ importers:
       '@itwin/webgl-compatibility': ^3.0.0
       '@testing-library/react': ^11.2.6
       '@types/chai': 4.2.11
-      '@types/chai-as-promised': ^7.1.2
       '@types/chai-jest-snapshot': ^1.3.4
-      '@types/chai-spies': ^1.0.0
       '@types/enzyme': 3.10.5
       '@types/faker': ^4.1.0
-      '@types/i18next': ^8.4.2
       '@types/mocha': ^8.2.2
-      '@types/mock-require': ^2.0.0
       '@types/react': ^17.0.19
       '@types/react-dom': ^17.0.9
       '@types/react-redux': ^7.1.9
       '@types/sinon': ^7.5.1
-      '@typescript-eslint/eslint-plugin': ^5.3.1
       '@wojtekmaj/enzyme-adapter-react-17': ^0.6.3
       chai: ^4.2.0
       chai-as-promised: ^7.1.1
@@ -59,7 +54,6 @@ importers:
       jsdom-global: 3.0.2
       mocha: ^8.3.2
       mock-local-storage: ^1.1.8
-      mock-require: ^3.0.3
       nyc: ^15.1.0
       react: ^17.0.0
       react-dom: ^17.0.0
@@ -98,19 +92,14 @@ importers:
       '@itwin/webgl-compatibility': 3.1.1
       '@testing-library/react': 11.2.7_react-dom@17.0.2+react@17.0.2
       '@types/chai': 4.2.11
-      '@types/chai-as-promised': 7.1.5
       '@types/chai-jest-snapshot': 1.3.6
-      '@types/chai-spies': 1.0.3
       '@types/enzyme': 3.10.5
       '@types/faker': 4.1.12
-      '@types/i18next': 8.4.6
       '@types/mocha': 8.2.3
-      '@types/mock-require': 2.0.1
       '@types/react': 17.0.43
       '@types/react-dom': 17.0.14
       '@types/react-redux': 7.1.23
       '@types/sinon': 7.5.2
-      '@typescript-eslint/eslint-plugin': 5.18.0_eslint@7.32.0+typescript@4.6.3
       '@wojtekmaj/enzyme-adapter-react-17': 0.6.7_fae758709a8810ba97b4c03852dde4d0
       chai: 4.3.6
       chai-as-promised: 7.1.1_chai@4.3.6
@@ -125,7 +114,6 @@ importers:
       jsdom-global: 3.0.2_jsdom@13.2.0
       mocha: 8.4.0
       mock-local-storage: 1.1.21
-      mock-require: 3.0.3
       nyc: 15.1.0
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
@@ -2432,12 +2420,6 @@ packages:
       '@types/mocha': 8.2.3
     dev: true
 
-  /@types/chai-spies/1.0.3:
-    resolution: {integrity: sha512-RBZjhVuK7vrg4rWMt04UF5zHYwfHnpk5mIWu3nQvU3AKGDixXzSjZ6v0zke6pBcaJqMv3IBZ5ibLWPMRDL0sLw==}
-    dependencies:
-      '@types/chai': 4.2.11
-    dev: true
-
   /@types/chai/4.2.11:
     resolution: {integrity: sha512-t7uW6eFafjO+qJ3BIV2gGUyZs27egcNRkUdalkud+Qa3+kg//f129iuOFivHDXQ+vnU3fDXuwgv0cqMCbcE8sw==}
     dev: true
@@ -2529,12 +2511,6 @@ packages:
 
   /@types/mocha/8.2.3:
     resolution: {integrity: sha512-ekGvFhFgrc2zYQoX4JeZPmVzZxw6Dtllga7iGHzfbYIYkAMUx/sAFP2GdFpLff+vdHXu5fl7WX9AT+TtqYcsyw==}
-    dev: true
-
-  /@types/mock-require/2.0.1:
-    resolution: {integrity: sha512-O7U5DVGboY/Crueb5/huUCIRjKtRVRaLmRDbZJBlDQgJn966z3aiFDN+6AtYviu2ExwMkl34LjT/IiC0OPtKuQ==}
-    dependencies:
-      '@types/node': 14.18.12
     dev: true
 
   /@types/node/14.18.12:
@@ -6932,10 +6908,6 @@ packages:
       node-source-walk: 4.3.0
     dev: true
 
-  /get-caller-file/1.0.3:
-    resolution: {integrity: sha512-3t6rVToeoZfYSGd8YoLFR2DJkiQrIiUrGcjvFX2mDw3bn6k2OtwHN0TNCLbBO+w8qTvimhDkv+LSscbJY1vE6w==}
-    dev: true
-
   /get-caller-file/2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
     engines: {node: 6.* || 8.* || >= 10.*}
@@ -9481,14 +9453,6 @@ packages:
     dependencies:
       core-js: 3.21.1
       global: 4.4.0
-    dev: true
-
-  /mock-require/3.0.3:
-    resolution: {integrity: sha512-lLzfLHcyc10MKQnNUCv7dMcoY/2Qxd6wJfbqCcVk3LDb8An4hF6ohk5AztrvgKhJCqj36uyzi/p5se+tvyD+Wg==}
-    engines: {node: '>=4.3.0'}
-    dependencies:
-      get-caller-file: 1.0.3
-      normalize-path: 2.1.1
     dev: true
 
   /module-definition/3.4.0:
