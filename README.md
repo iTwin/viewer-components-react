@@ -19,6 +19,7 @@ Each one has it's own folder and README describing the package.
 | @itwin/grouping-mapping-widget | [grouping-mapping-widget](./packages/itwin/grouping-mapping-widget) | [changelog](./packages/itwin/grouping-mapping-widget/CHANGELOG.md) | [![npm version](https://badge.fury.io/js/%40itwin%2Fgrouping-mapping-widget.svg)](https://badge.fury.io/js/%40itwin%2Fgrouping-mapping-widget) |
 | @itwin/geo-tools-react         | [geo-tools](./packages/itwin/geo-tools)                             | [changelog](./packages/itwin/geo-tools/CHANGELOG.md)               | [![npm version](https://badge.fury.io/js/%40itwin%2Fgeo-tools-react.svg)](https://badge.fury.io/js/%40itwin%2Fgeo-tools-react)                 |
 | @itwin/imodel-react-hooks      | [imodel-react-hooks](./packages/itwin/imodel-react-hooks)           | [changelog](./packages/itwin/imodel-react-hooks/CHANGELOG.md)      | [![npm version](https://badge.fury.io/js/%40itwin%2Fimodel-react-hooks.svg)](https://badge.fury.io/js/%40itwin%2Fimodel-react-hooks)           |
+| @itwin/one-click-lca-react     | [one-click-lca-widget](./packages/itwin/one-click-lca-widget)       | [changelog](./packages/itwin/one-click-lca-widget/CHANGELOG.md)    | [![npm version](https://badge.fury.io/js/%40itwin%2Fone-click-lca-react.svg)](https://badge.fury.io/js/%40itwin%2Fone-click-lca-react)         |
 
 ## Archived
 
