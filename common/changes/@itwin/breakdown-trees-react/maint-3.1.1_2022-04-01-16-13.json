@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/breakdown-trees-react",
+      "comment": "Add transitive peers as dev deps",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/breakdown-trees-react"
+}
