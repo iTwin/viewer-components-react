@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/one-click-lca-react",
-      "comment": "initial publish of one click lca UI component",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@itwin/one-click-lca-react"

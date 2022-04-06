@@ -1,6 +1,19 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Mon, 14 Mar 2022 19:46:44 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Apr 2022 13:48:44 GMT and should not be manually modified.
+
+## 0.4.0
+Wed, 06 Apr 2022 13:48:44 GMT
+
+### Minor changes
+
+- hide property-grid by default
+
+### Patches
+
+- PropertyGridProps expanded to allow default location
+- Add transitive peers as dev deps
+- remove widget control and add temporary support for ui 1.0
 
 ## 0.3.1
 Mon, 14 Mar 2022 19:46:44 GMT

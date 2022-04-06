@@ -1,6 +1,19 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 14 Mar 2022 19:46:44 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Apr 2022 13:48:44 GMT and should not be manually modified.
+
+## 0.3.0
+Wed, 06 Apr 2022 13:48:44 GMT
+
+### Minor changes
+
+- Add missing peer dep on core-frontend
+
+### Patches
+
+- Fixed cancel buttons being disabled initially and readded missing styles in calculated properties menu item
+- Fixed group by selection spinners being triggered by mistake and package updates
+- Add transitive peers as dev deps
 
 ## 0.2.3
 Mon, 14 Mar 2022 19:46:44 GMT
