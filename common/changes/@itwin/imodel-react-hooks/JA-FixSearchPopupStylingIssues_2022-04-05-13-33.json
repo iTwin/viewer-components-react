@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/imodel-react-hooks",
+      "comment": "Remove bentleyjs-core mock in useMarker test file",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/imodel-react-hooks"
+}

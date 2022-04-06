@@ -11,8 +11,6 @@ import React, { useContext } from "react";
 import { IModelJsViewProvider, MarkerDecoration, MarkerDecorationContext } from "../IModelJsViewProvider";
 import { IModelJsMarker, useMarker } from "./useMarker";
 
-jest.mock("@bentley/bentleyjs-core");
-
 jest.mock("@itwin/core-frontend", () => {
   const actual = jest.requireActual("@itwin/core-frontend");
   return {
