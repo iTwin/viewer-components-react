@@ -25,7 +25,7 @@ describe("Widget Header Component", function () {
     );
   });
 
-  it("with diabled", function () {
+  it("with disabled", function () {
     const { container } = render(
       <WidgetHeader title="hello" disabled={true} returnFn={async () => {}} />
     );
