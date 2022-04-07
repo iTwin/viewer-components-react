@@ -19,7 +19,7 @@ Users must have the `imodels_read` and `insights_view` [permissions](https://dev
 ## Sample usage
 
 ```tsx
-import { OneClickLCAProvider } from "@itwin/one-click-lca-widget";
+import { OneClickLCAProvider } from "@itwin/one-click-lca-react";
 
 <Viewer
   ...
