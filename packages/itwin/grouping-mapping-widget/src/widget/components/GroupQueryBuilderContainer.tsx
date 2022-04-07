@@ -25,7 +25,7 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
   useEffect(() => {
     const _onSelectionChanged = async (
       evt: SelectionChangeEventArgs,
-      selectionProvider: ISelectionProvider,
+      selectionProvider: ISelectionProvider
     ) => {
       SetSelected(true);
       context.setCurrentPropertyList([]);
@@ -50,14 +50,14 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
   };
 
   return (
-    <div className='find-similar-container'>
+    <div className="find-similar-container">
       <PropertyGridWrapperApp keys={keysState} imodel={iModelConnection} />
       {selected && (
-        <div className='button-container'>
+        <div className="button-container">
           <Button
-            styleType='default'
-            size='small'
-            className='reset-button'
+            styleType="default"
+            size="small"
+            className="reset-button"
             onClick={_onClickResetButton}
           >
             Reset

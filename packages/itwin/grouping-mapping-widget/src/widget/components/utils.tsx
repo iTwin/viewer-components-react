@@ -15,7 +15,7 @@ import { QueryRowFormat } from "@itwin/core-common";
 
 export const onSelectionChanged = (
   evt: SelectionChangeEventArgs,
-  selectionProvider: ISelectionProvider,
+  selectionProvider: ISelectionProvider
 ) => {
   /* eslint-disable no-console */
   const selection = selectionProvider.getSelection(evt.imodel, evt.level);
@@ -52,7 +52,7 @@ export const WidgetHeader = ({
   returnFn,
 }: WidgetHeaderProps) => {
   return (
-    <div className='widget-header-container'>
+    <div className="widget-header-container">
       {returnFn && (
         <div
           className={disabled ? "chevron-disabled" : "chevron"}
@@ -61,7 +61,7 @@ export const WidgetHeader = ({
           <SvgChevronLeft />
         </div>
       )}
-      <Text className='title' variant='title'>
+      <Text className="title" variant="title">
         {title}
       </Text>
     </div>
@@ -71,7 +71,7 @@ export const WidgetHeader = ({
 export const handleInputChange = <T,>(
   e: React.ChangeEvent<HTMLInputElement>,
   values: T,
-  setValues: React.Dispatch<React.SetStateAction<T>>,
+  setValues: React.Dispatch<React.SetStateAction<T>>
 ) => {
   const { name, value } = e.target;
 
@@ -83,7 +83,7 @@ export const handleInputChange = <T,>(
 
 export const fetchIdsFromQuery = async (
   query: string,
-  iModelConnection: IModelConnection,
+  iModelConnection: IModelConnection
 ) => {
   if (query === "") {
     return [];
@@ -142,7 +142,6 @@ export const handleError = (errorStatus: number) => {
       errorMessage += `Something went wrong!`;
   }
   toaster.negative(errorMessage);
-
 };
 
 export const LoadingSpinner = () => {

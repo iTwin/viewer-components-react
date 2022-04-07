@@ -7,14 +7,33 @@ import type {
   ISelectionProvider,
   SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import {
-  Presentation,
-} from "@itwin/presentation-frontend";
-import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
+  selectionContextStateFunc,
+  useActiveIModelConnection,
+} from "@itwin/appui-react";
+import {
+  Button,
+  Fieldset,
+  Label,
+  LabeledInput,
+  LabeledTextarea,
+  RadioTile,
+  RadioTileGroup,
+  Small,
+  Text,
+  Textarea,
+  toaster,
+} from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
-import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
+import {
+  fetchIdsFromQuery,
+  handleError,
+  handleInputChange,
+  LoadingSpinner,
+  WidgetHeader,
+} from "./utils";
 import type { Group } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -28,13 +47,17 @@ import {
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
+import { SvgCompare, SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
+import { GroupQueryBuilderApi } from "../../api/GroupQueryBuilderApi";
 
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
   group?: Group;
   goBack: () => Promise<void>;
+}
+export interface MLResponse {
+  dgnElementIds: string[];
 }
 
 const GroupAction = ({
@@ -57,10 +80,35 @@ const GroupAction = ({
   PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
-    new QueryBuilder(undefined),
+    new QueryBuilder(undefined)
   );
   const [groupByType, setGroupByType] = React.useState("Selection");
   const [searchInput, setSearchInput] = React.useState("");
+
+  const [mlElementList, setMLElementList] = React.useState<string[]>([]);
+
+  const processMLRequest = async () => {
+    if (mlElementList.length === 0) {
+      toaster.warning("No selection");
+    }
+    // request
+    const response = await GroupQueryBuilderApi.similarSearch(
+      iModelConnection,
+      mlElementList
+    );
+    console.log("ML response: ", response);
+    if (response) {
+      await visualizeElementsById(
+        response.dgnElementIds,
+        "red",
+        iModelConnection
+      );
+    } else {
+      toaster.negative("Sorry, we have failed to find similar elements. 😔");
+    }
+
+    setMLElementList([]);
+  };
 
   const changeGroupByType = (event: React.ChangeEvent<HTMLInputElement>) => {
     const {
@@ -69,22 +117,38 @@ const GroupAction = ({
     setGroupByType(value);
     Presentation.selection.clearSelection(
       "GroupingMappingWidget",
-      iModelConnection,
+      iModelConnection
     );
+    setMLElementList([]);
     setQuery("");
+    clearEmphasizedElements();
   };
 
   useEffect(() => {
     const removeListener = Presentation.selection.selectionChange.addListener(
       async (
         evt: SelectionChangeEventArgs,
-        selectionProvider: ISelectionProvider,
+        selectionProvider: ISelectionProvider
       ) => {
+        if (mlElementList.length === 0) {
+          clearEmphasizedElements();
+        }
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-        const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-        }` : "";
+        const query =
+          selection.instanceKeys.size > 0
+            ? `SELECT ECInstanceId FROM ${
+              selection.instanceKeys.keys().next().value
+            }`
+            : "";
         setSimpleQuery(query);
-      },
+        if (selection.instanceKeys.size > 0) {
+          const elements = mlElementList;
+          selection.instanceKeys.forEach((ids, _) => {
+            elements.push(...ids);
+          });
+          setMLElementList(elements);
+        }
+      }
     );
     return () => {
       removeListener();
@@ -103,8 +167,8 @@ const GroupAction = ({
         const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
         const resolvedHiliteIds = await visualizeElementsById(
           ids,
-          "red",
-          iModelConnection,
+          "rgb(255,0,0)",
+          iModelConnection
         );
         await zoomToElements(resolvedHiliteIds);
       } catch {
@@ -120,7 +184,7 @@ const GroupAction = ({
   useEffect(() => {
     Presentation.selection.clearSelection(
       "GroupingMappingWidget",
-      iModelConnection,
+      iModelConnection
     );
   }, [iModelConnection]);
 
@@ -129,7 +193,9 @@ const GroupAction = ({
   };
   // Temporary until ECViews become available for use.
   const generateSearchQuery = (searchQuery: string[]) => {
-    const generatedSearchQuery = searchQuery.length > 0 ? `SELECT
+    const generatedSearchQuery =
+      searchQuery.length > 0
+        ? `SELECT
       be.ecinstanceid
     FROM
       generic.physicalobject be
@@ -140,10 +206,15 @@ const GroupAction = ({
         bis.ELEMENT de
         ON ce.targetecinstanceid = de.ecinstanceid
     WHERE
-      (${searchQuery.map((token, index) =>
-    `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
-      de.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-  ).join(" ")}
+      (${searchQuery
+    .map(
+      (token, index) =>
+        `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+      de.codevalue LIKE '%${
+  isWrappedInQuotes(token) ? token.slice(1, -1) : token
+}%'`
+    )
+    .join(" ")}
       )
     UNION
     SELECT
@@ -154,10 +225,13 @@ const GroupAction = ({
         ecdbmeta.ecclassdef AS be
         ON de.ecclassid = be.ecinstanceid
     WHERE
-      (${searchQuery.map((token, index) =>
-    `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+      (${searchQuery
+    .map(
+      (token, index) =>
+        `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       be.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-  ).join(" ")}
+    )
+    .join(" ")}
       )
     UNION
     SELECT
@@ -165,13 +239,18 @@ const GroupAction = ({
     FROM
       generic.physicalobject be
     WHERE
-      (${searchQuery.map((token, index) =>
-    `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
-      be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-  ).join(" ")}
-      )` : "";
+      (${searchQuery
+    .map(
+      (token, index) =>
+        `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+      be.userlabel LIKE '%${
+  isWrappedInQuotes(token) ? token.slice(1, -1) : token
+}%'`
+    )
+    .join(" ")}
+      )`
+        : "";
     setQuery(generatedSearchQuery.trim());
-
   };
 
   const save = useCallback(async () => {
@@ -188,7 +267,7 @@ const GroupAction = ({
           iModelId,
           mappingId,
           group.id ?? "",
-          { ...details, query: currentQuery },
+          { ...details, query: currentQuery }
         )
         : await reportingClientApi.createGroup(iModelId, mappingId, {
           ...details,
@@ -196,7 +275,7 @@ const GroupAction = ({
         });
       Presentation.selection.clearSelection(
         "GroupingMappingWidget",
-        iModelConnection,
+        iModelConnection
       );
       await goBack();
     } catch (error: any) {
@@ -216,7 +295,13 @@ const GroupAction = ({
     validator,
   ]);
 
-  const isBlockingActions = !(details.groupName && details.description && (query || simpleQuery) && !isRendering && !isLoading);
+  const isBlockingActions = !(
+    details.groupName &&
+    details.description &&
+    (query || simpleQuery) &&
+    !isRendering &&
+    !isLoading
+  );
 
   return (
     <>
@@ -225,20 +310,20 @@ const GroupAction = ({
         returnFn={async () => {
           Presentation.selection.clearSelection(
             "GroupingMappingWidget",
-            iModelConnection,
+            iModelConnection
           );
           await goBack();
         }}
       />
-      <div className='group-add-modify-container'>
-        <Fieldset legend='Group Details' className='group-details'>
-          <Small className='field-legend'>
+      <div className="group-add-modify-container">
+        <Fieldset legend="Group Details" className="group-details">
+          <Small className="field-legend">
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
-            id='groupName'
-            name='groupName'
-            label='Name'
+            id="groupName"
+            name="groupName"
+            label="Name"
             value={details.groupName}
             required
             onChange={(event) => {
@@ -248,13 +333,13 @@ const GroupAction = ({
             message={validator.message(
               "groupName",
               details.groupName,
-              NAME_REQUIREMENTS,
+              NAME_REQUIREMENTS
             )}
             status={
               validator.message(
                 "groupName",
                 details.groupName,
-                NAME_REQUIREMENTS,
+                NAME_REQUIREMENTS
               )
                 ? "negative"
                 : undefined
@@ -268,10 +353,10 @@ const GroupAction = ({
             }}
           />
           <LabeledInput
-            id='description'
+            id="description"
             required
-            name='description'
-            label='Description'
+            name="description"
+            label="Description"
             value={details.description}
             onChange={(event) => {
               handleInputChange(event, details, setDetails);
@@ -280,7 +365,7 @@ const GroupAction = ({
             message={validator.message(
               "description",
               details.description,
-              "required",
+              "required"
             )}
             status={
               validator.message("description", details.description, "required")
@@ -296,10 +381,8 @@ const GroupAction = ({
             }}
           />
         </Fieldset>
-        <Fieldset legend='Group By' className='query-builder-container'>
-          <RadioTileGroup
-            className="radio-group-tile"
-            required>
+        <Fieldset legend="Group By" className="query-builder-container">
+          <RadioTileGroup className="radio-group-tile" required>
             <RadioTile
               name={"groupby"}
               icon={<SvgCursor />}
@@ -317,8 +400,16 @@ const GroupAction = ({
               label={"Query Keywords"}
               disabled={isLoading || isRendering}
             />
+            <RadioTile
+              icon={<SvgCompare />}
+              name={"groupby"}
+              onChange={changeGroupByType}
+              value={"ML"}
+              label={"ML"}
+              disabled={isLoading || isRendering}
+            />
           </RadioTileGroup>
-          {groupByType === "Selection" ?
+          {groupByType === "Selection" ? (
             <GroupQueryBuilderContext.Provider
               value={{
                 currentPropertyList,
@@ -332,28 +423,49 @@ const GroupAction = ({
               }}
             >
               <GroupQueryBuilderContainer />
-            </GroupQueryBuilderContext.Provider> :
+            </GroupQueryBuilderContext.Provider>
+          ) : groupByType === "Query Keywords" ? (
             <div className="search-form">
-              <Text>Generate a query by keywords. Keywords wrapped in double quotes will be considered a required criteria.</Text>
+              <Text>
+                Generate a query by keywords. Keywords wrapped in double quotes
+                will be considered a required criteria.
+              </Text>
               <LabeledTextarea
                 label="Query Keywords"
                 required
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
                 disabled={isLoading || isRendering}
-                placeholder={`ex: wall curtain "panel" facade`} />
+                placeholder={`ex: wall curtain "panel" facade`}
+              />
               <div className="search-actions">
-                {isRendering &&
-                  <LoadingSpinner />
-                }
-                <Button disabled={isLoading || isRendering} onClick={() => generateSearchQuery(searchInput ? searchInput.split(" ") : [])}>Apply</Button>
-                <Button disabled={isLoading || isRendering} onClick={() => {
-                  setQuery("");
-                  setSearchInput("");
-                }}>Clear</Button>
+                {isRendering && <LoadingSpinner />}
+                <Button
+                  disabled={isLoading || isRendering}
+                  onClick={() =>
+                    generateSearchQuery(
+                      searchInput ? searchInput.split(" ") : []
+                    )
+                  }
+                >
+                  Apply
+                </Button>
+                <Button
+                  disabled={isLoading || isRendering}
+                  onClick={() => {
+                    setQuery("");
+                    setSearchInput("");
+                  }}
+                >
+                  Clear
+                </Button>
               </div>
             </div>
-          }
+          ) : (
+            <div>
+              <Button onClick={processMLRequest}>Process</Button>
+            </div>
+          )}
         </Fieldset>
       </div>
       <ActionPanel
@@ -363,13 +475,11 @@ const GroupAction = ({
         onCancel={async () => {
           Presentation.selection.clearSelection(
             "GroupingMappingWidget",
-            iModelConnection,
+            iModelConnection
           );
           await goBack();
         }}
-        isSavingDisabled={
-          isBlockingActions
-        }
+        isSavingDisabled={isBlockingActions}
         isCancelDisabled={isBlockingActions}
         isLoading={isLoading}
       />
