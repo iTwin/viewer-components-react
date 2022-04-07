@@ -17,7 +17,7 @@ import type {
 } from "@itwin/appui-abstract";
 
 export type ContextMenuItemInfo = ContextMenuItemProps &
-React.Attributes & { label: string };
+  React.Attributes & { label: string };
 
 export interface OnSelectEventArgs {
   dataProvider: IPresentationPropertyDataProvider;
@@ -30,6 +30,7 @@ export interface PropertyGridProps {
   isOrientationFixed?: boolean;
   enableFavoriteProperties?: boolean;
   favoritePropertiesScope?: FavoritePropertiesScope;
+  onAddFavoriteProperty?: (field: Field) => void;
   enableCopyingPropertyText?: boolean;
   enableNullValueToggle?: boolean;
   defaultPanelLocation?: StagePanelLocation;

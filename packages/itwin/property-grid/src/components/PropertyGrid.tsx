@@ -25,8 +25,8 @@ import {
   useOptionalDisposable,
   useResizeObserver,
 } from "@itwin/core-react";
-import {
-  UiFramework,
+import { 
+  UiFramework, 
   useActiveIModelConnection,
 } from "@itwin/appui-react";
 import type { ReactNode } from "react";
@@ -56,6 +56,7 @@ export const PropertyGrid = ({
   isOrientationFixed,
   enableFavoriteProperties,
   favoritePropertiesScope,
+  onAddFavoriteProperty,
   enableCopyingPropertyText,
   enableNullValueToggle,
   enablePropertyGroupNesting,
@@ -83,8 +84,8 @@ export const PropertyGrid = ({
     }
     if (dp) {
       dp.pagingSize = 50;
-      dp.isNestedPropertyCategoryGroupingEnabled =
-        !!enablePropertyGroupNesting;
+      dp.isNestedPropertyCategoryGroupingEnabled = 
+      !!enablePropertyGroupNesting;
 
       // Set selected instance as the key (for Single Element Property Grid)
       if (instanceKey) {
@@ -99,10 +100,10 @@ export const PropertyGrid = ({
   const [title, setTitle] = useState<PropertyRecord>();
   const [className, setClassName] = useState<string>("");
   const [contextMenu, setContextMenu] = useState<
-  PropertyGridContextMenuArgs | undefined
+    PropertyGridContextMenuArgs | undefined
   >(undefined);
   const [contextMenuItemInfos, setContextMenuItemInfos] = useState<
-  ContextMenuItemInfo[] | undefined
+    ContextMenuItemInfo[] | undefined
   >(undefined);
   const [showNullValues, setShowNullValues] = useState<boolean>(true);
   const [filterer, setFilterer] = useState<PropertyDataFiltererBase>(
@@ -194,6 +195,16 @@ export const PropertyGrid = ({
       if (iModelConnection) {
         await Presentation.favoriteProperties.add(propertyField, iModelConnection, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
         setContextMenu(undefined);
+      }
+      // Check if consuming app passed in their own fcn for saving fav properties
+      if (onAddFavoriteProperty !== undefined) {
+        console.log(
+          "PROPGRID onAddFavoriteProperty is defined. Calling now with field: ",
+          propertyField
+        );
+        onAddFavoriteProperty(propertyField);
+      } else {
+        console.log("PROPGRID onAddFavoriteProperty is not defined.");
       }
     },
     [iModelConnection, favoritePropertiesScope]

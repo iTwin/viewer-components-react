@@ -22,6 +22,7 @@ import type { PropertyGridProps } from "./types";
 /** Provides the property grid widget to zone 9 */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
+  public static readonly providerId = "PropertyGridUiItemsProvider";
 
   private _props?: PropertyGridProps;
 
@@ -46,13 +47,13 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
         location === preferredLocation &&
         section === preferredPanelSection &&
         UiFramework.uiVersion !== "1"
-      ) ||
+        ) ||
       (
         !section &&
         stageUsage === StageUsage.General &&
         // eslint-disable-next-line deprecation/deprecation
         zoneLocation === AbstractZoneLocation.CenterRight
-      )
+        )
     ) {
       widgets.push({
         id: MultiElementPropertyGridId,

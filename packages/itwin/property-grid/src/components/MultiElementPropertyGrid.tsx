@@ -8,6 +8,7 @@ import "./MultiElementPropertyGrid.scss";
 import type { InstanceKey } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
+  UiFramework,
   useActiveFrontstageDef,
   useActiveIModelConnection,
 } from "@itwin/appui-react";
@@ -40,7 +41,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   );
   const [instanceKeys, setInstanceKeys] = useState<InstanceKey[]>([]);
   const [moreThanOneElement, setMoreThanOneElement] = useState(false);
-  const [selectedInstanceKey, setSelectedInstanceKey] =
+  const [selectedInstanceKey, setSelectedInstanceKey] = 
     useState<InstanceKey>();
   const widgetDef = useSpecificWidgetDef(MultiElementPropertyGridId);
 
@@ -79,8 +80,8 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
           onInfoButton={
             moreThanOneElement
               ? () => {
-                setContent(MultiElementPropertyContent.ElementList);
-              }
+                  setContent(MultiElementPropertyContent.ElementList);
+                }
               : undefined
           }
           key={"PropertyGrid"}
@@ -121,6 +122,9 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   );
 
   useEffect(() => {
+    if (UiFramework.uiVersion === "1") {
+      return;
+    }
     if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
       widgetDef?.setWidgetState(WidgetState.Open);
     } else {
@@ -133,10 +137,10 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
       <div className="property-grid-react-transition-container-inner">
         {items.map((component, idx) => (
           <div key={component.key} className={classnames({
-            "property-grid-react-animated-tab": true,
-            "property-grid-react-animated-tab-animate-right": idx > content,
-            "property-grid-react-animated-tab-animate-left": idx < content,
-          })} >
+              "property-grid-react-animated-tab": true,
+              "property-grid-react-animated-tab-animate-right": idx > content,
+              "property-grid-react-animated-tab-animate-left": idx < content,
+            })} >
             { component }
           </div>
         ))}
