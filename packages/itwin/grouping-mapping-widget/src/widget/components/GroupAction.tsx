@@ -3,26 +3,22 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { IModelConnection } from "@itwin/core-frontend";
-import type {
+import {
   ISelectionProvider,
   SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
-import {
-  selectionContextStateFunc,
-  useActiveIModelConnection,
-} from "@itwin/appui-react";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import {
   Button,
   Fieldset,
-  Label,
   LabeledInput,
   LabeledTextarea,
+  ProgressRadial,
   RadioTile,
   RadioTileGroup,
   Small,
   Text,
-  Textarea,
   toaster,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
@@ -77,7 +73,7 @@ const GroupAction = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
-  PropertyRecord[]
+    PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined)
@@ -88,6 +84,7 @@ const GroupAction = ({
   const [mlElementList, setMLElementList] = React.useState<string[]>([]);
 
   const processMLRequest = async () => {
+    setIsRendering(true);
     if (mlElementList.length === 0) {
       toaster.warning("No selection");
     }
@@ -96,18 +93,28 @@ const GroupAction = ({
       iModelConnection,
       mlElementList
     );
-    console.log("ML response: ", response);
-    if (response) {
-      await visualizeElementsById(
-        response.dgnElementIds,
-        "red",
-        iModelConnection
-      );
-    } else {
-      toaster.negative("Sorry, we have failed to find similar elements. 😔");
-    }
 
+    if (!response?.dgnElementIds || response.dgnElementIds.length === 0) {
+      toaster.negative("Sorry, we have failed to find similar elements. 😔");
+    } else {
+      setQuery(getMLQuery(response?.dgnElementIds));
+    }
     setMLElementList([]);
+    setIsRendering(false);
+  };
+
+  const getMLQuery = (ids: string[]): string => {
+    if (ids.length === 0) {
+      toaster.negative("There is no predicted similar elements. 😔");
+      return "";
+    }
+    let query = `SELECT ECInstanceId FROM bis.element WHERE ECInstanceId=${ids[0]}`;
+    if (ids.length > 1) {
+      for (let i = 1; i < ids.length; i++) {
+        query += ` OR ECInstanceId=${ids[i]}`;
+      }
+    }
+    return query;
   };
 
   const changeGroupByType = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,7 +128,6 @@ const GroupAction = ({
     );
     setMLElementList([]);
     setQuery("");
-    clearEmphasizedElements();
   };
 
   useEffect(() => {
@@ -130,24 +136,15 @@ const GroupAction = ({
         evt: SelectionChangeEventArgs,
         selectionProvider: ISelectionProvider
       ) => {
-        if (mlElementList.length === 0) {
-          clearEmphasizedElements();
-        }
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
         const query =
           selection.instanceKeys.size > 0
             ? `SELECT ECInstanceId FROM ${
-              selection.instanceKeys.keys().next().value
-            }`
+                selection.instanceKeys.keys().next().value
+              }`
             : "";
         setSimpleQuery(query);
-        if (selection.instanceKeys.size > 0) {
-          const elements = mlElementList;
-          selection.instanceKeys.forEach((ids, _) => {
-            elements.push(...ids);
-          });
-          setMLElementList(elements);
-        }
+        setMLElementList(Array.from(iModelConnection.selectionSet.elements));
       }
     );
     return () => {
@@ -207,14 +204,14 @@ const GroupAction = ({
         ON ce.targetecinstanceid = de.ecinstanceid
     WHERE
       (${searchQuery
-    .map(
-      (token, index) =>
-        `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+        .map(
+          (token, index) =>
+            `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       de.codevalue LIKE '%${
-  isWrappedInQuotes(token) ? token.slice(1, -1) : token
-}%'`
-    )
-    .join(" ")}
+        isWrappedInQuotes(token) ? token.slice(1, -1) : token
+      }%'`
+        )
+        .join(" ")}
       )
     UNION
     SELECT
@@ -226,12 +223,12 @@ const GroupAction = ({
         ON de.ecclassid = be.ecinstanceid
     WHERE
       (${searchQuery
-    .map(
-      (token, index) =>
-        `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+        .map(
+          (token, index) =>
+            `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       be.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    )
-    .join(" ")}
+        )
+        .join(" ")}
       )
     UNION
     SELECT
@@ -240,14 +237,14 @@ const GroupAction = ({
       generic.physicalobject be
     WHERE
       (${searchQuery
-    .map(
-      (token, index) =>
-        `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
+        .map(
+          (token, index) =>
+            `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       be.userlabel LIKE '%${
-  isWrappedInQuotes(token) ? token.slice(1, -1) : token
-}%'`
-    )
-    .join(" ")}
+        isWrappedInQuotes(token) ? token.slice(1, -1) : token
+      }%'`
+        )
+        .join(" ")}
       )`
         : "";
     setQuery(generatedSearchQuery.trim());
@@ -264,15 +261,15 @@ const GroupAction = ({
 
       group
         ? await reportingClientApi.updateGroup(
-          iModelId,
-          mappingId,
-          group.id ?? "",
-          { ...details, query: currentQuery }
-        )
+            iModelId,
+            mappingId,
+            group.id ?? "",
+            { ...details, query: currentQuery }
+          )
         : await reportingClientApi.createGroup(iModelId, mappingId, {
-          ...details,
-          query: currentQuery,
-        });
+            ...details,
+            query: currentQuery,
+          });
       Presentation.selection.clearSelection(
         "GroupingMappingWidget",
         iModelConnection
@@ -462,8 +459,23 @@ const GroupAction = ({
               </div>
             </div>
           ) : (
-            <div>
-              <Button onClick={processMLRequest}>Process</Button>
+            <div className="ml-actions">
+              <Button
+                styleType="cta"
+                disabled={isLoading || isRendering}
+                onClick={processMLRequest}
+              >
+                {isRendering ? (
+                  <ProgressRadial
+                    className="ml-wait"
+                    indeterminate
+                    size="small"
+                    value={50}
+                  />
+                ) : (
+                  "Run ML Prediction"
+                )}
+              </Button>
             </div>
           )}
         </Fieldset>

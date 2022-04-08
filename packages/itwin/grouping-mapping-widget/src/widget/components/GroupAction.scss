@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
+@import "~@itwin/itwinui-css/scss/variables";
 
 .group-add-modify-container {
   display: flex;
@@ -36,6 +36,17 @@
         display: flex;
         justify-content: flex-end;
         gap: $iui-s;
+      }
+    }
+
+    .ml-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: $iui-baseline;
+
+      .ml-wait {
+        vertical-align: middle;
+        line-height: normal;
       }
     }
   }
