@@ -2,6 +2,29 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.3.0",
+      "date": "Wed, 06 Apr 2022 13:48:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed cancel buttons being disabled initially and readded missing styles in calculated properties menu item"
+          },
+          {
+            "comment": "Fixed group by selection spinners being triggered by mistake and package updates"
+          },
+          {
+            "comment": "Add transitive peers as dev deps"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add missing peer dep on core-frontend"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.3",
       "tag": "@itwin/grouping-mapping-widget_v0.2.3",
       "date": "Mon, 14 Mar 2022 19:46:44 GMT",

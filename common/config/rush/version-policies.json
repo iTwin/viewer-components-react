@@ -38,5 +38,10 @@
     "policyName": "grouping-mapping-widget",
     "definitionName": "individualVersion",
     "lockedMajor": 0
+  },
+  {
+    "policyName": "one-click-lca-widget",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   }
 ]

@@ -1,6 +1,14 @@
 # Change Log - @itwin/breakdown-trees-react
 
-This log was last generated on Wed, 02 Mar 2022 21:38:51 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Apr 2022 13:48:44 GMT and should not be manually modified.
+
+## 0.3.3
+Wed, 06 Apr 2022 13:48:44 GMT
+
+### Patches
+
+- Fix for Search Popup styling issues. Remove unused dependencies
+- Add transitive peers as dev deps
 
 ## 0.3.2
 Wed, 02 Mar 2022 21:38:51 GMT
