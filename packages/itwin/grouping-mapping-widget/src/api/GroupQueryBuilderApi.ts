@@ -61,7 +61,7 @@ export class GroupQueryBuilderApi {
           iModelId: conn?.iModelId,
           changeSetId: conn?.changeset?.id,
           dgnElementIds: elementIds,
-          maxIdsReturned: 100,
+          nIdsReturned: 100,
         }),
       }
     )
