@@ -9,11 +9,11 @@ import spatialRulesDefault from "../assets/SpatialBreakdown.json";
 import spatialRulesByType from "../assets/SpatialBreakdownByType.json";
 import spatialRulesByDiscipline from "../assets/SpatialBreakdownByDiscipline.json";
 import spatialRulesByTypeAndDiscipline from "../assets/SpatialBreakdownByTypeAndDiscipline.json";
-import type { IModelConnection, SpatialViewState } from "@itwin/core-frontend";
+import { IModelConnection, SpatialViewState } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { Ruleset } from "@itwin/presentation-common";
+import { Ruleset } from "@itwin/presentation-common";
 import { ControlledTreeWrapper, populateMapWithCommonMenuItems } from "./TreeWithRuleset";
 import { BreakdownTrees } from "../BreakdownTrees";
 import { BuildingClipPlanesProvider } from "./FunctionalityProviders/BuildingClipPlanesProvider";
@@ -22,14 +22,14 @@ import { CombinedTreeNodeFunctionalityProvider } from "./FunctionalityProviders/
 import { SpaceClipPlanesProvider } from "./FunctionalityProviders/SpaceClipPlanesProvider";
 import { StoryClipPlanesProvider } from "./FunctionalityProviders/StoryClipPlanesProvider";
 import { TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders/TreeNodeFunctionIconMapper";
-import type { OptionItemHandler } from "./OptionItemHandlers";
+import { OptionItemHandler } from "./OptionItemHandlers";
 import { ClipAtSpacesHandler } from "./OptionItemHandlers/ClipAtSpacesHandler";
 import { GenericOptionItemHandler } from "./OptionItemHandlers/GenericOptionItemHandler";
 import { LabelHandler } from "./OptionItemHandlers/LabelHandler";
 import { TopViewHandler } from "./OptionItemHandlers/TopViewHandler";
 import { LoadableRuleSetComponent } from "./LoadableRuleSetComponent";
 import { ToolbarItemKeys } from "./TreeNodeFunctionsToolbar";
-import type { BeEvent } from "@itwin/core-bentley";
+import { BeEvent } from "@itwin/core-bentley";
 
 export interface SpatialContainmentEventHandlers {
   onZoomToElement: BeEvent<() => void>;
@@ -128,7 +128,7 @@ export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (pr
   const containmentTree = React.useMemo(() => <ControlledTreeWrapper iModel={props.iModel} loadedRuleset={spatialRules} dataProvider={dataProvider}
     treeName={treeName} treeNodeIconMapper={functionIconMapper} optionItems={optionItems} searchTools={true}
     displayGuids={props.displayGuids} setIsDisplayGuids={props.setIsDisplayGuids} enableVisibility={!!props.enableVisibility} />,
-  [props.iModel, props.displayGuids, props.setIsDisplayGuids, functionIconMapper, dataProvider, optionItems, props.enableVisibility, spatialRules]);
+    [props.iModel, props.displayGuids, props.setIsDisplayGuids, functionIconMapper, dataProvider, optionItems, props.enableVisibility, spatialRules]);
 
   return (<LoadableRuleSetComponent ruleSet={spatialRules}>
     {containmentTree}

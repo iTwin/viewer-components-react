@@ -3,15 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { BeButtonEvent, IModelConnection, Tool, Viewport } from "@itwin/core-frontend";
+import { BeButtonEvent, IModelConnection, Tool, Viewport } from "@itwin/core-frontend";
 import { EmphasizeElements, IModelApp } from "@itwin/core-frontend";
-import type { Range3d } from "@itwin/core-geometry";
+import { Range3d } from "@itwin/core-geometry";
 import { ClipPlane, ClipPrimitive, ClipVector, ConvexClipPlaneSet, Plane3dByOriginAndUnitNormal, Point3d, Vector3d } from "@itwin/core-geometry";
 import { ColorDef } from "@itwin/core-common";
 import { DataLink } from "./DataLink";
 import { SpaceLabelDecorator } from "./SpaceLabelDecorator";
-import type { SpaceLabelDecoration } from "./SpaceLabelDecoration";
 import { Logger } from "@itwin/core-bentley";
+import { SpaceLabelDecoration } from "./SpaceLabelDecoration";
 
 export class SectioningUtil {
   private static _spaceDecorator?: SpaceLabelDecorator = undefined;

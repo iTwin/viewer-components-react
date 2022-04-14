@@ -3,15 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { DecorateContext, Decorator, IModelConnection } from "@itwin/core-frontend";
+import { DecorateContext, Decorator, IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
-import type { TextOffsetProps, TextStyleProps } from "@itwin/measure-tools-react";
+import { TextOffsetProps, TextStyleProps } from "@itwin/measure-tools-react";
 import { TextOffsetType } from "@itwin/measure-tools-react";
-import type { ElementProps, GeometricElement3dProps, MassPropertiesResponseProps } from "@itwin/core-common";
+import { ElementProps, GeometricElement3dProps, MassPropertiesResponseProps } from "@itwin/core-common";
 import { ColorDef, MassPropertiesOperation } from "@itwin/core-common";
-import type { DecorationClickedHandler, SpaceLabelDecorationProps } from "./SpaceLabelDecoration";
+import { DecorationClickedHandler, SpaceLabelDecorationProps } from "./SpaceLabelDecoration";
 import { SpaceLabelDecoration } from "./SpaceLabelDecoration";
-import type { Id64Arg } from "@itwin/core-bentley";
+import { Id64Arg } from "@itwin/core-bentley";
 import { assert } from "@itwin/core-bentley";
 import { Point3d, Range3d } from "@itwin/core-geometry";
 

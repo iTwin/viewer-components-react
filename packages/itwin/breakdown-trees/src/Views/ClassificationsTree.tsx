@@ -4,17 +4,17 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import type { Ruleset } from "@itwin/presentation-common";
+import { Ruleset } from "@itwin/presentation-common";
 import { ControlledTreeWrapper, populateMapWithCommonMenuItems } from "./TreeWithRuleset";
 import { TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders/TreeNodeFunctionIconMapper";
-import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelConnection } from "@itwin/core-frontend";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import classificationRules from "../assets/ClassificationSystems.json";
 import { BreakdownTrees } from "../BreakdownTrees";
-import type { OptionItemHandler } from "./OptionItemHandlers";
+import { OptionItemHandler } from "./OptionItemHandlers";
 import { GenericOptionItemHandler } from "./OptionItemHandlers/GenericOptionItemHandler";
 import { LoadableRuleSetComponent } from "./LoadableRuleSetComponent";
-import type { BeEvent } from "@itwin/core-bentley";
+import { BeEvent } from "@itwin/core-bentley";
 
 export interface ClassificationsTreeEventHandlers {
   onZoomToElement: BeEvent<() => void>;

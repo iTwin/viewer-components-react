@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import React, { useState } from "react";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 export const useTreeFilteringState = () => {
   const [filterString, setFilterString] = useState("");

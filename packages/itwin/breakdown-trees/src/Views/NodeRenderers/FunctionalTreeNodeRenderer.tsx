@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import type { CheckBoxInfo, HighlightableTreeNodeProps, ITreeImageLoader, PropertyValueRendererContext, TreeActions, TreeModel, TreeModelNode, TreeNodeItem, TreeNodeRendererProps, TreeRendererProps } from "@itwin/components-react";
+import { CheckBoxInfo, HighlightableTreeNodeProps, ITreeImageLoader, PropertyValueRendererContext, TreeActions, TreeModel, TreeModelNode, TreeNodeItem, TreeNodeRendererProps, TreeRendererProps } from "@itwin/components-react";
 import { HighlightingEngine, PropertyValueRendererManager, TreeRenderer } from "@itwin/components-react";
-import type { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "../FunctionalityProviders/TreeNodeFunctionIconMapper";
-import type { PropertyRecord } from "@itwin/appui-abstract";
-import type { NodeCheckboxProps, NodeCheckboxRenderProps } from "@itwin/core-react";
+import { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "../FunctionalityProviders/TreeNodeFunctionIconMapper";
+import { PropertyRecord } from "@itwin/appui-abstract";
+import { NodeCheckboxProps, NodeCheckboxRenderProps } from "@itwin/core-react";
 import { CheckBoxState, ContextMenuItem, GlobalContextMenu, ImageCheckBox, TreeNode } from "@itwin/core-react";
-import type { VisibilityHandler } from "../EventHandlers/VisibilityHandler";
+import { VisibilityHandler } from "../EventHandlers/VisibilityHandler";
 import styles from "./FunctionalTreeNodeRenderer.module.scss";
 import { ToolbarItemKeys } from "../TreeNodeFunctionsToolbar";
 

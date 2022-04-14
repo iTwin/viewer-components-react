@@ -3,10 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { ContentDataProvider } from "@itwin/presentation-components";
-import type { DescriptorOverrides, Keys} from "@itwin/presentation-common";
+import { DescriptorOverrides, Keys } from "@itwin/presentation-common";
 import { ContentFlags, KeySet } from "@itwin/presentation-common";
-import type { IModelConnection } from "@itwin/core-frontend";
-import type { Id64String } from "@itwin/core-bentley";
+import { IModelConnection } from "@itwin/core-frontend";
+import { Id64String } from "@itwin/core-bentley";
 
 class RulesetDrivenIdsProvider extends ContentDataProvider {
   constructor(imodel: IModelConnection, rulesetId: string, displayType: string, inputKeys: Keys) {

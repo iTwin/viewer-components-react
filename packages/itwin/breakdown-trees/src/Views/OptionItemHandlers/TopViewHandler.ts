@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { OptionItemHandler } from "./OptionItemHandler";
-import type { ToggledTopFitViewFunctionalityProvider } from "../FunctionalityProviders/ToggledTopFitViewFunctionalityProvider";
+import { ToggledTopFitViewFunctionalityProvider } from "../FunctionalityProviders/ToggledTopFitViewFunctionalityProvider";
 
 export class TopViewHandler extends OptionItemHandler {
   private static readonly TOP_VIEW_STORAGE_KEY = "top-view-storage-key";

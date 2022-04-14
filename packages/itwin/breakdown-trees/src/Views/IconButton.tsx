@@ -5,7 +5,7 @@
 
 import * as React from "react";
 import classnames from "classnames";
-import type { CommonProps } from "@itwin/core-react";
+import { CommonProps } from "@itwin/core-react";
 import "./IconButton.scss";
 
 /** Properties for [[IconButton]] component */
@@ -19,7 +19,7 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
 /** Generic icon button component */
 export class IconButton extends React.PureComponent<IconButtonProps> {
   public render() {
-    const {  className, icon, onClick, ...props } = this.props;
+    const { className, icon, onClick, ...props } = this.props;
     return (
       <button {...props} className={classnames("visibility-icon-button", className)} onClick={onClick}>
         <span className={classnames("icon", icon)} />
