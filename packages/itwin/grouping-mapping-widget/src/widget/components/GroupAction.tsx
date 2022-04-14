@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { IModelConnection } from "@itwin/core-frontend";
-import { IModelApp } from "@itwin/core-frontend";
 import type {
   ISelectionProvider,
   SelectionChangeEventArgs,
@@ -132,16 +131,6 @@ const GroupAction = ({
   const needsAndOperator = (token: string, index: number, searchQuery: string[]) => isWrappedInQuotes(token) || (index === 1 && isWrappedInQuotes(searchQuery[0]));
   // Temporary until ECViews become available for use.
   const generateSearchQuery = async (searchQuery: string[]) => {
-
-    if (
-      !IModelApp.viewManager.selectedView ||
-      !IModelApp.viewManager.selectedView.iModel
-    ) {
-      return;
-    }
-
-    const doTypeDefinitionsExist = (await IModelApp.viewManager.selectedView?.iModel.queryRowCount("SELECT * FROM bis.PhysicalType")) > 0;
-
     if (searchQuery.length < 0) {
       setQuery("");
       return;
@@ -149,10 +138,8 @@ const GroupAction = ({
 
     let generatedSearchQuery =
       `SELECT be.ECInstanceId FROM bis.geometricelement3d be `;
-    generatedSearchQuery += `JOIN bis.SpatialCategory cat ON be.Category.Id = cat.ECInstanceID JOIN ecdbmeta.ECClassDef ecc ON be.ECClassId = ecc.ECInstanceId `;
-    if (doTypeDefinitionsExist) {
-      generatedSearchQuery += (`JOIN bis.PhysicalType pt ON be.TypeDefinition.Id = pt.ECInstanceID`);
-    }
+    generatedSearchQuery += `LEFT JOIN bis.SpatialCategory cat ON be.Category.Id = cat.ECInstanceID LEFT JOIN ecdbmeta.ECClassDef ecc ON be.ECClassId = ecc.ECInstanceId `;
+    generatedSearchQuery += `LEFT JOIN bis.PhysicalType pt ON be.TypeDefinition.Id = pt.ECInstanceID`;
     generatedSearchQuery += ` WHERE `;
     generatedSearchQuery += `((${searchQuery.map((token, index) =>
       `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} be.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
@@ -165,14 +152,11 @@ const GroupAction = ({
     ).join(" ")})) OR (${searchQuery.map((token, index) =>
       `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} ecc.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
     ).join(" ")})`;
-
-    if (doTypeDefinitionsExist) {
-      generatedSearchQuery += ` OR ((${searchQuery.map((token, index) =>
-        `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} pt.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-      ).join(" ")}) OR (${searchQuery.map((token, index) =>
-        `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} pt.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-      ).join(" ")})) `;
-    }
+    generatedSearchQuery += ` OR ((${searchQuery.map((token, index) =>
+      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} pt.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
+    ).join(" ")}) OR (${searchQuery.map((token, index) =>
+      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} pt.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
+    ).join(" ")})) `;
 
     setQuery(generatedSearchQuery);
   };
