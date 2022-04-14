@@ -137,7 +137,7 @@ const GroupAction = ({
     }
 
     let generatedSearchQuery =
-      `SELECT be.ECInstanceId FROM bis.geometricelement3d be `;
+      `SELECT be.ECInstanceId, be.ECClassId FROM bis.geometricelement3d be `;
     generatedSearchQuery += `LEFT JOIN bis.SpatialCategory cat ON be.Category.Id = cat.ECInstanceID LEFT JOIN ecdbmeta.ECClassDef ecc ON be.ECClassId = ecc.ECInstanceId `;
     generatedSearchQuery += `LEFT JOIN bis.PhysicalType pt ON be.TypeDefinition.Id = pt.ECInstanceID`;
     generatedSearchQuery += ` WHERE `;
@@ -152,6 +152,7 @@ const GroupAction = ({
     ).join(" ")})) OR (${searchQuery.map((token, index) =>
       `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} ecc.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
     ).join(" ")})`;
+    // Physical Types
     generatedSearchQuery += ` OR ((${searchQuery.map((token, index) =>
       `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} pt.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
     ).join(" ")}) OR (${searchQuery.map((token, index) =>
