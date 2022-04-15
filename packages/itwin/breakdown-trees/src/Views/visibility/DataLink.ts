@@ -49,7 +49,13 @@ export class DataLink {
         select s.ecinstanceid from buildingspatial.story s where s.ecinstanceid=${storyId})`;
     };
 
-    return clipAtSpaces && runQuery(constructQuery("spatialcomposition.CompositeComposesSubComposites")) || runQuery(constructQuery("spatialcomposition.CompositeOverlapsSpatialElements"));
+    let result;
+
+    if (clipAtSpaces) {
+      result = runQuery(constructQuery("spatialcomposition.CompositeComposesSubComposites"));
+    }
+
+    return result ?? runQuery(constructQuery("spatialcomposition.CompositeOverlapsSpatialElements"));
   }
 
   public static async queryRooms(iModel: IModelConnection, storyId?: string) {
