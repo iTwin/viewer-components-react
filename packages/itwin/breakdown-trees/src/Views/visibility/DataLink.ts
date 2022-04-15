@@ -52,7 +52,7 @@ export class DataLink {
     let result;
 
     if (clipAtSpaces) {
-      result = runQuery(constructQuery("spatialcomposition.CompositeComposesSubComposites"));
+      result = await runQuery(constructQuery("spatialcomposition.CompositeComposesSubComposites"));
     }
 
     return result ?? runQuery(constructQuery("spatialcomposition.CompositeOverlapsSpatialElements"));
