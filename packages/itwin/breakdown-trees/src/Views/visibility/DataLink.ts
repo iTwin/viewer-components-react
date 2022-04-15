@@ -40,32 +40,25 @@ export class DataLink {
       return undefined;
     };
 
-    const queryGetStoryWithElementsProps = `select MIN(spel.minX) as minX, MIN(spel.minY) as minY, MIN(spel.minZ) as minZ, MAX(spel.maxX) as maxX, MAX(spel.maxY) as maxY, MAX(spel.maxZ) as maxZ
-    from spatialcomposition.CompositeOverlapsSpatialElements ovr join biscore.spatialIndex spel on spel.ECinstanceId = ovr.targetecinstanceid
-    where sourceECInstanceId in
-    (select sp.ecinstanceid from buildingspatial.story s join buildingspatial.space sp on s.ecinstanceid=sp.composingelement.id where s.ecinstanceid=${storyId}
-    union
-    select s.ecinstanceid from buildingspatial.story s where s.ecinstanceid=${storyId})`;
+    const constructQuery = (queryClass: string) => {
+      return `select MIN(spel.minX) as minX, MIN(spel.minY) as minY, MIN(spel.minZ) as minZ, MAX(spel.maxX) as maxX, MAX(spel.maxY) as maxY, MAX(spel.maxZ) as maxZ
+        from ${queryClass} ovr join biscore.spatialIndex spel on spel.ECinstanceId = ovr.targetecinstanceid
+        where sourceECInstanceId in
+        (select sp.ecinstanceid from buildingspatial.story s join buildingspatial.space sp on s.ecinstanceid=sp.composingelement.id where s.ecinstanceid=${storyId}
+        union
+        select s.ecinstanceid from buildingspatial.story s where s.ecinstanceid=${storyId})`;
+    };
 
-    const queryGetStoreyProps = `select MIN(spel.minX) as minX, MIN(spel.minY) as minY, MIN(spel.minZ) as minZ, MAX(spel.maxX) as maxX, MAX(spel.maxY) as maxY, MAX(spel.maxZ) as maxZ
-      from spatialcomposition.CompositeComposesSubComposites ovr join biscore.spatialIndex spel on spel.ECinstanceId = ovr.targetecinstanceid
-      where sourceECInstanceId in
-      (select sp.ecinstanceid from buildingspatial.story s join buildingspatial.space sp on s.ecinstanceid=sp.composingelement.id where s.ecinstanceid=${storyId}
-      union
-      select s.ecinstanceid from buildingspatial.story s where s.ecinstanceid=${storyId})`;
-
-    return clipAtSpaces ? runQuery(queryGetStoreyProps) ?? runQuery(queryGetStoryWithElementsProps) : runQuery(queryGetStoryWithElementsProps);
+    return clipAtSpaces && runQuery(constructQuery("spatialcomposition.CompositeComposesSubComposites")) || runQuery(constructQuery("spatialcomposition.CompositeOverlapsSpatialElements"));
   }
 
   public static async queryRooms(iModel: IModelConnection, storyId?: string) {
-    const queryWithoutStoryId = `SELECT room.ECInstanceId as id, room.UserLabel as label, room.CodeValue as code, room.BBoxHigh as bBoxHigh, room.BBoxLow as bBoxLow, story.ECInstanceId as composingId
+    const baseQuery = `SELECT room.ECInstanceId as id, room.UserLabel as label, room.CodeValue as code, room.BBoxHigh as bBoxHigh, room.BBoxLow as bBoxLow, story.ECInstanceId as composingId
     FROM BuildingSpatial:Space room
     JOIN Spatial.Story story ON story.ECInstanceId = room.composingElement.id`;
-    const queryWithStoryId = `SELECT room.ECInstanceId as id, room.UserLabel as label, room.CodeValue as code, room.BBoxHigh as bBoxHigh, room.BBoxLow as bBoxLow, story.ECInstanceId as composingId
-    FROM BuildingSpatial:Space room
-    JOIN Spatial.Story story ON story.ECInstanceId = room.composingElement.id WHERE story.ECInstanceId = ${storyId}`;
+    const whereClause = storyId ? ` WHERE story.ECInstanceId = ${storyId}` : "";
 
-    return this.executeQuery(iModel, storyId ? queryWithStoryId : queryWithoutStoryId);
+    return this.executeQuery(iModel, baseQuery + whereClause);
   }
 
   public static async queryCategoryIds(iModel: IModelConnection, categoryNames: string[]) {
