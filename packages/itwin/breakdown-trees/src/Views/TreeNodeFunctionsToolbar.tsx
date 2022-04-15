@@ -5,8 +5,8 @@
 
 import { IconButton } from "./IconButton";
 import * as React from "react";
-import { TreeModel, TreeModelNode } from "@itwin/components-react";
-import { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders/TreeNodeFunctionIconMapper";
+import type { TreeModel, TreeModelNode } from "@itwin/components-react";
+import type { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders/TreeNodeFunctionIconMapper";
 
 export enum ToolbarItemKeys {
   zoom = "ZoomToSelectedElements",

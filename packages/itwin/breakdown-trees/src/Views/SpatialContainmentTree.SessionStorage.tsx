@@ -3,9 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { SpatialContainmentEventHandlers } from "./SpatialContainmentTree";
+import type { SpatialContainmentEventHandlers } from "./SpatialContainmentTree";
 import { SpatialContainmentTree } from "./SpatialContainmentTree";
-import { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 export interface SessionStorageSpatialContainmentTreeProps {
   iModel: IModelConnection;

@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { DelayLoadedTreeNodeItem, TreeModelNode, TreeNodeItem } from "@itwin/components-react";
-import { ECClassGroupingNodeKey, ECInstancesNodeKey, GroupingNodeKey, InstanceKey } from "@itwin/presentation-common";
+import type { DelayLoadedTreeNodeItem, TreeModelNode, TreeNodeItem } from "@itwin/components-react";
+import type { ECClassGroupingNodeKey, ECInstancesNodeKey, GroupingNodeKey, InstanceKey } from "@itwin/presentation-common";
 import { StandardNodeTypes } from "@itwin/presentation-common";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { CheckBoxState } from "@itwin/core-react";

@@ -4,14 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { NodeKey } from "@itwin/presentation-common";
-import { TreeModelNode } from "@itwin/components-react";
-import { IModelConnection } from "@itwin/core-frontend";
+import type { TreeModelNode } from "@itwin/components-react";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import { ToggledTopFitViewFunctionalityProvider } from "./ToggledTopFitViewFunctionalityProvider";
-import { GeometricElement3dProps } from "@itwin/core-common";
+import type { GeometricElement3dProps } from "@itwin/core-common";
 import { Placement3d } from "@itwin/core-common";
 import { ClipPrimitive, ClipVector, ConvexClipPlaneSet } from "@itwin/core-geometry";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 export class SpaceClipPlanesProvider extends ToggledTopFitViewFunctionalityProvider {
   public defaultHeight?: number;

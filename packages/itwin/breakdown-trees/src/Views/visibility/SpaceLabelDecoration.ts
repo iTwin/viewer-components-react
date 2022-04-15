@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
+import type { BeButtonEvent, DecorateContext } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
-import { TextOffsetProps, TextStyleProps } from "@itwin/measure-tools-react";
+import type { TextOffsetProps, TextStyleProps } from "@itwin/measure-tools-react";
 import { TextMarker } from "@itwin/measure-tools-react";
-import { Id64Arg } from "@itwin/core-bentley";
+import type { Id64Arg } from "@itwin/core-bentley";
 
 export type DecorationClickedHandler = (ev: BeButtonEvent, decoration?: SpaceLabelDecoration) => void;
 

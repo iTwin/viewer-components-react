@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { Range3d } from "@itwin/core-geometry";
 import { expect } from "chai";
 import * as Moq from "typemoq";
@@ -15,7 +15,7 @@ const range3DProps = {
   maxX: 4,
   maxY: 5,
   maxZ: 6,
-}
+};
 
 async function* queryResultGenerator() {
   yield range3DProps;

@@ -5,24 +5,24 @@
 
 import * as React from "react";
 import * as moq from "typemoq";
-import { ConfigurableCreateInfo } from "@itwin/appui-react";
+import type { ConfigurableCreateInfo } from "@itwin/appui-react";
 import { ContentControl, FrameworkReducer, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
-import { TreeNodeItem } from "@itwin/components-react";
+import type { TreeNodeItem } from "@itwin/components-react";
 import { Id64 } from "@itwin/core-bentley";
-import { AnyAction, Store } from "redux";
+import type { AnyAction, Store } from "redux";
 import { combineReducers, createStore } from "redux";
-import { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
-import { ECInstancesNodeKey, InstanceKey, Ruleset } from "@itwin/presentation-common";
+import type { ECInstancesNodeKey, InstanceKey, Ruleset } from "@itwin/presentation-common";
 import { StandardNodeTypes } from "@itwin/presentation-common";
 import ruleList from "./assets/RulesList.json";
 import faker from "faker";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BreakdownTrees } from "../breakdown-trees-react";
 import { getPropertyRecordAsString } from "@itwin/components-react";
 import { TreeWithRulesetControllerBase } from "../Controllers/TreeWithRulesetControllerBase";
-import { Localization } from "@itwin/core-common";
+import type { Localization } from "@itwin/core-common";
 
 function createAppStore(): Store {
   const rootReducer = combineReducers({

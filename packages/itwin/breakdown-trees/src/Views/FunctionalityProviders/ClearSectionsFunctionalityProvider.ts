@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { TreeModelNode } from "@itwin/components-react";
+import type { TreeModelNode } from "@itwin/components-react";
 import { IModelApp, ViewClipClearTool, ViewClipDecorationProvider } from "@itwin/core-frontend";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
 import { SectioningUtil } from "../visibility/SectioningUtil";
