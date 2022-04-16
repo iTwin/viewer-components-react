@@ -11,7 +11,7 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import classificationRules from "../assets/ClassificationSystems.json";
 import { BreakdownTrees } from "../BreakdownTrees";
-import type { OptionItemHandler } from "./OptionItemHandlers";
+import type { OptionItemHandler } from "./OptionItemHandlers/OptionItemHandler";
 import { GenericOptionItemHandler } from "./OptionItemHandlers/GenericOptionItemHandler";
 import { LoadableRuleSetComponent } from "./LoadableRuleSetComponent";
 import type { BeEvent } from "@itwin/core-bentley";

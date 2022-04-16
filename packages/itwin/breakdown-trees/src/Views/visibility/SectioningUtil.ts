@@ -10,8 +10,8 @@ import { ClipPlane, ClipPrimitive, ClipVector, ConvexClipPlaneSet, Plane3dByOrig
 import { ColorDef } from "@itwin/core-common";
 import { DataLink } from "./DataLink";
 import { SpaceLabelDecorator } from "./SpaceLabelDecorator";
-import type { SpaceLabelDecoration } from "./SpaceLabelDecoration";
 import { Logger } from "@itwin/core-bentley";
+import type { SpaceLabelDecoration } from "./SpaceLabelDecoration";
 
 export class SectioningUtil {
   private static _spaceDecorator?: SpaceLabelDecorator = undefined;

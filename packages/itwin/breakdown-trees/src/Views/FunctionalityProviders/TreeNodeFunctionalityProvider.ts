@@ -9,7 +9,7 @@ export abstract class TreeNodeFunctionalityProvider {
   protected _treeDataProvider: IPresentationTreeDataProvider;
   protected _functionalitySourceName: string;
 
-  constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider){
+  constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider) {
     this._treeDataProvider = treeDataProvider;
     this._functionalitySourceName = functionalitySourceName;
   }
