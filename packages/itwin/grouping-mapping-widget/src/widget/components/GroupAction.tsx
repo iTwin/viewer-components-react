@@ -130,8 +130,8 @@ const GroupAction = ({
 
   const needsAndOperator = (token: string, index: number, searchQuery: string[]) => isWrappedInQuotes(token) || (index === 1 && isWrappedInQuotes(searchQuery[0]));
   // Temporary until ECViews become available for use.
-  const generateSearchQuery = async (searchQuery: string[]) => {
-    if (searchQuery.length < 0) {
+  const generateSearchQuery = (searchQuery: string[]) => {
+    if (searchQuery.length === 0) {
       setQuery("");
       return;
     }
@@ -334,7 +334,7 @@ const GroupAction = ({
                 {isRendering &&
                   <LoadingSpinner />
                 }
-                <Button disabled={isLoading || isRendering} onClick={async () => generateSearchQuery(searchInput ? searchInput.replace(/(\r\n|\n|\r)/gm, "").trim().split(" ") : [])}>Apply</Button>
+                <Button disabled={isLoading || isRendering} onClick={() => generateSearchQuery(searchInput ? searchInput.replace(/(\r\n|\n|\r)/gm, "").trim().split(" ") : [])}>Apply</Button>
                 <Button disabled={isLoading || isRendering} onClick={() => {
                   setQuery("");
                   setSearchInput("");
