@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Add transitive peers as dev deps",
+      "comment": "Fixed search bar container to take up entire width of widget when open.",
       "type": "patch"
     }
   ],

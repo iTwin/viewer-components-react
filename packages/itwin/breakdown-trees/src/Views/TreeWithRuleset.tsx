@@ -14,7 +14,7 @@ import { useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "@itwin
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import { BreakdownTrees } from "../BreakdownTrees";
-import type { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders";
+import type { FunctionIconInfo, TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders/TreeNodeFunctionIconMapper";
 import { SelectRelatedFunctionalityProvider } from "./FunctionalityProviders/SelectRelatedFunctionalityProvider";
 import { ZoomFunctionalityProvider } from "./FunctionalityProviders/ZoomFunctionalityProvider";
 import { SearchBar } from "./SearchBar/SearchBar";

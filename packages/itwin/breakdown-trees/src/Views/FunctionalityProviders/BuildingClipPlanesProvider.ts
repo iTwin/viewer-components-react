@@ -24,7 +24,7 @@ export class BuildingClipPlanesProvider extends ToggledTopFitViewFunctionalityPr
 
   private async executeQuery(iModel: IModelConnection, query: string) {
     const rows = [];
-    for await (const row of iModel.query(query)) rows.push(row);
+    for await (const row of iModel.query(query, undefined, { rowFormat: 0 })) rows.push(row);
     return rows;
   }
 

@@ -1,6 +1,15 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 18 Mar 2022 13:31:19 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Apr 2022 13:48:44 GMT and should not be manually modified.
+
+## 0.4.1
+Wed, 06 Apr 2022 13:48:44 GMT
+
+### Patches
+
+- Updates to allow specification of default panel location.
+- Add transitive peers as dev deps
+- added tree icon to tree widget tab
 
 ## 0.4.0
 Fri, 18 Mar 2022 13:31:19 GMT

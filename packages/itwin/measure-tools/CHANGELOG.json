@@ -2,6 +2,26 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@itwin/measure-tools-react_v0.7.0",
+      "date": "Wed, 06 Apr 2022 13:48:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "remove setTimeout from useEffect"
+          },
+          {
+            "comment": "Add transitive peers as dev deps"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Hide Measurement widget until measurement is selected\""
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@itwin/measure-tools-react_v0.6.0",
       "date": "Wed, 02 Mar 2022 21:38:51 GMT",

@@ -38,6 +38,11 @@
       "versionPolicyName": "reports-widget-react"
     },
     {
+      "packageName": "@itwin/one-click-lca-react",
+      "projectFolder": "packages/itwin/one-click-lca-widget",
+      "versionPolicyName": "one-click-lca-widget"
+    },
+    {
       "packageName": "@itwin/imodel-react-hooks",
       "projectFolder": "packages/itwin/imodel-react-hooks",
       "versionPolicyName": "itwin-imodel-react-hooks"

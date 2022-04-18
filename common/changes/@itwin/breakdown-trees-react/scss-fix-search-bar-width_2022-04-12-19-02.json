@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/breakdown-trees-react",
+      "comment": "Fixed search bar container to take up entire width of widget.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/breakdown-trees-react"
+}

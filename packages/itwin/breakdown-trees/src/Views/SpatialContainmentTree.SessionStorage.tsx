@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import type { SpatialContainmentEventHandlers} from "./SpatialContainmentTree";
+import type { SpatialContainmentEventHandlers } from "./SpatialContainmentTree";
 import { SpatialContainmentTree } from "./SpatialContainmentTree";
 import type { IModelConnection } from "@itwin/core-frontend";
 
