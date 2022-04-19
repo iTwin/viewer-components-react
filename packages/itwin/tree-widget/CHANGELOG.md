@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Wed, 06 Apr 2022 13:48:44 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Apr 2022 14:15:57 GMT and should not be manually modified.
+
+## 0.4.2
+Tue, 19 Apr 2022 14:15:57 GMT
+
+### Patches
+
+- Fixed search bar container to take up entire width of widget when open.
 
 ## 0.4.1
 Wed, 06 Apr 2022 13:48:44 GMT
