@@ -55,7 +55,7 @@
   "dependencies": {
     "@itwin/imodel-browser-react": "^0.12.1",
     "@itwin/itwinui-icons-react": "^1.7.0",
-    "@itwin/itwinui-react": "^1.33.0",
+    "@itwin/itwinui-react": "^1.35.0",
     "classnames": "^2.3.1",
     "cross-fetch": "^3.1.4",
     "immer": "^9.0.7",
