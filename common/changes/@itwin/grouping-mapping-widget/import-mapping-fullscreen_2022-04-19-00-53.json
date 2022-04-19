@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "Import mappings modal converted to full page modal",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}
