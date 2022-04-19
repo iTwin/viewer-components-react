@@ -48,7 +48,7 @@ export const DeleteModal = ({
   return (
     <>
       <Modal
-        title={IModelApp.localization.getLocalizedString("ReportsWidget:Confirm")}
+        title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Confirm")}
         isOpen={show}
         isDismissible={!isLoading}
         onClose={() => {
@@ -58,7 +58,7 @@ export const DeleteModal = ({
         <ModalContent>
           <div className="delete-modal-body-text">
             <Leading>
-              {IModelApp.localization.getLocalizedString("ReportsWidget:AreYouSureYouWantToDelete")}
+              {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AreYouSureYouWantToDelete")}
             </Leading>
             <strong>
               {<MiddleTextTruncation text={`${entityName}?`} />}

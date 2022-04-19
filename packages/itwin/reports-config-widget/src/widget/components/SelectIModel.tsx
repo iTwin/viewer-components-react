@@ -5,14 +5,14 @@
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
-import type { GetIModelListParams, MinimalIModel } from "@itwin/imodels-client-management";
+import { Constants, GetIModelListParams, IModelsClientOptions, MinimalIModel } from "@itwin/imodels-client-management";
 import { IModelsClient, toArray } from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useMemo } from "react";
 import { useEffect, useState } from "react";
 import { AccessTokenContext } from "./ReportsContainer";
 import './SelectIModel.scss'
-import { LoadingSpinner } from "./utils";
+import { LoadingSpinner, prefixUrl } from "./utils";
 
 const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
@@ -21,7 +21,11 @@ const fetchIModels = async (
   accessToken: string
 ) => {
   try {
-    const iModelsClient: IModelsClient = new IModelsClient();
+    const iModelClientOptions: IModelsClientOptions = {
+      api: { baseUrl: `${prefixUrl(Constants.api.baseUrl, process.env.IMJS_URL_PREFIX)}` }
+    }
+
+    const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
     const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
     const getiModelListParams: GetIModelListParams = {
       urlParams: { projectId: iTwinId },
@@ -59,7 +63,7 @@ export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: Selected
     const [iModels, setIModels] = useState<MinimalIModel[]>([]);
     useEffect(() => {
       if (iModelId && iTwinId) {
-        void fetchIModels(setIModels, iTwinId, setIsLoading, accessToken);
+        fetchIModels(setIModels, iTwinId, setIsLoading, accessToken);
       }
     }, [setIModels, setIsLoading, iModelId, iTwinId]);
 

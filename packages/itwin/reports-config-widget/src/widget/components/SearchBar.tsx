@@ -17,7 +17,7 @@ interface SearchBarProps {
 
 export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarProps) =>
   <LabeledInput
-    placeholder={IModelApp.localization.getLocalizedString("ReportsWidget:Search")}
+    placeholder={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Search")}
     svgIcon={searchValue ?
       <IconButton onClick={() => setSearchValue("")} styleType='borderless'>
         <SvgCloseSmall />

@@ -6,9 +6,9 @@
 @import '~@itwin/itwinui-css/scss/icon/index';
 @import '~@itwin/itwinui-css/scss/button/index';
 
-.widget-header-container {
+.rcw-widget-header-container {
   display: flex;
-  margin-bottom: $iui-baseline * 3;
+  margin-bottom: $iui-baseline;
 
   .chevron {
     @include iui-icons-large();
@@ -35,7 +35,7 @@
   }
 }
 
-.rp-loading-spinner {
+.rcw-loading-spinner {
   display: flex;
   align-items: center;
 }

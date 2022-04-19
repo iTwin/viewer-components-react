@@ -24,6 +24,7 @@
     gap: $iui-s;
     border-bottom: 1px solid var(--iui-color-background-4);
     padding-bottom: $iui-baseline;
+    flex-wrap: wrap;
   }
 
   .search-bar-container {

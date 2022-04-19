@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, handleInputChange, WidgetHeader } from "./utils";
@@ -11,6 +11,7 @@ import "./ReportAction.scss";
 import type { Report } from "../../reporting";
 import { ReportingClient } from "../../reporting/reportingClient";
 import { IModelApp } from "@itwin/core-frontend";
+import { AccessTokenContext } from "./ReportsContainer";
 
 interface ReportActionProps {
   iTwinId: string;
@@ -19,6 +20,7 @@ interface ReportActionProps {
 }
 
 const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
+  const accessToken = useContext(AccessTokenContext);
   const [values, setValues] = useState({
     name: report?.displayName ?? "",
     description: report?.description ?? "",
@@ -33,7 +35,6 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         return;
       }
       setIsLoading(true);
-      const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       const reportingClientApi = new ReportingClient();
       report
         ? await reportingClientApi.updateReport(accessToken, report.id ?? "", {

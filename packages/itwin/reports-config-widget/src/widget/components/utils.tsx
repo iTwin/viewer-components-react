@@ -20,7 +20,7 @@ export const WidgetHeader = ({
   returnFn,
 }: WidgetHeaderProps) => {
   return (
-    <div className='widget-header-container'>
+    <div className='rcw-widget-header-container'>
       {returnFn && (
         <div
           className={disabled ? "chevron-disabled" : "chevron"}
@@ -75,9 +75,9 @@ export const handleError = (errorStatus: number) => {
 
 export const LoadingOverlay = () => (
   <div className='rcw-center-overlay'>
-    <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Loading")}</Text>
+    <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:Loading")}</Text>
     <ProgressRadial indeterminate />
-    <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:PleaseWait")}</Text>
+    <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:PleaseWait")}</Text>
   </div>
 )
 interface EmptyMessageProps {
@@ -106,7 +106,7 @@ export const handleInputChange = <T,>(
 
 export const LoadingSpinner = () => {
   return (
-    <div className="rp-loading-spinner">
+    <div className="rcw-loading-spinner">
       <ProgressRadial size="small" indeterminate />
     </div>
   );

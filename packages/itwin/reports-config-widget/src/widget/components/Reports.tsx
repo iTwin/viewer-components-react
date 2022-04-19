@@ -27,7 +27,7 @@ import {
   TablePaginator,
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { CreateTypeFromInterface, EmptyMessage, LoadingOverlay } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./Reports.scss";
@@ -40,6 +40,7 @@ import { ReportMappings } from "./ReportMappings";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import { HorizontalTile } from "./HorizontalTile";
 import { SearchBar } from "./SearchBar";
+import { AccessTokenContext } from "./ReportsContainer";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -53,12 +54,12 @@ enum ReportsView {
 const fetchReports = async (
   setReports: React.Dispatch<React.SetStateAction<Report[]>>,
   iTwinId: string | undefined,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  accessToken: string
 ) => {
   try {
     if (!iTwinId) return;
     setIsLoading(true);
-    const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
     const reportingClientApi = new ReportingClient();
     const reports = await reportingClientApi.getReports(accessToken, iTwinId);
     setReports(reports.reports ?? []);
@@ -69,23 +70,10 @@ const fetchReports = async (
   }
 };
 
-const useFetchReports = (
-  iTwinId: string | undefined,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-): [
-    Report[],
-    React.Dispatch<React.SetStateAction<Report[]>>
-  ] => {
-  const [reports, setReports] = useState<Report[]>([]);
-  useEffect(() => {
-    void fetchReports(setReports, iTwinId, setIsLoading);
-  }, [iTwinId, setIsLoading]);
-
-  return [reports, setReports];
-};
 
 export const Reports = () => {
   const iTwinId = useActiveIModelConnection()?.iTwinId;
+  const accessToken = useContext(AccessTokenContext);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [reportsView, setReportsView] = useState<ReportsView>(
     ReportsView.REPORTS
@@ -94,14 +82,32 @@ export const Reports = () => {
     Report | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [reports, setReports] = useFetchReports(iTwinId, setIsLoading);
   const [searchValue, setSearchValue] = useState<string>("");
+
+
+  const useFetchReports = (
+    iTwinId: string | undefined,
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  ): [
+      Report[],
+      React.Dispatch<React.SetStateAction<Report[]>>
+    ] => {
+    const [reports, setReports] = useState<Report[]>([]);
+    useEffect(() => {
+      void fetchReports(setReports, iTwinId, setIsLoading, accessToken);
+    }, [iTwinId, setIsLoading]);
+
+    return [reports, setReports];
+  };
+
+  const [reports, setReports] = useFetchReports(iTwinId, setIsLoading);
+
 
   const refresh = useCallback(async () => {
     setReportsView(ReportsView.REPORTS);
     setSelectedReport(undefined);
     setReports([]);
-    await fetchReports(setReports, iTwinId, setIsLoading);
+    await fetchReports(setReports, iTwinId, setIsLoading, accessToken);
   }, [iTwinId, setReports]);
 
   const addReport = () => {
@@ -131,7 +137,7 @@ export const Reports = () => {
     default:
       return (
         <>
-          <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsWidget:ITwinReports")} />
+          <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ITwinReports")} />
           <div className="reports-list-container">
             <div className="toolbar">
               <Button
@@ -150,11 +156,11 @@ export const Reports = () => {
               reports.length === 0 ?
                 <EmptyMessage>
                   <>
-                    {IModelApp.localization.getLocalizedString("ReportsWidget:NoReports")}
+                    {IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoReports")}
                     <Text
                       className="iui-anchor"
                       onClick={() => addReport()}
-                    > {IModelApp.localization.getLocalizedString("ReportsWidget:CreateOneReportCTA")}</Text>
+                    > {IModelApp.localization.getLocalizedString("ReportsConfigWidget:CreateOneReportCTA")}</Text>
                   </>
                 </EmptyMessage> :
                 <div className="reports-list">
@@ -180,7 +186,7 @@ export const Reports = () => {
                               }}
                               icon={<SvgEdit />}
                             >
-                              {IModelApp.localization.getLocalizedString("ReportsWidget:Modify")}
+                              {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Modify")}
                             </MenuItem>,
                             <MenuItem
                               key={1}
@@ -191,7 +197,7 @@ export const Reports = () => {
                               }}
                               icon={<SvgDelete />}
                             >
-                              {IModelApp.localization.getLocalizedString("ReportsWidget:Remove")}
+                              {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Remove")}
                             </MenuItem>,
                           ]}
                         >
@@ -216,7 +222,6 @@ export const Reports = () => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
               const reportingClientApi = new ReportingClient();
               await reportingClientApi.deleteReport(
                 accessToken,

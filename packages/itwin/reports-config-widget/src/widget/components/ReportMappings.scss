@@ -14,12 +14,6 @@
   padding: $iui-baseline $iui-m;
   min-height: 0;
 
-  .toolbar {
-    display: flex;
-    justify-content: space-between;
-    gap: $iui-s;
-  }
-
   .odata-url-input {
     margin-bottom: $iui-baseline * 2;
   }
@@ -30,7 +24,9 @@
     gap: $iui-s;
     border-bottom: 1px solid var(--iui-color-background-4);
     padding-bottom: $iui-baseline;
+    flex-wrap: wrap;
   }
+
   .mapping-list {
     display: flex;
     flex-direction: column;

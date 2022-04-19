@@ -18,13 +18,14 @@ import {
   tableFilters,
   TablePaginator,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Mapping } from "../../reporting";
 import { ReportingClient } from "../../reporting/reportingClient";
 import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import type { ReportMappingAndMapping } from "./ReportMappings";
+import { AccessTokenContext } from "./ReportsContainer";
 import { SelectIModel } from "./SelectIModel";
 import type { CreateTypeFromInterface } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
@@ -34,11 +35,11 @@ export type MappingType = CreateTypeFromInterface<Mapping>;
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  accessToken: string
 ) => {
   try {
     setIsLoading(true);
-    const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
     const reportingClientApi = new ReportingClient();
     const mappings = await reportingClientApi.getMappings(accessToken, iModelId);
     setMappings(mappings);
@@ -49,22 +50,6 @@ const fetchMappings = async (
   }
 };
 
-const useFetchMappings = (
-  selectedIModelId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-): [
-    Mapping[],
-    React.Dispatch<React.SetStateAction<Mapping[]>>
-  ] => {
-  const [mappings, setMappings] = useState<Mapping[]>([]);
-  useEffect(() => {
-    if (selectedIModelId) {
-      void fetchMappings(setMappings, selectedIModelId, setIsLoading);
-    }
-  }, [selectedIModelId, setIsLoading]);
-
-  return [mappings, setMappings];
-};
 
 interface AddMappingsModalProps {
   reportId: string;
@@ -82,6 +67,26 @@ const AddMappingsModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const [selectedIModelId, setSelectediModelId] = useState<string>("");
+  const accessToken = useContext(AccessTokenContext);
+
+
+  const useFetchMappings = (
+    selectedIModelId: string,
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  ): [
+      Mapping[],
+      React.Dispatch<React.SetStateAction<Mapping[]>>
+    ] => {
+    const [mappings, setMappings] = useState<Mapping[]>([]);
+    useEffect(() => {
+      if (selectedIModelId) {
+        void fetchMappings(setMappings, selectedIModelId, setIsLoading, accessToken);
+      }
+    }, [selectedIModelId, setIsLoading]);
+
+    return [mappings, setMappings];
+  };
+
   const [mappings] = useFetchMappings(selectedIModelId, setIsLoading);
 
   const mappingsColumns = useMemo(
@@ -91,13 +96,13 @@ const AddMappingsModal = ({
         columns: [
           {
             id: "mappingName",
-            Header: IModelApp.localization.getLocalizedString("ReportsWidget:MappingName"),
+            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:MappingName"),
             accessor: "mappingName",
             Filter: tableFilters.TextFilter(),
           },
           {
             id: "description",
-            Header: IModelApp.localization.getLocalizedString("ReportsWidget:Description"),
+            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Description"),
             accessor: "description",
             Filter: tableFilters.TextFilter(),
           },
@@ -111,7 +116,6 @@ const AddMappingsModal = ({
     try {
       if (!selectedIModelId) return;
       setIsLoading(true);
-      const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       const reportingClientApi = new ReportingClient();
       for (const mapping of selectedMappings) {
         await reportingClientApi.createReportMapping(accessToken, reportId, { imodelId: selectedIModelId, mappingId: mapping.id ?? "" });
@@ -128,7 +132,7 @@ const AddMappingsModal = ({
 
   return (
     <Modal
-      title={IModelApp.localization.getLocalizedString("ReportsWidget:AddMappings")}
+      title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddMappings")}
       isOpen={show}
       isDismissible={!isLoading}
       onClose={async () => {
@@ -143,7 +147,7 @@ const AddMappingsModal = ({
             columns={mappingsColumns}
             className='add-mappings-table'
             density="extra-condensed"
-            emptyTableContent={IModelApp.localization.getLocalizedString("ReportsWidget:NoMappingsAvailable")}
+            emptyTableContent={IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoMappingsAvailable")}
             isSortable
             isSelectable
             isLoading={isLoading}
@@ -156,7 +160,7 @@ const AddMappingsModal = ({
         </div>
       </ModalContent>
       <ActionPanel
-        actionLabel={IModelApp.localization.getLocalizedString("ReportsWidget:Add")}
+        actionLabel={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Add")}
         onAction={onSave}
         onCancel={returnFn}
         isSavingDisabled={selectedMappings.length === 0}

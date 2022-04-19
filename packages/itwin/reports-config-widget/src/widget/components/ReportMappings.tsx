@@ -28,8 +28,8 @@ import {
   ToggleSwitch,
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { CreateTypeFromInterface, EmptyMessage, LoadingOverlay } from "./utils";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { CreateTypeFromInterface, EmptyMessage, LoadingOverlay, prefixUrl } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
@@ -37,12 +37,13 @@ import type { Report, ReportMapping } from "../../reporting";
 import { ReportingClient } from "../../reporting/reportingClient";
 import { IModelApp } from "@itwin/core-frontend";
 import AddMappingsModal from "./AddMappingsModal";
-import type { GetSingleIModelParams } from "@itwin/imodels-client-management";
+import { Constants, GetSingleIModelParams, IModelsClientOptions } from "@itwin/imodels-client-management";
 import { IModelsClient } from "@itwin/imodels-client-management";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import { HorizontalTile } from "./HorizontalTile";
 import { Extraction, ExtractionStates, ExtractionStatus } from "./Extraction";
 import { SearchBar } from "./SearchBar";
+import { AccessTokenContext } from "./ReportsContainer";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
@@ -56,14 +57,18 @@ enum ReportMappingsView {
 const fetchReportMappings = async (
   setReportMappings: React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>,
   reportId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  accessToken: string
 ) => {
   try {
     setIsLoading(true);
-    const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
     const reportingClientApi = new ReportingClient();
     const reportMappings = await reportingClientApi.getReportMappings(accessToken, reportId);
-    const iModelsClient: IModelsClient = new IModelsClient();
+    const iModelClientOptions: IModelsClientOptions = {
+      api: { baseUrl: `${prefixUrl(Constants.api.baseUrl, process.env.IMJS_URL_PREFIX)}` }
+    }
+
+    const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
     const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
     const iModelNames = new Map<string, string>();
     const reportMappingsAndMapping = await Promise.all(reportMappings.mappings?.map(async (reportMapping) => {
@@ -96,27 +101,13 @@ const fetchReportMappings = async (
   }
 };
 
-const useFetchReportMappings = (
-  reportId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-): [
-    ReportMappingAndMapping[],
-    React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>
-  ] => {
-  const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
-  useEffect(() => {
-    void fetchReportMappings(setReportMappings, reportId, setIsLoading);
-  }, [reportId, setIsLoading]);
-
-  return [reportMappings, setReportMappings];
-};
-
 interface ReportMappingsProps {
   report: Report;
   goBack: () => Promise<void>;
 }
 
 export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
+  const accessToken = useContext(AccessTokenContext);
   const [reportMappingsView, setReportMappingsView] = useState<ReportMappingsView>(
     ReportMappingsView.REPORTMAPPINGS
   );
@@ -125,17 +116,35 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   >(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [reportMappings, setReportMappings] = useFetchReportMappings(report.id ?? "", setIsLoading);
+
   const [extractionState, setExtractionState] = useState<ExtractionStates>(ExtractionStates.None);
   const [runningIModelId, setRunningIModelId] = useState<string>("");
   const [searchValue, setSearchValue] = useState<string>("");
+
+  const useFetchReportMappings = (
+    reportId: string,
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  ): [
+      ReportMappingAndMapping[],
+      React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>
+    ] => {
+    const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
+    useEffect(() => {
+      void fetchReportMappings(setReportMappings, reportId, setIsLoading, accessToken);
+    }, [reportId, setIsLoading]);
+
+    return [reportMappings, setReportMappings];
+  };
+
+  const [reportMappings, setReportMappings] = useFetchReportMappings(report.id ?? "", setIsLoading);
+
 
 
 
   const refresh = useCallback(async () => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
     setReportMappings([]);
-    await fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading);
+    await fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, accessToken);
   }, [report.id, setReportMappings]);
 
   const addMapping = () => {
@@ -159,14 +168,14 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     <>
       <WidgetHeader title={report.displayName ?? ""} returnFn={goBack} />
       <LabeledInput
-        label={IModelApp.localization.getLocalizedString("ReportsWidget:ODataFeedURL")}
+        label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ODataFeedURL")}
         className="odata-url-input"
         readOnly={true}
         value={odataFeedUrl}
         svgIcon={
           <IconButton styleType='borderless' onClick={async (_) => {
             await navigator.clipboard.writeText(odataFeedUrl);
-            toaster.positive(IModelApp.localization.getLocalizedString("ReportsWidget:CopiedToClipboard"));
+            toaster.positive(IModelApp.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
           }}>
             <SvgCopy />
           </IconButton>
@@ -180,7 +189,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
             onClick={() => addMapping()}
             styleType="high-visibility"
           >
-            {IModelApp.localization.getLocalizedString("ReportsWidget:AddMapping")}
+            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddMapping")}
           </Button>
           <Extraction
             iModels={uniqueIModels}
@@ -196,11 +205,11 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           reportMappings.length === 0 ?
             <EmptyMessage>
               <>
-                <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:NoReportMappings")}</Text>
+                <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoReportMappings")}</Text>
                 <Text
                   className="iui-anchor"
                   onClick={() => addMapping()}
-                > {IModelApp.localization.getLocalizedString("ReportsWidget:LetsAddSomeMappingsCTA")}</Text>
+                > {IModelApp.localization.getLocalizedString("ReportsConfigWidget:LetsAddSomeMappingsCTA")}</Text>
               </>
             </EmptyMessage> :
             <div className="mapping-list">{filteredReportMappings.map((mapping) =>
@@ -211,7 +220,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
                 titleTooltip={mapping.mappingDescription}
                 button={<ExtractionStatus
                   state={mapping.imodelId === runningIModelId ? extractionState : ExtractionStates.None} >
-                  <IconButton title={IModelApp.localization.getLocalizedString("ReportsWidget:Delete")}
+                  <IconButton title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Delete")}
                     styleType="borderless" onClick={
                       () => {
                         setSelectedReportMapping(mapping);
@@ -235,7 +244,6 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
-          const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
           const reportingClientApi = new ReportingClient();
           await reportingClientApi.deleteReportMapping(
             accessToken,
