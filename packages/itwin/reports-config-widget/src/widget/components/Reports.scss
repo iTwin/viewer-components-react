@@ -4,23 +4,36 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.reports-table-container {
+.reports-list-container {
   display: flex;
   flex-direction: column;
-  gap: $iui-baseline;
-  height: 100%;
-
-  .table-toolbar {
-    display: flex;
-    gap: $iui-s;
-  }
-
-  .reports-table {
-    flex-grow: 1;
-    overflow: auto;
-  }
+  gap: $iui-baseline * 2;
+  flex-grow: 1;
+  color: var(--buic-foreground-body);
+  background-color: var(--buic-background-control);
+  padding: $iui-baseline $iui-m;
+  min-height: 0;
 
   button {
     align-self: flex-start;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: $iui-s;
+    border-bottom: 1px solid var(--iui-color-background-4);
+    padding-bottom: $iui-baseline;
+  }
+
+  .search-bar-container {
+    padding: 0px $iui-s;
+  }
+
+  .reports-list {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline * 2;
+    overflow-y: auto;
   }
 }

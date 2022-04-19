@@ -4,22 +4,17 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.rw-loading-overlay {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: $iui-baseline;
-  height: 100%;
-}
-
 .report-mappings-container {
   display: flex;
   flex-direction: column;
-  gap: $iui-baseline;
-  height: 100%;
+  gap: $iui-baseline * 2;
+  flex-grow: 1;
+  color: var(--buic-foreground-body);
+  background-color: var(--buic-background-control);
+  padding: $iui-baseline $iui-m;
+  min-height: 0;
 
-  .table-toolbar {
+  .toolbar {
     display: flex;
     justify-content: space-between;
     gap: $iui-s;
@@ -29,13 +24,21 @@
     margin-bottom: $iui-baseline * 2;
   }
 
-  .imodels-list {
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: $iui-s;
+    border-bottom: 1px solid var(--iui-color-background-4);
+    padding-bottom: $iui-baseline;
+  }
+  .mapping-list {
     display: flex;
     flex-direction: column;
-    gap: $iui-baseline;
-    flex-grow: 1;
-    color: var(--buic-foreground-body);
-    background-color: var(--buic-background-control);
-    padding: $iui-baseline $iui-m;
+    gap: $iui-baseline * 2;
+    overflow-y: auto;
+  }
+
+  .search-bar-container {
+    padding: 0px $iui-s;
   }
 }

@@ -86,7 +86,6 @@ export const IModelReportMappings = ({ iModelId, reportMappings, isLoading, setS
     <>
       <ExpandableBlock title={openedIModelId === iModelId ? `(Viewing) ${reportMappings[0].iModelName}` : reportMappings[0].iModelName}>
         <div className="imodel-report-mappings-container">
-          <Extraction iModelId={iModelId} />
           <Table<ReportMappingAndMapping>
             data={reportMappings}
             className='mappings-table'

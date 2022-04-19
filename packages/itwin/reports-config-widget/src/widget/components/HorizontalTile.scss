@@ -4,32 +4,25 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.extraction-container {
+.rcw-horizontal-tile-container {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: $iui-s;
-  .extraction-status-container {
+  .body {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: calc($iui-baseline / 2);
+    min-width: 0;
+    &-text {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .bold {
+      font-weight: bold;
+    }
   }
-}
-
-.extraction-status {
-  display: flex;
-  align-items: center;
-  margin: 0 $iui-s;
-  .status-icon {
-    width: $iui-icons-default;
-    height: $iui-icons-default;
-  }
-}
-
-@keyframes fadeOut {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
+  .action-button {
+    margin-left: 0;
+    align-self: center;
   }
 }

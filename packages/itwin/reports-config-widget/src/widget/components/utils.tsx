@@ -5,7 +5,7 @@
 import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
 import { ProgressRadial, Text, toaster } from "@itwin/itwinui-react";
 import "./utils.scss";
-import React from "react";
+import React, { ReactNode } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 
 export interface WidgetHeaderProps {
@@ -72,6 +72,24 @@ export const handleError = (errorStatus: number) => {
   toaster.negative(errorMessage);
 
 };
+
+export const LoadingOverlay = () => (
+  <div className='rcw-center-overlay'>
+    <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Loading")}</Text>
+    <ProgressRadial indeterminate />
+    <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:PleaseWait")}</Text>
+  </div>
+)
+interface EmptyMessageProps {
+  children?: React.ReactNode;
+}
+export const EmptyMessage = ({ children }: EmptyMessageProps) => {
+  return (
+    <div className='rcw-center-overlay'>
+      {children}
+    </div>)
+}
+
 
 export const handleInputChange = <T,>(
   e: React.ChangeEvent<HTMLInputElement>,

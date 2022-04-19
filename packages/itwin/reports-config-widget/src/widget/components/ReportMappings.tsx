@@ -29,32 +29,24 @@ import {
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { CreateTypeFromInterface } from "./utils";
+import { CreateTypeFromInterface, EmptyMessage, LoadingOverlay } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
 import type { Report, ReportMapping } from "../../reporting";
-import { Mapping } from "../../reporting/generated/api";
 import { ReportingClient } from "../../reporting/reportingClient";
 import { IModelApp } from "@itwin/core-frontend";
-import { useActiveIModelConnection } from "@itwin/appui-react";
-import AddMappings from "./AddMappings";
-import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
-import { IModelReportMappings } from "./IModelReportMappings";
+import AddMappingsModal from "./AddMappingsModal";
 import type { GetSingleIModelParams } from "@itwin/imodels-client-management";
 import { IModelsClient } from "@itwin/imodels-client-management";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
+import { HorizontalTile } from "./HorizontalTile";
+import { Extraction, ExtractionStates, ExtractionStatus } from "./Extraction";
+import { SearchBar } from "./SearchBar";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
 export type ReportMappingAndMapping = ReportMappingType & { mappingName: string, mappingDescription: string, iModelName: string };
-
-const groupBy = <T, K extends keyof T>(value: T[], key: K) =>
-  value.reduce((acc, curr) => {
-    if (acc.get(curr[key])) return acc;
-    acc.set(curr[key], value.filter((elem) => elem[key] === curr[key]));
-    return acc;
-  }, new Map<T[K], T[]>());
 
 enum ReportMappingsView {
   REPORTMAPPINGS = "reportmappings",
@@ -134,8 +126,11 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reportMappings, setReportMappings] = useFetchReportMappings(report.id ?? "", setIsLoading);
+  const [extractionState, setExtractionState] = useState<ExtractionStates>(ExtractionStates.None);
+  const [runningIModelId, setRunningIModelId] = useState<string>("");
+  const [searchValue, setSearchValue] = useState<string>("");
 
-  const iModels = useMemo(() => groupBy(reportMappings, "imodelId"), [reportMappings]);
+
 
   const refresh = useCallback(async () => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
@@ -143,78 +138,114 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     await fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading);
   }, [report.id, setReportMappings]);
 
-  const addMapping = async () => {
+  const addMapping = () => {
     setReportMappingsView(ReportMappingsView.ADDING);
   };
 
+  const uniqueIModels = useMemo(() => new Map(reportMappings.map(mapping => [mapping.imodelId ?? "", mapping.iModelName])), [reportMappings])
+
+
+
   const odataFeedUrl = `https://${process.env.IMJS_URL_PREFIX}api.bentley.com/insights/reporting/odata/${report.id}`;
 
-  switch (reportMappingsView) {
-    case ReportMappingsView.ADDING:
-      return <AddMappings reportId={report.id ?? ""} existingMappings={reportMappings} returnFn={refresh} />;
-    default:
-      return (
-        <>
-          <WidgetHeader title={report.displayName ?? ""} returnFn={goBack} />
-          <div className="report-mappings-container">
-            <LabeledInput
-              label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ODataFeedURL")}
-              className="odata-url-input"
-              readOnly={true}
-              value={odataFeedUrl}
-              svgIcon={
-                <IconButton styleType='borderless' onClick={async (_) => {
-                  await navigator.clipboard.writeText(odataFeedUrl);
-                  toaster.positive(IModelApp.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
-                }}>
-                  <SvgCopy />
-                </IconButton>
-              }
-              iconDisplayStyle='inline'
-            />
-            <div className="table-toolbar">
-              <Button
-                startIcon={<SvgAdd />}
-                onClick={async () => addMapping()}
-                styleType="high-visibility"
-              >
-                {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddMapping")}
-              </Button>
+
+  const filteredReportMappings = useMemo(() => reportMappings.filter((x) =>
+    [x.iModelName, x.mappingName, x.mappingDescription]
+      .join(' ')
+      .toLowerCase()
+      .includes(searchValue.toLowerCase())), [reportMappings, searchValue])
+
+  return (
+    <>
+      <WidgetHeader title={report.displayName ?? ""} returnFn={goBack} />
+      <LabeledInput
+        label={IModelApp.localization.getLocalizedString("ReportsWidget:ODataFeedURL")}
+        className="odata-url-input"
+        readOnly={true}
+        value={odataFeedUrl}
+        svgIcon={
+          <IconButton styleType='borderless' onClick={async (_) => {
+            await navigator.clipboard.writeText(odataFeedUrl);
+            toaster.positive(IModelApp.localization.getLocalizedString("ReportsWidget:CopiedToClipboard"));
+          }}>
+            <SvgCopy />
+          </IconButton>
+        }
+        iconDisplayStyle='inline'
+      />
+      <div className="report-mappings-container">
+        <div className="toolbar">
+          <Button
+            startIcon={<SvgAdd />}
+            onClick={() => addMapping()}
+            styleType="high-visibility"
+          >
+            {IModelApp.localization.getLocalizedString("ReportsWidget:AddMapping")}
+          </Button>
+          <Extraction
+            iModels={uniqueIModels}
+            extractionState={extractionState}
+            setExtractionState={setExtractionState}
+            setExtractingIModelId={setRunningIModelId} />
+        </div>
+        <div className="search-bar-container">
+          <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
+        </div>
+        {isLoading ?
+          <LoadingOverlay /> :
+          reportMappings.length === 0 ?
+            <EmptyMessage>
+              <>
+                <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:NoReportMappings")}</Text>
+                <Text
+                  className="iui-anchor"
+                  onClick={() => addMapping()}
+                > {IModelApp.localization.getLocalizedString("ReportsWidget:LetsAddSomeMappingsCTA")}</Text>
+              </>
+            </EmptyMessage> :
+            <div className="mapping-list">{filteredReportMappings.map((mapping) =>
+              <HorizontalTile
+                key={mapping.mappingId}
+                title={mapping.mappingName}
+                subText={mapping.iModelName}
+                titleTooltip={mapping.mappingDescription}
+                button={<ExtractionStatus
+                  state={mapping.imodelId === runningIModelId ? extractionState : ExtractionStates.None} >
+                  <IconButton title={IModelApp.localization.getLocalizedString("ReportsWidget:Delete")}
+                    styleType="borderless" onClick={
+                      () => {
+                        setSelectedReportMapping(mapping);
+                        setShowDeleteModal(true);
+                      }}
+                  ><SvgDelete /></IconButton>
+                </ExtractionStatus>}
+              />)}
             </div>
-            <div className="imodels-list">
-              {isLoading ?
-                <div className='rw-loading-overlay'>
-                  <Text>Loading Mappings</Text>
-                  <ProgressRadial indeterminate />
-                  <Text>Please wait...</Text>
-                </div> : Array.from(iModels.keys()).map((iModelId) =>
-                  iModelId &&
-                  <IModelReportMappings
-                    key={iModelId}
-                    iModelId={iModelId}
-                    setSelectedReportMapping={setSelectedReportMapping}
-                    setShowDeleteModal={setShowDeleteModal}
-                    reportMappings={iModels.get(iModelId) ?? []}
-                    isLoading={isLoading}
-                  />)}
-            </div>
-          </div>
-          <DeleteModal
-            entityName={selectedReportMapping?.mappingName ?? ""}
-            show={showDeleteModal}
-            setShow={setShowDeleteModal}
-            onDelete={async () => {
-              const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
-              const reportingClientApi = new ReportingClient();
-              await reportingClientApi.deleteReportMapping(
-                accessToken,
-                report.id ?? "",
-                selectedReportMapping?.mappingId ?? ""
-              );
-            }}
-            refresh={refresh}
-          />
-        </>
-      );
-  }
+        }
+
+      </div>
+      <AddMappingsModal
+        show={reportMappingsView === ReportMappingsView.ADDING}
+        reportId={report.id ?? ""}
+        existingMappings={reportMappings}
+        returnFn={refresh}
+      />
+      <DeleteModal
+        entityName={selectedReportMapping?.mappingName ?? ""}
+        show={showDeleteModal}
+        setShow={setShowDeleteModal}
+        onDelete={async () => {
+          const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+          const reportingClientApi = new ReportingClient();
+          await reportingClientApi.deleteReportMapping(
+            accessToken,
+            report.id ?? "",
+            selectedReportMapping?.mappingId ?? ""
+          );
+        }}
+        refresh={refresh}
+      />
+    </>
+  );
+
 };

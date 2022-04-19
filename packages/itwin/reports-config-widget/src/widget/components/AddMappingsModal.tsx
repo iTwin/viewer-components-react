@@ -7,7 +7,9 @@ import { IModelApp } from "@itwin/core-frontend";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import type { MinimalIModel } from "@itwin/imodels-client-management";
 import { GetIModelListParams, IModelsClient, toArray } from "@itwin/imodels-client-management";
-import type {
+import {
+  Modal,
+  ModalContent,
   TablePaginatorRendererProps,
 } from "@itwin/itwinui-react";
 import {
@@ -20,7 +22,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { Mapping } from "../../reporting";
 import { ReportingClient } from "../../reporting/reportingClient";
 import ActionPanel from "./ActionPanel";
-import "./AddMappings.scss";
+import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import type { ReportMappingAndMapping } from "./ReportMappings";
 import { SelectIModel } from "./SelectIModel";
@@ -64,17 +66,19 @@ const useFetchMappings = (
   return [mappings, setMappings];
 };
 
-interface AddMappingsProps {
+interface AddMappingsModalProps {
   reportId: string;
   existingMappings: ReportMappingAndMapping[];
+  show: boolean;
   returnFn: () => Promise<void>;
 }
 
-const AddMappings = ({
+const AddMappingsModal = ({
   reportId,
   existingMappings,
+  show,
   returnFn,
-}: AddMappingsProps) => {
+}: AddMappingsModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const [selectedIModelId, setSelectediModelId] = useState<string>("");
@@ -87,13 +91,13 @@ const AddMappings = ({
         columns: [
           {
             id: "mappingName",
-            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:MappingName"),
+            Header: IModelApp.localization.getLocalizedString("ReportsWidget:MappingName"),
             accessor: "mappingName",
             Filter: tableFilters.TextFilter(),
           },
           {
             id: "description",
-            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Description"),
+            Header: IModelApp.localization.getLocalizedString("ReportsWidget:Description"),
             accessor: "description",
             Filter: tableFilters.TextFilter(),
           },
@@ -116,41 +120,50 @@ const AddMappings = ({
       await returnFn();
     } catch (error: any) {
       handleError(error.status);
+    }
+    finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddMappings")} />
-      <div className='add-mappings-container'>
-        <SelectIModel selectedIModelId={selectedIModelId} setSelectedIModelId={setSelectediModelId} />
-        <Table<MappingType>
-          data={isLoading ? [] : mappings}
-          columns={mappingsColumns}
-          className='add-mappings-table'
-          density="extra-condensed"
-          emptyTableContent={IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoMappingsAvailable")}
-          isSortable
-          isSelectable
-          isLoading={isLoading}
-          isRowDisabled={(rowData) => existingMappings.some((v) => v.mappingId === rowData.id)}
-          onSelect={(selectData: Mapping[] | undefined) => {
-            selectData && setSelectedMappings(selectData);
-          }}
-          paginatorRenderer={LocalizedTablePaginator}
-        />
-      </div>
+    <Modal
+      title={IModelApp.localization.getLocalizedString("ReportsWidget:AddMappings")}
+      isOpen={show}
+      isDismissible={!isLoading}
+      onClose={async () => {
+        await returnFn();
+      }}
+    >
+      <ModalContent>
+        <div className='add-mappings-container'>
+          <SelectIModel selectedIModelId={selectedIModelId} setSelectedIModelId={setSelectediModelId} />
+          <Table<MappingType>
+            data={isLoading ? [] : mappings}
+            columns={mappingsColumns}
+            className='add-mappings-table'
+            density="extra-condensed"
+            emptyTableContent={IModelApp.localization.getLocalizedString("ReportsWidget:NoMappingsAvailable")}
+            isSortable
+            isSelectable
+            isLoading={isLoading}
+            isRowDisabled={(rowData) => existingMappings.some((v) => v.mappingId === rowData.id)}
+            onSelect={(selectData: Mapping[] | undefined) => {
+              selectData && setSelectedMappings(selectData);
+            }}
+            paginatorRenderer={LocalizedTablePaginator}
+          />
+        </div>
+      </ModalContent>
       <ActionPanel
-        actionLabel={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Add")}
+        actionLabel={IModelApp.localization.getLocalizedString("ReportsWidget:Add")}
         onAction={onSave}
         onCancel={returnFn}
         isSavingDisabled={selectedMappings.length === 0}
         isLoading={isLoading}
       />
-    </>
-
+    </Modal>
   );
 };
 
-export default AddMappings;
+export default AddMappingsModal;

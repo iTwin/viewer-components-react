@@ -9,6 +9,7 @@ import {
   MiddleTextTruncation,
   Modal,
   ModalButtonBar,
+  ModalContent,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import "./DeleteModal.scss";
@@ -47,22 +48,23 @@ export const DeleteModal = ({
   return (
     <>
       <Modal
-        title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Confirm")}
-        modalRootId='grouping-mapping-widget'
+        title={IModelApp.localization.getLocalizedString("ReportsWidget:Confirm")}
         isOpen={show}
         isDismissible={!isLoading}
         onClose={() => {
           setShow(false);
         }}
       >
-        <div className="delete-modal-body-text">
-          <Leading>
-            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AreYouSureYouWantToDelete")}
-          </Leading>
-          <strong>
-            {<MiddleTextTruncation text={`${entityName}?`} />}
-          </strong>
-        </div>
+        <ModalContent>
+          <div className="delete-modal-body-text">
+            <Leading>
+              {IModelApp.localization.getLocalizedString("ReportsWidget:AreYouSureYouWantToDelete")}
+            </Leading>
+            <strong>
+              {<MiddleTextTruncation text={`${entityName}?`} />}
+            </strong>
+          </div>
+        </ModalContent>
         <ModalButtonBar>
           {isLoading &&
             <div className="loading-delete">

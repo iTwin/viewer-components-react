@@ -8,18 +8,19 @@ import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import type { GetIModelListParams, MinimalIModel } from "@itwin/imodels-client-management";
 import { IModelsClient, toArray } from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import { useEffect, useState } from "react";
+import { AccessTokenContext } from "./ReportsContainer";
 import './SelectIModel.scss'
 import { LoadingSpinner } from "./utils";
 
 const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
   iTwinId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  accessToken: string
 ) => {
   try {
-    const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
     const iModelsClient: IModelsClient = new IModelsClient();
     const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
     const getiModelListParams: GetIModelListParams = {
@@ -35,24 +36,6 @@ const fetchIModels = async (
   }
 };
 
-const useFetchIModels = (
-  iTwinId: string | undefined,
-  iModelId: string | undefined,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-): [
-    MinimalIModel[],
-    React.Dispatch<React.SetStateAction<MinimalIModel[]>>
-  ] => {
-  const [iModels, setIModels] = useState<MinimalIModel[]>([]);
-  useEffect(() => {
-    if (iModelId && iTwinId) {
-      void fetchIModels(setIModels, iTwinId, setIsLoading);
-    }
-  }, [setIModels, setIsLoading, iModelId, iTwinId]);
-
-
-  return [iModels, setIModels];
-};
 
 interface SelectedIModelProps {
   selectedIModelId: string;
@@ -60,9 +43,30 @@ interface SelectedIModelProps {
 }
 
 export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: SelectedIModelProps) => {
+  const accessToken = useContext(AccessTokenContext);
   const iModelId = useActiveIModelConnection()?.iModelId;
   const iTwinId = useActiveIModelConnection()?.iTwinId;
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const useFetchIModels = (
+    iTwinId: string | undefined,
+    iModelId: string | undefined,
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  ): [
+      MinimalIModel[],
+      React.Dispatch<React.SetStateAction<MinimalIModel[]>>
+    ] => {
+    const [iModels, setIModels] = useState<MinimalIModel[]>([]);
+    useEffect(() => {
+      if (iModelId && iTwinId) {
+        void fetchIModels(setIModels, iTwinId, setIsLoading, accessToken);
+      }
+    }, [setIModels, setIsLoading, iModelId, iTwinId]);
+
+
+    return [iModels, setIModels];
+  };
+
   const [iModels] = useFetchIModels(iTwinId, iModelId, setIsLoading);
 
   useEffect(() => {

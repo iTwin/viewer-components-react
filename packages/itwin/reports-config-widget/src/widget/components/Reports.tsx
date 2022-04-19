@@ -22,12 +22,13 @@ import {
   LabeledInput,
   MenuItem,
   Table,
+  Text,
   tableFilters,
   TablePaginator,
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { CreateTypeFromInterface } from "./utils";
+import { CreateTypeFromInterface, EmptyMessage, LoadingOverlay } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
@@ -37,6 +38,8 @@ import { IModelApp } from "@itwin/core-frontend";
 import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
+import { HorizontalTile } from "./HorizontalTile";
+import { SearchBar } from "./SearchBar";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -92,6 +95,7 @@ export const Reports = () => {
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reports, setReports] = useFetchReports(iTwinId, setIsLoading);
+  const [searchValue, setSearchValue] = useState<string>("");
 
   const refresh = useCallback(async () => {
     setReportsView(ReportsView.REPORTS);
@@ -100,86 +104,16 @@ export const Reports = () => {
     await fetchReports(setReports, iTwinId, setIsLoading);
   }, [iTwinId, setReports]);
 
-  const addReport = async () => {
+  const addReport = () => {
     setReportsView(ReportsView.ADDING);
   };
 
-  const reportsColumns = useMemo(
-    () => [
-      {
-        Header: "Table",
-        columns: [
-          {
-            id: "displayName",
-            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:ReportName"),
-            accessor: "displayName",
-            Cell: (value: CellProps<Report>) => (
-              <div
-                className="iui-anchor"
-                onClick={() => {
-                  setSelectedReport(value.row.original);
-                  setReportsView(ReportsView.REPORTSMAPPING);
-                }}
-              >
-                {value.row.original.displayName}
-              </div>
-            ),
-            Filter: tableFilters.TextFilter(),
-          },
-          {
-            id: "description",
-            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Description"),
-            accessor: "description",
-            Filter: tableFilters.TextFilter(),
-          },
-          {
-            id: "dropdown",
-            Header: "",
-            width: 80,
-            Cell: (value: CellProps<ReportType>) => {
-              return (
-                <DropdownMenu
-                  menuItems={(close: () => void) => [
-                    <MenuItem
-                      key={0}
-                      onClick={() => {
-                        setSelectedReport(value.row.original);
-                        setReportsView(ReportsView.MODIFYING);
-                      }}
-                      icon={<SvgEdit />}
-                    >
-                      {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Modify")}
-                    </MenuItem>,
-                    <MenuItem
-                      key={1}
-                      onClick={() => {
-                        setSelectedReport(value.row.original);
-                        setShowDeleteModal(true);
-                        close();
-                      }}
-                      icon={<SvgDelete />}
-                    >
-                      {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Remove")}
-                    </MenuItem>,
-                  ]}
-                >
-                  <IconButton styleType="borderless">
-                    <SvgMore
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                      }}
-                    />
-                  </IconButton>
-                </DropdownMenu>
-              );
-            },
-          },
-        ],
-      },
-    ],
-    []
-  );
+  const filteredReports = useMemo(() => reports.filter((x) =>
+    [x.displayName, x.description]
+      .join(' ')
+      .toLowerCase()
+      .includes(searchValue.toLowerCase())), [reports, searchValue])
+
 
   switch (reportsView) {
     case ReportsView.ADDING:
@@ -197,27 +131,85 @@ export const Reports = () => {
     default:
       return (
         <>
-          <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ITwinReports")} />
-          <div className="reports-table-container">
-            <div className="table-toolbar">
+          <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsWidget:ITwinReports")} />
+          <div className="reports-list-container">
+            <div className="toolbar">
               <Button
                 startIcon={<SvgAdd />}
-                onClick={async () => addReport()}
+                onClick={() => addReport()}
                 styleType="high-visibility"
               >
                 {IModelApp.localization.getLocalizedString("ReportsConfigWidget:New")}
               </Button>
             </div>
-            <Table<ReportType>
-              data={reports}
-              className="reports-table"
-              density="extra-condensed"
-              columns={reportsColumns}
-              emptyTableContent={IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoReportsAvailable")}
-              isSortable
-              isLoading={isLoading}
-              paginatorRenderer={LocalizedTablePaginator}
-            />
+            <div className="search-bar-container">
+              <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
+            </div>
+            {isLoading ?
+              <LoadingOverlay /> :
+              reports.length === 0 ?
+                <EmptyMessage>
+                  <>
+                    {IModelApp.localization.getLocalizedString("ReportsWidget:NoReports")}
+                    <Text
+                      className="iui-anchor"
+                      onClick={() => addReport()}
+                    > {IModelApp.localization.getLocalizedString("ReportsWidget:CreateOneReportCTA")}</Text>
+                  </>
+                </EmptyMessage> :
+                <div className="reports-list">
+                  {filteredReports.map((report) =>
+                    <HorizontalTile
+                      key={report.id}
+                      title={report.displayName ?? ""}
+                      subText={report.description ?? ""}
+                      subtextToolTip={report.description ?? ""}
+                      titleTooltip={report.displayName}
+                      onClickTitle={() => {
+                        setSelectedReport(report);
+                        setReportsView(ReportsView.REPORTSMAPPING);
+                      }}
+                      button={
+                        <DropdownMenu
+                          menuItems={(close: () => void) => [
+                            <MenuItem
+                              key={0}
+                              onClick={() => {
+                                setSelectedReport(report);
+                                setReportsView(ReportsView.MODIFYING);
+                              }}
+                              icon={<SvgEdit />}
+                            >
+                              {IModelApp.localization.getLocalizedString("ReportsWidget:Modify")}
+                            </MenuItem>,
+                            <MenuItem
+                              key={1}
+                              onClick={() => {
+                                setSelectedReport(report);
+                                setShowDeleteModal(true);
+                                close();
+                              }}
+                              icon={<SvgDelete />}
+                            >
+                              {IModelApp.localization.getLocalizedString("ReportsWidget:Remove")}
+                            </MenuItem>,
+                          ]}
+                        >
+                          <IconButton styleType="borderless">
+                            <SvgMore
+                              style={{
+                                width: "16px",
+                                height: "16px",
+                              }}
+                            />
+                          </IconButton>
+                        </DropdownMenu>
+                      }
+                    />
+                  )}
+                </div>
+            }
+
           </div>
           <DeleteModal
             entityName={selectedReport?.displayName ?? ""}

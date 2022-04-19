@@ -89,30 +89,11 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
           />
           <LabeledInput
             id='description'
-            required
             name='description'
             label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Description")}
             value={values.description}
             onChange={(event) => {
               handleInputChange(event, values, setValues);
-              validator.showMessageFor("description");
-            }}
-            message={validator.message(
-              "description",
-              values.description,
-              "required",
-            )}
-            status={
-              validator.message("description", values.description, "required")
-                ? "negative"
-                : undefined
-            }
-            onBlur={() => {
-              validator.showMessageFor("description");
-            }}
-            onBlurCapture={(event) => {
-              handleInputChange(event, values, setValues);
-              validator.showMessageFor("description");
             }}
           />
         </Fieldset>

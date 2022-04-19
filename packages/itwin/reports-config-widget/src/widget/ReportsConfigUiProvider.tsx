@@ -15,10 +15,17 @@ import {
 import { IModelApp } from "@itwin/core-frontend";
 
 import * as React from "react";
+import { ReportingClient } from "../reporting";
 import ReportsContainer from "./components/ReportsContainer";
 
 export class ReportsConfigProvider implements UiItemsProvider {
   public readonly id = "ReportsConfigProvider";
+  private readonly _accessToken: string | undefined;
+
+  constructor(accessToken?: string) {
+    this._accessToken = accessToken;
+  }
+
 
   public provideWidgets(
     _stageId: string,
@@ -37,8 +44,8 @@ export class ReportsConfigProvider implements UiItemsProvider {
       const ReportsWidget: AbstractWidgetProps = {
         id: "reports-config-widget",
         label: IModelApp.localization.getLocalizedString("ReportsConfigWidget:ReportsConfig"),
-        getWidgetContent() {
-          return <ReportsContainer />;
+        getWidgetContent: () => {
+          return <ReportsContainer accessToken={this._accessToken} />;
         },
       };
 

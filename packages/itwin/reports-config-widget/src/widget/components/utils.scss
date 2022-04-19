@@ -39,3 +39,12 @@
   display: flex;
   align-items: center;
 }
+
+.rcw-center-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: $iui-baseline;
+  height: 100%;
+}

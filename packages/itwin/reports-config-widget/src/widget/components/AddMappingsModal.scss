@@ -10,6 +10,8 @@
   display: flex;
   flex-direction: column;
   gap: $iui-baseline;
+  width: 45vw;
+  min-width: 100%;
   .add-mappings-table {
     flex-grow: 1;
     overflow: auto;
