@@ -47,7 +47,7 @@ export const DeleteModal = ({
   return (
     <>
       <Modal
-        title={IModelApp.localization.getLocalizedString("ReportsWidget:Confirm")}
+        title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Confirm")}
         modalRootId='grouping-mapping-widget'
         isOpen={show}
         isDismissible={!isLoading}
@@ -57,7 +57,7 @@ export const DeleteModal = ({
       >
         <div className="delete-modal-body-text">
           <Leading>
-            {IModelApp.localization.getLocalizedString("ReportsWidget:AreYouSureYouWantToDelete")}
+            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AreYouSureYouWantToDelete")}
           </Leading>
           <strong>
             {<MiddleTextTruncation text={`${entityName}?`} />}
@@ -69,7 +69,7 @@ export const DeleteModal = ({
               <LoadingSpinner />
             </div>}
           <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>
-            {IModelApp.localization.getLocalizedString("ReportsWidget:Delete")}
+            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Delete")}
           </Button>
           <Button
             styleType='default'
@@ -78,7 +78,7 @@ export const DeleteModal = ({
             }}
             disabled={isLoading}
           >
-            {IModelApp.localization.getLocalizedString("ReportsWidget:Cancel")}
+            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Cancel")}
           </Button>
         </ModalButtonBar>
       </Modal>

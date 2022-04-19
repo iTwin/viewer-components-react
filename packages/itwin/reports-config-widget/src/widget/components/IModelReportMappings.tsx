@@ -34,12 +34,12 @@ export const IModelReportMappings = ({ iModelId, reportMappings, isLoading, setS
         columns: [
           {
             id: "mappingName",
-            Header: IModelApp.localization.getLocalizedString("ReportsWidget:MappingName"),
+            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:MappingName"),
             accessor: "mappingName",
             Filter: tableFilters.TextFilter(),
           }, {
             id: "mappingDescription",
-            Header: IModelApp.localization.getLocalizedString("ReportsWidget:Description"),
+            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Description"),
             accessor: "mappingDescription",
             Filter: tableFilters.TextFilter(),
           },
@@ -60,7 +60,7 @@ export const IModelReportMappings = ({ iModelId, reportMappings, isLoading, setS
                       }}
                       icon={<SvgDelete />}
                     >
-                      {IModelApp.localization.getLocalizedString("ReportsWidget:Remove")}
+                      {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Remove")}
                     </MenuItem>,
                   ]}
                 >
@@ -92,7 +92,7 @@ export const IModelReportMappings = ({ iModelId, reportMappings, isLoading, setS
             className='mappings-table'
             density="extra-condensed"
             columns={reportMappingsColumns}
-            emptyTableContent={IModelApp.localization.getLocalizedString("ReportsWidget:NoReportMappingsAvailable")}
+            emptyTableContent={IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoReportMappingsAvailable")}
             isSortable
             isLoading={isLoading}
             paginatorRenderer={LocalizedTablePaginator}

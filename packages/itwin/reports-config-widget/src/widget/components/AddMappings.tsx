@@ -87,13 +87,13 @@ const AddMappings = ({
         columns: [
           {
             id: "mappingName",
-            Header: IModelApp.localization.getLocalizedString("ReportsWidget:MappingName"),
+            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:MappingName"),
             accessor: "mappingName",
             Filter: tableFilters.TextFilter(),
           },
           {
             id: "description",
-            Header: IModelApp.localization.getLocalizedString("ReportsWidget:Description"),
+            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Description"),
             accessor: "description",
             Filter: tableFilters.TextFilter(),
           },
@@ -122,7 +122,7 @@ const AddMappings = ({
 
   return (
     <>
-      <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsWidget:AddMappings")} />
+      <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddMappings")} />
       <div className='add-mappings-container'>
         <SelectIModel selectedIModelId={selectedIModelId} setSelectedIModelId={setSelectediModelId} />
         <Table<MappingType>
@@ -130,7 +130,7 @@ const AddMappings = ({
           columns={mappingsColumns}
           className='add-mappings-table'
           density="extra-condensed"
-          emptyTableContent={IModelApp.localization.getLocalizedString("ReportsWidget:NoMappingsAvailable")}
+          emptyTableContent={IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoMappingsAvailable")}
           isSortable
           isSelectable
           isLoading={isLoading}
@@ -142,7 +142,7 @@ const AddMappings = ({
         />
       </div>
       <ActionPanel
-        actionLabel={IModelApp.localization.getLocalizedString("ReportsWidget:Add")}
+        actionLabel={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Add")}
         onAction={onSave}
         onCancel={returnFn}
         isSavingDisabled={selectedMappings.length === 0}

@@ -14,32 +14,32 @@ const useValidator = (
   const [show, setShow] = useState(false);
   const customValidator = {
     NoDuplicateUnderscore: {
-      message: IModelApp.localization.getLocalizedString("ReportsWidget:Validators.NoDuplicateUnderscore"),
+      message: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Validators.NoDuplicateUnderscore"),
       rule: (val: string) => {
         return !val.match(/__+/i);
       },
     },
     OnlyBeginsWithLetterOrUnderscore: {
-      message: IModelApp.localization.getLocalizedString("ReportsWidget:Validators.OnlyBeginsWithLetterOrUnderscore"),
+      message: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Validators.OnlyBeginsWithLetterOrUnderscore"),
       rule: (val: string) => {
         return !val.match(/^[\W\d]+/i);
       },
     },
     FollowedByLettersUnderscoresAndDigits: {
-      message: IModelApp.localization.getLocalizedString("ReportsWidget:Validators.FollowedByLettersUnderscoresAndDigits"),
+      message: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Validators.FollowedByLettersUnderscoresAndDigits"),
       rule: (val: string) => {
         return !val.match(/\W+/i);
       },
     },
     CharLimit: {
-      message: IModelApp.localization.getLocalizedString("ReportsWidget:Validators.CharLimit"),
+      message: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Validators.CharLimit"),
       rule: (val: string) => {
         return val.length <= 128;
       },
     },
   };
 
-  const customMessages = { required: IModelApp.localization.getLocalizedString("ReportsWidget:Validators.ThisFieldIsRequired") };
+  const customMessages = { required: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Validators.ThisFieldIsRequired") };
 
   const validator = new SimpleReactValidator({
     messages: customMessages,

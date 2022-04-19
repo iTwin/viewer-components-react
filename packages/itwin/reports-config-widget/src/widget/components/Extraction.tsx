@@ -79,7 +79,7 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
         return (
           <div className="extraction-status">
             <ProgressRadial size="x-small" indeterminate />
-            <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Checking")}</Text>
+            <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:Checking")}</Text>
           </div>
         );
       case ExtractionStates.Queued:
@@ -90,7 +90,7 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
             >
               <SvgStatusPending />
             </div>
-            <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Queued")}</Text>
+            <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:Queued")}</Text>
           </div>
         );
       case ExtractionStates.Running:
@@ -101,7 +101,7 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
             >
               <SvgStatusRunning />
             </div>
-            <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Running")}</Text>
+            <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:Running")}</Text>
           </div>
         );
       case ExtractionStates.Succeeded:
@@ -112,7 +112,7 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
             >
               <SvgStatusSuccess />
             </div>
-            <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Success")}</Text>
+            <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:Success")}</Text>
           </div>
         );
       case ExtractionStates.Failed:
@@ -123,13 +123,13 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
             >
               <SvgStatusError />
             </div>
-            <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Failed")}</Text>
+            <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:Failed")}</Text>
           </div>
         );
       default:
         return (
           <div className="extraction-status">
-            <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:NotStarted")}</Text>
+            <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:NotStarted")}</Text>
           </div>
         );
     }
@@ -138,19 +138,19 @@ export const Extraction = ({ iModelId }: ExtractionProps) => {
   return (
     <div className="extraction-container">
       <Button onClick={async () => runExtraction()} disabled={isRunning} startIcon={<SvgCaretRight />}>
-        {IModelApp.localization.getLocalizedString("ReportsWidget:RunExtraction")}
+        {IModelApp.localization.getLocalizedString("ReportsConfigWidget:RunExtraction")}
       </Button>
       <span className="extraction-status-container">
         {state !== ExtractionStates.None &&
           <>
-            <Text>{IModelApp.localization.getLocalizedString("ReportsWidget:Status")}</Text>
+            <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:Status")}</Text>
             {status(state)}
             <IconButton styleType='borderless' onClick={async (_) => {
               await navigator.clipboard.writeText(jobId);
-              toaster.positive(IModelApp.localization.getLocalizedString("ReportsWidget:CopiedToClipboard"));
+              toaster.positive(IModelApp.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
             }}
-            disabled={!jobId}
-            title={IModelApp.localization.getLocalizedString("ReportsWidget:CopyJobId")}>
+              disabled={!jobId}
+              title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:CopyJobId")}>
               <SvgCopy />
             </IconButton>
           </>

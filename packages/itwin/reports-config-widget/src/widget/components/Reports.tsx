@@ -70,9 +70,9 @@ const useFetchReports = (
   iTwinId: string | undefined,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): [
-  Report[],
-  React.Dispatch<React.SetStateAction<Report[]>>
-] => {
+    Report[],
+    React.Dispatch<React.SetStateAction<Report[]>>
+  ] => {
   const [reports, setReports] = useState<Report[]>([]);
   useEffect(() => {
     void fetchReports(setReports, iTwinId, setIsLoading);
@@ -88,7 +88,7 @@ export const Reports = () => {
     ReportsView.REPORTS
   );
   const [selectedReport, setSelectedReport] = useState<
-  Report | undefined
+    Report | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reports, setReports] = useFetchReports(iTwinId, setIsLoading);
@@ -111,7 +111,7 @@ export const Reports = () => {
         columns: [
           {
             id: "displayName",
-            Header: IModelApp.localization.getLocalizedString("ReportsWidget:ReportName"),
+            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:ReportName"),
             accessor: "displayName",
             Cell: (value: CellProps<Report>) => (
               <div
@@ -128,7 +128,7 @@ export const Reports = () => {
           },
           {
             id: "description",
-            Header: IModelApp.localization.getLocalizedString("ReportsWidget:Description"),
+            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Description"),
             accessor: "description",
             Filter: tableFilters.TextFilter(),
           },
@@ -148,7 +148,7 @@ export const Reports = () => {
                       }}
                       icon={<SvgEdit />}
                     >
-                      {IModelApp.localization.getLocalizedString("ReportsWidget:Modify")}
+                      {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Modify")}
                     </MenuItem>,
                     <MenuItem
                       key={1}
@@ -159,7 +159,7 @@ export const Reports = () => {
                       }}
                       icon={<SvgDelete />}
                     >
-                      {IModelApp.localization.getLocalizedString("ReportsWidget:Remove")}
+                      {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Remove")}
                     </MenuItem>,
                   ]}
                 >
@@ -197,7 +197,7 @@ export const Reports = () => {
     default:
       return (
         <>
-          <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsWidget:ITwinReports")} />
+          <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ITwinReports")} />
           <div className="reports-table-container">
             <div className="table-toolbar">
               <Button
@@ -205,7 +205,7 @@ export const Reports = () => {
                 onClick={async () => addReport()}
                 styleType="high-visibility"
               >
-                {IModelApp.localization.getLocalizedString("ReportsWidget:New")}
+                {IModelApp.localization.getLocalizedString("ReportsConfigWidget:New")}
               </Button>
             </div>
             <Table<ReportType>
@@ -213,7 +213,7 @@ export const Reports = () => {
               className="reports-table"
               density="extra-condensed"
               columns={reportsColumns}
-              emptyTableContent={IModelApp.localization.getLocalizedString("ReportsWidget:NoReportsAvailable")}
+              emptyTableContent={IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoReportsAvailable")}
               isSortable
               isLoading={isLoading}
               paginatorRenderer={LocalizedTablePaginator}

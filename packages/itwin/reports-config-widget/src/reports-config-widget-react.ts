@@ -3,5 +3,5 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 /** UI Provider for iTwin Viewer Applications */
-export * from "./widget/ReportsUiProvider";
+export * from "./widget/ReportsConfigUiProvider";
 export * from "./ReportsWidget";

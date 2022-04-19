@@ -41,7 +41,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import AddMappings from "./AddMappings";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import { IModelReportMappings } from "./IModelReportMappings";
-import type { GetSingleIModelParams} from "@itwin/imodels-client-management";
+import type { GetSingleIModelParams } from "@itwin/imodels-client-management";
 import { IModelsClient } from "@itwin/imodels-client-management";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 
@@ -108,9 +108,9 @@ const useFetchReportMappings = (
   reportId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): [
-  ReportMappingAndMapping[],
-  React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>
-] => {
+    ReportMappingAndMapping[],
+    React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>
+  ] => {
   const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
   useEffect(() => {
     void fetchReportMappings(setReportMappings, reportId, setIsLoading);
@@ -129,7 +129,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     ReportMappingsView.REPORTMAPPINGS
   );
   const [selectedReportMapping, setSelectedReportMapping] = useState<
-  ReportMappingAndMapping | undefined
+    ReportMappingAndMapping | undefined
   >(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -158,14 +158,14 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           <WidgetHeader title={report.displayName ?? ""} returnFn={goBack} />
           <div className="report-mappings-container">
             <LabeledInput
-              label={IModelApp.localization.getLocalizedString("ReportsWidget:ODataFeedURL")}
+              label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ODataFeedURL")}
               className="odata-url-input"
               readOnly={true}
               value={odataFeedUrl}
               svgIcon={
                 <IconButton styleType='borderless' onClick={async (_) => {
                   await navigator.clipboard.writeText(odataFeedUrl);
-                  toaster.positive(IModelApp.localization.getLocalizedString("ReportsWidget:CopiedToClipboard"));
+                  toaster.positive(IModelApp.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
                 }}>
                   <SvgCopy />
                 </IconButton>
@@ -178,7 +178,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
                 onClick={async () => addMapping()}
                 styleType="high-visibility"
               >
-                {IModelApp.localization.getLocalizedString("ReportsWidget:AddMapping")}
+                {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddMapping")}
               </Button>
             </div>
             <div className="imodels-list">

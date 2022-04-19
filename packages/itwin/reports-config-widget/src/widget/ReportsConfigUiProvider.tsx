@@ -12,12 +12,13 @@ import {
   StagePanelSection,
   StageUsage,
 } from "@itwin/appui-abstract";
+import { IModelApp } from "@itwin/core-frontend";
 
 import * as React from "react";
 import ReportsContainer from "./components/ReportsContainer";
 
-export class ReportsProvider implements UiItemsProvider {
-  public readonly id = "ReportsProvider";
+export class ReportsConfigProvider implements UiItemsProvider {
+  public readonly id = "ReportsConfigProvider";
 
   public provideWidgets(
     _stageId: string,
@@ -34,8 +35,8 @@ export class ReportsProvider implements UiItemsProvider {
       zonelocation === AbstractZoneLocation.CenterLeft
     ) {
       const ReportsWidget: AbstractWidgetProps = {
-        id: "reports-widget",
-        label: "Reports",
+        id: "reports-config-widget",
+        label: IModelApp.localization.getLocalizedString("ReportsConfigWidget:ReportsConfig"),
         getWidgetContent() {
           return <ReportsContainer />;
         },

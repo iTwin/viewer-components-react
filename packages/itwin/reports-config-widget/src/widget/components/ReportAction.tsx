@@ -55,18 +55,18 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
   return (
     <>
       <WidgetHeader
-        title={report ? IModelApp.localization.getLocalizedString("ReportsWidget:ModifyReport") : IModelApp.localization.getLocalizedString("ReportsWidget:AddReport")}
+        title={report ? IModelApp.localization.getLocalizedString("ReportsConfigWidget:ModifyReport") : IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddReport")}
         returnFn={returnFn}
       />
       <div className='details-form-container'>
-        <Fieldset legend={IModelApp.localization.getLocalizedString("ReportsWidget:ReportDetails")} className='details-form'>
+        <Fieldset legend={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ReportDetails")} className='details-form'>
           <Small className='field-legend'>
-            {IModelApp.localization.getLocalizedString("ReportsWidget:MandatoryFields")}
+            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:MandatoryFields")}
           </Small>
           <LabeledInput
             id='name'
             name='name'
-            label={IModelApp.localization.getLocalizedString("ReportsWidget:Name")}
+            label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Name")}
             value={values.name}
             required
             onChange={(event) => {
@@ -91,7 +91,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
             id='description'
             required
             name='description'
-            label={IModelApp.localization.getLocalizedString("ReportsWidget:Description")}
+            label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Description")}
             value={values.description}
             onChange={(event) => {
               handleInputChange(event, values, setValues);
@@ -118,7 +118,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         </Fieldset>
       </div>
       <ActionPanel
-        actionLabel={IModelApp.localization.getLocalizedString("ReportsWidget:Add")}
+        actionLabel={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Add")}
         onAction={onSave}
         onCancel={returnFn}
         isSavingDisabled={!(values.name && values.description)}

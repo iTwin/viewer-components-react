@@ -62,5 +62,6 @@
     "FollowedByLettersUnderscoresAndDigits": "Name can only contain letters, underscores, or digits",
     "CharLimit": "There is an 128 character limit.",
     "ThisFieldIsRequired": "This field is required"
-  }
+  },
+  "ReportsConfig": "Reports Config"
 }

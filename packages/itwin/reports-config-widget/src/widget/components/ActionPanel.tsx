@@ -46,7 +46,7 @@ const ActionPanel = ({
           onClick={onCancel}
           disabled={isCancelDisabled || isLoading}
         >
-          {IModelApp.localization.getLocalizedString("ReportsWidget:Cancel")}
+          {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Cancel")}
         </Button>
       </div>
     </div>
