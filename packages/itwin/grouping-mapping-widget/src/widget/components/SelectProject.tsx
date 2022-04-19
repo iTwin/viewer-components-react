@@ -92,7 +92,6 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
           }
         />
       </HorizontalTabs>
-
       <div className='project-grid'>
         <ProjectGrid
           onThumbnailClick={onSelect}
