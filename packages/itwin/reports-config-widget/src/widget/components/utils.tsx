@@ -5,7 +5,7 @@
 import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
 import { ProgressRadial, Text, toaster } from "@itwin/itwinui-react";
 import "./utils.scss";
-import React, { ReactNode } from "react";
+import React from "react";
 import { IModelApp } from "@itwin/core-frontend";
 
 export interface WidgetHeaderProps {
@@ -25,6 +25,7 @@ export const WidgetHeader = ({
         <div
           className={disabled ? "chevron-disabled" : "chevron"}
           onClick={disabled ? undefined : returnFn}
+          onKeyUp={disabled ? undefined : returnFn}
         >
           <SvgChevronLeft />
         </div>
@@ -79,7 +80,7 @@ export const LoadingOverlay = () => (
     <ProgressRadial indeterminate />
     <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:PleaseWait")}</Text>
   </div>
-)
+);
 interface EmptyMessageProps {
   children?: React.ReactNode;
 }
@@ -87,9 +88,8 @@ export const EmptyMessage = ({ children }: EmptyMessageProps) => {
   return (
     <div className='rcw-center-overlay'>
       {children}
-    </div>)
-}
-
+    </div>);
+};
 
 export const handleInputChange = <T,>(
   e: React.ChangeEvent<HTMLInputElement>,

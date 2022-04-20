@@ -8,27 +8,18 @@ import {
   SvgAdd,
   SvgDelete,
   SvgEdit,
-  SvgImport,
   SvgMore,
 } from "@itwin/itwinui-icons-react";
-import type {
-  TablePaginatorRendererProps,
-} from "@itwin/itwinui-react";
 import {
   Button,
-  ButtonGroup,
   DropdownMenu,
   IconButton,
-  LabeledInput,
   MenuItem,
-  Table,
   Text,
-  tableFilters,
-  TablePaginator,
 } from "@itwin/itwinui-react";
-import type { CellProps } from "react-table";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { CreateTypeFromInterface, EmptyMessage, LoadingOverlay } from "./utils";
+import type { CreateTypeFromInterface } from "./utils";
+import { EmptyMessage, LoadingOverlay } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
@@ -37,7 +28,6 @@ import { ReportingClient } from "../../reporting/reportingClient";
 import { IModelApp } from "@itwin/core-frontend";
 import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
-import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import { HorizontalTile } from "./HorizontalTile";
 import { SearchBar } from "./SearchBar";
 import { AccessTokenContext } from "./ReportsContainer";
@@ -70,7 +60,6 @@ const fetchReports = async (
   }
 };
 
-
 export const Reports = () => {
   const iTwinId = useActiveIModelConnection()?.iTwinId;
   const accessToken = useContext(AccessTokenContext);
@@ -79,36 +68,22 @@ export const Reports = () => {
     ReportsView.REPORTS
   );
   const [selectedReport, setSelectedReport] = useState<
-    Report | undefined
+  Report | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
+  const [reports, setReports] = useState<Report[]>([]);
 
-
-  const useFetchReports = (
-    iTwinId: string | undefined,
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  ): [
-      Report[],
-      React.Dispatch<React.SetStateAction<Report[]>>
-    ] => {
-    const [reports, setReports] = useState<Report[]>([]);
-    useEffect(() => {
-      void fetchReports(setReports, iTwinId, setIsLoading, accessToken);
-    }, [iTwinId, setIsLoading]);
-
-    return [reports, setReports];
-  };
-
-  const [reports, setReports] = useFetchReports(iTwinId, setIsLoading);
-
+  useEffect(() => {
+    void fetchReports(setReports, iTwinId, setIsLoading, accessToken);
+  }, [accessToken, iTwinId, setIsLoading]);
 
   const refresh = useCallback(async () => {
     setReportsView(ReportsView.REPORTS);
     setSelectedReport(undefined);
     setReports([]);
     await fetchReports(setReports, iTwinId, setIsLoading, accessToken);
-  }, [iTwinId, setReports]);
+  }, [accessToken, iTwinId, setReports]);
 
   const addReport = () => {
     setReportsView(ReportsView.ADDING);
@@ -116,10 +91,9 @@ export const Reports = () => {
 
   const filteredReports = useMemo(() => reports.filter((x) =>
     [x.displayName, x.description]
-      .join(' ')
+      .join(" ")
       .toLowerCase()
-      .includes(searchValue.toLowerCase())), [reports, searchValue])
-
+      .includes(searchValue.toLowerCase())), [reports, searchValue]);
 
   switch (reportsView) {
     case ReportsView.ADDING:

@@ -2,23 +2,17 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useActiveIModelConnection } from "@itwin/appui-react";
+
 import { IModelApp } from "@itwin/core-frontend";
-import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
-import type { MinimalIModel } from "@itwin/imodels-client-management";
-import { GetIModelListParams, IModelsClient, toArray } from "@itwin/imodels-client-management";
 import {
   Modal,
   ModalContent,
-  TablePaginatorRendererProps,
 } from "@itwin/itwinui-react";
 import {
-  Button,
   Table,
   tableFilters,
-  TablePaginator,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import type { Mapping } from "../../reporting";
 import { ReportingClient } from "../../reporting/reportingClient";
 import ActionPanel from "./ActionPanel";
@@ -28,7 +22,7 @@ import type { ReportMappingAndMapping } from "./ReportMappings";
 import { AccessTokenContext } from "./ReportsContainer";
 import { SelectIModel } from "./SelectIModel";
 import type { CreateTypeFromInterface } from "./utils";
-import { handleError, WidgetHeader } from "./utils";
+import { handleError } from "./utils";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
 
@@ -50,7 +44,6 @@ const fetchMappings = async (
   }
 };
 
-
 interface AddMappingsModalProps {
   reportId: string;
   existingMappings: ReportMappingAndMapping[];
@@ -67,27 +60,14 @@ const AddMappingsModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const [selectedIModelId, setSelectediModelId] = useState<string>("");
+  const [mappings, setMappings] = useState<Mapping[]>([]);
   const accessToken = useContext(AccessTokenContext);
 
-
-  const useFetchMappings = (
-    selectedIModelId: string,
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  ): [
-      Mapping[],
-      React.Dispatch<React.SetStateAction<Mapping[]>>
-    ] => {
-    const [mappings, setMappings] = useState<Mapping[]>([]);
-    useEffect(() => {
-      if (selectedIModelId) {
-        void fetchMappings(setMappings, selectedIModelId, setIsLoading, accessToken);
-      }
-    }, [selectedIModelId, setIsLoading]);
-
-    return [mappings, setMappings];
-  };
-
-  const [mappings] = useFetchMappings(selectedIModelId, setIsLoading);
+  useEffect(() => {
+    if (selectedIModelId) {
+      void fetchMappings(setMappings, selectedIModelId, setIsLoading, accessToken);
+    }
+  }, [accessToken, selectedIModelId, setIsLoading]);
 
   const mappingsColumns = useMemo(
     () => [
@@ -124,8 +104,7 @@ const AddMappingsModal = ({
       await returnFn();
     } catch (error: any) {
       handleError(error.status);
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
   };

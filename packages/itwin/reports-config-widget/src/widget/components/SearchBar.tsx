@@ -6,12 +6,12 @@ import { IModelApp } from "@itwin/core-frontend";
 import { SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
 import { IconButton, LabeledInput } from "@itwin/itwinui-react";
 import React from "react";
-import './SearchBar.scss'
+import "./SearchBar.scss";
 
 interface SearchBarProps {
   searchValue: string;
-  setSearchValue: React.Dispatch<React.SetStateAction<string>>
-  disabled?: boolean
+  setSearchValue: React.Dispatch<React.SetStateAction<string>>;
+  disabled?: boolean;
 
 }
 
@@ -27,5 +27,5 @@ export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarPr
     value={searchValue}
     onChange={(e) => setSearchValue(e.target.value)}
     disabled={disabled}
-  />
+  />;
 

@@ -7,29 +7,17 @@ import {
   SvgAdd,
   SvgCopy,
   SvgDelete,
-  SvgMore,
 } from "@itwin/itwinui-icons-react";
 import {
-  ProgressRadial,
-  TablePaginatorRendererProps,
-} from "@itwin/itwinui-react";
-import {
   Button,
-  Checkbox,
-  DropdownMenu,
   IconButton,
   LabeledInput,
-  MenuItem,
-  Table,
-  tableFilters,
-  TablePaginator,
   Text,
   toaster,
-  ToggleSwitch,
 } from "@itwin/itwinui-react";
-import type { CellProps } from "react-table";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { CreateTypeFromInterface, EmptyMessage, LoadingOverlay, prefixUrl } from "./utils";
+import type { CreateTypeFromInterface } from "./utils";
+import { EmptyMessage, LoadingOverlay, prefixUrl } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
@@ -37,7 +25,8 @@ import type { Report, ReportMapping } from "../../reporting";
 import { ReportingClient } from "../../reporting/reportingClient";
 import { IModelApp } from "@itwin/core-frontend";
 import AddMappingsModal from "./AddMappingsModal";
-import { Constants, GetSingleIModelParams, IModelsClientOptions } from "@itwin/imodels-client-management";
+import type { GetSingleIModelParams, IModelsClientOptions } from "@itwin/imodels-client-management";
+import { Constants } from "@itwin/imodels-client-management";
 import { IModelsClient } from "@itwin/imodels-client-management";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import { HorizontalTile } from "./HorizontalTile";
@@ -65,8 +54,8 @@ const fetchReportMappings = async (
     const reportingClientApi = new ReportingClient();
     const reportMappings = await reportingClientApi.getReportMappings(accessToken, reportId);
     const iModelClientOptions: IModelsClientOptions = {
-      api: { baseUrl: `${prefixUrl(Constants.api.baseUrl, process.env.IMJS_URL_PREFIX)}` }
-    }
+      api: { baseUrl: `${prefixUrl(Constants.api.baseUrl, process.env.IMJS_URL_PREFIX)}` },
+    };
 
     const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
     const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
@@ -112,7 +101,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     ReportMappingsView.REPORTMAPPINGS
   );
   const [selectedReportMapping, setSelectedReportMapping] = useState<
-    ReportMappingAndMapping | undefined
+  ReportMappingAndMapping | undefined
   >(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -120,49 +109,31 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   const [extractionState, setExtractionState] = useState<ExtractionStates>(ExtractionStates.None);
   const [runningIModelId, setRunningIModelId] = useState<string>("");
   const [searchValue, setSearchValue] = useState<string>("");
+  const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
 
-  const useFetchReportMappings = (
-    reportId: string,
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  ): [
-      ReportMappingAndMapping[],
-      React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>
-    ] => {
-    const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
-    useEffect(() => {
-      void fetchReportMappings(setReportMappings, reportId, setIsLoading, accessToken);
-    }, [reportId, setIsLoading]);
-
-    return [reportMappings, setReportMappings];
-  };
-
-  const [reportMappings, setReportMappings] = useFetchReportMappings(report.id ?? "", setIsLoading);
-
-
-
+  useEffect(() => {
+    void fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, accessToken);
+  }, [accessToken, report.id, setIsLoading]);
 
   const refresh = useCallback(async () => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
     setReportMappings([]);
     await fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, accessToken);
-  }, [report.id, setReportMappings]);
+  }, [accessToken, report.id, setReportMappings]);
 
   const addMapping = () => {
     setReportMappingsView(ReportMappingsView.ADDING);
   };
 
-  const uniqueIModels = useMemo(() => new Map(reportMappings.map(mapping => [mapping.imodelId ?? "", mapping.iModelName])), [reportMappings])
-
-
+  const uniqueIModels = useMemo(() => new Map(reportMappings.map((mapping) => [mapping.imodelId ?? "", mapping.iModelName])), [reportMappings]);
 
   const odataFeedUrl = `https://${process.env.IMJS_URL_PREFIX}api.bentley.com/insights/reporting/odata/${report.id}`;
 
-
   const filteredReportMappings = useMemo(() => reportMappings.filter((x) =>
     [x.iModelName, x.mappingName, x.mappingDescription]
-      .join(' ')
+      .join(" ")
       .toLowerCase()
-      .includes(searchValue.toLowerCase())), [reportMappings, searchValue])
+      .includes(searchValue.toLowerCase())), [reportMappings, searchValue]);
 
   return (
     <>

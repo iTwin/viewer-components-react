@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { AccessToken } from "@itwin/core-bentley";
+import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import * as React from "react";
 import { createContext, useEffect, useState } from "react";
@@ -16,15 +16,15 @@ interface ReportsContainerProps {
 }
 
 const ReportsContainer = ({ accessToken }: ReportsContainerProps) => {
-  const [currentAccessToken, setCurrentAccessToken] = useState<string>("")
+  const [currentAccessToken, setCurrentAccessToken] = useState<string>("");
 
   useEffect(() => {
     const fetchAccessToken = async () => {
-      const token = accessToken ?? (await IModelApp.authorizationClient?.getAccessToken() ?? "")
-      setCurrentAccessToken(token)
-    }
-    fetchAccessToken();
-  }, [accessToken, setCurrentAccessToken])
+      const token = accessToken ?? (await IModelApp.authorizationClient?.getAccessToken() ?? "");
+      setCurrentAccessToken(token);
+    };
+    void fetchAccessToken();
+  }, [accessToken, setCurrentAccessToken]);
 
   return (
     currentAccessToken ? <AccessTokenContext.Provider value={currentAccessToken}>

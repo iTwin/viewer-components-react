@@ -2,16 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
-import { SvgCaretRight, SvgCopy } from "@itwin/itwinui-icons-react";
-import { Button, ComboBox, ExpandableBlock, IconButton, LabeledInput, ProgressRadial, SelectOption, Text, toaster } from "@itwin/itwinui-react";
+import type { SelectOption } from "@itwin/itwinui-react";
+import { ComboBox, ProgressRadial, Text } from "@itwin/itwinui-react";
 import * as React from "react";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { ReportingClient } from "../../reporting/reportingClient";
-import { handleError, LoadingSpinner } from "./utils";
+import { handleError } from "./utils";
 import "./Extraction.scss";
-import { SvgStatusError, SvgStatusPending, SvgStatusRunning, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
+import { SvgStatusError, SvgStatusPending, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
 import { AccessTokenContext } from "./ReportsContainer";
 
 export enum ExtractionStates {
@@ -23,8 +22,8 @@ export enum ExtractionStates {
   Failed
 }
 interface ExtractionStatusProps {
-  state: ExtractionStates
-  setExtractionState?: React.Dispatch<React.SetStateAction<ExtractionStates>>
+  state: ExtractionStates;
+  setExtractionState?: React.Dispatch<React.SetStateAction<ExtractionStates>>;
   children?: React.ReactNode;
 }
 
@@ -40,21 +39,21 @@ export const ExtractionStatus = ({ state, children, setExtractionState }: Extrac
           timer = window.setTimeout(() => {
             setExtractionState(ExtractionStates.None);
             setFadeOut(false);
-          }, 6000)
+          }, 6000);
       }
     }
     return () => clearTimeout(timer);
-  }, [state, setExtractionState])
+  }, [state, setExtractionState]);
 
   useEffect(() => {
     let timer: number;
     switch (state) {
       case ExtractionStates.Succeeded:
       case ExtractionStates.Failed:
-        timer = window.setTimeout(() => setFadeOut(true), 5000)
+        timer = window.setTimeout(() => setFadeOut(true), 5000);
     }
     return () => clearTimeout(timer);
-  }, [state, setExtractionState])
+  }, [state, setExtractionState]);
 
   switch (state) {
     case ExtractionStates.Checking:
@@ -84,7 +83,7 @@ export const ExtractionStatus = ({ state, children, setExtractionState }: Extrac
         <div title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Success")} className="extraction-status">
           <div
             className={`status-icon`}
-            style={{ animation: fadeOut ? 'fade-out 1s' : "" }}
+            style={{ animation: fadeOut ? "fade-out 1s" : "" }}
           >
             <SvgStatusSuccess />
           </div>
@@ -101,15 +100,15 @@ export const ExtractionStatus = ({ state, children, setExtractionState }: Extrac
         </div>
       );
     default:
-      return <>{children}</>
+      return <>{children}</>;
   }
 };
 
 interface ExtractionProps {
   iModels: Map<string, string>;
-  setExtractingIModelId: React.Dispatch<React.SetStateAction<string>>
+  setExtractingIModelId: React.Dispatch<React.SetStateAction<string>>;
   extractionState: ExtractionStates;
-  setExtractionState: React.Dispatch<React.SetStateAction<ExtractionStates>>
+  setExtractionState: React.Dispatch<React.SetStateAction<ExtractionStates>>;
 }
 
 export const Extraction = ({ iModels, setExtractingIModelId, extractionState, setExtractionState }: ExtractionProps) => {
@@ -159,15 +158,15 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
       setIntervalId(undefined);
     }
     return () => window.clearInterval(intervalId);
-  }, [isRunning, intervalId, jobId]);
+  }, [accessToken, isRunning, intervalId, jobId, setExtractionState]);
 
   const iModelOptions = useMemo(() => {
-    const iModelOptions: SelectOption<string>[] = [];
+    const newIModelOptions: SelectOption<string>[] = [];
     for (const [iModelId, iModelName] of iModels.entries()) {
-      iModelOptions.push({ label: iModelName, value: iModelId, key: iModelId })
+      newIModelOptions.push({ label: iModelName, value: iModelId, key: iModelId });
     }
-    return iModelOptions
-  }, [iModels])
+    return newIModelOptions;
+  }, [iModels]);
 
   return (
     <div className="extraction-container">
@@ -181,10 +180,10 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
               setShowComboBox(false);
             }}
             inputProps={{
-              id: 'combo-input',
-              placeholder: IModelApp.localization.getLocalizedString("ReportsConfigWidget:SelectIModel")
+              id: "combo-input",
+              placeholder: IModelApp.localization.getLocalizedString("ReportsConfigWidget:SelectIModel"),
             }}
-            style={{ flexGrow: 1, maxWidth: '395px' }}
+            style={{ flexGrow: 1, maxWidth: "395px" }}
           /> :
           <Text
             className="iui-anchor"

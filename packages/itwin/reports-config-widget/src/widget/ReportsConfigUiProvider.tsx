@@ -15,7 +15,6 @@ import {
 import { IModelApp } from "@itwin/core-frontend";
 
 import * as React from "react";
-import { ReportingClient } from "../reporting";
 import ReportsContainer from "./components/ReportsContainer";
 
 export class ReportsConfigProvider implements UiItemsProvider {
@@ -25,7 +24,6 @@ export class ReportsConfigProvider implements UiItemsProvider {
   constructor(accessToken?: string) {
     this._accessToken = accessToken;
   }
-
 
   public provideWidgets(
     _stageId: string,

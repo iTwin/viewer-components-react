@@ -2,10 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { ReactNode } from "react";
+import type { ReactNode } from "react";
+import React from "react";
 import { Text } from "@itwin/itwinui-react";
-import './HorizontalTile.scss'
-
+import "./HorizontalTile.scss";
 
 interface HorizontalTileProps {
   title: string;
@@ -28,6 +28,6 @@ export const HorizontalTile = ({ title, subText, onClickTitle, titleTooltip, sub
         {button}
       </div>
     </div>
-  )
+  );
 
-}
+};
