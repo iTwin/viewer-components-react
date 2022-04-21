@@ -15,27 +15,32 @@ import {
   MenuItem,
   Table,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { GroupPropertyReportingAPI } from "../../api/generated/api";
-import { reportingClientApi } from "../../api/reportingClient";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import { PropertyMenuView } from "./PropertyMenu";
 import { handleError } from "./utils";
+import type { GroupProperty } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
+import type { Api } from "./GroupingMapping";
+import { ApiContext } from "./GroupingMapping";
 
-export type GroupProperty = CreateTypeFromInterface<GroupPropertyReportingAPI>;
+export type GroupPropertyType = CreateTypeFromInterface<GroupProperty>;
 
 const fetchGroupProperties = async (
-  setGroupProperties: React.Dispatch<React.SetStateAction<GroupProperty[]>>,
+  setGroupProperties: React.Dispatch<React.SetStateAction<GroupPropertyType[]>>,
   iModelId: string,
   mappingId: string,
   groupId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  apiContext: Api
 ) => {
   try {
     setIsLoading(true);
+    const reportingClientApi = new ReportingClient(apiContext.prefix);
     const groupProperties = await reportingClientApi.getGroupProperties(
+      apiContext.accessToken,
       iModelId,
       mappingId,
       groupId,
@@ -48,27 +53,6 @@ const fetchGroupProperties = async (
   }
 };
 
-const useFetchGroupProperties = (
-  iModelId: string,
-  mappingId: string,
-  groupId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-): [GroupProperty[], React.Dispatch<React.SetStateAction<GroupProperty[]>>] => {
-  const [groupProperties, setGroupProperties] = useState<GroupProperty[]>([]);
-
-  useEffect(() => {
-    void fetchGroupProperties(
-      setGroupProperties,
-      iModelId,
-      mappingId,
-      groupId,
-      setIsLoading,
-    );
-  }, [groupId, iModelId, mappingId, setIsLoading]);
-
-  return [groupProperties, setGroupProperties];
-};
-
 interface GroupPropertyTableProps {
   iModelId: string;
   mappingId: string;
@@ -76,12 +60,12 @@ interface GroupPropertyTableProps {
 
   setSelectedGroupProperty: React.Dispatch<
   React.SetStateAction<
-  CreateTypeFromInterface<GroupPropertyReportingAPI> | undefined
+  CreateTypeFromInterface<GroupProperty> | undefined
   >
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
-  onGroupPropertyModify: (value: CellProps<GroupProperty>) => void;
-  selectedGroupProperty?: GroupProperty;
+  onGroupPropertyModify: (value: CellProps<GroupPropertyType>) => void;
+  selectedGroupProperty?: GroupPropertyType;
 }
 
 const GroupPropertyTable = ({
@@ -93,15 +77,22 @@ const GroupPropertyTable = ({
   setSelectedGroupProperty,
   setGroupModifyView,
 }: GroupPropertyTableProps) => {
+  const apiContext = useContext(ApiContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [groupProperties, setGroupProperties] = useFetchGroupProperties(
-    iModelId,
-    mappingId,
-    groupId,
-    setIsLoading,
-  );
   const [showGroupPropertyDeleteModal, setShowGroupPropertyDeleteModal] =
     useState<boolean>(false);
+  const [groupProperties, setGroupProperties] = useState<GroupPropertyType[]>([]);
+
+  useEffect(() => {
+    void fetchGroupProperties(
+      setGroupProperties,
+      iModelId,
+      mappingId,
+      groupId,
+      setIsLoading,
+      apiContext
+    );
+  }, [apiContext, groupId, iModelId, mappingId, setIsLoading]);
 
   const refresh = useCallback(async () => {
     setGroupProperties([]);
@@ -111,8 +102,9 @@ const GroupPropertyTable = ({
       mappingId,
       groupId,
       setIsLoading,
+      apiContext
     );
-  }, [groupId, iModelId, mappingId, setGroupProperties]);
+  }, [apiContext, groupId, iModelId, mappingId, setGroupProperties]);
 
   const groupPropertiesColumns = useMemo(
     () => [
@@ -123,7 +115,7 @@ const GroupPropertyTable = ({
             id: "propertyName",
             Header: "Property",
             accessor: "propertyName",
-            Cell: (value: CellProps<GroupProperty>) => (
+            Cell: (value: CellProps<GroupPropertyType>) => (
               <div
                 className='iui-anchor'
                 onClick={() => onGroupPropertyModify(value)}
@@ -136,7 +128,7 @@ const GroupPropertyTable = ({
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<GroupProperty>) => {
+            Cell: (value: CellProps<GroupPropertyType>) => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
@@ -189,7 +181,7 @@ const GroupPropertyTable = ({
       >
         Add Property
       </Button>
-      <Table<GroupProperty>
+      <Table<GroupPropertyType>
         data={groupProperties}
         density='extra-condensed'
         columns={groupPropertiesColumns}
@@ -202,7 +194,9 @@ const GroupPropertyTable = ({
         show={showGroupPropertyDeleteModal}
         setShow={setShowGroupPropertyDeleteModal}
         onDelete={async () => {
+          const reportingClientApi = new ReportingClient(apiContext.prefix);
           await reportingClientApi.deleteGroupProperty(
+            apiContext.accessToken,
             iModelId,
             mappingId,
             groupId,

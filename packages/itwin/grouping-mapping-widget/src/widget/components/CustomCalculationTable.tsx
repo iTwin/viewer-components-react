@@ -15,30 +15,35 @@ import {
   MenuItem,
   Table,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { CustomCalculationReportingAPI } from "../../api/generated/api";
-import { reportingClientApi } from "../../api/reportingClient";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import { handleError } from "./utils";
+import type { CustomCalculation } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
+import type { Api } from "./GroupingMapping";
+import { ApiContext } from "./GroupingMapping";
 
-export type CustomCalculation =
-  CreateTypeFromInterface<CustomCalculationReportingAPI>;
+export type CustomCalculationType =
+  CreateTypeFromInterface<CustomCalculation>;
 
 const fetchCustomCalculations = async (
   setCustomCalculations: React.Dispatch<
-  React.SetStateAction<CustomCalculation[]>
+  React.SetStateAction<CustomCalculationType[]>
   >,
   iModelId: string,
   mappingId: string,
   groupId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  apiContext: Api
 ) => {
   try {
     setIsLoading(true);
+    const reportingClientApi = new ReportingClient(apiContext.prefix);
     const customCalculations = await reportingClientApi.getCustomCalculations(
+      apiContext.accessToken,
       iModelId,
       mappingId,
       groupId,
@@ -51,32 +56,6 @@ const fetchCustomCalculations = async (
   }
 };
 
-const useFetchCustomCalculations = (
-  iModelId: string,
-  mappingId: string,
-  groupId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-): [
-  CustomCalculation[],
-  React.Dispatch<React.SetStateAction<CustomCalculation[]>>,
-] => {
-  const [CustomCalculations, setCustomCalculations] = useState<
-  CustomCalculation[]
-  >([]);
-
-  useEffect(() => {
-    void fetchCustomCalculations(
-      setCustomCalculations,
-      iModelId,
-      mappingId,
-      groupId,
-      setIsLoading,
-    );
-  }, [groupId, iModelId, mappingId, setIsLoading]);
-
-  return [CustomCalculations, setCustomCalculations];
-};
-
 interface CustomCalculationTableProps {
   iModelId: string;
   mappingId: string;
@@ -84,12 +63,12 @@ interface CustomCalculationTableProps {
 
   setSelectedCustomCalculation: React.Dispatch<
   React.SetStateAction<
-  CreateTypeFromInterface<CustomCalculationReportingAPI> | undefined
+  CreateTypeFromInterface<CustomCalculation> | undefined
   >
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
-  onCustomCalculationModify: (value: CellProps<CustomCalculation>) => void;
-  selectedCustomCalculation?: CustomCalculation;
+  onCustomCalculationModify: (value: CellProps<CustomCalculationType>) => void;
+  selectedCustomCalculation?: CustomCalculationType;
 }
 
 const CustomCalculationTable = ({
@@ -101,13 +80,26 @@ const CustomCalculationTable = ({
   onCustomCalculationModify,
   selectedCustomCalculation,
 }: CustomCalculationTableProps) => {
+  const apiContext = useContext(ApiContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [customCalculations, setCustomCalculations] =
-    useFetchCustomCalculations(iModelId, mappingId, groupId, setIsLoading);
   const [
     showCustomCalculationDeleteModal,
     setShowCustomCalculationDeleteModal,
   ] = useState<boolean>(false);
+  const [customCalculations, setCustomCalculations] = useState<
+  CustomCalculationType[]
+  >([]);
+
+  useEffect(() => {
+    void fetchCustomCalculations(
+      setCustomCalculations,
+      iModelId,
+      mappingId,
+      groupId,
+      setIsLoading,
+      apiContext
+    );
+  }, [apiContext, groupId, iModelId, mappingId, setIsLoading]);
 
   const refresh = useCallback(async () => {
     setCustomCalculations([]);
@@ -117,8 +109,9 @@ const CustomCalculationTable = ({
       mappingId,
       groupId,
       setIsLoading,
+      apiContext
     );
-  }, [groupId, iModelId, mappingId, setCustomCalculations]);
+  }, [apiContext, groupId, iModelId, mappingId, setCustomCalculations]);
 
   const CustomCalculationsColumns = useMemo(
     () => [
@@ -129,7 +122,7 @@ const CustomCalculationTable = ({
             id: "propertyName",
             Header: "Custom Calculation",
             accessor: "propertyName",
-            Cell: (value: CellProps<CustomCalculation>) => (
+            Cell: (value: CellProps<CustomCalculationType>) => (
               <div
                 className='iui-anchor'
                 onClick={() => onCustomCalculationModify(value)}
@@ -147,7 +140,7 @@ const CustomCalculationTable = ({
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<CustomCalculation>) => {
+            Cell: (value: CellProps<CustomCalculationType>) => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
@@ -200,7 +193,7 @@ const CustomCalculationTable = ({
       >
         Add Custom Calculation
       </Button>
-      <Table<CustomCalculation>
+      <Table<CustomCalculationType>
         data={customCalculations}
         density='extra-condensed'
         columns={CustomCalculationsColumns}
@@ -214,7 +207,9 @@ const CustomCalculationTable = ({
         show={showCustomCalculationDeleteModal}
         setShow={setShowCustomCalculationDeleteModal}
         onDelete={async () => {
+          const reportingClientApi = new ReportingClient(apiContext.prefix);
           await reportingClientApi.deleteCustomCalculation(
+            apiContext.accessToken,
             iModelId,
             mappingId,
             groupId,

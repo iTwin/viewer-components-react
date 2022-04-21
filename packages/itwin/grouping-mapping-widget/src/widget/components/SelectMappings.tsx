@@ -11,21 +11,25 @@ import {
   tableFilters,
   TablePaginator,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { MappingReportingAPI } from "../../api/generated/api";
-import { reportingClientApi } from "../../api/reportingClient";
-import type { Mapping } from "./Mapping";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { Mapping } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
+import type { Api } from "./GroupingMapping";
+import { ApiContext } from "./GroupingMapping";
+import type { MappingType } from "./Mapping";
 import "./SelectMapping.scss";
 import { handleError } from "./utils";
 
 const fetchMappings = async (
-  setMappings: React.Dispatch<React.SetStateAction<MappingReportingAPI[]>>,
+  setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  apiContext: Api
 ) => {
   try {
     setIsLoading(true);
-    const mappings = await reportingClientApi.getMappings(iModelId);
+    const reportingClientApi = new ReportingClient(apiContext.prefix);
+    const mappings = await reportingClientApi.getMappings(apiContext.accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -34,24 +38,9 @@ const fetchMappings = async (
   }
 };
 
-const useFetchMappings = (
-  iModelId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-): [
-  MappingReportingAPI[],
-  React.Dispatch<React.SetStateAction<MappingReportingAPI[]>>
-] => {
-  const [mappings, setMappings] = useState<MappingReportingAPI[]>([]);
-  useEffect(() => {
-    void fetchMappings(setMappings, iModelId, setIsLoading);
-  }, [iModelId, setIsLoading]);
-
-  return [mappings, setMappings];
-};
-
 interface SelectMappingsProps {
   iModelId: string;
-  onSelect: (selectedMappings: Mapping[]) => void;
+  onSelect: (selectedMappings: MappingType[]) => void;
   onCancel: () => void;
   backFn: () => void;
 }
@@ -62,9 +51,14 @@ const SelectMappings = ({
   onCancel,
   backFn,
 }: SelectMappingsProps) => {
+  const apiContext = useContext(ApiContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [mappings] = useFetchMappings(iModelId, setIsLoading);
-  const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
+  const [selectedMappings, setSelectedMappings] = useState<MappingType[]>([]);
+  const [mappings, setMappings] = useState<Mapping[]>([]);
+
+  useEffect(() => {
+    void fetchMappings(setMappings, iModelId, setIsLoading, apiContext);
+  }, [apiContext, iModelId, setIsLoading]);
 
   const mappingsColumns = useMemo(
     () => [
@@ -99,7 +93,7 @@ const SelectMappings = ({
 
   return (
     <div className='select-mapping-container'>
-      <Table<Mapping>
+      <Table<MappingType>
         data={mappings}
         columns={mappingsColumns}
         className='select-mapping-table'
@@ -107,7 +101,7 @@ const SelectMappings = ({
         isSortable
         isSelectable
         isLoading={isLoading}
-        onSelect={(selectData: Mapping[] | undefined) => {
+        onSelect={(selectData: MappingType[] | undefined) => {
           selectData && setSelectedMappings(selectData);
         }}
         paginatorRenderer={paginator}
