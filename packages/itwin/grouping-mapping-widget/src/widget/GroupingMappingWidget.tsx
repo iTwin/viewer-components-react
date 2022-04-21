@@ -13,7 +13,6 @@ import {
   StageUsage,
 } from "@itwin/appui-abstract";
 import type { AccessToken } from "@itwin/core-bentley";
-
 import React from "react";
 import GroupingMapping from "./components/GroupingMapping";
 
