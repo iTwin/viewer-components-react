@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 19 Apr 2022 14:15:57 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Apr 2022 18:47:53 GMT and should not be manually modified.
+
+## 0.4.3
+Thu, 21 Apr 2022 18:47:53 GMT
+
+### Patches
+
+- Do not unmount children in AutoSizer when height or width is 0 to avoid losing children state
 
 ## 0.4.2
 Tue, 19 Apr 2022 14:15:57 GMT
