@@ -19,7 +19,7 @@ import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import type { ReportMappingAndMapping } from "./ReportMappings";
-import { Api, ApiContext } from "./ReportsContainer";
+import { Api, ApiContext, useApi } from "../context/ApiContext";
 import { SelectIModel } from "./SelectIModel";
 import type { CreateTypeFromInterface } from "./utils";
 import { handleError } from "./utils";
@@ -61,7 +61,7 @@ const AddMappingsModal = ({
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const [selectedIModelId, setSelectediModelId] = useState<string>("");
   const [mappings, setMappings] = useState<Mapping[]>([]);
-  const apiContext = useContext(ApiContext);
+  const apiContext = useApi();
 
   useEffect(() => {
     if (selectedIModelId) {

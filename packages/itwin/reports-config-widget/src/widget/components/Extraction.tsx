@@ -11,7 +11,7 @@ import { ReportingClient } from "../../reporting/reportingClient";
 import { handleError } from "./utils";
 import "./Extraction.scss";
 import { SvgStatusError, SvgStatusPending, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
-import { ApiContext } from "./ReportsContainer";
+import { ApiContext, useApi } from "../context/ApiContext";
 
 export enum ExtractionStates {
   None,
@@ -111,7 +111,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [intervalId, setIntervalId] = useState<number>();
   const [showComboBox, setShowComboBox] = useState<boolean>(false);
-  const apiContext = useContext(ApiContext);
+  const apiContext = useApi();
 
   const runExtraction = async (iModelId: string) => {
     try {

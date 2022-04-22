@@ -30,7 +30,7 @@ import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
 import { HorizontalTile } from "./HorizontalTile";
 import { SearchBar } from "./SearchBar";
-import { Api, ApiContext } from "./ReportsContainer";
+import { Api, ApiContext, useApi } from "../context/ApiContext";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -62,7 +62,7 @@ const fetchReports = async (
 
 export const Reports = () => {
   const iTwinId = useActiveIModelConnection()?.iTwinId;
-  const apiContext = useContext(ApiContext);
+  const apiContext = useApi();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [reportsView, setReportsView] = useState<ReportsView>(
     ReportsView.REPORTS

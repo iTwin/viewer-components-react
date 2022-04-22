@@ -11,7 +11,7 @@ import "./ReportAction.scss";
 import type { Report } from "../../reporting";
 import { ReportingClient } from "../../reporting/reportingClient";
 import { IModelApp } from "@itwin/core-frontend";
-import { ApiContext } from "./ReportsContainer";
+import { ApiContext, useApi } from "../context/ApiContext";
 
 interface ReportActionProps {
   iTwinId: string;
@@ -20,7 +20,7 @@ interface ReportActionProps {
 }
 
 const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
-  const apiContext = useContext(ApiContext);
+  const apiContext = useApi();
   const [values, setValues] = useState({
     name: report?.displayName ?? "",
     description: report?.description ?? "",

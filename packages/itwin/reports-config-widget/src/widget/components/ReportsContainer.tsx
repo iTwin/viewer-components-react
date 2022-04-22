@@ -6,15 +6,9 @@ import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import * as React from "react";
 import { createContext, useEffect, useState } from "react";
-import { Reports } from "./Reports";
+import { Reports } from "../components/Reports";
+import { ApiContext } from "../context/ApiContext";
 import "./ReportsContainer.scss";
-
-export interface Api {
-  accessToken: AccessToken;
-  prefix?: "" | "dev" | "qa";
-}
-
-export const ApiContext = createContext<Api>({ accessToken: "" });
 
 interface ReportsContainerProps {
   accessToken?: AccessToken;

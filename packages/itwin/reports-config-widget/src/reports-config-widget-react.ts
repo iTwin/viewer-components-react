@@ -4,4 +4,4 @@
 *--------------------------------------------------------------------------------------------*/
 /** UI Provider for iTwin Viewer Applications */
 export * from "./widget/ReportsConfigUiProvider";
-export * from "./ReportsWidget";
+export * from "./ReportsConfigWidget";

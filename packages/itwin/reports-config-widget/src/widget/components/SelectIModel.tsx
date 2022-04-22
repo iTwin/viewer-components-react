@@ -11,7 +11,7 @@ import { IModelsClient, toArray } from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useContext, useMemo } from "react";
 import { useEffect, useState } from "react";
-import { Api, ApiContext } from "./ReportsContainer";
+import { Api, ApiContext, useApi } from "../context/ApiContext";
 import "./SelectIModel.scss";
 import { LoadingSpinner, prefixUrl } from "./utils";
 
@@ -47,7 +47,7 @@ interface SelectedIModelProps {
 }
 
 export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: SelectedIModelProps) => {
-  const apiContext = useContext(ApiContext);
+  const apiContext = useApi();
   const iModelId = useActiveIModelConnection()?.iModelId;
   const iTwinId = useActiveIModelConnection()?.iTwinId;
   const [isLoading, setIsLoading] = useState<boolean>(true);

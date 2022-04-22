@@ -32,7 +32,7 @@ import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import { HorizontalTile } from "./HorizontalTile";
 import { Extraction, ExtractionStates, ExtractionStatus } from "./Extraction";
 import { SearchBar } from "./SearchBar";
-import { Api, ApiContext } from "./ReportsContainer";
+import { Api, ApiContext, useApi } from "../context/ApiContext";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
@@ -96,7 +96,7 @@ interface ReportMappingsProps {
 }
 
 export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
-  const apiContext = useContext(ApiContext);
+  const apiContext = useApi();
   const [reportMappingsView, setReportMappingsView] = useState<ReportMappingsView>(
     ReportMappingsView.REPORTMAPPINGS
   );
