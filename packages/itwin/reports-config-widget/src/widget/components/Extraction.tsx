@@ -11,7 +11,7 @@ import { ReportingClient } from "../../reporting/reportingClient";
 import { handleError } from "./utils";
 import "./Extraction.scss";
 import { SvgStatusError, SvgStatusPending, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
-import { AccessTokenContext } from "./ReportsContainer";
+import { ApiContext } from "./ReportsContainer";
 
 export enum ExtractionStates {
   None,
@@ -111,14 +111,14 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [intervalId, setIntervalId] = useState<number>();
   const [showComboBox, setShowComboBox] = useState<boolean>(false);
-  const accessToken = useContext(AccessTokenContext);
+  const apiContext = useContext(ApiContext);
 
   const runExtraction = async (iModelId: string) => {
     try {
       setExtractionState(ExtractionStates.Checking);
       setExtractingIModelId(iModelId);
-      const reportingClientApi = new ReportingClient();
-      const response = await reportingClientApi.runExtraction(accessToken, iModelId);
+      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const response = await reportingClientApi.runExtraction(apiContext.accessToken, iModelId);
       setJobId(response.run?.id ?? "");
       setIsRunning(true);
 
@@ -133,8 +133,8 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
       const delay = 5000;
       const newIntervalId = window.setInterval(async () => {
         setExtractionState(ExtractionStates.Checking);
-        const reportingClientApi = new ReportingClient();
-        const response = await reportingClientApi.getExtractionStatus(accessToken, jobId);
+        const reportingClientApi = new ReportingClient(apiContext.prefix);
+        const response = await reportingClientApi.getExtractionStatus(apiContext.accessToken, jobId);
         if (response.status?.state === "Queued") {
           setExtractionState(ExtractionStates.Queued);
         } else if (response.status?.state === "Running") {
@@ -153,7 +153,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
       setIntervalId(undefined);
     }
     return () => window.clearInterval(intervalId);
-  }, [accessToken, isRunning, intervalId, jobId, setExtractionState]);
+  }, [apiContext, isRunning, intervalId, jobId, setExtractionState]);
 
   const iModelOptions = useMemo(() => {
     const newIModelOptions: SelectOption<string>[] = [];

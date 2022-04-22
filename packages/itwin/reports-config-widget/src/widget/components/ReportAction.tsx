@@ -11,7 +11,7 @@ import "./ReportAction.scss";
 import type { Report } from "../../reporting";
 import { ReportingClient } from "../../reporting/reportingClient";
 import { IModelApp } from "@itwin/core-frontend";
-import { AccessTokenContext } from "./ReportsContainer";
+import { ApiContext } from "./ReportsContainer";
 
 interface ReportActionProps {
   iTwinId: string;
@@ -20,7 +20,7 @@ interface ReportActionProps {
 }
 
 const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
-  const accessToken = useContext(AccessTokenContext);
+  const apiContext = useContext(ApiContext);
   const [values, setValues] = useState({
     name: report?.displayName ?? "",
     description: report?.description ?? "",
@@ -35,13 +35,13 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         return;
       }
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient();
+      const reportingClientApi = new ReportingClient(apiContext.prefix);
       report
-        ? await reportingClientApi.updateReport(accessToken, report.id ?? "", {
+        ? await reportingClientApi.updateReport(apiContext.accessToken, report.id ?? "", {
           displayName: values.name,
           description: values.description,
         })
-        : await reportingClientApi.createReport(accessToken, {
+        : await reportingClientApi.createReport(apiContext.accessToken, {
           displayName: values.name,
           description: values.description,
           projectId: iTwinId,

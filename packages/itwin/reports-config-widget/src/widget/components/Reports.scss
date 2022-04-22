@@ -7,7 +7,6 @@
 .reports-list-container {
   display: flex;
   flex-direction: column;
-  gap: $iui-baseline;
   flex-grow: 1;
   color: var(--buic-foreground-body);
   background-color: var(--buic-background-control);
@@ -36,7 +35,6 @@
   .reports-list {
     display: flex;
     flex-direction: column;
-    gap: $iui-baseline * 2;
     overflow-y: auto;
   }
 }

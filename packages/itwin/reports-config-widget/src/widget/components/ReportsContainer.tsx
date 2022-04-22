@@ -9,13 +9,20 @@ import { createContext, useEffect, useState } from "react";
 import { Reports } from "./Reports";
 import "./ReportsContainer.scss";
 
-export const AccessTokenContext = createContext<string>("");
+export interface Api {
+  accessToken: AccessToken;
+  prefix?: "" | "dev" | "qa";
+}
+
+export const ApiContext = createContext<Api>({ accessToken: "" });
 
 interface ReportsContainerProps {
   accessToken?: AccessToken;
+  prefix?: "" | "dev" | "qa";
 }
 
-const ReportsContainer = ({ accessToken }: ReportsContainerProps) => {
+
+const ReportsContainer = ({ accessToken, prefix }: ReportsContainerProps) => {
   const [currentAccessToken, setCurrentAccessToken] = useState<string>("");
 
   useEffect(() => {
@@ -27,11 +34,11 @@ const ReportsContainer = ({ accessToken }: ReportsContainerProps) => {
   }, [accessToken, setCurrentAccessToken]);
 
   return (
-    currentAccessToken ? <AccessTokenContext.Provider value={currentAccessToken}>
+    currentAccessToken ? <ApiContext.Provider value={{ accessToken: currentAccessToken, prefix }}>
       <div className='reports-container'>
         <Reports />
       </div>
-    </AccessTokenContext.Provider> : null
+    </ApiContext.Provider> : null
   );
 };
 

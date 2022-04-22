@@ -46,7 +46,7 @@ export class ReportsConfigProvider implements UiItemsProvider {
         id: "reports-config-widget",
         label: IModelApp.localization.getLocalizedString("ReportsConfigWidget:ReportsConfig"),
         getWidgetContent: () => {
-          return <ReportsContainer accessToken={this._accessToken} />;
+          return <ReportsContainer accessToken={this._accessToken} prefix={this._prefix} />;
         },
       };
 

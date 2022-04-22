@@ -32,7 +32,7 @@ import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import { HorizontalTile } from "./HorizontalTile";
 import { Extraction, ExtractionStates, ExtractionStatus } from "./Extraction";
 import { SearchBar } from "./SearchBar";
-import { AccessTokenContext } from "./ReportsContainer";
+import { Api, ApiContext } from "./ReportsContainer";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
@@ -47,23 +47,23 @@ const fetchReportMappings = async (
   setReportMappings: React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>,
   reportId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  accessToken: string
+  apiContext: Api
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient();
-    const reportMappings = await reportingClientApi.getReportMappings(accessToken, reportId);
+    const reportingClientApi = new ReportingClient(apiContext.prefix);
+    const reportMappings = await reportingClientApi.getReportMappings(apiContext.accessToken, reportId);
     const iModelClientOptions: IModelsClientOptions = {
-      api: { baseUrl: `${prefixUrl(Constants.api.baseUrl, process.env.IMJS_URL_PREFIX)}` },
+      api: { baseUrl: `${prefixUrl(Constants.api.baseUrl, apiContext.prefix ? `${apiContext.prefix}-` : process.env.IMJS_URL_PREFIX)}` },
     };
 
     const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
-    const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
+    const authorization = AccessTokenAdapter.toAuthorizationCallback(apiContext.accessToken);
     const iModelNames = new Map<string, string>();
     const reportMappingsAndMapping = await Promise.all(reportMappings.mappings?.map(async (reportMapping) => {
       const iModelId = reportMapping.imodelId ?? "";
       let iModelName = "";
-      const mapping = await reportingClientApi.getMapping(accessToken, reportMapping.mappingId ?? "", iModelId);
+      const mapping = await reportingClientApi.getMapping(apiContext.accessToken, reportMapping.mappingId ?? "", iModelId);
 
       if (iModelNames.has(iModelId)) {
         iModelName = iModelNames.get(iModelId) ?? "";
@@ -96,7 +96,7 @@ interface ReportMappingsProps {
 }
 
 export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
-  const accessToken = useContext(AccessTokenContext);
+  const apiContext = useContext(ApiContext);
   const [reportMappingsView, setReportMappingsView] = useState<ReportMappingsView>(
     ReportMappingsView.REPORTMAPPINGS
   );
@@ -112,14 +112,14 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
 
   useEffect(() => {
-    void fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, accessToken);
-  }, [accessToken, report.id, setIsLoading]);
+    void fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, apiContext);
+  }, [apiContext, report.id, setIsLoading]);
 
   const refresh = useCallback(async () => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
     setReportMappings([]);
-    await fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, accessToken);
-  }, [accessToken, report.id, setReportMappings]);
+    await fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, apiContext);
+  }, [apiContext, report.id, setReportMappings]);
 
   const addMapping = () => {
     setReportMappingsView(ReportMappingsView.ADDING);
@@ -217,9 +217,9 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
-          const reportingClientApi = new ReportingClient();
+          const reportingClientApi = new ReportingClient(apiContext.prefix);
           await reportingClientApi.deleteReportMapping(
-            accessToken,
+            apiContext.accessToken,
             report.id ?? "",
             selectedReportMapping?.mappingId ?? ""
           );

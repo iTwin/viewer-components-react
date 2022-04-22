@@ -11,7 +11,7 @@ import { IModelsClient, toArray } from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useContext, useMemo } from "react";
 import { useEffect, useState } from "react";
-import { AccessTokenContext } from "./ReportsContainer";
+import { Api, ApiContext } from "./ReportsContainer";
 import "./SelectIModel.scss";
 import { LoadingSpinner, prefixUrl } from "./utils";
 
@@ -19,15 +19,15 @@ const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
   iTwinId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  accessToken: string
+  apiContext: Api
 ) => {
   try {
     const iModelClientOptions: IModelsClientOptions = {
-      api: { baseUrl: `${prefixUrl(Constants.api.baseUrl, process.env.IMJS_URL_PREFIX)}` },
+      api: { baseUrl: `${prefixUrl(Constants.api.baseUrl, apiContext.prefix ? `${apiContext.prefix}-` : process.env.IMJS_URL_PREFIX)}` },
     };
 
     const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
-    const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
+    const authorization = AccessTokenAdapter.toAuthorizationCallback(apiContext.accessToken);
     const getiModelListParams: GetIModelListParams = {
       urlParams: { projectId: iTwinId },
       authorization,
@@ -47,7 +47,7 @@ interface SelectedIModelProps {
 }
 
 export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: SelectedIModelProps) => {
-  const accessToken = useContext(AccessTokenContext);
+  const apiContext = useContext(ApiContext);
   const iModelId = useActiveIModelConnection()?.iModelId;
   const iTwinId = useActiveIModelConnection()?.iTwinId;
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -55,9 +55,9 @@ export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: Selected
 
   useEffect(() => {
     if (iModelId && iTwinId) {
-      void fetchIModels(setIModels, iTwinId, setIsLoading, accessToken);
+      void fetchIModels(setIModels, iTwinId, setIsLoading, apiContext);
     }
-  }, [accessToken, setIModels, setIsLoading, iModelId, iTwinId]);
+  }, [apiContext, setIModels, setIsLoading, iModelId, iTwinId]);
 
   useEffect(() => {
     if (iModelId && iModels.length > 0) {
