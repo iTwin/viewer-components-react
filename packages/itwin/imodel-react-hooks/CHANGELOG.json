@@ -1,6 +1,27 @@
 {
-  "name": "@bentley/imodel-react-hooks",
+  "name": "@itwin/imodel-react-hooks",
   "entries": [
+    {
+      "version": "0.1.5",
+      "tag": "@itwin/imodel-react-hooks_v0.1.5",
+      "date": "Tue, 19 Apr 2022 14:15:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update to iTwin.js 3.0"
+          },
+          {
+            "comment": "Fix dependency lists of hooks"
+          },
+          {
+            "comment": "Remove bentleyjs-core mock in useMarker test file"
+          },
+          {
+            "comment": "Add transitive peers as dev deps"
+          }
+        ]
+      }
+    },
     {
       "version": "0.1.4",
       "tag": "@bentley/imodel-react-hooks_v0.1.4",
