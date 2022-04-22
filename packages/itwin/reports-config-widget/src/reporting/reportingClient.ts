@@ -20,7 +20,8 @@ import type {
   MappingUpdate,
   ReportCreate,
   ReportMappingCreate,
-  ReportUpdate} from "./generated/api";
+  ReportUpdate
+} from "./generated/api";
 import {
   ExtractionApi,
 } from "./generated/api";
@@ -40,8 +41,8 @@ export class ReportingClient {
   private _mappingsApi: MappingsApi;
   private _reportsApi: ReportsApi;
   private _extractionApi: ExtractionApi;
-  constructor() {
-    const baseUrl = prefixUrl(REPORTING_BASE_PATH, process.env.IMJS_URL_PREFIX);
+  constructor(prefix?: "dev" | "qa" | "") {
+    const baseUrl = prefixUrl(REPORTING_BASE_PATH, prefix ? `${prefix}-` : process.env.IMJS_URL_PREFIX);
     this._mappingsApi = new MappingsApi(undefined, baseUrl);
     this._reportsApi = new ReportsApi(undefined, baseUrl);
     this._extractionApi = new ExtractionApi(undefined, baseUrl);

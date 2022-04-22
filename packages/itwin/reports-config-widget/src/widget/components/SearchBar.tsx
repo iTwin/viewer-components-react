@@ -5,7 +5,7 @@
 import { IModelApp } from "@itwin/core-frontend";
 import { SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
 import { IconButton, LabeledInput } from "@itwin/itwinui-react";
-import React from "react";
+import React, { useState } from "react";
 import "./SearchBar.scss";
 
 interface SearchBarProps {
@@ -15,17 +15,35 @@ interface SearchBarProps {
 
 }
 
-export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarProps) =>
-  <LabeledInput
-    placeholder={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Search")}
-    svgIcon={searchValue ?
-      <IconButton onClick={() => setSearchValue("")} styleType='borderless'>
-        <SvgCloseSmall />
-      </IconButton> : <div className="search-icon"><SvgSearch /></div>
-    }
-    iconDisplayStyle='inline'
-    value={searchValue}
-    onChange={(e) => setSearchValue(e.target.value)}
-    disabled={disabled}
-  />;
+export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarProps) => {
+  const [searchBarOpen, setSearchBarOpened] = useState<boolean>(false);
+  const [searchBarClosing, setSearchBarClosing] = useState<boolean>(false);
+
+  return (
+    searchBarOpen ?
+      <div style={{ animation: searchBarClosing ? 'shrink .5s' : 'expand .5s' }}
+        onAnimationEnd={() => {
+          if (searchBarClosing) {
+            setSearchBarClosing(false)
+            setSearchBarOpened(false);
+            setSearchValue("");
+          }
+        }}>
+        <LabeledInput
+
+          placeholder={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Search")}
+          svgIcon={
+            <IconButton onClick={() => setSearchBarClosing(true)} styleType='borderless'>
+              <SvgCloseSmall />
+            </IconButton>
+          }
+          iconDisplayStyle='inline'
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          disabled={disabled}
+
+        /> </div> :
+      <IconButton styleType="borderless" onClick={() => setSearchBarOpened(true)}><SvgSearch /></IconButton>
+  )
+};
 

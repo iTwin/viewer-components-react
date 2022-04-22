@@ -68,7 +68,7 @@ export const Reports = () => {
     ReportsView.REPORTS
   );
   const [selectedReport, setSelectedReport] = useState<
-  Report | undefined
+    Report | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
@@ -121,9 +121,9 @@ export const Reports = () => {
               >
                 {IModelApp.localization.getLocalizedString("ReportsConfigWidget:New")}
               </Button>
-            </div>
-            <div className="search-bar-container">
-              <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
+              <div className="search-bar-container">
+                <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
+              </div>
             </div>
             {isLoading ?
               <LoadingOverlay /> :

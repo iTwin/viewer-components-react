@@ -101,7 +101,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     ReportMappingsView.REPORTMAPPINGS
   );
   const [selectedReportMapping, setSelectedReportMapping] = useState<
-  ReportMappingAndMapping | undefined
+    ReportMappingAndMapping | undefined
   >(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -138,21 +138,28 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   return (
     <>
       <WidgetHeader title={report.displayName ?? ""} returnFn={goBack} />
-      <LabeledInput
-        label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ODataFeedURL")}
-        className="odata-url-input"
-        readOnly={true}
-        value={odataFeedUrl}
-        svgIcon={
-          <IconButton styleType='borderless' onClick={async (_) => {
-            await navigator.clipboard.writeText(odataFeedUrl);
-            toaster.positive(IModelApp.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
-          }}>
-            <SvgCopy />
-          </IconButton>
-        }
-        iconDisplayStyle='inline'
-      />
+      <div className="report-mapping-misc">
+        <LabeledInput
+          label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ODataFeedURL")}
+          className="odata-url-input"
+          readOnly={true}
+          value={odataFeedUrl}
+          svgIcon={
+            <IconButton styleType='borderless' onClick={async (_) => {
+              await navigator.clipboard.writeText(odataFeedUrl);
+              toaster.positive(IModelApp.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
+            }}>
+              <SvgCopy />
+            </IconButton>
+          }
+          iconDisplayStyle='inline'
+        />
+        <Extraction
+          iModels={uniqueIModels}
+          extractionState={extractionState}
+          setExtractionState={setExtractionState}
+          setExtractingIModelId={setRunningIModelId} />
+      </div>
       <div className="report-mappings-container">
         <div className="toolbar">
           <Button
@@ -162,14 +169,9 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           >
             {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddMapping")}
           </Button>
-          <Extraction
-            iModels={uniqueIModels}
-            extractionState={extractionState}
-            setExtractionState={setExtractionState}
-            setExtractingIModelId={setRunningIModelId} />
-        </div>
-        <div className="search-bar-container">
-          <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
+          <div className="search-bar-container">
+            <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
+          </div>
         </div>
         {isLoading ?
           <LoadingOverlay /> :

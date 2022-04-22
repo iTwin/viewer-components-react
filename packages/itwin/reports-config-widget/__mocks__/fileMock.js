@@ -2,26 +2,4 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
-
-@keyframes expand {
-  0% {
-    opacity: 0;
-    width: 20%;
-  }
-  100% {
-    opacity: 1;
-    width: 100%;
-  }
-}
-
-@keyframes shrink {
-  100% {
-    opacity: 0;
-    width: 20%;
-  }
-  0% {
-    opacity: 1;
-    width: 100%;
-  }
-}
+module.exports = {};

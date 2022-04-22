@@ -30,20 +30,12 @@ interface ExtractionStatusProps {
 export const ExtractionStatus = ({ state, children, setExtractionState }: ExtractionStatusProps) => {
   const [fadeOut, setFadeOut] = useState<boolean>(false);
 
-  useEffect(() => {
-    let timer: number;
+  const onAnimationEnd = () => {
     if (setExtractionState) {
-      switch (state) {
-        case ExtractionStates.Succeeded:
-        case ExtractionStates.Failed:
-          timer = window.setTimeout(() => {
-            setExtractionState(ExtractionStates.None);
-            setFadeOut(false);
-          }, 6000);
-      }
+      setExtractionState(ExtractionStates.None);
+      setFadeOut(false);
     }
-    return () => clearTimeout(timer);
-  }, [state, setExtractionState]);
+  };
 
   useEffect(() => {
     let timer: number;
@@ -83,7 +75,8 @@ export const ExtractionStatus = ({ state, children, setExtractionState }: Extrac
         <div title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Success")} className="extraction-status">
           <div
             className={`status-icon`}
-            style={{ animation: fadeOut ? "fade-out 1s" : "" }}
+            style={{ animationName: fadeOut ? "fade-out" : "", animationDelay: "5s", animationDuration: "1s" }}
+            onAnimationEnd={onAnimationEnd}
           >
             <SvgStatusSuccess />
           </div>
@@ -93,7 +86,9 @@ export const ExtractionStatus = ({ state, children, setExtractionState }: Extrac
       return (
         <div title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Failed")} className="extraction-status">
           <div
-            className="status-icon"
+            className={`status-icon`}
+            style={{ animationName: fadeOut ? "fade-out" : "", animationDelay: "5s", animationDuration: "1s" }}
+            onAnimationEnd={onAnimationEnd}
           >
             <SvgStatusError />
           </div>

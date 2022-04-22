@@ -21,7 +21,7 @@ export const HorizontalTile = ({ title, subText, onClickTitle, titleTooltip, sub
   return (
     <div className="rcw-horizontal-tile-container">
       <div className="body">
-        <Text className={`body-text bold ${onClickTitle ? "iui-anchor" : ""}`} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
+        <Text className={`body-text ${onClickTitle ? "iui-anchor" : ""}`} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
         <Text className="body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>
       </div>
       <div className="action-button">

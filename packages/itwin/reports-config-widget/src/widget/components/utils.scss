@@ -9,29 +9,13 @@
 .rcw-widget-header-container {
   display: flex;
   margin-bottom: $iui-baseline;
-
-  .chevron {
-    @include iui-icons-large();
-    cursor: pointer;
-    align-self: center;
-    margin-right: $iui-s;
-  }
-
-  .chevron-disabled {
-    @include iui-icons-large();
-    @include themed {
-      fill: t(iui-icons-color-actionable-disabled);
-    }
-    cursor: not-allowed;
-
-    align-self: center;
-    margin-right: $iui-s;
-  }
+  align-items: center;
 
   .title {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    margin-bottom: 3px;
   }
 }
 

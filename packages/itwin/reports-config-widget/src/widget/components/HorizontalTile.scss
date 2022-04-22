@@ -7,18 +7,15 @@
 .rcw-horizontal-tile-container {
   display: flex;
   justify-content: space-between;
+  border-bottom: 1px solid var(--iui-color-background-4);
   .body {
     display: flex;
     flex-direction: column;
-    gap: calc($iui-baseline / 2);
     min-width: 0;
     &-text {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-    }
-    .bold {
-      font-weight: bold;
     }
   }
   .action-button {

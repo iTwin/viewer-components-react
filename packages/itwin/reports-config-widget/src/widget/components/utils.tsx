@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
-import { ProgressRadial, Text, toaster } from "@itwin/itwinui-react";
+import { IconButton, ProgressRadial, Text, toaster } from "@itwin/itwinui-react";
 import "./utils.scss";
 import React from "react";
 import { IModelApp } from "@itwin/core-frontend";
@@ -22,13 +22,13 @@ export const WidgetHeader = ({
   return (
     <div className='rcw-widget-header-container'>
       {returnFn && (
-        <div
-          className={disabled ? "chevron-disabled" : "chevron"}
-          onClick={disabled ? undefined : returnFn}
-          onKeyUp={disabled ? undefined : returnFn}
+        <IconButton
+          onClick={returnFn}
+          disabled={disabled}
+          styleType="borderless"
         >
           <SvgChevronLeft />
-        </div>
+        </IconButton>
       )}
       <Text className='title' variant='title'>
         {title}

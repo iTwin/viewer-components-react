@@ -2,26 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
-
-@keyframes expand {
-  0% {
-    opacity: 0;
-    width: 20%;
-  }
-  100% {
-    opacity: 1;
-    width: 100%;
-  }
-}
-
-@keyframes shrink {
-  100% {
-    opacity: 0;
-    width: 20%;
-  }
-  0% {
-    opacity: 1;
-    width: 100%;
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  transform: {
+    "\\.(ts|js)$": ['ts-jest'],
+  },
+  moduleNameMapper: {
+    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|svg?.+)$":
+      "<rootDir>/src/tests/mocks/fileMock.js",
+    "\\.(scss|sass|css)$": "jest-transform-stub",
   }
 }

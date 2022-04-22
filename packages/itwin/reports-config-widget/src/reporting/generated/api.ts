@@ -666,7 +666,7 @@ export interface GroupPropertyCollection {
    * @type {Array<GroupProperty>}
    * @memberof GroupPropertyCollection
    */
-  groupProperties?: Array<GroupProperty>;
+  properties?: Array<GroupProperty>;
   /**
    *
    * @type {PagedResponseLinks}
@@ -716,7 +716,7 @@ export interface GroupPropertySingle {
    * @type {GroupProperty}
    * @memberof GroupPropertySingle
    */
-  groupProperty?: GroupProperty;
+  property?: GroupProperty;
 }
 /**
  * Properties of the GroupProperty to be updated.

@@ -12,6 +12,7 @@ import {
   StagePanelSection,
   StageUsage,
 } from "@itwin/appui-abstract";
+import { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 
 import * as React from "react";
@@ -19,10 +20,12 @@ import ReportsContainer from "./components/ReportsContainer";
 
 export class ReportsConfigProvider implements UiItemsProvider {
   public readonly id = "ReportsConfigProvider";
-  private readonly _accessToken: string | undefined;
+  private readonly _accessToken?: AccessToken;
+  private readonly _prefix?: "" | "dev" | "qa";
 
-  constructor(accessToken?: string) {
+  constructor(accessToken?: AccessToken, prefix?: "" | "dev" | "qa") {
     this._accessToken = accessToken;
+    this._prefix = prefix;
   }
 
   public provideWidgets(

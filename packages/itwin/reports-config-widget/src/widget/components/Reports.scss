@@ -7,7 +7,7 @@
 .reports-list-container {
   display: flex;
   flex-direction: column;
-  gap: $iui-baseline * 2;
+  gap: $iui-baseline;
   flex-grow: 1;
   color: var(--buic-foreground-body);
   background-color: var(--buic-background-control);
@@ -28,7 +28,9 @@
   }
 
   .search-bar-container {
-    padding: 0px $iui-s;
+    flex-basis: 94px;
+    flex-shrink: 1;
+    flex-grow: 1;
   }
 
   .reports-list {

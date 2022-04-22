@@ -673,6 +673,7 @@ importers:
       '@testing-library/dom': ^8.12.0
       '@testing-library/jest-dom': ^5.16.3
       '@testing-library/react': ^12.1.4
+      '@testing-library/user-event': ^14.1.1
       '@types/i18next': ^8.4.2
       '@types/jest': ^27.4.1
       '@types/node': ^14.14.20
@@ -690,6 +691,7 @@ importers:
       eslint-plugin-react-hooks: ^4.2.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      jest-transform-stub: ^2.0.0
       react: ^17.0.2
       react-dom: ^17.0.2
       react-table: ^7.7.0
@@ -718,6 +720,7 @@ importers:
       '@testing-library/dom': 8.13.0
       '@testing-library/jest-dom': 5.16.4
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
+      '@testing-library/user-event': 14.1.1_@testing-library+dom@8.13.0
       '@types/i18next': 8.4.6
       '@types/jest': 27.4.1
       '@types/node': 14.18.12
@@ -735,6 +738,7 @@ importers:
       eslint-plugin-react-hooks: 4.4.0_eslint@7.32.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      jest-transform-stub: 2.0.0
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-table: 7.7.0_react@17.0.2
@@ -3100,6 +3104,15 @@ packages:
       '@types/testing-library__react': 9.1.3
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
+    dev: true
+
+  /@testing-library/user-event/14.1.1_@testing-library+dom@8.13.0:
+    resolution: {integrity: sha512-XrjH/iEUqNl9lF2HX9YhPNV7Amntkcnpw0Bo1KkRzowNDcgSN9i0nm4Q8Oi5wupgdfPaJNMAWa61A+voD6Kmwg==}
+    engines: {node: '>=12', npm: '>=6'}
+    peerDependencies:
+      '@testing-library/dom': '>=7.21.4'
+    dependencies:
+      '@testing-library/dom': 8.13.0
     dev: true
 
   /@tippyjs/react/4.2.6_react-dom@17.0.2+react@17.0.2:
@@ -9647,6 +9660,10 @@ packages:
       semver: 7.3.7
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /jest-transform-stub/2.0.0:
+    resolution: {integrity: sha512-lspHaCRx/mBbnm3h4uMMS3R5aZzMwyNpNIJLXj4cEsV0mIUtS4IjYJLSoyjRCtnxb6RIGJ4NL2quZzfIeNhbkg==}
     dev: true
 
   /jest-util/24.9.0:
