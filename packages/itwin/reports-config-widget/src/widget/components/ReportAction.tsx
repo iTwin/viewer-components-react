@@ -103,7 +103,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         actionLabel={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Add")}
         onAction={onSave}
         onCancel={returnFn}
-        isSavingDisabled={!(values.name && values.description)}
+        isSavingDisabled={!(values.name)}
         isLoading={isLoading}
       />
     </>

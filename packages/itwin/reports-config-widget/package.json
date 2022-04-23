@@ -110,7 +110,10 @@
     "redux": "^4.0.4",
     "cross-fetch": "^3.1.4",
     "typemoq": "^2.1.0",
-    "@itwin/core-bentley": "^3.0.0"
+    "@itwin/core-bentley": "^3.0.0",
+    "sinon": "^7.5.0",
+    "@types/sinon": "^7.5.1",
+    "msw": "^0.39.2"
   },
   "peerDependencies": {
     "@itwin/appui-abstract": "^3.0.0",

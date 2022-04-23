@@ -5,7 +5,6 @@
 import type { AccessToken } from "@itwin/core-bentley";
 import * as React from "react";
 import { createContext } from "react";
-import "./ReportsContainer.scss";
 
 export interface Api {
   accessToken: AccessToken;

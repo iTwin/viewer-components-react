@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import {
   SvgAdd,
   SvgDelete,
@@ -31,6 +30,7 @@ import { ReportMappings } from "./ReportMappings";
 import { HorizontalTile } from "./HorizontalTile";
 import { SearchBar } from "./SearchBar";
 import { Api, ApiContext, useApi } from "../context/ApiContext";
+import { useActiveIModel } from "../hooks/useActiveIModel";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -61,7 +61,7 @@ const fetchReports = async (
 };
 
 export const Reports = () => {
-  const iTwinId = useActiveIModelConnection()?.iTwinId;
+  const iTwinId = useActiveIModel().iTwinId;
   const apiContext = useApi();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [reportsView, setReportsView] = useState<ReportsView>(
@@ -131,10 +131,11 @@ export const Reports = () => {
                 <EmptyMessage>
                   <>
                     {IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoReports")}
-                    <Text
-                      className="iui-anchor"
+                    <Button
                       onClick={() => addReport()}
-                    > {IModelApp.localization.getLocalizedString("ReportsConfigWidget:CreateOneReportCTA")}</Text>
+                      styleType='cta'>
+                      {IModelApp.localization.getLocalizedString("ReportsConfigWidget:CreateOneReportCTA")}
+                    </Button>
                   </>
                 </EmptyMessage> :
                 <div className="reports-list">

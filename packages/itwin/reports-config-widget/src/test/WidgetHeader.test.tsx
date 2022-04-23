@@ -4,13 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen } from "../test/test-utils";
-import userEvent from '@testing-library/user-event'
+import { render, screen } from "../test/test-utils";
 import { WidgetHeader } from "../widget/components/utils";
 import { faker } from '@faker-js/faker';
 
-describe("Widget Header Component", function () {
-  it("title renders", function () {
+describe("Widget Header Component", () => {
+  it("title renders", async () => {
     const fakeTitle = faker.word.interjection();
     render(<WidgetHeader title={fakeTitle} />);
 
@@ -19,14 +18,14 @@ describe("Widget Header Component", function () {
     expect(title).toHaveTextContent(fakeTitle);
   });
 
-  it("header allows return callback", function () {
+  it("header allows return callback", async () => {
     const mockReturnFn = jest.fn();
-    render(
+    const { user } = render(
       <WidgetHeader title="" returnFn={mockReturnFn} />
     );
 
     const returnBtn = screen.getByRole('button');
-    userEvent.click(returnBtn);
-    expect(mockReturnFn).toHaveBeenCalled;
+    await user.click(returnBtn);
+    expect(mockReturnFn).toHaveBeenCalledTimes(1);
   });
 });

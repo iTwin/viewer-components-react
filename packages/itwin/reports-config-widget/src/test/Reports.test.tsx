@@ -4,31 +4,64 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen, TestUtils } from "../test/test-utils";
+import { render, screen, TestUtils, waitForElementToBeRemoved } from "../test/test-utils";
 import { Reports } from "../widget/components/Reports";
-import * as moq from "typemoq"
-import { IModelApp, IModelConnection, NoRenderApp, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
-import { BeEvent } from "@itwin/core-bentley";
-import { Presentation } from "@itwin/presentation-frontend";
+import { NoRenderApp } from "@itwin/core-frontend";
+import { ReportsConfigWidget } from "../ReportsConfigWidget";
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import { ActiveIModel, useActiveIModel } from "../widget/hooks/useActiveIModel";
+import faker from "@faker-js/faker";
 
-const connection = moq.Mock.ofType<IModelConnection>();
+const mockITwinId = faker.datatype.uuid();
+const mockIModelId = faker.datatype.uuid();
 
-describe("Reports Component", function () {
+jest.mock('../widget/hooks/useActiveIModel', () => ({
+  useActiveIModel: () => {
+    const activeIModel: ActiveIModel = { iTwinId: mockITwinId, iModelId: mockIModelId }
+    return activeIModel
+  }
+}))
 
-  beforeAll(async () => {
-    // await NoRenderApp.startup();
-    const selectionSetMock = moq.Mock.ofType<SelectionSet>();
-    const onChangeMock = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
-    connection.setup((c) => c.selectionSet).returns(() => selectionSetMock.object);
-    selectionSetMock.setup((ss) => ss.onChanged).returns(() => onChangeMock.object);
-    await TestUtils.initializeUiFramework();
-    await IModelApp.localization.registerNamespace("ReportsConfigWidget");
+const server = setupServer()
 
-  });
+beforeAll(async () => {
+  await TestUtils.initializeUiFramework();
+  await NoRenderApp.startup();
+  ReportsConfigWidget.initialize(TestUtils.localization)
+  server.listen();
 
-  it("component renders", function () {
-    render(<Reports />);
+});
+
+afterAll(() => {
+  TestUtils.terminateUiFramework();
+  server.close();
+})
+
+afterEach(() => server.resetHandlers())
+
+describe("Reports Component", () => {
+
+  it("call to action button should be clickable with no reports", async () => {
+
+    server.use(
+      rest.get(
+        'https://api.bentley.com/insights/reporting/reports',
+        async (_req, res, ctx) => {
+          return res(ctx.delay(500), ctx.status(200), ctx.json({ reports: [] }))
+        },
+      ),
+    )
+
+    const { user } = render(<Reports />);
+
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
+
+    const ctaButton = screen.getByRole('button', { name: /createonereportcta/i })
+
+    await user.click(ctaButton);
 
     screen.debug()
+
   });
 });

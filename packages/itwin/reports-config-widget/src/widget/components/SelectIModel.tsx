@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import type { GetIModelListParams, IModelsClientOptions, MinimalIModel } from "@itwin/imodels-client-management";
@@ -12,6 +11,7 @@ import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useContext, useMemo } from "react";
 import { useEffect, useState } from "react";
 import { Api, ApiContext, useApi } from "../context/ApiContext";
+import { useActiveIModel } from "../hooks/useActiveIModel";
 import "./SelectIModel.scss";
 import { LoadingSpinner, prefixUrl } from "./utils";
 
@@ -48,8 +48,7 @@ interface SelectedIModelProps {
 
 export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: SelectedIModelProps) => {
   const apiContext = useApi();
-  const iModelId = useActiveIModelConnection()?.iModelId;
-  const iTwinId = useActiveIModelConnection()?.iTwinId;
+  const { iTwinId, iModelId } = useActiveIModel();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
 

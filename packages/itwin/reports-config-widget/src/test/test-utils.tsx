@@ -6,10 +6,11 @@ import * as React from 'react'
 import { render as rtlRender } from '@testing-library/react'
 import { ApiContext } from '../widget/context/ApiContext'
 import { AnyAction, combineReducers, createStore, Store } from 'redux';
-import { FrameworkReducer, UiFramework, ToolSettingsManager, SyncUiEventDispatcher } from '@itwin/appui-react';
+import { FrameworkReducer, UiFramework, SyncUiEventDispatcher } from '@itwin/appui-react';
 import { Localization } from '@itwin/core-common';
 import { IModelApp, IModelConnection } from '@itwin/core-frontend';
 import { ReportsConfigWidget } from '../ReportsConfigWidget';
+import userEvent from "@testing-library/user-event";
 
 export const mockAccessToken = "mockAccessToken";
 
@@ -21,7 +22,11 @@ function render(ui: React.ReactElement, { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (
     <ApiContext.Provider value={{ accessToken: mockAccessToken, prefix: "" }}>{children}</ApiContext.Provider>
   )
-  return rtlRender(ui, { wrapper: Wrapper, ...options })
+
+  return {
+    user: userEvent.setup(),
+    ...rtlRender(ui, { wrapper: Wrapper, ...options }),
+  }
 }
 
 export * from '@testing-library/react'
@@ -47,7 +52,7 @@ export class TestUtils {
     return IModelApp.localization;
   }
 
-  public static async initializeUiFramework() {
+  public static async initializeUiFramework(imodel?: IModelConnection) {
     if (!TestUtils._uiFrameworkInitialized) {
       // This is required by our I18n module (specifically the i18next package).
       (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
@@ -55,6 +60,8 @@ export class TestUtils {
 
       await UiFramework.initialize(this.store);
       // Set the iModelConnection in the Redux store
+      if (imodel)
+        UiFramework.setIModelConnection(imodel);
       TestUtils._uiFrameworkInitialized = true;
     }
     SyncUiEventDispatcher.setTimeoutPeriod(0); // disables non-immediate event processing.
@@ -64,4 +71,13 @@ export class TestUtils {
     ReportsConfigWidget.terminate();
     TestUtils._uiFrameworkInitialized = false;
   }
+}
+
+export const deferred = async () => {
+  let resolve, reject
+  const promise = new Promise((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+  return { promise, resolve, reject }
 }
