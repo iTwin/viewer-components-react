@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/infrastructure-iot",
+      "comment": "Initial release of the infrastructure-iot package",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/infrastructure-iot"
+}
