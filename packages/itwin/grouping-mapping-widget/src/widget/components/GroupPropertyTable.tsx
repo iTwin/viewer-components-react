@@ -45,7 +45,7 @@ const fetchGroupProperties = async (
       mappingId,
       groupId,
     );
-    setGroupProperties(groupProperties.properties ?? []);
+    setGroupProperties(groupProperties);
   } catch (error: any) {
     handleError(error.status);
   } finally {

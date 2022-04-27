@@ -49,7 +49,7 @@ const fetchCalculatedProperties = async (
         mappingId,
         groupId,
       );
-    setCalculatedProperties(calculatedProperties.properties ?? []);
+    setCalculatedProperties(calculatedProperties);
   } catch (error: any) {
     handleError(error.status);
   } finally {

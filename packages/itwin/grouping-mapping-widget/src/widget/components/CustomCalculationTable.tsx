@@ -48,7 +48,7 @@ const fetchCustomCalculations = async (
       mappingId,
       groupId,
     );
-    setCustomCalculations(customCalculations.customCalculations ?? []);
+    setCustomCalculations(customCalculations);
   } catch (error: any) {
     handleError(error.status);
   } finally {

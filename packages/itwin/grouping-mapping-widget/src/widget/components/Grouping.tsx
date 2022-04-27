@@ -79,7 +79,7 @@ const fetchGroups = async (
     setIsLoading(true);
     const reportingClientApi = new ReportingClient(apiContext.prefix);
     const groups = await reportingClientApi.getGroups(apiContext.accessToken, iModelId, mappingId);
-    setGroups(groups.groups ?? []);
+    setGroups(groups);
   } catch (error: any) {
     handleError(error.status);
   } finally {
