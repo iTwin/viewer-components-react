@@ -12,6 +12,7 @@ import {
   Button,
   IconButton,
   LabeledInput,
+  Surface,
   Text,
   toaster,
 } from "@itwin/itwinui-react";
@@ -160,7 +161,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           setExtractionState={setExtractionState}
           setExtractingIModelId={setRunningIModelId} />
       </div>
-      <div className="report-mappings-container">
+      <Surface className="report-mappings-container">
         <div className="toolbar">
           <Button
             startIcon={<SvgAdd />}
@@ -205,7 +206,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
             </div>
         }
 
-      </div>
+      </Surface>
       <AddMappingsModal
         show={reportMappingsView === ReportMappingsView.ADDING}
         reportId={report.id ?? ""}

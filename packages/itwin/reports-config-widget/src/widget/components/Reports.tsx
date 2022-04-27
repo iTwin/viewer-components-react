@@ -15,6 +15,7 @@ import {
   IconButton,
   MenuItem,
   Text,
+  Surface
 } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "./utils";
@@ -112,7 +113,7 @@ export const Reports = () => {
       return (
         <>
           <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ITwinReports")} />
-          <div className="reports-list-container">
+          <Surface className="reports-list-container">
             <div className="toolbar">
               <Button
                 startIcon={<SvgAdd />}
@@ -192,8 +193,7 @@ export const Reports = () => {
                   )}
                 </div>
             }
-
-          </div>
+          </Surface>
           <DeleteModal
             entityName={selectedReport?.displayName ?? ""}
             show={showDeleteModal}

@@ -53,7 +53,7 @@
   "dependencies": {
     "@itwin/itwinui-icons-react": "^1.7.0",
     "@itwin/itwinui-icons-color-react": "^1.0.1",
-    "@itwin/itwinui-react": "^1.35.0",
+    "@itwin/itwinui-react": "^1.37.0",
     "simple-react-validator": "^1.6.1"
   },
   "devDependencies": {

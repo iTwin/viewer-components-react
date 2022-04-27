@@ -8,6 +8,9 @@
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid var(--iui-color-background-4);
+  margin-top: 5.5px;
+  padding-bottom: 2.75px;
+  margin-right: $iui-xs;
   .body {
     display: flex;
     flex-direction: column;
