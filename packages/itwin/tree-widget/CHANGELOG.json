@@ -2,6 +2,30 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "0.4.3",
+      "tag": "@itwin/tree-widget-react_v0.4.3",
+      "date": "Thu, 21 Apr 2022 18:47:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Do not unmount children in AutoSizer when height or width is 0 to avoid losing children state"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.2",
+      "tag": "@itwin/tree-widget-react_v0.4.2",
+      "date": "Tue, 19 Apr 2022 14:15:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed search bar container to take up entire width of widget when open."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.1",
       "tag": "@itwin/tree-widget-react_v0.4.1",
       "date": "Wed, 06 Apr 2022 13:48:44 GMT",

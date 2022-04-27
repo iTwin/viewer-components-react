@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useState } from "react";
 import { useResizeObserver } from "@itwin/core-react";
 
@@ -21,7 +25,7 @@ export const AutoSizer = (props: AutoSizerProps) => {
 
   return (
     <div ref={ref} style={{ width: "100%", height: "100%" }}>
-      {width && height && (props.children({ width, height }))}
+      {props.children({ width, height })}
     </div>
   );
 };
