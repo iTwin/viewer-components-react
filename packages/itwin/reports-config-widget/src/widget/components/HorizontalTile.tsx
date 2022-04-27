@@ -19,12 +19,12 @@ interface HorizontalTileProps {
 export const HorizontalTile = ({ title, subText, onClickTitle, titleTooltip, subtextToolTip, button }: HorizontalTileProps) => {
 
   return (
-    <div className="rcw-horizontal-tile-container">
+    <div className="rcw-horizontal-tile-container" data-testid="horizontal-tile">
       <div className="body">
         <Text className={`body-text ${onClickTitle ? "iui-anchor" : ""}`} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
         <Text className="body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>
       </div>
-      <div className="action-button">
+      <div className="action-button" data-testid="tile-action-button">
         {button}
       </div>
     </div>

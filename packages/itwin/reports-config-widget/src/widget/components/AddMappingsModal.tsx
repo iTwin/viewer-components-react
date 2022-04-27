@@ -13,8 +13,8 @@ import {
   tableFilters,
 } from "@itwin/itwinui-react";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import type { Mapping } from "../../reporting";
-import { ReportingClient } from "../../reporting/reportingClient";
+import type { Mapping } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
 import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";

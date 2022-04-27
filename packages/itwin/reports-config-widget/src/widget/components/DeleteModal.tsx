@@ -67,7 +67,7 @@ export const DeleteModal = ({
         </ModalContent>
         <ModalButtonBar>
           {isLoading &&
-            <div className="loading-delete">
+            <div className="rcw-loading-delete" data-testid="rcw-loading-delete">
               <LoadingSpinner />
             </div>}
           <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>

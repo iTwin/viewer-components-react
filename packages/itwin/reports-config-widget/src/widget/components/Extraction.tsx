@@ -7,7 +7,7 @@ import type { SelectOption } from "@itwin/itwinui-react";
 import { ComboBox, ProgressRadial, Text } from "@itwin/itwinui-react";
 import * as React from "react";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ReportingClient } from "../../reporting/reportingClient";
+import { ReportingClient } from "@itwin/insights-client";
 import { handleError } from "./utils";
 import "./Extraction.scss";
 import { SvgStatusError, SvgStatusPending, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";

@@ -21,8 +21,8 @@ import { EmptyMessage, LoadingOverlay, prefixUrl } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
-import type { Report, ReportMapping } from "../../reporting";
-import { ReportingClient } from "../../reporting/reportingClient";
+import type { Report, ReportMapping } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
 import { IModelApp } from "@itwin/core-frontend";
 import AddMappingsModal from "./AddMappingsModal";
 import type { GetSingleIModelParams, IModelsClientOptions } from "@itwin/imodels-client-management";
@@ -60,7 +60,7 @@ const fetchReportMappings = async (
     const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
     const authorization = AccessTokenAdapter.toAuthorizationCallback(apiContext.accessToken);
     const iModelNames = new Map<string, string>();
-    const reportMappingsAndMapping = await Promise.all(reportMappings.mappings?.map(async (reportMapping) => {
+    const reportMappingsAndMapping = await Promise.all(reportMappings?.map(async (reportMapping) => {
       const iModelId = reportMapping.imodelId ?? "";
       let iModelName = "";
       const mapping = await reportingClientApi.getMapping(apiContext.accessToken, reportMapping.mappingId ?? "", iModelId);

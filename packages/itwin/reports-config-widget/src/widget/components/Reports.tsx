@@ -22,8 +22,8 @@ import { EmptyMessage, LoadingOverlay } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
-import type { Report } from "../../reporting";
-import { ReportingClient } from "../../reporting/reportingClient";
+import type { Report } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
 import { IModelApp } from "@itwin/core-frontend";
 import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
@@ -52,7 +52,7 @@ const fetchReports = async (
     setIsLoading(true);
     const reportingClientApi = new ReportingClient(apiContext.prefix);
     const reports = await reportingClientApi.getReports(apiContext.accessToken, iTwinId);
-    setReports(reports.reports ?? []);
+    setReports(reports ?? []);
   } catch (error: any) {
     handleError(error.status);
   } finally {
@@ -121,7 +121,7 @@ export const Reports = () => {
               >
                 {IModelApp.localization.getLocalizedString("ReportsConfigWidget:New")}
               </Button>
-              <div className="search-bar-container">
+              <div className="search-bar-container" data-testid="search-bar">
                 <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
               </div>
             </div>
@@ -131,11 +131,13 @@ export const Reports = () => {
                 <EmptyMessage>
                   <>
                     {IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoReports")}
-                    <Button
-                      onClick={() => addReport()}
-                      styleType='cta'>
-                      {IModelApp.localization.getLocalizedString("ReportsConfigWidget:CreateOneReportCTA")}
-                    </Button>
+                    <div>
+                      <Button
+                        onClick={() => addReport()}
+                        styleType='cta'>
+                        {IModelApp.localization.getLocalizedString("ReportsConfigWidget:CreateOneReportCTA")}
+                      </Button>
+                    </div>
                   </>
                 </EmptyMessage> :
                 <div className="reports-list">

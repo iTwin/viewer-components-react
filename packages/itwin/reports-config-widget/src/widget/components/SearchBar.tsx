@@ -30,7 +30,7 @@ export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarPr
           }
         }}>
         <LabeledInput
-
+          aria-label="search-textbox"
           placeholder={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Search")}
           svgIcon={
             <IconButton onClick={() => setSearchBarClosing(true)} styleType='borderless'>

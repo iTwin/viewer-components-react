@@ -8,8 +8,8 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, handleInputChange, WidgetHeader } from "./utils";
 import "./ReportAction.scss";
-import type { Report } from "../../reporting";
-import { ReportingClient } from "../../reporting/reportingClient";
+import type { Report } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
 import { IModelApp } from "@itwin/core-frontend";
 import { ApiContext, useApi } from "../context/ApiContext";
 
