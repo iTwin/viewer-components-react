@@ -2,6 +2,21 @@
   "name": "@itwin/breakdown-trees-react",
   "entries": [
     {
+      "version": "0.3.4",
+      "tag": "@itwin/breakdown-trees-react_v0.3.4",
+      "date": "Tue, 19 Apr 2022 14:15:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "#861473 Fixed: Spatial Containment Tree - Unable to create section plane for a floor"
+          },
+          {
+            "comment": "Fixed search bar container to take up entire width of widget."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.3",
       "tag": "@itwin/breakdown-trees-react_v0.3.3",
       "date": "Wed, 06 Apr 2022 13:48:44 GMT",
