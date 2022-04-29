@@ -15,74 +15,21 @@ import {
   MenuItem,
   Table,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { CalculatedPropertyReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
 import type { CreateTypeFromInterface } from "../utils";
 import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
-import { handleError } from "./utils";
 
 export type CalculatedProperty =
   CreateTypeFromInterface<CalculatedPropertyReportingAPI>;
-
-const fetchCalculatedProperties = async (
-  setCalculatedProperties: React.Dispatch<
-  React.SetStateAction<CalculatedProperty[]>
-  >,
-  iModelId: string,
-  mappingId: string,
-  groupId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-) => {
-  try {
-    setIsLoading(true);
-    const calculatedProperties =
-      await reportingClientApi.getCalculatedProperties(
-        iModelId,
-        mappingId,
-        groupId,
-      );
-    setCalculatedProperties(calculatedProperties.properties ?? []);
-  } catch (error: any) {
-    handleError(error.status);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-const useFetchCalculatedProperties = (
-  iModelId: string,
-  mappingId: string,
-  groupId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-): [
-  CalculatedProperty[],
-  React.Dispatch<React.SetStateAction<CalculatedProperty[]>>,
-] => {
-  const [calculatedProperties, setCalculatedProperties] = useState<
-  CalculatedProperty[]
-  >([]);
-
-  useEffect(() => {
-    void fetchCalculatedProperties(
-      setCalculatedProperties,
-      iModelId,
-      mappingId,
-      groupId,
-      setIsLoading,
-    );
-  }, [groupId, iModelId, mappingId, setIsLoading]);
-
-  return [calculatedProperties, setCalculatedProperties];
-};
 
 interface CalculatedPropertyTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-
   setSelectedCalculatedProperty: React.Dispatch<
   React.SetStateAction<
   CreateTypeFromInterface<CalculatedPropertyReportingAPI> | undefined
@@ -90,6 +37,9 @@ interface CalculatedPropertyTableProps {
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
   onCalculatedPropertyModify: (value: CellProps<CalculatedProperty>) => void;
+  isLoadingCalculatedProperties: boolean;
+  calculatedProperties: CalculatedProperty[];
+  refreshCalculatedProperties: () => Promise<void>;
   selectedCalculatedProperty?: CalculatedProperty;
 }
 
@@ -100,26 +50,15 @@ const CalculatedPropertyTable = ({
   setSelectedCalculatedProperty,
   setGroupModifyView,
   onCalculatedPropertyModify,
+  isLoadingCalculatedProperties: isLoadingGroupProperties,
+  calculatedProperties,
+  refreshCalculatedProperties,
   selectedCalculatedProperty,
 }: CalculatedPropertyTableProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [calculatedProperties, setCalculatedProperties] =
-    useFetchCalculatedProperties(iModelId, mappingId, groupId, setIsLoading);
   const [
     showCalculatedPropertyDeleteModal,
     setShowCalculatedPropertyDeleteModal,
   ] = useState<boolean>(false);
-
-  const refresh = useCallback(async () => {
-    setCalculatedProperties([]);
-    await fetchCalculatedProperties(
-      setCalculatedProperties,
-      iModelId,
-      mappingId,
-      groupId,
-      setIsLoading,
-    );
-  }, [groupId, iModelId, mappingId, setCalculatedProperties]);
 
   const calculatedPropertiesColumns = useMemo(
     () => [
@@ -202,7 +141,7 @@ const CalculatedPropertyTable = ({
         columns={calculatedPropertiesColumns}
         emptyTableContent='No Calculated Properties'
         isSortable
-        isLoading={isLoading}
+        isLoading={isLoadingGroupProperties}
       />
 
       <DeleteModal
@@ -217,7 +156,7 @@ const CalculatedPropertyTable = ({
             selectedCalculatedProperty?.id ?? "",
           );
         }}
-        refresh={refresh}
+        refresh={refreshCalculatedProperties}
       />
     </>
   );

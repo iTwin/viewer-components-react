@@ -59,7 +59,7 @@ interface GroupPropertyActionProps {
   groupPropertyId?: string;
   groupPropertyName?: string;
   keySet: KeySet;
-  returnFn: () => Promise<void>;
+  returnFn: (modified: boolean) => Promise<void>;
 }
 
 export const quantityTypesSelectionOptions: SelectOption<string>[] = [
@@ -437,7 +437,7 @@ const GroupPropertyAction = ({
           groupId,
           groupProperty
         );
-      await returnFn();
+      await returnFn(true);
     } catch (error: any) {
       handleError(error.status);
       setIsLoading(false);
@@ -501,7 +501,7 @@ const GroupPropertyAction = ({
     <>
       <WidgetHeader
         title={groupPropertyName ?? "Add Property"}
-        returnFn={returnFn}
+        returnFn={async () => returnFn(false)}
       />
       <div className='group-property-action-container'>
         <Fieldset className='property-options' legend='Property Details'>
@@ -649,7 +649,7 @@ const GroupPropertyAction = ({
         </Fieldset>
       </div>
       {/* TODO: Disable when no properties are selected. Will do when I rework property selection. */}
-      <ActionPanel onSave={onSave} onCancel={returnFn} isLoading={isLoading} />
+      <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} />
     </>
   );
 };

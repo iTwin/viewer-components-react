@@ -15,65 +15,20 @@ import {
   MenuItem,
   Table,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { GroupPropertyReportingAPI } from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
 import type { CreateTypeFromInterface } from "../utils";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import { PropertyMenuView } from "./PropertyMenu";
-import { handleError } from "./utils";
 
 export type GroupProperty = CreateTypeFromInterface<GroupPropertyReportingAPI>;
-
-const fetchGroupProperties = async (
-  setGroupProperties: React.Dispatch<React.SetStateAction<GroupProperty[]>>,
-  iModelId: string,
-  mappingId: string,
-  groupId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-) => {
-  try {
-    setIsLoading(true);
-    const groupProperties = await reportingClientApi.getGroupProperties(
-      iModelId,
-      mappingId,
-      groupId,
-    );
-    setGroupProperties(groupProperties.properties ?? []);
-  } catch (error: any) {
-    handleError(error.status);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-const useFetchGroupProperties = (
-  iModelId: string,
-  mappingId: string,
-  groupId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-): [GroupProperty[], React.Dispatch<React.SetStateAction<GroupProperty[]>>] => {
-  const [groupProperties, setGroupProperties] = useState<GroupProperty[]>([]);
-
-  useEffect(() => {
-    void fetchGroupProperties(
-      setGroupProperties,
-      iModelId,
-      mappingId,
-      groupId,
-      setIsLoading,
-    );
-  }, [groupId, iModelId, mappingId, setIsLoading]);
-
-  return [groupProperties, setGroupProperties];
-};
 
 interface GroupPropertyTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-
   setSelectedGroupProperty: React.Dispatch<
   React.SetStateAction<
   CreateTypeFromInterface<GroupPropertyReportingAPI> | undefined
@@ -81,6 +36,9 @@ interface GroupPropertyTableProps {
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
   onGroupPropertyModify: (value: CellProps<GroupProperty>) => void;
+  isLoadingGroupProperties: boolean;
+  groupProperties: GroupProperty[];
+  refreshGroupProperties: () => Promise<void>;
   selectedGroupProperty?: GroupProperty;
 }
 
@@ -91,28 +49,13 @@ const GroupPropertyTable = ({
   selectedGroupProperty,
   onGroupPropertyModify,
   setSelectedGroupProperty,
+  isLoadingGroupProperties,
+  groupProperties,
+  refreshGroupProperties,
   setGroupModifyView,
 }: GroupPropertyTableProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [groupProperties, setGroupProperties] = useFetchGroupProperties(
-    iModelId,
-    mappingId,
-    groupId,
-    setIsLoading,
-  );
   const [showGroupPropertyDeleteModal, setShowGroupPropertyDeleteModal] =
     useState<boolean>(false);
-
-  const refresh = useCallback(async () => {
-    setGroupProperties([]);
-    await fetchGroupProperties(
-      setGroupProperties,
-      iModelId,
-      mappingId,
-      groupId,
-      setIsLoading,
-    );
-  }, [groupId, iModelId, mappingId, setGroupProperties]);
 
   const groupPropertiesColumns = useMemo(
     () => [
@@ -195,7 +138,7 @@ const GroupPropertyTable = ({
         columns={groupPropertiesColumns}
         emptyTableContent='No Group Properties'
         isSortable
-        isLoading={isLoading}
+        isLoading={isLoadingGroupProperties}
       />
       <DeleteModal
         entityName={selectedGroupProperty?.propertyName ?? ""}
@@ -209,7 +152,7 @@ const GroupPropertyTable = ({
             selectedGroupProperty?.id ?? "",
           );
         }}
-        refresh={refresh}
+        refresh={refreshGroupProperties}
       />
     </>
   );
