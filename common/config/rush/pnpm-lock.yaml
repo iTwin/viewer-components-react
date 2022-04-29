@@ -272,7 +272,7 @@ importers:
       '@itwin/eslint-plugin': ^3.0.0
       '@itwin/imodel-browser-react': ^0.12.1
       '@itwin/imodel-components-react': ^3.0.0
-      '@itwin/insights-client': ^0.1.1
+      '@itwin/insights-client': 0.1.1
       '@itwin/itwinui-icons-react': ^1.7.0
       '@itwin/itwinui-react': ^1.33.0
       '@itwin/presentation-common': ^3.0.0
@@ -513,7 +513,7 @@ importers:
       '@itwin/core-frontend': ^3.0.0
       '@itwin/core-react': ^3.0.0
       '@itwin/eslint-plugin': ^3.0.0
-      '@itwin/insights-client': ^0.1.0
+      '@itwin/insights-client': 0.1.0
       '@itwin/itwinui-icons-react': ^1.5.1
       '@itwin/itwinui-react': ^1.29.2
       '@testing-library/dom': ^8.12.0
@@ -1903,7 +1903,7 @@ packages:
     dev: true
 
   /@itwin/insights-client/0.1.0:
-    resolution: {integrity: sha1-U3TIvscBwL1GvIDqcOMpLPbqK6o=}
+    resolution: {integrity: sha512-CpK9EhEKF+yXdwUpf/J7HyYs453twEM49qQchZ4lL2x54sSNQ8P4KXZhEdMxz9BMpob/7f/xImolTLd3HnY/Bg==}
     dependencies:
       cross-fetch: 3.1.5
     transitivePeerDependencies:
