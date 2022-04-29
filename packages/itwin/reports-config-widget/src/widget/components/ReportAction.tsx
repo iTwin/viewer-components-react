@@ -51,6 +51,9 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
       handleError(error.status);
       setIsLoading(false);
     }
+    finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -70,6 +73,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
             label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Name")}
             value={values.name}
             required
+            disabled={isLoading}
             onChange={(event) => {
               handleInputChange(event, values, setValues);
               validator.showMessageFor("name");
@@ -96,6 +100,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
             onChange={(event) => {
               handleInputChange(event, values, setValues);
             }}
+            disabled={isLoading}
           />
         </Fieldset>
       </div>

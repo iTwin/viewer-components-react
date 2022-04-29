@@ -7,10 +7,12 @@
 .rcw-horizontal-tile-container {
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid var(--iui-color-background-4);
-  margin-top: 5.5px;
+  border-radius: 5px;
+  padding-top: 5.5px;
   padding-bottom: 2.75px;
   margin-right: $iui-xs;
+  background-color: var(--iui-color-background-2);
+  padding-left: 8px;
   .body {
     display: flex;
     flex-direction: column;
@@ -25,5 +27,6 @@
     margin-left: 0;
     align-self: center;
     min-width: 36px;
+    margin-right: $iui-xs;
   }
 }

@@ -55,8 +55,10 @@ const fetchReportMappings = async (
     const reportingClientApi = new ReportingClient(apiContext.prefix);
     const reportMappings = await reportingClientApi.getReportMappings(apiContext.accessToken, reportId);
     const iModelClientOptions: IModelsClientOptions = {
-      api: { baseUrl: `${prefixUrl(Constants.api.baseUrl, apiContext.prefix ? `${apiContext.prefix}-` : process.env.IMJS_URL_PREFIX)}` },
+      api: { baseUrl: prefixUrl(Constants.api.baseUrl, apiContext.prefix) },
     };
+
+    console.log(iModelClientOptions)
 
     const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
     const authorization = AccessTokenAdapter.toAuthorizationCallback(apiContext.accessToken);
@@ -128,7 +130,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
 
   const uniqueIModels = useMemo(() => new Map(reportMappings.map((mapping) => [mapping.imodelId ?? "", mapping.iModelName])), [reportMappings]);
 
-  const odataFeedUrl = `https://${process.env.IMJS_URL_PREFIX}api.bentley.com/insights/reporting/odata/${report.id}`;
+  const odataFeedUrl = prefixUrl(`https://api.bentley.com/insights/reporting/odata/${report.id}`, apiContext.prefix);
 
   const filteredReportMappings = useMemo(() => reportMappings.filter((x) =>
     [x.iModelName, x.mappingName, x.mappingDescription]
@@ -205,7 +207,6 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
               />)}
             </div>
         }
-
       </Surface>
       <AddMappingsModal
         show={reportMappingsView === ReportMappingsView.ADDING}

@@ -23,7 +23,7 @@ const fetchIModels = async (
 ) => {
   try {
     const iModelClientOptions: IModelsClientOptions = {
-      api: { baseUrl: `${prefixUrl(Constants.api.baseUrl, apiContext.prefix ? `${apiContext.prefix}-` : process.env.IMJS_URL_PREFIX)}` },
+      api: { baseUrl: prefixUrl(Constants.api.baseUrl, apiContext.prefix) },
     };
 
     const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
