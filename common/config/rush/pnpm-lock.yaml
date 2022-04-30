@@ -673,7 +673,7 @@ importers:
       '@itwin/imodel-components-react': ^3.0.0
       '@itwin/imodels-access-frontend': ^1.0.1
       '@itwin/imodels-client-management': ^1.0.1
-      '@itwin/insights-client': ^0.1.1
+      '@itwin/insights-client': ^0.2.0
       '@itwin/itwinui-css': ^0.50.0
       '@itwin/itwinui-icons-color-react': ^1.0.1
       '@itwin/itwinui-icons-react': ^1.7.0
@@ -712,6 +712,7 @@ importers:
       typemoq: ^2.1.0
       typescript: ~4.3.0
     dependencies:
+      '@itwin/insights-client': 0.2.0
       '@itwin/itwinui-icons-color-react': 1.0.2_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-icons-react': 1.8.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.37.1_react-dom@17.0.2+react@17.0.2
@@ -735,7 +736,6 @@ importers:
       '@itwin/imodel-components-react': 3.1.2_fcc770174d8197d3a18365576c406db0
       '@itwin/imodels-access-frontend': 1.0.1_2414eca3a9c2fbe38db6d770ef8437a0
       '@itwin/imodels-client-management': 1.0.1
-      '@itwin/insights-client': 0.1.1
       '@itwin/itwinui-css': 0.50.1
       '@itwin/presentation-common': 3.1.2_a9d059ba8516a7a72612d25159406e59
       '@itwin/presentation-frontend': 3.1.2_b29da3c443aebd689ab43aab735e636e
@@ -2104,13 +2104,13 @@ packages:
       - encoding
     dev: false
 
-  /@itwin/insights-client/0.1.1:
-    resolution: {integrity: sha512-kCeeNfu8SDvJtDCbQILRlj1iyMahDQyfaTA6IptWofgZg+B/N8iTKoAd6/8TsZxd/1/sCl+mXuXo5rVhIK8byA==}
+  /@itwin/insights-client/0.2.0:
+    resolution: {integrity: sha512-D8jeHbQVErug9cBNkmdTFd93Yavg/lfYQ0UYcJWA538qk4Fw32GkOxDaMIj584NzmXr26n4xW2HLB3mwk3ewig==}
     dependencies:
       cross-fetch: 3.1.5
     transitivePeerDependencies:
       - encoding
-    dev: true
+    dev: false
 
   /@itwin/itwinui-css/0.44.2:
     resolution: {integrity: sha512-n+ju00BaRaLZe8LqjEcl5i0Um8oKliyTagyz5SHi6IGqQKZilMs1feLsfyqWzNbDYaI4M4Bn4SBWJBFgXtDOjg==}

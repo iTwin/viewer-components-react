@@ -8,10 +8,10 @@ import { createContext } from "react";
 
 export interface Api {
   accessToken: AccessToken;
-  prefix?: "" | "dev" | "qa";
+  baseUrl: string;
 }
 
-export const ApiContext = createContext<Api>({ accessToken: "" });
+export const ApiContext = createContext<Api>({ accessToken: "", baseUrl: "" });
 
 export const useApi = () => {
   const context = React.useContext(ApiContext)

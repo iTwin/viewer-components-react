@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from 'react'
 import { render as rtlRender } from '@testing-library/react'
+import faker from "@faker-js/faker";
 import { ApiContext } from '../widget/context/ApiContext'
 import { AnyAction, combineReducers, createStore, Store } from 'redux';
 import { FrameworkReducer, UiFramework, SyncUiEventDispatcher } from '@itwin/appui-react';
@@ -11,8 +12,9 @@ import { Localization } from '@itwin/core-common';
 import { IModelApp, IModelConnection } from '@itwin/core-frontend';
 import { ReportsConfigWidget } from '../ReportsConfigWidget';
 import userEvent from "@testing-library/user-event";
+import { REPORTS_CONFIG_BASE_URL } from '../widget/ReportsConfigUiProvider';
 
-export const mockAccessToken = "mockAccessToken";
+export const mockAccessToken = "Bearer eyJhbGci";
 
 interface WrapperProps {
   children?: React.ReactNode
@@ -20,7 +22,7 @@ interface WrapperProps {
 
 function render(ui: React.ReactElement, { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (
-    <ApiContext.Provider value={{ accessToken: mockAccessToken, prefix: "" }}>{children}</ApiContext.Provider>
+    <ApiContext.Provider value={{ accessToken: mockAccessToken, baseUrl: REPORTS_CONFIG_BASE_URL }}>{children}</ApiContext.Provider>
   )
 
   return {

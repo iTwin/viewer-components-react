@@ -106,17 +106,14 @@ export const handleInputChange = <T,>(
 
 export const LoadingSpinner = () => {
   return (
-    <div className="rcw-loading-spinner">
+    <div className="rcw-loading-spinner" data-testid="loading-spinner">
       <ProgressRadial size="small" indeterminate />
     </div>
   );
 };
 
-export const prefixUrl = (baseUrl?: string, prefix?: string) => {
-  if (prefix && baseUrl) {
-    return baseUrl.replace("api.bentley.com", `${prefix}api.bentley.com`);
-  }
-  return baseUrl;
+export const generateUrl = (baseUrl: string, newBaseUrl: string) => {
+  return baseUrl.replace("https://api.bentley.com", newBaseUrl);
 };
 
 export type CreateTypeFromInterface<Interface> = {

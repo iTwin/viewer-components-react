@@ -7,8 +7,8 @@ import type { SelectOption } from "@itwin/itwinui-react";
 import { ComboBox, ProgressRadial, Text } from "@itwin/itwinui-react";
 import * as React from "react";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ReportingClient } from "@itwin/insights-client";
-import { handleError } from "./utils";
+import { ReportingClient, REPORTING_BASE_PATH } from "@itwin/insights-client";
+import { generateUrl, handleError } from "./utils";
 import "./Extraction.scss";
 import { SvgStatusError, SvgStatusPending, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
 import { ApiContext, useApi } from "../context/ApiContext";
@@ -117,7 +117,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
     try {
       setExtractionState(ExtractionStates.Checking);
       setExtractingIModelId(iModelId);
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
       const response = await reportingClientApi.runExtraction(apiContext.accessToken, iModelId);
       setJobId(response.run?.id ?? "");
       setIsRunning(true);
@@ -133,7 +133,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
       const delay = 5000;
       const newIntervalId = window.setInterval(async () => {
         setExtractionState(ExtractionStates.Checking);
-        const reportingClientApi = new ReportingClient(apiContext.prefix);
+        const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
         const response = await reportingClientApi.getExtractionStatus(apiContext.accessToken, jobId);
         if (response.status?.state === "Queued") {
           setExtractionState(ExtractionStates.Queued);

@@ -18,14 +18,16 @@ import { IModelApp } from "@itwin/core-frontend";
 import * as React from "react";
 import ReportsContainer from "./components/ReportsContainer";
 
+export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com"
+
 export class ReportsConfigProvider implements UiItemsProvider {
   public readonly id = "ReportsConfigProvider";
   private readonly _accessToken?: AccessToken;
-  private readonly _prefix?: "" | "dev" | "qa";
+  private readonly _baseUrl: string;
 
-  constructor(accessToken?: AccessToken, prefix?: "" | "dev" | "qa") {
+  constructor(accessToken?: AccessToken, baseUrl: string = REPORTS_CONFIG_BASE_URL) {
     this._accessToken = accessToken;
-    this._prefix = prefix;
+    this._baseUrl = baseUrl;
   }
 
   public provideWidgets(
@@ -46,7 +48,7 @@ export class ReportsConfigProvider implements UiItemsProvider {
         id: "reports-config-widget",
         label: IModelApp.localization.getLocalizedString("ReportsConfigWidget:ReportsConfig"),
         getWidgetContent: () => {
-          return <ReportsContainer accessToken={this._accessToken} prefix={this._prefix} />;
+          return <ReportsContainer accessToken={this._accessToken} baseUrl={this._baseUrl} />;
         },
       };
 

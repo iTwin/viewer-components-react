@@ -37,7 +37,7 @@
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./public/locales/en-PSEUDO",
     "rebuild": "npm run clean && npm run build",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch "
   },
   "eslintConfig": {
     "plugins": [
@@ -54,7 +54,8 @@
     "@itwin/itwinui-icons-react": "^1.7.0",
     "@itwin/itwinui-icons-color-react": "^1.0.1",
     "@itwin/itwinui-react": "^1.37.0",
-    "simple-react-validator": "^1.6.1"
+    "simple-react-validator": "^1.6.1",
+    "@itwin/insights-client": "^0.2.0"
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^3.0.0",
@@ -107,7 +108,6 @@
     "redux": "^4.0.4",
     "typemoq": "^2.1.0",
     "@itwin/core-bentley": "^3.0.0",
-    "@itwin/insights-client": "^0.1.1",
     "msw": "^0.39.2"
   },
   "peerDependencies": {

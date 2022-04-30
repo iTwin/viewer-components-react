@@ -18,12 +18,12 @@ import {
   Surface
 } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import type { CreateTypeFromInterface } from "./utils";
+import { CreateTypeFromInterface, generateUrl } from "./utils";
 import { EmptyMessage, LoadingOverlay } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
-import type { Report } from "@itwin/insights-client";
+import { Report, REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 import { IModelApp } from "@itwin/core-frontend";
 import ReportAction from "./ReportAction";
@@ -51,7 +51,7 @@ const fetchReports = async (
   try {
     if (!iTwinId) return;
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(apiContext.prefix);
+    const reportingClientApi = new ReportingClient()
     const reports = await reportingClientApi.getReports(apiContext.accessToken, iTwinId);
     setReports(reports ?? []);
   } catch (error: any) {
@@ -199,7 +199,7 @@ export const Reports = () => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = new ReportingClient(apiContext.prefix);
+              const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
               await reportingClientApi.deleteReport(
                 apiContext.accessToken,
                 selectedReport?.id ?? ""

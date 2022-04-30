@@ -12,11 +12,11 @@ import "./ReportsContainer.scss";
 
 interface ReportsContainerProps {
   accessToken?: AccessToken;
-  prefix?: "" | "dev" | "qa";
+  baseUrl: string;
 }
 
 
-const ReportsContainer = ({ accessToken, prefix }: ReportsContainerProps) => {
+const ReportsContainer = ({ accessToken, baseUrl }: ReportsContainerProps) => {
   const [currentAccessToken, setCurrentAccessToken] = useState<string>("");
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const ReportsContainer = ({ accessToken, prefix }: ReportsContainerProps) => {
   }, [accessToken, setCurrentAccessToken]);
 
   return (
-    currentAccessToken ? <ApiContext.Provider value={{ accessToken: currentAccessToken, prefix }}>
+    currentAccessToken ? <ApiContext.Provider value={{ accessToken: currentAccessToken, baseUrl }}>
       <div className='reports-container'>
         <Reports />
       </div>

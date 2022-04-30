@@ -18,11 +18,11 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "./utils";
-import { EmptyMessage, LoadingOverlay, prefixUrl } from "./utils";
+import { EmptyMessage, LoadingOverlay, generateUrl } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
-import type { Report, ReportMapping } from "@itwin/insights-client";
+import { Report, REPORTING_BASE_PATH, ReportMapping } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 import { IModelApp } from "@itwin/core-frontend";
 import AddMappingsModal from "./AddMappingsModal";
@@ -52,13 +52,11 @@ const fetchReportMappings = async (
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(apiContext.prefix);
+    const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
     const reportMappings = await reportingClientApi.getReportMappings(apiContext.accessToken, reportId);
     const iModelClientOptions: IModelsClientOptions = {
-      api: { baseUrl: prefixUrl(Constants.api.baseUrl, apiContext.prefix) },
+      api: { baseUrl: generateUrl(Constants.api.baseUrl, apiContext.baseUrl) },
     };
-
-    console.log(iModelClientOptions)
 
     const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
     const authorization = AccessTokenAdapter.toAuthorizationCallback(apiContext.accessToken);
@@ -67,7 +65,6 @@ const fetchReportMappings = async (
       const iModelId = reportMapping.imodelId ?? "";
       let iModelName = "";
       const mapping = await reportingClientApi.getMapping(apiContext.accessToken, reportMapping.mappingId ?? "", iModelId);
-
       if (iModelNames.has(iModelId)) {
         iModelName = iModelNames.get(iModelId) ?? "";
       } else {
@@ -85,6 +82,7 @@ const fetchReportMappings = async (
       return reportMappingAndMapping;
     }) ?? []);
 
+    console.log(reportMappingsAndMapping)
     setReportMappings(reportMappingsAndMapping);
   } catch (error: any) {
     handleError(error.status);
@@ -130,7 +128,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
 
   const uniqueIModels = useMemo(() => new Map(reportMappings.map((mapping) => [mapping.imodelId ?? "", mapping.iModelName])), [reportMappings]);
 
-  const odataFeedUrl = prefixUrl(`https://api.bentley.com/insights/reporting/odata/${report.id}`, apiContext.prefix);
+  const odataFeedUrl = `${apiContext.baseUrl}/insights/reporting/odata/${report.id}`;
 
   const filteredReportMappings = useMemo(() => reportMappings.filter((x) =>
     [x.iModelName, x.mappingName, x.mappingDescription]
@@ -219,7 +217,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
-          const reportingClientApi = new ReportingClient(apiContext.prefix);
+          const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
           await reportingClientApi.deleteReportMapping(
             apiContext.accessToken,
             report.id ?? "",

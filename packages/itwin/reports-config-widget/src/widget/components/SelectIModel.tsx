@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { Api, ApiContext, useApi } from "../context/ApiContext";
 import { useActiveIModel } from "../hooks/useActiveIModel";
 import "./SelectIModel.scss";
-import { LoadingSpinner, prefixUrl } from "./utils";
+import { LoadingSpinner, generateUrl } from "./utils";
 
 const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
@@ -23,7 +23,7 @@ const fetchIModels = async (
 ) => {
   try {
     const iModelClientOptions: IModelsClientOptions = {
-      api: { baseUrl: prefixUrl(Constants.api.baseUrl, apiContext.prefix) },
+      api: { baseUrl: generateUrl(Constants.api.baseUrl, apiContext.baseUrl) },
     };
 
     const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);

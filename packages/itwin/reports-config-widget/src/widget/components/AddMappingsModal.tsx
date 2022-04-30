@@ -13,7 +13,7 @@ import {
   tableFilters,
 } from "@itwin/itwinui-react";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import type { Mapping } from "@itwin/insights-client";
+import { Mapping, REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
@@ -21,7 +21,7 @@ import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import type { ReportMappingAndMapping } from "./ReportMappings";
 import { Api, ApiContext, useApi } from "../context/ApiContext";
 import { SelectIModel } from "./SelectIModel";
-import type { CreateTypeFromInterface } from "./utils";
+import { CreateTypeFromInterface, generateUrl } from "./utils";
 import { handleError } from "./utils";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
@@ -34,7 +34,7 @@ const fetchMappings = async (
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(apiContext.prefix);
+    const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
     const mappings = await reportingClientApi.getMappings(apiContext.accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
@@ -96,7 +96,7 @@ const AddMappingsModal = ({
     try {
       if (!selectedIModelId) return;
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
       for (const mapping of selectedMappings) {
         await reportingClientApi.createReportMapping(apiContext.accessToken, reportId, { imodelId: selectedIModelId, mappingId: mapping.id ?? "" });
       }
