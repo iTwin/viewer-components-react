@@ -14,7 +14,7 @@ import { ActiveIModel, useActiveIModel } from "../widget/hooks/useActiveIModel";
 import faker from "@faker-js/faker";
 import { ReportCollection } from "@itwin/insights-client";
 import userEvent from "@testing-library/user-event";
-import { ReportMappings } from "../widget/components/ReportMappings";
+import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
@@ -23,21 +23,21 @@ const mockReportName = faker.random.word();
 const mockReportDescription = faker.random.words();
 
 
-const reportsFactoryDuplicates = (): ReportCollection => ({
-  reports: Array.from({ length: faker.datatype.number({ min: 3, max: 5 }) }, () => (
-    {
-      id: `${faker.datatype.uuid()}`,
-      displayName: mockReportName,
-      description: mockReportDescription,
-    }),
-  ),
-  _links: {
-    next: undefined,
-    self: {
-      href: ""
-    }
-  }
-});
+// const reportsFactoryDuplicates = (): ReportCollection => ({
+//   reports: Array.from({ length: faker.datatype.number({ min: 3, max: 5 }) }, () => (
+//     {
+//       id: `${faker.datatype.uuid()}`,
+//       displayName: mockReportName,
+//       description: mockReportDescription,
+//     }),
+//   ),
+//   _links: {
+//     next: undefined,
+//     self: {
+//       href: ""
+//     }
+//   }
+// });
 
 const reportsFactoryUnique = (): ReportCollection => ({
   reports: Array.from({ length: faker.datatype.number({ min: 3, max: 5 }) }, () => (
@@ -87,7 +87,7 @@ describe("Reports View", () => {
   it("call to action button should be clickable with no reports", async () => {
     server.use(
       rest.get(
-        'https://api.bentley.com/insights/reporting/reports',
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
         async (_req, res, ctx) => {
           return res(ctx.delay(500), ctx.status(200), ctx.json({ reports: [] }))
         },
@@ -102,11 +102,32 @@ describe("Reports View", () => {
     expect(screen.getByText(/addreport/i)).toBeInTheDocument();
   });
 
-  it("list reports", async () => {
-    const mockedReports: ReportCollection = reportsFactoryDuplicates();
+  it("be able to add new report", async () => {
     server.use(
       rest.get(
-        'https://api.bentley.com/insights/reporting/reports',
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
+        async (_req, res, ctx) => {
+          return res(ctx.delay(500), ctx.status(200), ctx.json({ reports: [] }))
+        },
+      ),
+    )
+
+    const { user } = render(<Reports />);
+
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
+    const newButton = screen.getByRole('button', {
+      name: /new/i
+    })
+    await user.click(newButton);
+    expect(screen.getByText(/addreport/i)).toBeInTheDocument();
+  });
+
+
+  it("list all reports", async () => {
+    const mockedReports: ReportCollection = reportsFactoryUnique();
+    server.use(
+      rest.get(
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
         async (_req, res, ctx) => {
           return res(ctx.delay(500), ctx.status(200), ctx.json(mockedReports))
         },
@@ -116,15 +137,24 @@ describe("Reports View", () => {
     render(<Reports />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
-    expect(screen.getAllByText(mockReportName)).toHaveLength(mockedReports.reports?.length ?? 0)
-    expect(screen.getAllByText(mockReportDescription)).toHaveLength(mockedReports.reports?.length ?? 0)
+    const horizontalTiles = screen.getAllByTestId("horizontal-tile");
+    //TODO check for all descriptions and names and imodels
+    expect(horizontalTiles).toHaveLength(mockedReports?.reports!.length);
+
+
+    for (let [index, horizontalTile] of horizontalTiles.entries()) {
+      const reportMappingTile = within(horizontalTile);
+      expect(reportMappingTile.getByText(mockedReports?.reports![index].displayName ?? "")).toBeInTheDocument();
+      expect(reportMappingTile.getByTitle(mockedReports?.reports![index].description ?? "")).toBeInTheDocument();
+    }
+
   });
 
   it("able to modify a report", async () => {
-    const mockedReports: ReportCollection = reportsFactoryDuplicates();
+    const mockedReports: ReportCollection = reportsFactoryUnique();
     server.use(
       rest.get(
-        'https://api.bentley.com/insights/reporting/reports',
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
         async (_req, res, ctx) => {
           return res(ctx.delay(500), ctx.status(200), ctx.json(mockedReports))
         },
@@ -145,17 +175,17 @@ describe("Reports View", () => {
 
 
   it("remove a report", async () => {
-    const mockedReports: ReportCollection = reportsFactoryDuplicates();
+    const mockedReports: ReportCollection = reportsFactoryUnique();
     const mockedReportsOriginalLength = mockedReports.reports!.length;
     server.use(
       rest.get(
-        'https://api.bentley.com/insights/reporting/reports',
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
         async (_req, res, ctx) => {
           return res(ctx.delay(200), ctx.status(200), ctx.json(mockedReports))
         },
       ),
       rest.delete(
-        `https://api.bentley.com/insights/reporting/reports/${mockedReports.reports![0].id}`,
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockedReports.reports![0].id}`,
         async (_req, res, ctx) => {
           mockedReports.reports = mockedReports.reports!.filter((report) => report.id !== mockedReports.reports![0].id)
           return res(ctx.delay(100), ctx.status(204))
@@ -183,9 +213,9 @@ describe("Reports View", () => {
     await waitForElementToBeRemoved(() => screen.getByTestId(/rcw-loading-delete/i));
     await waitForElementToBeRemoved(() => screen.getByRole('dialog'))
 
+    console.log(mockedReports.reports)
     // Should be one less report
-    expect(screen.queryAllByText(mockReportName)).toHaveLength(mockedReportsOriginalLength - 1)
-    expect(screen.queryAllByText(mockReportDescription)).toHaveLength(mockedReportsOriginalLength - 1)
+    expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(mockedReportsOriginalLength - 1)
 
   });
 
@@ -193,7 +223,7 @@ describe("Reports View", () => {
     const mockedReports: ReportCollection = reportsFactoryUnique();
     server.use(
       rest.get(
-        'https://api.bentley.com/insights/reporting/reports',
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
         async (_req, res, ctx) => {
           return res(ctx.delay(200), ctx.status(200), ctx.json(mockedReports))
         },
@@ -223,10 +253,10 @@ describe("Reports View", () => {
   });
 
   it("modify a report", async () => {
-    const mockedReports: ReportCollection = reportsFactoryDuplicates();
+    const mockedReports: ReportCollection = reportsFactoryUnique();
     server.use(
       rest.get(
-        'https://api.bentley.com/insights/reporting/reports',
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
         async (_req, res, ctx) => {
           return res(ctx.delay(200), ctx.status(200), ctx.json(mockedReports))
         },
@@ -249,7 +279,7 @@ describe("Reports View", () => {
     const mockedReports: ReportCollection = reportsFactoryUnique();
     server.use(
       rest.get(
-        'https://api.bentley.com/insights/reporting/reports',
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
         async (_req, res, ctx) => {
           return res(ctx.delay(200), ctx.status(200), ctx.json(mockedReports))
         },
