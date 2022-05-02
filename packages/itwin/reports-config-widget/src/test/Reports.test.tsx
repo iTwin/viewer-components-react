@@ -22,24 +22,7 @@ const mockIModelId = faker.datatype.uuid();
 const mockReportName = faker.random.word();
 const mockReportDescription = faker.random.words();
 
-
-// const reportsFactoryDuplicates = (): ReportCollection => ({
-//   reports: Array.from({ length: faker.datatype.number({ min: 3, max: 5 }) }, () => (
-//     {
-//       id: `${faker.datatype.uuid()}`,
-//       displayName: mockReportName,
-//       description: mockReportDescription,
-//     }),
-//   ),
-//   _links: {
-//     next: undefined,
-//     self: {
-//       href: ""
-//     }
-//   }
-// });
-
-const reportsFactoryUnique = (): ReportCollection => ({
+const reportsFactory = (): ReportCollection => ({
   reports: Array.from({ length: faker.datatype.number({ min: 3, max: 5 }) }, () => (
     {
       id: `${faker.datatype.uuid()}`,
@@ -124,7 +107,7 @@ describe("Reports View", () => {
 
 
   it("list all reports", async () => {
-    const mockedReports: ReportCollection = reportsFactoryUnique();
+    const mockedReports: ReportCollection = reportsFactory();
     server.use(
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
@@ -151,7 +134,7 @@ describe("Reports View", () => {
   });
 
   it("able to modify a report", async () => {
-    const mockedReports: ReportCollection = reportsFactoryUnique();
+    const mockedReports: ReportCollection = reportsFactory();
     server.use(
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
@@ -175,7 +158,7 @@ describe("Reports View", () => {
 
 
   it("remove a report", async () => {
-    const mockedReports: ReportCollection = reportsFactoryUnique();
+    const mockedReports: ReportCollection = reportsFactory();
     const mockedReportsOriginalLength = mockedReports.reports!.length;
     server.use(
       rest.get(
@@ -220,7 +203,7 @@ describe("Reports View", () => {
   });
 
   it("search for a report", async () => {
-    const mockedReports: ReportCollection = reportsFactoryUnique();
+    const mockedReports: ReportCollection = reportsFactory();
     server.use(
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
@@ -253,7 +236,7 @@ describe("Reports View", () => {
   });
 
   it("modify a report", async () => {
-    const mockedReports: ReportCollection = reportsFactoryUnique();
+    const mockedReports: ReportCollection = reportsFactory();
     server.use(
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
@@ -276,7 +259,7 @@ describe("Reports View", () => {
   });
 
   it("click a report", async () => {
-    const mockedReports: ReportCollection = reportsFactoryUnique();
+    const mockedReports: ReportCollection = reportsFactory();
     server.use(
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
