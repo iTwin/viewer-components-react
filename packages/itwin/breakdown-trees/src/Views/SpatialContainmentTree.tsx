@@ -22,7 +22,7 @@ import { CombinedTreeNodeFunctionalityProvider } from "./FunctionalityProviders/
 import { SpaceClipPlanesProvider } from "./FunctionalityProviders/SpaceClipPlanesProvider";
 import { StoryClipPlanesProvider } from "./FunctionalityProviders/StoryClipPlanesProvider";
 import { TreeNodeFunctionIconInfoMapper } from "./FunctionalityProviders/TreeNodeFunctionIconMapper";
-import type { OptionItemHandler } from "./OptionItemHandlers";
+import type { OptionItemHandler } from "./OptionItemHandlers/OptionItemHandler";
 import { ClipAtSpacesHandler } from "./OptionItemHandlers/ClipAtSpacesHandler";
 import { GenericOptionItemHandler } from "./OptionItemHandlers/GenericOptionItemHandler";
 import { LabelHandler } from "./OptionItemHandlers/LabelHandler";

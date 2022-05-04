@@ -3,6 +3,12 @@
 trigger:
   - master
 
+pr:
+  drafts: false
+  branches:
+    include:
+      - master
+
 schedules:
   - cron: "0 9 * * Mon-Fri"
     displayName: Weekday 4 AM (UTC -5) daily build
