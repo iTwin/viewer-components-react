@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
-import type { SelectOption } from "@itwin/itwinui-react";
+import { Label, SelectOption, StatusMessage } from "@itwin/itwinui-react";
 import { ComboBox, ProgressRadial, Text } from "@itwin/itwinui-react";
 import * as React from "react";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -110,7 +110,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
   const [jobId, setJobId] = useState<string>("");
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [intervalId, setIntervalId] = useState<number>();
-  const [showComboBox, setShowComboBox] = useState<boolean>(false);
+  const [currentIModelName, setCurrentIModelName] = useState<string>();
   const apiContext = useApi();
 
   const runExtraction = async (iModelId: string) => {
@@ -142,9 +142,11 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
         } else if (response.status?.state === "Succeeded") {
           setExtractionState(ExtractionStates.Succeeded);
           setIsRunning(false);
+          setCurrentIModelName(undefined);
         } else if (response.status?.state === "Failed") {
           setExtractionState(ExtractionStates.Failed);
           setIsRunning(false);
+          setCurrentIModelName(undefined);
         }
       }, delay);
       setIntervalId(newIntervalId);
@@ -158,40 +160,41 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
   const iModelOptions = useMemo(() => {
     const newIModelOptions: SelectOption<string>[] = [];
     for (const [iModelId, iModelName] of iModels.entries()) {
-      newIModelOptions.push({ label: iModelName, value: iModelId, key: iModelId });
+      newIModelOptions.push({ label: iModelName, value: iModelId, key: iModelId, disabled: extractionState !== ExtractionStates.None });
     }
     return newIModelOptions;
-  }, [iModels]);
+  }, [iModels, extractionState]);
 
   return (
     <div className="extraction-container">
-      {extractionState === ExtractionStates.None ?
-        showComboBox ?
-          <ComboBox<string>
-            options={iModelOptions}
-            value={undefined}
-            onChange={async (value) => {
-              await runExtraction(value);
-              setShowComboBox(false);
-            }}
-            inputProps={{
-              id: "combo-input",
-              placeholder: IModelApp.localization.getLocalizedString("ReportsConfigWidget:SelectIModel"),
-            }}
-            style={{ flexGrow: 1, maxWidth: "395px" }}
-          /> :
-          <Text
-            className="iui-anchor"
-            onClick={() => setShowComboBox(true)}
-          >
-            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateDataset")}
-          </Text>
-        :
-        <span className="extraction-status-container">
-          <ExtractionStatus state={extractionState} setExtractionState={setExtractionState} />
-          <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateInProgress")}</Text>
-        </span>
-      }
-    </div>
+
+      <div className="extraction-combo-box">
+        <Label htmlFor='combo-input'>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateDataset")}</Label>
+
+        <ComboBox<string>
+          options={iModelOptions}
+          value={currentIModelName}
+          onChange={async (value) => {
+            await runExtraction(value);
+            setCurrentIModelName(value)
+          }}
+          inputProps={{
+            id: "combo-input",
+            placeholder: IModelApp.localization.getLocalizedString("ReportsConfigWidget:SelectIModel"),
+          }}
+          message={extractionState !== ExtractionStates.None && <StatusMessage>
+            <div className="extraction-status-container">
+              <ExtractionStatus state={extractionState} setExtractionState={setExtractionState} />
+              {IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateInProgress")}
+            </div>
+          </StatusMessage>
+          }
+        />
+
+
+      </div>
+
+
+    </div >
   );
 };

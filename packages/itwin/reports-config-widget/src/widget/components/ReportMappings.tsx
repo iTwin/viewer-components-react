@@ -7,11 +7,14 @@ import {
   SvgAdd,
   SvgCopy,
   SvgDelete,
+  SvgMore,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
+  DropdownMenu,
   IconButton,
   LabeledInput,
+  MenuItem,
   Surface,
   Text,
   toaster,
@@ -82,7 +85,6 @@ const fetchReportMappings = async (
       return reportMappingAndMapping;
     }) ?? []);
 
-    console.log(reportMappingsAndMapping)
     setReportMappings(reportMappingsAndMapping);
   } catch (error: any) {
     handleError(error.status);
@@ -128,7 +130,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
 
   const uniqueIModels = useMemo(() => new Map(reportMappings.map((mapping) => [mapping.imodelId ?? "", mapping.iModelName])), [reportMappings]);
 
-  const odataFeedUrl = `${apiContext.baseUrl}/insights/reporting/odata/${report.id}`;
+  const odataFeedUrl = `${generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl)}/odata/${report.id}`;
 
   const filteredReportMappings = useMemo(() => reportMappings.filter((x) =>
     [x.iModelName, x.mappingName, x.mappingDescription]
@@ -170,7 +172,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           >
             {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddMapping")}
           </Button>
-          <div className="search-bar-container">
+          <div className="search-bar-container" data-testid="search-bar">
             <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
           </div>
         </div>
@@ -194,13 +196,30 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
                 titleTooltip={mapping.mappingDescription}
                 button={<ExtractionStatus
                   state={mapping.imodelId === runningIModelId ? extractionState : ExtractionStates.None} >
-                  <IconButton title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Delete")}
-                    styleType="borderless" onClick={
-                      () => {
-                        setSelectedReportMapping(mapping);
-                        setShowDeleteModal(true);
-                      }}
-                  ><SvgDelete /></IconButton>
+                  <DropdownMenu
+                    menuItems={(_: () => void) => [
+                      <MenuItem
+                        key={0}
+                        onClick={
+                          () => {
+                            setSelectedReportMapping(mapping);
+                            setShowDeleteModal(true);
+                          }}
+                        icon={<SvgDelete />}
+                      >
+                        {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Remove")}
+                      </MenuItem>,
+                    ]}
+                  >
+                    <IconButton styleType="borderless">
+                      <SvgMore
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                        }}
+                      />
+                    </IconButton>
+                  </DropdownMenu>
                 </ExtractionStatus>}
               />)}
             </div>

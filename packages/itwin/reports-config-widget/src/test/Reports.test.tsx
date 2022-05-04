@@ -196,7 +196,6 @@ describe("Reports View", () => {
     await waitForElementToBeRemoved(() => screen.getByTestId(/rcw-loading-delete/i));
     await waitForElementToBeRemoved(() => screen.getByRole('dialog'))
 
-    console.log(mockedReports.reports)
     // Should be one less report
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(mockedReportsOriginalLength - 1)
 

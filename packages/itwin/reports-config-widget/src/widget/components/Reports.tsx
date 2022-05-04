@@ -51,7 +51,7 @@ const fetchReports = async (
   try {
     if (!iTwinId) return;
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient()
+    const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
     const reports = await reportingClientApi.getReports(apiContext.accessToken, iTwinId);
     setReports(reports ?? []);
   } catch (error: any) {

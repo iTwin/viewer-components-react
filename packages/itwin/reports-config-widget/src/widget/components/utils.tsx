@@ -106,7 +106,7 @@ export const handleInputChange = <T,>(
 
 export const LoadingSpinner = () => {
   return (
-    <div className="rcw-loading-spinner" data-testid="loading-spinner">
+    <div className="rcw-loading-spinner" data-testid="rcw-action-loading-spinner">
       <ProgressRadial size="small" indeterminate />
     </div>
   );

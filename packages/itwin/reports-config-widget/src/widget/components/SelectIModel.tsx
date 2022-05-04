@@ -83,9 +83,6 @@ export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: Selected
           }}
           style={{ flexGrow: 1, maxWidth: "395px" }}
         />
-        {isLoading &&
-          <LoadingSpinner />
-        }
       </div>
     </div>);
 
