@@ -13,7 +13,8 @@ import {
   WidgetState,
 } from "@itwin/appui-abstract";
 import { FrontstageManager, UiFramework } from "@itwin/appui-react";
-import { ISelectionProvider, Presentation, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
+import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import * as React from "react";
 
 import { MultiElementPropertyGrid, MultiElementPropertyGridId } from "./components/MultiElementPropertyGrid";
