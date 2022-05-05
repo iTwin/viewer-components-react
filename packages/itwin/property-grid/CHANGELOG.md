@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Wed, 06 Apr 2022 13:48:44 GMT and should not be manually modified.
+This log was last generated on Thu, 05 May 2022 21:41:23 GMT and should not be manually modified.
+
+## 0.4.1
+Thu, 05 May 2022 21:41:23 GMT
+
+### Patches
+
+- fix property grid ui items provider when loading into appui v1.0
 
 ## 0.4.0
 Wed, 06 Apr 2022 13:48:44 GMT

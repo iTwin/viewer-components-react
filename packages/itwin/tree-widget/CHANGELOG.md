@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 05 May 2022 12:21:21 GMT and should not be manually modified.
+This log was last generated on Thu, 05 May 2022 21:41:23 GMT and should not be manually modified.
+
+## 0.4.5
+Thu, 05 May 2022 21:41:23 GMT
+
+### Patches
+
+- set restore transient state in tree widget ui items provider to restore state when remounted
 
 ## 0.4.4
 Thu, 05 May 2022 12:21:21 GMT

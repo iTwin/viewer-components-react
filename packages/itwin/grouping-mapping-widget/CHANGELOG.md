@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 19 Apr 2022 14:15:57 GMT and should not be manually modified.
+This log was last generated on Thu, 05 May 2022 21:41:23 GMT and should not be manually modified.
+
+## 0.3.2
+Thu, 05 May 2022 21:41:23 GMT
+
+### Patches
+
+- Added optional access token and enviroment props and switched to insights-client
 
 ## 0.3.1
 Tue, 19 Apr 2022 14:15:57 GMT
