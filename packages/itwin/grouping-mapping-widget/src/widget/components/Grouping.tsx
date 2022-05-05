@@ -14,13 +14,12 @@ import {
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import type { GroupReportingAPI, MappingReportingAPI } from "../../api/generated/api";
-import { reportingClientApi } from "../../api/reportingClient";
 import type { CreateTypeFromInterface } from "../utils";
 import {
   Button,
@@ -50,8 +49,12 @@ import {
 } from "./viewerUtils";
 import { fetchIdsFromQuery, handleError, WidgetHeader } from "./utils";
 import GroupAction from "./GroupAction";
+import type { Group, Mapping } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
+import type { Api } from "./GroupingMapping";
+import { ApiContext } from "./GroupingMapping";
 
-export type Group = CreateTypeFromInterface<GroupReportingAPI>;
+export type GroupType = CreateTypeFromInterface<Group>;
 
 enum GroupsView {
   GROUPS = "groups",
@@ -61,20 +64,22 @@ enum GroupsView {
 }
 
 interface GroupsTreeProps {
-  mapping: MappingReportingAPI;
+  mapping: Mapping;
   goBack: () => Promise<void>;
 }
 
 const fetchGroups = async (
-  setGroups: React.Dispatch<React.SetStateAction<Group[]>>,
+  setGroups: React.Dispatch<React.SetStateAction<GroupType[]>>,
   iModelId: string,
   mappingId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  apiContext: Api
 ) => {
   try {
     setIsLoading(true);
-    const groups = await reportingClientApi.getGroups(iModelId, mappingId);
-    setGroups(groups.groups ?? []);
+    const reportingClientApi = new ReportingClient(apiContext.prefix);
+    const groups = await reportingClientApi.getGroups(apiContext.accessToken, iModelId, mappingId);
+    setGroups(groups);
   } catch (error: any) {
     handleError(error.status);
   } finally {
@@ -82,44 +87,31 @@ const fetchGroups = async (
   }
 };
 
-const useFetchGroups = (
-  iModelId: string,
-  mappingId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-): [Group[], React.Dispatch<React.SetStateAction<Group[]>>] => {
-  const [groups, setGroups] = useState<GroupReportingAPI[]>([]);
-
-  useEffect(() => {
-    void fetchGroups(setGroups, iModelId, mappingId, setIsLoading);
-  }, [iModelId, mappingId, setIsLoading]);
-
-  return [groups, setGroups];
-};
-
 export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
+  const apiContext = useContext(ApiContext);
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [groupsView, setGroupsView] = useState<GroupsView>(GroupsView.GROUPS);
-  const [selectedGroup, setSelectedGroup] = useState<Group | undefined>(
+  const [selectedGroup, setSelectedGroup] = useState<GroupType | undefined>(
     undefined,
-  );
-  const [groups, setGroups] = useFetchGroups(
-    iModelId,
-    mapping.id ?? "",
-    setIsLoading,
   );
   const hilitedElements = useRef<Map<string, string[]>>(new Map());
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
+  const [groups, setGroups] = useState<Group[]>([]);
+
+  useEffect(() => {
+    void fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading, apiContext);
+  }, [apiContext, iModelId, mapping.id, setIsLoading]);
 
   const refresh = useCallback(async () => {
     setGroupsView(GroupsView.GROUPS);
     setSelectedGroup(undefined);
     setGroups([]);
-    await fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading);
-  }, [iModelId, mapping.id, setGroups]);
+    await fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading, apiContext);
+  }, [apiContext, iModelId, mapping.id, setGroups]);
 
   const addGroup = () => {
     // TODO Retain selection in view without emphasizes. Goal is to make it so we can distinguish
@@ -150,7 +142,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             id: "groupName",
             Header: "Group",
             accessor: "groupName",
-            Cell: (value: CellProps<Group>) => (
+            Cell: (value: CellProps<GroupType>) => (
               <>
                 {isLoadingQuery ? (
                   value.row.original.groupName
@@ -177,7 +169,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<Group>) => {
+            Cell: (value: CellProps<GroupType>) => {
               return (
                 <div onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu
@@ -247,7 +239,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   };
 
   const onSelect = useCallback(
-    async (selectedData: Group[] | undefined) => {
+    async (selectedData: GroupType[] | undefined) => {
       clearEmphasizedElements();
       if (selectedData && selectedData.length > 0) {
         setLoadingQuery(true);
@@ -407,7 +399,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             >
               {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
             </Button>
-            <Table<Group>
+            <Table<GroupType>
               data={groups}
               density='extra-condensed'
               columns={groupsColumns}
@@ -426,7 +418,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
+              const reportingClientApi = new ReportingClient(apiContext.prefix);
               await reportingClientApi.deleteGroup(
+                apiContext.accessToken,
                 iModelId,
                 mapping.id ?? "",
                 selectedGroup?.id ?? "",
