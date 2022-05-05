@@ -32,3 +32,8 @@
   gap: $iui-baseline;
   height: 100%;
 }
+
+.skeleton-block {
+  height: $iui-baseline * 3;
+  width: 100%;
+}

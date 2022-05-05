@@ -8,7 +8,7 @@ import { ComboBox, ProgressRadial, Text } from "@itwin/itwinui-react";
 import * as React from "react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ReportingClient, REPORTING_BASE_PATH } from "@itwin/insights-client";
-import { generateUrl, handleError } from "./utils";
+import { generateUrl, handleError, LoadingOverlay, LoadingSpinner, SkeletonBlock } from "./utils";
 import "./Extraction.scss";
 import { SvgStatusError, SvgStatusPending, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
 import { ApiContext, useApi } from "../context/ApiContext";
@@ -104,9 +104,10 @@ interface ExtractionProps {
   setExtractingIModelId: React.Dispatch<React.SetStateAction<string>>;
   extractionState: ExtractionStates;
   setExtractionState: React.Dispatch<React.SetStateAction<ExtractionStates>>;
+  isLoading: boolean;
 }
 
-export const Extraction = ({ iModels, setExtractingIModelId, extractionState, setExtractionState }: ExtractionProps) => {
+export const Extraction = ({ iModels, setExtractingIModelId, extractionState, setExtractionState, isLoading }: ExtractionProps) => {
   const [jobId, setJobId] = useState<string>("");
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [intervalId, setIntervalId] = useState<number>();
@@ -158,7 +159,9 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
   }, [apiContext, isRunning, intervalId, jobId, setExtractionState]);
 
   const iModelOptions = useMemo(() => {
+    // TODO Report ComboBox bug. Unique key error happens when the options list becomes reduced.
     const newIModelOptions: SelectOption<string>[] = [];
+
     for (const [iModelId, iModelName] of iModels.entries()) {
       newIModelOptions.push({ label: iModelName, value: iModelId, key: iModelId, disabled: extractionState !== ExtractionStates.None });
     }
@@ -170,31 +173,28 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
 
       <div className="extraction-combo-box">
         <Label htmlFor='combo-input'>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateDataset")}</Label>
-
-        <ComboBox<string>
-          options={iModelOptions}
-          value={currentIModelName}
-          onChange={async (value) => {
-            await runExtraction(value);
-            setCurrentIModelName(value)
-          }}
-          inputProps={{
-            id: "combo-input",
-            placeholder: IModelApp.localization.getLocalizedString("ReportsConfigWidget:SelectIModel"),
-          }}
-          message={extractionState !== ExtractionStates.None && <StatusMessage>
-            <div className="extraction-status-container">
-              <ExtractionStatus state={extractionState} setExtractionState={setExtractionState} />
-              {IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateInProgress")}
-            </div>
-          </StatusMessage>
-          }
-        />
-
-
+        {
+          isLoading ? <SkeletonBlock /> :
+            <ComboBox
+              options={iModelOptions}
+              value={currentIModelName}
+              onChange={async (value) => {
+                await runExtraction(value);
+                setCurrentIModelName(value)
+              }}
+              inputProps={{
+                id: "combo-input",
+                placeholder: IModelApp.localization.getLocalizedString("ReportsConfigWidget:SelectIModel"),
+              }}
+              message={extractionState !== ExtractionStates.None && <StatusMessage>
+                <div className="extraction-status-container">
+                  <ExtractionStatus state={extractionState} setExtractionState={setExtractionState} />
+                  {IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateInProgress")}
+                </div>
+              </StatusMessage>
+              }
+            />}
       </div>
-
-
     </div >
   );
 };

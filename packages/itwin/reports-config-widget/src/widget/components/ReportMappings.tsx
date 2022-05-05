@@ -120,7 +120,6 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
 
   const refresh = useCallback(async () => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
-    setReportMappings([]);
     await fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, apiContext);
   }, [apiContext, report.id, setReportMappings]);
 
@@ -161,7 +160,8 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           iModels={uniqueIModels}
           extractionState={extractionState}
           setExtractionState={setExtractionState}
-          setExtractingIModelId={setRunningIModelId} />
+          setExtractingIModelId={setRunningIModelId}
+          isLoading={isLoading} />
       </div>
       <Surface className="report-mappings-container">
         <div className="toolbar">
@@ -197,13 +197,14 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
                 button={<ExtractionStatus
                   state={mapping.imodelId === runningIModelId ? extractionState : ExtractionStates.None} >
                   <DropdownMenu
-                    menuItems={(_: () => void) => [
+                    menuItems={(close: () => void) => [
                       <MenuItem
                         key={0}
                         onClick={
                           () => {
                             setSelectedReportMapping(mapping);
                             setShowDeleteModal(true);
+                            close();
                           }}
                         icon={<SvgDelete />}
                       >

@@ -82,7 +82,6 @@ export const Reports = () => {
   const refresh = useCallback(async () => {
     setReportsView(ReportsView.REPORTS);
     setSelectedReport(undefined);
-    setReports([]);
     await fetchReports(setReports, iTwinId, setIsLoading, apiContext);
   }, [apiContext, iTwinId, setReports]);
 
