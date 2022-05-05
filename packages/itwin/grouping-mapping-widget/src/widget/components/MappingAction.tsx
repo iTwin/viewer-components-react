@@ -9,7 +9,7 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, handleInputChange, WidgetHeader } from "./utils";
 import "./MappingAction.scss";
 import { ApiContext } from "./GroupingMapping";
-import type { Mapping} from "@itwin/insights-client";
+import type { Mapping } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 
 interface MappingActionProps {
