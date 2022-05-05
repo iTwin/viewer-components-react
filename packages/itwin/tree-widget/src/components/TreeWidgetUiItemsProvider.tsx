@@ -46,7 +46,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       // eslint-disable-next-line deprecation/deprecation
       (!section && stageUsage === StageUsage.General && zoneLocation === AbstractZoneLocation.CenterRight) ||
       (stageUsage === StageUsage.General && location === preferredLocation && section === preferredPanelSection
-         && UiFramework.uiVersion !== "1")
+        && UiFramework.uiVersion !== "1")
     ) {
       const trees: SelectableContentDefinition[] = [];
 
@@ -103,6 +103,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
         label: TreeWidget.translate("treeview"),
         getWidgetContent: () => <TreeWidgetComponent trees={trees} />,
         icon: "icon-hierarchy-tree",
+        restoreTransientState: () => true,
       });
     }
 
