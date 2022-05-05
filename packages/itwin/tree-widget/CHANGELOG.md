@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 21 Apr 2022 18:47:53 GMT and should not be manually modified.
+This log was last generated on Thu, 05 May 2022 12:21:21 GMT and should not be manually modified.
+
+## 0.4.4
+Thu, 05 May 2022 12:21:21 GMT
+
+### Patches
+
+- set tree-widget-search-bar-button-container z-index to 1
 
 ## 0.4.3
 Thu, 21 Apr 2022 18:47:53 GMT
