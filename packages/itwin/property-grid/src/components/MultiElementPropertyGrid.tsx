@@ -8,6 +8,7 @@ import "./MultiElementPropertyGrid.scss";
 import type { InstanceKey } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
+  UiFramework,
   useActiveFrontstageDef,
   useActiveIModelConnection,
 } from "@itwin/appui-react";
@@ -121,10 +122,12 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   );
 
   useEffect(() => {
-    if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
-      widgetDef?.setWidgetState(WidgetState.Open);
-    } else {
-      widgetDef?.setWidgetState(WidgetState.Hidden);
+    if (UiFramework.uiVersion !== "1") {
+      if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
+        widgetDef?.setWidgetState(WidgetState.Open);
+      } else {
+        widgetDef?.setWidgetState(WidgetState.Hidden);
+      }
     }
   }, [widgetDef, instanceKeys]);
 
@@ -137,7 +140,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
             "property-grid-react-animated-tab-animate-right": idx > content,
             "property-grid-react-animated-tab-animate-left": idx < content,
           })} >
-            { component }
+            {component}
           </div>
         ))}
       </div>
