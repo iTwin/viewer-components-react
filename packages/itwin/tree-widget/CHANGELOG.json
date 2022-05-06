@@ -2,6 +2,18 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "0.4.4",
+      "tag": "@itwin/tree-widget-react_v0.4.4",
+      "date": "Thu, 05 May 2022 12:21:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "set tree-widget-search-bar-button-container z-index to 1"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.3",
       "tag": "@itwin/tree-widget-react_v0.4.3",
       "date": "Thu, 21 Apr 2022 18:47:53 GMT",

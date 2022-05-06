@@ -15,16 +15,17 @@ import {
   MenuItem,
   Table,
 } from "@itwin/itwinui-react";
-import React, { useMemo, useState } from "react";
-import type { CustomCalculationReportingAPI } from "../../api/generated/api";
-import { reportingClientApi } from "../../api/reportingClient";
+import React, { useContext, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
+import type { CustomCalculation } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
+import { ApiContext } from "./GroupingMapping";
 
-export type CustomCalculation =
-  CreateTypeFromInterface<CustomCalculationReportingAPI>;
+export type CustomCalculationType =
+  CreateTypeFromInterface<CustomCalculation>;
 
 interface CustomCalculationTableProps {
   iModelId: string;
@@ -32,15 +33,15 @@ interface CustomCalculationTableProps {
   groupId: string;
   setSelectedCustomCalculation: React.Dispatch<
   React.SetStateAction<
-  CreateTypeFromInterface<CustomCalculationReportingAPI> | undefined
+  CreateTypeFromInterface<CustomCalculationType> | undefined
   >
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
-  onCustomCalculationModify: (value: CellProps<CustomCalculation>) => void;
+  onCustomCalculationModify: (value: CellProps<CustomCalculationType>) => void;
   isLoadingCustomCalculations: boolean;
-  customCalculations: CustomCalculation[];
+  customCalculations: CustomCalculationType[];
   refreshCustomCalculations: () => Promise<void>;
-  selectedCustomCalculation?: CustomCalculation;
+  selectedCustomCalculation?: CustomCalculationType;
 }
 
 const CustomCalculationTable = ({
@@ -55,6 +56,7 @@ const CustomCalculationTable = ({
   refreshCustomCalculations,
   selectedCustomCalculation,
 }: CustomCalculationTableProps) => {
+  const apiContext = useContext(ApiContext);
   const [
     showCustomCalculationDeleteModal,
     setShowCustomCalculationDeleteModal,
@@ -69,7 +71,7 @@ const CustomCalculationTable = ({
             id: "propertyName",
             Header: "Custom Calculation",
             accessor: "propertyName",
-            Cell: (value: CellProps<CustomCalculation>) => (
+            Cell: (value: CellProps<CustomCalculationType>) => (
               <div
                 className='iui-anchor'
                 onClick={() => onCustomCalculationModify(value)}
@@ -87,7 +89,7 @@ const CustomCalculationTable = ({
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<CustomCalculation>) => {
+            Cell: (value: CellProps<CustomCalculationType>) => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
@@ -140,7 +142,7 @@ const CustomCalculationTable = ({
       >
         Add Custom Calculation
       </Button>
-      <Table<CustomCalculation>
+      <Table<CustomCalculationType>
         data={customCalculations}
         density='extra-condensed'
         columns={CustomCalculationsColumns}
@@ -154,7 +156,9 @@ const CustomCalculationTable = ({
         show={showCustomCalculationDeleteModal}
         setShow={setShowCustomCalculationDeleteModal}
         onDelete={async () => {
+          const reportingClientApi = new ReportingClient(apiContext.prefix);
           await reportingClientApi.deleteCustomCalculation(
+            apiContext.accessToken,
             iModelId,
             mappingId,
             groupId,

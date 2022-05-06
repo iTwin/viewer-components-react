@@ -15,16 +15,17 @@ import {
   MenuItem,
   Table,
 } from "@itwin/itwinui-react";
-import React, { useMemo, useState } from "react";
-import type { CalculatedPropertyReportingAPI } from "../../api/generated/api";
-import { reportingClientApi } from "../../api/reportingClient";
+import React, { useContext, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
+import type { CalculatedProperty } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
+import { ApiContext } from "./GroupingMapping";
 
-export type CalculatedProperty =
-  CreateTypeFromInterface<CalculatedPropertyReportingAPI>;
+export type CalculatedPropertyType =
+  CreateTypeFromInterface<CalculatedProperty>;
 
 interface CalculatedPropertyTableProps {
   iModelId: string;
@@ -32,15 +33,15 @@ interface CalculatedPropertyTableProps {
   groupId: string;
   setSelectedCalculatedProperty: React.Dispatch<
   React.SetStateAction<
-  CreateTypeFromInterface<CalculatedPropertyReportingAPI> | undefined
+  CreateTypeFromInterface<CalculatedPropertyType> | undefined
   >
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
-  onCalculatedPropertyModify: (value: CellProps<CalculatedProperty>) => void;
+  onCalculatedPropertyModify: (value: CellProps<CalculatedPropertyType>) => void;
   isLoadingCalculatedProperties: boolean;
-  calculatedProperties: CalculatedProperty[];
+  calculatedProperties: CalculatedPropertyType[];
   refreshCalculatedProperties: () => Promise<void>;
-  selectedCalculatedProperty?: CalculatedProperty;
+  selectedCalculatedProperty?: CalculatedPropertyType;
 }
 
 const CalculatedPropertyTable = ({
@@ -55,6 +56,7 @@ const CalculatedPropertyTable = ({
   refreshCalculatedProperties,
   selectedCalculatedProperty,
 }: CalculatedPropertyTableProps) => {
+  const apiContext = useContext(ApiContext);
   const [
     showCalculatedPropertyDeleteModal,
     setShowCalculatedPropertyDeleteModal,
@@ -69,7 +71,7 @@ const CalculatedPropertyTable = ({
             id: "propertyName",
             Header: "Calculated Property",
             accessor: "propertyName",
-            Cell: (value: CellProps<CalculatedProperty>) => (
+            Cell: (value: CellProps<CalculatedPropertyType>) => (
               <div
                 className='iui-anchor'
                 onClick={() => onCalculatedPropertyModify(value)}
@@ -82,7 +84,7 @@ const CalculatedPropertyTable = ({
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<CalculatedProperty>) => {
+            Cell: (value: CellProps<CalculatedPropertyType>) => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
@@ -135,7 +137,7 @@ const CalculatedPropertyTable = ({
       >
         Add Calculated Property
       </Button>
-      <Table<CalculatedProperty>
+      <Table<CalculatedPropertyType>
         data={calculatedProperties}
         density='extra-condensed'
         columns={calculatedPropertiesColumns}
@@ -149,7 +151,9 @@ const CalculatedPropertyTable = ({
         show={showCalculatedPropertyDeleteModal}
         setShow={setShowCalculatedPropertyDeleteModal}
         onDelete={async () => {
+          const reportingClientApi = new ReportingClient(apiContext.prefix);
           await reportingClientApi.deleteCalculatedProperty(
+            apiContext.accessToken,
             iModelId,
             mappingId,
             groupId,

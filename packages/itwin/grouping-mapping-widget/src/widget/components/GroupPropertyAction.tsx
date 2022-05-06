@@ -40,17 +40,15 @@ import {
   Small,
   Text,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import type {
-  ECPropertyReportingAPI,
-  GroupPropertyCreateReportingAPI,
-} from "../../api/generated/api";
-import { reportingClientApi } from "../../api/reportingClient";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
+import type { ECProperty, GroupPropertyCreate } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
+import { ApiContext } from "./GroupingMapping";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -269,12 +267,13 @@ const GroupPropertyAction = ({
   returnFn,
 }: GroupPropertyActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
+  const apiContext = useContext(ApiContext);
   const [propertyName, setPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<string | undefined>();
   const [quantityType, setQuantityType] = useState<string>("Undefined");
   const [classToPropertiesMapping, setClassToPropertiesMapping] =
     useState<Map<string, Property[]>>();
-  const [ecProperties, setEcProperties] = useState<ECPropertyReportingAPI[]>(
+  const [ecProperties, setEcProperties] = useState<ECProperty[]>(
     []
   );
   const [validator, showValidationMessage] = useValidator();
@@ -352,11 +351,13 @@ const GroupPropertyAction = ({
 
       setClassToPropertiesMapping(classToPropertiesMapping);
 
-      let newEcProperties: ECPropertyReportingAPI[];
+      let newEcProperties: ECProperty[];
+      const reportingClientApi = new ReportingClient(apiContext.prefix);
       // Fetch already existing ec properties then add all classes from presentation
       if (groupPropertyId) {
         // TODO Error handling
         const response = await reportingClientApi.getGroupProperty(
+          apiContext.accessToken,
           iModelId,
           mappingId,
           groupId,
@@ -402,7 +403,7 @@ const GroupPropertyAction = ({
       setIsLoading(false);
     };
     void getContent();
-  }, [groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
+  }, [apiContext.accessToken, apiContext.prefix, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
 
   const onSave = async () => {
     const filteredEcProperties = ecProperties.filter(
@@ -417,14 +418,16 @@ const GroupPropertyAction = ({
     }
     try {
       setIsLoading(true);
-      const groupProperty: GroupPropertyCreateReportingAPI = {
+      const groupProperty: GroupPropertyCreate = {
         propertyName,
         dataType,
         quantityType,
         ecProperties: filteredEcProperties,
       };
+      const reportingClientApi = new ReportingClient(apiContext.prefix);
       groupPropertyId
         ? await reportingClientApi.updateGroupProperty(
+          apiContext.accessToken,
           iModelId,
           mappingId,
           groupId,
@@ -432,6 +435,7 @@ const GroupPropertyAction = ({
           groupProperty
         )
         : await reportingClientApi.createGroupProperty(
+          apiContext.accessToken,
           iModelId,
           mappingId,
           groupId,
@@ -468,7 +472,7 @@ const GroupPropertyAction = ({
 
   const propertyOptions = useMemo(() => {
     return ecProperties.map(
-      (ecProperty: ECPropertyReportingAPI) =>
+      (ecProperty: ECProperty) =>
         classToPropertiesMapping
           ?.get(`${ecProperty.ecSchemaName}:${ecProperty.ecClassName}`)
           ?.map((property) => ({
@@ -482,7 +486,7 @@ const GroupPropertyAction = ({
   }, [classToPropertiesMapping, ecProperties]);
 
   const getValue = useCallback(
-    (ecProperty: ECPropertyReportingAPI, index: number) => {
+    (ecProperty: ECProperty, index: number) => {
       const property = classToPropertiesMapping
         ?.get(`${ecProperty.ecSchemaName}:${ecProperty.ecClassName}`)
         ?.find(

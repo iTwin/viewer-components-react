@@ -9,25 +9,25 @@ import {
   LabeledTextarea,
   Small,
 } from "@itwin/itwinui-react";
-import React, { useState } from "react";
-import { reportingClientApi } from "../../api/reportingClient";
+import React, { useContext, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import "./CalculatedPropertyAction.scss";
-import type { CustomCalculation } from "./CustomCalculationTable";
-import type { CustomCalculationCreateReportingAPI } from "../../api/generated/api";
+import type { CustomCalculationType } from "./CustomCalculationTable";
 import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
 import type { PropertyMap } from "../../formula/Types";
+import { ReportingClient } from "@itwin/insights-client";
+import { ApiContext } from "./GroupingMapping";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
   properties: PropertyMap;
-  customCalculation?: CustomCalculation;
+  customCalculation?: CustomCalculationType;
   returnFn: (modified: boolean) => Promise<void>;
 }
 
@@ -39,6 +39,7 @@ const CustomCalculationAction = ({
   customCalculation,
   returnFn,
 }: CalculatedPropertyActionProps) => {
+  const apiContext = useContext(ApiContext);
   const [propertyName, setPropertyName] = useState<string>(
     customCalculation?.propertyName ?? "",
   );
@@ -61,26 +62,31 @@ const CustomCalculationAction = ({
     }
     try {
       setIsLoading(true);
-
-      const newCustomCalculation: CustomCalculationCreateReportingAPI = {
-        propertyName,
-        formula,
-        quantityType,
-      };
+      const reportingClientApi = new ReportingClient(apiContext.prefix);
 
       customCalculation
         ? await reportingClientApi.updateCustomCalculation(
+          apiContext.accessToken,
           iModelId,
           mappingId,
           groupId,
           customCalculation.id ?? "",
-          newCustomCalculation,
+          {
+            propertyName,
+            formula,
+            quantityType,
+          }
         )
         : await reportingClientApi.createCustomCalculation(
+          apiContext.accessToken,
           iModelId,
           mappingId,
           groupId,
-          newCustomCalculation,
+          {
+            propertyName,
+            formula,
+            quantityType,
+          }
         );
       await returnFn(true);
     } catch (error: any) {
