@@ -9,16 +9,19 @@ import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { setupServer } from 'msw/node'
 import { ActiveIModel } from "../widget/hooks/useActiveIModel";
-import { render, TestUtils, screen, waitForElementToBeRemoved, within } from "./test-utils";
+import { render, TestUtils, screen, waitForElementToBeRemoved, within, act, findAllByTitle } from "./test-utils";
 import ReportAction from "../widget/components/ReportAction";
 import userEvent from "@testing-library/user-event";
 import { RequestHandler, rest } from "msw";
-import { Report, ReportMappingCollection, Mapping, MappingSingle, MappingCollection } from "@itwin/insights-client";
+import { Report, ReportMappingCollection, Mapping, MappingSingle, MappingCollection, ExtractionStatus } from "@itwin/insights-client";
 import { ReportMappings } from "../widget/components/ReportMappings";
 import { Constants, IModel, IModelState } from "@itwin/imodels-client-management";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
-import { prettyDOM } from "@testing-library/react";
+import { Extraction, ExtractionStates } from "../widget/components/Extraction";
+import { prettyDOM, waitFor } from "@testing-library/react";
 
+
+jest.setTimeout(20000);
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -26,33 +29,6 @@ const mockIModelId1 = faker.datatype.uuid();
 const mockIModelId2 = faker.datatype.uuid();
 
 const mockReportId = faker.datatype.uuid();
-
-
-jest.mock('../widget/hooks/useActiveIModel', () => ({
-  useActiveIModel: () => {
-    const activeIModel: ActiveIModel = { iTwinId: mockITwinId, iModelId: mockIModelId1 }
-    return activeIModel
-  }
-}))
-
-
-const server = setupServer()
-
-
-beforeAll(async () => {
-  await TestUtils.initializeUiFramework();
-  await NoRenderApp.startup();
-  ReportsConfigWidget.initialize(TestUtils.localization)
-  server.listen();
-
-});
-
-afterAll(() => {
-  TestUtils.terminateUiFramework();
-  server.close();
-})
-
-afterEach(() => server.resetHandlers())
 
 const mockIModelsResponse = [{
   iModel: {
@@ -201,6 +177,38 @@ const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): [Mapp
   return [mockMappings, iModelHandlers]
 }
 
+jest.mock('../widget/hooks/useActiveIModel', () => ({
+  useActiveIModel: () => {
+    const activeIModel: ActiveIModel = { iTwinId: mockITwinId, iModelId: mockIModelId1 }
+    return activeIModel
+  }
+}))
+
+const server = setupServer()
+
+// beforeEach(() => {
+//   jest.useFakeTimers()
+// })
+
+
+beforeAll(async () => {
+  await TestUtils.initializeUiFramework();
+  await NoRenderApp.startup();
+  ReportsConfigWidget.initialize(TestUtils.localization)
+  server.listen();
+});
+
+afterAll(() => {
+  TestUtils.terminateUiFramework();
+  server.close();
+})
+
+afterEach(() => {
+  server.resetHandlers()
+  // jest.runOnlyPendingTimers()
+  // jest.useRealTimers()
+})
+
 
 describe(("Report Mappings View"), () => {
   it("shows all report mappings", async () => {
@@ -285,21 +293,21 @@ describe(("Report Mappings View"), () => {
     const searchInput = screen.getByRole('textbox', { name: /search\-textbox/i })
 
     // Be an exact match on display name.
-    await userEvent.type(searchInput, mockMappings[0].mapping?.mappingName ?? "");
+    await user.type(searchInput, mockMappings[0].mapping?.mappingName ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
     expect(screen.getByText(mockMappings[0].mapping?.mappingName ?? "")).toBeInTheDocument()
 
 
     // Be an exact match on description.
-    await userEvent.clear(searchInput);
-    await userEvent.type(searchInput, mockMappings[0].mapping?.description ?? "");
+    await user.clear(searchInput);
+    await user.type(searchInput, mockMappings[0].mapping?.description ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
     expect(screen.getByTitle(mockMappings[0].mapping?.description ?? "")).toBeInTheDocument()
 
     // Be an exact match on iModel Name.
     const iModel = mockIModelsResponse.find((iModel) => iModel.iModel.id === mockMappings[0].mapping?._links?.imodel?.href)
-    await userEvent.clear(searchInput);
-    await userEvent.type(searchInput, iModel?.iModel.displayName ?? "");
+    await user.clear(searchInput);
+    await user.type(searchInput, iModel?.iModel.displayName ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
     expect(screen.getByText(iModel?.iModel.displayName ?? "")).toBeInTheDocument()
 
@@ -499,4 +507,132 @@ describe(("Report Mappings View"), () => {
     await waitForElementToBeRemoved(() => screen.getByTestId(/rcw-action-loading-spinner/i));
     await waitForElementToBeRemoved(() => screen.getByRole('dialog'))
   })
+
+  it("full extraction", async () => {
+    const mockReportMappings = mockReportMappingsFactory();
+    let [_, iModelHandlers] = mockMappingsFactory(mockReportMappings)
+
+    const delay = 2000;
+
+
+    // Faking timers currently makes all promise based queries from RTL become unpredictable.
+    // https://github.com/testing-library/dom-testing-library/issues/988
+    // Should come back to this later.
+    // Consequently, this test will be a bit slower.
+    // jest.useFakeTimers()
+
+    Element.prototype.scrollIntoView = jest.fn();
+
+    const mockIModel = mockIModelsResponse[0].iModel
+    const mockRunId = faker.datatype.uuid()
+
+    let mockExtractionResponse = {
+      run: {
+        id: mockRunId,
+        _links: {
+          status: {
+            href: ""
+          }
+        }
+      }
+    }
+
+    let mockStatusResponse: ExtractionStatus = {
+      status: {
+        state: "Queued",
+        reason: "mock reason",
+      }
+    }
+
+    server.use(
+      rest.get(
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
+        async (_req, res, ctx) => {
+          return res(ctx.delay(), ctx.status(200), ctx.json(mockReportMappings))
+        },
+      ),
+      rest.get(
+        `${Constants.api.baseUrl}/${mockIModelId1}`,
+        async (_req, res, ctx) => {
+          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[0]))
+        },
+      ),
+      rest.get(
+        `${Constants.api.baseUrl}/${mockIModelId2}`,
+        async (_req, res, ctx) => {
+          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[1]))
+        },
+      ),
+      ...iModelHandlers,
+      rest.post(
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mockIModel.id}/extraction/run`,
+        async (_req, res, ctx) => {
+          return res(ctx.status(200), ctx.json(mockExtractionResponse))
+        },
+      ),
+      rest.get(
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/extraction/status/${mockRunId}`,
+        async (_req, res, ctx) => {
+          return res(ctx.delay(), ctx.status(200), ctx.json(mockStatusResponse))
+        },
+      ),
+    )
+
+
+    render(<ReportMappings report={mockReport} goBack={jest.fn()} />);
+
+    // https://github.com/testing-library/user-event/issues/833
+    const user = userEvent.setup({ delay: null })
+
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
+
+    const comboBox = screen.getByRole('combobox', {
+      name: /updatedataset/i
+    })
+    await user.type(comboBox, mockIModel.displayName);
+
+    const option = screen.getByRole('option', {
+      name: mockIModel.displayName
+    })
+
+    await user.click(option);
+
+    //Combobox should have correct status
+    const extractionComponent = screen.getByTestId("extraction-combo-box")
+    expect(within(extractionComponent).getByDisplayValue(mockIModel.displayName)).toBeInTheDocument();
+    expect(screen.getAllByTitle(/starting/i)).toHaveLength(2);
+
+    const loadingStates = await screen.findAllByTitle(/loading/i)
+    expect(loadingStates).toHaveLength(2);
+
+    // act(() => {
+    //   jest.advanceTimersByTime(2000)
+    // });
+    const queuedStates = await screen.findAllByTitle(/queued/i, undefined, { timeout: delay })
+    expect(queuedStates).toHaveLength(2);
+
+    mockStatusResponse = {
+      status: {
+        state: "Running",
+        reason: "mock reason",
+      }
+    }
+
+
+    const runningStates = await screen.findAllByTitle(/running/i, undefined, { timeout: delay })
+    expect(runningStates).toHaveLength(2);
+
+    mockStatusResponse = {
+      status: {
+        state: "Succeeded",
+        reason: "mock reason",
+      }
+    }
+
+    const succeededStates = await screen.findAllByTitle(/success/i, undefined, { timeout: delay })
+    expect(succeededStates).toHaveLength(2);
+
+  });
+
+
 })

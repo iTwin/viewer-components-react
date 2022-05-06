@@ -54,6 +54,7 @@
   "UpdateInProgress": "Update in progress...",
   "Success": "Success",
   "UpdateDataset": "Update your dataset",
+  "Starting": "Starting",
   "Table": {
     "SizePerPage": "{{size}} per page",
     "StartIndexEndIndex": "{{startIndex}}-{{endIndex}}...",

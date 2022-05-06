@@ -4,18 +4,19 @@
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
 import { Label, SelectOption, StatusMessage } from "@itwin/itwinui-react";
-import { ComboBox, ProgressRadial, Text } from "@itwin/itwinui-react";
+import { ComboBox, ProgressRadial } from "@itwin/itwinui-react";
 import * as React from "react";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ReportingClient, REPORTING_BASE_PATH } from "@itwin/insights-client";
-import { generateUrl, handleError, LoadingOverlay, LoadingSpinner, SkeletonBlock } from "./utils";
+import { generateUrl, handleError, SkeletonBlock } from "./utils";
 import "./Extraction.scss";
-import { SvgStatusError, SvgStatusPending, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
-import { ApiContext, useApi } from "../context/ApiContext";
+import { SvgStatusError, SvgStatusPending, SvgStatusPendingHollow, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
+import { useApi } from "../context/ApiContext";
 
 export enum ExtractionStates {
   None,
-  Checking,
+  Starting,
+  FetchingUpdate,
   Queued,
   Running,
   Succeeded,
@@ -48,9 +49,19 @@ export const ExtractionStatus = ({ state, children, setExtractionState }: Extrac
   }, [state, setExtractionState]);
 
   switch (state) {
-    case ExtractionStates.Checking:
+    case ExtractionStates.Starting:
       return (
-        <div title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Checking")} className="extraction-status">
+        <div title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Starting")} className="extraction-status">
+          <div
+            className="status-icon"
+          >
+            <SvgStatusPendingHollow />
+          </div>
+        </div>
+      );
+    case ExtractionStates.FetchingUpdate:
+      return (
+        <div title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Loading")} className="extraction-status">
           <ProgressRadial size="x-small" indeterminate />
         </div>
       );
@@ -108,20 +119,21 @@ interface ExtractionProps {
 }
 
 export const Extraction = ({ iModels, setExtractingIModelId, extractionState, setExtractionState, isLoading }: ExtractionProps) => {
-  const [jobId, setJobId] = useState<string>("");
+  const jobId = useRef<string>("");
+  const intervalId = useRef<number>();
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [intervalId, setIntervalId] = useState<number>();
   const [currentIModelName, setCurrentIModelName] = useState<string>();
   const apiContext = useApi();
 
   const runExtraction = async (iModelId: string) => {
     try {
-      setExtractionState(ExtractionStates.Checking);
+      setExtractionState(ExtractionStates.Starting);
       setExtractingIModelId(iModelId);
       const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
       const response = await reportingClientApi.runExtraction(apiContext.accessToken, iModelId);
-      setJobId(response.run?.id ?? "");
+      jobId.current = response.run?.id ?? "";
       setIsRunning(true);
+      setExtractionState(ExtractionStates.FetchingUpdate);
 
     } catch (error: any) {
       handleError(error.status);
@@ -130,12 +142,11 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
   };
 
   useEffect(() => {
-    if (!intervalId && isRunning) {
-      const delay = 5000;
+    if (!intervalId.current && isRunning) {
+      const delay = 2000;
       const newIntervalId = window.setInterval(async () => {
-        setExtractionState(ExtractionStates.Checking);
         const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
-        const response = await reportingClientApi.getExtractionStatus(apiContext.accessToken, jobId);
+        const response = await reportingClientApi.getExtractionStatus(apiContext.accessToken, jobId.current);
         if (response.status?.state === "Queued") {
           setExtractionState(ExtractionStates.Queued);
         } else if (response.status?.state === "Running") {
@@ -150,13 +161,13 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
           setCurrentIModelName(undefined);
         }
       }, delay);
-      setIntervalId(newIntervalId);
+      intervalId.current = newIntervalId;
     } else if (intervalId && !isRunning) {
-      window.clearInterval(intervalId);
-      setIntervalId(undefined);
+      window.clearInterval(intervalId.current);
+      intervalId.current = undefined;
     }
-    return () => window.clearInterval(intervalId);
-  }, [apiContext, isRunning, intervalId, jobId, setExtractionState]);
+    return () => window.clearInterval(intervalId.current);
+  }, [apiContext, isRunning, jobId, setExtractionState]);
 
   const iModelOptions = useMemo(() => {
     // TODO Report ComboBox bug. Unique key error happens when the options list becomes reduced.
@@ -170,8 +181,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
 
   return (
     <div className="extraction-container">
-
-      <div className="extraction-combo-box">
+      <div className="extraction-combo-box" data-testid="extraction-combo-box">
         <Label htmlFor='combo-input'>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateDataset")}</Label>
         {
           isLoading ? <SkeletonBlock /> :
@@ -179,8 +189,8 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
               options={iModelOptions}
               value={currentIModelName}
               onChange={async (value) => {
-                await runExtraction(value);
                 setCurrentIModelName(value)
+                await runExtraction(value);
               }}
               inputProps={{
                 id: "combo-input",
