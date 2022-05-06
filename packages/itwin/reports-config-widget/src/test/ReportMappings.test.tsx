@@ -33,9 +33,9 @@ const mockReportId = faker.datatype.uuid();
 const mockIModelsResponse = [{
   iModel: {
     id: mockIModelId1,
-    displayName: faker.random.word(),
-    name: faker.random.word(),
-    description: faker.random.words(),
+    displayName: faker.random.alpha(10),
+    name: faker.random.alpha(10),
+    description: faker.random.words(10),
     createdDateTime: "2021-10-04T22:13:50.397Z",
     state: IModelState.Initialized,
     projectId: mockITwinId,
@@ -56,9 +56,9 @@ const mockIModelsResponse = [{
 {
   iModel: {
     id: mockIModelId2,
-    displayName: faker.random.word(),
-    name: faker.random.word(),
-    description: faker.random.words(),
+    displayName: faker.random.alpha(10),
+    name: faker.random.alpha(10),
+    description: faker.random.words(10),
     createdDateTime: "2021-10-04T22:13:50.397Z",
     state: IModelState.Initialized,
     projectId: mockITwinId,
@@ -90,8 +90,8 @@ const mockProjectIModels = {
 
 const mockReport: Report = {
   id: mockReportId,
-  displayName: faker.random.word(),
-  description: faker.random.words(),
+  displayName: faker.random.alpha(10),
+  description: faker.random.words(10),
   deleted: false,
   _links: {
     project: {
@@ -151,8 +151,8 @@ const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): [Mapp
   const mockMappings: MappingSingle[] = mockReportMappings.mappings!.map((mapping) => ({
     mapping: {
       id: mapping.mappingId,
-      mappingName: faker.random.word(),
-      description: faker.random.words(),
+      mappingName: faker.random.alpha(10),
+      description: faker.random.words(10),
       extractionEnabled: false,
       createdOn: "",
       createdBy: "",
@@ -380,13 +380,13 @@ describe(("Report Mappings View"), () => {
 
     // Adding an extra unmapped mapping.
     const extraMappingId = faker.datatype.uuid();
-    const extraMappingName = faker.random.word();
+    const extraMappingName = faker.random.alpha(10);
 
     mockMappings.push({
       mapping: {
         id: extraMappingId,
         mappingName: extraMappingName,
-        description: faker.random.words(),
+        description: faker.random.words(10),
         extractionEnabled: false,
         createdOn: "",
         createdBy: "",
@@ -567,7 +567,7 @@ describe(("Report Mappings View"), () => {
       rest.post(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mockIModel.id}/extraction/run`,
         async (_req, res, ctx) => {
-          return res(ctx.status(200), ctx.json(mockExtractionResponse))
+          return res(ctx.delay(), ctx.status(200), ctx.json(mockExtractionResponse))
         },
       ),
       rest.get(
@@ -600,6 +600,8 @@ describe(("Report Mappings View"), () => {
     //Combobox should have correct status
     const extractionComponent = screen.getByTestId("extraction-combo-box")
     expect(within(extractionComponent).getByDisplayValue(mockIModel.displayName)).toBeInTheDocument();
+    // Should be two in the document. One in the status and the other in the list.
+    // TODO Assert that it is in the correct HorizontalTile
     expect(screen.getAllByTitle(/starting/i)).toHaveLength(2);
 
     const loadingStates = await screen.findAllByTitle(/loading/i)

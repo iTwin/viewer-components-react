@@ -19,15 +19,13 @@ import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
 
-const mockReportName = faker.random.word();
-const mockReportDescription = faker.random.words();
 
 const reportsFactory = (): ReportCollection => ({
   reports: Array.from({ length: faker.datatype.number({ min: 3, max: 5 }) }, () => (
     {
       id: `${faker.datatype.uuid()}`,
-      displayName: faker.random.word(),
-      description: faker.random.words()
+      displayName: faker.random.alpha(10),
+      description: faker.random.words(10)
     }),
   ),
   _links: {
