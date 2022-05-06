@@ -8,16 +8,24 @@ import type {
   IPresentationPropertyDataProvider,
   PresentationPropertyDataProvider,
 } from "@itwin/presentation-components";
-import type { PropertyGridContextMenuArgs } from "@itwin/components-react";
+import type {
+  ActionButtonRenderer,
+  PropertyGridContextMenuArgs,
+} from "@itwin/components-react";
 import type { ContextMenuItemProps, Orientation } from "@itwin/core-react";
 import type { FavoritePropertiesScope } from "@itwin/presentation-frontend";
 import type {
+  PropertyRecord,
   StagePanelLocation,
   StagePanelSection,
 } from "@itwin/appui-abstract";
 
 export type ContextMenuItemInfo = ContextMenuItemProps &
-  React.Attributes & { label: string };
+  React.Attributes & {
+    label: string;
+    hideDefaultContextMenuItem?: PropertyGridDefaultContextMenuKey;
+    isValid?: (record: PropertyRecord, field: Field) => boolean;
+  };
 
 export interface OnSelectEventArgs {
   dataProvider: IPresentationPropertyDataProvider;
@@ -30,7 +38,10 @@ export interface PropertyGridProps {
   isOrientationFixed?: boolean;
   enableFavoriteProperties?: boolean;
   favoritePropertiesScope?: FavoritePropertiesScope;
-  onAddFavoriteProperty?: (field: Field) => void;
+  customOnDataChanged?: (
+    dataProvider: IPresentationPropertyDataProvider
+  ) => void;
+  actionButtonRenderer?: ActionButtonRenderer;
   enableCopyingPropertyText?: boolean;
   enableNullValueToggle?: boolean;
   defaultPanelLocation?: StagePanelLocation;
@@ -46,3 +57,10 @@ export interface PropertyGridProps {
   disableUnifiedSelection?: boolean;
 }
 
+export enum PropertyGridDefaultContextMenuKey {
+  RemoveFavorite = "remove-favorite",
+  AddFavorite = "add-favorite",
+  CopyText = "copy-text",
+  HideNull = "hide-null",
+  ShowNull = "show-null",
+}

@@ -6,9 +6,13 @@
 import "./PropertyGrid.scss";
 import type { Field, InstanceKey } from "@itwin/presentation-common";
 import { KeySet } from "@itwin/presentation-common";
-import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
+import {
+  FavoritePropertiesScope,
+  Presentation,
+} from "@itwin/presentation-frontend";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
+  ActionButtonRenderer,
   PropertyData,
   PropertyDataFiltererBase,
   PropertyGridContextMenuArgs,
@@ -26,7 +30,7 @@ import {
   useResizeObserver,
 } from "@itwin/core-react";
 import { 
-  UiFramework, 
+  UiFramework,
   useActiveIModelConnection,
 } from "@itwin/appui-react";
 import type { ReactNode } from "react";
@@ -34,10 +38,11 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
-import type {
+import {
   ContextMenuItemInfo,
   OnSelectEventArgs,
   PropertyGridProps,
+  PropertyGridDefaultContextMenuKey,
 } from "../types";
 import {
   FilteringPropertyGridWithUnifiedSelection,
@@ -56,7 +61,8 @@ export const PropertyGrid = ({
   isOrientationFixed,
   enableFavoriteProperties,
   favoritePropertiesScope,
-  onAddFavoriteProperty,
+  customOnDataChanged,
+  actionButtonRenderer,
   enableCopyingPropertyText,
   enableNullValueToggle,
   enablePropertyGroupNesting,
@@ -84,7 +90,7 @@ export const PropertyGrid = ({
     }
     if (dp) {
       dp.pagingSize = 50;
-      dp.isNestedPropertyCategoryGroupingEnabled = 
+      dp.isNestedPropertyCategoryGroupingEnabled =
       !!enablePropertyGroupNesting;
 
       // Set selected instance as the key (for Single Element Property Grid)
@@ -121,22 +127,6 @@ export const PropertyGrid = ({
   const localizations = useMemo(() => {
     return {
       favorite: PropertyGridManager.translate("context-menu.favorite"),
-      unshareFavorite: {
-        title: PropertyGridManager.translate(
-          "context-menu.unshare-favorite.description"
-        ),
-        label: PropertyGridManager.translate(
-          "context-menu.unshare-favorite.label"
-        ),
-      },
-      shareFavorite: {
-        title: PropertyGridManager.translate(
-          "context-menu.share-favorite.description"
-        ),
-        label: PropertyGridManager.translate(
-          "context-menu.share-favorite.label"
-        ),
-      },
       removeFavorite: {
         title: PropertyGridManager.translate(
           "context-menu.remove-favorite.description"
@@ -179,6 +169,9 @@ export const PropertyGrid = ({
       if (propertyData) {
         setTitle(propertyData?.label);
         setClassName(propertyData?.description ?? "");
+        if (dataProvider && customOnDataChanged) {
+          customOnDataChanged(dataProvider);
+        }
       }
     };
 
@@ -195,16 +188,6 @@ export const PropertyGrid = ({
       if (iModelConnection) {
         await Presentation.favoriteProperties.add(propertyField, iModelConnection, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
         setContextMenu(undefined);
-      }
-      // Check if consuming app passed in their own fcn for saving fav properties
-      if (onAddFavoriteProperty !== undefined) {
-        console.log(
-          "PROPGRID onAddFavoriteProperty is defined. Calling now with field: ",
-          propertyField
-        );
-        onAddFavoriteProperty(propertyField);
-      } else {
-        console.log("PROPGRID onAddFavoriteProperty is not defined.");
       }
     },
     [iModelConnection, favoritePropertiesScope]
@@ -244,14 +227,14 @@ export const PropertyGrid = ({
           if (field && iModelConnection) {
             if (Presentation.favoriteProperties.has(field, iModelConnection, favoritePropertiesScope ?? FavoritePropertiesScope.IModel)) {
               items.push({
-                key: "remove-favorite",
+                key: PropertyGridDefaultContextMenuKey.RemoveFavorite,
                 onSelect: async () => onRemoveFavorite(field),
                 title: localizations.removeFavorite.title,
                 label: localizations.removeFavorite.label,
               });
             } else {
               items.push({
-                key: "add-favorite",
+                key: PropertyGridDefaultContextMenuKey.AddFavorite,
                 onSelect: async () => onAddFavorite(field),
                 title: localizations.addFavorite.title,
                 label: localizations.addFavorite.label,
@@ -262,7 +245,7 @@ export const PropertyGrid = ({
 
         if (enableCopyingPropertyText) {
           items.push({
-            key: "copy-text",
+            key: PropertyGridDefaultContextMenuKey.CopyText,
             onSelect: () => {
               args.propertyRecord?.description &&
                 copyToClipboard(args.propertyRecord.description);
@@ -276,7 +259,7 @@ export const PropertyGrid = ({
         if (enableNullValueToggle) {
           if (showNullValues) {
             items.push({
-              key: "hide-null",
+              key: PropertyGridDefaultContextMenuKey.HideNull,
               onSelect: () => {
                 onHideNull();
               },
@@ -285,7 +268,7 @@ export const PropertyGrid = ({
             });
           } else {
             items.push({
-              key: "show-null",
+              key: PropertyGridDefaultContextMenuKey.ShowNull,
               onSelect: () => {
                 onShowNull();
               },
@@ -297,20 +280,36 @@ export const PropertyGrid = ({
 
         if (additionalContextMenuOptions?.length) {
           for (const option of additionalContextMenuOptions) {
-            items.push({
-              ...option,
-              key: `additionalContextMenuOption_${option.label}`,
-              onSelect: () => {
-                if (option.onSelect) {
-                  (option.onSelect as (args: OnSelectEventArgs) => void)({
-                    contextMenuArgs: args,
-                    field,
-                    dataProvider,
-                  });
-                }
-                setContextMenu(undefined);
-              },
-            });
+            // if the option has an isValid callback, use it to decide to add it to the menu. Otherwise always add it.
+            if (
+              !option.isValid ||
+              (option.isValid &&
+                field &&
+                option.isValid(args.propertyRecord, field))
+            ) {
+              items.push({
+                ...option,
+                key: `additionalContextMenuOption_${option.label}`,
+                onSelect: () => {
+                  if (option.onSelect) {
+                    (option.onSelect as (args: OnSelectEventArgs) => void)({
+                      contextMenuArgs: args,
+                      field,
+                      dataProvider,
+                    });
+                  }
+                  setContextMenu(undefined);
+                },
+              });
+
+              // If the option should hide / replace a default option, remove that default option
+              if (option.hideDefaultContextMenuItem) {
+                const index = items
+                  .map((item) => item.key)
+                  .indexOf(option.hideDefaultContextMenuItem);
+                items.splice(index, 1);
+              }
+            }
           }
         }
 
@@ -436,6 +435,7 @@ export const PropertyGrid = ({
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
             onPropertyContextMenu={onPropertyContextMenu}
+            actionButtonRenderers={actionButtonRenderer ? [actionButtonRenderer] : undefined}
             width={width}
             height={height}
           />
@@ -448,6 +448,7 @@ export const PropertyGrid = ({
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
             onPropertyContextMenu={onPropertyContextMenu}
+            actionButtonRenderers={actionButtonRenderer ? [actionButtonRenderer] : undefined}
             width={width}
             height={height}
           />
