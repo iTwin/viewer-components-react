@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/one-click-lca-react",
+      "comment": "Changed insights-client dependency to exact version.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/one-click-lca-react"
+}
