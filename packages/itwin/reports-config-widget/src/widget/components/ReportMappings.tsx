@@ -106,7 +106,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     ReportMappingsView.REPORTMAPPINGS
   );
   const [selectedReportMapping, setSelectedReportMapping] = useState<
-  ReportMappingAndMapping | undefined
+    ReportMappingAndMapping | undefined
   >(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -149,7 +149,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           readOnly={true}
           value={odataFeedUrl}
           svgIcon={
-            <IconButton styleType='borderless' onClick={async (_) => {
+            <IconButton title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Copy")} styleType='borderless' onClick={async (_) => {
               await navigator.clipboard.writeText(odataFeedUrl);
               toaster.positive(IModelApp.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
             }}>

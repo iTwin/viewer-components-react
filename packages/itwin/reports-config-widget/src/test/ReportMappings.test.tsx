@@ -17,6 +17,7 @@ import type { ExtractionStatus, Mapping, MappingCollection, MappingSingle, Repor
 import { ReportMappings } from "../widget/components/ReportMappings";
 import { Constants, IModelState } from "@itwin/imodels-client-management";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
+import { getByDisplayValue, prettyDOM } from "@testing-library/dom";
 
 jest.setTimeout(20000);
 
@@ -515,9 +516,24 @@ describe(("Report Mappings View"), () => {
       ...iModelHandlers
     );
 
-    render(<ReportMappings report={mockReport} goBack={jest.fn()} />);
+    const { user } = render(<ReportMappings report={mockReport} goBack={jest.fn()} />);
 
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
+
+    const urlTextbox = screen.getByRole('textbox', {
+      name: /odatafeedurl/i,
+    })
+    expect(urlTextbox).toBeInTheDocument();
+    expect(screen.getByDisplayValue(`https://api.bentley.com/insights/reporting/odata/${mockReport.id}`)).toBeInTheDocument();
+
+    const copyButton = screen.getByRole('button', {
+      name: /copy/i
+    })
+
+    await user.click(copyButton);
+    expect(screen.getByText(/copiedtoclipboard/i)).toBeInTheDocument();
   });
+
 
   it("full extraction", async () => {
     const mockReportMappings = mockReportMappingsFactory();
