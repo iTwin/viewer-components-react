@@ -19,13 +19,14 @@ import {
   Text,
   toaster,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "./utils";
-import { EmptyMessage, LoadingOverlay, generateUrl } from "./utils";
+import { EmptyMessage, generateUrl, LoadingOverlay } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
-import { Report, REPORTING_BASE_PATH, ReportMapping } from "@itwin/insights-client";
+import type { Report, ReportMapping } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 import { IModelApp } from "@itwin/core-frontend";
 import AddMappingsModal from "./AddMappingsModal";
@@ -36,7 +37,8 @@ import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import { HorizontalTile } from "./HorizontalTile";
 import { Extraction, ExtractionStates, ExtractionStatus } from "./Extraction";
 import { SearchBar } from "./SearchBar";
-import { Api, ApiContext, useApi } from "../context/ApiContext";
+import type { Api } from "../context/ApiContext";
+import { useApi } from "../context/ApiContext";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
@@ -104,7 +106,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     ReportMappingsView.REPORTMAPPINGS
   );
   const [selectedReportMapping, setSelectedReportMapping] = useState<
-    ReportMappingAndMapping | undefined
+  ReportMappingAndMapping | undefined
   >(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);

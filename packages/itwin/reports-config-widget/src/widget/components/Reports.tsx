@@ -14,23 +14,25 @@ import {
   DropdownMenu,
   IconButton,
   MenuItem,
-  Text,
-  Surface
+  Surface,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { CreateTypeFromInterface, generateUrl } from "./utils";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import type { CreateTypeFromInterface } from "./utils";
+import { generateUrl } from "./utils";
 import { EmptyMessage, LoadingOverlay } from "./utils";
 import { handleError, WidgetHeader } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
-import { Report, REPORTING_BASE_PATH } from "@itwin/insights-client";
+import type { Report } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 import { IModelApp } from "@itwin/core-frontend";
 import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
 import { HorizontalTile } from "./HorizontalTile";
 import { SearchBar } from "./SearchBar";
-import { Api, ApiContext, useApi } from "../context/ApiContext";
+import type { Api } from "../context/ApiContext";
+import { useApi } from "../context/ApiContext";
 import { useActiveIModel } from "../hooks/useActiveIModel";
 
 export type ReportType = CreateTypeFromInterface<Report>;
@@ -69,7 +71,7 @@ export const Reports = () => {
     ReportsView.REPORTS
   );
   const [selectedReport, setSelectedReport] = useState<
-    Report | undefined
+  Report | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
@@ -198,7 +200,7 @@ export const Reports = () => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
+              const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
               await reportingClientApi.deleteReport(
                 apiContext.accessToken,
                 selectedReport?.id ?? ""

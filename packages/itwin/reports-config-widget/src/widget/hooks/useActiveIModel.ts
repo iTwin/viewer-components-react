@@ -12,7 +12,7 @@ export interface ActiveIModel {
 export const useActiveIModel = () => {
   const IModelConnection = useActiveIModelConnection();
 
-  const activeIModel: ActiveIModel = { iTwinId: IModelConnection?.iTwinId ?? "", iModelId: IModelConnection?.iModelId ?? "" }
+  const activeIModel: ActiveIModel = { iTwinId: IModelConnection?.iTwinId ?? "", iModelId: IModelConnection?.iModelId ?? "" };
 
-  return activeIModel
-}
+  return activeIModel;
+};

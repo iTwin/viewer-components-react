@@ -8,37 +8,31 @@ import type { GetIModelListParams, IModelsClientOptions, MinimalIModel } from "@
 import { Constants } from "@itwin/imodels-client-management";
 import { IModelsClient, toArray } from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
-import React, { useContext, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useEffect, useState } from "react";
-import { Api, ApiContext, useApi } from "../context/ApiContext";
+import type { Api } from "../context/ApiContext";
+import { useApi } from "../context/ApiContext";
 import { useActiveIModel } from "../hooks/useActiveIModel";
 import "./SelectIModel.scss";
-import { LoadingSpinner, generateUrl } from "./utils";
+import { generateUrl } from "./utils";
 
 const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
   iTwinId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   apiContext: Api
 ) => {
-  try {
-    const iModelClientOptions: IModelsClientOptions = {
-      api: { baseUrl: generateUrl(Constants.api.baseUrl, apiContext.baseUrl) },
-    };
+  const iModelClientOptions: IModelsClientOptions = {
+    api: { baseUrl: generateUrl(Constants.api.baseUrl, apiContext.baseUrl) },
+  };
 
-    const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
-    const authorization = AccessTokenAdapter.toAuthorizationCallback(apiContext.accessToken);
-    const getiModelListParams: GetIModelListParams = {
-      urlParams: { projectId: iTwinId },
-      authorization,
-    };
-    const iModels = await toArray(iModelsClient.iModels.getMinimalList(getiModelListParams));
-    setiModels(iModels);
-
-  } catch (error: any) {
-  } finally {
-    setIsLoading(false);
-  }
+  const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
+  const authorization = AccessTokenAdapter.toAuthorizationCallback(apiContext.accessToken);
+  const getiModelListParams: GetIModelListParams = {
+    urlParams: { projectId: iTwinId },
+    authorization,
+  };
+  const iModels = await toArray(iModelsClient.iModels.getMinimalList(getiModelListParams));
+  setiModels(iModels);
 };
 
 interface SelectedIModelProps {
@@ -49,14 +43,13 @@ interface SelectedIModelProps {
 export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: SelectedIModelProps) => {
   const apiContext = useApi();
   const { iTwinId, iModelId } = useActiveIModel();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
 
   useEffect(() => {
     if (iModelId && iTwinId) {
-      void fetchIModels(setIModels, iTwinId, setIsLoading, apiContext);
+      void fetchIModels(setIModels, iTwinId, apiContext);
     }
-  }, [apiContext, setIModels, setIsLoading, iModelId, iTwinId]);
+  }, [apiContext, setIModels, iModelId, iTwinId]);
 
   useEffect(() => {
     if (iModelId && iModels.length > 0) {

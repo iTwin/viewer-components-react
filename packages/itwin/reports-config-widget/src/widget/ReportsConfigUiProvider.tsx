@@ -12,13 +12,13 @@ import {
   StagePanelSection,
   StageUsage,
 } from "@itwin/appui-abstract";
-import { AccessToken } from "@itwin/core-bentley";
+import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 
 import * as React from "react";
 import ReportsContainer from "./components/ReportsContainer";
 
-export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com"
+export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com";
 
 export class ReportsConfigProvider implements UiItemsProvider {
   public readonly id = "ReportsConfigProvider";

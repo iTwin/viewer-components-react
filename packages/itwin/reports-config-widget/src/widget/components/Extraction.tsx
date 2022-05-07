@@ -3,11 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
-import { Label, SelectOption, StatusMessage } from "@itwin/itwinui-react";
+import type { SelectOption} from "@itwin/itwinui-react";
+import { Label, StatusMessage } from "@itwin/itwinui-react";
 import { ComboBox, ProgressRadial } from "@itwin/itwinui-react";
 import * as React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ReportingClient, REPORTING_BASE_PATH } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
 import { generateUrl, handleError, SkeletonBlock } from "./utils";
 import "./Extraction.scss";
 import { SvgStatusError, SvgStatusPending, SvgStatusPendingHollow, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
@@ -129,7 +130,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
     try {
       setExtractionState(ExtractionStates.Starting);
       setExtractingIModelId(iModelId);
-      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
+      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
       const response = await reportingClientApi.runExtraction(apiContext.accessToken, iModelId);
       jobId.current = response.run?.id ?? "";
       setIsRunning(true);
@@ -145,7 +146,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
     if (!intervalId.current && isRunning) {
       const delay = 2000;
       const newIntervalId = window.setInterval(async () => {
-        const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
+        const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
         const response = await reportingClientApi.getExtractionStatus(apiContext.accessToken, jobId.current);
         if (response.status?.state === "Queued") {
           setExtractionState(ExtractionStates.Queued);
@@ -189,7 +190,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
               options={iModelOptions}
               value={currentIModelName}
               onChange={async (value) => {
-                setCurrentIModelName(value)
+                setCurrentIModelName(value);
                 await runExtraction(value);
               }}
               inputProps={{

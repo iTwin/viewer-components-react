@@ -21,10 +21,10 @@ export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarPr
 
   return (
     searchBarOpen ?
-      <div style={{ animation: searchBarClosing ? 'shrink .5s' : 'expand .5s' }}
+      <div style={{ animation: searchBarClosing ? "shrink .5s" : "expand .5s" }}
         onAnimationEnd={() => {
           if (searchBarClosing) {
-            setSearchBarClosing(false)
+            setSearchBarClosing(false);
             setSearchBarOpened(false);
             setSearchValue("");
           }
@@ -44,6 +44,6 @@ export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarPr
 
         /> </div> :
       <IconButton styleType="borderless" onClick={() => setSearchBarOpened(true)}><SvgSearch /></IconButton>
-  )
+  );
 };
 

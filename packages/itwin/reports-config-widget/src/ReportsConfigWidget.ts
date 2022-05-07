@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Localization } from "@itwin/core-common";
+import type { Localization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 
 export class ReportsConfigWidget {
@@ -28,8 +28,7 @@ export class ReportsConfigWidget {
     const ReportsWidgetNamespace = "ReportsConfigWidget";
     if (ReportsConfigWidget._i18n) {
       await ReportsConfigWidget._i18n.registerNamespace(ReportsWidgetNamespace);
-    }
-    else {
+    } else {
       await IModelApp.localization.registerNamespace(ReportsWidgetNamespace);
     }
 

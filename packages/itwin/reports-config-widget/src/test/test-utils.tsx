@@ -2,44 +2,43 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import * as React from 'react'
-import { render as rtlRender } from '@testing-library/react'
-import faker from "@faker-js/faker";
-import { ApiContext } from '../widget/context/ApiContext'
-import { AnyAction, combineReducers, createStore, Store } from 'redux';
-import { FrameworkReducer, UiFramework, SyncUiEventDispatcher } from '@itwin/appui-react';
-import { Localization } from '@itwin/core-common';
-import { IModelApp, IModelConnection } from '@itwin/core-frontend';
-import { ReportsConfigWidget } from '../ReportsConfigWidget';
+import * as React from "react";
+import { render as rtlRender } from "@testing-library/react";
+import { ApiContext } from "../widget/context/ApiContext";
+import type { AnyAction, Store } from "redux";
+import { combineReducers, createStore } from "redux";
+import { FrameworkReducer, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
+import type { Localization } from "@itwin/core-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import userEvent from "@testing-library/user-event";
-import { REPORTS_CONFIG_BASE_URL } from '../widget/ReportsConfigUiProvider';
+import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 
 export const mockAccessToken = "Bearer eyJhbGci";
 
 interface WrapperProps {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 }
 
 function render(ui: React.ReactElement, { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (
     <ApiContext.Provider value={{ accessToken: mockAccessToken, baseUrl: REPORTS_CONFIG_BASE_URL }}>{children}</ApiContext.Provider>
-  )
+  );
 
   return {
     user: userEvent.setup(),
     ...rtlRender(ui, { wrapper: Wrapper, ...options }),
-  }
+  };
 }
 
-export * from '@testing-library/react'
+export * from "@testing-library/react";
 // override React Testing Library's render with our own
-export { render }
-
-
+export { render };
 
 function createAppStore(): Store {
   const rootReducer = combineReducers({
-    FrameworkReducer // eslint-disable-line @typescript-eslint/naming-convention
+    FrameworkReducer, // eslint-disable-line @typescript-eslint/naming-convention
   } as any);
 
   return createStore(rootReducer,
@@ -76,10 +75,10 @@ export class TestUtils {
 }
 
 export const deferred = async () => {
-  let resolve, reject
+  let resolve, reject;
   const promise = new Promise((res, rej) => {
-    resolve = res
-    reject = rej
-  })
-  return { promise, resolve, reject }
-}
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};

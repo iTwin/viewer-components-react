@@ -14,9 +14,9 @@ export interface Api {
 export const ApiContext = createContext<Api>({ accessToken: "", baseUrl: "" });
 
 export const useApi = () => {
-  const context = React.useContext(ApiContext)
+  const context = React.useContext(ApiContext);
   if (!context) {
-    throw new Error('useApiContext should be used within a Api Context provider')
+    throw new Error("useApiContext should be used within a Api Context provider");
   }
   return context;
-}
+};

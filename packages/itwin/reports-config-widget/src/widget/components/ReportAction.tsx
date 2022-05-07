@@ -3,15 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { generateUrl, handleError, handleInputChange, WidgetHeader } from "./utils";
 import "./ReportAction.scss";
-import { Report, REPORTING_BASE_PATH } from "@itwin/insights-client";
+import type { Report } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 import { IModelApp } from "@itwin/core-frontend";
-import { ApiContext, useApi } from "../context/ApiContext";
+import { useApi } from "../context/ApiContext";
 
 interface ReportActionProps {
   iTwinId: string;
@@ -35,7 +36,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         return;
       }
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl))
+      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
       report
         ? await reportingClientApi.updateReport(apiContext.accessToken, report.id ?? "", {
           displayName: values.name,
@@ -50,8 +51,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
     } catch (error: any) {
       handleError(error.status);
       setIsLoading(false);
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
   };
