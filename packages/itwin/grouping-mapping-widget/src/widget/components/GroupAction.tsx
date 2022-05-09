@@ -8,15 +8,10 @@ import {
   SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
-import {
-  InputStatus,
-  useActiveIModelConnection,
-  ValidationTextbox,
-} from "@itwin/appui-react";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import {
   Button,
   Fieldset,
-  Label,
   LabeledInput,
   LabeledTextarea,
   ProgressRadial,
@@ -50,13 +45,7 @@ import {
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import {
-  SvgCompare,
-  SvgCursor,
-  SvgInfo,
-  SvgInfoCircular,
-  SvgSearch,
-} from "@itwin/itwinui-icons-react";
+import { SvgCompare, SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
 import { GroupQueryBuilderApi } from "../../api/GroupQueryBuilderApi";
 import { UiContext } from "./UiContext";
 
@@ -568,7 +557,7 @@ const GroupAction = ({
               <div className="ml-distance">
                 <Tooltip
                   content="Slide left and right to show elements with different distance."
-                  placement="top"
+                  placement="right"
                 >
                   <div
                     id="tooltip-target"
