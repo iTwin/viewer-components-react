@@ -68,6 +68,9 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
       }
     };
 
+    // ensure this selection handling runs if component mounts after the selection event fires:
+    onSelectionChange();
+
     const removeListener = Presentation.selection.selectionChange.addListener(onSelectionChange);
     return () => removeListener();
   }, [iModelConnection]);
