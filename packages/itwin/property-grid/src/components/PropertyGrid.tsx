@@ -166,7 +166,7 @@ export const PropertyGrid = ({
         setTitle(propertyData?.label);
         setClassName(propertyData?.description ?? "");
         if (dataProvider && customOnDataChanged) {
-          customOnDataChanged(dataProvider);
+          await customOnDataChanged(dataProvider);
         }
       }
     };

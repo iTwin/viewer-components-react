@@ -40,7 +40,7 @@ export interface PropertyGridProps {
   favoritePropertiesScope?: FavoritePropertiesScope;
   customOnDataChanged?: (
     dataProvider: IPresentationPropertyDataProvider
-  ) => void;
+  ) => Promise<void>;
   actionButtonRenderer?: ActionButtonRenderer;
   enableCopyingPropertyText?: boolean;
   enableNullValueToggle?: boolean;
