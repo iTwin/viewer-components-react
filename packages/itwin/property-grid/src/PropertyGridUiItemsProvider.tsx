@@ -13,6 +13,8 @@ import {
   WidgetState,
 } from "@itwin/appui-abstract";
 import { FrontstageManager, UiFramework } from "@itwin/appui-react";
+import { Id64 } from "@itwin/core-bentley";
+import type { InstanceKey } from "@itwin/presentation-common";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import * as React from "react";
@@ -26,12 +28,21 @@ const onPresentationSelectionChanged = async (evt: SelectionChangeEventArgs, sel
   const widgetDef = FrontstageManager.activeFrontstageDef?.findWidgetDef(MultiElementPropertyGridId);
   if (widgetDef) {
     const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-    if (selection.isEmpty) {
-      widgetDef?.setWidgetState(WidgetState.Hidden);
-    } else {
-      if (selection.instanceKeys.size !== 0) {
-        widgetDef?.setWidgetState(WidgetState.Open);
+    const instanceKeys: InstanceKey[] = [];
+    selection.instanceKeys.forEach(
+      (ids: Set<string>, className: string) => {
+        ids.forEach((id: string) => {
+          instanceKeys.push({
+            id,
+            className,
+          });
+        });
       }
+    );
+    if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
+      widgetDef.setWidgetState(WidgetState.Open);
+    } else {
+      widgetDef.setWidgetState(WidgetState.Hidden);
     }
   }
 };
