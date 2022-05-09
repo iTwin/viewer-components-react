@@ -215,19 +215,19 @@ export const PropertyMenu = ({
 
   const groupPropertyReturn = useCallback(async (modified: boolean) => {
     setPropertyMenuView(PropertyMenuView.DEFAULT);
-    modified && refreshGroupProperties();
+    modified && await refreshGroupProperties();
   }, [refreshGroupProperties]);
 
   const calculatedPropertyReturn = useCallback(async (modified: boolean) => {
     visualizeElements(resolvedHiliteIds, "red");
     await zoomToElements(resolvedHiliteIds);
     setPropertyMenuView(PropertyMenuView.DEFAULT);
-    modified && refreshCalculatedProperties();
+    modified && await refreshCalculatedProperties();
   }, [resolvedHiliteIds, refreshCalculatedProperties]);
 
   const customCalculationReturn = useCallback(async (modified: boolean) => {
     setPropertyMenuView(PropertyMenuView.DEFAULT);
-    modified && refreshCustomCalculations();
+    modified && await refreshCustomCalculations();
   }, [refreshCustomCalculations]);
 
   if (isLoading) {
@@ -246,7 +246,7 @@ export const PropertyMenu = ({
         <GroupPropertyAction
           iModelId={iModelId}
           mappingId={mappingId}
-          groupId={group.id ?? ""}
+          groupId={groupId}
           keySet={keySet ?? new KeySet()}
           returnFn={groupPropertyReturn}
         />
@@ -256,7 +256,7 @@ export const PropertyMenu = ({
         <GroupPropertyAction
           iModelId={iModelId}
           mappingId={mappingId}
-          groupId={group.id ?? ""}
+          groupId={groupId}
           keySet={keySet ?? new KeySet()}
           groupPropertyId={selectedGroupProperty?.id ?? ""}
           groupPropertyName={selectedGroupProperty?.propertyName ?? ""}
@@ -268,7 +268,7 @@ export const PropertyMenu = ({
         <CalculatedPropertyAction
           iModelId={iModelId}
           mappingId={mappingId}
-          groupId={group.id ?? ""}
+          groupId={groupId}
           ids={resolvedHiliteIds}
           returnFn={calculatedPropertyReturn}
         />
@@ -278,7 +278,7 @@ export const PropertyMenu = ({
         <CalculatedPropertyAction
           iModelId={iModelId}
           mappingId={mappingId}
-          groupId={group.id ?? ""}
+          groupId={groupId}
           property={selectedCalculatedProperty}
           ids={resolvedHiliteIds}
           returnFn={calculatedPropertyReturn}
@@ -289,7 +289,7 @@ export const PropertyMenu = ({
         <CustomCalculationAction
           iModelId={iModelId}
           mappingId={mappingId}
-          groupId={group.id ?? ""}
+          groupId={groupId}
           properties={properties}
           returnFn={customCalculationReturn}
         />
@@ -299,7 +299,7 @@ export const PropertyMenu = ({
         <CustomCalculationAction
           iModelId={iModelId}
           mappingId={mappingId}
-          groupId={group.id ?? ""}
+          groupId={groupId}
           properties={properties}
           customCalculation={selectedCustomCalculation}
           returnFn={customCalculationReturn}
@@ -326,7 +326,7 @@ export const PropertyMenu = ({
                 <GroupPropertyTable
                   iModelId={iModelId}
                   mappingId={mappingId}
-                  groupId={group.id ?? ""}
+                  groupId={groupId}
                   onGroupPropertyModify={onGroupPropertyModify}
                   setSelectedGroupProperty={setSelectedGroupProperty}
                   setGroupModifyView={setPropertyMenuView}
@@ -343,7 +343,7 @@ export const PropertyMenu = ({
                 <CalculatedPropertyTable
                   iModelId={iModelId}
                   mappingId={mappingId}
-                  groupId={group.id ?? ""}
+                  groupId={groupId}
                   onCalculatedPropertyModify={onCalculatedPropertyModify}
                   setSelectedCalculatedProperty={setSelectedCalculatedProperty}
                   setGroupModifyView={setPropertyMenuView}
@@ -359,7 +359,7 @@ export const PropertyMenu = ({
                 <CustomCalculationTable
                   iModelId={iModelId}
                   mappingId={mappingId}
-                  groupId={group.id ?? ""}
+                  groupId={groupId}
                   onCustomCalculationModify={onCustomCalculationModify}
                   setSelectedCustomCalculation={setSelectedCustomCalculation}
                   setGroupModifyView={setPropertyMenuView}

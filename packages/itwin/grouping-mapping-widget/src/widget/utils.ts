@@ -7,9 +7,9 @@ export type CreateTypeFromInterface<Interface> = {
 };
 
 export function debounce<F extends (...args: any[]) => void>(f: F, delay: number) {
-  let timer: NodeJS.Timeout;
+  let timer: number | undefined;
   return (...args: any[]) => {
-    timer && clearTimeout(timer);
-    timer = setTimeout(f, delay, ...args);
+    timer && window.clearTimeout(timer);
+    timer = window.setTimeout(f, delay, ...args);
   };
 }
