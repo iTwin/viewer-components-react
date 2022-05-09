@@ -47,13 +47,13 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
         location === preferredLocation &&
         section === preferredPanelSection &&
         UiFramework.uiVersion !== "1"
-        ) ||
+      ) ||
       (
         !section &&
         stageUsage === StageUsage.General &&
         // eslint-disable-next-line deprecation/deprecation
         zoneLocation === AbstractZoneLocation.CenterRight
-        )
+      )
     ) {
       widgets.push({
         id: MultiElementPropertyGridId,
