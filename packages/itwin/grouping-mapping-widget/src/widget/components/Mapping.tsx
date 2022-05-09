@@ -30,6 +30,7 @@ import DeleteModal from "./DeleteModal";
 import { Groupings } from "./Grouping";
 import MappingAction from "./MappingAction";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
+import { UiContext } from "./UiContext";
 
 export type Mapping = CreateTypeFromInterface<MappingReportingAPI>;
 
@@ -44,7 +45,7 @@ enum MappingView {
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<MappingReportingAPI[]>>,
   iModelId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ) => {
   try {
     setIsLoading(true);
@@ -59,10 +60,10 @@ const fetchMappings = async (
 
 const useFetchMappings = (
   iModelId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ): [
   MappingReportingAPI[],
-  React.Dispatch<React.SetStateAction<MappingReportingAPI[]>>
+  React.Dispatch<React.SetStateAction<MappingReportingAPI[]>>,
 ] => {
   const [mappings, setMappings] = useState<MappingReportingAPI[]>([]);
   useEffect(() => {
@@ -77,13 +78,15 @@ export const Mappings = () => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
   const [mappingView, setMappingView] = useState<MappingView>(
-    MappingView.MAPPINGS
+    MappingView.MAPPINGS,
   );
   const [selectedMapping, setSelectedMapping] = useState<
-  MappingReportingAPI | undefined
+    MappingReportingAPI | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useFetchMappings(iModelId, setIsLoading);
+
+  const [lastGroupMode, setGroupMode] = useState<string>("Selection");
 
   useEffect(() => {
     const removeListener =
@@ -177,7 +180,7 @@ export const Mappings = () => {
         ],
       },
     ],
-    []
+    [],
   );
 
   switch (mappingView) {
@@ -193,10 +196,12 @@ export const Mappings = () => {
       );
     case MappingView.GROUPS:
       return (
-        <Groupings
-          mapping={selectedMapping as MappingReportingAPI}
-          goBack={refresh}
-        />
+        <UiContext.Provider value={{ lastGroupMode, setGroupMode }}>
+          <Groupings
+            mapping={selectedMapping as MappingReportingAPI}
+            goBack={refresh}
+          />
+        </UiContext.Provider>
       );
     default:
       return (
@@ -233,7 +238,7 @@ export const Mappings = () => {
             onDelete={async () => {
               await reportingClientApi.deleteMapping(
                 iModelId,
-                selectedMapping?.id ?? ""
+                selectedMapping?.id ?? "",
               );
             }}
             refresh={refresh}

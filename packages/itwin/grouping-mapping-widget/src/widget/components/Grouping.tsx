@@ -8,9 +8,7 @@ import type {
   TableInstance,
   TableState,
 } from "react-table";
-import {
-  actions,
-} from "react-table";
+import { actions } from "react-table";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, {
   useCallback,
@@ -19,7 +17,10 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type { GroupReportingAPI, MappingReportingAPI } from "../../api/generated/api";
+import type {
+  GroupReportingAPI,
+  MappingReportingAPI,
+} from "../../api/generated/api";
 import { reportingClientApi } from "../../api/reportingClient";
 import type { CreateTypeFromInterface } from "../utils";
 import {
@@ -156,7 +157,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   value.row.original.groupName
                 ) : (
                   <div
-                    className='iui-anchor'
+                    className="iui-anchor"
                     onClick={(e) => {
                       e.stopPropagation();
                       openProperties(value);
@@ -212,7 +213,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   >
                     <IconButton
                       disabled={isLoadingQuery}
-                      styleType='borderless'
+                      styleType="borderless"
                     >
                       <SvgMore
                         style={{
@@ -241,7 +242,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     let colour = "#";
     for (let i = 0; i < 3; i++) {
       const value = (hash >> (i * 8)) & 0xff;
-      colour += (`00${value.toString(16)}`).substr(-2);
+      colour += `00${value.toString(16)}`.substr(-2);
     }
     return colour;
   };
@@ -265,7 +266,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 iModelConnection,
               );
               if (ids.length === 0) {
-                toaster.warning(`${row.groupName}'s query is valid but produced no results.`);
+                toaster.warning(
+                  `${row.groupName}'s query is valid but produced no results.`,
+                );
               }
               const hiliteIds = await visualizeElementsById(
                 ids,
@@ -282,8 +285,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 delete selectedRowIds[index];
                 return selectedRowIds;
               });
-              toaster.negative(`Could not load ${row.groupName}. Query could not be resolved.`);
-
+              toaster.negative(
+                `Could not load ${row.groupName}. Query could not be resolved.`,
+              );
             }
           }
         }
@@ -396,12 +400,16 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               await goBack();
             }}
           />
-          <div className='groups-container'>
+          <div className="groups-container">
             <Button
               startIcon={
-                isLoadingQuery ? <ProgressRadial size="small" indeterminate /> : <SvgAdd />
+                isLoadingQuery ? (
+                  <ProgressRadial size="small" indeterminate />
+                ) : (
+                  <SvgAdd />
+                )
               }
-              styleType='high-visibility'
+              styleType="high-visibility"
               disabled={isLoadingQuery}
               onClick={() => addGroup()}
             >
@@ -409,9 +417,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             </Button>
             <Table<Group>
               data={groups}
-              density='extra-condensed'
+              density="extra-condensed"
               columns={groupsColumns}
-              emptyTableContent='No Groups available.'
+              emptyTableContent="No Groups available."
               isSortable
               isSelectable
               onSelect={onSelect}

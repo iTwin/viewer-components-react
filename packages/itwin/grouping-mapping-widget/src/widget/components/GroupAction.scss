@@ -40,13 +40,24 @@
     }
 
     .ml-actions {
+      margin: $iui-l;
       display: flex;
-      justify-content: center;
-      margin-top: $iui-baseline;
-
-      .ml-wait {
-        vertical-align: middle;
-        line-height: normal;
+      flex-direction: column;
+      .ml-configs {
+        margin: $iui-l 0;
+        .ml-input {
+          width: fit-content;
+        }
+        .ml-distance {
+          margin: $iui-baseline 0;
+        }
+      }
+      .ml-button {
+        margin: $iui-l 0;
+        .ml-wait {
+          vertical-align: middle;
+          line-height: normal;
+        }
       }
     }
   }

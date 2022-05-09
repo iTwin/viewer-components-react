@@ -48,7 +48,8 @@ export class GroupQueryBuilderApi {
 
   public static async similarSearch(
     conn: IModelConnection,
-    elementIds: string[]
+    elementIds: string[],
+    maxIdsReturned: number = 100,
   ): Promise<MLResponse | undefined> {
     if (elementIds.length === 0) return undefined;
 
@@ -61,7 +62,7 @@ export class GroupQueryBuilderApi {
           iModelId: conn?.iModelId,
           changeSetId: conn?.changeset?.id,
           dgnElementIds: elementIds,
-          nIdsReturned: 100,
+          nIdsReturned: maxIdsReturned,
         }),
       }
     )

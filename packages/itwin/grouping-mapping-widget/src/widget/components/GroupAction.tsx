@@ -8,20 +8,27 @@ import {
   SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
-import { useActiveIModelConnection } from "@itwin/appui-react";
+import {
+  InputStatus,
+  useActiveIModelConnection,
+  ValidationTextbox,
+} from "@itwin/appui-react";
 import {
   Button,
   Fieldset,
+  Label,
   LabeledInput,
   LabeledTextarea,
   ProgressRadial,
   RadioTile,
   RadioTileGroup,
+  Slider,
   Small,
   Text,
   toaster,
+  Tooltip,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { reportingClientApi } from "../../api/reportingClient";
 import {
   fetchIdsFromQuery,
@@ -43,8 +50,15 @@ import {
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { SvgCompare, SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
+import {
+  SvgCompare,
+  SvgCursor,
+  SvgInfo,
+  SvgInfoCircular,
+  SvgSearch,
+} from "@itwin/itwinui-icons-react";
 import { GroupQueryBuilderApi } from "../../api/GroupQueryBuilderApi";
+import { UiContext } from "./UiContext";
 
 interface GroupActionProps {
   iModelId: string;
@@ -52,8 +66,14 @@ interface GroupActionProps {
   group?: Group;
   goBack: () => Promise<void>;
 }
+
+export interface dgnElement {
+  dgnElementId: string;
+  relativeDistance: Number;
+}
+
 export interface MLResponse {
-  dgnElementIds: string[];
+  elements: dgnElement[];
 }
 
 const GroupAction = ({
@@ -76,42 +96,71 @@ const GroupAction = ({
     PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
-    new QueryBuilder(undefined)
+    new QueryBuilder(undefined),
   );
-  const [groupByType, setGroupByType] = React.useState("Selection");
+  const { lastGroupMode, setGroupMode } = useContext(UiContext);
+  const [groupByType, setGroupByType] = React.useState(lastGroupMode);
   const [searchInput, setSearchInput] = React.useState("");
 
-  const [mlElementList, setMLElementList] = React.useState<string[]>([]);
+  const [mlDistance, setMLDistance] = React.useState<number>(1);
+  const [mlMaxElements, setMlMaxElements] = React.useState<number>(100);
+  const [mlSelectedElements, setMLSelectedElements] = React.useState<string[]>(
+    [],
+  );
+  const [mlMatchedElements, setMLMatchedElements] = React.useState<
+    dgnElement[]
+  >([]);
+  var maxElementNumber = 1000;
 
   const processMLRequest = async () => {
     setIsRendering(true);
-    if (mlElementList.length === 0) {
-      toaster.warning("No selection");
-    }
-    // request
-    const response = await GroupQueryBuilderApi.similarSearch(
-      iModelConnection,
-      mlElementList
-    );
 
-    if (!response?.dgnElementIds || response.dgnElementIds.length === 0) {
-      toaster.negative("Sorry, we have failed to find similar elements. 😔");
+    if (mlMaxElements > maxElementNumber || mlMaxElements < 0) {
+      toaster.negative("Maximum Ids is out of bound.");
+    } else if (mlSelectedElements.length === 0) {
+      toaster.warning("No selection");
     } else {
-      setQuery(getMLQuery(response?.dgnElementIds));
+      // request
+      const response = await GroupQueryBuilderApi.similarSearch(
+        iModelConnection,
+        mlSelectedElements,
+        mlMaxElements,
+      );
+
+      if (!response?.elements) {
+        toaster.negative("Sorry, we have failed to find similar elements. 😔");
+      } else {
+        setMLMatchedElements(response.elements);
+        setQuery(getMLQuery(response?.elements, mlDistance));
+      }
+      setMLSelectedElements([]);
     }
-    setMLElementList([]);
+
+    Presentation.selection.clearSelection(
+      "GroupingMappingWidget",
+      iModelConnection,
+    );
     setIsRendering(false);
   };
 
-  const getMLQuery = (ids: string[]): string => {
-    if (ids.length === 0) {
+  const getMLQuery = (elements: dgnElement[], distance: number): string => {
+    if (elements.length === 0) {
       toaster.negative("There is no predicted similar elements. 😔");
       return "";
     }
-    let query = `SELECT ECInstanceId FROM bis.element WHERE ECInstanceId=${ids[0]}`;
-    if (ids.length > 1) {
-      for (let i = 1; i < ids.length; i++) {
-        query += ` OR ECInstanceId=${ids[i]}`;
+    const filterByDistance = elements
+      .filter((a) => a.relativeDistance < distance)
+      .map((a) => a.dgnElementId);
+    if (filterByDistance.length === 0) {
+      toaster.negative(
+        "There is no elements matching given relative distance. 😔",
+      );
+      return "";
+    }
+    let query = `SELECT ECInstanceId FROM bis.element WHERE ECInstanceId=${filterByDistance[0]}`;
+    if (filterByDistance.length > 1) {
+      for (let i = 1; i < filterByDistance.length; i++) {
+        query += ` OR ECInstanceId=${filterByDistance[i]}`;
       }
     }
     return query;
@@ -122,19 +171,15 @@ const GroupAction = ({
       target: { value },
     } = event;
     setGroupByType(value);
-    Presentation.selection.clearSelection(
-      "GroupingMappingWidget",
-      iModelConnection
-    );
-    setMLElementList([]);
-    setQuery("");
+    setGroupMode(value);
+    console.log(lastGroupMode);
   };
 
   useEffect(() => {
     const removeListener = Presentation.selection.selectionChange.addListener(
       async (
         evt: SelectionChangeEventArgs,
-        selectionProvider: ISelectionProvider
+        selectionProvider: ISelectionProvider,
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
         const query =
@@ -144,8 +189,11 @@ const GroupAction = ({
               }`
             : "";
         setSimpleQuery(query);
-        setMLElementList(Array.from(iModelConnection.selectionSet.elements));
-      }
+        setMLSelectedElements(
+          Array.from(iModelConnection.selectionSet.elements),
+        );
+        maxElementNumber = await getMaxElementNumber();
+      },
     );
     return () => {
       removeListener();
@@ -165,7 +213,7 @@ const GroupAction = ({
         const resolvedHiliteIds = await visualizeElementsById(
           ids,
           "rgb(255,0,0)",
-          iModelConnection
+          iModelConnection,
         );
         await zoomToElements(resolvedHiliteIds);
       } catch {
@@ -181,7 +229,7 @@ const GroupAction = ({
   useEffect(() => {
     Presentation.selection.clearSelection(
       "GroupingMappingWidget",
-      iModelConnection
+      iModelConnection,
     );
   }, [iModelConnection]);
 
@@ -209,7 +257,7 @@ const GroupAction = ({
             `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       de.codevalue LIKE '%${
         isWrappedInQuotes(token) ? token.slice(1, -1) : token
-      }%'`
+      }%'`,
         )
         .join(" ")}
       )
@@ -226,7 +274,9 @@ const GroupAction = ({
         .map(
           (token, index) =>
             `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
-      be.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
+      be.name LIKE '%${
+        isWrappedInQuotes(token) ? token.slice(1, -1) : token
+      }%'`,
         )
         .join(" ")}
       )
@@ -242,7 +292,7 @@ const GroupAction = ({
             `${index === 0 ? "" : isWrappedInQuotes(token) ? "AND" : "OR"}
       be.userlabel LIKE '%${
         isWrappedInQuotes(token) ? token.slice(1, -1) : token
-      }%'`
+      }%'`,
         )
         .join(" ")}
       )`
@@ -264,7 +314,7 @@ const GroupAction = ({
             iModelId,
             mappingId,
             group.id ?? "",
-            { ...details, query: currentQuery }
+            { ...details, query: currentQuery },
           )
         : await reportingClientApi.createGroup(iModelId, mappingId, {
             ...details,
@@ -272,7 +322,7 @@ const GroupAction = ({
           });
       Presentation.selection.clearSelection(
         "GroupingMappingWidget",
-        iModelConnection
+        iModelConnection,
       );
       await goBack();
     } catch (error: any) {
@@ -300,6 +350,29 @@ const GroupAction = ({
     !isLoading
   );
 
+  const adjustDistance = (vals: readonly number[]) => {
+    const distance = vals[0];
+    if (!mlMatchedElements || mlMatchedElements.length === 0) {
+      toaster.warning(
+        "You need to run ML prediction first to get matched elements",
+      );
+    }
+    setMLDistance(distance);
+    setQuery(getMLQuery(mlMatchedElements, distance));
+  };
+
+  const getMaxElementNumber = async () => {
+    const ids = await iModelConnection.elements.queryIds({
+      from: "biscore.GeometricElement",
+    });
+    if (ids?.keys.length > 0) {
+      return ids.keys.length;
+    } else {
+      console.error("Unable to get number of elements in the model");
+    }
+    return maxElementNumber;
+  };
+
   return (
     <>
       <WidgetHeader
@@ -307,7 +380,7 @@ const GroupAction = ({
         returnFn={async () => {
           Presentation.selection.clearSelection(
             "GroupingMappingWidget",
-            iModelConnection
+            iModelConnection,
           );
           await goBack();
         }}
@@ -330,13 +403,13 @@ const GroupAction = ({
             message={validator.message(
               "groupName",
               details.groupName,
-              NAME_REQUIREMENTS
+              NAME_REQUIREMENTS,
             )}
             status={
               validator.message(
                 "groupName",
                 details.groupName,
-                NAME_REQUIREMENTS
+                NAME_REQUIREMENTS,
               )
                 ? "negative"
                 : undefined
@@ -362,7 +435,7 @@ const GroupAction = ({
             message={validator.message(
               "description",
               details.description,
-              "required"
+              "required",
             )}
             status={
               validator.message("description", details.description, "required")
@@ -384,7 +457,7 @@ const GroupAction = ({
               name={"groupby"}
               icon={<SvgCursor />}
               onChange={changeGroupByType}
-              defaultChecked
+              checked={groupByType === "Selection"}
               value={"Selection"}
               label={"Selection"}
               disabled={isLoading || isRendering}
@@ -393,6 +466,7 @@ const GroupAction = ({
               icon={<SvgSearch />}
               name={"groupby"}
               onChange={changeGroupByType}
+              checked={groupByType === "Query Keywords"}
               value={"Query Keywords"}
               label={"Query Keywords"}
               disabled={isLoading || isRendering}
@@ -401,6 +475,7 @@ const GroupAction = ({
               icon={<SvgCompare />}
               name={"groupby"}
               onChange={changeGroupByType}
+              checked={groupByType === "ML"}
               value={"ML"}
               label={"ML"}
               disabled={isLoading || isRendering}
@@ -441,7 +516,7 @@ const GroupAction = ({
                   disabled={isLoading || isRendering}
                   onClick={() =>
                     generateSearchQuery(
-                      searchInput ? searchInput.split(" ") : []
+                      searchInput ? searchInput.split(" ") : [],
                     )
                   }
                 >
@@ -460,7 +535,21 @@ const GroupAction = ({
             </div>
           ) : (
             <div className="ml-actions">
+              <LabeledInput
+                label="Number of Elements"
+                className="ml-input"
+                value={mlMaxElements}
+                pattern="[0-9]*"
+                onChange={(e) => {
+                  !isNaN(Number(e.target.value))
+                    ? setMlMaxElements(Number(e.target.value))
+                    : toaster.informational(
+                        "The maximum limit must be non-negative integer.",
+                      );
+                }}
+              ></LabeledInput>
               <Button
+                className="ml-button"
                 styleType="cta"
                 disabled={isLoading || isRendering}
                 onClick={processMLRequest}
@@ -476,6 +565,29 @@ const GroupAction = ({
                   "Run ML Prediction"
                 )}
               </Button>
+              <div className="ml-distance">
+                <Tooltip
+                  content="Slide left and right to show elements with different distance."
+                  placement="top"
+                >
+                  <div
+                    id="tooltip-target"
+                    style={{ fontWeight: "bold", width: "fit-content" }}
+                  >
+                    Distance
+                  </div>
+                </Tooltip>
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.001}
+                  values={[mlDistance]}
+                  disabled={isRendering || mlMatchedElements.length === 0}
+                  trackDisplayMode="auto"
+                  thumbMode="inhibit-crossing"
+                  onChange={adjustDistance}
+                ></Slider>
+              </div>
             </div>
           )}
         </Fieldset>
@@ -487,7 +599,7 @@ const GroupAction = ({
         onCancel={async () => {
           Presentation.selection.clearSelection(
             "GroupingMappingWidget",
-            iModelConnection
+            iModelConnection,
           );
           await goBack();
         }}
