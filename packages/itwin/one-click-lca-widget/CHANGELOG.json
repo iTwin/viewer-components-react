@@ -2,6 +2,18 @@
   "name": "@itwin/one-click-lca-react",
   "entries": [
     {
+      "version": "0.1.3",
+      "tag": "@itwin/one-click-lca-react_v0.1.3",
+      "date": "Mon, 09 May 2022 18:04:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Changed insights-client dependency to exact version."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@itwin/one-click-lca-react_v0.1.2",
       "date": "Tue, 19 Apr 2022 14:15:57 GMT",
