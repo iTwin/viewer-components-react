@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "remove widget control and add temporary support for ui 1.0",
+      "comment": "dont open property grid tab when only transient elements (such as view sections) are selected",
       "type": "patch"
     }
   ],

@@ -22,6 +22,9 @@
 /packages/itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @Guillar1 @bingjiez
 /common/changes/@itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @Guillar1 @bingjiez
 
+/packages/itwin/one-click-lca-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1
+/common/changes/@itwin/one-click-lca-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1
+
 /packages/itwin/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty @DanishMehmood-bit
 /common/changes/@itwin/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty @DanishMehmood-bit
 

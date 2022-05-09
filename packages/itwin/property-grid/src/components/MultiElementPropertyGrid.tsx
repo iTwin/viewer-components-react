@@ -68,6 +68,9 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
       }
     };
 
+    // ensure this selection handling runs if component mounts after the selection event fires:
+    onSelectionChange();
+
     const removeListener = Presentation.selection.selectionChange.addListener(onSelectionChange);
     return () => removeListener();
   }, [iModelConnection]);
@@ -122,13 +125,12 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   );
 
   useEffect(() => {
-    if (UiFramework.uiVersion === "1") {
-      return;
-    }
-    if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
-      widgetDef?.setWidgetState(WidgetState.Open);
-    } else {
-      widgetDef?.setWidgetState(WidgetState.Hidden);
+    if (UiFramework.uiVersion !== "1") {
+      if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
+        widgetDef?.setWidgetState(WidgetState.Open);
+      } else {
+        widgetDef?.setWidgetState(WidgetState.Hidden);
+      }
     }
   }, [widgetDef, instanceKeys]);
 
@@ -141,7 +143,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
             "property-grid-react-animated-tab-animate-right": idx > content,
             "property-grid-react-animated-tab-animate-left": idx < content,
           })} >
-            { component }
+            {component}
           </div>
         ))}
       </div>

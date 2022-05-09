@@ -1,11 +1,11 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
-  "rushVersion": "5.51.1",
-  "pnpmVersion": "6.13.0",
+  "rushVersion": "5.58.0",
+  "pnpmVersion": "6.24.4",
   "pnpmOptions": {
     "useWorkspaces": true
   },
-  "nodeSupportedVersionRange": ">=12.17.0 <15.0.0",
+  "nodeSupportedVersionRange": ">=14.9.0 <17.0.0",
   "projectFolderMinDepth": 2,
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
@@ -31,6 +31,11 @@
       "packageName": "@itwin/grouping-mapping-widget",
       "projectFolder": "packages/itwin/grouping-mapping-widget",
       "versionPolicyName": "grouping-mapping-widget"
+    },
+    {
+      "packageName": "@itwin/one-click-lca-react",
+      "projectFolder": "packages/itwin/one-click-lca-widget",
+      "versionPolicyName": "one-click-lca-widget"
     },
     {
       "packageName": "@itwin/imodel-react-hooks",

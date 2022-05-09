@@ -3,21 +3,23 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
-import React, { useState } from "react";
-import type { MappingReportingAPI } from "../../api/generated/api";
-import { reportingClientApi } from "../../api/reportingClient";
+import React, { useContext, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, handleInputChange, WidgetHeader } from "./utils";
 import "./MappingAction.scss";
+import { ApiContext } from "./GroupingMapping";
+import type { Mapping } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
 
 interface MappingActionProps {
   iModelId: string;
-  mapping?: MappingReportingAPI;
+  mapping?: Mapping;
   returnFn: () => Promise<void>;
 }
 
 const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
+  const apiContext = useContext(ApiContext);
   const [values, setValues] = useState({
     name: mapping?.mappingName ?? "",
     description: mapping?.description ?? "",
@@ -33,12 +35,13 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
         return;
       }
       setIsLoading(true);
+      const reportingClientApi = new ReportingClient(apiContext.prefix);
       mapping
-        ? await reportingClientApi.updateMapping(iModelId, mapping.id ?? "", {
+        ? await reportingClientApi.updateMapping(apiContext.accessToken, iModelId, mapping.id ?? "", {
           mappingName: values.name,
           description: values.description,
         })
-        : await reportingClientApi.createMapping(iModelId, {
+        : await reportingClientApi.createMapping(apiContext.accessToken, iModelId, {
           mappingName: values.name,
           description: values.description,
         });

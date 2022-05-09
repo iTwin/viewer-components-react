@@ -3,6 +3,12 @@
 trigger:
   - master
 
+pr:
+  drafts: false
+  branches:
+    include:
+      - master
+
 schedules:
   - cron: "0 9 * * Mon-Fri"
     displayName: Weekday 4 AM (UTC -5) daily build
@@ -15,14 +21,14 @@ jobs:
     condition: succeeded()
     strategy:
       matrix:
-        "Windows - Node 12":
-          NodeVersion: 12
+        "Windows - Node 14":
+          NodeVersion: 14
           OS: windows-latest
-        "Linux - Node 12":
-          NodeVersion: 12
+        "Linux - Node 14":
+          NodeVersion: 14
           OS: ubuntu-latest
-        "Mac - Node 12":
-          NodeVersion: 12
+        "Mac - Node 14":
+          NodeVersion: 14
           OS: macOS-latest
 
     workspace:

@@ -1,6 +1,16 @@
-# Change Log - @bentley/imodel-react-hooks
+# Change Log - @itwin/imodel-react-hooks
 
-This log was last generated on Fri, 04 Feb 2022 00:43:35 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Apr 2022 14:15:57 GMT and should not be manually modified.
+
+## 0.1.5
+Tue, 19 Apr 2022 14:15:57 GMT
+
+### Patches
+
+- Update to iTwin.js 3.0
+- Fix dependency lists of hooks
+- Remove bentleyjs-core mock in useMarker test file
+- Add transitive peers as dev deps
 
 ## 0.1.4
 Fri, 04 Feb 2022 00:43:35 GMT

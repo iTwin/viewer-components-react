@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed cancel buttons being disabled initially and readded missing styles in calculated properties menu item",
+      "comment": "Added optional access token and enviroment props and switched to insights-client",
       "type": "patch"
     }
   ],

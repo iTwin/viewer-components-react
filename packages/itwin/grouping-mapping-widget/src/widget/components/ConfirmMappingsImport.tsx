@@ -9,21 +9,22 @@ import {
   ProgressLinear,
   Text,
 } from "@itwin/itwinui-react";
-import React, { useEffect, useState } from "react";
-import type { Mapping } from "./Mapping";
+import React, { useContext, useEffect, useState } from "react";
+import type { MappingType } from "./Mapping";
 import "./ConfirmMappingsImport.scss";
-import { reportingClientApi } from "../../api/reportingClient";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SvgStatusSuccessHollow } from "@itwin/itwinui-icons-react";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError } from "./utils";
+import { ReportingClient } from "@itwin/insights-client";
+import { ApiContext } from "./GroupingMapping";
 
 interface ConfirmMappingImportProps {
   sourceiModelId: string;
-  selectedMappings: Mapping[];
+  selectedMappings: MappingType[];
   importing: boolean;
   setImporting: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedMappings: React.Dispatch<React.SetStateAction<Mapping[]>>;
+  setSelectedMappings: React.Dispatch<React.SetStateAction<MappingType[]>>;
   backFn: () => void;
   onCancel: () => void;
   onFinish: () => void;
@@ -39,7 +40,8 @@ const ConfirmMappingImport = ({
   onCancel,
   onFinish,
 }: ConfirmMappingImportProps) => {
-  const iModelId = useActiveIModelConnection()?.iModelId as string;
+  const iModelId = useActiveIModelConnection()?.iModelId;
+  const apiContext = useContext(ApiContext);
 
   const [importCount, setImportCount] = useState<number>(0);
   const [currentlyImporting, setCurrentlyImporting] = useState<string>("");
@@ -74,13 +76,15 @@ const ConfirmMappingImport = ({
     }
     setImporting(true);
     try {
+      const reportingClientApi = new ReportingClient(apiContext.prefix);
       for (const selectedMapping of selectedMappings) {
         setCurrentlyImporting(selectedMapping.mappingName ?? "");
         await reportingClientApi.copyMapping(
+          apiContext.accessToken,
           sourceiModelId,
           selectedMapping.id ?? "",
           {
-            targetIModelId: iModelId,
+            targetIModelId: iModelId ?? "",
             mappingName: selectedMapping.mappingName ?? "",
           },
         );

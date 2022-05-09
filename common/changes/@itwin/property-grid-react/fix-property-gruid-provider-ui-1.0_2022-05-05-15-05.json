@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "hide property-grid by default",
-      "type": "minor"
+      "comment": "fix property grid ui items provider when loading into appui v1.0",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/property-grid-react"

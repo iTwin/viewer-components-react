@@ -1,6 +1,6 @@
 {
   "name": "@itwin/measure-tools-react",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "license": "MIT",
   "description": "Frontend framework and tools for measurements",
   "repository": {
@@ -77,6 +77,9 @@
     "@itwin/core-telemetry": "^3.0.0",
     "@itwin/eslint-plugin": "^3.0.0",
     "@itwin/imodel-components-react": "^3.0.0",
+    "@itwin/presentation-common": "^3.0.0",
+    "@itwin/presentation-components": "^3.0.0",
+    "@itwin/presentation-frontend": "^3.0.0",
     "@itwin/webgl-compatibility": "^3.0.0",
     "@types/chai": "^4.2.0",
     "@types/chai-as-promised": "^7.1.1",

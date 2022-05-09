@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "added tree icon to tree widget tab",
+      "comment": "set restore transient state in tree widget ui items provider to restore state when remounted",
       "type": "patch"
     }
   ],
