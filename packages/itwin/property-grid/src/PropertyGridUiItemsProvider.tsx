@@ -14,7 +14,7 @@ import {
 } from "@itwin/appui-abstract";
 import { FrontstageManager, UiFramework } from "@itwin/appui-react";
 import { Id64 } from "@itwin/core-bentley";
-import { InstanceKey } from "@itwin/presentation-common";
+import type { InstanceKey } from "@itwin/presentation-common";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import * as React from "react";
