@@ -6,13 +6,9 @@
 import "./PropertyGrid.scss";
 import type { Field, InstanceKey } from "@itwin/presentation-common";
 import { KeySet } from "@itwin/presentation-common";
-import {
-  FavoritePropertiesScope,
-  Presentation,
-} from "@itwin/presentation-frontend";
+import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
-  ActionButtonRenderer,
   PropertyData,
   PropertyDataFiltererBase,
   PropertyGridContextMenuArgs,
@@ -29,7 +25,7 @@ import {
   useOptionalDisposable,
   useResizeObserver,
 } from "@itwin/core-react";
-import { 
+import {
   UiFramework,
   useActiveIModelConnection,
 } from "@itwin/appui-react";
@@ -91,7 +87,7 @@ export const PropertyGrid = ({
     if (dp) {
       dp.pagingSize = 50;
       dp.isNestedPropertyCategoryGroupingEnabled =
-      !!enablePropertyGroupNesting;
+       !!enablePropertyGroupNesting;
 
       // Set selected instance as the key (for Single Element Property Grid)
       if (instanceKey) {
@@ -106,10 +102,10 @@ export const PropertyGrid = ({
   const [title, setTitle] = useState<PropertyRecord>();
   const [className, setClassName] = useState<string>("");
   const [contextMenu, setContextMenu] = useState<
-    PropertyGridContextMenuArgs | undefined
+  PropertyGridContextMenuArgs | undefined
   >(undefined);
   const [contextMenuItemInfos, setContextMenuItemInfos] = useState<
-    ContextMenuItemInfo[] | undefined
+  ContextMenuItemInfo[] | undefined
   >(undefined);
   const [showNullValues, setShowNullValues] = useState<boolean>(true);
   const [filterer, setFilterer] = useState<PropertyDataFiltererBase>(
