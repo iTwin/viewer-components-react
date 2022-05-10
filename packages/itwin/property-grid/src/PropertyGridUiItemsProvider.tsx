@@ -77,6 +77,8 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     const widgets: AbstractWidgetProps[] = [];
     const preferredLocation = this._props?.defaultPanelLocation ?? StagePanelLocation.Right;
     const preferredPanelSection = this._props?.defaultPanelSection ?? StagePanelSection.End;
+    // eslint-disable-next-line deprecation/deprecation
+    const preferredZoneLocation = this._props?.defaultZoneLocation ?? AbstractZoneLocation.CenterRight
     if (
       (
         stageUsage === StageUsage.General &&
@@ -87,8 +89,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
       (
         !section &&
         stageUsage === StageUsage.General &&
-        // eslint-disable-next-line deprecation/deprecation
-        zoneLocation === AbstractZoneLocation.CenterRight
+        zoneLocation === preferredZoneLocation
       )
     ) {
       widgets.push({
