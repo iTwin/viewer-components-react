@@ -9,7 +9,7 @@ import SelectProject from "./SelectProject";
 import "./MappingImportWizardModal.scss";
 import SelectIModel from "./SelectIModel";
 import SelectMappings from "./SelectMappings";
-import type { Mapping } from "./Mapping";
+import type { MappingType } from "./Mapping";
 import ConfirmMappingImport from "./ConfirmMappingsImport";
 
 interface MappingImportWizardModalProps {
@@ -26,7 +26,7 @@ export const MappingImportWizardModal = ({
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [selectedIModelId, setSelectedIModelId] = useState<string>("");
-  const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
+  const [selectedMappings, setSelectedMappings] = useState<MappingType[]>([]);
   const [importing, setImporting] = useState<boolean>(false);
 
   const steps = useRef<StepProperties[]>([

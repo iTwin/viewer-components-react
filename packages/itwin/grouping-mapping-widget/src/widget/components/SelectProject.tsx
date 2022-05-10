@@ -22,9 +22,8 @@ import {
   LabeledInput,
   Tab,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useMemo, useState } from "react";
-import { getUrlPrefix } from "../../api/reportingClient";
-import useFetchAccessToken from "../hooks/useFetchAccessToken";
+import React, { useCallback, useContext, useMemo, useState } from "react";
+import { ApiContext } from "./GroupingMapping";
 import "./SelectProject.scss";
 
 const tabsWithIcons = [
@@ -41,7 +40,7 @@ interface SelectProjectProps {
   onCancel: () => void;
 }
 const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
-  const accessToken = useFetchAccessToken();
+  const apiContext = useContext(ApiContext);
   const [projectType, setProjectType] = useState<number>(0);
   const [searchInput, setSearchInput] = useState<string>("");
   const [activeSearchInput, setActiveSearchInput] = useState<string>("");
@@ -51,8 +50,8 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
   }, [searchInput]);
 
   const apiOverrides = useMemo<ApiOverrides<ProjectFull[]>>(
-    () => ({ serverEnvironmentPrefix: getUrlPrefix() }),
-    [],
+    () => ({ serverEnvironmentPrefix: apiContext.prefix }),
+    [apiContext.prefix],
   );
 
   return (
@@ -95,7 +94,7 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
       <div className='project-grid'>
         <ProjectGrid
           onThumbnailClick={onSelect}
-          accessToken={accessToken}
+          accessToken={apiContext.accessToken}
           apiOverrides={apiOverrides}
           filterOptions={activeSearchInput}
           requestType={

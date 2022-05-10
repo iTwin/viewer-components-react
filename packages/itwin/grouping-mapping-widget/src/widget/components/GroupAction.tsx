@@ -12,10 +12,9 @@ import {
 } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useState } from "react";
-import { reportingClientApi } from "../../api/reportingClient";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
-import type { Group } from "./Grouping";
+import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -29,11 +28,13 @@ import {
   zoomToElements,
 } from "./viewerUtils";
 import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
+import { ReportingClient } from "@itwin/insights-client";
+import { ApiContext } from "./GroupingMapping";
 
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
-  group?: Group;
+  group?: GroupType;
   goBack: () => Promise<void>;
 }
 
@@ -44,6 +45,7 @@ const GroupAction = ({
   goBack,
 }: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
+  const apiContext = useContext(ApiContext);
   const [details, setDetails] = useState({
     groupName: group?.groupName ?? "",
     description: group?.description ?? "",
@@ -170,15 +172,17 @@ const GroupAction = ({
     try {
       setIsLoading(true);
       const currentQuery = query || simpleQuery;
+      const reportingClientApi = new ReportingClient(apiContext.prefix);
 
       group
         ? await reportingClientApi.updateGroup(
+          apiContext.accessToken,
           iModelId,
           mappingId,
           group.id ?? "",
           { ...details, query: currentQuery },
         )
-        : await reportingClientApi.createGroup(iModelId, mappingId, {
+        : await reportingClientApi.createGroup(apiContext.accessToken, iModelId, mappingId, {
           ...details,
           query: currentQuery,
         });
@@ -202,6 +206,8 @@ const GroupAction = ({
     showValidationMessage,
     simpleQuery,
     validator,
+    apiContext.accessToken,
+    apiContext.prefix,
   ]);
 
   const isBlockingActions = !(details.groupName && details.description && (query || simpleQuery) && !isRendering && !isLoading);
