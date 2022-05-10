@@ -43,5 +43,10 @@
     "policyName": "one-click-lca-widget",
     "definitionName": "individualVersion",
     "lockedMajor": 0
+  },
+  {
+    "policyName": "reports-config-widget",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   }
 ]
