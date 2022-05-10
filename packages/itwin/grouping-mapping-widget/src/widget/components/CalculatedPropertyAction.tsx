@@ -13,9 +13,7 @@ import {
   MenuItem,
   Small,
 } from "@itwin/itwinui-react";
-import React, { useEffect, useState } from "react";
-import type { CalculatedPropertyCreateReportingAPI } from "../../api/generated/api";
-import { reportingClientApi } from "../../api/reportingClient";
+import React, { useContext, useEffect, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import {
   BboxDimension,
@@ -25,13 +23,15 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
-import type { CalculatedProperty } from "./CalculatedPropertyTable";
+import type { CalculatedPropertyType } from "./CalculatedPropertyTable";
+import { ReportingClient } from "@itwin/insights-client";
+import { ApiContext } from "./GroupingMapping";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  property?: CalculatedProperty;
+  property?: CalculatedPropertyType;
   ids: string[];
   returnFn: () => Promise<void>;
 }
@@ -44,6 +44,7 @@ const CalculatedPropertyAction = ({
   ids,
   returnFn,
 }: CalculatedPropertyActionProps) => {
+  const apiContext = useContext(ApiContext);
   const [propertyName, setPropertyName] = useState<string>(
     property?.propertyName ?? "",
   );
@@ -105,24 +106,29 @@ const CalculatedPropertyAction = ({
     try {
       setIsLoading(true);
 
-      const calculatedProperty: CalculatedPropertyCreateReportingAPI = {
-        propertyName,
-        type,
-      };
+      const reportingClientApi = new ReportingClient(apiContext.prefix);
 
       property
         ? await reportingClientApi.updateCalculatedProperty(
+          apiContext.accessToken,
           iModelId,
           mappingId,
           groupId,
           property.id ?? "",
-          calculatedProperty,
+          {
+            propertyName,
+            type,
+          },
         )
         : await reportingClientApi.createCalculatedProperty(
+          apiContext.accessToken,
           iModelId,
           mappingId,
           groupId,
-          calculatedProperty,
+          {
+            propertyName,
+            type,
+          },
         );
       await returnFn();
     } catch (error: any) {

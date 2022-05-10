@@ -20,18 +20,20 @@ import {
   Table,
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { MappingReportingAPI } from "../../api/generated/api";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import { handleError, onSelectionChanged, WidgetHeader } from "./utils";
 import "./Mapping.scss";
-import { reportingClientApi } from "../../api/reportingClient";
 import DeleteModal from "./DeleteModal";
 import { Groupings } from "./Grouping";
 import MappingAction from "./MappingAction";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
+import type { Api } from "./GroupingMapping";
+import { ApiContext } from "./GroupingMapping";
+import type { Mapping } from "@itwin/insights-client";
+import { ReportingClient } from "@itwin/insights-client";
 
-export type Mapping = CreateTypeFromInterface<MappingReportingAPI>;
+export type MappingType = CreateTypeFromInterface<Mapping>;
 
 enum MappingView {
   MAPPINGS = "mappings",
@@ -42,13 +44,15 @@ enum MappingView {
 }
 
 const fetchMappings = async (
-  setMappings: React.Dispatch<React.SetStateAction<MappingReportingAPI[]>>,
+  setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  apiContext: Api
 ) => {
   try {
     setIsLoading(true);
-    const mappings = await reportingClientApi.getMappings(iModelId);
+    const reportingClientApi = new ReportingClient(apiContext.prefix);
+    const mappings = await reportingClientApi.getMappings(apiContext.accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -57,22 +61,8 @@ const fetchMappings = async (
   }
 };
 
-const useFetchMappings = (
-  iModelId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-): [
-  MappingReportingAPI[],
-  React.Dispatch<React.SetStateAction<MappingReportingAPI[]>>
-] => {
-  const [mappings, setMappings] = useState<MappingReportingAPI[]>([]);
-  useEffect(() => {
-    void fetchMappings(setMappings, iModelId, setIsLoading);
-  }, [iModelId, setIsLoading]);
-
-  return [mappings, setMappings];
-};
-
 export const Mappings = () => {
+  const apiContext = useContext(ApiContext);
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
@@ -80,10 +70,14 @@ export const Mappings = () => {
     MappingView.MAPPINGS
   );
   const [selectedMapping, setSelectedMapping] = useState<
-  MappingReportingAPI | undefined
+  Mapping | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [mappings, setMappings] = useFetchMappings(iModelId, setIsLoading);
+  const [mappings, setMappings] = useState<Mapping[]>([]);
+
+  useEffect(() => {
+    void fetchMappings(setMappings, iModelId, setIsLoading, apiContext);
+  }, [apiContext, iModelId, setIsLoading]);
 
   useEffect(() => {
     const removeListener =
@@ -97,8 +91,8 @@ export const Mappings = () => {
     setMappingView(MappingView.MAPPINGS);
     setSelectedMapping(undefined);
     setMappings([]);
-    await fetchMappings(setMappings, iModelId, setIsLoading);
-  }, [iModelId, setMappings]);
+    await fetchMappings(setMappings, iModelId, setIsLoading, apiContext);
+  }, [apiContext, iModelId, setMappings]);
 
   const addMapping = async () => {
     setMappingView(MappingView.ADDING);
@@ -134,7 +128,7 @@ export const Mappings = () => {
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<Mapping>) => {
+            Cell: (value: CellProps<MappingType>) => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
@@ -194,7 +188,7 @@ export const Mappings = () => {
     case MappingView.GROUPS:
       return (
         <Groupings
-          mapping={selectedMapping as MappingReportingAPI}
+          mapping={selectedMapping as Mapping}
           goBack={refresh}
         />
       );
@@ -217,7 +211,7 @@ export const Mappings = () => {
                 </IconButton>
               </ButtonGroup>
             </div>
-            <Table<Mapping>
+            <Table<MappingType>
               data={mappings}
               density="extra-condensed"
               columns={mappingsColumns}
@@ -231,7 +225,9 @@ export const Mappings = () => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
+              const reportingClientApi = new ReportingClient(apiContext.prefix);
               await reportingClientApi.deleteMapping(
+                apiContext.accessToken,
                 iModelId,
                 selectedMapping?.id ?? ""
               );
