@@ -10,9 +10,8 @@ import {
   IModelGrid,
 } from "@itwin/imodel-browser-react";
 import { Button } from "@itwin/itwinui-react";
-import React, { useMemo } from "react";
-import { getUrlPrefix } from "../../api/reportingClient";
-import useFetchAccessToken from "../hooks/useFetchAccessToken";
+import React, { useContext, useMemo } from "react";
+import { ApiContext } from "./GroupingMapping";
 import "./SelectIModel.scss";
 
 interface SelectIModelProps {
@@ -27,11 +26,11 @@ const SelectIModel = ({
   onCancel,
   backFn,
 }: SelectIModelProps) => {
-  const accessToken = useFetchAccessToken();
+  const apiContext = useContext(ApiContext);
 
   const apiOverrides = useMemo<ApiOverrides<IModelFull[]>>(
-    () => ({ serverEnvironmentPrefix: getUrlPrefix() }),
-    []
+    () => ({ serverEnvironmentPrefix: apiContext.prefix }),
+    [apiContext.prefix]
   );
 
   return (
@@ -40,7 +39,7 @@ const SelectIModel = ({
         <IModelGrid
           projectId={projectId}
           onThumbnailClick={onSelect}
-          accessToken={accessToken}
+          accessToken={apiContext.accessToken}
           apiOverrides={apiOverrides}
         />
       </div>
