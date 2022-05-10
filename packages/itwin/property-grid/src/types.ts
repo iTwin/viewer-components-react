@@ -17,8 +17,7 @@ import type {
   StagePanelSection,
 } from "@itwin/appui-abstract";
 
-export type ContextMenuItemInfo = ContextMenuItemProps &
-  React.Attributes & { label: string };
+export type ContextMenuItemInfo = ContextMenuItemProps & React.Attributes & { label: string };
 
 export interface OnSelectEventArgs {
   dataProvider: IPresentationPropertyDataProvider;

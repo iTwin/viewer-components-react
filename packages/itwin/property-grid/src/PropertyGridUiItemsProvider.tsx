@@ -78,7 +78,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     const preferredLocation = this._props?.defaultPanelLocation ?? StagePanelLocation.Right;
     const preferredPanelSection = this._props?.defaultPanelSection ?? StagePanelSection.End;
     // eslint-disable-next-line deprecation/deprecation
-    const preferredZoneLocation = this._props?.defaultZoneLocation ?? AbstractZoneLocation.CenterRight
+    const preferredZoneLocation = this._props?.defaultZoneLocation ?? AbstractZoneLocation.CenterRight;
     if (
       (
         stageUsage === StageUsage.General &&
