@@ -1,8 +1,8 @@
-# @itwin/grouping-mapping-widget
+# @itwin/reports-config-widget
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 The Reports Config widget is a UI component for iTwin Viewer applications that simplifies how users (and developers) interface with the [Reporting Platform APIs](https://developer.bentley.com/apis/insights/overview/).
-The grouping-mapping-widget package provides a UiProvider class - `ReportsConfigProvider` - which can be passed into the `uiProviders` prop of the iTwin Viewer's `<Viewer />` component.
+The reports-config-widget package provides a UiProvider class - `ReportsConfigProvider` - which can be passed into the `uiProviders` prop of the iTwin Viewer's `<Viewer />` component.
 
 ## Getting Started
 
