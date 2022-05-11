@@ -299,8 +299,7 @@ export const PropertyGrid = ({
           for(const key of Object.values(PropertyGridDefaultContextMenuKey)) {          
             const overrides = defaultContextMenuOptions?.get(key);
             const itemIndex = items.map((item) => item.key).indexOf(key);
-            const spreadItem = { ...items[itemIndex], ...overrides};
-            items[itemIndex] = spreadItem;
+            items[itemIndex] = { ...items[itemIndex], ...overrides};
           }
         }
 
