@@ -352,7 +352,7 @@ export const PropertyGrid = ({
         <ContextMenuItem
           key={info.key}
           onSelect={info.onSelect}
-          title={info.title}          
+          title={info.title}
         >
           {info.label}
         </ContextMenuItem>
