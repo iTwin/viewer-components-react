@@ -16,6 +16,7 @@ import type { ContextMenuItemProps, Orientation } from "@itwin/core-react";
 import type { FavoritePropertiesScope } from "@itwin/presentation-frontend";
 import type {
   PropertyRecord,
+  AbstractZoneLocation,
   StagePanelLocation,
   StagePanelSection,
 } from "@itwin/appui-abstract";
@@ -59,6 +60,8 @@ export interface PropertyGridProps {
   onInfoButton?: () => void;
   onBackButton?: () => void;
   disableUnifiedSelection?: boolean;
+  // eslint-disable-next-line deprecation/deprecation
+  defaultZoneLocation?: AbstractZoneLocation;
 }
 
 export enum PropertyGridDefaultContextMenuKey {

@@ -1,6 +1,29 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Wed, 06 Apr 2022 13:48:44 GMT and should not be manually modified.
+This log was last generated on Wed, 11 May 2022 17:37:15 GMT and should not be manually modified.
+
+## 0.4.4
+Wed, 11 May 2022 17:37:15 GMT
+
+### Patches
+
+- allow default zone location to be overridden
+
+## 0.4.3
+Tue, 10 May 2022 15:21:40 GMT
+
+### Patches
+
+- manually bump to 0.4.2 to allow previous commits to be published
+
+## 0.4.1
+Mon, 09 May 2022 18:04:58 GMT
+
+### Patches
+
+- ensure the multi select property grid option appears if applicable when component first mounts
+- dont open property grid tab when only transient elements (such as view sections) are selected
+- fix property grid ui items provider when loading into appui v1.0
 
 ## 0.4.0
 Wed, 06 Apr 2022 13:48:44 GMT
