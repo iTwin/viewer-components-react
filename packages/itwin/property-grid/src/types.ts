@@ -23,7 +23,6 @@ import type {
 export type ContextMenuItemInfo = ContextMenuItemProps &
   React.Attributes & {
     label: string;
-    hideDefaultContextMenuItem?: PropertyGridDefaultContextMenuKey;
     isValid?: (record: PropertyRecord, field: Field) => boolean;
   };
 
@@ -49,6 +48,11 @@ export interface PropertyGridProps {
   /** If true, enables property category group nesting  */
   enablePropertyGroupNesting?: boolean;
   additionalContextMenuOptions?: ContextMenuItemInfo[];
+  /** Override some or all attributes of some or all default context menu options **/
+  defaultContextMenuOptions?: Map<
+    PropertyGridDefaultContextMenuKey,
+    Partial<ContextMenuItemInfo>
+  >;
   rulesetId?: string;
   rootClassName?: string;
   dataProvider?: PresentationPropertyDataProvider;

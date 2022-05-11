@@ -63,6 +63,7 @@ export const PropertyGrid = ({
   enableNullValueToggle,
   enablePropertyGroupNesting,
   additionalContextMenuOptions,
+  defaultContextMenuOptions,
   rulesetId,
   rootClassName,
   dataProvider: propDataProvider,
@@ -276,36 +277,39 @@ export const PropertyGrid = ({
 
         if (additionalContextMenuOptions?.length) {
           for (const option of additionalContextMenuOptions) {
-            // if the option has an isValid callback, use it to decide to add it to the menu. Otherwise always add it.
-            if (
-              !option.isValid ||
-              (option.isValid &&
-                field &&
-                option.isValid(args.propertyRecord, field))
-            ) {
-              items.push({
-                ...option,
-                key: `additionalContextMenuOption_${option.label}`,
-                onSelect: () => {
-                  if (option.onSelect) {
-                    (option.onSelect as (args: OnSelectEventArgs) => void)({
-                      contextMenuArgs: args,
-                      field,
-                      dataProvider,
-                    });
-                  }
-                  setContextMenu(undefined);
-                },
-              });
+            items.push({
+              ...option,
+              key: `additionalContextMenuOption_${option.label}`,
+              onSelect: () => {
+                if (option.onSelect) {
+                  (option.onSelect as (args: OnSelectEventArgs) => void)({
+                    contextMenuArgs: args,
+                    field,
+                    dataProvider,
+                  });
+                }
+                setContextMenu(undefined);
+              },
+            });
+          }
+        }
 
-              // If the option should hide / replace a default option, remove that default option
-              if (option.hideDefaultContextMenuItem) {
-                const index = items
-                  .map((item) => item.key)
-                  .indexOf(option.hideDefaultContextMenuItem);
-                items.splice(index, 1);
-              }
-            }
+        // Do any overrides on default menu options
+        if(defaultContextMenuOptions?.size && defaultContextMenuOptions.size > 0 ) {
+          for(const key of Object.values(PropertyGridDefaultContextMenuKey)) {          
+            const overrides = defaultContextMenuOptions?.get(key);
+            const itemIndex = items.map((item) => item.key).indexOf(key);
+            const spreadItem = { ...items[itemIndex], ...overrides};
+            items[itemIndex] = spreadItem;
+          }
+        }
+
+        // Verify all existing options are valid, and if not remove them
+        for(let i = items.length - 1; i >= 0; --i) {
+          const item = items[i];
+          if(item.isValid && field && !item.isValid(args.propertyRecord, field)) {
+            items.splice(i, 1);
+          
           }
         }
 
@@ -349,7 +353,7 @@ export const PropertyGrid = ({
         <ContextMenuItem
           key={info.key}
           onSelect={info.onSelect}
-          title={info.title}
+          title={info.title}          
         >
           {info.label}
         </ContextMenuItem>
