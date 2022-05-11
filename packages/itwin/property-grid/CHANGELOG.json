@@ -2,6 +2,18 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "0.4.4",
+      "tag": "@itwin/property-grid-react_v0.4.4",
+      "date": "Wed, 11 May 2022 17:37:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "allow default zone location to be overridden"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.3",
       "tag": "@itwin/property-grid-react_v0.4.3",
       "date": "Tue, 10 May 2022 15:21:40 GMT",
