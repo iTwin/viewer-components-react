@@ -4,13 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import type { Id64String } from "@itwin/core-bentley";
-import { IModelApp } from "@itwin/core-frontend";
+import { IModelApp, SelectionSetEventType } from "@itwin/core-frontend";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import { PropertyRecord, PropertyValueFormat, WidgetState } from "@itwin/appui-abstract";
 import { useActiveFrontstageDef } from "@itwin/appui-react";
 import { PropertyGrid, SimplePropertyDataProvider } from "@itwin/components-react";
 import { Orientation } from "@itwin/core-react";
-import type { AggregatableValue, MeasurementWidgetData } from "../api/Measurement";
+import type { AggregatableValue, Measurement, MeasurementWidgetData } from "../api/Measurement";
+import type { MeasurementSelectionSetEvent } from "../api/MeasurementSelectionSet";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";
@@ -120,11 +121,28 @@ export const MeasurementPropertyWidget = () => {
     }
   };
 
-  const onSelectionChanged = async () => {
-    // If we are selected more than one measurement at once, it does not make much sense to have the first measurement expanded since we don't necessarily have
-    // an order (e.g. user selecting each one by one). So try and detect this if there was nothing selected, and then 2 or more when the event is raised.
+  const onSelectionChanged = async (args: MeasurementSelectionSetEvent | Measurement[]) => {
+    // Only collapse if we are adding/removing more than one at once
+    let collapseAll: boolean;
+    if (Array.isArray(args)) {
+      // Property value update only
+      collapseAll = false;
+    } else {
+      // Selection event
+      switch (args.type) {
+        case SelectionSetEventType.Add:
+        case SelectionSetEventType.Replace:
+          collapseAll = args.added.length !== 1;
+          break;
+        case SelectionSetEventType.Remove:
+          collapseAll = args.removed.length !== 1;
+          break;
+        default:
+          collapseAll = true;
+      }
+    }
+
     const selectCount = MeasurementSelectionSet.global.measurements.length;
-    const collapseAll = !lastSelectedCount && selectCount >= 2;
     setLastSelectedCount(selectCount);
     await getData(collapseAll);
   };
