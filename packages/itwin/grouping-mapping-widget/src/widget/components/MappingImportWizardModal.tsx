@@ -63,6 +63,7 @@ export const MappingImportWizardModal = ({
       closeOnEsc={false}
       closeOnExternalClick={false}
       isDismissible={!importing}
+      styleType='fullPage'
       onClose={async () => {
         await onClose();
       }}
@@ -106,7 +107,8 @@ export const MappingImportWizardModal = ({
               return (
                 <>
                   <div
-                    style={{ display: currentStep === 2 ? "block" : "none" }}
+                    style={{ display: currentStep === 2 ? "flex" : "none" }}
+                    className="mappings-container"
                   >
                     <SelectMappings
                       iModelId={selectedIModelId}

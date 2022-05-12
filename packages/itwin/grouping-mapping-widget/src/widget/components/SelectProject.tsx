@@ -90,25 +90,25 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
             </IconButton>
           }
         />
-        <div className='project-grid'>
-          <ProjectGrid
-            onThumbnailClick={onSelect}
-            accessToken={apiContext.accessToken}
-            apiOverrides={apiOverrides}
-            filterOptions={activeSearchInput}
-            requestType={
-              projectType === 0
-                ? "favorites"
-                : projectType === 1
-                  ? "recents"
-                  : ""
-            }
-          />
-        </div>
-        <div className='select-project-action-panel'>
-          <Button onClick={onCancel}>Cancel</Button>
-        </div>
       </HorizontalTabs>
+      <div className='project-grid'>
+        <ProjectGrid
+          onThumbnailClick={onSelect}
+          accessToken={apiContext.accessToken}
+          apiOverrides={apiOverrides}
+          filterOptions={activeSearchInput}
+          requestType={
+            projectType === 0
+              ? "favorites"
+              : projectType === 1
+                ? "recents"
+                : ""
+          }
+        />
+      </div>
+      <div className='select-project-action-panel'>
+        <Button onClick={onCancel}>Cancel</Button>
+      </div>
     </div>
   );
 };

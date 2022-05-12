@@ -7,8 +7,9 @@
 .select-mapping-container {
   display: flex;
   flex-direction: column;
-  height: 66vh;
   gap: $iui-baseline * 2;
+  flex-grow: 1;
+  min-height: 0;
 
   .select-mapping-table {
     flex-grow: 1;
