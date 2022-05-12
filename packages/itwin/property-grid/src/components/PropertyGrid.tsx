@@ -295,20 +295,21 @@ export const PropertyGrid = ({
         }
 
         // Do any overrides on default menu options
-        if(defaultContextMenuOptions?.size && defaultContextMenuOptions.size > 0 ) {
-          for(const key of Object.values(PropertyGridDefaultContextMenuKey)) {          
+        if (defaultContextMenuOptions?.size && defaultContextMenuOptions.size > 0 ) {
+          for (const key of Object.values(PropertyGridDefaultContextMenuKey)) {          
             const overrides = defaultContextMenuOptions?.get(key);
-            const itemIndex = items.map((item) => item.key).indexOf(key);
-            items[itemIndex] = { ...items[itemIndex], ...overrides};
+            if (overrides) {
+              const itemIndex = items.map((item) => item.key).indexOf(key);
+              items[itemIndex] = { ...items[itemIndex], ...overrides};
+            }            
           }
         }
 
         // Verify all existing options are valid, and if not remove them
-        for(let i = items.length - 1; i >= 0; --i) {
+        for (let i = items.length - 1; i >= 0; --i) {
           const item = items[i];
-          if(item.isValid && field && !item.isValid(args.propertyRecord, field)) {
-            items.splice(i, 1);
-          
+          if (item.isValid !== undefined && !item.isValid(args.propertyRecord, field)) {
+            items.splice(i, 1);          
           }
         }
 
