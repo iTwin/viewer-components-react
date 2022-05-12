@@ -58,7 +58,7 @@ export const PropertyGrid = ({
   enableFavoriteProperties,
   favoritePropertiesScope,
   customOnDataChanged,
-  actionButtonRenderer,
+  actionButtonRenderers,
   enableCopyingPropertyText,
   enableNullValueToggle,
   enablePropertyGroupNesting,
@@ -436,7 +436,7 @@ export const PropertyGrid = ({
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
             onPropertyContextMenu={onPropertyContextMenu}
-            actionButtonRenderers={actionButtonRenderer ? [actionButtonRenderer] : undefined}
+            actionButtonRenderers={actionButtonRenderers}
             width={width}
             height={height}
           />
@@ -449,7 +449,7 @@ export const PropertyGrid = ({
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
             onPropertyContextMenu={onPropertyContextMenu}
-            actionButtonRenderers={actionButtonRenderer ? [actionButtonRenderer] : undefined}
+            actionButtonRenderers={actionButtonRenderers}
             width={width}
             height={height}
           />
