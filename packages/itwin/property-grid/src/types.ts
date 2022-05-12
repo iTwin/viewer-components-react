@@ -15,17 +15,16 @@ import type {
 import type { ContextMenuItemProps, Orientation } from "@itwin/core-react";
 import type { FavoritePropertiesScope } from "@itwin/presentation-frontend";
 import type {
-  PropertyRecord,
   AbstractZoneLocation,
+  PropertyRecord,
   StagePanelLocation,
   StagePanelSection,
 } from "@itwin/appui-abstract";
 
-export type ContextMenuItemInfo = ContextMenuItemProps &
-  React.Attributes & {
-    label: string;
-    isValid?: (record: PropertyRecord, field?: Field) => boolean;
-  };
+export type ContextMenuItemInfo = ContextMenuItemProps & React.Attributes & {
+  label: string;
+  isValid?: (record: PropertyRecord, field?: Field) => boolean;
+};
 
 export interface OnSelectEventArgs {
   dataProvider: IPresentationPropertyDataProvider;
@@ -50,10 +49,7 @@ export interface PropertyGridProps {
   enablePropertyGroupNesting?: boolean;
   additionalContextMenuOptions?: ContextMenuItemInfo[];
   /** Override some or all attributes of some or all default context menu options **/
-  defaultContextMenuOptions?: Map<
-    PropertyGridDefaultContextMenuKey,
-    Partial<ContextMenuItemInfo>
-  >;
+  defaultContextMenuOptions?: Map<PropertyGridDefaultContextMenuKey, Partial<ContextMenuItemInfo>>;
   rulesetId?: string;
   rootClassName?: string;
   dataProvider?: PresentationPropertyDataProvider;

@@ -34,12 +34,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
-import {
+import type {
   ContextMenuItemInfo,
   OnSelectEventArgs,
   PropertyGridProps,
-  PropertyGridDefaultContextMenuKey,
 } from "../types";
+import { PropertyGridDefaultContextMenuKey } from "../types";
 import {
   FilteringPropertyGridWithUnifiedSelection,
   NonEmptyValuesPropertyDataFilterer,
@@ -178,7 +178,7 @@ export const PropertyGrid = ({
     return () => {
       removeListener?.();
     };
-  }, [dataProvider]);
+  }, [dataProvider, customOnDataChanged]);
 
   const onAddFavorite = useCallback(
     async (propertyField: Field) => {
@@ -296,12 +296,12 @@ export const PropertyGrid = ({
 
         // Do any overrides on default menu options
         if (defaultContextMenuOptions?.size && defaultContextMenuOptions.size > 0 ) {
-          for (const key of Object.values(PropertyGridDefaultContextMenuKey)) {          
+          for (const key of Object.values(PropertyGridDefaultContextMenuKey)) {
             const overrides = defaultContextMenuOptions?.get(key);
             if (overrides) {
               const itemIndex = items.map((item) => item.key).indexOf(key);
               items[itemIndex] = { ...items[itemIndex], ...overrides};
-            }            
+            }
           }
         }
 
@@ -309,7 +309,7 @@ export const PropertyGrid = ({
         for (let i = items.length - 1; i >= 0; --i) {
           const item = items[i];
           if (item.isValid !== undefined && !item.isValid(args.propertyRecord, field)) {
-            items.splice(i, 1);          
+            items.splice(i, 1);
           }
         }
 
@@ -325,6 +325,7 @@ export const PropertyGrid = ({
       enableCopyingPropertyText,
       enableNullValueToggle,
       additionalContextMenuOptions,
+      defaultContextMenuOptions,
       onAddFavorite,
       onRemoveFavorite,
       onHideNull,
