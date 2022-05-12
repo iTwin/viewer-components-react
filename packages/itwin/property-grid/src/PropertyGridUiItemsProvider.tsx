@@ -50,8 +50,8 @@ const onPresentationSelectionChanged = async (evt: SelectionChangeEventArgs, sel
 /** Provides the property grid widget to zone 9 */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
+  public static readonly providerId = "PropertyGridUiItemsProvider";
   private _removeListenerFunc?: () => void;
-
   private _props?: PropertyGridProps;
 
   constructor(props?: PropertyGridProps) {

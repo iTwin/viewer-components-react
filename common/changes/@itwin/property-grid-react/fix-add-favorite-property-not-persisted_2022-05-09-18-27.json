@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Add ability to persist shared favorites via consuming app",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
