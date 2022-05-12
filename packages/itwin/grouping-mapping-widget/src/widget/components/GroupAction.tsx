@@ -56,7 +56,7 @@ const GroupAction = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
-  PropertyRecord[]
+    PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
@@ -84,7 +84,7 @@ const GroupAction = ({
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
         const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-        }` : "";
+          }` : "";
         setSimpleQuery(query);
       },
     );
@@ -210,7 +210,7 @@ const GroupAction = ({
     apiContext.prefix,
   ]);
 
-  const isBlockingActions = !(details.groupName && details.description && (query || simpleQuery) && !isRendering && !isLoading);
+  const isBlockingActions = !(details.groupName && (query || simpleQuery) && !isRendering && !isLoading);
 
   return (
     <>
@@ -263,30 +263,11 @@ const GroupAction = ({
           />
           <LabeledInput
             id='description'
-            required
             name='description'
             label='Description'
             value={details.description}
             onChange={(event) => {
               handleInputChange(event, details, setDetails);
-              validator.showMessageFor("description");
-            }}
-            message={validator.message(
-              "description",
-              details.description,
-              "required",
-            )}
-            status={
-              validator.message("description", details.description, "required")
-                ? "negative"
-                : undefined
-            }
-            onBlur={() => {
-              validator.showMessageFor("description");
-            }}
-            onBlurCapture={(event) => {
-              handleInputChange(event, details, setDetails);
-              validator.showMessageFor("description");
             }}
           />
         </Fieldset>
