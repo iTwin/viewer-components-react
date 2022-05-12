@@ -7,7 +7,8 @@
 .imodel-grid-container {
   display: flex;
   flex-direction: column;
-  height: 66vh;
+  flex-grow: 1;
+  min-height: 0;
 
   .imodel-grid {
     overflow: auto;
