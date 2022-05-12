@@ -40,7 +40,7 @@ export interface PropertyGridProps {
   customOnDataChanged?: (
     dataProvider: IPresentationPropertyDataProvider
   ) => Promise<void>;
-  actionButtonRenderer?: ActionButtonRenderer;
+  actionButtonRenderers?: ActionButtonRenderer[];
   enableCopyingPropertyText?: boolean;
   enableNullValueToggle?: boolean;
   defaultPanelLocation?: StagePanelLocation;
