@@ -88,7 +88,7 @@ export const PropertyGrid = ({
     if (dp) {
       dp.pagingSize = 50;
       dp.isNestedPropertyCategoryGroupingEnabled =
-       !!enablePropertyGroupNesting;
+      !!enablePropertyGroupNesting;
 
       // Set selected instance as the key (for Single Element Property Grid)
       if (instanceKey) {
