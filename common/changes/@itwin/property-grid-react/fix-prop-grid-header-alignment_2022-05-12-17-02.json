@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "allow default zone location to be overridden",
+      "comment": "Fixed misaligned property grid header",
       "type": "patch"
     }
   ],

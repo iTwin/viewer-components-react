@@ -1,6 +1,20 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Tue, 10 May 2022 15:21:40 GMT and should not be manually modified.
+This log was last generated on Thu, 12 May 2022 16:56:06 GMT and should not be manually modified.
+
+## 0.5.0
+Thu, 12 May 2022 16:56:06 GMT
+
+### Minor changes
+
+- Add ability to persist shared favorites via consuming app
+
+## 0.4.4
+Wed, 11 May 2022 17:37:15 GMT
+
+### Patches
+
+- allow default zone location to be overridden
 
 ## 0.4.3
 Tue, 10 May 2022 15:21:40 GMT

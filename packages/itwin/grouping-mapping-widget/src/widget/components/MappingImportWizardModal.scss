@@ -9,8 +9,12 @@
   flex-direction: column;
   gap: $iui-baseline * 2;
   margin-top: $iui-baseline * 2;
-  width: 50vw;
-  min-width: 400px;
+  flex-grow: 1;
+  min-height: 0;
+  .mappings-container {
+    flex-grow: 1;
+    min-height: 0;
+  }
 }
 
 .import-action-panel {
