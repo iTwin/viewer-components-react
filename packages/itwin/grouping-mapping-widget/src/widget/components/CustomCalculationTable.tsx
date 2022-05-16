@@ -15,59 +15,32 @@ import {
   MenuItem,
   Table,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
-import { handleError } from "./utils";
 import type { CustomCalculation } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
-import type { Api } from "./GroupingMapping";
 import { ApiContext } from "./GroupingMapping";
 
 export type CustomCalculationType =
   CreateTypeFromInterface<CustomCalculation>;
 
-const fetchCustomCalculations = async (
-  setCustomCalculations: React.Dispatch<
-  React.SetStateAction<CustomCalculationType[]>
-  >,
-  iModelId: string,
-  mappingId: string,
-  groupId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: Api
-) => {
-  try {
-    setIsLoading(true);
-    const reportingClientApi = new ReportingClient(apiContext.prefix);
-    const customCalculations = await reportingClientApi.getCustomCalculations(
-      apiContext.accessToken,
-      iModelId,
-      mappingId,
-      groupId,
-    );
-    setCustomCalculations(customCalculations);
-  } catch (error: any) {
-    handleError(error.status);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
 interface CustomCalculationTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-
   setSelectedCustomCalculation: React.Dispatch<
   React.SetStateAction<
-  CreateTypeFromInterface<CustomCalculation> | undefined
+  CreateTypeFromInterface<CustomCalculationType> | undefined
   >
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
   onCustomCalculationModify: (value: CellProps<CustomCalculationType>) => void;
+  isLoadingCustomCalculations: boolean;
+  customCalculations: CustomCalculationType[];
+  refreshCustomCalculations: () => Promise<void>;
   selectedCustomCalculation?: CustomCalculationType;
 }
 
@@ -78,40 +51,16 @@ const CustomCalculationTable = ({
   setSelectedCustomCalculation,
   setGroupModifyView,
   onCustomCalculationModify,
+  isLoadingCustomCalculations,
+  customCalculations,
+  refreshCustomCalculations,
   selectedCustomCalculation,
 }: CustomCalculationTableProps) => {
   const apiContext = useContext(ApiContext);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [
     showCustomCalculationDeleteModal,
     setShowCustomCalculationDeleteModal,
   ] = useState<boolean>(false);
-  const [customCalculations, setCustomCalculations] = useState<
-  CustomCalculationType[]
-  >([]);
-
-  useEffect(() => {
-    void fetchCustomCalculations(
-      setCustomCalculations,
-      iModelId,
-      mappingId,
-      groupId,
-      setIsLoading,
-      apiContext
-    );
-  }, [apiContext, groupId, iModelId, mappingId, setIsLoading]);
-
-  const refresh = useCallback(async () => {
-    setCustomCalculations([]);
-    await fetchCustomCalculations(
-      setCustomCalculations,
-      iModelId,
-      mappingId,
-      groupId,
-      setIsLoading,
-      apiContext
-    );
-  }, [apiContext, groupId, iModelId, mappingId, setCustomCalculations]);
 
   const CustomCalculationsColumns = useMemo(
     () => [
@@ -199,7 +148,7 @@ const CustomCalculationTable = ({
         columns={CustomCalculationsColumns}
         emptyTableContent='No Custom Calculations'
         isSortable
-        isLoading={isLoading}
+        isLoading={isLoadingCustomCalculations}
       />
 
       <DeleteModal
@@ -216,7 +165,7 @@ const CustomCalculationTable = ({
             selectedCustomCalculation?.id ?? "",
           );
         }}
-        refresh={refresh}
+        refresh={refreshCustomCalculations}
       />
     </>
   );
