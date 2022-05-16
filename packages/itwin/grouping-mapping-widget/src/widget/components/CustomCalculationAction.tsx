@@ -17,6 +17,8 @@ import "./CalculatedPropertyAction.scss";
 import type { CustomCalculationType } from "./CustomCalculationTable";
 import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
+import { useFormulaValidation } from "../hooks/useFormulaValidation";
+import type { PropertyMap } from "../../formula/Types";
 import { ReportingClient } from "@itwin/insights-client";
 import { ApiContext } from "./GroupingMapping";
 
@@ -24,14 +26,16 @@ interface CalculatedPropertyActionProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
+  properties: PropertyMap;
   customCalculation?: CustomCalculationType;
-  returnFn: () => Promise<void>;
+  returnFn: (modified: boolean) => Promise<void>;
 }
 
 const CustomCalculationAction = ({
   iModelId,
   mappingId,
   groupId,
+  properties,
   customCalculation,
   returnFn,
 }: CalculatedPropertyActionProps) => {
@@ -46,10 +50,14 @@ const CustomCalculationAction = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
+  const { isValid, forceValidation } = useFormulaValidation(formula, properties, setFormulaErrorMessage);
 
   const onSave = async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
+      return;
+    }
+    if (!forceValidation()) {
       return;
     }
     try {
@@ -80,7 +88,7 @@ const CustomCalculationAction = ({
             quantityType,
           }
         );
-      await returnFn();
+      await returnFn(true);
     } catch (error: any) {
       // error instanceof Response refuses to be true when it should be.
       if (error.status === 422) {
@@ -107,7 +115,7 @@ const CustomCalculationAction = ({
             ? `${customCalculation?.propertyName ?? ""}`
             : "Create Custom Calculation"
         }
-        returnFn={returnFn}
+        returnFn={async () => returnFn(false)}
       />
       <div className='custom-calculation-action-container'>
         <Fieldset legend='Custom Calculation Details' className='details-form'>
@@ -163,8 +171,8 @@ const CustomCalculationAction = ({
       </div>
       <ActionPanel
         onSave={onSave}
-        onCancel={returnFn}
-        isSavingDisabled={!(formula && propertyName)}
+        onCancel={async () => returnFn(false)}
+        isSavingDisabled={!(formula && propertyName && isValid)}
         isLoading={isLoading}
       />
     </>

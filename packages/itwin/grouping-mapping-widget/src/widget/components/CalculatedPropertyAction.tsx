@@ -33,7 +33,7 @@ interface CalculatedPropertyActionProps {
   groupId: string;
   property?: CalculatedPropertyType;
   ids: string[];
-  returnFn: () => Promise<void>;
+  returnFn: (modified: boolean) => Promise<void>;
 }
 
 const CalculatedPropertyAction = ({
@@ -49,13 +49,9 @@ const CalculatedPropertyAction = ({
     property?.propertyName ?? "",
   );
   const [type, setType] = useState<string>(property?.type ?? "");
-  const [bboxDecorator, setBboxDecorator] = useState<
-  BboxDimensionsDecorator | undefined
-  >();
+  const [bboxDecorator, setBboxDecorator] = useState<BboxDimensionsDecorator | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [inferredSpatialData, setInferredSpatialData] = useState<
-  Map<BboxDimension, number> | undefined
-  >();
+  const [inferredSpatialData, setInferredSpatialData] = useState<Map<BboxDimension, number> | undefined>();
   const [validator, showValidationMessage] = useValidator();
 
   useEffect(() => {
@@ -130,7 +126,7 @@ const CalculatedPropertyAction = ({
             type,
           },
         );
-      await returnFn();
+      await returnFn(true);
     } catch (error: any) {
       handleError(error.status);
       setIsLoading(false);
@@ -156,7 +152,7 @@ const CalculatedPropertyAction = ({
             ? `${property?.propertyName ?? ""}`
             : "Create Calculated Property"
         }
-        returnFn={returnFn}
+        returnFn={async () => returnFn(false)}
       />
       <div className='calculated-properties-action-container'>
         <Fieldset legend='Calculated Property Details' className='details-form'>
@@ -245,7 +241,7 @@ const CalculatedPropertyAction = ({
       </div>
       <ActionPanel
         onSave={onSave}
-        onCancel={returnFn}
+        onCancel={async () => returnFn(false)}
         isSavingDisabled={!(type && propertyName)}
         isLoading={isLoading}
       />
