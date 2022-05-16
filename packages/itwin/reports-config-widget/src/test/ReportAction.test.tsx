@@ -172,9 +172,9 @@ describe("Reports Action", () => {
       name: /name/i,
     });
 
-    await userEvent.type(nameInput, "_#");
+    await userEvent.type(nameInput, "_# ");
     await user.click(addButton);
-    expect(screen.getByText(/validators\.followedbylettersunderscoresanddigits/i)).toBeInTheDocument();
+    expect(screen.getByText(/validators\.FollowedByLettersUnderscoresSpacesAndDigits/i)).toBeInTheDocument();
 
   });
 

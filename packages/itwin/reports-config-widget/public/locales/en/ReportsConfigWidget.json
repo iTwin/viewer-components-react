@@ -69,7 +69,7 @@
   "Validators": {
     "NoDuplicateUnderscore": "Remove duplicate \"_\"",
     "OnlyBeginsWithLetterOrUnderscore": "Name can only start with a letter or underscore.",
-    "FollowedByLettersUnderscoresAndDigits": "Name can only contain letters, underscores, or digits",
+    "FollowedByLettersUnderscoresSpacesAndDigits": "Name can only contain letters, underscores, spaces, or digits",
     "CharLimit": "There is an 128 character limit.",
     "ThisFieldIsRequired": "This field is required"
   }

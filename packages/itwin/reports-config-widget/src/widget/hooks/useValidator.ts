@@ -7,7 +7,7 @@ import { useState } from "react";
 import SimpleReactValidator from "simple-react-validator";
 
 export const NAME_REQUIREMENTS =
-  "required|NoDuplicateUnderscore|OnlyBeginsWithLetterOrUnderscore|FollowedByLettersUnderscoresAndDigits|CharLimit";
+  "required|NoDuplicateUnderscore|OnlyBeginsWithLetterOrUnderscore|FollowedByLettersUnderscoresSpacesAndDigits|CharLimit";
 
 const useValidator = (
 ): [SimpleReactValidator, React.Dispatch<React.SetStateAction<boolean>>] => {
@@ -25,10 +25,10 @@ const useValidator = (
         return !val.match(/^[\W\d]+/i);
       },
     },
-    FollowedByLettersUnderscoresAndDigits: {
-      message: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Validators.FollowedByLettersUnderscoresAndDigits"),
+    FollowedByLettersUnderscoresSpacesAndDigits: {
+      message: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Validators.FollowedByLettersUnderscoresSpacesAndDigits"),
       rule: (val: string) => {
-        return !val.match(/\W+/i);
+        return !val.match(/[^a-zA-Z0-9_\s]+/i);
       },
     },
     CharLimit: {

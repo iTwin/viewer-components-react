@@ -69,7 +69,7 @@
   "Validators": {
     "NoDuplicateUnderscore": "Rèmóvê dûplìçàtë \"_\"",
     "OnlyBeginsWithLetterOrUnderscore": "Ñámê çäñ òñlý stãrt wîth å lèttér ôr µñdérs¢órè.",
-    "FollowedByLettersUnderscoresAndDigits": "Ñámê çäñ òñlý çöñtàíñ lëttèrs, úñdërs¢õrês, ør dìgíts",
+    "FollowedByLettersUnderscoresSpacesAndDigits": "Ñámê çäñ òñlý çöñtàíñ lëttèrs, úñdërs¢õrês, ør dìgíts",
     "CharLimit": "Thèré îs ãñ 128 çhàrá¢tér lîmït.",
     "ThisFieldIsRequired": "Thìs fíêld ïs rèqµîrëd"
   }
