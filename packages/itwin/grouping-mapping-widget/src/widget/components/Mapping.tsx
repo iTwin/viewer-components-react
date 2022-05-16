@@ -32,6 +32,7 @@ import type { Api } from "./GroupingMapping";
 import { ApiContext } from "./GroupingMapping";
 import type { Mapping } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
+import { BlockingOverlay } from "./BlockingOverlay";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
 
@@ -61,11 +62,27 @@ const fetchMappings = async (
   }
 };
 
+const toggleExtraction = async (apiContext: Api, iModelId: string, mapping: Mapping) => {
+  try {
+    const newState = !mapping?.extractionEnabled;
+    const reportingClient = new ReportingClient(apiContext.prefix);
+    await reportingClient.updateMapping(
+      apiContext.accessToken,
+      iModelId,
+      mapping?.id ?? "",
+      { extractionEnabled: newState }
+    );
+  } catch (error: any) {
+    handleError(error.status);
+  }
+};
+
 export const Mappings = () => {
   const apiContext = useContext(ApiContext);
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
+  const [showBlockingOverlay, setShowBlockingOverlay] = useState<boolean>(false);
   const [mappingView, setMappingView] = useState<MappingView>(
     MappingView.MAPPINGS
   );
@@ -154,6 +171,20 @@ export const Mappings = () => {
                     >
                       Remove
                     </MenuItem>,
+
+                    <MenuItem
+                      key={2}
+                      onClick={async () => {
+                        setSelectedMapping(value.row.original);
+                        setShowBlockingOverlay(true);
+                        close();
+                        await toggleExtraction(apiContext, iModelId, value.row.original);
+                        await refresh();
+                        setShowBlockingOverlay(false);
+                      }}
+                    >
+                      {value.row.original.extractionEnabled ? "Disable extraction" : "Enable extraction"}
+                    </MenuItem>,
                   ]}
                 >
                   <IconButton styleType="borderless">
@@ -171,7 +202,7 @@ export const Mappings = () => {
         ],
       },
     ],
-    []
+    [apiContext, iModelId, refresh]
   );
 
   switch (mappingView) {
@@ -195,6 +226,7 @@ export const Mappings = () => {
     default:
       return (
         <>
+          <BlockingOverlay isVisible={showBlockingOverlay} />
           <WidgetHeader title="Mappings" />
           <div className="mappings-container">
             <div className="table-toolbar">
