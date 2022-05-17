@@ -120,6 +120,7 @@ const AddMappingsModal = ({
       onClose={async () => {
         await returnFn();
       }}
+      styleType='fullPage'
     >
       <ModalContent>
         <div className='add-mappings-container'>

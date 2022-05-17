@@ -20,7 +20,7 @@ export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarPr
   const [searchBarClosing, setSearchBarClosing] = useState<boolean>(false);
 
   return (
-    searchBarOpen ?
+    searchBarOpen || searchValue ?
       <div style={{ animation: searchBarClosing ? "shrink .5s" : "expand .5s" }}
         onAnimationEnd={() => {
           if (searchBarClosing) {

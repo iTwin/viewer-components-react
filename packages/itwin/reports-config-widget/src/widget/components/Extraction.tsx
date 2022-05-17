@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
-import type { SelectOption} from "@itwin/itwinui-react";
+import type { SelectOption } from "@itwin/itwinui-react";
 import { Label, StatusMessage } from "@itwin/itwinui-react";
 import { ComboBox, ProgressRadial } from "@itwin/itwinui-react";
 import * as React from "react";

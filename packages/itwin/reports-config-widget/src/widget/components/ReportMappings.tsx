@@ -106,7 +106,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     ReportMappingsView.REPORTMAPPINGS
   );
   const [selectedReportMapping, setSelectedReportMapping] = useState<
-  ReportMappingAndMapping | undefined
+    ReportMappingAndMapping | undefined
   >(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -184,10 +184,13 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
             <EmptyMessage>
               <>
                 <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoReportMappings")}</Text>
-                <Text
-                  className="iui-anchor"
-                  onClick={() => addMapping()}
-                > {IModelApp.localization.getLocalizedString("ReportsConfigWidget:LetsAddSomeMappingsCTA")}</Text>
+                <div>
+                  <Button
+                    onClick={() => addMapping()}
+                    styleType='cta'>
+                    {IModelApp.localization.getLocalizedString("ReportsConfigWidget:LetsAddSomeMappingsCTA")}
+                  </Button>
+                </div>
               </>
             </EmptyMessage> :
             <div className="mapping-list">{filteredReportMappings.map((mapping) =>
