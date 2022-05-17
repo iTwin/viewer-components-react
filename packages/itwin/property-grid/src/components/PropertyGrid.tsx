@@ -71,9 +71,9 @@ export const PropertyGrid = ({
   onBackButton,
   disableUnifiedSelection,
   instanceKey,
+  autoExpandChildCategories,
 }: PropertyGridPropsWithSingleElement) => {
   const iModelConnection = useActiveIModelConnection();
-
   const createDataProvider = useCallback(() => {
     let dp;
     if (propDataProvider) {
@@ -83,6 +83,7 @@ export const PropertyGrid = ({
         imodel: iModelConnection,
         ruleset: rulesetId,
         disableFavoritesCategory: !enableFavoriteProperties,
+        autoExpandChildCategories,
       });
     }
     if (dp) {
@@ -96,7 +97,7 @@ export const PropertyGrid = ({
       }
     }
     return dp;
-  }, [propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting, instanceKey]);
+  }, [autoExpandChildCategories, propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting, instanceKey]);
 
   const dataProvider = useOptionalDisposable(createDataProvider);
 
@@ -452,6 +453,7 @@ export const PropertyGrid = ({
             actionButtonRenderers={actionButtonRenderers}
             width={width}
             height={height}
+            autoExpandChildCategories={autoExpandChildCategories}
           />
         )}
       </div>
