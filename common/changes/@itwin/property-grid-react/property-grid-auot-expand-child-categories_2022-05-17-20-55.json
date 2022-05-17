@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "support overriding property grid auto child category expansion behavior",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
