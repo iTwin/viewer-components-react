@@ -1,5 +1,5 @@
 {
-  "name": "@itwin/infrastructure-iot",
+  "name": "@itwin/infrastructure-iot-react",
   "version": "0.1.0",
   "description": "This package package provides pre-built UI components and data services to integrate Infrastructure IoT real-time sensor data into an iTwin application",
   "license": "MIT",
@@ -18,9 +18,9 @@
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
-  "main": "lib/cjs/infrastructure-iot.js",
-  "module": "lib/esm/infrastructure-iot.js",
-  "typings": "lib/cjs/infrastructure-iot",
+  "main": "lib/cjs/infrastructure-iot-react.js",
+  "module": "lib/esm/infrastructure-iot-react.js",
+  "typings": "lib/cjs/infrastructure-iot-react",
   "scripts": {
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "dual-build": "npm run -s build:cjs && npm run -s build:esm",

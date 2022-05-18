@@ -58,7 +58,7 @@
       "versionPolicyName": "itwin-property-grid"
     },
     {
-      "packageName": "@itwin/infrastructure-iot",
+      "packageName": "@itwin/infrastructure-iot-react",
       "projectFolder": "packages/itwin/infrastructure-iot",
       "versionPolicyName": "infrastructure-iot"
     }

@@ -1,8 +1,8 @@
-# @itwin/infrastructure-iot
+# @itwin/infrastructure-iot-react
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 
-The infrastructure-iot package provides pre-built UI components and data services to integrate Infrastructure IoT real-time sensor data into an iTwin application.
+The infrastructure-iot-react package provides pre-built UI components and data services to integrate Infrastructure IoT real-time sensor data into an iTwin application.
 
 The package aims to provide all functionality out-of-the-box to reduce the amount of integration code and speed up development.
 
