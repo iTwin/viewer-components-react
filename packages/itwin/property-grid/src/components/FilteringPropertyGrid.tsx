@@ -78,13 +78,17 @@ class AutoExpandingPropertyFilterDataProvider<TPropertyData extends PropertyData
 implements IPropertyDataProvider, IDisposable {
   public onDataChanged = new PropertyDataChangeEvent();
   private _removeListener: () => void;
-
+  private _autoExpandChildCategories = true;
   public constructor(
-    private _wrapped: CustomPropertyDataProvider<TPropertyData>
+    private _wrapped: CustomPropertyDataProvider<TPropertyData>,
+    autoExpandChildCategories?: boolean,
   ) {
     this._removeListener = this._wrapped.onDataChanged.addListener(() =>
       this.onDataChanged.raiseEvent()
     );
+    if (undefined !== autoExpandChildCategories) {
+      this._autoExpandChildCategories = autoExpandChildCategories;
+    }
   }
 
   public dispose() {
@@ -93,10 +97,11 @@ implements IPropertyDataProvider, IDisposable {
   }
 
   public async getData(): Promise<TPropertyData> {
+    const autoExpandChildCategories = this._autoExpandChildCategories;
     function expandCategories(categories: PropertyCategory[]) {
       categories.forEach((category: PropertyCategory) => {
         category.expand = true;
-        if (category.childCategories) {
+        if (category.childCategories && autoExpandChildCategories) {
           expandCategories(category.childCategories);
         }
       });
@@ -110,6 +115,7 @@ implements IPropertyDataProvider, IDisposable {
 interface FilteringPropertyGrid
   extends VirtualizedPropertyGridWithDataProviderProps {
   filterer: PropertyDataFiltererBase;
+  autoExpandChildCategories?: boolean;
 }
 
 export const FilteringPropertyGridWithUnifiedSelection = (
@@ -135,8 +141,8 @@ export const FilteringPropertyGridWithUnifiedSelection = (
   ));
 
   const autoExpandingFilteringDataProvider = useDisposable(useCallback(
-    () => new AutoExpandingPropertyFilterDataProvider(filteringDataProvider),
-    [filteringDataProvider],
+    () => new AutoExpandingPropertyFilterDataProvider(filteringDataProvider, props.autoExpandChildCategories),
+    [props.autoExpandChildCategories, filteringDataProvider],
   ));
 
   return (

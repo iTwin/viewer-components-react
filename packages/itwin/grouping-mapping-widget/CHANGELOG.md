@@ -1,6 +1,15 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 09 May 2022 18:04:58 GMT and should not be manually modified.
+This log was last generated on Wed, 18 May 2022 15:36:43 GMT and should not be manually modified.
+
+## 0.3.3
+Wed, 18 May 2022 15:36:43 GMT
+
+### Patches
+
+- Description is no longer required in mapping and groups
+- Added custom calculation formula validation
+- Import mappings modal converted to full page modal
 
 ## 0.3.2
 Mon, 09 May 2022 18:04:58 GMT

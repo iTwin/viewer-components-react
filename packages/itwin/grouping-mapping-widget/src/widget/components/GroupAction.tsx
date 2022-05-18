@@ -210,7 +210,7 @@ const GroupAction = ({
     apiContext.prefix,
   ]);
 
-  const isBlockingActions = !(details.groupName && details.description && (query || simpleQuery) && !isRendering && !isLoading);
+  const isBlockingActions = !(details.groupName && (query || simpleQuery) && !isRendering && !isLoading);
 
   return (
     <>
@@ -263,30 +263,11 @@ const GroupAction = ({
           />
           <LabeledInput
             id='description'
-            required
             name='description'
             label='Description'
             value={details.description}
             onChange={(event) => {
               handleInputChange(event, details, setDetails);
-              validator.showMessageFor("description");
-            }}
-            message={validator.message(
-              "description",
-              details.description,
-              "required",
-            )}
-            status={
-              validator.message("description", details.description, "required")
-                ? "negative"
-                : undefined
-            }
-            onBlur={() => {
-              validator.showMessageFor("description");
-            }}
-            onBlurCapture={(event) => {
-              handleInputChange(event, details, setDetails);
-              validator.showMessageFor("description");
             }}
           />
         </Fieldset>
