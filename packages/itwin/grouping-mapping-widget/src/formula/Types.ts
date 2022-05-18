@@ -2,20 +2,12 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
+export type ValueType = number | string | boolean;
 
-.imodel-grid-container {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  min-height: 0;
+export type PossibleValueType = ValueType | undefined;
 
-  .imodel-grid {
-    overflow: auto;
-    flex-grow: 1;
+export type DataType = "number" | "string" | "boolean";
 
-    .search-input {
-      margin-left: auto;
-    }
-  }
-}
+export type PossibleDataType = DataType | "undefined";
+
+export interface PropertyMap { [key: string]: PossibleDataType }

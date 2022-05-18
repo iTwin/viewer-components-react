@@ -39,6 +39,7 @@ import type {
   OnSelectEventArgs,
   PropertyGridProps,
 } from "../types";
+import { PropertyGridDefaultContextMenuKey } from "../types";
 import {
   FilteringPropertyGridWithUnifiedSelection,
   NonEmptyValuesPropertyDataFilterer,
@@ -56,10 +57,13 @@ export const PropertyGrid = ({
   isOrientationFixed,
   enableFavoriteProperties,
   favoritePropertiesScope,
+  customOnDataChanged,
+  actionButtonRenderers,
   enableCopyingPropertyText,
   enableNullValueToggle,
   enablePropertyGroupNesting,
   additionalContextMenuOptions,
+  defaultContextMenuOptions,
   rulesetId,
   rootClassName,
   dataProvider: propDataProvider,
@@ -67,9 +71,9 @@ export const PropertyGrid = ({
   onBackButton,
   disableUnifiedSelection,
   instanceKey,
+  autoExpandChildCategories,
 }: PropertyGridPropsWithSingleElement) => {
   const iModelConnection = useActiveIModelConnection();
-
   const createDataProvider = useCallback(() => {
     let dp;
     if (propDataProvider) {
@@ -79,12 +83,13 @@ export const PropertyGrid = ({
         imodel: iModelConnection,
         ruleset: rulesetId,
         disableFavoritesCategory: !enableFavoriteProperties,
+        autoExpandChildCategories,
       });
     }
     if (dp) {
       dp.pagingSize = 50;
       dp.isNestedPropertyCategoryGroupingEnabled =
-        !!enablePropertyGroupNesting;
+      !!enablePropertyGroupNesting;
 
       // Set selected instance as the key (for Single Element Property Grid)
       if (instanceKey) {
@@ -92,7 +97,7 @@ export const PropertyGrid = ({
       }
     }
     return dp;
-  }, [propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting, instanceKey]);
+  }, [autoExpandChildCategories, propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting, instanceKey]);
 
   const dataProvider = useOptionalDisposable(createDataProvider);
 
@@ -120,22 +125,6 @@ export const PropertyGrid = ({
   const localizations = useMemo(() => {
     return {
       favorite: PropertyGridManager.translate("context-menu.favorite"),
-      unshareFavorite: {
-        title: PropertyGridManager.translate(
-          "context-menu.unshare-favorite.description"
-        ),
-        label: PropertyGridManager.translate(
-          "context-menu.unshare-favorite.label"
-        ),
-      },
-      shareFavorite: {
-        title: PropertyGridManager.translate(
-          "context-menu.share-favorite.description"
-        ),
-        label: PropertyGridManager.translate(
-          "context-menu.share-favorite.label"
-        ),
-      },
       removeFavorite: {
         title: PropertyGridManager.translate(
           "context-menu.remove-favorite.description"
@@ -178,6 +167,9 @@ export const PropertyGrid = ({
       if (propertyData) {
         setTitle(propertyData?.label);
         setClassName(propertyData?.description ?? "");
+        if (dataProvider && customOnDataChanged) {
+          await customOnDataChanged(dataProvider);
+        }
       }
     };
 
@@ -187,7 +179,7 @@ export const PropertyGrid = ({
     return () => {
       removeListener?.();
     };
-  }, [dataProvider]);
+  }, [dataProvider, customOnDataChanged]);
 
   const onAddFavorite = useCallback(
     async (propertyField: Field) => {
@@ -233,14 +225,14 @@ export const PropertyGrid = ({
           if (field && iModelConnection) {
             if (Presentation.favoriteProperties.has(field, iModelConnection, favoritePropertiesScope ?? FavoritePropertiesScope.IModel)) {
               items.push({
-                key: "remove-favorite",
+                key: PropertyGridDefaultContextMenuKey.RemoveFavorite,
                 onSelect: async () => onRemoveFavorite(field),
                 title: localizations.removeFavorite.title,
                 label: localizations.removeFavorite.label,
               });
             } else {
               items.push({
-                key: "add-favorite",
+                key: PropertyGridDefaultContextMenuKey.AddFavorite,
                 onSelect: async () => onAddFavorite(field),
                 title: localizations.addFavorite.title,
                 label: localizations.addFavorite.label,
@@ -251,7 +243,7 @@ export const PropertyGrid = ({
 
         if (enableCopyingPropertyText) {
           items.push({
-            key: "copy-text",
+            key: PropertyGridDefaultContextMenuKey.CopyText,
             onSelect: () => {
               args.propertyRecord?.description &&
                 copyToClipboard(args.propertyRecord.description);
@@ -265,7 +257,7 @@ export const PropertyGrid = ({
         if (enableNullValueToggle) {
           if (showNullValues) {
             items.push({
-              key: "hide-null",
+              key: PropertyGridDefaultContextMenuKey.HideNull,
               onSelect: () => {
                 onHideNull();
               },
@@ -274,7 +266,7 @@ export const PropertyGrid = ({
             });
           } else {
             items.push({
-              key: "show-null",
+              key: PropertyGridDefaultContextMenuKey.ShowNull,
               onSelect: () => {
                 onShowNull();
               },
@@ -303,6 +295,25 @@ export const PropertyGrid = ({
           }
         }
 
+        // Do any overrides on default menu options
+        if (defaultContextMenuOptions?.size && defaultContextMenuOptions.size > 0 ) {
+          for (const key of Object.values(PropertyGridDefaultContextMenuKey)) {
+            const overrides = defaultContextMenuOptions?.get(key);
+            if (overrides) {
+              const itemIndex = items.map((item) => item.key).indexOf(key);
+              items[itemIndex] = { ...items[itemIndex], ...overrides};
+            }
+          }
+        }
+
+        // Verify all existing options are valid, and if not remove them
+        for (let i = items.length - 1; i >= 0; --i) {
+          const item = items[i];
+          if (item.isValid !== undefined && !item.isValid(args.propertyRecord, field)) {
+            items.splice(i, 1);
+          }
+        }
+
         setContextMenuItemInfos(items.length > 0 ? items : undefined);
       }
     },
@@ -315,6 +326,7 @@ export const PropertyGrid = ({
       enableCopyingPropertyText,
       enableNullValueToggle,
       additionalContextMenuOptions,
+      defaultContextMenuOptions,
       onAddFavorite,
       onRemoveFavorite,
       onHideNull,
@@ -425,6 +437,7 @@ export const PropertyGrid = ({
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
             onPropertyContextMenu={onPropertyContextMenu}
+            actionButtonRenderers={actionButtonRenderers}
             width={width}
             height={height}
           />
@@ -437,8 +450,10 @@ export const PropertyGrid = ({
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
             onPropertyContextMenu={onPropertyContextMenu}
+            actionButtonRenderers={actionButtonRenderers}
             width={width}
             height={height}
+            autoExpandChildCategories={autoExpandChildCategories}
           />
         )}
       </div>

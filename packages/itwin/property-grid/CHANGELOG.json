@@ -2,6 +2,57 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "0.5.1",
+      "tag": "@itwin/property-grid-react_v0.5.1",
+      "date": "Wed, 18 May 2022 15:36:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed misaligned property grid header"
+          },
+          {
+            "comment": "support overriding property grid auto child category expansion behavior"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.0",
+      "tag": "@itwin/property-grid-react_v0.5.0",
+      "date": "Thu, 12 May 2022 16:56:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add ability to persist shared favorites via consuming app"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.4",
+      "tag": "@itwin/property-grid-react_v0.4.4",
+      "date": "Wed, 11 May 2022 17:37:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "allow default zone location to be overridden"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.3",
+      "tag": "@itwin/property-grid-react_v0.4.3",
+      "date": "Tue, 10 May 2022 15:21:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "manually bump to 0.4.2 to allow previous commits to be published"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.1",
       "tag": "@itwin/property-grid-react_v0.4.1",
       "date": "Mon, 09 May 2022 18:04:58 GMT",

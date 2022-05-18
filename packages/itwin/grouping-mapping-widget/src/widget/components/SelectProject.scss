@@ -7,12 +7,8 @@
 .select-project-grid-container {
   display: flex;
   flex-direction: column;
-
-  > .iui-tabs-wrapper {
-    height: 66vh;
-    display: flex;
-    flex-direction: column;
-  }
+  flex-grow: 1;
+  min-height: 0;
 
   .search-input {
     margin-left: auto;
@@ -26,10 +22,9 @@
   .grid-holding-tab {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     gap: $iui-baseline;
-    flex-grow: 1;
   }
+
   .select-project-action-panel {
     display: flex;
     justify-content: center;

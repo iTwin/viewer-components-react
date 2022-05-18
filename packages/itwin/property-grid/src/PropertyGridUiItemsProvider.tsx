@@ -50,8 +50,8 @@ const onPresentationSelectionChanged = async (evt: SelectionChangeEventArgs, sel
 /** Provides the property grid widget to zone 9 */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
+  public static readonly providerId = "PropertyGridUiItemsProvider";
   private _removeListenerFunc?: () => void;
-
   private _props?: PropertyGridProps;
 
   constructor(props?: PropertyGridProps) {
@@ -77,6 +77,8 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
     const widgets: AbstractWidgetProps[] = [];
     const preferredLocation = this._props?.defaultPanelLocation ?? StagePanelLocation.Right;
     const preferredPanelSection = this._props?.defaultPanelSection ?? StagePanelSection.End;
+    // eslint-disable-next-line deprecation/deprecation
+    const preferredZoneLocation = this._props?.defaultZoneLocation ?? AbstractZoneLocation.CenterRight;
     if (
       (
         stageUsage === StageUsage.General &&
@@ -87,8 +89,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
       (
         !section &&
         stageUsage === StageUsage.General &&
-        // eslint-disable-next-line deprecation/deprecation
-        zoneLocation === AbstractZoneLocation.CenterRight
+        zoneLocation === preferredZoneLocation
       )
     ) {
       widgets.push({

@@ -20,7 +20,8 @@
 .import-progress-container {
   display: flex;
   flex-direction: column;
-  height: 66vh;
+  flex-grow: 1;
+  min-height: 0;
   justify-content: center;
 
   .import-progress-bar {
@@ -52,7 +53,8 @@
 .rename-confirm-container {
   display: flex;
   flex-direction: column;
-  height: 66vh;
+  flex-grow: 1;
+  min-height: 0;
 
   .mapping-rename-container {
     display: flex;
