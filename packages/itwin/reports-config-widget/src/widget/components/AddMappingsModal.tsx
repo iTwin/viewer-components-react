@@ -129,7 +129,6 @@ const AddMappingsModal = ({
             data={isLoading ? [] : mappings}
             columns={mappingsColumns}
             className='add-mappings-table'
-            density="extra-condensed"
             emptyTableContent={IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoMappingsAvailable")}
             isSortable
             isSelectable
