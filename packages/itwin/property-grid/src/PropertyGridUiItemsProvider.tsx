@@ -40,7 +40,10 @@ const onPresentationSelectionChanged = async (evt: SelectionChangeEventArgs, sel
       }
     );
     if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
-      widgetDef.setWidgetState(WidgetState.Open);
+      // if the widget is minimized, do not force it open
+      if (widgetDef.activeState === WidgetState.Hidden) {
+        widgetDef.setWidgetState(WidgetState.Open);
+      }
     } else {
       widgetDef.setWidgetState(WidgetState.Hidden);
     }
