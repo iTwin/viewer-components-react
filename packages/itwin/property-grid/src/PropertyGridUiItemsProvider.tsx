@@ -23,7 +23,10 @@ import { MultiElementPropertyGrid, MultiElementPropertyGridId } from "./componen
 import { PropertyGridManager } from "./PropertyGridManager";
 import type { PropertyGridProps } from "./types";
 
-/** Listen for selection changes and when nothing is selection hide the Widget by calling widgetDef.setWidgetState  */
+/** 
+ * Listen for selection changes and when nothing is selection hide the Widget by calling widgetDef.setWidgetState
+ * Note: only applicable for App UI v1.0  
+ * */
 const onPresentationSelectionChanged = async (evt: SelectionChangeEventArgs, selectionProvider: ISelectionProvider) => {
   const widgetDef = FrontstageManager.activeFrontstageDef?.findWidgetDef(MultiElementPropertyGridId);
   if (widgetDef) {
