@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Wed, 18 May 2022 15:36:43 GMT and should not be manually modified.
+This log was last generated on Wed, 18 May 2022 18:04:59 GMT and should not be manually modified.
+
+## 0.5.2
+Wed, 18 May 2022 18:04:59 GMT
+
+### Patches
+
+- if the property grid is minimized do not force it open
 
 ## 0.5.1
 Wed, 18 May 2022 15:36:43 GMT
