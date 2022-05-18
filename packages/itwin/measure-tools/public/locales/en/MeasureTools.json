@@ -82,11 +82,13 @@
       "unhandledGeoLocationError": "Failed to convert coordinates to GeoLocation"
     },
     "MeasureRadius": {
-      "measureRadius": "Radius",
+      "keyin": "Radius",
+      "flyover": "Radius",
+      "description": "Create radius measurements.",
+      "longLabel": "Measure Radius",
       "identifyStart": "Identify the start point of the arc",
       "identifyMidpoint": "Identify a point on the arc",
       "identifyEnd": "Identify the end point of the arc",
-      "radiusMeasurement": "Radius",
       "measurement": "Radius Measurement",
       "radius": "Radius",
       "diameter": "Diameter",
@@ -96,6 +98,8 @@
     "MeasureAngle": {
       "keyin": "Angle",
       "flyover": "Angle",
+      "description": "Create angle measurements.",
+      "longLabel": "Measure Angle",
       "identifyStart": "Identify first point for angle",
       "identifyCenter": "Identify center point",
       "identifyEnd": "Identify end point for angle",
@@ -106,6 +110,7 @@
       "keyin": "Perpendicular",
       "flyover": "Perpendicular Distance",
       "description": "Create perpendicular distance measurements.",
+      "longLabel": "Measure Perpendicular",
       "mainInstruction": "Identify surface to measure to",
       "mainInstruction2": "Enter point on surface to measure from",
       "identifySurface": "No surface identified"
