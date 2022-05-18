@@ -58,6 +58,8 @@ export interface PropertyGridProps {
   disableUnifiedSelection?: boolean;
   // eslint-disable-next-line deprecation/deprecation
   defaultZoneLocation?: AbstractZoneLocation;
+  /** If true, expands child categories (true by default)  */
+  autoExpandChildCategories?: boolean;
 }
 
 export enum PropertyGridDefaultContextMenuKey {

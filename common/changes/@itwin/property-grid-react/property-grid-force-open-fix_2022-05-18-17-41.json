@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Fixed misaligned property grid header",
+      "comment": "if the property grid is minimized do not force it open",
       "type": "patch"
     }
   ],
