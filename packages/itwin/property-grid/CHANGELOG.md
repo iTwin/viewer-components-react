@@ -1,6 +1,14 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 12 May 2022 16:56:06 GMT and should not be manually modified.
+This log was last generated on Wed, 18 May 2022 15:36:43 GMT and should not be manually modified.
+
+## 0.5.1
+Wed, 18 May 2022 15:36:43 GMT
+
+### Patches
+
+- Fixed misaligned property grid header
+- support overriding property grid auto child category expansion behavior
 
 ## 0.5.0
 Thu, 12 May 2022 16:56:06 GMT

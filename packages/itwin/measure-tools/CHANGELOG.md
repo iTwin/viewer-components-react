@@ -1,6 +1,13 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Wed, 06 Apr 2022 13:48:44 GMT and should not be manually modified.
+This log was last generated on Wed, 18 May 2022 15:36:43 GMT and should not be manually modified.
+
+## 0.7.1
+Wed, 18 May 2022 15:36:43 GMT
+
+### Patches
+
+- Modify MeasurementPropertyWidget such that adding or removing measurements one by one does not collapse them. This was working in the MeasurementWidget.
 
 ## 0.7.0
 Wed, 06 Apr 2022 13:48:44 GMT
