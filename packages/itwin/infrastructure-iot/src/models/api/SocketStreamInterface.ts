@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Observer } from "rxjs";
+import type { Observer } from "rxjs";
 
 export interface SocketStream {
   id: number;

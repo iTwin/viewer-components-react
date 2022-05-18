@@ -3,18 +3,19 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { combineLatest, Observable, Observer, of } from "rxjs";
+import type { Observer} from "rxjs";
+import { combineLatest, Observable, of } from "rxjs";
 import { distinctUntilChanged, finalize, map, shareReplay, switchMap, throttleTime } from "rxjs/operators";
 import { instanceToPlain } from "class-transformer";
 import { isEqual as _isEqual } from "lodash";
 
 import { EntityType } from "../../enums/entities/EntityTypeEnum";
-import { SensorData } from "../../models/entities/SensorDataInterface";
-import { Alert } from "../../models/alerts/AlertModel";
-import { ObservationQuery } from "../../models/observations/ObservationQueryModel";
-import { ObservationQueryMetadata } from "../../models/observations/ObservationQueryMetadataModel";
-import { ObservationSet } from "../../models/observations/ObservationSetModel";
-import { IModelSettings } from "../../models/imodel/IModelSettingsModel";
+import type { SensorData } from "../../models/entities/SensorDataInterface";
+import type { Alert } from "../../models/alerts/AlertModel";
+import type { ObservationQuery } from "../../models/observations/ObservationQueryModel";
+import type { ObservationQueryMetadata } from "../../models/observations/ObservationQueryMetadataModel";
+import type { ObservationSet } from "../../models/observations/ObservationSetModel";
+import type { IModelSettings } from "../../models/imodel/IModelSettingsModel";
 import { EntityService } from "./EntityService";
 import { AlertService } from "../alerts/AlertService";
 import { MetricService } from "../observations/MetricService";

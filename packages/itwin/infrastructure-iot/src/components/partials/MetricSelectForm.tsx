@@ -6,14 +6,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import { Select, useTheme } from "@itwin/itwinui-react";
-import { SelectOption } from "@itwin/itwinui-react/esm/core/Select/Select";
+import type { SelectOption } from "@itwin/itwinui-react/esm/core/Select/Select";
 
 import { find as _find, map as _map } from "lodash";
 
-import { ObservationQuery } from "../../models/observations/ObservationQueryModel";
-import { MetricCategory } from "../../models/observations/MetricCategoryModel";
-import { Metric } from "../../models/observations/MetricModel";
-import { Unit } from "../../models/observations/UnitModel";
+import type { ObservationQuery } from "../../models/observations/ObservationQueryModel";
+import type { MetricCategory } from "../../models/observations/MetricCategoryModel";
+import type { Metric } from "../../models/observations/MetricModel";
+import type { Unit } from "../../models/observations/UnitModel";
 import { MetricService } from "../../services/observations/MetricService";
 import { IModelSettingsService } from "../../services/imodel/IModelSettingsService";
 

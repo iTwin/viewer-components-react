@@ -5,7 +5,7 @@
 
 import * as React from "react";
 
-import { ObservationSet } from "../../models/observations/ObservationSetModel";
+import type { ObservationSet } from "../../models/observations/ObservationSetModel";
 import { UtilitiesService } from "../../services/UtilitiesService";
 
 import appStyles from "../../styles/App.module.scss";

@@ -3,7 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { HitDetail, IModelApp, ToolAdmin } from "@itwin/core-frontend";
+import type { HitDetail} from "@itwin/core-frontend";
+import { IModelApp, ToolAdmin } from "@itwin/core-frontend";
 
 class IModelToolAdminServiceSingleton extends ToolAdmin {
 

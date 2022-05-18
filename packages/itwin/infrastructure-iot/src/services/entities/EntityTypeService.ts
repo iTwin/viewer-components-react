@@ -3,7 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BehaviorSubject, Observable } from "rxjs";
+import type { Observable } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 import { filter } from "rxjs/operators";
 
 import { plainToInstance } from "class-transformer";
@@ -11,7 +12,7 @@ import { chain as _chain } from "lodash";
 
 import { EntityType } from "../../enums/entities/EntityTypeEnum";
 import { EntityTypeMetadata } from "../../models/entities/EntityTypeMetadataModel";
-import { Sensor } from "../../models/entities/SensorModel";
+import type { Sensor } from "../../models/entities/SensorModel";
 import { ApiService } from "../api/ApiService";
 import { LoggerService } from "../LoggerService";
 

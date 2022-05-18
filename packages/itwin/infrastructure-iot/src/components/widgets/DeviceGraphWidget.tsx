@@ -15,9 +15,9 @@ import HighchartsReact from "highcharts-react-official";
 import { useResizeDetector } from "react-resize-detector";
 import moment from "moment";
 
-import { SensorData } from "../../models/entities/SensorDataInterface";
+import type { SensorData } from "../../models/entities/SensorDataInterface";
 import { ObservationQueryMetadata } from "../../models/observations/ObservationQueryMetadataModel";
-import { ObservationSet } from "../../models/observations/ObservationSetModel";
+import type { ObservationSet } from "../../models/observations/ObservationSetModel";
 import { DateRangeOption } from "../../models/observations/DateRangeOptionModel";
 import { EntityDataService } from "../../services/entities/EntityDataService";
 import { IModelSettingsService } from "../../services/imodel/IModelSettingsService";

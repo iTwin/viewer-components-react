@@ -3,17 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { XYAndZ } from "@itwin/core-geometry";
+import type { XYAndZ } from "@itwin/core-geometry";
 
 import { Exclude } from "class-transformer";
 import { chain as _chain, forEach as _forEach, map as _map } from "lodash";
 
-import { AlertPriority } from "../../enums/alerts/AlertPriorityEnum";
+import type { AlertPriority } from "../../enums/alerts/AlertPriorityEnum";
 import { IModelMarkerStyle } from "../../enums/imodel/IModelMarkerStyleEnum";
 import { IModelEntityAssociation } from "./IModelEntityAssociationModel";
 import { ObservationQuery } from "../observations/ObservationQueryModel";
 import { AlertPriorityMetadata } from "../alerts/AlertPriorityMetadataModel";
-import { AlertPriorityMetadataObject } from "../alerts/AlertPriorityMetadataObjectInterface";
+import type { AlertPriorityMetadataObject } from "../alerts/AlertPriorityMetadataObjectInterface";
 
 declare interface StoredIModelEntityAssociation {
   entityId: string;

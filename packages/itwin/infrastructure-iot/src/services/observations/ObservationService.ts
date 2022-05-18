@@ -3,17 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { combineLatest, Observable, Observer, of } from "rxjs";
+import type { Observer} from "rxjs";
+import { combineLatest, Observable, of } from "rxjs";
 import { catchError, first, map, startWith, switchMap, tap } from "rxjs/operators";
 import { plainToInstance } from "class-transformer";
 import { cloneDeep as _cloneDeep, compact as _compact, forEach as _forEach, has as _has, map as _map } from "lodash";
 import moment from "moment";
 
 import { ObservationQuery } from "../../models/observations/ObservationQueryModel";
-import { ObservationQueryMetadata } from "../../models/observations/ObservationQueryMetadataModel";
+import type { ObservationQueryMetadata } from "../../models/observations/ObservationQueryMetadataModel";
 import { ObservationSet } from "../../models/observations/ObservationSetModel";
-import { Metric } from "../../models/observations/MetricModel";
-import { Sensor } from "../../models/entities/SensorModel";
+import type { Metric } from "../../models/observations/MetricModel";
+import type { Sensor } from "../../models/entities/SensorModel";
 import { SocketService } from "../api/SocketService";
 import { EntityTypeService } from "../entities/EntityTypeService";
 import { MetricService } from "./MetricService";

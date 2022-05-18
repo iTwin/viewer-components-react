@@ -5,9 +5,9 @@
 
 import { AlertType } from "../../enums/alerts/AlertTypeEnum";
 import { DataObject } from "../DataObjectModel";
-import { AlertPriority } from "../../enums/alerts/AlertPriorityEnum";
-import { AlertState } from "../../enums/alerts/AlertStateEnum";
-import { AlertTrigger } from "./AlertTriggerModel";
+import type { AlertPriority } from "../../enums/alerts/AlertPriorityEnum";
+import type { AlertState } from "../../enums/alerts/AlertStateEnum";
+import type { AlertTrigger } from "./AlertTriggerModel";
 
 export class Alert extends DataObject {
 

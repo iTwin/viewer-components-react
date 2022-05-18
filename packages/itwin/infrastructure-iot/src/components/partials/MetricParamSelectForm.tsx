@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { Checkbox, Select, useTheme } from "@itwin/itwinui-react";
 
-import { ObservationQuery } from "../../models/observations/ObservationQueryModel";
+import type { ObservationQuery } from "../../models/observations/ObservationQueryModel";
 import { MetricParamsMetadata } from "../../models/observations/MetricParamsMetadataModel";
 
 import { InputWithUnit } from "./inputs/InputWithUnit";

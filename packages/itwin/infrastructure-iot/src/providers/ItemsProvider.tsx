@@ -5,7 +5,8 @@
 
 import * as React from "react";
 
-import { AbstractWidgetProps, StagePanelLocation, StagePanelSection, UiItemsProvider } from "@itwin/appui-abstract";
+import type { AbstractWidgetProps, StagePanelSection, UiItemsProvider } from "@itwin/appui-abstract";
+import { StagePanelLocation } from "@itwin/appui-abstract";
 
 import { DeviceConfigurationWidget } from "../components/widgets/DeviceConfigurationWidget";
 import { DeviceDataWidget } from "../components/widgets/DeviceDataWidget";

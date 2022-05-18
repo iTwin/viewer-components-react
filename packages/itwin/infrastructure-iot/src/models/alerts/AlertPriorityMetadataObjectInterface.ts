@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { AlertPriority } from "../../enums/alerts/AlertPriorityEnum";
+import type { AlertPriority } from "../../enums/alerts/AlertPriorityEnum";
 
 export interface AlertPriorityMetadataObject {
   id: AlertPriority | "default";

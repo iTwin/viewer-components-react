@@ -3,12 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { from, Observable, throwError } from "rxjs";
+import type { Observable} from "rxjs";
+import { from, throwError } from "rxjs";
 import { first, map, switchMap, tap } from "rxjs/operators";
 import { forEach as _forEach, isArray as _isArray } from "lodash";
-import axios, { AxiosResponse, Method } from "axios";
+import type { AxiosResponse, Method } from "axios";
+import axios from "axios";
 
-import { AuthState } from "../../models/auth/AuthStateModel";
+import type { AuthState } from "../../models/auth/AuthStateModel";
 import { ConfigService } from "../ConfigService";
 import { AuthService } from "../AuthService";
 import { LoggerService } from "../LoggerService";

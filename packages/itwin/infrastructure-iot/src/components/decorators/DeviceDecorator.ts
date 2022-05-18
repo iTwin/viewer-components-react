@@ -3,15 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { XYAndZ } from "@itwin/core-geometry";
-import { DecorateContext, Decorator, IModelApp, SelectionSetEvent } from "@itwin/core-frontend";
+import type { XYAndZ } from "@itwin/core-geometry";
+import type { DecorateContext, Decorator, SelectionSetEvent } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 
 import { filter as _filter, find as _find, forEach as _forEach, isEqual as _isEqual, map as _map } from "lodash";
 
 import { IModelMarkerStyle } from "../../enums/imodel/IModelMarkerStyleEnum";
-import { IModelSettings } from "../../models/imodel/IModelSettingsModel";
-import { IModelEntityAssociation } from "../../models/imodel/IModelEntityAssociationModel";
-import { AlertPriorityMetadataObject } from "../../models/alerts/AlertPriorityMetadataObjectInterface";
+import type { IModelSettings } from "../../models/imodel/IModelSettingsModel";
+import type { IModelEntityAssociation } from "../../models/imodel/IModelEntityAssociationModel";
+import type { AlertPriorityMetadataObject } from "../../models/alerts/AlertPriorityMetadataObjectInterface";
 import { IModelSettingsService } from "../../services/imodel/IModelSettingsService";
 import { DeviceMarker } from "../markers/DeviceMarker";
 import { UtilitiesService } from "../../services/UtilitiesService";

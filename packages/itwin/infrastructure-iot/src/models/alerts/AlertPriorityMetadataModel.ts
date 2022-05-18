@@ -6,7 +6,7 @@
 import { map as _map } from "lodash";
 
 import { AlertPriority } from "../../enums/alerts/AlertPriorityEnum";
-import { AlertPriorityMetadataObject } from "./AlertPriorityMetadataObjectInterface";
+import type { AlertPriorityMetadataObject } from "./AlertPriorityMetadataObjectInterface";
 
 export class AlertPriorityMetadata {
 

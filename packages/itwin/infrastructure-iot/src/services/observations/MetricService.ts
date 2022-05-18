@@ -3,16 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Observable, Observer, of } from "rxjs";
+import type { Observer} from "rxjs";
+import { Observable, of } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
 import { plainToInstance } from "class-transformer";
 import { find as _find, forEach as _forEach, map as _map } from "lodash";
 
 import { EntityType } from "../../enums/entities/EntityTypeEnum";
-import { Sensor } from "../../models/entities/SensorModel";
+import type { Sensor } from "../../models/entities/SensorModel";
 import { MetricCategory } from "../../models/observations/MetricCategoryModel";
 import { Metric } from "../../models/observations/MetricModel";
-import { Unit } from "../../models/observations/UnitModel";
+import type { Unit } from "../../models/observations/UnitModel";
 import { ApiService } from "../api/ApiService";
 import { EntityTypeService } from "../entities/EntityTypeService";
 import { LoggerService } from "../LoggerService";

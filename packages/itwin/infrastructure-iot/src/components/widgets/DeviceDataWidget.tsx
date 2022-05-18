@@ -13,14 +13,14 @@ import { finalize, map } from "rxjs/operators";
 
 import { EntityType } from "../../enums/entities/EntityTypeEnum";
 import { AlertType } from "../../enums/alerts/AlertTypeEnum";
-import { SensorData } from "../../models/entities/SensorDataInterface";
-import { Sensor } from "../../models/entities/SensorModel";
-import { Alert } from "../../models/alerts/AlertModel";
+import type { SensorData } from "../../models/entities/SensorDataInterface";
+import type { Sensor } from "../../models/entities/SensorModel";
+import type { Alert } from "../../models/alerts/AlertModel";
 import { AlertPriorityMetadata } from "../../models/alerts/AlertPriorityMetadataModel";
 import { ObservationQuery } from "../../models/observations/ObservationQueryModel";
-import { ObservationSet } from "../../models/observations/ObservationSetModel";
-import { Metric } from "../../models/observations/MetricModel";
-import { AuthState } from "../../models/auth/AuthStateModel";
+import type { ObservationSet } from "../../models/observations/ObservationSetModel";
+import type { Metric } from "../../models/observations/MetricModel";
+import type { AuthState } from "../../models/auth/AuthStateModel";
 
 import { AuthService } from "../../services/AuthService";
 import { EntityService } from "../../services/entities/EntityService";

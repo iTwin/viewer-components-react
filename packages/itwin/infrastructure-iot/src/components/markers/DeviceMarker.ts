@@ -5,19 +5,21 @@
 
 import ReactDOM from "react-dom";
 
-import { Point2d, XAndY, XYAndZ } from "@itwin/core-geometry";
+import type { XAndY, XYAndZ } from "@itwin/core-geometry";
+import { Point2d } from "@itwin/core-geometry";
 import { getCssVariable } from "@itwin/core-react";
 import { ColorDef, FeatureOverrideType } from "@itwin/core-common";
-import { BeButtonEvent, EmphasizeElements, IModelApp, Marker } from "@itwin/core-frontend";
+import type { BeButtonEvent} from "@itwin/core-frontend";
+import { EmphasizeElements, IModelApp, Marker } from "@itwin/core-frontend";
 
-import { Subscription } from "rxjs";
+import type { Subscription } from "rxjs";
 import { get as _get } from "lodash";
 
 import { IModelMarkerStyle } from "../../enums/imodel/IModelMarkerStyleEnum";
-import { IModelEntityAssociation } from "../../models/imodel/IModelEntityAssociationModel";
-import { SensorData } from "../../models/entities/SensorDataInterface";
+import type { IModelEntityAssociation } from "../../models/imodel/IModelEntityAssociationModel";
+import type { SensorData } from "../../models/entities/SensorDataInterface";
 import { AlertPriorityMetadata } from "../../models/alerts/AlertPriorityMetadataModel";
-import { AlertPriorityMetadataObject } from "../../models/alerts/AlertPriorityMetadataObjectInterface";
+import type { AlertPriorityMetadataObject } from "../../models/alerts/AlertPriorityMetadataObjectInterface";
 import { EntityDataService } from "../../services/entities/EntityDataService";
 import { IModelSettingsService } from "../../services/imodel/IModelSettingsService";
 import { IModelToolAdminService } from "../../services/imodel/IModelToolAdminService";

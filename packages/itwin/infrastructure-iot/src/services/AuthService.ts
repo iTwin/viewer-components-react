@@ -5,10 +5,12 @@
 
 import { IModelApp } from "@itwin/core-frontend";
 
-import { BehaviorSubject, from, Observable, of, throwError } from "rxjs";
+import type { Observable} from "rxjs";
+import { BehaviorSubject, from, of, throwError } from "rxjs";
 import { filter, map, switchMap, tap } from "rxjs/operators";
 import { plainToInstance } from "class-transformer";
-import axios, { AxiosResponse } from "axios";
+import type { AxiosResponse } from "axios";
+import axios from "axios";
 
 import { AuthState } from "../models/auth/AuthStateModel";
 import { ConfigService } from "./ConfigService";

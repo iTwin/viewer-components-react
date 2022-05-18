@@ -3,9 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { XYAndZ } from "@itwin/core-geometry";
+import type { XYAndZ } from "@itwin/core-geometry";
 
-import { ObservationQuery } from "../observations/ObservationQueryModel";
+import type { ObservationQuery } from "../observations/ObservationQueryModel";
 
 export class IModelEntityAssociation {
 

@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import type { SelectionSetEvent } from "@itwin/core-frontend";
 import {
   IModelApp,
   MessageBoxIconType,
@@ -10,18 +11,18 @@ import {
   MessageBoxValue,
   NotifyMessageDetails,
   OutputMessagePriority,
-  SelectionSetEvent,
 } from "@itwin/core-frontend";
 import { QueryRowFormat } from "@itwin/core-common";
 
-import { BehaviorSubject, Observable } from "rxjs";
+import type { Observable } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 import { filter, first, map } from "rxjs/operators";
 import { instanceToInstance, instanceToPlain, plainToInstance } from "class-transformer";
 
 import { IModelSettings } from "../../models/imodel/IModelSettingsModel";
 import { IModelEntityAssociation } from "../../models/imodel/IModelEntityAssociationModel";
-import { ObservationQuery } from "../../models/observations/ObservationQueryModel";
-import { AuthState } from "../../models/auth/AuthStateModel";
+import type { ObservationQuery } from "../../models/observations/ObservationQueryModel";
+import type { AuthState } from "../../models/auth/AuthStateModel";
 import { AuthService } from "../AuthService";
 import { ConfigSettingsService } from "../config-settings/ConfigSettingsService";
 import { IModelToolAdminService } from "./IModelToolAdminService";

@@ -3,14 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { BehaviorSubject, Observable, Observer } from "rxjs";
+import type { Observer } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { filter, first, map, switchMap } from "rxjs/operators";
 import { forEach as _forEach, random as _random } from "lodash";
 
 import { SocketState } from "../../enums/api/SocketStateEnum";
-import { SocketStream } from "../../models/api/SocketStreamInterface";
+import type { SocketStream } from "../../models/api/SocketStreamInterface";
 import { SocketResponse } from "../../models/api/SocketResponseModel";
-import { AuthState } from "../../models/auth/AuthStateModel";
+import type { AuthState } from "../../models/auth/AuthStateModel";
 import { ConfigService } from "../ConfigService";
 import { AuthService } from "../AuthService";
 import { LoggerService } from "../LoggerService";

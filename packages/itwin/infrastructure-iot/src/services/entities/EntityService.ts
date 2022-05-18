@@ -3,17 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { combineLatest, Observable, of, throwError } from "rxjs";
+import type { Observable} from "rxjs";
+import { combineLatest, of, throwError } from "rxjs";
 import { catchError, first, map, switchMap, tap } from "rxjs/operators";
 import { instanceToInstance, plainToInstance } from "class-transformer";
 import { map as _map } from "lodash";
 
 import { EntityType } from "../../enums/entities/EntityTypeEnum";
-import { SearchQuery } from "../../models/SearchQueryModel";
+import type { SearchQuery } from "../../models/SearchQueryModel";
 import { Node } from "../../models/entities/NodeModel";
 import { Device } from "../../models/entities/DeviceModel";
 import { Sensor } from "../../models/entities/SensorModel";
-import { AuthState } from "../../models/auth/AuthStateModel";
+import type { AuthState } from "../../models/auth/AuthStateModel";
 import { ConfigService } from "../ConfigService";
 import { AuthService } from "../AuthService";
 import { ApiService } from "../api/ApiService";

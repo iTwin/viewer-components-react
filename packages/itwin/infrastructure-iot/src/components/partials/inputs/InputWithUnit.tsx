@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from "react";
 
 import { Input, Select, useTheme } from "@itwin/itwinui-react";
-import { SelectOption } from "@itwin/itwinui-react/esm/core/Select/Select";
+import type { SelectOption } from "@itwin/itwinui-react/esm/core/Select/Select";
 
 import { debounce as _debounce, isFinite as _isFinite } from "lodash";
 

@@ -3,7 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Observable, of } from "rxjs";
+import type { Observable} from "rxjs";
+import { of } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
 import { forEach as _forEach, get as _get } from "lodash";
 

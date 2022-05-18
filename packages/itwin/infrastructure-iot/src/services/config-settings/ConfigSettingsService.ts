@@ -5,7 +5,7 @@
 
 import { IModelApp } from "@itwin/core-frontend";
 
-import { Observable } from "rxjs";
+import type { Observable } from "rxjs";
 
 import { ApiService } from "../api/ApiService";
 

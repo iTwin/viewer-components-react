@@ -103,7 +103,9 @@
     ],
     "extends": "plugin:@itwin/ui",
     "rules": {
+      "no-duplicate-imports": "off",
       "@itwin/prefer-get": "off",
+      "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-shadow": "off"
     }
   }

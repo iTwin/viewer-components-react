@@ -10,15 +10,15 @@ import { Alert, Button, IconButton, Select, Slider, ToggleSwitch, Tooltip, useTh
 
 import InfiniteScroll from "react-infinite-scroll-component";
 
-import { AlertPriority } from "../../enums/alerts/AlertPriorityEnum";
+import type { AlertPriority } from "../../enums/alerts/AlertPriorityEnum";
 import { IModelMarkerStyle } from "../../enums/imodel/IModelMarkerStyleEnum";
-import { AuthState } from "../../models/auth/AuthStateModel";
+import type { AuthState } from "../../models/auth/AuthStateModel";
 import { IModelSettings } from "../../models/imodel/IModelSettingsModel";
 import { EntityType } from "../../enums/entities/EntityTypeEnum";
 import { SearchQuery } from "../../models/SearchQueryModel";
-import { Sensor } from "../../models/entities/SensorModel";
+import type { Sensor } from "../../models/entities/SensorModel";
 import { AlertPriorityMetadata } from "../../models/alerts/AlertPriorityMetadataModel";
-import { AlertPriorityMetadataObject } from "../../models/alerts/AlertPriorityMetadataObjectInterface";
+import type { AlertPriorityMetadataObject } from "../../models/alerts/AlertPriorityMetadataObjectInterface";
 import { AuthService } from "../../services/AuthService";
 import { EntityService } from "../../services/entities/EntityService";
 import { IModelSettingsService } from "../../services/imodel/IModelSettingsService";

@@ -6,9 +6,9 @@
 import * as React from "react";
 
 import { EntityType } from "../../enums/entities/EntityTypeEnum";
-import { SensorData } from "../../models/entities/SensorDataInterface";
-import { AlertPriorityMetadataObject } from "../../models/alerts/AlertPriorityMetadataObjectInterface";
-import { ObservationSet } from "../../models/observations/ObservationSetModel";
+import type { SensorData } from "../../models/entities/SensorDataInterface";
+import type { AlertPriorityMetadataObject } from "../../models/alerts/AlertPriorityMetadataObjectInterface";
+import type { ObservationSet } from "../../models/observations/ObservationSetModel";
 import { UtilitiesService } from "../../services/UtilitiesService";
 import { EntityTypeService } from "../../services/entities/EntityTypeService";
 

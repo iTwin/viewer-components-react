@@ -5,12 +5,14 @@
 
 import { IModelApp } from "@itwin/core-frontend";
 
-import { BehaviorSubject, Observable } from "rxjs";
+import type { Observable } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 import { first, map } from "rxjs/operators";
 import { get as _get } from "lodash";
-import axios, { AxiosResponse } from "axios";
+import type { AxiosResponse } from "axios";
+import axios from "axios";
 
-import { AppConfig } from "../models/AppConfigInterface";
+import type { AppConfig } from "../models/AppConfigInterface";
 import { DeviceDecorator } from "../components/decorators/DeviceDecorator";
 
 class ConfigServiceSingleton {
