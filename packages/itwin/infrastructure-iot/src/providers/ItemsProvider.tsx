@@ -30,7 +30,7 @@ export class ItemsProvider implements UiItemsProvider {
         id: "InfrastructureIotDeviceConfigurationWidget",
         label: "IoT Sensors",
         getWidgetContent: () => { // eslint-disable-line react/display-name
-          return <DeviceConfigurationWidget></DeviceConfigurationWidget>;
+          return <DeviceConfigurationWidget />;
         },
       };
 
@@ -38,7 +38,7 @@ export class ItemsProvider implements UiItemsProvider {
         id: "InfrastructureIotDeviceDataWidget",
         label: "IoT Sensor Data",
         getWidgetContent: () => { // eslint-disable-line react/display-name
-          return <DeviceDataWidget></DeviceDataWidget>;
+          return <DeviceDataWidget />;
         },
       };
 
@@ -50,7 +50,7 @@ export class ItemsProvider implements UiItemsProvider {
         id: "InfrastructureIotDeviceGraphWidget",
         label: "IoT Sensor Data Trend",
         getWidgetContent: () => { // eslint-disable-line react/display-name
-          return <DeviceGraphWidget></DeviceGraphWidget>;
+          return <DeviceGraphWidget />;
         },
       };
 

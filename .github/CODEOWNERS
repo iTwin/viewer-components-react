@@ -34,5 +34,5 @@
 /packages/itwin/imodel-react-hooks  @itwin/viewer-components-reviewers @michaelbelousov
 /common/changes/@itwin/imodel-react-hooks  @itwin/viewer-components-reviewers @michaelbelousov
 
-/packages/itwin/infrastructure-iot  @itwin/viewer-components-reviewers @AntonAI
-/common/changes/@itwin/infrastructure-iot  @itwin/viewer-components-reviewers @AntonAI
+/packages/itwin/infrastructure-iot  @itwin/viewer-components-reviewers @AntonAI @jpferrara @adamjhickey
+/common/changes/@itwin/infrastructure-iot  @itwin/viewer-components-reviewers @AntonAI @jpferrara @adamjhickey
