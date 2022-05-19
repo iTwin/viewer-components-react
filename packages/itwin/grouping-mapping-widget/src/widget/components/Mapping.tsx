@@ -10,6 +10,7 @@ import {
   SvgEdit,
   SvgImport,
   SvgMore,
+  SvgProcess,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
@@ -182,6 +183,7 @@ export const Mappings = () => {
                         await refresh();
                         setShowBlockingOverlay(false);
                       }}
+                      icon={<SvgProcess />}
                     >
                       {value.row.original.extractionEnabled ? "Disable extraction" : "Enable extraction"}
                     </MenuItem>,
