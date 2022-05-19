@@ -163,18 +163,6 @@ export const Mappings = () => {
 
                     <MenuItem
                       key={1}
-                      onClick={() => {
-                        setSelectedMapping(value.row.original);
-                        setShowDeleteModal(true);
-                        close();
-                      }}
-                      icon={<SvgDelete />}
-                    >
-                      Remove
-                    </MenuItem>,
-
-                    <MenuItem
-                      key={2}
                       onClick={async () => {
                         setSelectedMapping(value.row.original);
                         setShowBlockingOverlay(true);
@@ -186,6 +174,18 @@ export const Mappings = () => {
                       icon={<SvgProcess />}
                     >
                       {value.row.original.extractionEnabled ? "Disable extraction" : "Enable extraction"}
+                    </MenuItem>,
+
+                    <MenuItem
+                      key={2}
+                      onClick={() => {
+                        setSelectedMapping(value.row.original);
+                        setShowDeleteModal(true);
+                        close();
+                      }}
+                      icon={<SvgDelete />}
+                    >
+                      Remove
                     </MenuItem>,
                   ]}
                 >
