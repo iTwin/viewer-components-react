@@ -6,7 +6,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import { Icon, LoadingSpinner, SearchBox } from "@itwin/core-react";
-import { Alert, Button, IconButton, Select, Slider, ToggleSwitch, Tooltip, useTheme } from "@itwin/itwinui-react";
+import { Alert, Button, IconButton, Select, Slider, ToggleSwitch, Tooltip } from "@itwin/itwinui-react";
 
 import InfiniteScroll from "react-infinite-scroll-component";
 
@@ -31,9 +31,6 @@ import appStyles from "../../styles/App.module.scss";
 import styles from "./DeviceConfigurationWidget.module.scss";
 
 export function DeviceConfigurationWidget() {
-
-  // This is needed to iTwin React component to respect system-wide light/dark mode
-  useTheme("os");
 
   // Save re-usable variables
   const searchQuery = useMemo(() => new SearchQuery(), []);

@@ -5,16 +5,13 @@
 
 import React, { useEffect, useState } from "react";
 
-import { DatePicker, DropdownButton, MenuExtraContent, useTheme } from "@itwin/itwinui-react";
+import { DatePicker, DropdownButton, MenuExtraContent } from "@itwin/itwinui-react";
 
 import { UtilitiesService } from "../../../services/UtilitiesService";
 
 import styles from "./InputDatePicker.module.scss";
 
 export function InputDatePicker(props: {value: string, onChange: (newValue: string) => void}) {
-
-  // This is needed to iTwin React component to respect system-wide light/dark mode
-  useTheme("os");
 
   // Storage for date object of input
   const [date, setDate] = useState<Date | undefined>(new Date(props.value));

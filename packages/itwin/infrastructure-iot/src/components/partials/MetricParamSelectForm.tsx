@@ -5,7 +5,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Checkbox, Select, useTheme } from "@itwin/itwinui-react";
+import { Checkbox, Select } from "@itwin/itwinui-react";
 
 import type { ObservationQuery } from "../../models/observations/ObservationQueryModel";
 import { MetricParamsMetadata } from "../../models/observations/MetricParamsMetadataModel";
@@ -21,9 +21,6 @@ export function MetricParamSelectForm(props: {
   observationQuery: ObservationQuery;
   onChange: (newValue: {[key: string]: any}) => void;
 }) {
-
-  // This is needed to iTwin React component to respect system-wide light/dark mode
-  useTheme("os");
 
   // Create reusable instance of params metadata
   const paramsMetadata = useMemo<MetricParamsMetadata>(() => {

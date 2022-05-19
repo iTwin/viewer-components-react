@@ -15,15 +15,11 @@ import {
   DropdownMenu,
   IconButton,
   MenuExtraContent,
-  useTheme,
 } from "@itwin/itwinui-react";
 
 import styles from "./InputColorPicker.module.scss";
 
 export function InputColorPicker(props: {presetColors?: string[], value: string, onChange: (newValue: string) => void}) {
-
-  // This is needed to iTwin React component to respect system-wide light/dark mode
-  useTheme("os");
 
   // Storage for color object of input
   const [color, setColor] = useState<ColorValue>(ColorValue.create(props.value));

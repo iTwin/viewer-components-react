@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from "react";
 
-import { Input, Select, useTheme } from "@itwin/itwinui-react";
+import { Input, Select } from "@itwin/itwinui-react";
 import type { SelectOption } from "@itwin/itwinui-react/esm/core/Select/Select";
 
 import { debounce as _debounce, isFinite as _isFinite } from "lodash";
@@ -19,9 +19,6 @@ export function InputWithUnit(props: {
   label?: string;
   onChange: (newValue: {value: number, unit?: string}) => void;
 }) {
-
-  // This is needed to iTwin React component to respect system-wide light/dark mode
-  useTheme("os");
 
   // Store local copies of input/unit values
   const [inputValue, setInputValue] = useState<number>(props.inputValue);

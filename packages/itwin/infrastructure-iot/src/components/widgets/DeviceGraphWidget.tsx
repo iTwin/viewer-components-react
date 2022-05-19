@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { Icon } from "@itwin/core-react";
-import { Button, IconButton, ProgressRadial, Tooltip, useTheme } from "@itwin/itwinui-react";
+import { Button, IconButton, ProgressRadial, Tooltip } from "@itwin/itwinui-react";
 
 import Highcharts from "highcharts";
 import brandLight from "highcharts/themes/brand-light";
@@ -27,9 +27,6 @@ import appStyles from "../../styles/App.module.scss";
 import styles from "./DeviceGraphWidget.module.scss";
 
 export function DeviceGraphWidget() {
-
-  // This is needed to iTwin React component to respect system-wide light/dark mode
-  useTheme("os");
 
   const defaultRange = 3;
   const rangeOptions: DateRangeOption[] = [

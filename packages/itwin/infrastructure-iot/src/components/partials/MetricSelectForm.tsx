@@ -5,7 +5,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 
-import { Select, useTheme } from "@itwin/itwinui-react";
+import { Select } from "@itwin/itwinui-react";
 import type { SelectOption } from "@itwin/itwinui-react/esm/core/Select/Select";
 
 import { find as _find, map as _map } from "lodash";
@@ -22,9 +22,6 @@ import { MetricParamSelectForm } from "./MetricParamSelectForm";
 import appStyles from "../../styles/App.module.scss";
 
 export function MetricSelectForm(props: {observationQueryIndex: number, observationQuery: ObservationQuery}) {
-
-  // This is needed to iTwin React component to respect system-wide light/dark mode
-  useTheme("os");
 
   // We work with a local copy of the passed in observation query so we don"t modify parent props
   const [observationQuery, setObservationQuery] = useState<ObservationQuery>(props.observationQuery);

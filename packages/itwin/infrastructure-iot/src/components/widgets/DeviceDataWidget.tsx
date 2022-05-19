@@ -6,7 +6,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { Icon } from "@itwin/core-react";
-import { Button, IconButton, ProgressRadial, Tooltip, useTheme } from "@itwin/itwinui-react";
+import { Button, IconButton, ProgressRadial, Tooltip } from "@itwin/itwinui-react";
 import { IModelApp, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 
 import { finalize, map } from "rxjs/operators";
@@ -38,9 +38,6 @@ import appStyles from "../../styles/App.module.scss";
 import styles from "./DeviceDataWidget.module.scss";
 
 export function DeviceDataWidget() {
-
-  // This is needed to iTwin React component to respect system-wide light/dark mode
-  useTheme("os");
 
   const [canSave, setCanSave] = useState<boolean>(false);
   useEffect(() => {
