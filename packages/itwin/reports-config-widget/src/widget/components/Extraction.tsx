@@ -139,6 +139,8 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
     } catch (error: any) {
       handleError(error.status);
       setExtractionState(ExtractionStates.Failed);
+      setIsRunning(false);
+      setCurrentIModelName(undefined);
     }
   };
 
