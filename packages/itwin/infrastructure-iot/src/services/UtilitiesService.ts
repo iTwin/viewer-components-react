@@ -5,8 +5,6 @@
 
 import { IModelApp, MarginPercent } from "@itwin/core-frontend";
 
-import { times as _times } from "lodash";
-import numeral from "numeral";
 import moment from "moment";
 
 export class UtilitiesService {
@@ -22,12 +20,10 @@ export class UtilitiesService {
   }
 
   public static formatNumericalValue(value: number, decimalDigits = 3, decimalOptional = false): string {
-    let format = "0,0";
-    if (decimalDigits > 0) {
-      format += decimalOptional ? "[.]" : ".";
-      _times(decimalDigits, () => format += "0");
-    }
-    return numeral(value).format(format);
+    return value.toLocaleString(undefined, {
+      minimumFractionDigits: decimalDigits > 0 && !decimalOptional ? decimalDigits : undefined,
+      maximumFractionDigits: decimalDigits > 0 ? decimalDigits : undefined,
+    });
   }
 
   // Date can be any object acceptable by the Moment constructor
