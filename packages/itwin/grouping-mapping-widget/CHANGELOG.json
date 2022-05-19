@@ -2,6 +2,24 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.3.3",
+      "tag": "@itwin/grouping-mapping-widget_v0.3.3",
+      "date": "Wed, 18 May 2022 15:36:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Description is no longer required in mapping and groups"
+          },
+          {
+            "comment": "Added custom calculation formula validation"
+          },
+          {
+            "comment": "Import mappings modal converted to full page modal"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.2",
       "tag": "@itwin/grouping-mapping-widget_v0.3.2",
       "date": "Mon, 09 May 2022 18:04:58 GMT",

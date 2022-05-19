@@ -92,30 +92,11 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
           />
           <LabeledInput
             id='description'
-            required
             name='description'
             label='Description'
             value={values.description}
             onChange={(event) => {
               handleInputChange(event, values, setValues);
-              validator.showMessageFor("description");
-            }}
-            message={validator.message(
-              "description",
-              values.description,
-              "required",
-            )}
-            status={
-              validator.message("description", values.description, "required")
-                ? "negative"
-                : undefined
-            }
-            onBlur={() => {
-              validator.showMessageFor("description");
-            }}
-            onBlurCapture={(event) => {
-              handleInputChange(event, values, setValues);
-              validator.showMessageFor("description");
             }}
           />
           <ToggleSwitch
@@ -133,7 +114,7 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
       <ActionPanel
         onSave={onSave}
         onCancel={returnFn}
-        isSavingDisabled={!(values.name && values.description)}
+        isSavingDisabled={!values.name}
         isLoading={isLoading}
       />
     </>

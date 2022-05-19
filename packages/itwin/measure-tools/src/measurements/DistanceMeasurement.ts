@@ -5,12 +5,12 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { XYAndZ, XYZProps } from "@itwin/core-geometry";
+import { Geometry, Range1d } from "@itwin/core-geometry";
 import {
   IModelJson,
   LineSegment3d,
   Point3d,
   PointString3d,
-  Range3d,
   Ray3d,
   Vector3d,
 } from "@itwin/core-geometry";
@@ -42,7 +42,6 @@ import { MeasurementPropertyHelper } from "../api/MeasurementPropertyHelper";
 import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
-import { ViewHelper } from "../api/ViewHelper";
 import { MeasureTools } from "../MeasureTools";
 
 /**
@@ -256,7 +255,7 @@ export class DistanceMeasurement extends Measurement {
 
     const style = styleTheme.getGraphicStyle(
       this._graphicStyleOverride ||
-        WellKnownGraphicStyleType.DistanceMeasurement
+      WellKnownGraphicStyleType.DistanceMeasurement
     )!;
     const xBuilder = context.createGraphicBuilder(
       GraphicType.WorldOverlay,
@@ -270,7 +269,10 @@ export class DistanceMeasurement extends Measurement {
     if (!this._textMarker || this._startPoint.isAlmostEqual(this._endPoint))
       return;
 
-    const textLocation = this.calculateTextLocation(context);
+    const textLocation = this.calculateWorldTextLocation(context);
+    if (undefined === textLocation)
+      return;
+
     this._textMarker.worldLocation = textLocation;
 
     // Determine which side to place the text marker relative to its anchor point
@@ -292,48 +294,40 @@ export class DistanceMeasurement extends Measurement {
       this._runRiseAxes.forEach((axis) => axis.decorate(context));
   }
 
-  /** Make sure the text is still on screen even if parts of the  graphics are outside.
-   * Returned point is in WORLD coordinates.
+  /** Clamps the segment to the current view frustum and return its midpoint.
+   * @remarks Returns undefined if the segment is entirely 'behind' the camera eye
    */
-  private calculateTextLocation(context: DecorateContext): Point3d {
-    const viewPoints = [this._startPoint.clone(), this._endPoint.clone()];
-    context.viewport.worldToViewArray(viewPoints);
+  private calculateWorldTextLocation(context: DecorateContext): Point3d | undefined {
+    const clipFront = context.viewport.view.is3d();
+    const clipPlanes = context.viewport.getWorldFrustum().getRangePlanes(clipFront, false, 0.0);
+    const startIn = clipPlanes.isPointOnOrInside(this._startPoint, Geometry.smallMetricDistance);
+    const endIn = clipPlanes.isPointOnOrInside(this._endPoint, Geometry.smallMetricDistance);
 
-    const rect = context.viewport.viewRect;
-    const range = Range3d.createArray(viewPoints);
-    const isNotIntersecting =
-      rect.width < range.low.x ||
-      range.high.x < 0.0 ||
-      rect.height < range.low.y ||
-      range.high.y < 0.0;
+    if (startIn && endIn)
+      return Point3d.createAdd2Scaled(this._startPoint, 0.5, this._endPoint, 0.5);
 
-    let p0 = rect.containsPoint(viewPoints[0]) ? viewPoints[0] : undefined;
-    let p1 = rect.containsPoint(viewPoints[1]) ? viewPoints[1] : undefined;
+    const range = Range1d.createNull();
+    let ray = Ray3d.createStartEnd(this._startPoint, this._endPoint);
 
-    if (isNotIntersecting || (p0 && p1))
-      return Point3d.createAdd2Scaled(
-        this._startPoint,
-        0.5,
-        this._endPoint,
-        0.5
-      );
+    // Either start/end or BOTH are outside the clip planes. If nothing intersects, don't bother displaying anything.
+    if (!clipPlanes.hasIntersectionWithRay(ray, range))
+      return undefined;
 
-    if (!p0)
-      p0 =
-        ViewHelper.closestIntersectionWithViewPlanes(
-          rect,
-          Ray3d.createStartEnd(viewPoints[1], viewPoints[0])
-        ) || viewPoints[0];
+    let clampedStartPoint = this._startPoint;
+    let clampedEndPoint = this._endPoint;
 
-    if (!p1)
-      p1 =
-        ViewHelper.closestIntersectionWithViewPlanes(
-          rect,
-          Ray3d.createStartEnd(viewPoints[0], viewPoints[1])
-        ) || viewPoints[1];
+    if (!startIn) {
+      // Computed from the test above
+      clampedStartPoint = ray.fractionToPoint(range.high);
+    }
 
-    const result = Point3d.createAdd2Scaled(p0, 0.5, p1, 0.5);
-    return context.viewport.viewToWorld(result, result);
+    if (!endIn) {
+      ray = Ray3d.createStartEnd(this._endPoint, this._startPoint, ray);
+      if (clipPlanes.hasIntersectionWithRay(ray, range))
+        clampedEndPoint = ray.fractionToPoint(range.high);
+    }
+
+    return Point3d.createAdd2Scaled(clampedStartPoint, 0.5, clampedEndPoint, 0.5);
   }
 
   private buildRunRiseAxes(): void {
