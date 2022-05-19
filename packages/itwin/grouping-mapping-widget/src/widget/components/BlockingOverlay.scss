@@ -1,0 +1,26 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+.group-mapping-blocking-overlay {
+  background-color: black;
+  position: absolute;
+  height: inherit;
+  right: 6px;
+  left: 6px;
+  opacity: 60%;
+  z-index: 9999;
+  visibility: hidden;
+
+  &.visible {
+    visibility: visible;
+  }
+}
+
+.group-mapping-blocking-overlay-spinner {
+  display: flex;
+  justify-content: center;
+  height: inherit;
+}

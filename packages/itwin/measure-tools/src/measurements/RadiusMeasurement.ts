@@ -457,7 +457,7 @@ export class RadiusMeasurement extends Measurement {
       value: fDiameter,
       aggregatableValue:
         lengthSpec !== undefined
-          ? { value: length, formatSpec: lengthSpec }
+          ? { value: diameter, formatSpec: lengthSpec }
           : undefined,
     });
     data.properties.push({
