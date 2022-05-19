@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, Small, ToggleSwitch } from "@itwin/itwinui-react";
 import React, { useContext, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -23,6 +23,7 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
   const [values, setValues] = useState({
     name: mapping?.mappingName ?? "",
     description: mapping?.description ?? "",
+    extractionEnabled: mapping?.extractionEnabled ?? true,
   });
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -40,10 +41,12 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
         ? await reportingClientApi.updateMapping(apiContext.accessToken, iModelId, mapping.id ?? "", {
           mappingName: values.name,
           description: values.description,
+          extractionEnabled: values.extractionEnabled,
         })
         : await reportingClientApi.createMapping(apiContext.accessToken, iModelId, {
           mappingName: values.name,
           description: values.description,
+          extractionEnabled: values.extractionEnabled,
         });
       await returnFn();
     } catch (error: any) {
@@ -94,6 +97,16 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
             value={values.description}
             onChange={(event) => {
               handleInputChange(event, values, setValues);
+            }}
+          />
+          <ToggleSwitch
+            id='extractionEnabled'
+            name='extractionEnabled'
+            label='Extraction enabled'
+            labelPosition="left"
+            checked={values.extractionEnabled}
+            onChange={(event) => {
+              setValues({ ...values, extractionEnabled: event.currentTarget.checked });
             }}
           />
         </Fieldset>
