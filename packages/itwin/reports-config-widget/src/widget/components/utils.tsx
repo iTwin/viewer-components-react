@@ -38,7 +38,7 @@ export const WidgetHeader = ({
 };
 
 export const handleError = (errorStatus: number) => {
-  let errorMessage = IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.Error");
+  let errorMessage = `${IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.Error")} `;
   switch (errorStatus) {
     case 401:
       errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.401");
