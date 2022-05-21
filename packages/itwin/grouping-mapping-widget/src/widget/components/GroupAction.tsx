@@ -23,7 +23,6 @@ import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
 import { GroupQueryBuilderContext } from "./GroupQueryBuilderContext";
 import { QueryBuilder } from "./QueryBuilder";
 import {
-  clearEmphasizedElements,
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
@@ -55,9 +54,7 @@ const GroupAction = ({
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const [currentPropertyList, setCurrentPropertyList] = React.useState<
-  PropertyRecord[]
-  >([]);
+  const [currentPropertyList, setCurrentPropertyList] = React.useState<PropertyRecord[]>([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
@@ -83,8 +80,7 @@ const GroupAction = ({
         selectionProvider: ISelectionProvider,
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-        const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-        }` : "";
+        const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}` : "";
         setSimpleQuery(query);
       },
     );
@@ -96,7 +92,6 @@ const GroupAction = ({
   useEffect(() => {
     const reemphasize = async () => {
       try {
-        clearEmphasizedElements();
         if (!query || query === "") {
           return;
         }
