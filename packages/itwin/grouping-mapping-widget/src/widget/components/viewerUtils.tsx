@@ -384,3 +384,15 @@ export const clearEmphasizedOverriddenElements = () => {
   emph.clearEmphasizedElements(vp);
   emph.clearOverriddenElements(vp);
 };
+
+export const clearAll = () => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+  emph.clearEmphasizedElements(vp);
+  emph.clearOverriddenElements(vp);
+  emph.clearHiddenElements(vp);
+};
+

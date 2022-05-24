@@ -4,34 +4,28 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.groups-container {
+.gmw-group-tile-container {
   display: flex;
-  flex-direction: column;
-  gap: $iui-baseline;
-  padding: $iui-l;
-
-  .toolbar {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .group-list {
+  justify-content: space-between;
+  border-radius: 5px;
+  margin-right: $iui-xs;
+  background-color: var(--iui-color-background-2);
+  padding: 5.5px 0px 2.75px 8px;
+  .body {
     display: flex;
     flex-direction: column;
-    gap: $iui-baseline;
-
-    .actions {
-      display: flex;
-      flex-direction: row;
+    min-width: 0;
+    &-text {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
   }
-
-  .group-view-icon {
+  .action-button {
     margin-left: 0;
     align-self: center;
-    min-width: $iui-l;
+    min-width: 36px;
     margin-right: $iui-xs;
+    flex-shrink: 0;
   }
 }
