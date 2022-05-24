@@ -431,7 +431,6 @@ importers:
       '@itwin/webgl-compatibility': ^3.1.0
       '@types/i18next': ^8.4.2
       '@types/lodash': ^4.14.181
-      '@types/numeral': ^2.0.2
       '@types/react': ^17.0.19
       '@types/react-dom': ^17.0.9
       '@typescript-eslint/eslint-plugin': ^5.3.1
@@ -443,7 +442,6 @@ importers:
       highcharts-react-official: ^3.1.0
       lodash: ^4.17.21
       moment: ^2.29.1
-      numeral: ^2.0.6
       react: ^17.0.2
       react-dom: ^17.0.2
       react-infinite-scroll-component: ^6.1.0
@@ -460,7 +458,6 @@ importers:
       highcharts-react-official: 3.1.0_highcharts@10.0.0+react@17.0.2
       lodash: 4.17.21
       moment: 2.29.3
-      numeral: 2.0.6
       react-infinite-scroll-component: 6.1.0_react@17.0.2
       react-resize-detector: 7.0.0_react-dom@17.0.2+react@17.0.2
       reflect-metadata: 0.1.13
@@ -488,7 +485,6 @@ importers:
       '@itwin/webgl-compatibility': 3.1.2
       '@types/i18next': 8.4.6
       '@types/lodash': 4.14.182
-      '@types/numeral': 2.0.2
       '@types/react': 17.0.44
       '@types/react-dom': 17.0.15
       '@typescript-eslint/eslint-plugin': 5.19.0_eslint@7.32.0+typescript@4.3.5
@@ -3181,10 +3177,6 @@ packages:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
     dev: true
 
-  /@types/numeral/2.0.2:
-    resolution: {integrity: sha512-A8F30k2gYJ/6e07spSCPpkuZu79LCnkPTvqmIWQzNGcrzwFKpVOydG41lNt5wZXjSI149qjyzC2L1+F2PD/NUA==}
-    dev: true
-
   /@types/parse-json/4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
     dev: true
@@ -5111,7 +5103,7 @@ packages:
     dev: true
 
   /buffer-crc32/0.2.13:
-    resolution: {integrity: sha1-DTM+PwDqxQqhRUq9MO+MKl2ackI=}
+    resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
     dev: true
 
   /buffer-from/1.1.2:
@@ -10837,10 +10829,6 @@ packages:
       schema-utils: 1.0.0
       webpack: 4.44.2_webpack-cli@3.3.12
     dev: true
-
-  /numeral/2.0.6:
-    resolution: {integrity: sha1-StCAk21EPCVhrtnyGX7//iX05QY=}
-    dev: false
 
   /nwsapi/2.2.0:
     resolution: {integrity: sha512-h2AatdwYH+JHiZpv7pt/gSX1XoRGb7L/qSIeuqA6GwYoF9w1vP1cw42TO0aI2pNyshRK5893hNSl+1//vHK7hQ==}
