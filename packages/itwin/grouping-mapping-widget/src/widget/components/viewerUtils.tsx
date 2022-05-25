@@ -284,6 +284,27 @@ export const zoomToElements = async (elementIds: string[]) => {
   await vp.zoomToElements(elementIds, { ...viewChangeOpts });
 };
 
+export const getHiliteIds = async (
+  elementIds: string[],
+  iModelConnection: IModelConnection,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return [];
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+
+  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
+    imodel: vp.iModel,
+  });
+  const set = await hiliteProvider.getHiliteSet(keySet);
+  if (set.elements) {
+    return [...set.elements];
+  }
+  return [];
+};
+
 export const manufactureKeys = async (
   elementIds: string[],
   iModelConnection: IModelConnection,

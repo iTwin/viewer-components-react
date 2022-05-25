@@ -7,20 +7,30 @@
 .groups-container {
   display: flex;
   flex-direction: column;
-  gap: $iui-baseline;
-  padding: $iui-l;
+  flex-grow: 1;
+  padding: $iui-baseline $iui-m;
+  min-height: 0;
 
   .toolbar {
     display: flex;
-    flex-direction: row;
-    align-items: center;
     justify-content: space-between;
+    gap: $iui-s;
+    border-bottom: 1px solid var(--iui-color-background-4);
+    padding-bottom: $iui-baseline;
+    flex-wrap: wrap;
+    margin-right: $iui-s;
+
+    .toggle {
+      margin-right: $iui-xs;
+    }
   }
 
   .group-list {
     display: flex;
     flex-direction: column;
-    gap: $iui-baseline;
+    overflow-y: auto;
+    gap: 7.5px;
+    margin-top: 7.5px;
 
     .actions {
       display: flex;
@@ -32,6 +42,5 @@
     margin-left: 0;
     align-self: center;
     min-width: $iui-l;
-    margin-right: $iui-xs;
   }
 }

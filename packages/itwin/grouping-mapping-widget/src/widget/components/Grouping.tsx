@@ -20,6 +20,7 @@ import {
   ProgressRadial,
   Surface,
   toaster,
+  ToggleSwitch,
 } from "@itwin/itwinui-react";
 import {
   SvgAdd,
@@ -27,8 +28,6 @@ import {
   SvgEdit,
   SvgList,
   SvgMore,
-  SvgPaintbrush,
-  SvgPalette,
   SvgVisibilityHide,
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
@@ -42,13 +41,14 @@ import {
   clearHiddenElements,
   emphasisElementsById,
   emphasizeElements,
+  getHiliteIds,
   hideElements,
   hideElementsById,
   overrideElements,
   overrideElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { fetchIdsFromQuery, handleError, WidgetHeader } from "./utils";
+import { EmptyMessage, fetchIdsFromQuery, handleError, LoadingOverlay, WidgetHeader } from "./utils";
 import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
@@ -226,15 +226,69 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     visualizeGroupColors,
   ]);
 
-  const hideGroup = useCallback(
-    async (viewGroup: Group) => {
+  const hideGroups = useCallback(
+    async (viewGroups: Group[], zoomTo: boolean = true) => {
       setLoadingQuery(true);
       let allIds: string[] = [];
+      for (const viewGroup of viewGroups) {
+        const query = viewGroup.query ?? "";
+        if (hilitedElements.current.has(query)) {
+          const hilitedIds = hilitedElements.current.get(query) ?? [];
+          hideElements(hilitedIds);
+          allIds = allIds.concat(hilitedIds);
+        } else {
+          try {
+            const ids: string[] = await fetchIdsFromQuery(
+              query,
+              iModelConnection,
+            );
+            if (ids.length === 0) {
+              toaster.warning(
+                `${viewGroup.groupName}'s query is valid but produced no results.`,
+              );
+            }
+            const hiliteIds = await hideElementsById(
+              ids,
+              iModelConnection,
+              false,
+            );
+            hilitedElements.current.set(query, hiliteIds);
+            allIds = allIds.concat(ids);
+          } catch {
+            toaster.negative(
+              `Could not hide/show ${viewGroup.groupName}. Query could not be resolved.`,
+            );
+          }
+        }
+      }
+      if (zoomTo) {
+        await zoomToElements(allIds);
+      }
+      setLoadingQuery(false);
+    },
+    [iModelConnection],
+  );
+
+  const showGroup = useCallback(
+    async (viewGroup: Group) => {
+      clearHiddenElements();
+      const newHiddenGroups: Group[] = [];
+      for (const id of hiddenGroupsIds) {
+        if (id === viewGroup.id) {
+          continue;
+        }
+        const newHiddenGroup = groups.find((g) => g.id === id);
+        if (newHiddenGroup) {
+          newHiddenGroups.push(newHiddenGroup);
+        }
+      }
+      await hideGroups(newHiddenGroups, false);
+
+      // zoom to showed elements
       const query = viewGroup.query ?? "";
       if (hilitedElements.current.has(query)) {
-        const hilitedIds = hilitedElements.current.get(query) ?? [];
-        hideElements(hilitedIds);
-        allIds = allIds.concat(hilitedIds);
+        const hiliteIds = hilitedElements.current.get(query) ?? [];
+        await zoomToElements(hiliteIds);
       } else {
         try {
           const ids: string[] = await fetchIdsFromQuery(
@@ -246,38 +300,17 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               `${viewGroup.groupName}'s query is valid but produced no results.`,
             );
           }
-          const hiliteIds = await hideElementsById(
-            ids,
-            iModelConnection,
-            false,
-          );
-          hilitedElements.current.set(query, hiliteIds);
-          allIds = allIds.concat(ids);
+          const hiliteIds = await getHiliteIds(ids, iModelConnection);
+          await zoomToElements(hiliteIds);
         } catch {
           toaster.negative(
             `Could not hide/show ${viewGroup.groupName}. Query could not be resolved.`,
           );
         }
       }
-      await zoomToElements(allIds);
-      setLoadingQuery(false);
     },
-    [iModelConnection],
+    [groups, hiddenGroupsIds, hideGroups, iModelConnection, hilitedElements],
   );
-
-  const showGroup = useCallback(
-    async (viewGroup: Group) => {
-      clearHiddenElements();
-      for (const id of hiddenGroupsIds) {
-        if (viewGroup.id === id) {
-          continue;
-        }
-        const group = groups.find((g) => g.id === id);
-        if (group) {
-          await hideGroup(group);
-        }
-      }
-    }, [hiddenGroupsIds, hideGroup, groups]);
 
   const showAll = useCallback(async () => {
     clearHiddenElements();
@@ -285,20 +318,25 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   }, [setHiddenGroupsIds]);
 
   const hideAll = useCallback(async () => {
-    groups.forEach(async (g) => {
-      const group = hiddenGroupsIds.find((id) => g.id === id);
-      if (!group) {
-        await hideGroup(g);
+    await hideGroups(groups);
+    setHiddenGroupsIds(
+      groups
+        .filter((g) => g.id)
+        .map((g) => (g.id ? g.id : "")),
+    );
+  }, [setHiddenGroupsIds, groups, hideGroups]);
+
+  const toggleGroupColor = useCallback(
+    async (e: any) => {
+      if (e.target.checked) {
+        await visualizeGroupColors(groups);
+        setShowGroupColor(true);
+      } else {
+        clearEmphasizedOverriddenElements();
+        setShowGroupColor(false);
       }
-    });
-    const hideIds: string[] = [];
-    groups.forEach((g) => {
-      if (g.id) {
-        hideIds.push(g.id);
-      }
-    });
-    setHiddenGroupsIds(hideIds);
-  }, [setHiddenGroupsIds, groups, hideGroup, hiddenGroupsIds]);
+    },
+    [groups, visualizeGroupColors, setShowGroupColor]);
 
   const propertyMenuGoBack = useCallback(async () => {
     setGroupsView(GroupsView.GROUPS);
@@ -366,6 +404,14 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
               </Button>
               <ButtonGroup>
+                <ToggleSwitch
+                  label="Color"
+                  labelPosition="left"
+                  className="group-view-icon toggle"
+                  disabled={isLoadingQuery}
+                  checked={showGroupColor}
+                  onChange={toggleGroupColor}>
+                </ToggleSwitch>
                 <IconButton
                   disabled={isLoadingQuery}
                   styleType="borderless"
@@ -380,33 +426,12 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 >
                   <SvgVisibilityHide onClick={hideAll}></SvgVisibilityHide>
                 </IconButton>
-                <IconButton
-                  disabled={isLoadingQuery}
-                  styleType="borderless"
-                  className="group-view-icon"
-                >
-                  {showGroupColor ? (
-                    <SvgPaintbrush
-                      onClick={() => {
-                        clearEmphasizedOverriddenElements();
-                        setShowGroupColor(false);
-                      }}
-                    ></SvgPaintbrush>
-                  ) : (
-                    <SvgPalette
-                      onClick={async () => {
-                        await visualizeGroupColors(groups);
-                        setShowGroupColor(true);
-                      }}
-                    ></SvgPalette>
-                  )}
-                </IconButton>
               </ButtonGroup>
             </div>
             {isLoading ? (
-              <ProgressRadial indeterminate />
+              <LoadingOverlay />
             ) : groups.length === 0 ? (
-              "No Groups available."
+              <EmptyMessage message="No Groups available." />
             ) : (
               <div className="group-list">
                 {groups.map((g) => (
@@ -433,9 +458,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                           ) : (
                             <SvgVisibilityShow
                               onClick={async () => {
-                                await hideGroup(g);
+                                await hideGroups([g]);
                                 setHiddenGroupsIds(
-                                  hiddenGroupsIds.concat(g.id ? [g.id] : [])
+                                  hiddenGroupsIds.concat(g.id ? [g.id] : []),
                                 );
                               }}
                             ></SvgVisibilityShow>
