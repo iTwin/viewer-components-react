@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Allow a caller to specify a default priority for Tree / Property item providers.",
+      "comment": "Allow a caller to specify a default priority for Tree Widget item provider.",
       "type": "patch"
     }
   ],
