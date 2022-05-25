@@ -24,6 +24,7 @@ import type {
 export type ContextMenuItemInfo = ContextMenuItemProps & React.Attributes & {
   label: string;
   isValid?: (record: PropertyRecord, field?: Field) => boolean;
+  forcePosition?: number;
 };
 
 export interface OnSelectEventArgs {

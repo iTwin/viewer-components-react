@@ -278,7 +278,7 @@ export const PropertyGrid = ({
 
         if (additionalContextMenuOptions?.length) {
           for (const option of additionalContextMenuOptions) {
-            items.push({
+            const newItem = {
               ...option,
               key: `additionalContextMenuOption_${option.label}`,
               onSelect: () => {
@@ -291,7 +291,14 @@ export const PropertyGrid = ({
                 }
                 setContextMenu(undefined);
               },
-            });
+            };
+            // If option needs to go in a specific position in the list, put it there. otherwise just push.
+            if(option.forcePosition !== undefined) {
+              items.splice(option.forcePosition, 0, newItem);
+            }
+            else {
+              items.push(newItem);
+            }
           }
         }
 
