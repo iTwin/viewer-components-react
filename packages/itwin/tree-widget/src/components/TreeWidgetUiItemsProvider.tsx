@@ -104,6 +104,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
         getWidgetContent: () => <TreeWidgetComponent trees={trees} />,
         icon: "icon-hierarchy-tree",
         restoreTransientState: () => true,
+        priority: this._treeWidgetOptions?.defaultTreeWidgetPriority,
       });
     }
 
