@@ -441,7 +441,6 @@ importers:
       highcharts: ^10.0.0
       highcharts-react-official: ^3.1.0
       lodash: ^4.17.21
-      moment: ^2.29.1
       react: ^17.0.2
       react-dom: ^17.0.2
       react-infinite-scroll-component: ^6.1.0
@@ -457,7 +456,6 @@ importers:
       highcharts: 10.0.0
       highcharts-react-official: 3.1.0_highcharts@10.0.0+react@17.0.2
       lodash: 4.17.21
-      moment: 2.29.3
       react-infinite-scroll-component: 6.1.0_react@17.0.2
       react-resize-detector: 7.0.0_react-dom@17.0.2+react@17.0.2
       reflect-metadata: 0.1.13
@@ -10582,10 +10580,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-
-  /moment/2.29.3:
-    resolution: {integrity: sha512-c6YRvhEo//6T2Jz/vVtYzqBzwvPT95JBQ+smCytzf7c50oMZRsR/a4w88aD34I+/QVSfnoAnSBFPJHItlOMJVw==}
-    dev: false
 
   /moo/0.5.1:
     resolution: {integrity: sha512-I1mnb5xn4fO80BH9BLcF0yLypy2UKl+Cb01Fu0hJRkJjlCRtxZMWkTdAtDd5ZqCOxtCkhmRwyI57vWT+1iZ67w==}

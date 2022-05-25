@@ -6,7 +6,6 @@
 import { DataObject } from "../DataObjectModel";
 import { EntityStatus } from "../../enums/entities/EntityStatusEnum";
 import { EntityType } from "../../enums/entities/EntityTypeEnum";
-import { UtilitiesService } from "../../services/UtilitiesService";
 
 export abstract class Entity extends DataObject {
 
@@ -84,14 +83,6 @@ export abstract class Entity extends DataObject {
 
   public isRedirected(): boolean {
     return this.getStatus() === EntityStatus.REDIRECT;
-  }
-
-  public getLastActive(): string {
-    if (this.getStatus() === EntityStatus.ONLINE) {
-      return "Active now";
-    } else {
-      return `Active ${UtilitiesService.formatDate(this.props.LAST_COMM, true)}`;
-    }
   }
 
   public getObservationCount(): number {

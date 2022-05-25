@@ -22,8 +22,8 @@ export function InputDatePicker(props: {value: string, onChange: (newValue: stri
   // Fire off event on date change
   const onChange = (newDate?: Date) => {
     setDate(newDate);
-    const newDateValue = newDate ? UtilitiesService.fixDateEncoding(newDate.toISOString()) : undefined;
-    const oldDateValue = date ? UtilitiesService.fixDateEncoding(date.toISOString()) : undefined;
+    const newDateValue = newDate ? newDate.toISOString() : undefined;
+    const oldDateValue = date ? date.toISOString() : undefined;
     if (newDateValue && newDateValue !== oldDateValue) {
       props.onChange(newDateValue);
     }

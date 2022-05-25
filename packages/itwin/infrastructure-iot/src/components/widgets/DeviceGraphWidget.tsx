@@ -13,7 +13,6 @@ import brandLight from "highcharts/themes/brand-light";
 import brandDark from "highcharts/themes/brand-dark";
 import HighchartsReact from "highcharts-react-official";
 import { useResizeDetector } from "react-resize-detector";
-import moment from "moment";
 
 import type { SensorData } from "../../models/entities/SensorDataInterface";
 import { ObservationQueryMetadata } from "../../models/observations/ObservationQueryMetadataModel";
@@ -30,13 +29,13 @@ export function DeviceGraphWidget() {
 
   const defaultRange = 3;
   const rangeOptions: DateRangeOption[] = [
-    new DateRangeOption("1h",  { hours: 1 }),
-    new DateRangeOption("12h", { hours: 12 }),
-    new DateRangeOption("1d",  { days: 1 }),
-    new DateRangeOption("1w",  { weeks: 1 }),
-    new DateRangeOption("2w",  { weeks: 2 }),
-    new DateRangeOption("1m",  { months: 1 }),
-    new DateRangeOption("1y",  { years: 1 }),
+    new DateRangeOption("1h",  { value: 1, unit: "hour" }),
+    new DateRangeOption("12h", { value: 12, unit: "hour" }),
+    new DateRangeOption("1d",  { value: 1, unit: "day" }),
+    new DateRangeOption("1w",  { value: 1, unit: "week" }),
+    new DateRangeOption("2w",  { value: 2, unit: "week" }),
+    new DateRangeOption("1m",  { value: 1, unit: "month" }),
+    new DateRangeOption("1y",  { value: 1, unit: "year" }),
     new DateRangeOption("All", null),
   ];
 
@@ -46,8 +45,14 @@ export function DeviceGraphWidget() {
   const [loadingData, setLoadingData] = useState<boolean>(false);
   const [currentRange, setCurrentRange] = useState<number>(defaultRange);
 
-  const getCurrentRangeTimeStamp = (idx: number) => rangeOptions[idx].getLabel() === "All" ?
-    sensorData?.firstReadingDate : moment().subtract(rangeOptions[idx].getRangeSpan()).toISOString();
+  const getCurrentRangeTimeStamp = (idx: number) => {
+    if (rangeOptions[idx].getLabel() === "All") {
+      return sensorData?.firstReadingDate;
+    } else {
+      const rangeSpan: any = rangeOptions[idx].getRangeSpan();
+      return UtilitiesService.addToDate(new Date(), rangeSpan.value * -1, rangeSpan.unit).toISOString();
+    }
+  };
 
   const getObsQueryMetadata = (idx: number) => {
     return new ObservationQueryMetadata(getCurrentRangeTimeStamp(idx), observationQueryMetadata.getWindowResolution());

@@ -7,14 +7,15 @@ export class DateRangeOption {
 
   constructor(
     private label: string,
-    private rangeSpan: {[key: string]: number}|null
+    private rangeSpan: { value: number, unit: "hour" | "day" | "week" | "month" | "year" } | null
   ) {}
 
   public getLabel(): string {
     return this.label;
   }
 
-  public getRangeSpan(): object|null {
+  public getRangeSpan(): { value: number, unit: "hour" | "day" | "week" | "month" | "year" } | null {
     return this.rangeSpan;
   }
+
 }

@@ -8,7 +8,6 @@ import { of } from "rxjs";
 import { catchError, filter, map, shareReplay, startWith, switchMap, tap, throttleTime } from "rxjs/operators";
 import { plainToInstance } from "class-transformer";
 import { chain as _chain, forEach as _forEach, map as _map } from "lodash";
-import moment from "moment";
 
 import { AlertType } from "../../enums/alerts/AlertTypeEnum";
 import type { AccessLevel } from "../../enums/AccessLevelEnum";
@@ -159,7 +158,10 @@ class AlertServiceSingleton {
       .pipe(tap(() => LoggerService.log("Acknowledged alerts:", alertIds)));
   }
 
-  public snoozeAlerts$(alertIds: string[], wakeUpDateStr: string = moment().add(1, "hour").toISOString()): Observable<any> {
+  public snoozeAlerts$(
+    alertIds: string[],
+    wakeUpDateStr: string = UtilitiesService.addToDate(new Date(), 1, "hour").toISOString()
+  ): Observable<any> {
     return ApiService
       .sendRequest$(this.endpoints.snoozeAlerts, "PATCH", { data: { alertIds, wakeUpDateStr }})
       .pipe(tap(() => LoggerService.log("Snoozed alerts:", alertIds)));

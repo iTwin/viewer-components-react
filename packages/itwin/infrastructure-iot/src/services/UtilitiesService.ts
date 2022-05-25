@@ -5,8 +5,6 @@
 
 import { IModelApp, MarginPercent } from "@itwin/core-frontend";
 
-import moment from "moment";
-
 export class UtilitiesService {
 
   public static getUiTheme(): "light" | "dark" {
@@ -26,16 +24,32 @@ export class UtilitiesService {
     });
   }
 
-  // Date can be any object acceptable by the Moment constructor
-  public static formatDate(date: number | string | Date, fromNowFormat = false): string {
-    const momentDate = moment(date);
-    return fromNowFormat ? moment(date).fromNow() : momentDate.format("YYYY-M-D H:mm");
+  // Date can be any object acceptable by the JS Date constructor
+  public static formatDate(date: number | string | Date): string {
+    const dateObject = new Date(date);
+    return `${dateObject.getFullYear()}-${dateObject.getMonth() + 1}-${dateObject.getDate()} ` +
+      `${dateObject.getHours()}:${(dateObject.getMinutes() < 10 ? "0" : "") + dateObject.getMinutes()}`;
   }
 
-  // Found out iTwin Settings service will strip ".0" character sequence from field values for some unknown reason
-  // This often happens to ISO dates (milliseconds part). This method fixes that
-  public static fixDateEncoding(date: string): string {
-    return date.replace(".0", ".1");
+  public static addToDate(date: Date, value: number, unit: "hour" | "day" | "week" | "month" | "year" ): Date {
+    switch (unit) {
+      case "hour":
+        date.setHours(date.getHours() + value);
+        break;
+      case "week":
+        date.setDate(date.getDate() + value * 7);
+        break;
+      case "month":
+        date.setMonth(date.getMonth() + value);
+        break;
+      case "year":
+        date.setFullYear(date.getFullYear() + value);
+        break;
+      default:
+        date.setDate(date.getDate() + value);
+        break;
+    }
+    return date;
   }
 
   // Returns hash of a string

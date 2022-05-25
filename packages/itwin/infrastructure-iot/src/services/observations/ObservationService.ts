@@ -8,7 +8,6 @@ import { combineLatest, Observable, of } from "rxjs";
 import { catchError, first, map, startWith, switchMap, tap } from "rxjs/operators";
 import { plainToInstance } from "class-transformer";
 import { cloneDeep as _cloneDeep, compact as _compact, forEach as _forEach, has as _has, map as _map } from "lodash";
-import moment from "moment";
 
 import { ObservationQuery } from "../../models/observations/ObservationQueryModel";
 import type { ObservationQueryMetadata } from "../../models/observations/ObservationQueryMetadataModel";
@@ -18,6 +17,7 @@ import type { Sensor } from "../../models/entities/SensorModel";
 import { SocketService } from "../api/SocketService";
 import { EntityTypeService } from "../entities/EntityTypeService";
 import { MetricService } from "./MetricService";
+import { UtilitiesService } from "../UtilitiesService";
 import { LoggerService } from "../LoggerService";
 
 class ObservationServiceSingleton {
@@ -259,7 +259,7 @@ class ObservationServiceSingleton {
   // This is done so delta-like metrics don"t return a 0 with no reference params specified
   private getMetricParamsForQuery(observationQuery: ObservationQuery): {[key: string]: any} {
     const metricParams = _cloneDeep(observationQuery.getMetricParams());
-    const startDate = observationQuery.getStartDate() || moment().subtract(1, "week").toISOString();
+    const startDate = observationQuery.getStartDate() || UtilitiesService.addToDate(new Date(), -1, "week").toISOString();
     metricParams.START_DATE = { value: startDate };
     return metricParams;
   }

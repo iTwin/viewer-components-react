@@ -31,14 +31,6 @@ export class Sensor extends Entity {
     return this.props.ELEVATION_REFERENCE || this.getElevation() || 0;
   }
 
-  public override getLastActive(): string {
-    if (this.props.LAST_OBSERVATION && this.props.LAST_OBSERVATION.timestamp) {
-      return `Active ${UtilitiesService.formatDate(this.props.LAST_OBSERVATION.timestamp, true)}`;
-    } else {
-      return "Never been active";
-    }
-  }
-
   public getLastObsTime(): string | undefined {
     if (this.props.LAST_OBSERVATION && this.props.LAST_OBSERVATION.timestamp) {
       return UtilitiesService.formatDate(this.props.LAST_OBSERVATION.timestamp);

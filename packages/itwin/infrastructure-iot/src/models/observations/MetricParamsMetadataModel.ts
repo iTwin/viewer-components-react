@@ -5,8 +5,6 @@
 
 import { times as _times } from "lodash";
 
-import { UtilitiesService } from "../../services/UtilitiesService";
-
 export class MetricParamsMetadata {
 
   private readonly paramsMetadata: any = {
@@ -48,7 +46,7 @@ export class MetricParamsMetadata {
       name: "Reference Date",
       type: "date-picker",
       config: {
-        defaultValue: UtilitiesService.fixDateEncoding(new Date().toISOString()),
+        defaultValue: new Date().toISOString(),
       },
     },
     AZIMUTH_XY: {
