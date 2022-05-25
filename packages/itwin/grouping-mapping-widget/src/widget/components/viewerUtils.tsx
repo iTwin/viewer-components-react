@@ -9,7 +9,6 @@ import type { ElementProps, FeatureAppearance } from "@itwin/core-common";
 import { ColorDef, FeatureOverrideType } from "@itwin/core-common";
 import { KeySet } from "@itwin/presentation-common";
 import { HiliteSetProvider } from "@itwin/presentation-frontend";
-import type { Id64Set } from "@itwin/core-bentley";
 
 export const isolateElementsById = async (
   elementIds: string[],
@@ -55,17 +54,6 @@ export const clearIsolatedElements = () => {
   emph.clearIsolatedElements(vp);
 };
 
-export const getHiddenElements = (): Id64Set | undefined => {
-  if (!IModelApp.viewManager.selectedView) {
-    return undefined;
-  }
-
-  const vp = IModelApp.viewManager.selectedView;
-  const emph = EmphasizeElements.getOrCreate(vp);
-
-  return emph.getHiddenElements(vp);
-};
-
 export const hideElementsById = async (
   elementIds: string[],
   iModelConnection: IModelConnection,
@@ -88,29 +76,6 @@ export const hideElementsById = async (
     return ids;
   }
   return [];
-};
-
-export const showElementsByIds = async (
-  hilitedIds: string[],
-  iModelConnection: IModelConnection,
-): Promise<string[]> => {
-  const hiddenIds = getHiddenElements();
-  if (hiddenIds) {
-    clearHiddenElements();
-    return hideElementsById(
-      Array.from(hiddenIds).filter((id) => !(id in hilitedIds)),
-      iModelConnection,
-    );
-  }
-  return [];
-};
-
-export const showElements = (hilitedIds: string[]) => {
-  const hiddenIds = getHiddenElements();
-  if (hiddenIds) {
-    clearHiddenElements();
-    hideElements(Array.from(hiddenIds).filter((id) => !(id in hilitedIds)));
-  }
 };
 
 export const hideElements = (hilitedIds: string[], replace = false) => {
