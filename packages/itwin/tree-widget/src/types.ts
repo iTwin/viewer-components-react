@@ -44,6 +44,7 @@ SpatialContainmentTreeProps,
 export interface TreeWidgetOptions {
   defaultPanelLocation?: StagePanelLocation;
   defaultPanelSection?: StagePanelSection;
+  defaultTreeWidgetPriority?: number;
   enableElementsClassGrouping?: boolean;
   additionalTrees?: SelectableContentDefinition[];
   modelsTreeProps?: ModelTreeProps;

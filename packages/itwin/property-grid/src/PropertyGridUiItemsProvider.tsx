@@ -101,6 +101,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
         getWidgetContent: () => <MultiElementPropertyGrid {...this._props} />,
         defaultState: WidgetState.Hidden,
         icon: "icon-info",
+        priority: this._props?.defaultPanelWidgetPriority,
       });
     }
 

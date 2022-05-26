@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/measure-tools-react",
+      "comment": "Fix obtaining localized strings for the various tools.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/measure-tools-react"
+}

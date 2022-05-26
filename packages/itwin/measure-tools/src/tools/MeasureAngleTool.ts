@@ -34,14 +34,20 @@ MeasureAngleToolModel
   public static override toolId = "MeasureTools.MeasureAngle";
   // TODO: Change icon once UX team provides icon
   public static override iconSpec = "icon-angle-measure";
-  public static get label() {
+
+  public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
       "MeasureTools:tools.MeasureAngle.flyover"
     );
   }
-  public static override get flyover() {
+  public static override get description(): string {
     return MeasureTools.localization.getLocalizedString(
-      "MeasureTools:tools.MeasureAngle.flyover"
+      "MeasureTools:tools.MeasureAngle.description",
+    );
+  }
+  public static override get keyin(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureAngle.keyin",
     );
   }
 
