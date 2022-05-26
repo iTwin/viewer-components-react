@@ -295,8 +295,7 @@ export const PropertyGrid = ({
             // If option needs to go in a specific position in the list, put it there. otherwise just push.
             if(option.forcePosition !== undefined) {
               items.splice(option.forcePosition, 0, newItem);
-            }
-            else {
+            } else {
               items.push(newItem);
             }
           }
