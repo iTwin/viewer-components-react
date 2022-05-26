@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import type { Viewport } from "@itwin/core-frontend";
 import { MeasurementManager } from "../api/MeasurementManager";
@@ -10,10 +10,27 @@ import type { Measurement } from "../api/Measurement";
 import { PrimitiveToolBase } from "../api/MeasurementTool";
 import type { Feature } from "../api/FeatureTracking";
 import { MeasureToolsFeatures } from "../api/FeatureTracking";
+import { MeasureTools } from "../MeasureTools";
 
 export class ClearMeasurementsTool extends PrimitiveToolBase {
   public static override toolId = "MeasureTools.ClearMeasurements";
   public static override iconSpec = "icon-measure-clear";
+
+  public static override get flyover() {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.ClearMeasurements.flyover"
+    );
+  }
+  public static override get description(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.ClearMeasurements.description",
+    );
+  }
+  public static override get keyin(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.ClearMeasurements.keyin",
+    );
+  }
 
   protected override get feature(): Feature | undefined {
     return MeasureToolsFeatures.Tools_ClearMeasurements;
