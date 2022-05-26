@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Added option forcePosition property to ContextMenuItemInfo",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
