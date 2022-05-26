@@ -2,6 +2,21 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "0.5.3",
+      "tag": "@itwin/property-grid-react_v0.5.3",
+      "date": "Thu, 26 May 2022 15:54:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow a caller to specify a default priority for PropertyGrid item provider."
+          },
+          {
+            "comment": "Added option forcePosition property to ContextMenuItemInfo"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.2",
       "tag": "@itwin/property-grid-react_v0.5.2",
       "date": "Wed, 18 May 2022 18:04:59 GMT",
