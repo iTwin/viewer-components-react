@@ -6,8 +6,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { SearchBox } from "@itwin/core-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Button, Table } from "@itwin/itwinui-react";
-import type { Report} from "@itwin/insights-client";
+import { Button, Table, toaster } from "@itwin/itwinui-react";
+import type { Report } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 import { WidgetHeader } from "./utils";
 import ExportModal from "./ExportModal";
@@ -106,11 +106,14 @@ const Reports = () => {
             }
           })
           .catch((err) => {
-            throw new Error(err);
+            setIsLoading(false);
+            toaster.negative("You are not authorized to get reports for this projects. Please contact project administrator.")
+            console.error(err);
           });
       })
       .catch((err) => {
-        throw new Error(err);
+        toaster.negative("You are not authorized to use this system.")
+        console.error(err);
       });
   }, [projectId, reportingClientApi]);
 
