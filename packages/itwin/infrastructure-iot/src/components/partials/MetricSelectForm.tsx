@@ -205,6 +205,7 @@ export function MetricSelectForm(props: {observationQueryIndex: number, observat
         <div className={appStyles["mt-2"]}>
           <MetricParamSelectForm
             availableParams={getSelectedMetric()?.getMetricParams() || []}
+            observationQueryIndex={props.observationQueryIndex}
             observationQuery={observationQuery}
             onChange={(newValue: {[key: string]: any}) => {
               observationQuery.setMetricParams(newValue);

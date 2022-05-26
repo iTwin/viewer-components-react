@@ -18,6 +18,7 @@ import styles from "./MetricParamSelectForm.module.scss";
 
 export function MetricParamSelectForm(props: {
   availableParams: { id: string }[];
+  observationQueryIndex: number;
   observationQuery: ObservationQuery;
   onChange: (newValue: {[key: string]: any}) => void;
 }) {
@@ -31,6 +32,13 @@ export function MetricParamSelectForm(props: {
   // Among them is that we want to preserve value/unit selection during a single component session,
   // so we cache that for the duration of component's life. Otherwise it will auto-adjust the user's values
   const dtValueCache = useRef<{value: number, unit?: string} | null>(null);
+
+  // Reset rolling Interval (dt) param cache when switching to a different query
+  useEffect(() => {
+    if (dtValueCache.current) {
+      dtValueCache.current = null;
+    }
+  }, [props.observationQueryIndex]);
 
   // We work with a local copy of the passed in observation query so we don"t modify parent props
   const [observationQuery, setObservationQuery] = useState<ObservationQuery>(props.observationQuery);
