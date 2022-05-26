@@ -2,6 +2,21 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.7.2",
+      "tag": "@itwin/measure-tools-react_v0.7.2",
+      "date": "Thu, 26 May 2022 15:54:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix obtaining localized strings for the various tools."
+          },
+          {
+            "comment": "Fixed an issue where cumulative diameter is incorrect for RadiusMeasurement. Also, changed the way we compute the text position for DistanceMeasurement such that it should not display if the measurement is 'behind' the camera eye."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.1",
       "tag": "@itwin/measure-tools-react_v0.7.1",
       "date": "Wed, 18 May 2022 15:36:43 GMT",

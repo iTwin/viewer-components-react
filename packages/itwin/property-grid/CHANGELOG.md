@@ -1,6 +1,14 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Wed, 18 May 2022 18:04:59 GMT and should not be manually modified.
+This log was last generated on Thu, 26 May 2022 15:54:07 GMT and should not be manually modified.
+
+## 0.5.3
+Thu, 26 May 2022 15:54:07 GMT
+
+### Patches
+
+- Allow a caller to specify a default priority for PropertyGrid item provider.
+- Added option forcePosition property to ContextMenuItemInfo
 
 ## 0.5.2
 Wed, 18 May 2022 18:04:59 GMT

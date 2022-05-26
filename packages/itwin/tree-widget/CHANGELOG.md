@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 09 May 2022 18:04:58 GMT and should not be manually modified.
+This log was last generated on Thu, 26 May 2022 15:54:07 GMT and should not be manually modified.
+
+## 0.4.6
+Thu, 26 May 2022 15:54:07 GMT
+
+### Patches
+
+- Allow a caller to specify a default priority for Tree Widget item provider.
 
 ## 0.4.5
 Mon, 09 May 2022 18:04:58 GMT
