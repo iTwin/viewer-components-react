@@ -39,6 +39,23 @@ MeasureDistanceToolModel
   public static override iconSpec = "icon-measure-perpendicular";
 
   protected _firstSurface?: Plane3dByOriginAndUnitNormal;
+
+  public static override get flyover() {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasurePerpendicular.flyover"
+    );
+  }
+  public static override get description(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasurePerpendicular.description",
+    );
+  }
+  public static override get keyin(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasurePerpendicular.keyin",
+    );
+  }
+
   protected override get feature(): Feature | undefined {
     return MeasureToolsFeatures.Tools_MeasurePerpendicular;
   }

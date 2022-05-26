@@ -42,6 +42,22 @@ MeasureLocationToolModel
   public static override toolId = "MeasureTools.MeasureLocation";
   public static override iconSpec = "icon-measure-location";
 
+  public static override get flyover() {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureLocation.flyover"
+    );
+  }
+  public static override get description(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureLocation.description",
+    );
+  }
+  public static override get keyin(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureLocation.keyin",
+    );
+  }
+
   protected override get feature(): Feature | undefined {
     return MeasureToolsFeatures.Tools_MeasureLocation;
   }

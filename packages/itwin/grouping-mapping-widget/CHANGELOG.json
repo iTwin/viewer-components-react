@@ -2,6 +2,18 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.3.4",
+      "tag": "@itwin/grouping-mapping-widget_v0.3.4",
+      "date": "Thu, 26 May 2022 15:54:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Adds a toggle for enabling extraction in the add/edit mapping view and the three dot menu in the mappings table"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.3",
       "tag": "@itwin/grouping-mapping-widget_v0.3.3",
       "date": "Wed, 18 May 2022 15:36:43 GMT",

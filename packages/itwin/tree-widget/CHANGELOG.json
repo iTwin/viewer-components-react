@@ -2,6 +2,18 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "0.4.6",
+      "tag": "@itwin/tree-widget-react_v0.4.6",
+      "date": "Thu, 26 May 2022 15:54:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow a caller to specify a default priority for Tree Widget item provider."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.5",
       "tag": "@itwin/tree-widget-react_v0.4.5",
       "date": "Mon, 09 May 2022 18:04:58 GMT",
