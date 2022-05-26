@@ -45,6 +45,7 @@ export interface PropertyGridProps {
   enableNullValueToggle?: boolean;
   defaultPanelLocation?: StagePanelLocation;
   defaultPanelSection?: StagePanelSection;
+  defaultPanelWidgetPriority?: number;
   /** If true, enables property category group nesting  */
   enablePropertyGroupNesting?: boolean;
   additionalContextMenuOptions?: ContextMenuItemInfo[];
