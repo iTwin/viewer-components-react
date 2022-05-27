@@ -405,7 +405,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               </Button>
               <ButtonGroup>
                 <ToggleSwitch
-                  label="Color"
+                  label="Color by Group"
                   labelPosition="left"
                   className="group-view-icon toggle"
                   disabled={isLoadingQuery}
