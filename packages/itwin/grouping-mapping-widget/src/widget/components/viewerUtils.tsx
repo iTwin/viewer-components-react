@@ -261,7 +261,7 @@ export const visualizeElements = (
     elementIds,
     vp,
     ColorDef.fromString(color),
-    FeatureOverrideType.ColorOnly,
+    FeatureOverrideType.ColorAndAlpha,
     true,
   );
   if (!wantEmphasis) {
@@ -269,6 +269,27 @@ export const visualizeElements = (
   }
   emph.wantEmphasis = true;
   emph.emphasizeElements(elementIds, vp, undefined, replace);
+};
+
+export const transparentOverriddenElements = () => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+  const ids = emph.getOverriddenElements()?.values();
+  if (ids) {
+    const toOverride = new Set<string>();
+    Array.from(ids).forEach((a) => a.forEach((id) => toOverride.add(id)));
+    emph.overrideElements(
+      toOverride,
+      vp,
+      ColorDef.red.withAlpha(50),
+      FeatureOverrideType.AlphaOnly,
+      true,
+    );
+  }
 };
 
 export const zoomToElements = async (elementIds: string[]) => {
@@ -381,4 +402,3 @@ export const clearAll = () => {
   emph.clearOverriddenElements(vp);
   emph.clearHiddenElements(vp);
 };
-

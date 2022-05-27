@@ -125,7 +125,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   }, [apiContext, iModelId, mapping.id, setIsLoading]);
 
   const getGroupColor = function (index: number) {
-    return `hsl(${index * goldenAngle + 60}, 100%, 75%)`;
+    return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
   };
 
   const visualizeGroupColors = useCallback(

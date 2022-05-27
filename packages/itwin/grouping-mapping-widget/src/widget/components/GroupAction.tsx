@@ -23,6 +23,7 @@ import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
 import { GroupQueryBuilderContext } from "./GroupQueryBuilderContext";
 import { QueryBuilder } from "./QueryBuilder";
 import {
+  transparentOverriddenElements,
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
@@ -97,6 +98,7 @@ const GroupAction = ({
         }
 
         setIsRendering(true);
+        transparentOverriddenElements();
         const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
         const resolvedHiliteIds = await visualizeElementsById(
           ids,
