@@ -205,13 +205,13 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
                   {(() => {
                     switch (extractionState) {
                       case ExtractionStates.Succeeded: {
-                        return IModelApp.localization.getLocalizedString("ReportsConfigWidget:Success")
+                        return IModelApp.localization.getLocalizedString("ReportsConfigWidget:Success");
                       }
                       case ExtractionStates.Failed: {
-                        return IModelApp.localization.getLocalizedString("ReportsConfigWidget:Failed")
+                        return IModelApp.localization.getLocalizedString("ReportsConfigWidget:Failed");
                       }
                       default: {
-                        return IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateInProgress")
+                        return IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateInProgress");
                       }
                     }
                   })()}

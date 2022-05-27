@@ -6,7 +6,6 @@
 import { IModelApp } from "@itwin/core-frontend";
 import {
   Modal,
-  ModalContent,
 } from "@itwin/itwinui-react";
 import {
   Table,
