@@ -2,19 +2,20 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
+@import '~@itwin/itwinui-css/scss/variables';
 
 .gmw-group-tile-container {
   display: flex;
   justify-content: space-between;
   border-radius: 5px;
-  margin-right: $iui-xs;
   background-color: var(--iui-color-background-2);
-  padding: 5.5px 0px 2.75px 8px;
+  height: $iui-baseline * 4;
+  padding: 5.5px 8px;
   .body {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    justify-content: center;
     &-text {
       overflow: hidden;
       white-space: nowrap;

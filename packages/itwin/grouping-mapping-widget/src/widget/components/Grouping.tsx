@@ -438,7 +438,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   <GroupTile
                     key={g.id}
                     title={g.groupName ? g.groupName : "Untitled"}
-                    subText={g.description ? g.description : "No Description"}
+                    subText={g.description}
                     actionGroup={
                       <div className="actions">
                         <IconButton
