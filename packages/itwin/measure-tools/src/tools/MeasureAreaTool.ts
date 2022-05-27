@@ -32,6 +32,22 @@ MeasureAreaToolModel
   public static override toolId = "MeasureTools.MeasureArea";
   public static override iconSpec = "icon-measure-2d";
 
+  public static override get flyover() {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureArea.flyover"
+    );
+  }
+  public static override get description(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureArea.description",
+    );
+  }
+  public static override get keyin(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureArea.keyin",
+    );
+  }
+
   protected override get feature(): Feature | undefined {
     return MeasureToolsFeatures.Tools_MeasureArea;
   }

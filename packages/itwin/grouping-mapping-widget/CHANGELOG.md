@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 18 May 2022 15:36:43 GMT and should not be manually modified.
+This log was last generated on Thu, 26 May 2022 15:54:07 GMT and should not be manually modified.
+
+## 0.3.4
+Thu, 26 May 2022 15:54:07 GMT
+
+### Patches
+
+- Adds a toggle for enabling extraction in the add/edit mapping view and the three dot menu in the mappings table
 
 ## 0.3.3
 Wed, 18 May 2022 15:36:43 GMT
