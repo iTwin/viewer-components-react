@@ -679,7 +679,7 @@ importers:
       '@itwin/itwinui-css': ^0.50.0
       '@itwin/itwinui-icons-color-react': ^1.0.1
       '@itwin/itwinui-icons-react': ^1.7.0
-      '@itwin/itwinui-react': ^1.37.3
+      '@itwin/itwinui-react': ~1.37.3
       '@itwin/presentation-common': ^3.0.0
       '@itwin/presentation-frontend': ^3.0.0
       '@itwin/webgl-compatibility': ^3.0.0
@@ -717,7 +717,7 @@ importers:
       '@itwin/insights-client': 0.2.0
       '@itwin/itwinui-icons-color-react': 1.0.2_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-icons-react': 1.8.0_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 1.38.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 1.37.3_react-dom@17.0.2+react@17.0.2
       simple-react-validator: 1.6.1
     devDependencies:
       '@faker-js/faker': 6.2.0
@@ -2135,10 +2135,10 @@ packages:
 
   /@itwin/itwinui-css/0.55.0:
     resolution: {integrity: sha512-DOO0tuVyx7bmBlCcnz1PA0cOBnm9CWHKPnO2PG+wMXiRSa+aWmlLsgec6x6eJvAuAUenO2LdjQFNTTTKuW3GuA==}
-    dev: true
 
   /@itwin/itwinui-css/0.58.0:
     resolution: {integrity: sha512-BBMoB8OuMR8v5ndBgZlWDSEgIuJzOh5ja3WxH3w2uaT3VWnFMS00DURhYnfNnBOqnWbGWz7v8eX56GuZfIhUbQ==}
+    dev: true
 
   /@itwin/itwinui-icons-color-react/1.0.2_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-jsYwrecYVnve9qM4l6NegliJBI5jEupJ4aIvHlVTJMZEwtqLDYOzQKB/SfdE79aoKJ7qBVZDUqozRRbReFhQ8Q==}
@@ -2201,7 +2201,6 @@ packages:
       react-dom: 17.0.2_react@17.0.2
       react-table: 7.7.0_react@17.0.2
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
-    dev: true
 
   /@itwin/itwinui-react/1.38.1_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-iZPwWF85b0NJ0hI/iK3oWt+bZ5fbIi3/1LLExSyh1Z6IkemZsqbld6Wj8nnGfRQ+V3RU0e9JQUkZC77nM++m1w==}
@@ -2219,6 +2218,7 @@ packages:
       react-dom: 17.0.2_react@17.0.2
       react-table: 7.7.0_react@17.0.2
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
+    dev: true
 
   /@itwin/presentation-common/3.1.2_a9d059ba8516a7a72612d25159406e59:
     resolution: {integrity: sha512-BWCKfIa2RF7W6kA/XqRV0ZamZQdm76RyR6fp/trkbi3LbMln0JKm9mF+TcfMm/5dig3/gta5OcoQeue+Dq3Now==}
