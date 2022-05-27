@@ -82,17 +82,26 @@ const stringToPossibleDataType = (str?: string): PossibleDataType => {
   }
 };
 
-const convertToPropertyMap = (groupProperties: GroupPropertyType[], calculatedProperties: CalculatedPropertyType[]): PropertyMap => {
+const convertToPropertyMap = (
+  groupProperties: GroupPropertyType[],
+  calculatedProperties: CalculatedPropertyType[],
+  customCalculations: CustomCalculationType[]
+): PropertyMap => {
   const map: PropertyMap = {};
 
   groupProperties.forEach((p) => {
     if (p.propertyName)
-      map[p.propertyName] = stringToPossibleDataType(p.dataType);
+      map[p.propertyName.toLowerCase()] = stringToPossibleDataType(p.dataType);
   });
 
   calculatedProperties.forEach((p) => {
     if (p.propertyName)
-      map[p.propertyName] = "number";
+      map[p.propertyName.toLowerCase()] = "number";
+  });
+
+  customCalculations.forEach((p) => {
+    if (p.propertyName)
+      map[p.propertyName.toLowerCase()] = stringToPossibleDataType(p.dataType);
   });
 
   return map;
@@ -160,7 +169,8 @@ export const PropertyMenu = ({
   const { isLoading: isLoadingCustomCalculations, data: customCalculations, refreshData: refreshCustomCalculations } =
     useCombinedFetchRefresh<CustomCalculationType>(fetchCustomCalculations);
 
-  const properties = useMemo(() => convertToPropertyMap(groupProperties, calculatedProperties), [groupProperties, calculatedProperties]);
+  const properties = useMemo(() => convertToPropertyMap(groupProperties, calculatedProperties, customCalculations),
+    [groupProperties, calculatedProperties, customCalculations]);
 
   useEffect(() => {
     const initialize = async () => {

@@ -272,7 +272,7 @@ importers:
       '@itwin/eslint-plugin': ^3.0.0
       '@itwin/imodel-browser-react': ^0.12.1
       '@itwin/imodel-components-react': ^3.0.0
-      '@itwin/insights-client': 0.1.1
+      '@itwin/insights-client': 0.2.1
       '@itwin/itwinui-icons-react': ^1.7.0
       '@itwin/itwinui-react': ^1.35.0
       '@itwin/presentation-common': ^3.0.0
@@ -304,7 +304,7 @@ importers:
       typescript: ~4.3.0
     dependencies:
       '@itwin/imodel-browser-react': 0.12.2_react-dom@17.0.2+react@17.0.2
-      '@itwin/insights-client': 0.1.1
+      '@itwin/insights-client': 0.2.1
       '@itwin/itwinui-icons-react': 1.8.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.35.0_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
@@ -1910,8 +1910,8 @@ packages:
       - encoding
     dev: false
 
-  /@itwin/insights-client/0.1.1:
-    resolution: {integrity: sha512-kCeeNfu8SDvJtDCbQILRlj1iyMahDQyfaTA6IptWofgZg+B/N8iTKoAd6/8TsZxd/1/sCl+mXuXo5rVhIK8byA==}
+  /@itwin/insights-client/0.2.1:
+    resolution: {integrity: sha512-hghlgwRy/IGJd5zv0RGzCNUVYKyw2LGeyvZarCA3o7e41y8GzA00mvSwo8lHa35PmwPDjN2ArlfMzx85LLXuwQ==}
     dependencies:
       cross-fetch: 3.1.5
     transitivePeerDependencies:
@@ -4948,7 +4948,7 @@ packages:
     dev: true
 
   /buffer-crc32/0.2.13:
-    resolution: {integrity: sha1-DTM+PwDqxQqhRUq9MO+MKl2ackI=}
+    resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
     dev: true
 
   /buffer-from/1.1.2:
