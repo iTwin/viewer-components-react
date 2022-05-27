@@ -298,8 +298,6 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       setIsLoading,
       apiContext,
     );
-    setHiddenGroupsIds([]);
-    clearHiddenElements();
     if (groups) {
       if (showGroupColor) {
         await visualizeGroupColors(groups);
