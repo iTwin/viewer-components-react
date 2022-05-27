@@ -35,6 +35,22 @@ MeasureRadiusToolModel
   // TODO: Change icon once UX team provides icon
   public static override iconSpec = "icon-three-points-circular-arc";
 
+  public static override get flyover() {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureRadius.flyover"
+    );
+  }
+  public static override get description(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureRadius.description",
+    );
+  }
+  public static override get keyin(): string {
+    return MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureRadius.keyin",
+    );
+  }
+
   protected override get feature(): Feature | undefined {
     return MeasureToolsFeatures.Tools_MeasureRadius;
   }

@@ -1,6 +1,14 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Wed, 18 May 2022 15:36:43 GMT and should not be manually modified.
+This log was last generated on Thu, 26 May 2022 15:54:07 GMT and should not be manually modified.
+
+## 0.7.2
+Thu, 26 May 2022 15:54:07 GMT
+
+### Patches
+
+- Fix obtaining localized strings for the various tools.
+- Fixed an issue where cumulative diameter is incorrect for RadiusMeasurement. Also, changed the way we compute the text position for DistanceMeasurement such that it should not display if the measurement is 'behind' the camera eye.
 
 ## 0.7.1
 Wed, 18 May 2022 15:36:43 GMT
