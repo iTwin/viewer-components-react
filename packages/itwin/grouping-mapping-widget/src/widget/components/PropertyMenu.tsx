@@ -85,23 +85,28 @@ const stringToPossibleDataType = (str?: string): PossibleDataType => {
 const convertToPropertyMap = (
   groupProperties: GroupPropertyType[],
   calculatedProperties: CalculatedPropertyType[],
-  customCalculations: CustomCalculationType[]
+  customCalculations: CustomCalculationType[],
+  selectedPropertyName?: string
 ): PropertyMap => {
   const map: PropertyMap = {};
+  const selectedLowerName = selectedPropertyName?.toLowerCase();
 
   groupProperties.forEach((p) => {
-    if (p.propertyName)
-      map[p.propertyName.toLowerCase()] = stringToPossibleDataType(p.dataType);
+    const lowerName = p.propertyName?.toLowerCase();
+    if (lowerName && lowerName !== selectedLowerName)
+      map[lowerName] = stringToPossibleDataType(p.dataType);
   });
 
   calculatedProperties.forEach((p) => {
-    if (p.propertyName)
-      map[p.propertyName.toLowerCase()] = "number";
+    const lowerName = p.propertyName?.toLowerCase();
+    if (lowerName)
+      map[lowerName] = "number";
   });
 
   customCalculations.forEach((p) => {
-    if (p.propertyName)
-      map[p.propertyName.toLowerCase()] = stringToPossibleDataType(p.dataType);
+    const lowerName = p.propertyName?.toLowerCase();
+    if (lowerName && lowerName !== selectedLowerName)
+      map[lowerName] = stringToPossibleDataType(p.dataType);
   });
 
   return map;
@@ -168,9 +173,6 @@ export const PropertyMenu = ({
   );
   const { isLoading: isLoadingCustomCalculations, data: customCalculations, refreshData: refreshCustomCalculations } =
     useCombinedFetchRefresh<CustomCalculationType>(fetchCustomCalculations);
-
-  const properties = useMemo(() => convertToPropertyMap(groupProperties, calculatedProperties, customCalculations),
-    [groupProperties, calculatedProperties, customCalculations]);
 
   useEffect(() => {
     const initialize = async () => {
@@ -300,7 +302,7 @@ export const PropertyMenu = ({
           iModelId={iModelId}
           mappingId={mappingId}
           groupId={groupId}
-          properties={properties}
+          properties={convertToPropertyMap(groupProperties, calculatedProperties, customCalculations)}
           returnFn={customCalculationReturn}
         />
       );
@@ -310,7 +312,7 @@ export const PropertyMenu = ({
           iModelId={iModelId}
           mappingId={mappingId}
           groupId={groupId}
-          properties={properties}
+          properties={convertToPropertyMap(groupProperties, calculatedProperties, customCalculations, selectedCustomCalculation?.propertyName)}
           customCalculation={selectedCustomCalculation}
           returnFn={customCalculationReturn}
         />
