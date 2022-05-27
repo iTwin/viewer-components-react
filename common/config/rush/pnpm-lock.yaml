@@ -679,7 +679,7 @@ importers:
       '@itwin/itwinui-css': ^0.50.0
       '@itwin/itwinui-icons-color-react': ^1.0.1
       '@itwin/itwinui-icons-react': ^1.7.0
-      '@itwin/itwinui-react': ^1.37.2
+      '@itwin/itwinui-react': ^1.37.0
       '@itwin/presentation-common': ^3.0.0
       '@itwin/presentation-frontend': ^3.0.0
       '@itwin/webgl-compatibility': ^3.0.0

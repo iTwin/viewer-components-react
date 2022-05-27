@@ -123,7 +123,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
   const jobId = useRef<string>("");
   const intervalId = useRef<number>();
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [currentIModelValue, setCurrentIModelValue] = useState<string>();
+  const [currentIModelId, setCurrentIModelId] = useState<string>();
   const apiContext = useApi();
 
   const runExtraction = async (iModelId: string) => {
@@ -140,7 +140,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
       handleError(error.status);
       setExtractionState(ExtractionStates.Failed);
       setIsRunning(false);
-      setCurrentIModelValue(undefined);
+      setCurrentIModelId(undefined);
     }
   };
 
@@ -157,11 +157,11 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
         } else if (response.status?.state === "Succeeded") {
           setExtractionState(ExtractionStates.Succeeded);
           setIsRunning(false);
-          setCurrentIModelValue(undefined);
+          setCurrentIModelId(undefined);
         } else if (response.status?.state === "Failed") {
           setExtractionState(ExtractionStates.Failed);
           setIsRunning(false);
-          setCurrentIModelValue(undefined);
+          setCurrentIModelId(undefined);
         }
       }, delay);
       intervalId.current = newIntervalId;
@@ -190,9 +190,9 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
           isLoading ? <SkeletonBlock /> :
             <ComboBox
               options={iModelOptions}
-              value={currentIModelValue}
+              value={currentIModelId}
               onChange={async (value) => {
-                setCurrentIModelValue(value);
+                setCurrentIModelId(value);
                 await runExtraction(value);
               }}
               inputProps={{
