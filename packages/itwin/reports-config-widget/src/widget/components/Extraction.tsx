@@ -202,7 +202,20 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
               message={extractionState !== ExtractionStates.None && <StatusMessage>
                 <div className="extraction-status-container">
                   <ExtractionStatus state={extractionState} setExtractionState={setExtractionState} />
-                  {IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateInProgress")}
+                  {(() => {
+                    switch (extractionState) {
+                      case ExtractionStates.Succeeded: {
+                        return IModelApp.localization.getLocalizedString("ReportsConfigWidget:Success")
+                      }
+                      case ExtractionStates.Failed: {
+                        return IModelApp.localization.getLocalizedString("ReportsConfigWidget:Failed")
+                      }
+                      default: {
+                        return IModelApp.localization.getLocalizedString("ReportsConfigWidget:UpdateInProgress")
+                      }
+                    }
+                  })()}
+
                 </div>
               </StatusMessage>
               }

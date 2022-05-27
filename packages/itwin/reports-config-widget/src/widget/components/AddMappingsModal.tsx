@@ -120,27 +120,25 @@ const AddMappingsModal = ({
       onClose={async () => {
         await returnFn();
       }}
-      styleType='fullPage'
+      style={{ display: "flex", flexDirection: "column", maxHeight: "77vh" }}
     >
-      <ModalContent>
-        <div className='add-mappings-container'>
-          <SelectIModel selectedIModelId={selectedIModelId} setSelectedIModelId={setSelectediModelId} />
-          <Table<MappingType>
-            data={isLoading ? [] : mappings}
-            columns={mappingsColumns}
-            className='add-mappings-table'
-            emptyTableContent={IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoMappingsAvailable")}
-            isSortable
-            isSelectable
-            isLoading={isLoading}
-            isRowDisabled={(rowData) => existingMappings.some((v) => v.mappingId === rowData.id)}
-            onSelect={(selectData: Mapping[] | undefined) => {
-              selectData && setSelectedMappings(selectData);
-            }}
-            paginatorRenderer={LocalizedTablePaginator}
-          />
-        </div>
-      </ModalContent>
+      <div className='add-mappings-container'>
+        <SelectIModel selectedIModelId={selectedIModelId} setSelectedIModelId={setSelectediModelId} />
+        <Table<MappingType>
+          data={isLoading ? [] : mappings}
+          columns={mappingsColumns}
+          className='add-mappings-table'
+          emptyTableContent={IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoMappingsAvailable")}
+          isSortable
+          isSelectable
+          isLoading={isLoading}
+          isRowDisabled={(rowData) => existingMappings.some((v) => v.mappingId === rowData.id)}
+          onSelect={(selectData: Mapping[] | undefined) => {
+            selectData && setSelectedMappings(selectData);
+          }}
+          paginatorRenderer={LocalizedTablePaginator}
+        />
+      </div>
       <ActionPanel
         actionLabel={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Add")}
         onAction={onSave}

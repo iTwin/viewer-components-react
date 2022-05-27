@@ -29,7 +29,7 @@
   .reports-list {
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
+    overflow-y: overlay;
     gap: 7.5px;
     margin-top: 7.5px;
   }

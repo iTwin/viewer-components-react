@@ -8,15 +8,14 @@
   display: flex;
   justify-content: space-between;
   border-radius: 5px;
-  padding-top: 5.5px;
-  padding-bottom: 2.75px;
-  margin-right: $iui-xs;
   background-color: var(--iui-color-background-2);
-  padding-left: 8px;
+  height: $iui-baseline * 4;
+  padding: 5.5px 8px;
   .body {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    justify-content: center;
     &-text {
       overflow: hidden;
       white-space: nowrap;
