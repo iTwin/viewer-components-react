@@ -182,50 +182,6 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     [iModelConnection, groups],
   );
 
-  const addGroup = () => {
-    clearEmphasizedElements();
-    setGroupsView(GroupsView.ADD);
-  };
-
-  const onModify = useCallback((group) => {
-    setSelectedGroup(group);
-    setGroupsView(GroupsView.MODIFYING);
-  }, []);
-
-  const openProperties = useCallback((group) => {
-    setSelectedGroup(group);
-    setGroupsView(GroupsView.PROPERTIES);
-  }, []);
-
-  const refresh = useCallback(async () => {
-    setGroupsView(GroupsView.GROUPS);
-    setSelectedGroup(undefined);
-    setGroups([]);
-    const groups = await fetchGroups(
-      setGroups,
-      iModelId,
-      mapping.id ?? "",
-      setIsLoading,
-      apiContext,
-    );
-    setHiddenGroupsIds([]);
-    clearHiddenElements();
-    if (groups) {
-      if (showGroupColor) {
-        await visualizeGroupColors(groups);
-      } else {
-        clearEmphasizedOverriddenElements();
-      }
-    }
-  }, [
-    apiContext,
-    iModelId,
-    mapping.id,
-    setGroups,
-    showGroupColor,
-    visualizeGroupColors,
-  ]);
-
   const hideGroups = useCallback(
     async (viewGroups: Group[], zoomTo: boolean = true) => {
       setLoadingQuery(true);
@@ -311,6 +267,54 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     },
     [groups, hiddenGroupsIds, hideGroups, iModelConnection, hilitedElements],
   );
+
+  const addGroup = () => {
+    clearEmphasizedElements();
+    setGroupsView(GroupsView.ADD);
+  };
+
+  const onModify = useCallback((group) => {
+    setSelectedGroup(group);
+    setGroupsView(GroupsView.MODIFYING);
+  }, []);
+
+  const openProperties = useCallback(async (group) => {
+    setSelectedGroup(group);
+    setGroupsView(GroupsView.PROPERTIES);
+    if (group && hiddenGroupsIds.includes(group.id)) {
+      await showGroup(group);
+      setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
+    }
+  }, [showGroup, hiddenGroupsIds, setHiddenGroupsIds]);
+
+  const refresh = useCallback(async () => {
+    setGroupsView(GroupsView.GROUPS);
+    setSelectedGroup(undefined);
+    setGroups([]);
+    const groups = await fetchGroups(
+      setGroups,
+      iModelId,
+      mapping.id ?? "",
+      setIsLoading,
+      apiContext,
+    );
+    setHiddenGroupsIds([]);
+    clearHiddenElements();
+    if (groups) {
+      if (showGroupColor) {
+        await visualizeGroupColors(groups);
+      } else {
+        clearEmphasizedOverriddenElements();
+      }
+    }
+  }, [
+    apiContext,
+    iModelId,
+    mapping.id,
+    setGroups,
+    showGroupColor,
+    visualizeGroupColors,
+  ]);
 
   const showAll = useCallback(async () => {
     clearHiddenElements();
@@ -478,7 +482,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                             </MenuItem>,
                             <MenuItem
                               key={1}
-                              onClick={() => openProperties(g)}
+                              onClick={async () => openProperties(g)}
                               icon={<SvgList />}
                             >
                               Properties
@@ -511,7 +515,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                       </div>
                     }
                     onClickTitle={
-                      isLoadingQuery ? undefined : () => openProperties(g)
+                      isLoadingQuery ? undefined : async () => openProperties(g)
                     }
                   />
                 ))}
