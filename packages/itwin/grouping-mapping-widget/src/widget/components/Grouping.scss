@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
+@import "~@itwin/itwinui-css/scss/variables";
 
 .groups-container {
   display: flex;
@@ -18,10 +18,13 @@
     border-bottom: 1px solid var(--iui-color-background-4);
     padding-bottom: $iui-baseline;
     flex-wrap: wrap;
-    margin-right: $iui-s;
 
-    .toggle {
-      margin-right: $iui-xs;
+    .toolbar-buttons {
+      margin-right: $iui-sm;
+
+      .toggle {
+        margin-right: $iui-xs;
+      }
     }
   }
 

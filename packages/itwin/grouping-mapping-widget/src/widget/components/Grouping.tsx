@@ -403,7 +403,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               >
                 {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
               </Button>
-              <ButtonGroup>
+              <ButtonGroup className="toolbar-buttons">
                 <ToggleSwitch
                   label="Color by Group"
                   labelPosition="left"
