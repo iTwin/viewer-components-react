@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 26 May 2022 15:54:07 GMT and should not be manually modified.
+This log was last generated on Mon, 30 May 2022 12:44:10 GMT and should not be manually modified.
+
+## 0.4.7
+Mon, 30 May 2022 12:44:10 GMT
+
+### Patches
+
+- Fix GeometricElement nodes not being shown in `IModelContentTree`.
 
 ## 0.4.6
 Thu, 26 May 2022 15:54:07 GMT
