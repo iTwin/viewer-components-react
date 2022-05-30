@@ -7,7 +7,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import { fetchIdsFromQuery, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, getReportingClient, WidgetHeader } from "./utils";
 import {
   clearEmphasizedElements,
   manufactureKeys,
@@ -47,7 +47,6 @@ import { SvgProperties } from "@itwin/itwinui-icons-react";
 import type { PossibleDataType, PropertyMap } from "../../formula/Types";
 import { useCombinedFetchRefresh } from "../hooks/useFetchData";
 import { ApiContext } from "./GroupingMapping";
-import { ReportingClient } from "@itwin/insights-client";
 
 interface PropertyModifyProps {
   iModelId: string;
@@ -146,7 +145,7 @@ export const PropertyMenu = ({
 
   const fetchGroupProperties = useMemo(
     () => {
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = getReportingClient(apiContext.prefix);
       return async () => reportingClientApi.getGroupProperties(apiContext.accessToken, iModelId, mappingId, groupId);
     },
     [apiContext, iModelId, mappingId, groupId],
@@ -156,7 +155,7 @@ export const PropertyMenu = ({
 
   const fetchCalculatedProperties = useMemo(
     () => {
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = getReportingClient(apiContext.prefix);
       return async () => reportingClientApi.getCalculatedProperties(apiContext.accessToken, iModelId, mappingId, groupId);
     },
     [apiContext, iModelId, mappingId, groupId],
@@ -166,7 +165,7 @@ export const PropertyMenu = ({
 
   const fetchCustomCalculations = useMemo(
     () => {
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = getReportingClient(apiContext.prefix);
       return async () => reportingClientApi.getCustomCalculations(apiContext.accessToken, iModelId, mappingId, groupId);
     },
     [apiContext, iModelId, mappingId, groupId],

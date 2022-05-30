@@ -21,8 +21,8 @@ import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import { PropertyMenuView } from "./PropertyMenu";
 import type { GroupProperty } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
 import { ApiContext } from "./GroupingMapping";
+import { getReportingClient } from "./utils";
 
 export type GroupPropertyType = CreateTypeFromInterface<GroupProperty>;
 
@@ -147,7 +147,7 @@ const GroupPropertyTable = ({
         show={showGroupPropertyDeleteModal}
         setShow={setShowGroupPropertyDeleteModal}
         onDelete={async () => {
-          const reportingClientApi = new ReportingClient(apiContext.prefix);
+          const reportingClientApi = getReportingClient(apiContext.prefix);
           await reportingClientApi.deleteGroupProperty(
             apiContext.accessToken,
             iModelId,
