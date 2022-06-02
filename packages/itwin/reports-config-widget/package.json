@@ -6,6 +6,7 @@
     "Bentley",
     "BIM",
     "iModel",
+    "iTwin",
     "Reporting",
     "Reports"
   ],
@@ -113,6 +114,8 @@
   "peerDependencies": {
     "@itwin/appui-abstract": "^3.0.0",
     "@itwin/appui-react": "^3.0.0",
+    "@itwin/core-bentley": "^3.0.0",
+    "@itwin/core-frontend": "^3.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.0"

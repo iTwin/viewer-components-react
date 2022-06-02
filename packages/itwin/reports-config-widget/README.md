@@ -1,4 +1,4 @@
-# @itwin/reports-config-widget
+# @itwin/reports-config-widget-react
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 The Reports Config widget is a UI component for iTwin Viewer applications that simplifies how users (and developers) interface with the [Reporting Platform APIs](https://developer.bentley.com/apis/insights/overview/).

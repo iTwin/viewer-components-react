@@ -7,22 +7,15 @@ import type { Localization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
 
 export class ReportsConfigWidget {
-  private static _isInitialized = false;
-  private static _i18nNamespace: any;
+  private static _i18nNamespace: string;
   private static _i18n?: Localization;
 
   public static get i18nNamespace(): any {
     return ReportsConfigWidget._i18nNamespace;
   }
 
-  public static get isInitialized(): boolean {
-    return ReportsConfigWidget._isInitialized;
-  }
-  public static async initialize(localization?: Localization): Promise<void> {
-    if (ReportsConfigWidget.isInitialized)
-      return;
 
-    ReportsConfigWidget._isInitialized = true;
+  public static async initialize(localization?: Localization): Promise<void> {
     ReportsConfigWidget._i18n = localization;
     // Setup i18n
     const ReportsWidgetNamespace = "ReportsConfigWidget";
