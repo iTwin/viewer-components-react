@@ -46,45 +46,43 @@ export const DeleteModal = ({
   };
 
   return (
-    <>
-      <Modal
-        title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Confirm")}
-        isOpen={show}
-        isDismissible={!isLoading}
-        onClose={() => {
-          setShow(false);
-        }}
-      >
-        <ModalContent>
-          <div className="delete-modal-body-text">
-            <Leading>
-              {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AreYouSureYouWantToDelete")}
-            </Leading>
-            <strong>
-              {<MiddleTextTruncation text={`${entityName}?`} />}
-            </strong>
-          </div>
-        </ModalContent>
-        <ModalButtonBar>
-          {isLoading &&
-            <div className="rcw-loading-delete" data-testid="rcw-loading-delete">
-              <LoadingSpinner />
-            </div>}
-          <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>
-            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Delete")}
-          </Button>
-          <Button
-            styleType='default'
-            onClick={() => {
-              setShow(false);
-            }}
-            disabled={isLoading}
-          >
-            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Cancel")}
-          </Button>
-        </ModalButtonBar>
-      </Modal>
-    </>
+    <Modal
+      title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Confirm")}
+      isOpen={show}
+      isDismissible={!isLoading}
+      onClose={() => {
+        setShow(false);
+      }}
+    >
+      <ModalContent>
+        <div className="delete-modal-body-text">
+          <Leading>
+            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AreYouSureYouWantToDelete")}
+          </Leading>
+          <strong>
+            {<MiddleTextTruncation text={`${entityName}?`} />}
+          </strong>
+        </div>
+      </ModalContent>
+      <ModalButtonBar>
+        {isLoading &&
+          <div className="rcw-loading-delete" data-testid="rcw-loading-delete">
+            <LoadingSpinner />
+          </div>}
+        <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>
+          {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Delete")}
+        </Button>
+        <Button
+          styleType='default'
+          onClick={() => {
+            setShow(false);
+          }}
+          disabled={isLoading}
+        >
+          {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Cancel")}
+        </Button>
+      </ModalButtonBar>
+    </Modal>
   );
 };
 

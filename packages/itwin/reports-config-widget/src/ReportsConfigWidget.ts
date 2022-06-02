@@ -14,7 +14,6 @@ export class ReportsConfigWidget {
     return ReportsConfigWidget._i18nNamespace;
   }
 
-
   public static async initialize(localization?: Localization): Promise<void> {
     ReportsConfigWidget._i18n = localization;
     // Setup i18n
