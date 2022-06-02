@@ -49,7 +49,7 @@ const CustomCalculationAction = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
-  const { isValid, forceValidation } = useFormulaValidation(propertyName, formula, properties, setFormulaErrorMessage);
+  const { isValid, forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, properties, setFormulaErrorMessage);
 
   const onSave = async () => {
     if (!validator.allValid()) {

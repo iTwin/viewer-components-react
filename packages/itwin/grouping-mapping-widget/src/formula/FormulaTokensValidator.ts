@@ -50,7 +50,7 @@ export function validateTokens(formulaName: string, tokens: Queue<Token>, proper
         if (isConstant) {
           argStack.push("number");
         } else {
-          if (token.value.toLowerCase() === formulaName)
+          if (token.value === formulaName)
             return "Formula cannot reference itself.";
 
           const prop = properties[token.value];
