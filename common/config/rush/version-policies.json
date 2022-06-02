@@ -45,6 +45,11 @@
     "lockedMajor": 0
   },
   {
+    "policyName": "infrastructure-iot",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
+  },
+  {
     "policyName": "reports-config-widget",
     "definitionName": "individualVersion",
     "lockedMajor": 0
