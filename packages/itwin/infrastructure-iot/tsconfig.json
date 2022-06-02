@@ -1,0 +1,10 @@
+{
+  "extends": "./node_modules/@itwin/build-tools/tsconfig-base.json",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "experimentalDecorators": true
+  },
+  "include": [
+    "./src/**/*.ts*"
+  ]
+}
