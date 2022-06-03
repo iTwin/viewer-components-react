@@ -406,6 +406,87 @@ importers:
       ts-jest: 26.5.6_jest@26.6.3+typescript@4.4.4
       typescript: 4.4.4
 
+  ../../packages/itwin/infrastructure-iot:
+    specifiers:
+      '@itwin/appui-abstract': ^3.1.0
+      '@itwin/appui-layout-react': ^3.1.0
+      '@itwin/appui-react': ^3.1.0
+      '@itwin/build-tools': ^3.1.0
+      '@itwin/components-react': ^3.1.0
+      '@itwin/core-bentley': ^3.1.0
+      '@itwin/core-common': ^3.1.0
+      '@itwin/core-frontend': ^3.1.0
+      '@itwin/core-geometry': ^3.1.0
+      '@itwin/core-i18n': ^3.1.0
+      '@itwin/core-markup': ^3.1.0
+      '@itwin/core-orbitgt': ^3.1.0
+      '@itwin/core-quantity': ^3.1.0
+      '@itwin/core-react': ^3.1.0
+      '@itwin/eslint-plugin': ^3.1.0
+      '@itwin/imodel-components-react': ^3.1.0
+      '@itwin/itwinui-react': ^1.34.2
+      '@itwin/webgl-compatibility': ^3.1.0
+      '@types/i18next': ^8.4.2
+      '@types/lodash': ^4.14.181
+      '@types/react': ^17.0.19
+      '@types/react-dom': ^17.0.9
+      '@typescript-eslint/eslint-plugin': ^5.3.1
+      axios: ^0.26.1
+      class-transformer: ^0.5.1
+      cpx2: ^3.0.0
+      eslint: ^7.11.0
+      highcharts: ^10.0.0
+      highcharts-react-official: ^3.1.0
+      lodash: ^4.17.21
+      react: ^17.0.2
+      react-dom: ^17.0.2
+      react-infinite-scroll-component: ^6.1.0
+      react-resize-detector: ^7.0.0
+      reflect-metadata: ^0.1.13
+      rimraf: ^3.0.2
+      rxjs: ^7.5.5
+      typescript: ~4.3.0
+    dependencies:
+      '@itwin/itwinui-react': 1.35.0_react-dom@17.0.2+react@17.0.2
+      axios: 0.26.1
+      class-transformer: 0.5.1
+      highcharts: 10.0.0
+      highcharts-react-official: 3.1.0_highcharts@10.0.0+react@17.0.2
+      lodash: 4.17.21
+      react-infinite-scroll-component: 6.1.0_react@17.0.2
+      react-resize-detector: 7.0.0_react-dom@17.0.2+react@17.0.2
+      reflect-metadata: 0.1.13
+      rxjs: 7.5.5
+    devDependencies:
+      '@itwin/appui-abstract': 3.1.2_@itwin+core-bentley@3.1.2
+      '@itwin/appui-layout-react': 3.1.2_ad1af7938be23ef7011d65ba65fd969c
+      '@itwin/appui-react': 3.1.2_8493b923c12a6a9a4615a1daa129ef36
+      '@itwin/build-tools': 3.1.2
+      '@itwin/components-react': 3.1.2_ad1af7938be23ef7011d65ba65fd969c
+      '@itwin/core-bentley': 3.1.2
+      '@itwin/core-common': 3.1.2_3677922ab283ebfe2b0729d579358145
+      '@itwin/core-frontend': 3.1.2_5a82738ef9179eb6bb289529ae5c5770
+      '@itwin/core-geometry': 3.1.2
+      '@itwin/core-i18n': 3.1.2_@itwin+core-bentley@3.1.2
+      '@itwin/core-markup': 3.1.2_6a6465ae15903d79698f2170b25fd468
+      '@itwin/core-orbitgt': 3.1.2
+      '@itwin/core-quantity': 3.1.2_@itwin+core-bentley@3.1.2
+      '@itwin/core-react': 3.1.2_192e986a3ccac8c463840e3cecabb201
+      '@itwin/eslint-plugin': 3.1.2_eslint@7.32.0+typescript@4.3.5
+      '@itwin/imodel-components-react': 3.1.2_fcc770174d8197d3a18365576c406db0
+      '@itwin/webgl-compatibility': 3.1.2
+      '@types/i18next': 8.4.6
+      '@types/lodash': 4.14.182
+      '@types/react': 17.0.44
+      '@types/react-dom': 17.0.15
+      '@typescript-eslint/eslint-plugin': 5.19.0_eslint@7.32.0+typescript@4.3.5
+      cpx2: 3.0.2
+      eslint: 7.32.0
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      rimraf: 3.0.2
+      typescript: 4.3.5
+
   ../../packages/itwin/measure-tools:
     specifiers:
       '@bentley/icons-generic-webfont': ^1.0.29
@@ -1314,6 +1395,54 @@ packages:
       rxjs: 6.6.7
     dev: true
 
+  /@itwin/appui-react/3.1.2_8493b923c12a6a9a4615a1daa129ef36:
+    resolution: {integrity: sha1-YVURtkhsWxOZVS/HV8shDTGQduA=}
+    peerDependencies:
+      '@itwin/appui-abstract': ^3.1.2
+      '@itwin/appui-layout-react': ^3.1.2
+      '@itwin/components-react': ^3.1.2
+      '@itwin/core-bentley': ^3.1.2
+      '@itwin/core-common': ^3.1.2
+      '@itwin/core-frontend': ^3.1.2
+      '@itwin/core-geometry': ^3.1.2
+      '@itwin/core-markup': ^3.1.2
+      '@itwin/core-quantity': ^3.1.2
+      '@itwin/core-react': ^3.1.2
+      '@itwin/imodel-components-react': ^3.1.2
+      '@itwin/presentation-common': ^3.1.2
+      '@itwin/presentation-frontend': ^3.1.2
+      react: ^17.0.0
+      react-dom: ^17.0.0
+      react-redux: ^7.2.2
+      redux: ^4.1.0
+    dependencies:
+      '@bentley/icons-generic': 1.0.34
+      '@bentley/icons-generic-webfont': 1.0.34
+      '@itwin/appui-abstract': 3.1.2_@itwin+core-bentley@3.1.2
+      '@itwin/appui-layout-react': 3.1.2_ad1af7938be23ef7011d65ba65fd969c
+      '@itwin/components-react': 3.1.2_ad1af7938be23ef7011d65ba65fd969c
+      '@itwin/core-bentley': 3.1.2
+      '@itwin/core-common': 3.1.2_3677922ab283ebfe2b0729d579358145
+      '@itwin/core-frontend': 3.1.2_5a82738ef9179eb6bb289529ae5c5770
+      '@itwin/core-geometry': 3.1.2
+      '@itwin/core-markup': 3.1.2_6a6465ae15903d79698f2170b25fd468
+      '@itwin/core-quantity': 3.1.2_@itwin+core-bentley@3.1.2
+      '@itwin/core-react': 3.1.2_192e986a3ccac8c463840e3cecabb201
+      '@itwin/core-telemetry': 3.1.2_@itwin+core-geometry@3.1.2
+      '@itwin/imodel-components-react': 3.1.2_fcc770174d8197d3a18365576c406db0
+      '@itwin/itwinui-css': 0.44.2
+      '@itwin/itwinui-react': 1.35.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/presentation-components': 3.1.2_d58353103b3f48ef4e0f4eb12e0a2a48
+      classnames: 2.3.1
+      immer: 9.0.6
+      lodash: 4.17.21
+      react: 17.0.2
+      react-dnd: 11.1.3_react-dom@17.0.2+react@17.0.2
+      react-dnd-html5-backend: 11.1.3
+      react-dom: 17.0.2_react@17.0.2
+      rxjs: 6.6.7
+    dev: true
+
   /@itwin/appui-react/3.1.2_c2614f1fc3f77271db243a09583d6bf2:
     resolution: {integrity: sha1-YVURtkhsWxOZVS/HV8shDTGQduA=}
     peerDependencies:
@@ -2023,6 +2152,36 @@ packages:
       '@itwin/core-common': 3.1.2
       '@itwin/core-frontend': 3.1.2_fe125ab2e4638e5c1b1e8cc6a2c618f5
       '@itwin/core-react': 3.1.2_17f70b96faa1edad70f27c25573cacde
+      fast-deep-equal: 3.1.3
+      fast-sort: 3.1.3
+      micro-memoize: 4.0.9
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      rxjs: 6.6.7
+    dev: true
+
+  /@itwin/presentation-components/3.1.2_d58353103b3f48ef4e0f4eb12e0a2a48:
+    resolution: {integrity: sha1-8bDywMVR4jdYravI9tgDsZddS0I=}
+    peerDependencies:
+      '@itwin/appui-abstract': ^3.1.2
+      '@itwin/components-react': ^3.1.2
+      '@itwin/core-bentley': ^3.1.2
+      '@itwin/core-common': ^3.1.2
+      '@itwin/core-frontend': ^3.1.2
+      '@itwin/core-react': ^3.1.2
+      '@itwin/imodel-components-react': ^3.1.2
+      '@itwin/presentation-common': ^3.1.2
+      '@itwin/presentation-frontend': ^3.1.2
+      react: ^17.0.0
+      react-dom: ^17.0.0
+    dependencies:
+      '@itwin/appui-abstract': 3.1.2_@itwin+core-bentley@3.1.2
+      '@itwin/components-react': 3.1.2_ad1af7938be23ef7011d65ba65fd969c
+      '@itwin/core-bentley': 3.1.2
+      '@itwin/core-common': 3.1.2_3677922ab283ebfe2b0729d579358145
+      '@itwin/core-frontend': 3.1.2_5a82738ef9179eb6bb289529ae5c5770
+      '@itwin/core-react': 3.1.2_192e986a3ccac8c463840e3cecabb201
+      '@itwin/imodel-components-react': 3.1.2_fcc770174d8197d3a18365576c406db0
       fast-deep-equal: 3.1.3
       fast-sort: 3.1.3
       micro-memoize: 4.0.9
@@ -3014,6 +3173,10 @@ packages:
     resolution: {integrity: sha1-7ihweulOEdK4J7y+UnC86n8+ce4=}
     dev: true
 
+  /@types/lodash/4.14.182:
+    resolution: {integrity: sha512-/THyiqyQAP9AfARo4pF+aCGcyiQ94tX/Is2I7HofNRqoYLgN1PBoOWu2/zTA5zMxzP5EFutMtWtGAFRKUe961Q==}
+    dev: true
+
   /@types/mocha/8.2.3:
     resolution: {integrity: sha512-ekGvFhFgrc2zYQoX4JeZPmVzZxw6Dtllga7iGHzfbYIYkAMUx/sAFP2GdFpLff+vdHXu5fl7WX9AT+TtqYcsyw==}
     dev: true
@@ -3090,6 +3253,10 @@ packages:
       '@types/prop-types': 15.7.5
       '@types/scheduler': 0.16.2
       csstype: 3.0.11
+
+  /@types/resize-observer-browser/0.1.7:
+    resolution: {integrity: sha512-G9eN0Sn0ii9PWQ3Vl72jDPgeJwRWhv2Qk/nQkJuWmRmOB4HX3/BhD5SE1dZs/hzPZL/WKnvF0RHdTSG54QJFyg==}
+    dev: false
 
   /@types/scheduler/0.16.2:
     resolution: {integrity: sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==}
@@ -4539,6 +4706,14 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
+  /axios/0.26.1:
+    resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
+    dependencies:
+      follow-redirects: 1.14.9
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /axobject-query/2.2.0:
     resolution: {integrity: sha512-Td525n+iPOOyUQIeBfcASuG6uJsDOITl7Mds5gFyerkWiX7qhUTdYUBlSgNMyVqtSJqwpt1kXGLdUt6SykLMRA==}
     dev: true
@@ -4948,7 +5123,7 @@ packages:
     dev: true
 
   /buffer-crc32/0.2.13:
-    resolution: {integrity: sha1-DTM+PwDqxQqhRUq9MO+MKl2ackI=}
+    resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
     dev: true
 
   /buffer-from/1.1.2:
@@ -5269,6 +5444,10 @@ packages:
   /cjs-module-lexer/1.2.2:
     resolution: {integrity: sha512-cOU9usZw8/dXIXKtwa8pM0OTJQuJkxMN6w30csNRUerHfeQ5R6U3kkU/FtJeIf3M202OHfY2U8ccInBG7/xogA==}
     dev: true
+
+  /class-transformer/0.5.1:
+    resolution: {integrity: sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw==}
+    dev: false
 
   /class-utils/0.3.6:
     resolution: {integrity: sha512-qOhPa/Fj7s6TY8H8esGu5QNpMMQxz79h+urzrNYN6mn+9BnxlDGf5QZ+XeCDsxSjPqsSR56XOZOJmpeurnLMeg==}
@@ -7058,7 +7237,7 @@ packages:
     dev: true
 
   /fd-slicer/1.1.0:
-    resolution: {integrity: sha1-JcfInLH5B3+IkbvmHY85Dq4lbx4=}
+    resolution: {integrity: sha512-cE1qsB/VwyQozZ+q1dGxR8LBYNZeofhEdUNGSMbQD3Gw2lAzX9Zb3uIU6Ebc/Fmyjo9AWWfnn0AUCHqtevs/8g==}
     dependencies:
       pend: 1.2.0
     dev: true
@@ -7229,6 +7408,16 @@ packages:
       inherits: 2.0.4
       readable-stream: 2.3.7
     dev: true
+
+  /follow-redirects/1.14.9:
+    resolution: {integrity: sha512-MQDfihBQYMcyy5dhRDJUHcw7lb2Pv/TuE6xP1vyraLukNDHKbDxDNaOE3NbCAdKQApno+GPRyo1YAp89yCjK4w==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dev: false
 
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -7751,6 +7940,20 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
+  /highcharts-react-official/3.1.0_highcharts@10.0.0+react@17.0.2:
+    resolution: {integrity: sha512-CkWJHrVMOc6CT8KFu1dR+a0w5OxCVKKgZUNWtEi5TmR0xqBDIDe+RyM652MAN/jBYppxMo6TCUVlRObCyWAn0Q==}
+    peerDependencies:
+      highcharts: '>=6.0.0'
+      react: '>=16.8.0'
+    dependencies:
+      highcharts: 10.0.0
+      react: 17.0.2
+    dev: false
+
+  /highcharts/10.0.0:
+    resolution: {integrity: sha512-a14PrTraVaoSNyaRPhLF/jJ3/09rJwfUZedLgZOkzozGz4K/H8WtWNJtUZt/tc5QiJkaZHw4YX7vvuO98s+EoA==}
+    dev: false
+
   /highlight-words-core/1.2.2:
     resolution: {integrity: sha512-BXUKIkUuh6cmmxzi5OIbUJxrG8OAk2MqoL1DtO3Wo9D2faJg2ph5ntyuQeLqaHJmzER6H5tllCDA9ZnNe9BVGg==}
     dev: true
@@ -8009,11 +8212,11 @@ packages:
     dev: true
 
   /inherits/2.0.1:
-    resolution: {integrity: sha1-sX0I0ya0Qj5Wjv9xn5GwscvfafE=}
+    resolution: {integrity: sha512-8nWq2nLTAwd02jTqJExUYFSD/fKq6VH9Y/oG2accc/kdI0V98Bag8d5a4gi3XHz73rDWa2PvTtvcWYquKqSENA==}
     dev: true
 
   /inherits/2.0.3:
-    resolution: {integrity: sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=}
+    resolution: {integrity: sha512-x00IRNXNy63jwGkJmzPigoySHbaqpNuzKbBOmzK+g2OdZpQ9w+sxCN+VSB3ja7IAge2OP2qpfxTjeNcyjmW1uw==}
     dev: true
 
   /inherits/2.0.4:
@@ -9965,7 +10168,6 @@ packages:
 
   /lodash/4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
-    dev: true
 
   /log-symbols/4.0.0:
     resolution: {integrity: sha512-FN8JBzLx6CzeMrB0tg6pqlGU1wCrXW+ZXGH481kfsBqer0hToTIiHdjH4Mq8xJUbvATujKCvaREGWpGUionraA==}
@@ -11644,6 +11846,15 @@ packages:
       react: 17.0.2
     dev: true
 
+  /react-infinite-scroll-component/6.1.0_react@17.0.2:
+    resolution: {integrity: sha512-SQu5nCqy8DxQWpnUVLx7V7b7LcA37aM7tvoWjTLZp1dk6EJibM5/4EJKzOnl07/BsM1Y40sKLuqjCwwH/xV0TQ==}
+    peerDependencies:
+      react: '>=16.0.0'
+    dependencies:
+      react: 17.0.2
+      throttle-debounce: 2.3.0
+    dev: false
+
   /react-input-autosize/3.0.0_react@17.0.2:
     resolution: {integrity: sha512-nL9uS7jEs/zu8sqwFE5MAPx6pPkNAriACQ2rGLlqmKr2sPGtN7TXTyDdQt4lbNXVx7Uzadb40x8qotIuru6Rhg==}
     peerDependencies:
@@ -11709,6 +11920,18 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-is: 17.0.2
+
+  /react-resize-detector/7.0.0_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-Xd1POfpVzH9O3F/xB/0xYy2ijtKjE/z7y4c/aJP593YSzhPy2vDhsNPjes+uQbgL1RezxJajQ679qPs8K5LAFw==}
+    peerDependencies:
+      react: ^16.0.0 || ^17.0.0
+      react-dom: ^16.0.0 || ^17.0.0
+    dependencies:
+      '@types/resize-observer-browser': 0.1.7
+      lodash: 4.17.21
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+    dev: false
 
   /react-select/3.2.0_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-B/q3TnCZXEKItO0fFN/I0tWOX3WJvi/X2wtdffmwSQVRwg5BpValScTO1vdic9AxlUgmeSzib2hAZAwIUQUZGQ==}
@@ -11924,6 +12147,10 @@ packages:
     resolution: {integrity: sha512-SH8PglcebESbd/shgf6mii6EIoRM0zrQyjcuQ+ojmfxjTtE0z9Y8pa62iA/OJ58qjP6j27uyW4kUF4jl/jd6sw==}
     dependencies:
       '@babel/runtime': 7.17.9
+
+  /reflect-metadata/0.1.13:
+    resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
+    dev: false
 
   /regenerator-runtime/0.13.9:
     resolution: {integrity: sha512-p3VT+cOEgxFsRRA9X4lkI1E+k2/CtnKtU4gcxyaCUreilL/vqI6CdZ3wxVUx3UOUg+gnUOQQcRI7BmSI656MYA==}
@@ -12209,6 +12436,12 @@ packages:
     dependencies:
       tslib: 1.14.1
     dev: true
+
+  /rxjs/7.5.5:
+    resolution: {integrity: sha512-sy+H0pQofO95VDmFLzyaw9xNJU4KTRSwQIGM6+iG3SypAtCiLDzpeG8sJrNCWn2Up9km+KhkvTdbkrdy+yzZdw==}
+    dependencies:
+      tslib: 2.3.1
+    dev: false
 
   /safe-buffer/5.1.2:
     resolution: {integrity: sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==}
@@ -13123,6 +13356,11 @@ packages:
     resolution: {integrity: sha512-8hmiGIJMDlwjg7dlJ4yKGLK8EsYqKgPWbG3b4wjJddKNwc7N7Dpn08Df4szr/sZdMVeOstrdYSsqzX6BYbcB+w==}
     dev: true
 
+  /throttle-debounce/2.3.0:
+    resolution: {integrity: sha512-H7oLPV0P7+jgvrk+6mwwwBDmxTaxnu9HMXmloNLXwnNO0ZxZ31Orah2n8lU1eMPvsaowP2CX+USCgyovXfdOFQ==}
+    engines: {node: '>=8'}
+    dev: false
+
   /through/2.3.8:
     resolution: {integrity: sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=}
     dev: true
@@ -13337,7 +13575,6 @@ packages:
 
   /tslib/2.3.1:
     resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
-    dev: true
 
   /tsutils/3.21.0_typescript@3.9.10:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
