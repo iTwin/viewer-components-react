@@ -153,7 +153,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             FeatureOverrideType.ColorAndAlpha,
           );
           emphasizeElements(hilitedIds, undefined);
-          allIds = allIds.concat(hilitedIds);
+          if (!hiddenGroupsIds.includes(group.id ?? "")) {
+            allIds = allIds.concat(hilitedIds);
+          }
         } else {
           try {
             const ids: string[] = await fetchIdsFromQuery(
@@ -177,7 +179,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               undefined,
             );
             hilitedElements.current.set(query, hiliteIds);
-            allIds = allIds.concat(ids);
+            if (!hiddenGroupsIds.includes(group.id ?? "")) {
+              allIds = allIds.concat(hiliteIds);
+            }
           } catch {
             toaster.negative(
               `Could not load ${group.groupName}. Query could not be resolved.`,
@@ -188,7 +192,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       await zoomToElements(allIds);
       setLoadingQuery(false);
     },
-    [iModelConnection, groups],
+    [iModelConnection, groups, hiddenGroupsIds],
   );
 
   const hideGroups = useCallback(
@@ -218,7 +222,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               false,
             );
             hilitedElements.current.set(query, hiliteIds);
-            allIds = allIds.concat(ids);
+            allIds = allIds.concat(hiliteIds);
           } catch {
             toaster.negative(
               `Could not hide/show ${viewGroup.groupName}. Query could not be resolved.`,
@@ -329,6 +333,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const showAll = useCallback(async () => {
     clearHiddenElements();
     setHiddenGroupsIds([]);
+    await zoomToElements(Array.from(hilitedElements.current.values()).flat());
   }, [setHiddenGroupsIds]);
 
   const hideAll = useCallback(async () => {
