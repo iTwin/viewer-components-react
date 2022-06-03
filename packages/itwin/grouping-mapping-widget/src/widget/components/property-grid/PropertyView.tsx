@@ -179,6 +179,12 @@ export const PropertyView = (props: PropertyViewProps) => {
   );
 
   React.useEffect(() => {
+    if (!context.currentPropertyList.includes(props.propertyRecord)) {
+      setIsPropertySelected(false);
+    }
+  }, [context.currentPropertyList, props.propertyRecord]);
+
+  React.useEffect(() => {
     if (props?.propertyRecord) {
       if (isPropertySelected) {
         if (context.isRendering) {
@@ -287,15 +293,15 @@ export const PropertyView = (props: PropertyViewProps) => {
       <div className='components-property-record-label'>
         {props.propertyRecord.value.valueFormat ===
           PropertyValueFormat.Primitive && (
-          <Checkbox
-            style={{ marginLeft: offset }}
-            className='components-property-selection-checkbox'
-            checked={isPropertySelected}
-            onChange={_onPropertySelectionChanged}
-            disabled={context.isLoading || context.isRendering || (props.propertyRecord.value.value === undefined)}
-            isLoading={isCheckboxLoading}
-          />
-        )}
+            <Checkbox
+              style={{ marginLeft: offset }}
+              className='components-property-selection-checkbox'
+              checked={isPropertySelected}
+              onChange={_onPropertySelectionChanged}
+              disabled={context.isLoading || context.isRendering || (props.propertyRecord.value.value === undefined)}
+              isLoading={isCheckboxLoading}
+            />
+          )}
         {props.labelElement}
       </div>
       {needElementSeparator ? (
@@ -312,14 +318,14 @@ export const PropertyView = (props: PropertyViewProps) => {
       ) : undefined}
       {props.propertyRecord.value.valueFormat ===
         PropertyValueFormat.Primitive ? (
-          <div className='components-property-record-value'>
-            <span>
-              {props.valueElementRenderer
-                ? props.valueElementRenderer()
-                : props.valueElement}
-            </span>
-          </div>
-        ) : undefined}
+        <div className='components-property-record-value'>
+          <span>
+            {props.valueElementRenderer
+              ? props.valueElementRenderer()
+              : props.valueElement}
+          </span>
+        </div>
+      ) : undefined}
       {props.actionButtonRenderers ? (
         <ActionButtonList
           orientation={props.orientation}
