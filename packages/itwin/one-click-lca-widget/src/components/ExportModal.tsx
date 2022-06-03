@@ -125,16 +125,17 @@ const ExportModal = (props: ExportProps) => {
             pinStatus(jobCreated?.job);
           } else {
             setJobStatus(JobStatus.StatusEnum.Failed);
-            toaster.negative("Failed to create one click lca job. 😔")
+            toaster.negative("Failed to create one click lca job. 😔");
           }
         } catch (e) {
           setJobStatus(JobStatus.StatusEnum.Failed);
-          toaster.negative("You are not authorized to create carbon calculation jobs. Please contact project administrator.")
+          toaster.negative("You are not authorized to create carbon calculation jobs. Please contact project administrator.");
+          /* eslint-disable no-console */
           console.error(e);
         }
       } else {
         setJobStatus(JobStatus.StatusEnum.Failed);
-        toaster.negative("Failed to get retrieve reportId or token. 😔")
+        toaster.negative("Failed to get retrieve reportId or token. 😔");
       }
     },
     [props, pinStatus, oneClickLCAClientApi]
@@ -161,6 +162,7 @@ const ExportModal = (props: ExportProps) => {
         }
       } catch (err) {
         toaster.negative("Failed to sign in One Click LCA.");
+        /* eslint-disable no-console */
         console.error(err);
       }
       startSigningIn(false);
@@ -234,9 +236,9 @@ const ExportModal = (props: ExportProps) => {
         default:
           return (
             <div className="oclca-progress-radial-container">
-              <Text>Invalid Job Status 😔</Text>
+              <Text>Invalid Job Status <span role="img" aria-label="sad">😔</span></Text>
             </div>
-          )
+          );
       }
     },
     []
@@ -246,7 +248,8 @@ const ExportModal = (props: ExportProps) => {
     if (props.isOpen && isSignedIn && cache?.token) {
       runJob(cache.token).catch((err) => {
         setJobStatus(JobStatus.StatusEnum.Failed);
-        toaster.negative("Error occurs while running the job. 😔")
+        toaster.negative("Error occurs while running the job. 😔");
+        /* eslint-disable no-console */
         console.error(err);
       });
     }

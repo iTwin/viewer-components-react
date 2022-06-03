@@ -107,12 +107,14 @@ const Reports = () => {
           })
           .catch((err) => {
             setIsLoading(false);
-            toaster.negative("You are not authorized to get reports for this projects. Please contact project administrator.")
+            toaster.negative("You are not authorized to get reports for this projects. Please contact project administrator.");
+            /* eslint-disable no-console */
             console.error(err);
           });
       })
       .catch((err) => {
-        toaster.negative("You are not authorized to use this system.")
+        toaster.negative("You are not authorized to use this system.");
+        /* eslint-disable no-console */
         console.error(err);
       });
   }, [projectId, reportingClientApi]);
