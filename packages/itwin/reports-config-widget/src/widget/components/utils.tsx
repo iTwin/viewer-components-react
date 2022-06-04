@@ -112,7 +112,7 @@ export const LoadingSpinner = () => {
   );
 };
 
-export const SkeletonBlock = () => <div className="skeleton-block iui-skeleton" />;
+export const SkeletonBlock = () => <div className="rcw-skeleton-block iui-skeleton" />;
 
 export const generateUrl = (baseUrl: string, newBaseUrl: string) => {
   return baseUrl.replace("https://api.bentley.com", newBaseUrl);

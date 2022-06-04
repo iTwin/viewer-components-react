@@ -62,7 +62,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         title={report ? IModelApp.localization.getLocalizedString("ReportsConfigWidget:ModifyReport") : IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddReport")}
         returnFn={returnFn}
       />
-      <div className='details-form-container'>
+      <div className='rcw-details-form-container'>
         <Fieldset legend={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ReportDetails")} className='details-form'>
           <Small className='field-legend'>
             {IModelApp.localization.getLocalizedString("ReportsConfigWidget:MandatoryFields")}

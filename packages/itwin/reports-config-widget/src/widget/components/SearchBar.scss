@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-@keyframes expand {
+@keyframes rcw-expaind {
   0% {
     opacity: 0;
     width: 20%;
@@ -15,7 +15,7 @@
   }
 }
 
-@keyframes shrink {
+@keyframes rcw-shrink {
   100% {
     opacity: 0;
     width: 20%;
