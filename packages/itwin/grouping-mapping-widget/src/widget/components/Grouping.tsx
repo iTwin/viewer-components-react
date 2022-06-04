@@ -39,6 +39,7 @@ import {
   clearEmphasizedElements,
   clearEmphasizedOverriddenElements,
   clearHiddenElements,
+  clearOverriddenElements,
   emphasisElementsById,
   emphasizeElements,
   getHiliteIds,
@@ -286,10 +287,14 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     setGroupsView(GroupsView.ADD);
   };
 
-  const onModify = useCallback((group) => {
+  const onModify = useCallback(async (group) => {
     setSelectedGroup(group);
     setGroupsView(GroupsView.MODIFYING);
-  }, []);
+    if (group && hiddenGroupsIds.includes(group.id)) {
+      await showGroup(group);
+      setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
+    }
+  }, [showGroup, hiddenGroupsIds, setHiddenGroupsIds]);
 
   const openProperties = useCallback(
     async (group) => {
@@ -326,6 +331,21 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     iModelId,
     mapping.id,
     setGroups,
+    showGroupColor,
+    visualizeGroupColors,
+  ]);
+
+  const resetView = useCallback(async () => {
+    if (groups) {
+      if (showGroupColor) {
+        await visualizeGroupColors(groups);
+      } else {
+        clearOverriddenElements();
+      }
+      clearEmphasizedElements();
+    }
+  }, [
+    groups,
     showGroupColor,
     visualizeGroupColors,
   ]);
@@ -371,6 +391,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             setGroupsView(GroupsView.GROUPS);
             await refresh();
           }}
+          resetView={resetView}
         />
       );
     case GroupsView.MODIFYING:
@@ -383,6 +404,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             setGroupsView(GroupsView.GROUPS);
             await refresh();
           }}
+          resetView={resetView}
         />
       ) : null;
     case GroupsView.PROPERTIES:
@@ -489,7 +511,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                           menuItems={(close: () => void) => [
                             <MenuItem
                               key={0}
-                              onClick={() => onModify(g)}
+                              onClick={async () => onModify(g)}
                               icon={<SvgEdit />}
                             >
                               Modify

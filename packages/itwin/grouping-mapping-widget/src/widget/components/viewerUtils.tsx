@@ -10,6 +10,28 @@ import { ColorDef, FeatureOverrideType } from "@itwin/core-common";
 import { KeySet } from "@itwin/presentation-common";
 import { HiliteSetProvider } from "@itwin/presentation-frontend";
 
+export const isolateElementsByKeys = async (
+  keySet: KeySet,
+  replace = false,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return [];
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+
+  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
+    imodel: vp.iModel,
+  });
+  const set = await hiliteProvider.getHiliteSet(keySet);
+  if (set.elements) {
+    const ids = [...set.elements];
+    isolateElements(ids, replace);
+    return ids;
+  }
+  return [];
+};
+
 export const isolateElementsById = async (
   elementIds: string[],
   iModelConnection: IModelConnection,
@@ -182,6 +204,29 @@ export const emphasisElementsById = async (
   const vp = IModelApp.viewManager.selectedView;
 
   const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
+    imodel: vp.iModel,
+  });
+  const set = await hiliteProvider.getHiliteSet(keySet);
+  if (set.elements) {
+    const ids = [...set.elements];
+    emphasizeElements(ids, defaultAppearance, replace);
+    return ids;
+  }
+  return [];
+};
+
+export const emphasizeElementsByKeys = async (
+  keySet: KeySet,
+  defaultAppearance: FeatureAppearance | undefined = undefined,
+  replace = false,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return [];
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+
   const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
     imodel: vp.iModel,
   });
