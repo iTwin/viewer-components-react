@@ -101,8 +101,8 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
           <ToggleSwitch
             id='extractionEnabled'
             name='extractionEnabled'
-            label='Extraction enabled'
-            labelPosition="left"
+            label='Extract data from iModel'
+            labelPosition="right"
             checked={values.extractionEnabled}
             onChange={(event) => {
               setValues({ ...values, extractionEnabled: event.currentTarget.checked });
