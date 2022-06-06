@@ -99,8 +99,8 @@ export const PropertyGrid = ({
     return dp;
   }, [autoExpandChildCategories, propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting, instanceKey]);
 
-  const PROPERTY_GRID_NAMESPACE = "PropertyGridPreferences"
-  const PROPERTY_GRID_SHOWNULL_KEY = "showNullValues"
+  const PROPERTY_GRID_NAMESPACE = "PropertyGridPreferences";
+  const PROPERTY_GRID_SHOWNULL_KEY = "showNullValues";
 
   const dataProvider = useOptionalDisposable(createDataProvider);
   const filterer =  new PlaceholderPropertyDataFilterer();
@@ -173,13 +173,12 @@ export const PropertyGrid = ({
         }
       }
       if(persistNullValueToggle) {
-        let res = await getShowNullValues();
-        if(res !== undefined && dataProvider)
-        {
+        const res = await getShowNullValues();
+        if(res !== undefined && dataProvider) {
           dataProvider.includeFieldsWithNoValues = res;
           setShowNullValues(res);
-        }        
-    }
+        }
+      }
     };
 
     const getShowNullValues = async () => {
@@ -201,7 +200,7 @@ export const PropertyGrid = ({
         }
       }
       return true;
-    }
+    };
 
     const removeListener = dataProvider?.onDataChanged.addListener(onDataChanged);
     void onDataChanged();
@@ -209,16 +208,16 @@ export const PropertyGrid = ({
     return () => {
       removeListener?.();
     };
-  }, [dataProvider, customOnDataChanged]);
+  }, [dataProvider, customOnDataChanged, persistNullValueToggle]);
 
-  const updateShowNullValues = async (value: boolean) => {
+  const updateShowNullValues = useCallback(async (value: boolean) => {
     if(dataProvider) {
       // Update the data provider to show/hide empty values
       dataProvider.includeFieldsWithNoValues = value;
       setContextMenu(undefined);
       setShowNullValues(value);
 
-      // Persist in user preferences 
+      // Persist in user preferences
       if(persistNullValueToggle) {
         const userPrefs = IModelApp.userPreferences;
         if(userPrefs) {
@@ -237,7 +236,7 @@ export const PropertyGrid = ({
         }
       }
     }
-  };
+  }, [dataProvider, persistNullValueToggle]);
 
   const onAddFavorite = useCallback(
     async (propertyField: Field) => {
@@ -258,7 +257,7 @@ export const PropertyGrid = ({
     },
 
     [iModelConnection, favoritePropertiesScope]
-  );  
+  );
 
   const buildContextMenu = useCallback(
     async (args: PropertyGridContextMenuArgs) => {
@@ -373,6 +372,7 @@ export const PropertyGrid = ({
       dataProvider,
       localizations,
       showNullValues,
+      updateShowNullValues,
       enableFavoriteProperties,
       favoritePropertiesScope,
       enableCopyingPropertyText,
