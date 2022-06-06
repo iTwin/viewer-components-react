@@ -44,6 +44,7 @@ export interface PropertyGridProps {
   actionButtonRenderers?: ActionButtonRenderer[];
   enableCopyingPropertyText?: boolean;
   enableNullValueToggle?: boolean;
+  persistNullValueToggle?: boolean;
   defaultPanelLocation?: StagePanelLocation;
   defaultPanelSection?: StagePanelSection;
   defaultPanelWidgetPriority?: number;

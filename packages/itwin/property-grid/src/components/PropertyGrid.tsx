@@ -10,7 +10,6 @@ import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-front
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
   PropertyData,
-  PropertyDataFiltererBase,
   PropertyGridContextMenuArgs,
 } from "@itwin/components-react";
 import {
@@ -25,6 +24,7 @@ import {
   useOptionalDisposable,
   useResizeObserver,
 } from "@itwin/core-react";
+import { IModelApp } from "@itwin/core-frontend";
 import {
   UiFramework,
   useActiveIModelConnection,
@@ -42,7 +42,6 @@ import type {
 import { PropertyGridDefaultContextMenuKey } from "../types";
 import {
   FilteringPropertyGridWithUnifiedSelection,
-  NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 import classnames from "classnames";
@@ -61,6 +60,7 @@ export const PropertyGrid = ({
   actionButtonRenderers,
   enableCopyingPropertyText,
   enableNullValueToggle,
+  persistNullValueToggle,
   enablePropertyGroupNesting,
   additionalContextMenuOptions,
   defaultContextMenuOptions,
@@ -99,7 +99,11 @@ export const PropertyGrid = ({
     return dp;
   }, [autoExpandChildCategories, propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting, instanceKey]);
 
+  const PROPERTY_GRID_NAMESPACE = "PropertyGridPreferences"
+  const PROPERTY_GRID_SHOWNULL_KEY = "showNullValues"
+
   const dataProvider = useOptionalDisposable(createDataProvider);
+  const filterer =  new PlaceholderPropertyDataFilterer();
 
   const [title, setTitle] = useState<PropertyRecord>();
   const [className, setClassName] = useState<string>("");
@@ -110,9 +114,6 @@ export const PropertyGrid = ({
   ContextMenuItemInfo[] | undefined
   >(undefined);
   const [showNullValues, setShowNullValues] = useState<boolean>(true);
-  const [filterer, setFilterer] = useState<PropertyDataFiltererBase>(
-    new PlaceholderPropertyDataFilterer()
-  );
 
   const [height, setHeight] = useState(0);
   const [width, setWidth] = useState(0);
@@ -171,7 +172,36 @@ export const PropertyGrid = ({
           await customOnDataChanged(dataProvider);
         }
       }
+      if(persistNullValueToggle) {
+        let res = await getShowNullValues();
+        if(res !== undefined && dataProvider)
+        {
+          dataProvider.includeFieldsWithNoValues = res;
+          setShowNullValues(res);
+        }        
+    }
     };
+
+    const getShowNullValues = async () => {
+      const userPrefs = IModelApp.userPreferences;
+      if(userPrefs) {
+        const accessToken = await IModelApp.getAccessToken();
+        const iModel = UiFramework.getIModelConnection();
+        const iTwinId = iModel?.iTwinId;
+        const iModelId = iModel?.iModelId;
+        const showNullValuesRes = await userPrefs.get({
+          accessToken,
+          namespace: PROPERTY_GRID_NAMESPACE,
+          key: PROPERTY_GRID_SHOWNULL_KEY,
+          iTwinId,
+          iModelId,
+        });
+        if (showNullValuesRes !== undefined) {
+          return showNullValuesRes === "true";
+        }
+      }
+      return true;
+    }
 
     const removeListener = dataProvider?.onDataChanged.addListener(onDataChanged);
     void onDataChanged();
@@ -180,6 +210,34 @@ export const PropertyGrid = ({
       removeListener?.();
     };
   }, [dataProvider, customOnDataChanged]);
+
+  const updateShowNullValues = async (value: boolean) => {
+    if(dataProvider) {
+      // Update the data provider to show/hide empty values
+      dataProvider.includeFieldsWithNoValues = value;
+      setContextMenu(undefined);
+      setShowNullValues(value);
+
+      // Persist in user preferences 
+      if(persistNullValueToggle) {
+        const userPrefs = IModelApp.userPreferences;
+        if(userPrefs) {
+          const accessToken = await IModelApp.getAccessToken();
+          const iModel = UiFramework.getIModelConnection();
+          const iTwinId = iModel?.iTwinId;
+          const iModelId = iModel?.iModelId;
+          await userPrefs.save({
+            accessToken,
+            content: String(value),
+            namespace: PROPERTY_GRID_NAMESPACE,
+            key: PROPERTY_GRID_SHOWNULL_KEY,
+            iTwinId,
+            iModelId,
+          });
+        }
+      }
+    }
+  };
 
   const onAddFavorite = useCallback(
     async (propertyField: Field) => {
@@ -200,19 +258,7 @@ export const PropertyGrid = ({
     },
 
     [iModelConnection, favoritePropertiesScope]
-  );
-
-  const onHideNull = useCallback(() => {
-    setFilterer(new NonEmptyValuesPropertyDataFilterer());
-    setContextMenu(undefined);
-    setShowNullValues(false);
-  }, []);
-
-  const onShowNull = useCallback(() => {
-    setFilterer(new PlaceholderPropertyDataFilterer());
-    setContextMenu(undefined);
-    setShowNullValues(true);
-  }, []);
+  );  
 
   const buildContextMenu = useCallback(
     async (args: PropertyGridContextMenuArgs) => {
@@ -258,8 +304,8 @@ export const PropertyGrid = ({
           if (showNullValues) {
             items.push({
               key: PropertyGridDefaultContextMenuKey.HideNull,
-              onSelect: () => {
-                onHideNull();
+              onSelect: async () => {
+                await updateShowNullValues(false);
               },
               title: localizations.hideNull.title,
               label: localizations.hideNull.label,
@@ -267,8 +313,8 @@ export const PropertyGrid = ({
           } else {
             items.push({
               key: PropertyGridDefaultContextMenuKey.ShowNull,
-              onSelect: () => {
-                onShowNull();
+              onSelect: async () => {
+                await updateShowNullValues(true);
               },
               title: localizations.showNull.title,
               label: localizations.showNull.label,
@@ -335,8 +381,6 @@ export const PropertyGrid = ({
       defaultContextMenuOptions,
       onAddFavorite,
       onRemoveFavorite,
-      onHideNull,
-      onShowNull,
       iModelConnection,
     ]
   );
