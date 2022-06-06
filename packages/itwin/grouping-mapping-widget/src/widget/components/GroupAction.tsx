@@ -13,7 +13,7 @@ import {
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, getReportingClient, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -28,7 +28,6 @@ import {
   zoomToElements,
 } from "./viewerUtils";
 import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
-import { ReportingClient } from "@itwin/insights-client";
 import { ApiContext } from "./GroupingMapping";
 
 interface GroupActionProps {
@@ -172,7 +171,7 @@ const GroupAction = ({
     try {
       setIsLoading(true);
       const currentQuery = query || simpleQuery;
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = getReportingClient(apiContext.prefix);
 
       group
         ? await reportingClientApi.updateGroup(
