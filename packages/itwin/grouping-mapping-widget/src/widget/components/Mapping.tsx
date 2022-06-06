@@ -23,7 +23,7 @@ import {
 import type { CellProps } from "react-table";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
-import { handleError, onSelectionChanged, WidgetHeader } from "./utils";
+import { getReportingClient, handleError, onSelectionChanged, WidgetHeader } from "./utils";
 import "./Mapping.scss";
 import DeleteModal from "./DeleteModal";
 import { Groupings } from "./Grouping";
@@ -32,7 +32,6 @@ import { MappingImportWizardModal } from "./MappingImportWizardModal";
 import type { Api } from "./GroupingMapping";
 import { ApiContext } from "./GroupingMapping";
 import type { Mapping } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
@@ -53,7 +52,7 @@ const fetchMappings = async (
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(apiContext.prefix);
+    const reportingClientApi = getReportingClient(apiContext.prefix);
     const mappings = await reportingClientApi.getMappings(apiContext.accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
@@ -66,7 +65,7 @@ const fetchMappings = async (
 const toggleExtraction = async (apiContext: Api, iModelId: string, mapping: Mapping) => {
   try {
     const newState = !mapping?.extractionEnabled;
-    const reportingClient = new ReportingClient(apiContext.prefix);
+    const reportingClient = getReportingClient(apiContext.prefix);
     await reportingClient.updateMapping(
       apiContext.accessToken,
       iModelId,
@@ -259,7 +258,7 @@ export const Mappings = () => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = new ReportingClient(apiContext.prefix);
+              const reportingClientApi = getReportingClient(apiContext.prefix);
               await reportingClientApi.deleteMapping(
                 apiContext.accessToken,
                 iModelId,
