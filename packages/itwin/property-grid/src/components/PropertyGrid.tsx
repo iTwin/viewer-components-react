@@ -163,7 +163,7 @@ export const PropertyGrid = ({
   }, []);
 
   // If persisting hide/show empty values, get the preference
-  useMemo(() => {
+  useEffect(() => {
     const getPreferences = async () => {
       if(persistNullValueToggle) {
         const res = await getShowNullValuesPreference();
