@@ -165,7 +165,7 @@ export const PropertyGrid = ({
   // If persisting hide/show empty values, get the preference
   useEffect(() => {
     const setDefaultShowNullValues = async () => {
-      if(persistNullValueToggle) {
+      if (persistNullValueToggle) {
         const res = await getShowNullValuesPreference();
         if(res !== undefined) {
           res ? setFilterer(new PlaceholderPropertyDataFilterer()) : setFilterer(new NonEmptyValuesPropertyDataFilterer());
