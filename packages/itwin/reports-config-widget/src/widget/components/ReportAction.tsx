@@ -11,8 +11,8 @@ import "./ReportAction.scss";
 import type { Report } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
-import { IModelApp } from "@itwin/core-frontend";
 import { useApi } from "../context/ApiContext";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 interface ReportActionProps {
   iTwinId: string;
@@ -59,18 +59,18 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
   return (
     <>
       <WidgetHeader
-        title={report ? IModelApp.localization.getLocalizedString("ReportsConfigWidget:ModifyReport") : IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddReport")}
+        title={report ? ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ModifyReport") : ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:AddReport")}
         returnFn={returnFn}
       />
       <div className='rcw-details-form-container'>
-        <Fieldset legend={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ReportDetails")} className='details-form'>
+        <Fieldset legend={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ReportDetails")} className='details-form'>
           <Small className='field-legend'>
-            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:MandatoryFields")}
+            {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:MandatoryFields")}
           </Small>
           <LabeledInput
             id='name'
             name='name'
-            label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Name")}
+            label={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Name")}
             value={values.name}
             required
             disabled={isLoading}
@@ -95,7 +95,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
           <LabeledInput
             id='description'
             name='description'
-            label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Description")}
+            label={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Description")}
             value={values.description}
             onChange={(event) => {
               handleInputChange(event, values, setValues);
@@ -105,7 +105,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         </Fieldset>
       </div>
       <ActionPanel
-        actionLabel={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Add")}
+        actionLabel={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Add")}
         onAction={onSave}
         onCancel={returnFn}
         isSavingDisabled={!(values.name)}

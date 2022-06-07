@@ -10,6 +10,7 @@ import { IModelsClient, toArray } from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useMemo } from "react";
 import { useEffect, useState } from "react";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import type { Api } from "../context/ApiContext";
 import { useApi } from "../context/ApiContext";
 import { useActiveIModel } from "../hooks/useActiveIModel";
@@ -63,7 +64,7 @@ export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: Selected
 
   return (
     <div className="reports-select-imodel">
-      <Label htmlFor='combo-input'>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:SelectIModel")}</Label>
+      <Label htmlFor='combo-input'>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:SelectIModel")}</Label>
       <div className="combobox">
         <ComboBox<string>
           options={iModelOptions}

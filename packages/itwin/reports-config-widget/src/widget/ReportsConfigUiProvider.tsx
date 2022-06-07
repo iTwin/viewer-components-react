@@ -13,9 +13,9 @@ import {
   StageUsage,
 } from "@itwin/appui-abstract";
 import type { AccessToken } from "@itwin/core-bentley";
-import { IModelApp } from "@itwin/core-frontend";
 
 import * as React from "react";
+import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import ReportsContainer from "./components/ReportsContainer";
 
 export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com";
@@ -46,7 +46,7 @@ export class ReportsConfigProvider implements UiItemsProvider {
     ) {
       const ReportsWidget: AbstractWidgetProps = {
         id: "reports-config-widget",
-        label: IModelApp.localization.getLocalizedString("ReportsConfigWidget:ReportsConfig"),
+        label: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ReportsConfig"),
         getWidgetContent: () => {
           return <ReportsContainer accessToken={this._accessToken} baseUrl={this._baseUrl} />;
         },

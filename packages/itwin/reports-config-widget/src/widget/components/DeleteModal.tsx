@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelApp } from "@itwin/core-frontend";
 import {
   Button,
   Leading,
@@ -12,6 +11,7 @@ import {
   ModalContent,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import "./DeleteModal.scss";
 import { handleError, LoadingSpinner } from "./utils";
 
@@ -47,7 +47,7 @@ export const DeleteModal = ({
 
   return (
     <Modal
-      title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Confirm")}
+      title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Confirm")}
       isOpen={show}
       isDismissible={!isLoading}
       onClose={() => {
@@ -57,7 +57,7 @@ export const DeleteModal = ({
       <ModalContent>
         <div className="delete-modal-body-text">
           <Leading>
-            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AreYouSureYouWantToDelete")}
+            {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:AreYouSureYouWantToDelete")}
           </Leading>
           <strong>
             {<MiddleTextTruncation text={`${entityName}?`} />}
@@ -70,7 +70,7 @@ export const DeleteModal = ({
             <LoadingSpinner />
           </div>}
         <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>
-          {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Delete")}
+          {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Delete")}
         </Button>
         <Button
           styleType='default'
@@ -79,7 +79,7 @@ export const DeleteModal = ({
           }}
           disabled={isLoading}
         >
-          {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Cancel")}
+          {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Cancel")}
         </Button>
       </ModalButtonBar>
     </Modal>

@@ -3,15 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { IModelApp } from "@itwin/core-frontend";
 import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
 import { TablePaginator } from "@itwin/itwinui-react";
 import React, { useMemo } from "react";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export const LocalizedTablePaginator = (props: TablePaginatorRendererProps) => {
   const pageSizeList = useMemo(() => [10, 25, 50], []);
   const paginationLocalization = useMemo(() => ({
-    pageSizeLabel: (size: number) => IModelApp.localization.getLocalizedString("ReportsConfigWidget:Table.SizePerPage", { size }),
+    pageSizeLabel: (size: number) => ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Table.SizePerPage", { size }),
     rangeLabel: (
       startIndex: number,
       endIndex: number,
@@ -19,12 +19,12 @@ export const LocalizedTablePaginator = (props: TablePaginatorRendererProps) => {
       isLoading: boolean,
     ) =>
       isLoading
-        ? IModelApp.localization.getLocalizedString("ReportsConfigWidget:Table.StartIndexEndIndex", { startIndex, endIndex })
-        : IModelApp.localization.getLocalizedString("ReportsConfigWidget:Table.StartIndexEndIndexOf", { startIndex, endIndex, totalRows }),
-    previousPage: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Table.PreviousPage"),
-    nextPage: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Table.NextPage"),
-    goToPageLabel: (page: number) => IModelApp.localization.getLocalizedString("ReportsConfigWidget:Table.GoToPage", { page }),
-    rowsPerPageLabel: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Table.RowsPerPage"),
+        ? ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Table.StartIndexEndIndex", { startIndex, endIndex })
+        : ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Table.StartIndexEndIndexOf", { startIndex, endIndex, totalRows }),
+    previousPage: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Table.PreviousPage"),
+    nextPage: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Table.NextPage"),
+    goToPageLabel: (page: number) => ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Table.GoToPage", { page }),
+    rowsPerPageLabel: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Table.RowsPerPage"),
   }), []);
 
   return < TablePaginator {...props} pageSizeList={pageSizeList} localization={paginationLocalization} />;

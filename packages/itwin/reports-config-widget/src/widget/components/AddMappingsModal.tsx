@@ -2,8 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
-import { IModelApp } from "@itwin/core-frontend";
 import {
   Modal,
 } from "@itwin/itwinui-react";
@@ -25,6 +23,7 @@ import { SelectIModel } from "./SelectIModel";
 import type { CreateTypeFromInterface } from "./utils";
 import { generateUrl } from "./utils";
 import { handleError } from "./utils";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
 
@@ -78,13 +77,13 @@ const AddMappingsModal = ({
         columns: [
           {
             id: "mappingName",
-            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:MappingName"),
+            Header: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:MappingName"),
             accessor: "mappingName",
             Filter: tableFilters.TextFilter(),
           },
           {
             id: "description",
-            Header: IModelApp.localization.getLocalizedString("ReportsConfigWidget:Description"),
+            Header: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Description"),
             accessor: "description",
             Filter: tableFilters.TextFilter(),
           },
@@ -113,7 +112,7 @@ const AddMappingsModal = ({
 
   return (
     <Modal
-      title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddMappings")}
+      title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:AddMappings")}
       isOpen={show}
       isDismissible={!isLoading}
       onClose={async () => {
@@ -127,7 +126,7 @@ const AddMappingsModal = ({
           data={isLoading ? [] : mappings}
           columns={mappingsColumns}
           className='add-mappings-table'
-          emptyTableContent={IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoMappingsAvailable")}
+          emptyTableContent={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:NoMappingsAvailable")}
           isSortable
           isSelectable
           isLoading={isLoading}
@@ -139,7 +138,7 @@ const AddMappingsModal = ({
         />
       </div>
       <ActionPanel
-        actionLabel={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Add")}
+        actionLabel={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Add")}
         onAction={onSave}
         onCancel={returnFn}
         isSavingDisabled={selectedMappings.length === 0}

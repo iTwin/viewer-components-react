@@ -34,6 +34,7 @@ import { SearchBar } from "./SearchBar";
 import type { Api } from "../context/ApiContext";
 import { useApi } from "../context/ApiContext";
 import { useActiveIModel } from "../hooks/useActiveIModel";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -71,7 +72,7 @@ export const Reports = () => {
     ReportsView.REPORTS
   );
   const [selectedReport, setSelectedReport] = useState<
-  Report | undefined
+    Report | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
@@ -113,7 +114,7 @@ export const Reports = () => {
     default:
       return (
         <>
-          <WidgetHeader title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ITwinReports")} />
+          <WidgetHeader title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ITwinReports")} />
           <Surface className="reports-list-container">
             <div className="toolbar">
               <Button
@@ -121,7 +122,7 @@ export const Reports = () => {
                 onClick={() => addReport()}
                 styleType="high-visibility"
               >
-                {IModelApp.localization.getLocalizedString("ReportsConfigWidget:New")}
+                {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:New")}
               </Button>
               <div className="search-bar-container" data-testid="search-bar">
                 <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
@@ -132,12 +133,12 @@ export const Reports = () => {
               reports.length === 0 ?
                 <EmptyMessage>
                   <>
-                    {IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoReports")}
+                    {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:NoReports")}
                     <div>
                       <Button
                         onClick={() => addReport()}
                         styleType='cta'>
-                        {IModelApp.localization.getLocalizedString("ReportsConfigWidget:CreateOneReportCTA")}
+                        {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CreateOneReportCTA")}
                       </Button>
                     </div>
                   </>
@@ -165,7 +166,7 @@ export const Reports = () => {
                               }}
                               icon={<SvgEdit />}
                             >
-                              {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Modify")}
+                              {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Modify")}
                             </MenuItem>,
                             <MenuItem
                               key={1}
@@ -176,7 +177,7 @@ export const Reports = () => {
                               }}
                               icon={<SvgDelete />}
                             >
-                              {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Remove")}
+                              {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Remove")}
                             </MenuItem>,
                           ]}
                         >

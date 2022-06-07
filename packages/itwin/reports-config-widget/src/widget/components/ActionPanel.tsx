@@ -2,9 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelApp } from "@itwin/core-frontend";
 import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import "./ActionPanel.scss";
 import { LoadingSpinner } from "./utils";
 
@@ -46,7 +46,7 @@ const ActionPanel = ({
           onClick={onCancel}
           disabled={isCancelDisabled || isLoading}
         >
-          {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Cancel")}
+          {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Cancel")}
         </Button>
       </div>
     </div>

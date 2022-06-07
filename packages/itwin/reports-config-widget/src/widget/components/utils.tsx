@@ -6,7 +6,7 @@ import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
 import { IconButton, ProgressRadial, Text, toaster } from "@itwin/itwinui-react";
 import "./utils.scss";
 import React from "react";
-import { IModelApp } from "@itwin/core-frontend";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export interface WidgetHeaderProps {
   title: string;
@@ -38,37 +38,37 @@ export const WidgetHeader = ({
 };
 
 export const handleError = (errorStatus: number) => {
-  let errorMessage = `${IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.Error")} `;
+  let errorMessage = `${ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.Error")} `;
   switch (errorStatus) {
     case 401:
-      errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.401");
+      errorMessage += ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.401");
       break;
     case 403:
-      errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.403");
+      errorMessage += ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.403");
       break;
     case 404:
-      errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.404");
+      errorMessage += ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.404");
       break;
     case 409:
-      errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.409");
+      errorMessage += ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.409");
       break;
     case 422:
-      errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.422");
+      errorMessage += ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.422");
       break;
     case 429:
-      errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.429");
+      errorMessage += ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.429");
       break;
     case 500:
-      errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.500");
+      errorMessage += ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.500");
       break;
     case 502:
-      errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.502");
+      errorMessage += ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.502");
       break;
     case 503:
-      errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.503");
+      errorMessage += ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.503");
       break;
     default:
-      errorMessage += IModelApp.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.SomethingWentWrong");
+      errorMessage += ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ErrorMessages.SomethingWentWrong");
   }
   toaster.negative(errorMessage);
 
@@ -76,9 +76,9 @@ export const handleError = (errorStatus: number) => {
 
 export const LoadingOverlay = () => (
   <div className='rcw-center-overlay'>
-    <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:Loading")}</Text>
+    <Text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Loading")}</Text>
     <ProgressRadial indeterminate />
-    <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:PleaseWait")}</Text>
+    <Text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:PleaseWait")}</Text>
   </div>
 );
 interface EmptyMessageProps {
@@ -117,6 +117,7 @@ export const SkeletonBlock = () => <div className="rcw-skeleton-block iui-skelet
 export const generateUrl = (baseUrl: string, newBaseUrl: string) => {
   return baseUrl.replace("https://api.bentley.com", newBaseUrl);
 };
+
 
 export type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];

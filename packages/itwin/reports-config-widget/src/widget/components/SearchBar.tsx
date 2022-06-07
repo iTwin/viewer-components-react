@@ -6,6 +6,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
 import { IconButton, LabeledInput } from "@itwin/itwinui-react";
 import React, { useState } from "react";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import "./SearchBar.scss";
 
 interface SearchBarProps {
@@ -21,7 +22,7 @@ export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarPr
 
   return (
     searchBarOpen || searchValue ?
-      <div style={{ animation: searchBarClosing ? "rcw-shrink .5s" : "rcw-expaind .5s" }}
+      <div style={{ animation: searchBarClosing ? "rcw-shrink .5s" : "rcw-expand .5s" }}
         onAnimationEnd={() => {
           if (searchBarClosing) {
             setSearchBarClosing(false);
@@ -31,7 +32,7 @@ export const SearchBar = ({ searchValue, setSearchValue, disabled }: SearchBarPr
         }}>
         <LabeledInput
           aria-label="search-textbox"
-          placeholder={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Search")}
+          placeholder={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Search")}
           svgIcon={
             <IconButton onClick={() => setSearchBarClosing(true)} styleType='borderless'>
               <SvgCloseSmall />

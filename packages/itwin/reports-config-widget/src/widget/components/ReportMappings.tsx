@@ -28,7 +28,6 @@ import DeleteModal from "./DeleteModal";
 import type { Report, ReportMapping } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
-import { IModelApp } from "@itwin/core-frontend";
 import AddMappingsModal from "./AddMappingsModal";
 import type { GetSingleIModelParams, IModelsClientOptions } from "@itwin/imodels-client-management";
 import { Constants } from "@itwin/imodels-client-management";
@@ -39,6 +38,7 @@ import { Extraction, ExtractionStates, ExtractionStatus } from "./Extraction";
 import { SearchBar } from "./SearchBar";
 import type { Api } from "../context/ApiContext";
 import { useApi } from "../context/ApiContext";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
@@ -106,7 +106,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     ReportMappingsView.REPORTMAPPINGS
   );
   const [selectedReportMapping, setSelectedReportMapping] = useState<
-  ReportMappingAndMapping | undefined
+    ReportMappingAndMapping | undefined
   >(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -144,14 +144,14 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
       <WidgetHeader title={report.displayName ?? ""} returnFn={goBack} />
       <div className="report-mapping-misc">
         <LabeledInput
-          label={IModelApp.localization.getLocalizedString("ReportsConfigWidget:ODataFeedURL")}
+          label={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ODataFeedURL")}
           className="odata-url-input"
           readOnly={true}
           value={odataFeedUrl}
           svgIcon={
-            <IconButton title={IModelApp.localization.getLocalizedString("ReportsConfigWidget:Copy")} styleType='borderless' onClick={async (_) => {
+            <IconButton title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Copy")} styleType='borderless' onClick={async (_) => {
               await navigator.clipboard.writeText(odataFeedUrl);
-              toaster.positive(IModelApp.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
+              toaster.positive(ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CopiedToClipboard"));
             }}>
               <SvgCopy />
             </IconButton>
@@ -172,7 +172,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
             onClick={() => addMapping()}
             styleType="high-visibility"
           >
-            {IModelApp.localization.getLocalizedString("ReportsConfigWidget:AddMapping")}
+            {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:AddMapping")}
           </Button>
           <div className="search-bar-container" data-testid="search-bar">
             <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
@@ -183,12 +183,12 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           reportMappings.length === 0 ?
             <EmptyMessage>
               <>
-                <Text>{IModelApp.localization.getLocalizedString("ReportsConfigWidget:NoReportMappings")}</Text>
+                <Text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:NoReportMappings")}</Text>
                 <div>
                   <Button
                     onClick={() => addMapping()}
                     styleType='cta'>
-                    {IModelApp.localization.getLocalizedString("ReportsConfigWidget:LetsAddSomeMappingsCTA")}
+                    {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:LetsAddSomeMappingsCTA")}
                   </Button>
                 </div>
               </>
@@ -213,7 +213,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
                           }}
                         icon={<SvgDelete />}
                       >
-                        {IModelApp.localization.getLocalizedString("ReportsConfigWidget:Remove")}
+                        {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Remove")}
                       </MenuItem>,
                     ]}
                   >
