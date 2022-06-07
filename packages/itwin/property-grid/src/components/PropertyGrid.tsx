@@ -10,6 +10,7 @@ import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-front
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
   PropertyData,
+  PropertyDataFiltererBase,
   PropertyGridContextMenuArgs,
 } from "@itwin/components-react";
 import {
@@ -42,6 +43,7 @@ import type {
 import { PropertyGridDefaultContextMenuKey } from "../types";
 import {
   FilteringPropertyGridWithUnifiedSelection,
+  NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 import classnames from "classnames";
@@ -101,7 +103,6 @@ export const PropertyGrid = ({
   }, [autoExpandChildCategories, propDataProvider, iModelConnection, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting, instanceKey]);
 
   const dataProvider = useOptionalDisposable(createDataProvider);
-  const filterer =  new PlaceholderPropertyDataFilterer();
 
   const [title, setTitle] = useState<PropertyRecord>();
   const [className, setClassName] = useState<string>("");
@@ -112,6 +113,9 @@ export const PropertyGrid = ({
   ContextMenuItemInfo[] | undefined
   >(undefined);
   const [showNullValues, setShowNullValues] = useState<boolean>(true);
+  const [filterer, setFilterer] = useState<PropertyDataFiltererBase>(
+    new PlaceholderPropertyDataFilterer()
+  );
 
   const [height, setHeight] = useState(0);
   const [width, setWidth] = useState(0);
@@ -158,6 +162,17 @@ export const PropertyGrid = ({
       },
     };
   }, []);
+
+  // If persisting hide/show empty values, get the preference
+  useMemo(async () => {
+    if(persistNullValueToggle) {
+      const res = await getShowNullValuesPreference();
+      if(res !== undefined) {
+        res ? setFilterer(new PlaceholderPropertyDataFilterer()) : setFilterer(new NonEmptyValuesPropertyDataFilterer());
+        setShowNullValues(res);
+      }
+    }
+  }, [persistNullValueToggle]);
 
   useEffect(() => {
     const onDataChanged = async () => {
@@ -312,15 +327,17 @@ export const PropertyGrid = ({
 
       // Fcn for updating toggle for Hide / Show Empty Fields menu options
       const updateShowNullValues = async (value: boolean) => {
-        if(dataProvider) {
-          dataProvider.includeFieldsWithNoValues = value;
-          setContextMenu(undefined);
-          setShowNullValues(value);
-          if(persistNullValueToggle) {
-            saveShowNullValuesPreference(value);
-          }
+        // Update filter and reset context menu
+        value ? setFilterer(new PlaceholderPropertyDataFilterer()) : setFilterer(new NonEmptyValuesPropertyDataFilterer());
+        setContextMenu(undefined);
+        setShowNullValues(value);
+
+        // Persist hide/show value
+        if(persistNullValueToggle) {
+          saveShowNullValuesPreference(value);
         }
       }
+
     },
     [
       dataProvider,
