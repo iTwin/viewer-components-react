@@ -20,11 +20,10 @@ import {
   BboxDimensionsDecorator,
 } from "../../decorators/BboxDimensionsDecorator";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleError, WidgetHeader } from "./utils";
+import { getReportingClient, handleError, WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
 import type { CalculatedPropertyType } from "./CalculatedPropertyTable";
-import { ReportingClient } from "@itwin/insights-client";
 import { ApiContext } from "./GroupingMapping";
 
 interface CalculatedPropertyActionProps {
@@ -102,7 +101,7 @@ const CalculatedPropertyAction = ({
     try {
       setIsLoading(true);
 
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = getReportingClient(apiContext.prefix);
 
       property
         ? await reportingClientApi.updateCalculatedProperty(
