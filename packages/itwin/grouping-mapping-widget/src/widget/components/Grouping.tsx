@@ -49,7 +49,7 @@ import {
   overrideElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { fetchIdsFromQuery, getReportingClient, handleError, WidgetHeader, EmptyMessage, } from "./utils";
+import { fetchIdsFromQuery, getReportingClient, handleError, WidgetHeader, EmptyMessage, LoadingOverlay, } from "./utils";
 import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
 import type { Api } from "./GroupingMapping";
