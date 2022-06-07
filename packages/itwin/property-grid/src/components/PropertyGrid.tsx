@@ -47,7 +47,7 @@ import {
 } from "./FilteringPropertyGrid";
 import classnames from "classnames";
 import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
-import { getShowNullValuesPreference, saveShowNullValuesPreference } from "../api/ShowNullValuesPreferenceManager";
+import { getShowNullValuesPreference, saveShowNullValuesPreference } from "../api/ShowNullValuesPreferenceClient";
 
 interface PropertyGridPropsWithSingleElement extends PropertyGridProps {
   instanceKey?: InstanceKey;
@@ -196,7 +196,7 @@ export const PropertyGrid = ({
     return () => {
       removeListener?.();
     };
-  }, [dataProvider, customOnDataChanged, persistNullValueToggle]);
+  }, [dataProvider, customOnDataChanged]);
 
   const onAddFavorite = useCallback(
     async (propertyField: Field) => {
