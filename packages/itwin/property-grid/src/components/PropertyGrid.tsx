@@ -47,7 +47,7 @@ import {
 } from "./FilteringPropertyGrid";
 import classnames from "classnames";
 import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
-import { getShowNullValuesPreference, saveShowNullValuesPreference } from "../api/PropertyGridUserPreferences";
+import { getShowNullValuesPreference, saveShowNullValuesPreference } from "../api/ShowNullValuesPreferenceManager";
 
 interface PropertyGridPropsWithSingleElement extends PropertyGridProps {
   instanceKey?: InstanceKey;
@@ -219,6 +219,19 @@ export const PropertyGrid = ({
     [iModelConnection, favoritePropertiesScope]
   );
 
+  // Fcn for updating toggle for Hide / Show Empty Fields menu options
+  const updateShowNullValues = useCallback(async (value: boolean) => {
+    // Update filter and reset context menu
+    value ? setFilterer(new PlaceholderPropertyDataFilterer()) : setFilterer(new NonEmptyValuesPropertyDataFilterer());
+    setContextMenu(undefined);
+    setShowNullValues(value);
+
+    // Persist hide/show value
+    if(persistNullValueToggle) {
+      await saveShowNullValuesPreference(value);
+    }
+  }, [persistNullValueToggle]);
+
   const buildContextMenu = useCallback(
     async (args: PropertyGridContextMenuArgs) => {
       if (dataProvider) {
@@ -327,25 +340,12 @@ export const PropertyGrid = ({
 
         setContextMenuItemInfos(items.length > 0 ? items : undefined);
       }
-
-      // Fcn for updating toggle for Hide / Show Empty Fields menu options
-      const updateShowNullValues = async (value: boolean) => {
-        // Update filter and reset context menu
-        value ? setFilterer(new PlaceholderPropertyDataFilterer()) : setFilterer(new NonEmptyValuesPropertyDataFilterer());
-        setContextMenu(undefined);
-        setShowNullValues(value);
-
-        // Persist hide/show value
-        if(persistNullValueToggle) {
-          await saveShowNullValuesPreference(value);
-        }
-      };
     },
     [
       dataProvider,
       localizations,
       showNullValues,
-      persistNullValueToggle,
+      updateShowNullValues,
       enableFavoriteProperties,
       favoritePropertiesScope,
       enableCopyingPropertyText,
