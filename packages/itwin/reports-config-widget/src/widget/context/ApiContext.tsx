@@ -7,11 +7,11 @@ import * as React from "react";
 import { createContext } from "react";
 
 export interface Api {
-  accessToken: AccessToken;
+  getAccessToken: () => Promise<AccessToken>;
   baseUrl: string;
 }
 
-export const ApiContext = createContext<Api>({ accessToken: "", baseUrl: "" });
+export const ApiContext = createContext<Api>({ getAccessToken: async () => "", baseUrl: "" });
 
 export const useApi = () => {
   const context = React.useContext(ApiContext);

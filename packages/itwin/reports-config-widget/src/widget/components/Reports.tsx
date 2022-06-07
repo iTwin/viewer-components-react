@@ -55,7 +55,8 @@ const fetchReports = async (
     if (!iTwinId) return;
     setIsLoading(true);
     const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-    const reports = await reportingClientApi.getReports(apiContext.accessToken, iTwinId);
+    const accessToken = await apiContext.getAccessToken()
+    const reports = await reportingClientApi.getReports(accessToken, iTwinId);
     setReports(reports ?? []);
   } catch (error: any) {
     handleError(error.status);
@@ -202,8 +203,9 @@ export const Reports = () => {
             setShow={setShowDeleteModal}
             onDelete={async () => {
               const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
+              const accessToken = await apiContext.getAccessToken();
               await reportingClientApi.deleteReport(
-                apiContext.accessToken,
+                accessToken,
                 selectedReport?.id ?? ""
               );
             }}

@@ -27,7 +27,8 @@ const fetchIModels = async (
   };
 
   const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
-  const authorization = AccessTokenAdapter.toAuthorizationCallback(apiContext.accessToken);
+  const accessToken = await apiContext.getAccessToken()
+  const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
   const getiModelListParams: GetIModelListParams = {
     urlParams: { projectId: iTwinId },
     authorization,

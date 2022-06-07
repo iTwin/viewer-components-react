@@ -36,7 +36,8 @@ const fetchMappings = async (
   try {
     setIsLoading(true);
     const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-    const mappings = await reportingClientApi.getMappings(apiContext.accessToken, iModelId);
+    const accessToken = await apiContext.getAccessToken();
+    const mappings = await reportingClientApi.getMappings(accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -98,8 +99,9 @@ const AddMappingsModal = ({
       if (!selectedIModelId) return;
       setIsLoading(true);
       const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
+      const accessToken = await apiContext.getAccessToken();
       for (const mapping of selectedMappings) {
-        await reportingClientApi.createReportMapping(apiContext.accessToken, reportId, { imodelId: selectedIModelId, mappingId: mapping.id ?? "" });
+        await reportingClientApi.createReportMapping(accessToken, reportId, { imodelId: selectedIModelId, mappingId: mapping.id ?? "" });
       }
 
       await returnFn();

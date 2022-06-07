@@ -131,7 +131,8 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
       setExtractionState(ExtractionStates.Starting);
       setExtractingIModelId(iModelId);
       const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-      const response = await reportingClientApi.runExtraction(apiContext.accessToken, iModelId);
+      const accessToken = await apiContext.getAccessToken();
+      const response = await reportingClientApi.runExtraction(accessToken, iModelId);
       jobId.current = response.run?.id ?? "";
       setIsRunning(true);
       setExtractionState(ExtractionStates.FetchingUpdate);
@@ -149,7 +150,8 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
       const delay = 2000;
       const newIntervalId = window.setInterval(async () => {
         const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-        const response = await reportingClientApi.getExtractionStatus(apiContext.accessToken, jobId.current);
+        const accessToken = await apiContext.getAccessToken();
+        const response = await reportingClientApi.getExtractionStatus(accessToken, jobId.current);
         if (response.status?.state === "Queued") {
           setExtractionState(ExtractionStates.Queued);
         } else if (response.status?.state === "Running") {

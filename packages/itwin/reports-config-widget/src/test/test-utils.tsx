@@ -15,7 +15,7 @@ import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import userEvent from "@testing-library/user-event";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 
-export const mockAccessToken = "Bearer eyJhbGci";
+export const mockAccessToken = async () => "Bearer eyJhbGci";
 
 interface WrapperProps {
   children?: React.ReactNode;
@@ -23,7 +23,7 @@ interface WrapperProps {
 
 function render(ui: React.ReactElement, { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (
-    <ApiContext.Provider value={{ accessToken: mockAccessToken, baseUrl: REPORTS_CONFIG_BASE_URL }}>{children}</ApiContext.Provider>
+    <ApiContext.Provider value={{ getAccessToken: mockAccessToken, baseUrl: REPORTS_CONFIG_BASE_URL }}>{children}</ApiContext.Provider>
   );
 
   return {

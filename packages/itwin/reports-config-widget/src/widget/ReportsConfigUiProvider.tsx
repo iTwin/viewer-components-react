@@ -22,11 +22,11 @@ export const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com";
 
 export class ReportsConfigProvider implements UiItemsProvider {
   public readonly id = "ReportsConfigProvider";
-  private readonly _accessToken?: AccessToken;
+  private readonly _getAccessToken?: () => Promise<AccessToken>;
   private readonly _baseUrl: string;
 
-  constructor(accessToken?: AccessToken, baseUrl: string = REPORTS_CONFIG_BASE_URL) {
-    this._accessToken = accessToken;
+  constructor(getAccessToken?: () => Promise<AccessToken>, baseUrl: string = REPORTS_CONFIG_BASE_URL) {
+    this._getAccessToken = getAccessToken;
     this._baseUrl = baseUrl;
   }
 
@@ -35,20 +35,18 @@ export class ReportsConfigProvider implements UiItemsProvider {
     stageUsage: string,
     location: StagePanelLocation,
     section?: StagePanelSection,
-    zonelocation?: AbstractZoneLocation
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
     if (
       (location === StagePanelLocation.Left &&
         section === StagePanelSection.Start &&
-        stageUsage === StageUsage.General) ||
-      zonelocation === AbstractZoneLocation.CenterLeft
+        stageUsage === StageUsage.General)
     ) {
       const ReportsWidget: AbstractWidgetProps = {
         id: "reports-config-widget",
         label: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ReportsConfig"),
         getWidgetContent: () => {
-          return <ReportsContainer accessToken={this._accessToken} baseUrl={this._baseUrl} />;
+          return <ReportsContainer getAccessToken={this._getAccessToken} baseUrl={this._baseUrl} />;
         },
       };
 

@@ -58,18 +58,19 @@ const fetchReportMappings = async (
   try {
     setIsLoading(true);
     const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-    const reportMappings = await reportingClientApi.getReportMappings(apiContext.accessToken, reportId);
+    const accessToken = await apiContext.getAccessToken();
+    const reportMappings = await reportingClientApi.getReportMappings(accessToken, reportId);
     const iModelClientOptions: IModelsClientOptions = {
       api: { baseUrl: generateUrl(Constants.api.baseUrl, apiContext.baseUrl) },
     };
 
     const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
-    const authorization = AccessTokenAdapter.toAuthorizationCallback(apiContext.accessToken);
+    const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
     const iModelNames = new Map<string, string>();
     const reportMappingsAndMapping = await Promise.all(reportMappings?.map(async (reportMapping) => {
       const iModelId = reportMapping.imodelId ?? "";
       let iModelName = "";
-      const mapping = await reportingClientApi.getMapping(apiContext.accessToken, reportMapping.mappingId ?? "", iModelId);
+      const mapping = await reportingClientApi.getMapping(accessToken, reportMapping.mappingId ?? "", iModelId);
       if (iModelNames.has(iModelId)) {
         iModelName = iModelNames.get(iModelId) ?? "";
       } else {
@@ -243,8 +244,9 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
         setShow={setShowDeleteModal}
         onDelete={async () => {
           const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
+          const accessToken = await apiContext.getAccessToken();
           await reportingClientApi.deleteReportMapping(
-            apiContext.accessToken,
+            accessToken,
             report.id ?? "",
             selectedReportMapping?.mappingId ?? ""
           );

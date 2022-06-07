@@ -37,12 +37,13 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
       }
       setIsLoading(true);
       const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
+      const accessToken = await apiContext.getAccessToken();
       report
-        ? await reportingClientApi.updateReport(apiContext.accessToken, report.id ?? "", {
+        ? await reportingClientApi.updateReport(accessToken, report.id ?? "", {
           displayName: values.name,
           description: values.description,
         })
-        : await reportingClientApi.createReport(apiContext.accessToken, {
+        : await reportingClientApi.createReport(accessToken, {
           displayName: values.name,
           description: values.description,
           projectId: iTwinId,
