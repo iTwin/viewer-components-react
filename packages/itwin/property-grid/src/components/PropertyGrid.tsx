@@ -164,7 +164,7 @@ export const PropertyGrid = ({
 
   // If persisting hide/show empty values, get the preference
   useEffect(() => {
-    const getPreferences = async () => {
+    const setDefaultShowNullValues = async () => {
       if(persistNullValueToggle) {
         const res = await getShowNullValuesPreference();
         if(res !== undefined) {
@@ -174,7 +174,7 @@ export const PropertyGrid = ({
       }
     };
 
-    void getPreferences();
+    void setDefaultShowNullValues();
   }, [persistNullValueToggle]);
 
   useEffect(() => {
