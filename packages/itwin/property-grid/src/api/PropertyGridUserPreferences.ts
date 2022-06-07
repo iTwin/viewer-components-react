@@ -28,9 +28,8 @@ export const getShowNullValuesPreference = async () => {
       });
       if (showNullValuesRes !== undefined) {
         return showNullValuesRes === "true";
-      } 
-    }
-    catch (error) {
+      }
+    } catch (error) {
       Logger.logError(
         LOGGER_CATEGORY,
         `error saving showNullValues user preference: ${error}`
@@ -57,12 +56,11 @@ export const saveShowNullValuesPreference = async (value: boolean) => {
         iTwinId,
         iModelId,
       });
-    }
-    catch (error) {
+    } catch (error) {
       Logger.logError(
         LOGGER_CATEGORY,
         `error saving showNullValues user preference: ${error}`
       );
-    }    
+    }
   }
 };

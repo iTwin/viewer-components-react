@@ -25,7 +25,6 @@ import {
   useOptionalDisposable,
   useResizeObserver,
 } from "@itwin/core-react";
-import { IModelApp } from "@itwin/core-frontend";
 import {
   UiFramework,
   useActiveIModelConnection,
@@ -164,14 +163,18 @@ export const PropertyGrid = ({
   }, []);
 
   // If persisting hide/show empty values, get the preference
-  useMemo(async () => {
-    if(persistNullValueToggle) {
-      const res = await getShowNullValuesPreference();
-      if(res !== undefined) {
-        res ? setFilterer(new PlaceholderPropertyDataFilterer()) : setFilterer(new NonEmptyValuesPropertyDataFilterer());
-        setShowNullValues(res);
+  useMemo(() => {
+    const getPreferences = async () => {
+      if(persistNullValueToggle) {
+        const res = await getShowNullValuesPreference();
+        if(res !== undefined) {
+          res ? setFilterer(new PlaceholderPropertyDataFilterer()) : setFilterer(new NonEmptyValuesPropertyDataFilterer());
+          setShowNullValues(res);
+        }
       }
-    }
+    };
+
+    void getPreferences();
   }, [persistNullValueToggle]);
 
   useEffect(() => {
@@ -334,15 +337,15 @@ export const PropertyGrid = ({
 
         // Persist hide/show value
         if(persistNullValueToggle) {
-          saveShowNullValuesPreference(value);
+          await saveShowNullValuesPreference(value);
         }
-      }
-
+      };
     },
     [
       dataProvider,
       localizations,
       showNullValues,
+      persistNullValueToggle,
       enableFavoriteProperties,
       favoritePropertiesScope,
       enableCopyingPropertyText,
