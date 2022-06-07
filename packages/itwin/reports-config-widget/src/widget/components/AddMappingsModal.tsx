@@ -17,8 +17,8 @@ import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import type { ReportMappingAndMapping } from "./ReportMappings";
-import type { Api } from "../context/ApiContext";
-import { useApi } from "../context/ApiContext";
+import type { ApiConfig } from "../context/ApiContext";
+import { useApiConfig } from "../context/ApiContext";
 import { SelectIModel } from "./SelectIModel";
 import type { CreateTypeFromInterface } from "./utils";
 import { generateUrl } from "./utils";
@@ -31,7 +31,7 @@ const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: Api
+  apiContext: ApiConfig
 ) => {
   try {
     setIsLoading(true);
@@ -63,13 +63,13 @@ const AddMappingsModal = ({
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const [selectedIModelId, setSelectediModelId] = useState<string>("");
   const [mappings, setMappings] = useState<Mapping[]>([]);
-  const apiContext = useApi();
+  const apiConfig = useApiConfig();
 
   useEffect(() => {
     if (selectedIModelId) {
-      void fetchMappings(setMappings, selectedIModelId, setIsLoading, apiContext);
+      void fetchMappings(setMappings, selectedIModelId, setIsLoading, apiConfig);
     }
-  }, [apiContext, selectedIModelId, setIsLoading]);
+  }, [apiConfig, selectedIModelId, setIsLoading]);
 
   const mappingsColumns = useMemo(
     () => [
@@ -98,8 +98,8 @@ const AddMappingsModal = ({
     try {
       if (!selectedIModelId) return;
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-      const accessToken = await apiContext.getAccessToken();
+      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+      const accessToken = await apiConfig.getAccessToken();
       for (const mapping of selectedMappings) {
         await reportingClientApi.createReportMapping(accessToken, reportId, { imodelId: selectedIModelId, mappingId: mapping.id ?? "" });
       }

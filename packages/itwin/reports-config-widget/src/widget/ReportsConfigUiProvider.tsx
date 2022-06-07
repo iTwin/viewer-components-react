@@ -7,7 +7,6 @@ import type {
   UiItemsProvider,
 } from "@itwin/appui-abstract";
 import {
-  AbstractZoneLocation,
   StagePanelLocation,
   StagePanelSection,
   StageUsage,

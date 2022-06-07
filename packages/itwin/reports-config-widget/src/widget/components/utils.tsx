@@ -118,7 +118,6 @@ export const generateUrl = (baseUrl: string, newBaseUrl: string) => {
   return baseUrl.replace("https://api.bentley.com", newBaseUrl);
 };
 
-
 export type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
 };

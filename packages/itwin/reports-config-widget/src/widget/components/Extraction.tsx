@@ -11,7 +11,7 @@ import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
 import { generateUrl, handleError, SkeletonBlock } from "./utils";
 import "./Extraction.scss";
 import { SvgStatusError, SvgStatusPending, SvgStatusPendingHollow, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
-import { useApi } from "../context/ApiContext";
+import { useApiConfig } from "../context/ApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export enum ExtractionStates {
@@ -124,14 +124,14 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
   const intervalId = useRef<number>();
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [currentIModelId, setCurrentIModelId] = useState<string>();
-  const apiContext = useApi();
+  const apiConfig = useApiConfig();
 
   const runExtraction = async (iModelId: string) => {
     try {
       setExtractionState(ExtractionStates.Starting);
       setExtractingIModelId(iModelId);
-      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-      const accessToken = await apiContext.getAccessToken();
+      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+      const accessToken = await apiConfig.getAccessToken();
       const response = await reportingClientApi.runExtraction(accessToken, iModelId);
       jobId.current = response.run?.id ?? "";
       setIsRunning(true);
@@ -149,8 +149,8 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
     if (!intervalId.current && isRunning) {
       const delay = 2000;
       const newIntervalId = window.setInterval(async () => {
-        const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-        const accessToken = await apiContext.getAccessToken();
+        const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+        const accessToken = await apiConfig.getAccessToken();
         const response = await reportingClientApi.getExtractionStatus(accessToken, jobId.current);
         if (response.status?.state === "Queued") {
           setExtractionState(ExtractionStates.Queued);
@@ -172,7 +172,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
       intervalId.current = undefined;
     }
     return () => window.clearInterval(intervalId.current);
-  }, [apiContext, isRunning, jobId, setExtractionState]);
+  }, [apiConfig, isRunning, jobId, setExtractionState]);
 
   const iModelOptions = useMemo(() => {
     // TODO Report ComboBox bug. Unique key error happens when the options list becomes reduced.

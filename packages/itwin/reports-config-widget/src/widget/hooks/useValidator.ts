@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelApp } from "@itwin/core-frontend";
 import { useState } from "react";
 import SimpleReactValidator from "simple-react-validator";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";

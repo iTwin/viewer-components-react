@@ -11,7 +11,7 @@ import "./ReportAction.scss";
 import type { Report } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
-import { useApi } from "../context/ApiContext";
+import { useApiConfig } from "../context/ApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 interface ReportActionProps {
@@ -21,7 +21,7 @@ interface ReportActionProps {
 }
 
 const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
-  const apiContext = useApi();
+  const apiConfig = useApiConfig();
   const [values, setValues] = useState({
     name: report?.displayName ?? "",
     description: report?.description ?? "",
@@ -36,8 +36,8 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         return;
       }
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-      const accessToken = await apiContext.getAccessToken();
+      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+      const accessToken = await apiConfig.getAccessToken();
       report
         ? await reportingClientApi.updateReport(accessToken, report.id ?? "", {
           displayName: values.name,

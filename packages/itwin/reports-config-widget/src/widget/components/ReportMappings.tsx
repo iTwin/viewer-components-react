@@ -36,8 +36,8 @@ import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import { HorizontalTile } from "./HorizontalTile";
 import { Extraction, ExtractionStates, ExtractionStatus } from "./Extraction";
 import { SearchBar } from "./SearchBar";
-import type { Api } from "../context/ApiContext";
-import { useApi } from "../context/ApiContext";
+import type { ApiConfig } from "../context/ApiContext";
+import { useApiConfig } from "../context/ApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
@@ -53,7 +53,7 @@ const fetchReportMappings = async (
   setReportMappings: React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>,
   reportId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: Api
+  apiContext: ApiConfig
 ) => {
   try {
     setIsLoading(true);
@@ -102,12 +102,12 @@ interface ReportMappingsProps {
 }
 
 export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
-  const apiContext = useApi();
+  const apiConfig = useApiConfig();
   const [reportMappingsView, setReportMappingsView] = useState<ReportMappingsView>(
     ReportMappingsView.REPORTMAPPINGS
   );
   const [selectedReportMapping, setSelectedReportMapping] = useState<
-    ReportMappingAndMapping | undefined
+  ReportMappingAndMapping | undefined
   >(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -118,13 +118,13 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
 
   useEffect(() => {
-    void fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, apiContext);
-  }, [apiContext, report.id, setIsLoading]);
+    void fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, apiConfig);
+  }, [apiConfig, report.id, setIsLoading]);
 
   const refresh = useCallback(async () => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
-    await fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, apiContext);
-  }, [apiContext, report.id, setReportMappings]);
+    await fetchReportMappings(setReportMappings, report.id ?? "", setIsLoading, apiConfig);
+  }, [apiConfig, report.id, setReportMappings]);
 
   const addMapping = () => {
     setReportMappingsView(ReportMappingsView.ADDING);
@@ -132,7 +132,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
 
   const uniqueIModels = useMemo(() => new Map(reportMappings.map((mapping) => [mapping.imodelId ?? "", mapping.iModelName])), [reportMappings]);
 
-  const odataFeedUrl = `${generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl)}/odata/${report.id}`;
+  const odataFeedUrl = `${generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)}/odata/${report.id}`;
 
   const filteredReportMappings = useMemo(() => reportMappings.filter((x) =>
     [x.iModelName, x.mappingName, x.mappingDescription]
@@ -243,8 +243,8 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
-          const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-          const accessToken = await apiContext.getAccessToken();
+          const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+          const accessToken = await apiConfig.getAccessToken();
           await reportingClientApi.deleteReportMapping(
             accessToken,
             report.id ?? "",

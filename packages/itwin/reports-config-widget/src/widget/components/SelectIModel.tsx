@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelApp } from "@itwin/core-frontend";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import type { GetIModelListParams, IModelsClientOptions, MinimalIModel } from "@itwin/imodels-client-management";
 import { Constants } from "@itwin/imodels-client-management";
@@ -11,8 +10,8 @@ import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useMemo } from "react";
 import { useEffect, useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
-import type { Api } from "../context/ApiContext";
-import { useApi } from "../context/ApiContext";
+import type { ApiConfig } from "../context/ApiContext";
+import { useApiConfig } from "../context/ApiContext";
 import { useActiveIModel } from "../hooks/useActiveIModel";
 import "./SelectIModel.scss";
 import { generateUrl } from "./utils";
@@ -20,14 +19,14 @@ import { generateUrl } from "./utils";
 const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
   iTwinId: string,
-  apiContext: Api
+  apiContext: ApiConfig
 ) => {
   const iModelClientOptions: IModelsClientOptions = {
     api: { baseUrl: generateUrl(Constants.api.baseUrl, apiContext.baseUrl) },
   };
 
   const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
-  const accessToken = await apiContext.getAccessToken()
+  const accessToken = await apiContext.getAccessToken();
   const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
   const getiModelListParams: GetIModelListParams = {
     urlParams: { projectId: iTwinId },
@@ -43,15 +42,15 @@ interface SelectedIModelProps {
 }
 
 export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: SelectedIModelProps) => {
-  const apiContext = useApi();
+  const apiConfig = useApiConfig();
   const { iTwinId, iModelId } = useActiveIModel();
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
 
   useEffect(() => {
     if (iModelId && iTwinId) {
-      void fetchIModels(setIModels, iTwinId, apiContext);
+      void fetchIModels(setIModels, iTwinId, apiConfig);
     }
-  }, [apiContext, setIModels, iModelId, iTwinId]);
+  }, [apiConfig, setIModels, iModelId, iTwinId]);
 
   useEffect(() => {
     if (iModelId && iModels.length > 0) {

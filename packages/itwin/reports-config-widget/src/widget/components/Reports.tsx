@@ -26,13 +26,12 @@ import DeleteModal from "./DeleteModal";
 import type { Report } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
-import { IModelApp } from "@itwin/core-frontend";
 import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
 import { HorizontalTile } from "./HorizontalTile";
 import { SearchBar } from "./SearchBar";
-import type { Api } from "../context/ApiContext";
-import { useApi } from "../context/ApiContext";
+import type { ApiConfig } from "../context/ApiContext";
+import { useApiConfig } from "../context/ApiContext";
 import { useActiveIModel } from "../hooks/useActiveIModel";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
@@ -49,13 +48,13 @@ const fetchReports = async (
   setReports: React.Dispatch<React.SetStateAction<Report[]>>,
   iTwinId: string | undefined,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: Api
+  apiContext: ApiConfig
 ) => {
   try {
     if (!iTwinId) return;
     setIsLoading(true);
     const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-    const accessToken = await apiContext.getAccessToken()
+    const accessToken = await apiContext.getAccessToken();
     const reports = await reportingClientApi.getReports(accessToken, iTwinId);
     setReports(reports ?? []);
   } catch (error: any) {
@@ -67,27 +66,27 @@ const fetchReports = async (
 
 export const Reports = () => {
   const iTwinId = useActiveIModel().iTwinId;
-  const apiContext = useApi();
+  const apiConfig = useApiConfig();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [reportsView, setReportsView] = useState<ReportsView>(
     ReportsView.REPORTS
   );
   const [selectedReport, setSelectedReport] = useState<
-    Report | undefined
+  Report | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
 
   useEffect(() => {
-    void fetchReports(setReports, iTwinId, setIsLoading, apiContext);
-  }, [apiContext, iTwinId, setIsLoading]);
+    void fetchReports(setReports, iTwinId, setIsLoading, apiConfig);
+  }, [apiConfig, iTwinId, setIsLoading]);
 
   const refresh = useCallback(async () => {
     setReportsView(ReportsView.REPORTS);
     setSelectedReport(undefined);
-    await fetchReports(setReports, iTwinId, setIsLoading, apiContext);
-  }, [apiContext, iTwinId, setReports]);
+    await fetchReports(setReports, iTwinId, setIsLoading, apiConfig);
+  }, [apiConfig, iTwinId, setReports]);
 
   const addReport = () => {
     setReportsView(ReportsView.ADDING);
@@ -202,8 +201,8 @@ export const Reports = () => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
-              const accessToken = await apiContext.getAccessToken();
+              const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+              const accessToken = await apiConfig.getAccessToken();
               await reportingClientApi.deleteReport(
                 accessToken,
                 selectedReport?.id ?? ""

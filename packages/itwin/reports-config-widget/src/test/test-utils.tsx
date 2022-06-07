@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { render as rtlRender } from "@testing-library/react";
-import { ApiContext } from "../widget/context/ApiContext";
+import { ApiConfigContext } from "../widget/context/ApiContext";
 import type { AnyAction, Store } from "redux";
 import { combineReducers, createStore } from "redux";
 import { FrameworkReducer, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
@@ -23,7 +23,7 @@ interface WrapperProps {
 
 function render(ui: React.ReactElement, { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (
-    <ApiContext.Provider value={{ getAccessToken: mockAccessToken, baseUrl: REPORTS_CONFIG_BASE_URL }}>{children}</ApiContext.Provider>
+    <ApiConfigContext.Provider value={{ getAccessToken: mockAccessToken, baseUrl: REPORTS_CONFIG_BASE_URL }}>{children}</ApiConfigContext.Provider>
   );
 
   return {

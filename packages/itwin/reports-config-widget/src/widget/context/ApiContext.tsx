@@ -6,17 +6,17 @@ import type { AccessToken } from "@itwin/core-bentley";
 import * as React from "react";
 import { createContext } from "react";
 
-export interface Api {
+export interface ApiConfig {
   getAccessToken: () => Promise<AccessToken>;
   baseUrl: string;
 }
 
-export const ApiContext = createContext<Api>({ getAccessToken: async () => "", baseUrl: "" });
+export const ApiConfigContext = createContext<ApiConfig>({ getAccessToken: async () => "", baseUrl: "" });
 
-export const useApi = () => {
-  const context = React.useContext(ApiContext);
+export const useApiConfig = () => {
+  const context = React.useContext(ApiConfigContext);
   if (!context) {
-    throw new Error("useApiContext should be used within a Api Context provider");
+    throw new Error("useApiConfig should be used within a ApiConfigContext provider");
   }
   return context;
 };
