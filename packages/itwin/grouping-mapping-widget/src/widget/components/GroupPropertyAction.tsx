@@ -44,10 +44,9 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from "re
 
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleError, WidgetHeader } from "./utils";
+import { getReportingClient, handleError, WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
 import type { ECProperty, GroupPropertyCreate } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
 import { ApiContext } from "./GroupingMapping";
 
 interface GroupPropertyActionProps {
@@ -352,7 +351,7 @@ const GroupPropertyAction = ({
       setClassToPropertiesMapping(classToPropertiesMapping);
 
       let newEcProperties: ECProperty[];
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = getReportingClient(apiContext.prefix);
       // Fetch already existing ec properties then add all classes from presentation
       if (groupPropertyId) {
         // TODO Error handling
@@ -424,7 +423,7 @@ const GroupPropertyAction = ({
         quantityType,
         ecProperties: filteredEcProperties,
       };
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = getReportingClient(apiContext.prefix);
       groupPropertyId
         ? await reportingClientApi.updateGroupProperty(
           apiContext.accessToken,

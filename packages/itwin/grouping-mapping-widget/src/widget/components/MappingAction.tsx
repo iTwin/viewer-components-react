@@ -6,11 +6,10 @@ import { Fieldset, LabeledInput, Small, ToggleSwitch } from "@itwin/itwinui-reac
 import React, { useContext, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleError, handleInputChange, WidgetHeader } from "./utils";
+import { getReportingClient, handleError, handleInputChange, WidgetHeader } from "./utils";
 import "./MappingAction.scss";
 import { ApiContext } from "./GroupingMapping";
 import type { Mapping } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
 
 interface MappingActionProps {
   iModelId: string;
@@ -36,7 +35,7 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
         return;
       }
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = getReportingClient(apiContext.prefix);
       mapping
         ? await reportingClientApi.updateMapping(apiContext.accessToken, iModelId, mapping.id ?? "", {
           mappingName: values.name,
@@ -102,8 +101,8 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
           <ToggleSwitch
             id='extractionEnabled'
             name='extractionEnabled'
-            label='Extraction enabled'
-            labelPosition="left"
+            label='Extract data from iModel'
+            labelPosition="right"
             checked={values.extractionEnabled}
             onChange={(event) => {
               setValues({ ...values, extractionEnabled: event.currentTarget.checked });
