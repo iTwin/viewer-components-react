@@ -14,6 +14,8 @@ import { SvgStatusError, SvgStatusPending, SvgStatusPendingHollow, SvgStatusSucc
 import { useApiConfig } from "../context/ApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
+export const REFRESH_DELAY = 2000;
+
 export enum ExtractionStates {
   None,
   Starting,
@@ -147,7 +149,6 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
 
   useEffect(() => {
     if (!intervalId.current && isRunning) {
-      const delay = 2000;
       const newIntervalId = window.setInterval(async () => {
         const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
         const accessToken = await apiConfig.getAccessToken();
@@ -165,7 +166,7 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
           setIsRunning(false);
           setCurrentIModelId(undefined);
         }
-      }, delay);
+      }, REFRESH_DELAY);
       intervalId.current = newIntervalId;
     } else if (intervalId && !isRunning) {
       window.clearInterval(intervalId.current);

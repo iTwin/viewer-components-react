@@ -17,6 +17,7 @@ import type { ExtractionStatus, Mapping, MappingCollection, MappingSingle, Repor
 import { ReportMappings } from "../widget/components/ReportMappings";
 import { Constants, IModelState } from "@itwin/imodels-client-management";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
+import { REFRESH_DELAY } from "../widget/components/Extraction";
 
 // For the extraction test
 jest.setTimeout(20000);
@@ -538,7 +539,7 @@ describe(("Report Mappings View"), () => {
     const mockReportMappings = mockReportMappingsFactory();
     const [_, iModelHandlers] = mockMappingsFactory(mockReportMappings);
 
-    const delay = 2000;
+    const delay = REFRESH_DELAY;
 
     // Faking timers currently makes all promise based queries from RTL become unpredictable.
     // https://github.com/testing-library/dom-testing-library/issues/988
