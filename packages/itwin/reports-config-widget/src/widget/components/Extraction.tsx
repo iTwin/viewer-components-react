@@ -87,7 +87,7 @@ export const ExtractionStatus = ({ state, children, setExtractionState }: Extrac
         <div title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Success")} className="extraction-status">
           <div
             className={`status-icon`}
-            style={{ animationName: fadeOut ? "fade-out" : "", animationDelay: "5s", animationDuration: "1s" }}
+            style={{ animationName: fadeOut ? "rcw-fade-out" : "", animationDelay: "5s", animationDuration: "1s" }}
             onAnimationEnd={onAnimationEnd}
           >
             <SvgStatusSuccess />
@@ -99,7 +99,7 @@ export const ExtractionStatus = ({ state, children, setExtractionState }: Extrac
         <div title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Failed")} className="extraction-status">
           <div
             className={`status-icon`}
-            style={{ animationName: fadeOut ? "fade-out" : "", animationDelay: "5s", animationDuration: "1s" }}
+            style={{ animationName: fadeOut ? "rcw-fade-out" : "", animationDelay: "5s", animationDuration: "1s" }}
             onAnimationEnd={onAnimationEnd}
           >
             <SvgStatusError />
