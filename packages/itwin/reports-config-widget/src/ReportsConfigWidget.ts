@@ -15,11 +15,11 @@ export class ReportsConfigWidget {
   }
 
   public static get localization(): Localization {
-    return ReportsConfigWidget._localization ?? IModelApp.localization;
+    return ReportsConfigWidget._localization
   }
 
-  public static async initialize(localization: Localization): Promise<void> {
-    ReportsConfigWidget._localization = localization;
+  public static async initialize(localization?: Localization): Promise<void> {
+    ReportsConfigWidget._localization = localization ?? IModelApp.localization;;
     // Setup localization
     const ReportsWidgetNamespace = "ReportsConfigWidget";
     await ReportsConfigWidget._localization.registerNamespace(ReportsWidgetNamespace);

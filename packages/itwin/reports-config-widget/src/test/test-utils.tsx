@@ -46,31 +46,23 @@ function createAppStore(): Store {
 }
 
 export class TestUtils {
-  private static _uiFrameworkInitialized = false;
   public static store: Store<any, AnyAction>;
 
-  public static get localization(): Localization {
-    return IModelApp.localization;
-  }
-
   public static async initializeUiFramework(imodel?: IModelConnection) {
-    if (!TestUtils._uiFrameworkInitialized) {
-      // This is required by our I18n module (specifically the i18next package).
-      (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
-      this.store = createAppStore();
+    // This is required by our I18n module (specifically the i18next package).
+    (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
+    this.store = createAppStore();
 
-      await UiFramework.initialize(this.store);
-      // Set the iModelConnection in the Redux store
-      if (imodel)
-        UiFramework.setIModelConnection(imodel);
-      TestUtils._uiFrameworkInitialized = true;
-    }
+    await UiFramework.initialize(this.store);
+    // Set the iModelConnection in the Redux store
+    if (imodel)
+      UiFramework.setIModelConnection(imodel);
+
     SyncUiEventDispatcher.setTimeoutPeriod(0); // disables non-immediate event processing.
   }
 
   public static terminateUiFramework() {
     ReportsConfigWidget.terminate();
-    TestUtils._uiFrameworkInitialized = false;
   }
 }
 

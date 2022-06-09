@@ -187,7 +187,7 @@ const server = setupServer();
 beforeAll(async () => {
   await TestUtils.initializeUiFramework();
   await NoRenderApp.startup();
-  await ReportsConfigWidget.initialize(TestUtils.localization);
+  await ReportsConfigWidget.initialize();
   server.listen();
 });
 
