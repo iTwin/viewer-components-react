@@ -51,7 +51,6 @@ beforeAll(async () => {
   await NoRenderApp.startup();
   await ReportsConfigWidget.initialize();
   server.listen();
-
 });
 
 afterAll(() => {
