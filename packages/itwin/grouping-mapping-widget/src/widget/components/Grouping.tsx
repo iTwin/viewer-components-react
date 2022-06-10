@@ -287,26 +287,24 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     setGroupsView(GroupsView.ADD);
   };
 
-  const onModify = useCallback(async (group) => {
+  const onModify = async (group: Group) => {
     setSelectedGroup(group);
     setGroupsView(GroupsView.MODIFYING);
-    if (group && hiddenGroupsIds.includes(group.id)) {
+    if (group?.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
     }
-  }, [showGroup, hiddenGroupsIds, setHiddenGroupsIds]);
+    clearEmphasizedElements();
+  };
 
-  const openProperties = useCallback(
-    async (group) => {
-      setSelectedGroup(group);
-      setGroupsView(GroupsView.PROPERTIES);
-      if (group && hiddenGroupsIds.includes(group.id)) {
-        await showGroup(group);
-        setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
-      }
-    },
-    [showGroup, hiddenGroupsIds, setHiddenGroupsIds],
-  );
+  const openProperties = async (group: Group) => {
+    setSelectedGroup(group);
+    setGroupsView(GroupsView.PROPERTIES);
+    if (group?.id && hiddenGroupsIds.includes(group.id)) {
+      await showGroup(group);
+      setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
+    }
+  };
 
   const refresh = useCallback(async () => {
     setGroupsView(GroupsView.GROUPS);
@@ -335,7 +333,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     visualizeGroupColors,
   ]);
 
-  const resetView = useCallback(async () => {
+  const resetView = async () => {
     if (groups) {
       if (showGroupColor) {
         await visualizeGroupColors(groups);
@@ -344,22 +342,22 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       }
       clearEmphasizedElements();
     }
-  }, [
-    groups,
-    showGroupColor,
-    visualizeGroupColors,
-  ]);
+  };
 
-  const showAll = useCallback(async () => {
+  const showAll = async () => {
+    setLoadingQuery(true);
+
     clearHiddenElements();
     setHiddenGroupsIds([]);
     await zoomToElements(Array.from(hilitedElements.current.values()).flat());
-  }, [setHiddenGroupsIds]);
+
+    setLoadingQuery(false);
+  };
 
   const hideAll = useCallback(async () => {
     await hideGroups(groups);
     setHiddenGroupsIds(
-      groups.filter((g) => g.id).map((g) => (g.id ? g.id : "")),
+      groups.map((g) => g.id).filter((id): id is string => !!id),
     );
   }, [setHiddenGroupsIds, groups, hideGroups]);
 
@@ -453,6 +451,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   onChange={toggleGroupColor}
                 ></ToggleSwitch>
                 <IconButton
+                  title="Show All"
                   disabled={isLoadingQuery}
                   styleType="borderless"
                   className="group-view-icon"
@@ -460,6 +459,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   <SvgVisibilityShow onClick={showAll}></SvgVisibilityShow>
                 </IconButton>
                 <IconButton
+                  title="Hide All"
                   disabled={isLoadingQuery}
                   styleType="borderless"
                   className="group-view-icon"
