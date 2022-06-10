@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/one-click-lca-react",
+      "comment": "Update error message notification on unauthorized user triggering carbon calculation jobs. ",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/one-click-lca-react"
+}

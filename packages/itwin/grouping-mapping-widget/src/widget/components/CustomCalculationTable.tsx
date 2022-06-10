@@ -21,8 +21,8 @@ import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import type { CustomCalculation } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
 import { ApiContext } from "./GroupingMapping";
+import { getReportingClient } from "./utils";
 
 export type CustomCalculationType =
   CreateTypeFromInterface<CustomCalculation>;
@@ -156,7 +156,7 @@ const CustomCalculationTable = ({
         show={showCustomCalculationDeleteModal}
         setShow={setShowCustomCalculationDeleteModal}
         onDelete={async () => {
-          const reportingClientApi = new ReportingClient(apiContext.prefix);
+          const reportingClientApi = getReportingClient(apiContext.prefix);
           await reportingClientApi.deleteCustomCalculation(
             apiContext.accessToken,
             iModelId,

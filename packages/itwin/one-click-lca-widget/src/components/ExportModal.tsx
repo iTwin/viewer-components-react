@@ -19,6 +19,7 @@ import {
   ProgressLinear,
   ProgressRadial,
   Text,
+  toaster,
 } from "@itwin/itwinui-react";
 import {
   SvgVisibilityHide,
@@ -97,7 +98,8 @@ const ExportModal = (props: ExportProps) => {
             }
             setJobStatus(currentJobStatus.job?.status);
           } else {
-            throw new Error("failed to get job status");
+            setJobStatus(JobStatus.StatusEnum.Failed);
+            toaster.negative("Failed to get job status. 😔");
           }
         }
       }, PIN_INTERVAL);
@@ -122,13 +124,18 @@ const ExportModal = (props: ExportProps) => {
           if (jobCreated?.job?.id) {
             pinStatus(jobCreated?.job);
           } else {
-            throw new Error("Failed to create job");
+            setJobStatus(JobStatus.StatusEnum.Failed);
+            toaster.negative("Failed to create one click lca job. 😔");
           }
         } catch (e) {
-          throw new Error(`Failed to create one click lca job.${e}`);
+          setJobStatus(JobStatus.StatusEnum.Failed);
+          toaster.negative("You are not authorized to create carbon calculation jobs. Please contact project administrator.");
+          /* eslint-disable no-console */
+          console.error(e);
         }
       } else {
-        throw new Error("No reportId or accessToken");
+        setJobStatus(JobStatus.StatusEnum.Failed);
+        toaster.negative("Failed to get retrieve reportId or token. 😔");
       }
     },
     [props, pinStatus, oneClickLCAClientApi]
@@ -138,19 +145,25 @@ const ExportModal = (props: ExportProps) => {
     async (e) => {
       e.preventDefault();
       startSigningIn(true);
-      const result = await oneClickLCAClientApi.getOneclicklcaAccessToken(
-        email,
-        password
-      );
-      if (result && result.access_token && result.expires_in) {
-        cacheToken({
-          token: result.access_token,
-          exp: Date.now() + result.expires_in * MILI_SECONDS,
-        });
-        resetSignin();
-        setIsSignedIn(true);
-      } else {
-        showSigninError(true);
+      try {
+        const result = await oneClickLCAClientApi.getOneclicklcaAccessToken(
+          email,
+          password
+        );
+        if (result && result.access_token && result.expires_in) {
+          cacheToken({
+            token: result.access_token,
+            exp: Date.now() + result.expires_in * MILI_SECONDS,
+          });
+          resetSignin();
+          setIsSignedIn(true);
+        } else {
+          showSigninError(true);
+        }
+      } catch (err) {
+        toaster.negative("Failed to sign in One Click LCA.");
+        /* eslint-disable no-console */
+        console.error(err);
       }
       startSigningIn(false);
     },
@@ -221,7 +234,11 @@ const ExportModal = (props: ExportProps) => {
             </div>
           );
         default:
-          throw new Error(`Job status is invalid ${status}`);
+          return (
+            <div className="oclca-progress-radial-container">
+              <Text>Invalid Job Status <span role="img" aria-label="sad">😔</span></Text>
+            </div>
+          );
       }
     },
     []
@@ -230,7 +247,10 @@ const ExportModal = (props: ExportProps) => {
   useEffect(() => {
     if (props.isOpen && isSignedIn && cache?.token) {
       runJob(cache.token).catch((err) => {
-        throw new Error(err);
+        setJobStatus(JobStatus.StatusEnum.Failed);
+        toaster.negative("Error occurs while running the job. 😔");
+        /* eslint-disable no-console */
+        console.error(err);
       });
     }
   }, [props.isOpen, isSignedIn, cache, runJob]);

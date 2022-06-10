@@ -49,16 +49,9 @@ import {
   overrideElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import {
-  EmptyMessage,
-  fetchIdsFromQuery,
-  handleError,
-  LoadingOverlay,
-  WidgetHeader,
-} from "./utils";
+import { EmptyMessage, fetchIdsFromQuery, getReportingClient, handleError, LoadingOverlay, WidgetHeader } from "./utils";
 import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
 import type { Api } from "./GroupingMapping";
 import { ApiContext } from "./GroupingMapping";
 import { FeatureOverrideType } from "@itwin/core-common";
@@ -89,12 +82,8 @@ const fetchGroups = async (
 ): Promise<Group[] | undefined> => {
   try {
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(apiContext.prefix);
-    const groups = await reportingClientApi.getGroups(
-      apiContext.accessToken,
-      iModelId,
-      mappingId,
-    );
+    const reportingClientApi = getReportingClient(apiContext.prefix);
+    const groups = await reportingClientApi.getGroups(apiContext.accessToken, iModelId, mappingId);
     setGroups(groups);
     return groups;
   } catch (error: any) {
@@ -563,7 +552,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = new ReportingClient(apiContext.prefix);
+              const reportingClientApi = getReportingClient(apiContext.prefix);
               await reportingClientApi.deleteGroup(
                 apiContext.accessToken,
                 iModelId,

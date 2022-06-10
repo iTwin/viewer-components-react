@@ -12,14 +12,13 @@ import {
 import React, { useContext, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleError, WidgetHeader } from "./utils";
+import { getReportingClient, handleError, WidgetHeader } from "./utils";
 import "./CalculatedPropertyAction.scss";
 import type { CustomCalculationType } from "./CustomCalculationTable";
 import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
 import type { PropertyMap } from "../../formula/Types";
-import { ReportingClient } from "@itwin/insights-client";
 import { ApiContext } from "./GroupingMapping";
 
 interface CalculatedPropertyActionProps {
@@ -50,7 +49,7 @@ const CustomCalculationAction = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
-  const { isValid, forceValidation } = useFormulaValidation(formula, properties, setFormulaErrorMessage);
+  const { isValid, forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, properties, setFormulaErrorMessage);
 
   const onSave = async () => {
     if (!validator.allValid()) {
@@ -62,7 +61,7 @@ const CustomCalculationAction = ({
     }
     try {
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient(apiContext.prefix);
+      const reportingClientApi = getReportingClient(apiContext.prefix);
 
       customCalculation
         ? await reportingClientApi.updateCustomCalculation(
