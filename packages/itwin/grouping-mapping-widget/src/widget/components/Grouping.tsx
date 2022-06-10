@@ -49,7 +49,14 @@ import {
   overrideElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { EmptyMessage, fetchIdsFromQuery, getReportingClient, handleError, LoadingOverlay, WidgetHeader } from "./utils";
+import {
+  EmptyMessage,
+  fetchIdsFromQuery,
+  getReportingClient,
+  handleError,
+  LoadingOverlay,
+  WidgetHeader,
+} from "./utils";
 import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
 import type { Api } from "./GroupingMapping";
@@ -83,7 +90,11 @@ const fetchGroups = async (
   try {
     setIsLoading(true);
     const reportingClientApi = getReportingClient(apiContext.prefix);
-    const groups = await reportingClientApi.getGroups(apiContext.accessToken, iModelId, mappingId);
+    const groups = await reportingClientApi.getGroups(
+      apiContext.accessToken,
+      iModelId,
+      mappingId,
+    );
     setGroups(groups);
     return groups;
   } catch (error: any) {
@@ -441,19 +452,21 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 ></ToggleSwitch>
                 <IconButton
                   title="Show All"
+                  onClick={showAll}
                   disabled={isLoadingQuery}
                   styleType="borderless"
                   className="group-view-icon"
                 >
-                  <SvgVisibilityShow onClick={showAll}></SvgVisibilityShow>
+                  <SvgVisibilityShow></SvgVisibilityShow>
                 </IconButton>
                 <IconButton
                   title="Hide All"
+                  onClick={hideAll}
                   disabled={isLoadingQuery}
                   styleType="borderless"
                   className="group-view-icon"
                 >
-                  <SvgVisibilityHide onClick={hideAll}></SvgVisibilityHide>
+                  <SvgVisibilityHide></SvgVisibilityHide>
                 </IconButton>
               </ButtonGroup>
             </div>
@@ -470,31 +483,35 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                     subText={g.description}
                     actionGroup={
                       <div className="actions">
-                        <IconButton
-                          disabled={isLoadingQuery}
-                          styleType="borderless"
-                          className="group-view-icon"
-                        >
-                          {g.id && hiddenGroupsIds.includes(g.id) ? (
-                            <SvgVisibilityHide
-                              onClick={async () => {
-                                await showGroup(g);
-                                setHiddenGroupsIds(
-                                  hiddenGroupsIds.filter((id) => g.id !== id),
-                                );
-                              }}
-                            ></SvgVisibilityHide>
-                          ) : (
-                            <SvgVisibilityShow
-                              onClick={async () => {
-                                await hideGroups([g]);
-                                setHiddenGroupsIds(
-                                  hiddenGroupsIds.concat(g.id ? [g.id] : []),
-                                );
-                              }}
-                            ></SvgVisibilityShow>
-                          )}
-                        </IconButton>
+                        {g.id && hiddenGroupsIds.includes(g.id) ? (
+                          <IconButton
+                            disabled={isLoadingQuery}
+                            styleType="borderless"
+                            className="group-view-icon"
+                            onClick={async () => {
+                              await showGroup(g);
+                              setHiddenGroupsIds(
+                                hiddenGroupsIds.filter((id) => g.id !== id),
+                              );
+                            }}
+                          >
+                            <SvgVisibilityHide></SvgVisibilityHide>
+                          </IconButton>
+                        ) : (
+                          <IconButton
+                            disabled={isLoadingQuery}
+                            styleType="borderless"
+                            className="group-view-icon"
+                            onClick={async () => {
+                              await hideGroups([g]);
+                              setHiddenGroupsIds(
+                                hiddenGroupsIds.concat(g.id ? [g.id] : []),
+                              );
+                            }}
+                          >
+                            <SvgVisibilityShow></SvgVisibilityShow>
+                          </IconButton>
+                        )}
                         <DropdownMenu
                           disabled={isLoadingQuery}
                           menuItems={(close: () => void) => [
