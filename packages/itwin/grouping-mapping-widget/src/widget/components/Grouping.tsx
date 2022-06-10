@@ -457,7 +457,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   styleType="borderless"
                   className="group-view-icon"
                 >
-                  <SvgVisibilityShow></SvgVisibilityShow>
+                  <SvgVisibilityShow />
                 </IconButton>
                 <IconButton
                   title="Hide All"
@@ -466,7 +466,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   styleType="borderless"
                   className="group-view-icon"
                 >
-                  <SvgVisibilityHide></SvgVisibilityHide>
+                  <SvgVisibilityHide />
                 </IconButton>
               </ButtonGroup>
             </div>
@@ -495,7 +495,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                               );
                             }}
                           >
-                            <SvgVisibilityHide></SvgVisibilityHide>
+                            <SvgVisibilityHide />
                           </IconButton>
                         ) : (
                           <IconButton
@@ -509,7 +509,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                               );
                             }}
                           >
-                            <SvgVisibilityShow></SvgVisibilityShow>
+                            <SvgVisibilityShow />
                           </IconButton>
                         )}
                         <DropdownMenu
