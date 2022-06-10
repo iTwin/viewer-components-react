@@ -5,34 +5,58 @@
 import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
-import { NoRenderApp } from "@itwin/core-frontend";
+import { IModelConnection, NoRenderApp, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { setupServer } from "msw/node";
-import type { ActiveIModel } from "../widget/hooks/useActiveIModel";
 import { render, screen, TestUtils, waitForElementToBeRemoved } from "./test-utils";
 import ReportAction from "../widget/components/ReportAction";
 import userEvent from "@testing-library/user-event";
 import { rest } from "msw";
 import type { Report } from "@itwin/insights-client";
+import * as moq from "typemoq";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
+import { Presentation, SelectionChangeEvent, SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
+import { BeEvent } from "@itwin/core-bentley";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
 
-jest.mock("../widget/hooks/useActiveIModel", () => ({
-  useActiveIModel: () => {
-    const activeIModel: ActiveIModel = { iTwinId: mockITwinId, iModelId: mockIModelId };
-    return activeIModel;
-  },
-}));
+
+const connectionMock = moq.Mock.ofType<IModelConnection>();
+const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
+const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 
 jest.mock("../widget/components/ReportMappings", () => ({ ReportMappings: () => "MockReportMappings" }));
+
+jest.mock("@itwin/appui-react", () => ({
+  ...jest.requireActual('@itwin/appui-react'),
+  useActiveIModelConnection: () => connectionMock.object,
+}));
+
 
 const server = setupServer();
 
 beforeAll(async () => {
-  await TestUtils.initializeUiFramework();
+  // This is required by the i18n module within iTwin.js
+  (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
+
   await NoRenderApp.startup();
+  await Presentation.initialize();
+  const selectionSet = moq.Mock.ofType<SelectionSet>();
+  const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
+  selectionSet.setup((x) => x.elements).returns(() => new Set([]));
+  selectionSet.setup((x) => x.onChanged).returns(() => onChanged.object);
+  connectionMock.setup((x) => x.selectionSet).returns(() => selectionSet.object);
+  connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId);
+  connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
+
+  selectionManagerMock.setup((x) => x.selectionChange).returns(() => new SelectionChangeEvent());
+
+  selectionScopesManagerMock.setup(async (x) => x.getSelectionScopes(connectionMock.object)).returns(async () => []);
+  selectionManagerMock.setup((x) => x.scopes).returns(() => selectionScopesManagerMock.object);
+
+  Presentation.setSelectionManager(selectionManagerMock.object);
+  await TestUtils.initializeUiFramework(connectionMock.object);
   await ReportsConfigWidget.initialize();
   server.listen();
 });

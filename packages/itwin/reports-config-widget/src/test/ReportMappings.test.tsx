@@ -5,19 +5,21 @@
 import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
-import { NoRenderApp } from "@itwin/core-frontend";
+import { IModelConnection, NoRenderApp, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { setupServer } from "msw/node";
-import type { ActiveIModel } from "../widget/hooks/useActiveIModel";
 import { render, screen, TestUtils, waitForElementToBeRemoved, within } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import type { RequestHandler } from "msw";
+import * as moq from "typemoq";
 import { rest } from "msw";
 import type { ExtractionStatus, Mapping, MappingCollection, MappingSingle, Report, ReportMappingCollection } from "@itwin/insights-client";
 import { ReportMappings } from "../widget/components/ReportMappings";
 import { Constants, IModelState } from "@itwin/imodels-client-management";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 import { REFRESH_DELAY } from "../widget/components/Extraction";
+import { Presentation, SelectionChangeEvent, SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
+import { BeEvent } from "@itwin/core-bentley";
 
 // For the extraction test
 jest.setTimeout(20000);
@@ -175,18 +177,39 @@ const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): [Mapp
   return [mockMappings, iModelHandlers];
 };
 
-jest.mock("../widget/hooks/useActiveIModel", () => ({
-  useActiveIModel: () => {
-    const activeIModel: ActiveIModel = { iTwinId: mockITwinId, iModelId: mockIModelId1 };
-    return activeIModel;
-  },
+
+const connectionMock = moq.Mock.ofType<IModelConnection>();
+const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
+const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
+
+jest.mock("@itwin/appui-react", () => ({
+  ...jest.requireActual('@itwin/appui-react'),
+  useActiveIModelConnection: () => connectionMock.object,
 }));
+
 
 const server = setupServer();
 
 beforeAll(async () => {
-  await TestUtils.initializeUiFramework();
+  // This is required by the i18n module within iTwin.js
+  (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
   await NoRenderApp.startup();
+  await Presentation.initialize();
+  const selectionSet = moq.Mock.ofType<SelectionSet>();
+  const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
+  selectionSet.setup((x) => x.elements).returns(() => new Set([]));
+  selectionSet.setup((x) => x.onChanged).returns(() => onChanged.object);
+  connectionMock.setup((x) => x.selectionSet).returns(() => selectionSet.object);
+  connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId1);
+  connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
+
+  selectionManagerMock.setup((x) => x.selectionChange).returns(() => new SelectionChangeEvent());
+
+  selectionScopesManagerMock.setup(async (x) => x.getSelectionScopes(connectionMock.object)).returns(async () => []);
+  selectionManagerMock.setup((x) => x.scopes).returns(() => selectionScopesManagerMock.object);
+
+  Presentation.setSelectionManager(selectionManagerMock.object);
+  await TestUtils.initializeUiFramework(connectionMock.object);
   await ReportsConfigWidget.initialize();
   server.listen();
 });

@@ -4864,7 +4864,7 @@ packages:
     dev: true
 
   /array-from/2.1.1:
-    resolution: {integrity: sha1-z+nYwmYoudxa7MYqn12PHzUsEZU=}
+    resolution: {integrity: sha512-GQTc6Uupx1FCavi5mPzBvVT7nEOeWMmUA9P95wpfpW1XwMSKs+KaymD5C2Up7KAUKg/mYwbsUYzdZWcoajlNZg==}
     dev: true
 
   /array-includes/3.1.4:
@@ -13816,7 +13816,7 @@ packages:
     dev: false
 
   /through/2.3.8:
-    resolution: {integrity: sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=}
+    resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
     dev: true
 
   /through2/2.0.5:

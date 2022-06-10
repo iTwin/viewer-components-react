@@ -32,8 +32,8 @@ import { HorizontalTile } from "./HorizontalTile";
 import { SearchBar } from "./SearchBar";
 import type { ApiConfig } from "../context/ApiContext";
 import { useApiConfig } from "../context/ApiContext";
-import { useActiveIModel } from "../hooks/useActiveIModel";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -65,14 +65,14 @@ const fetchReports = async (
 };
 
 export const Reports = () => {
-  const iTwinId = useActiveIModel().iTwinId;
+  const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const apiConfig = useApiConfig();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [reportsView, setReportsView] = useState<ReportsView>(
     ReportsView.REPORTS
   );
   const [selectedReport, setSelectedReport] = useState<
-  Report | undefined
+    Report | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");

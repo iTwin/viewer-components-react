@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import type { GetIModelListParams, IModelsClientOptions, MinimalIModel } from "@itwin/imodels-client-management";
 import { Constants } from "@itwin/imodels-client-management";
@@ -12,7 +13,6 @@ import { useEffect, useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import type { ApiConfig } from "../context/ApiContext";
 import { useApiConfig } from "../context/ApiContext";
-import { useActiveIModel } from "../hooks/useActiveIModel";
 import "./SelectIModel.scss";
 import { generateUrl } from "./utils";
 
@@ -43,7 +43,8 @@ interface SelectedIModelProps {
 
 export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: SelectedIModelProps) => {
   const apiConfig = useApiConfig();
-  const { iTwinId, iModelId } = useActiveIModel();
+  const iModelId = useActiveIModelConnection()?.iModelId ?? "";
+  const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
 
   useEffect(() => {
