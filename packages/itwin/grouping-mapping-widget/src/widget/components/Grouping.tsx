@@ -47,10 +47,9 @@ import {
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { fetchIdsFromQuery, handleError, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, getReportingClient, handleError, WidgetHeader } from "./utils";
 import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
 import type { Api } from "./GroupingMapping";
 import { ApiContext } from "./GroupingMapping";
 
@@ -77,7 +76,7 @@ const fetchGroups = async (
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(apiContext.prefix);
+    const reportingClientApi = getReportingClient(apiContext.prefix);
     const groups = await reportingClientApi.getGroups(apiContext.accessToken, iModelId, mappingId);
     setGroups(groups);
   } catch (error: any) {
@@ -418,7 +417,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = new ReportingClient(apiContext.prefix);
+              const reportingClientApi = getReportingClient(apiContext.prefix);
               await reportingClientApi.deleteGroup(
                 apiContext.accessToken,
                 iModelId,

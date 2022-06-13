@@ -1,6 +1,6 @@
 {
   "name": "@itwin/grouping-mapping-widget",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
   "keywords": [
     "Bentley",
@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@itwin/imodel-browser-react": "^0.12.1",
-    "@itwin/insights-client": "0.1.1",
+    "@itwin/insights-client": "0.2.1",
     "@itwin/itwinui-icons-react": "^1.7.0",
     "@itwin/itwinui-react": "^1.35.0",
     "classnames": "^2.3.1",

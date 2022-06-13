@@ -7,14 +7,14 @@ import { validateFormula } from "../../formula/FormulaValidator";
 import type { PropertyMap } from "../../formula/Types";
 import { debounce } from "../utils";
 
-function validate(formula: string, properties: PropertyMap, setFormulaErrorMessage: (s: string) => void, setIsValid: (b: boolean) => void): boolean {
+function validate(formulaName: string, formula: string, properties: PropertyMap, setFormulaErrorMessage: (s: string) => void, setIsValid: (b: boolean) => void): boolean {
   if (!formula) {
     setFormulaErrorMessage("");
     setIsValid(false);
     return false;
   }
 
-  const error = validateFormula(formula, properties);
+  const error = validateFormula(formulaName, formula, properties);
   setFormulaErrorMessage(error);
   setIsValid(!error);
   return !error;
@@ -22,8 +22,8 @@ function validate(formula: string, properties: PropertyMap, setFormulaErrorMessa
 
 const debouncedValidationFunc = debounce(validate, 1000);
 
-export function useFormulaValidation(formula: string, properties: PropertyMap, setFormulaErrorMessage: (s: string) => void) {
+export function useFormulaValidation(formulaName: string, formula: string, properties: PropertyMap, setFormulaErrorMessage: (s: string) => void) {
   const [isValid, setIsValid] = useState(false);
-  useEffect(() => debouncedValidationFunc(formula, properties, setFormulaErrorMessage, setIsValid), [formula, properties, setFormulaErrorMessage]);
-  return { isValid, forceValidation: () => validate(formula, properties, setFormulaErrorMessage, setIsValid) };
+  useEffect(() => debouncedValidationFunc(formulaName, formula, properties, setFormulaErrorMessage, setIsValid), [formulaName, formula, properties, setFormulaErrorMessage]);
+  return { isValid, forceValidation: () => validate(formulaName, formula, properties, setFormulaErrorMessage, setIsValid) };
 }
