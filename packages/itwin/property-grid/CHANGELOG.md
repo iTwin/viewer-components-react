@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 26 May 2022 15:54:07 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Jun 2022 20:23:10 GMT and should not be manually modified.
+
+## 0.5.4
+Wed, 08 Jun 2022 20:23:10 GMT
+
+### Patches
+
+- Added persistNValueToggle property and the code to store this value in UserPreferences if true.
 
 ## 0.5.3
 Thu, 26 May 2022 15:54:07 GMT

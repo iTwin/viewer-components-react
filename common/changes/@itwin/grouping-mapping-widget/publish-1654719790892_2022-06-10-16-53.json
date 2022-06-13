@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Changed the extraction enable toggle label",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@itwin/grouping-mapping-widget"

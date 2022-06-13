@@ -2,6 +2,21 @@
   "name": "@itwin/one-click-lca-react",
   "entries": [
     {
+      "version": "0.1.4",
+      "tag": "@itwin/one-click-lca-react_v0.1.4",
+      "date": "Wed, 08 Jun 2022 20:23:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update error message notification on unauthorized user triggering carbon calculation jobs. "
+          },
+          {
+            "comment": "Fix name typo in description"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.3",
       "tag": "@itwin/one-click-lca-react_v0.1.3",
       "date": "Mon, 09 May 2022 18:04:58 GMT",
