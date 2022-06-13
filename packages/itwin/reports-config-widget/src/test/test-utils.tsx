@@ -5,14 +5,13 @@
 import * as React from "react";
 import { render as rtlRender } from "@testing-library/react";
 import { ApiConfigContext } from "../widget/context/ApiContext";
-import type { AnyAction, Store } from "redux";
+import type { Store } from "redux";
 import { combineReducers, createStore } from "redux";
 import { FrameworkReducer, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
-import { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import userEvent from "@testing-library/user-event";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
-
 
 export const mockAccessToken = async () => "Bearer eyJhbGci";
 

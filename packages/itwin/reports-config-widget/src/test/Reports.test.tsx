@@ -6,17 +6,19 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, TestUtils, waitForElementToBeRemoved, within } from "../test/test-utils";
 import { Reports } from "../widget/components/Reports";
-import { IModelConnection, NoRenderApp, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
+import type { IModelConnection, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
+import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 import * as moq from "typemoq";
-import { Presentation, SelectionChangeEvent, SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
+import type { SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
+import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import faker from "@faker-js/faker";
 import type { ReportCollection } from "@itwin/insights-client";
 import userEvent from "@testing-library/user-event";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
-import { BeEvent } from "@itwin/core-bentley";
+import type { BeEvent } from "@itwin/core-bentley";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
@@ -42,7 +44,7 @@ const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
 const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 
 jest.mock("@itwin/appui-react", () => ({
-  ...jest.requireActual('@itwin/appui-react'),
+  ...jest.requireActual("@itwin/appui-react"),
   useActiveIModelConnection: () => connectionMock.object,
 }));
 

@@ -5,7 +5,8 @@
 import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
-import { IModelConnection, NoRenderApp, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
+import type { IModelConnection, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
+import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { setupServer } from "msw/node";
 import { render, screen, TestUtils, waitForElementToBeRemoved, within } from "./test-utils";
@@ -18,8 +19,9 @@ import { ReportMappings } from "../widget/components/ReportMappings";
 import { Constants, IModelState } from "@itwin/imodels-client-management";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 import { REFRESH_DELAY } from "../widget/components/Extraction";
-import { Presentation, SelectionChangeEvent, SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
-import { BeEvent } from "@itwin/core-bentley";
+import type { SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
+import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
+import type { BeEvent } from "@itwin/core-bentley";
 
 // For the extraction test
 jest.setTimeout(20000);
@@ -177,16 +179,14 @@ const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): [Mapp
   return [mockMappings, iModelHandlers];
 };
 
-
 const connectionMock = moq.Mock.ofType<IModelConnection>();
 const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
 const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 
 jest.mock("@itwin/appui-react", () => ({
-  ...jest.requireActual('@itwin/appui-react'),
+  ...jest.requireActual("@itwin/appui-react"),
   useActiveIModelConnection: () => connectionMock.object,
 }));
-
 
 const server = setupServer();
 

@@ -72,7 +72,7 @@ export const Reports = () => {
     ReportsView.REPORTS
   );
   const [selectedReport, setSelectedReport] = useState<
-    Report | undefined
+  Report | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");

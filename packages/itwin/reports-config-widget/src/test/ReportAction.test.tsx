@@ -5,7 +5,8 @@
 import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
-import { IModelConnection, NoRenderApp, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
+import type { IModelConnection, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
+import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { setupServer } from "msw/node";
 import { render, screen, TestUtils, waitForElementToBeRemoved } from "./test-utils";
@@ -15,12 +16,12 @@ import { rest } from "msw";
 import type { Report } from "@itwin/insights-client";
 import * as moq from "typemoq";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
-import { Presentation, SelectionChangeEvent, SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
-import { BeEvent } from "@itwin/core-bentley";
+import type { SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
+import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
+import type { BeEvent } from "@itwin/core-bentley";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
-
 
 const connectionMock = moq.Mock.ofType<IModelConnection>();
 const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
@@ -29,10 +30,9 @@ const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 jest.mock("../widget/components/ReportMappings", () => ({ ReportMappings: () => "MockReportMappings" }));
 
 jest.mock("@itwin/appui-react", () => ({
-  ...jest.requireActual('@itwin/appui-react'),
+  ...jest.requireActual("@itwin/appui-react"),
   useActiveIModelConnection: () => connectionMock.object,
 }));
-
 
 const server = setupServer();
 
