@@ -22,21 +22,10 @@ In addition, users must have the `imodels_read` and `imodels_write` [permissions
 
 ## Sample usage
 
-### Call ReportsConfigWidget.initialize() **_before_** making use of the providers or add namespace
+### Call ReportsConfigWidget.initialize() **_before_** making use of the providers
 
 ```ts
 import { ReportsConfigWidget } from '@itwin/reports-config-widget-react'
 ...
 await ReportsConfigWidget.initialize(IModelApp.localization);
-```
-
-or
-
-```tsx
-import { ReportsConfigProvider } from "@itwin/reports-config-widget-react";
-<Viewer
-  ...
-  additionalI18nNamespaces={["ReportsConfigWidget"]}
-  uiProviders={[new ReportsConfigProvider()]}
-/>
 ```
