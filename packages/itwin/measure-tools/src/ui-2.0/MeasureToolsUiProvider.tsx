@@ -57,7 +57,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         return [
           ToolbarItemUtilities.createGroupButton(
             "measure-tools-toolbar",
-            500,
+            1000000,
             "icon-measure",
             MeasureTools.localization.getLocalizedString(
               "MeasureTools:MeasurementGroupButton.tooltip",
