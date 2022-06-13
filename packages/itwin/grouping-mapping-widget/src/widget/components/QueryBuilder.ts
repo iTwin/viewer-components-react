@@ -4,13 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { InstanceKey, PropertiesField } from "@itwin/presentation-common";
-import type {
-  Primitives,
-  PropertyRecord,
-} from "@itwin/appui-abstract";
-import {
-  PropertyValueFormat,
-} from "@itwin/appui-abstract";
+import type { Primitives, PropertyRecord } from "@itwin/appui-abstract";
+import { PropertyValueFormat } from "@itwin/appui-abstract";
 import "core-js/features/string/virtual";
 import { toaster } from "@itwin/itwinui-react";
 
@@ -52,9 +47,7 @@ export class QueryBuilder {
 
   public async addProperty(prop: PropertyRecord): Promise<boolean> {
     // TODO: only handle primitive properties now
-    if (
-      prop.value?.valueFormat !== PropertyValueFormat.Primitive
-    ) {
+    if (prop.value?.valueFormat !== PropertyValueFormat.Primitive) {
       toaster.warning("Only primitive types are supported for now.");
       return false;
     }
@@ -78,29 +71,37 @@ export class QueryBuilder {
       prop,
     )) as PropertiesField;
     if (propertyField === undefined) {
-      toaster.negative("Error. Failed to fetch field for this property record.");
+      toaster.negative(
+        "Error. Failed to fetch field for this property record.",
+      );
       return false;
     }
 
     // get the special cases
     const isNavigation: boolean =
       prop.property.typename.toLowerCase() === "navigation";
-
+    const isCategory: boolean = propertyField.properties[0].property.name
+      .toLowerCase()
+      .includes("category");
     const isAspect: boolean =
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
 
     const className =
       propertyField.properties[0].property.classInfo.name.replace(":", ".");
     const propertyName = isNavigation
-      ? `${propertyField.properties[0].property.name}.id`
+      ? isCategory
+        ? `${propertyField.properties[0].property.name}.CodeValue`
+        : `${propertyField.properties[0].property.name}.id`
       : propertyField.properties[0].property.name;
     const propertyValue = isNavigation
-      ? (prop.value.value as InstanceKey).id
+      ? isCategory
+        ? prop.value.displayValue ?? ""
+        : (prop.value.value as InstanceKey).id
       : prop.value.value;
 
     // console.log(prop);
@@ -306,15 +307,20 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
+    const isCategory: boolean = propertyField.properties[0].property.name
+      .toLowerCase()
+      .includes("category");
 
     const isNavigation: boolean =
       prop.property.typename.toLowerCase() === "navigation";
 
     const propertyName = isNavigation
-      ? `${propertyField.properties[0].property.name}.id`
+      ? isCategory
+        ? `${propertyField.properties[0].property.name}.CodeValue`
+        : `${propertyField.properties[0].property.name}.id`
       : propertyField.properties[0].property.name;
     const className =
       propertyField.properties[0].property.classInfo.name.replace(":", ".");
@@ -387,6 +393,10 @@ export class QueryBuilder {
     }
   }
 
+  public categoryQuery(codeValue: string): string {
+    return ` JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id AND ((bis.Category.CodeValue='${codeValue}') OR (bis.Category.UserLabel='${codeValue}'))`;
+  }
+
   public buildQueryString() {
     if (this.query === undefined || this.query.classes.length === 0) {
       return "";
@@ -398,7 +408,9 @@ export class QueryBuilder {
       ? `${baseClassName}.Element.id`
       : `${baseClassName}.ECInstanceId`;
 
-    let queryString = `SELECT ${baseIdName}${baseClass.isAspect ? " ECInstanceId" : ""} FROM ${baseClassName}`;
+    let queryString = `SELECT ${baseIdName}${
+      baseClass.isAspect ? " ECInstanceId" : ""
+    } FROM ${baseClassName}`;
 
     if (this.query.classes.length > 1) {
       for (let i = 1; i < this.query.classes.length; i++) {
@@ -411,17 +423,25 @@ export class QueryBuilder {
         if (joinClass.isRelational) {
           queryString += ` JOIN ${joinClassName}`;
           if (joinClass.properties.length > 0) {
-            if (joinClass.properties[0].needsQuote) {
-              queryString += ` ON ${joinClassName}.${joinClass.properties[0].name}='${joinClass.properties[0].value}'`;
+            if (
+              joinClass.properties[0].name.toLowerCase().includes("category")
+            ) {
+              queryString += this.categoryQuery(
+                joinClass.properties[0].value.toString(),
+              );
             } else {
-              if (this._isFloat(joinClass.properties[0].value)) {
-                queryString += ` ON ROUND(${joinClassName}.${joinClass.properties[0].name}, `;
-                queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-                queryString += `${Number(joinClass.properties[0].value).toFixed(
-                  QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-                )}`;
+              if (joinClass.properties[0].needsQuote) {
+                queryString += ` ON ${joinClassName}.${joinClass.properties[0].name}='${joinClass.properties[0].value}'`;
               } else {
-                queryString += ` ON ${joinClassName}.${joinClass.properties[0].name}=${joinClass.properties[0].value}`;
+                if (this._isFloat(joinClass.properties[0].value)) {
+                  queryString += ` ON ROUND(${joinClassName}.${joinClass.properties[0].name}, `;
+                  queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
+                  queryString += `${Number(
+                    joinClass.properties[0].value,
+                  ).toFixed(QueryBuilder.DEFAULT_DOUBLE_PRECISION)}`;
+                } else {
+                  queryString += ` ON ${joinClassName}.${joinClass.properties[0].name}=${joinClass.properties[0].value}`;
+                }
               }
             }
           }
@@ -430,34 +450,42 @@ export class QueryBuilder {
             queryString += ` AND ${joinIdName} = ${baseIdName}`;
           }
           for (const property of joinClass.properties) {
-            if (property.needsQuote) {
-              queryString += ` AND ${joinClassName}.${property.name}='${property.value}'`;
+            if (property.name.toLowerCase().includes("category")) {
+              queryString += this.categoryQuery(property.value.toString());
             } else {
-              if (this._isFloat(property.value)) {
-                queryString += ` AND ROUND(${joinClassName}.${property.name}, `;
-                queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-                queryString += `${Number(property.value).toFixed(
-                  QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-                )}`;
+              if (property.needsQuote) {
+                queryString += ` AND ${joinClassName}.${property.name}='${property.value}'`;
               } else {
-                queryString += ` AND ${joinClassName}.${property.name}=${property.value}`;
+                if (this._isFloat(property.value)) {
+                  queryString += ` AND ROUND(${joinClassName}.${property.name}, `;
+                  queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
+                  queryString += `${Number(property.value).toFixed(
+                    QueryBuilder.DEFAULT_DOUBLE_PRECISION,
+                  )}`;
+                } else {
+                  queryString += ` AND ${joinClassName}.${property.name}=${property.value}`;
+                }
               }
             }
           }
         } else {
           queryString += ` JOIN ${joinClassName} ON ${joinIdName} = ${baseIdName}`;
           for (const property of joinClass.properties) {
-            if (property.needsQuote) {
-              queryString += ` AND ${joinClassName}.${property.name}='${property.value}'`;
+            if (property.name.toLowerCase().includes("category")) {
+              queryString += this.categoryQuery(property.value.toString());
             } else {
-              if (this._isFloat(property.value)) {
-                queryString += ` AND ROUND(${joinClassName}.${property.name}, `;
-                queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-                queryString += `${Number(property.value).toFixed(
-                  QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-                )}`;
+              if (property.needsQuote) {
+                queryString += ` AND ${joinClassName}.${property.name}='${property.value}'`;
               } else {
-                queryString += ` AND ${joinClassName}.${property.name}=${property.value}`;
+                if (this._isFloat(property.value)) {
+                  queryString += ` AND ROUND(${joinClassName}.${property.name}, `;
+                  queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
+                  queryString += `${Number(property.value).toFixed(
+                    QueryBuilder.DEFAULT_DOUBLE_PRECISION,
+                  )}`;
+                } else {
+                  queryString += ` AND ${joinClassName}.${property.name}=${property.value}`;
+                }
               }
             }
           }
@@ -467,32 +495,40 @@ export class QueryBuilder {
 
     const properties = baseClass.properties;
     if (properties.length > 0) {
-      if (properties[0].needsQuote) {
-        queryString += ` WHERE ${baseClassName}.${properties[0].name}='${properties[0].value}'`;
+      if (properties[0].name.toLowerCase().includes("category")) {
+        queryString += this.categoryQuery(properties[0].value.toString());
       } else {
-        if (this._isFloat(properties[0].value)) {
-          queryString += ` WHERE ROUND(${baseClassName}.${properties[0].name}, `;
-          queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-          queryString += `${Number(properties[0].value).toFixed(
-            QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-          )}`;
+        if (properties[0].needsQuote) {
+          queryString += ` WHERE ${baseClassName}.${properties[0].name}='${properties[0].value}'`;
         } else {
-          queryString += ` WHERE ${baseClassName}.${properties[0].name}=${properties[0].value}`;
+          if (this._isFloat(properties[0].value)) {
+            queryString += ` WHERE ROUND(${baseClassName}.${properties[0].name}, `;
+            queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
+            queryString += `${Number(properties[0].value).toFixed(
+              QueryBuilder.DEFAULT_DOUBLE_PRECISION,
+            )}`;
+          } else {
+            queryString += ` WHERE ${baseClassName}.${properties[0].name}=${properties[0].value}`;
+          }
         }
       }
       if (properties.length > 1) {
         for (let i = 1; i < properties.length; i++) {
-          if (properties[i].needsQuote) {
-            queryString += ` AND ${baseClassName}.${properties[i].name}='${properties[i].value}'`;
+          if (properties[i].name.toLowerCase().includes("category")) {
+            queryString += this.categoryQuery(properties[i].value.toString());
           } else {
-            if (this._isFloat(properties[i].value)) {
-              queryString += ` AND ROUND(${baseClassName}.${properties[i].name}, `;
-              queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-              queryString += `${Number(properties[i].value).toFixed(
-                QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-              )}`;
+            if (properties[i].needsQuote) {
+              queryString += ` AND ${baseClassName}.${properties[i].name}='${properties[i].value}'`;
             } else {
-              queryString += ` AND ${baseClassName}.${properties[i].name}=${properties[i].value}`;
+              if (this._isFloat(properties[i].value)) {
+                queryString += ` AND ROUND(${baseClassName}.${properties[i].name}, `;
+                queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
+                queryString += `${Number(properties[i].value).toFixed(
+                  QueryBuilder.DEFAULT_DOUBLE_PRECISION,
+                )}`;
+              } else {
+                queryString += ` AND ${baseClassName}.${properties[i].name}=${properties[i].value}`;
+              }
             }
           }
         }
