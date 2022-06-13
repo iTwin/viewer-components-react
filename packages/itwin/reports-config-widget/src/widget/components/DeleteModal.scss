@@ -6,7 +6,7 @@
 
 .delete-modal-body-text {
   display: flex;
-  gap: 4px;
+  gap: $iui-xs;
   flex-wrap: wrap;
   > strong {
     min-width: 0px;

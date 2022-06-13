@@ -22,7 +22,7 @@ In addition, users must have the `imodels_read` and `imodels_write` [permissions
 
 ## Sample usage
 
-### Call ReportsConfigWidget.initialize() **_before_** making use of the providers
+### Call ReportsConfigWidget.initialize() **_before_** making use of the provider
 
 ```ts
 import { ReportsConfigWidget } from '@itwin/reports-config-widget-react'

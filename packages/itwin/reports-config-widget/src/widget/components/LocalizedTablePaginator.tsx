@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
 import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
 import { TablePaginator } from "@itwin/itwinui-react";
 import React, { useMemo } from "react";
