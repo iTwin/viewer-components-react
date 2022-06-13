@@ -26,6 +26,13 @@ In addition, users must have the `imodels_read` and `imodels_write` [permissions
 
 ```ts
 import { ReportsConfigWidget } from '@itwin/reports-config-widget-react'
+
 ...
+
 await ReportsConfigWidget.initialize(IModelApp.localization);
+
+<Viewer
+  ...
+  uiProviders={[new ReportsConfigProvider()]}
+/>
 ```

@@ -795,6 +795,8 @@ importers:
       typemoq: ^2.1.0
       typescript: ~4.3.0
     dependencies:
+      '@itwin/imodels-access-frontend': 1.0.1_2414eca3a9c2fbe38db6d770ef8437a0
+      '@itwin/imodels-client-management': 1.0.1
       '@itwin/insights-client': 0.2.0
       '@itwin/itwinui-icons-color-react': 1.0.2_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-icons-react': 1.8.0_react-dom@17.0.2+react@17.0.2
@@ -817,8 +819,6 @@ importers:
       '@itwin/core-react': 3.1.2_192e986a3ccac8c463840e3cecabb201
       '@itwin/eslint-plugin': 3.1.2_eslint@7.32.0+typescript@4.3.5
       '@itwin/imodel-components-react': 3.1.2_fcc770174d8197d3a18365576c406db0
-      '@itwin/imodels-access-frontend': 1.0.1_2414eca3a9c2fbe38db6d770ef8437a0
-      '@itwin/imodels-client-management': 1.0.1
       '@itwin/itwinui-css': 0.50.1
       '@itwin/presentation-common': 3.1.2_a9d059ba8516a7a72612d25159406e59
       '@itwin/presentation-frontend': 3.1.2_b29da3c443aebd689ab43aab735e636e
@@ -2217,7 +2217,7 @@ packages:
       '@itwin/imodels-client-management': 1.0.1
     transitivePeerDependencies:
       - debug
-    dev: true
+    dev: false
 
   /@itwin/imodels-client-management/1.0.1:
     resolution: {integrity: sha512-HzwegaR7krCXY1I2UPGGjxp4tttcU4RD5kZoHFpA+Nit3jrsvoXR0CieH7H0GUSKmgoV0Go5KN1YvbBUgqruRg==}
@@ -2225,7 +2225,7 @@ packages:
       axios: 0.21.4
     transitivePeerDependencies:
       - debug
-    dev: true
+    dev: false
 
   /@itwin/insights-client/0.1.0:
     resolution: {integrity: sha512-CpK9EhEKF+yXdwUpf/J7HyYs453twEM49qQchZ4lL2x54sSNQ8P4KXZhEdMxz9BMpob/7f/xImolTLd3HnY/Bg==}
@@ -5020,7 +5020,7 @@ packages:
       follow-redirects: 1.15.0
     transitivePeerDependencies:
       - debug
-    dev: true
+    dev: false
 
   /axios/0.26.1:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
@@ -7765,6 +7765,7 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+    dev: false
 
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -14327,7 +14328,7 @@ packages:
     dev: true
 
   /util-deprecate/1.0.2:
-    resolution: {integrity: sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=}
+    resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
     dev: true
 
   /util.promisify/1.1.1:
@@ -14920,7 +14921,7 @@ packages:
     dev: true
 
   /yauzl/2.10.0:
-    resolution: {integrity: sha1-x+sXyT4RLLEIb6bY5R+wZnt5pfk=}
+    resolution: {integrity: sha512-p4a9I6X6nu6IhoGmBqAcbJy1mlC4j27vEPZX9F4L4/vZT3Lyq1VkFHw/V/PUcB9Buo+DG3iHkT0x3Qya58zc3g==}
     dependencies:
       buffer-crc32: 0.2.13
       fd-slicer: 1.1.0
