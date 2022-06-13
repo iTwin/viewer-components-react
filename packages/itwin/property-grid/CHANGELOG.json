@@ -2,6 +2,18 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "0.5.4",
+      "tag": "@itwin/property-grid-react_v0.5.4",
+      "date": "Wed, 08 Jun 2022 20:23:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added persistNValueToggle property and the code to store this value in UserPreferences if true."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.3",
       "tag": "@itwin/property-grid-react_v0.5.3",
       "date": "Thu, 26 May 2022 15:54:07 GMT",

@@ -47,6 +47,7 @@ import {
 } from "./FilteringPropertyGrid";
 import classnames from "classnames";
 import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
+import { getShowNullValuesPreference, saveShowNullValuesPreference } from "../api/ShowNullValuesPreferenceClient";
 
 interface PropertyGridPropsWithSingleElement extends PropertyGridProps {
   instanceKey?: InstanceKey;
@@ -61,6 +62,7 @@ export const PropertyGrid = ({
   actionButtonRenderers,
   enableCopyingPropertyText,
   enableNullValueToggle,
+  persistNullValueToggle,
   enablePropertyGroupNesting,
   additionalContextMenuOptions,
   defaultContextMenuOptions,
@@ -160,6 +162,21 @@ export const PropertyGrid = ({
     };
   }, []);
 
+  // If persisting hide/show empty values, get the preference
+  useEffect(() => {
+    const setDefaultShowNullValues = async () => {
+      if (persistNullValueToggle) {
+        const res = await getShowNullValuesPreference();
+        if(res !== undefined) {
+          res ? setFilterer(new PlaceholderPropertyDataFilterer()) : setFilterer(new NonEmptyValuesPropertyDataFilterer());
+          setShowNullValues(res);
+        }
+      }
+    };
+
+    void setDefaultShowNullValues();
+  }, [persistNullValueToggle]);
+
   useEffect(() => {
     const onDataChanged = async () => {
       const propertyData: PropertyData | undefined =
@@ -202,17 +219,18 @@ export const PropertyGrid = ({
     [iModelConnection, favoritePropertiesScope]
   );
 
-  const onHideNull = useCallback(() => {
-    setFilterer(new NonEmptyValuesPropertyDataFilterer());
+  // Fcn for updating toggle for Hide / Show Empty Fields menu options
+  const updateShowNullValues = useCallback(async (value: boolean) => {
+    // Update filter and reset context menu
+    value ? setFilterer(new PlaceholderPropertyDataFilterer()) : setFilterer(new NonEmptyValuesPropertyDataFilterer());
     setContextMenu(undefined);
-    setShowNullValues(false);
-  }, []);
+    setShowNullValues(value);
 
-  const onShowNull = useCallback(() => {
-    setFilterer(new PlaceholderPropertyDataFilterer());
-    setContextMenu(undefined);
-    setShowNullValues(true);
-  }, []);
+    // Persist hide/show value
+    if(persistNullValueToggle) {
+      await saveShowNullValuesPreference(value);
+    }
+  }, [persistNullValueToggle]);
 
   const buildContextMenu = useCallback(
     async (args: PropertyGridContextMenuArgs) => {
@@ -258,8 +276,8 @@ export const PropertyGrid = ({
           if (showNullValues) {
             items.push({
               key: PropertyGridDefaultContextMenuKey.HideNull,
-              onSelect: () => {
-                onHideNull();
+              onSelect: async () => {
+                await updateShowNullValues(false);
               },
               title: localizations.hideNull.title,
               label: localizations.hideNull.label,
@@ -267,8 +285,8 @@ export const PropertyGrid = ({
           } else {
             items.push({
               key: PropertyGridDefaultContextMenuKey.ShowNull,
-              onSelect: () => {
-                onShowNull();
+              onSelect: async () => {
+                await updateShowNullValues(true);
               },
               title: localizations.showNull.title,
               label: localizations.showNull.label,
@@ -327,6 +345,7 @@ export const PropertyGrid = ({
       dataProvider,
       localizations,
       showNullValues,
+      updateShowNullValues,
       enableFavoriteProperties,
       favoritePropertiesScope,
       enableCopyingPropertyText,
@@ -335,8 +354,6 @@ export const PropertyGrid = ({
       defaultContextMenuOptions,
       onAddFavorite,
       onRemoveFavorite,
-      onHideNull,
-      onShowNull,
       iModelConnection,
     ]
   );
