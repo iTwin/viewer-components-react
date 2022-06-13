@@ -24,6 +24,11 @@ import { UiFramework } from "@itwin/appui-react";
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
+  private _props?: { itemPriority: number };
+
+  constructor(props?: { itemPriority: number }) {
+    this._props = props;
+  }
 
   public provideToolbarButtonItems(
     _stageId: string,
@@ -57,7 +62,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         return [
           ToolbarItemUtilities.createGroupButton(
             "measure-tools-toolbar",
-            1000000,
+            this._props?.itemPriority || 500,
             "icon-measure",
             MeasureTools.localization.getLocalizedString(
               "MeasureTools:MeasurementGroupButton.tooltip",
