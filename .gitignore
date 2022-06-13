@@ -40,3 +40,6 @@ package-deps.json
 
 # DS store
 .DS_Store
+
+# IDE configuration
+.idea

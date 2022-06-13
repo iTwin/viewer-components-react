@@ -23,7 +23,7 @@ function isNumericalConstant(name: string): boolean {
   ].includes(name.toLowerCase());
 }
 
-export function validateTokens(tokens: Queue<Token>, properties: PropertyMap): string {
+export function validateTokens(formulaName: string, tokens: Queue<Token>, properties: PropertyMap): string {
   if (tokens.length === 0)
     return "Formula cannot be empty.";
 
@@ -50,9 +50,13 @@ export function validateTokens(tokens: Queue<Token>, properties: PropertyMap): s
         if (isConstant) {
           argStack.push("number");
         } else {
+          if (token.value === formulaName)
+            return "Formula cannot reference itself.";
+
           const prop = properties[token.value];
           if (!prop)
             return `Variable "${token.value}" is not available.`;
+
           argStack.push(prop);
         }
         break;

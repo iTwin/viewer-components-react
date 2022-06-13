@@ -8,7 +8,7 @@ import { convertInfixToPostfix } from "./InfixToPostfixConverter";
 import { ParenthesisState, validateParenthesis } from "./ParenthesisValidator";
 import type { PropertyMap } from "./Types";
 
-export function validateFormula(formula: string, properties: PropertyMap): string {
+export function validateFormula(formulaName: string, formula: string, properties: PropertyMap): string {
   const parenthesisState = validateParenthesis(formula);
   if (ParenthesisState.NotClosed === parenthesisState) {
     return "Opened but not closed parenthesis found.";
@@ -29,5 +29,5 @@ export function validateFormula(formula: string, properties: PropertyMap): strin
     return postfixFormulaTokens.errorMessage ?? "Unknown error";
   }
 
-  return validateTokens(postfixFormulaTokens.value, properties);
+  return validateTokens(formulaName, postfixFormulaTokens.value, properties);
 }
