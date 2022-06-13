@@ -2,13 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import {
-  Modal,
-} from "@itwin/itwinui-react";
-import {
-  Table,
-  tableFilters,
-} from "@itwin/itwinui-react";
+import { Modal } from "@itwin/itwinui-react";
+import { Table, tableFilters } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
 import type { Mapping } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
@@ -35,9 +30,14 @@ const fetchMappings = async (
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
+    const reportingClientApi = new ReportingClient(
+      generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl)
+    );
     const accessToken = await apiContext.getAccessToken();
-    const mappings = await reportingClientApi.getMappings(accessToken, iModelId);
+    const mappings = await reportingClientApi.getMappings(
+      accessToken,
+      iModelId
+    );
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -67,7 +67,12 @@ const AddMappingsModal = ({
 
   useEffect(() => {
     if (selectedIModelId) {
-      void fetchMappings(setMappings, selectedIModelId, setIsLoading, apiConfig);
+      void fetchMappings(
+        setMappings,
+        selectedIModelId,
+        setIsLoading,
+        apiConfig
+      );
     }
   }, [apiConfig, selectedIModelId, setIsLoading]);
 
@@ -78,13 +83,17 @@ const AddMappingsModal = ({
         columns: [
           {
             id: "mappingName",
-            Header: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:MappingName"),
+            Header: ReportsConfigWidget.localization.getLocalizedString(
+              "ReportsConfigWidget:MappingName"
+            ),
             accessor: "mappingName",
             Filter: tableFilters.TextFilter(),
           },
           {
             id: "description",
-            Header: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Description"),
+            Header: ReportsConfigWidget.localization.getLocalizedString(
+              "ReportsConfigWidget:Description"
+            ),
             accessor: "description",
             Filter: tableFilters.TextFilter(),
           },
@@ -98,10 +107,15 @@ const AddMappingsModal = ({
     try {
       if (!selectedIModelId) return;
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+      const reportingClientApi = new ReportingClient(
+        generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
+      );
       const accessToken = await apiConfig.getAccessToken();
       for (const mapping of selectedMappings) {
-        await reportingClientApi.createReportMapping(accessToken, reportId, { imodelId: selectedIModelId, mappingId: mapping.id ?? "" });
+        await reportingClientApi.createReportMapping(accessToken, reportId, {
+          imodelId: selectedIModelId,
+          mappingId: mapping.id ?? "",
+        });
       }
 
       await returnFn();
@@ -114,7 +128,9 @@ const AddMappingsModal = ({
 
   return (
     <Modal
-      title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:AddMappings")}
+      title={ReportsConfigWidget.localization.getLocalizedString(
+        "ReportsConfigWidget:AddMappings"
+      )}
       isOpen={show}
       isDismissible={!isLoading}
       onClose={async () => {
@@ -122,17 +138,24 @@ const AddMappingsModal = ({
       }}
       style={{ display: "flex", flexDirection: "column", maxHeight: "77vh" }}
     >
-      <div className='add-mappings-container'>
-        <SelectIModel selectedIModelId={selectedIModelId} setSelectedIModelId={setSelectediModelId} />
+      <div className="add-mappings-container">
+        <SelectIModel
+          selectedIModelId={selectedIModelId}
+          setSelectedIModelId={setSelectediModelId}
+        />
         <Table<MappingType>
           data={isLoading ? [] : mappings}
           columns={mappingsColumns}
-          className='add-mappings-table'
-          emptyTableContent={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:NoMappingsAvailable")}
+          className="add-mappings-table"
+          emptyTableContent={ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:NoMappingsAvailable"
+          )}
           isSortable
           isSelectable
           isLoading={isLoading}
-          isRowDisabled={(rowData) => existingMappings.some((v) => v.mappingId === rowData.id)}
+          isRowDisabled={(rowData) =>
+            existingMappings.some((v) => v.mappingId === rowData.id)
+          }
           onSelect={(selectData: Mapping[] | undefined) => {
             selectData && setSelectedMappings(selectData);
           }}
@@ -140,7 +163,9 @@ const AddMappingsModal = ({
         />
       </div>
       <ActionPanel
-        actionLabel={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Add")}
+        actionLabel={ReportsConfigWidget.localization.getLocalizedString(
+          "ReportsConfigWidget:Add"
+        )}
         onAction={onSave}
         onCancel={returnFn}
         isSavingDisabled={selectedMappings.length === 0}

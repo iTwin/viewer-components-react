@@ -6,7 +6,12 @@ import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { generateUrl, handleError, handleInputChange, WidgetHeader } from "./utils";
+import {
+  generateUrl,
+  handleError,
+  handleInputChange,
+  WidgetHeader,
+} from "./utils";
 import "./ReportAction.scss";
 import type { Report } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
@@ -36,7 +41,9 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         return;
       }
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+      const reportingClientApi = new ReportingClient(
+        generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
+      );
       const accessToken = await apiConfig.getAccessToken();
       report
         ? await reportingClientApi.updateReport(accessToken, report.id ?? "", {
@@ -60,18 +67,35 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
   return (
     <>
       <WidgetHeader
-        title={report ? ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ModifyReport") : ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:AddReport")}
+        title={
+          report
+            ? ReportsConfigWidget.localization.getLocalizedString(
+              "ReportsConfigWidget:ModifyReport"
+            )
+            : ReportsConfigWidget.localization.getLocalizedString(
+              "ReportsConfigWidget:AddReport"
+            )
+        }
         returnFn={returnFn}
       />
-      <div className='rcw-details-form-container'>
-        <Fieldset legend={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ReportDetails")} className='details-form'>
-          <Small className='field-legend'>
-            {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:MandatoryFields")}
+      <div className="rcw-details-form-container">
+        <Fieldset
+          legend={ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:ReportDetails"
+          )}
+          className="details-form"
+        >
+          <Small className="field-legend">
+            {ReportsConfigWidget.localization.getLocalizedString(
+              "ReportsConfigWidget:MandatoryFields"
+            )}
           </Small>
           <LabeledInput
-            id='name'
-            name='name'
-            label={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Name")}
+            id="name"
+            name="name"
+            label={ReportsConfigWidget.localization.getLocalizedString(
+              "ReportsConfigWidget:Name"
+            )}
             value={values.name}
             required
             disabled={isLoading}
@@ -94,9 +118,11 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
             }}
           />
           <LabeledInput
-            id='description'
-            name='description'
-            label={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Description")}
+            id="description"
+            name="description"
+            label={ReportsConfigWidget.localization.getLocalizedString(
+              "ReportsConfigWidget:Description"
+            )}
             value={values.description}
             onChange={(event) => {
               handleInputChange(event, values, setValues);
@@ -106,10 +132,12 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         </Fieldset>
       </div>
       <ActionPanel
-        actionLabel={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Add")}
+        actionLabel={ReportsConfigWidget.localization.getLocalizedString(
+          "ReportsConfigWidget:Add"
+        )}
         onAction={onSave}
         onCancel={returnFn}
-        isSavingDisabled={!(values.name)}
+        isSavingDisabled={!values.name}
         isLoading={isLoading}
       />
     </>

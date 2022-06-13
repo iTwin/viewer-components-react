@@ -14,11 +14,23 @@ interface ReportsContainerProps {
   baseUrl: string;
 }
 
-const ReportsContainer = ({ getAccessToken, baseUrl }: ReportsContainerProps) =>
-  <ApiConfigContext.Provider value={{ getAccessToken: getAccessToken ?? (async () => await IModelApp.authorizationClient?.getAccessToken() ?? ""), baseUrl }}>
-    <div className='reports-container'>
+const ReportsContainer = ({
+  getAccessToken,
+  baseUrl,
+}: ReportsContainerProps) => (
+  <ApiConfigContext.Provider
+    value={{
+      getAccessToken:
+        getAccessToken ??
+        (async () =>
+          (await IModelApp.authorizationClient?.getAccessToken()) ?? ""),
+      baseUrl,
+    }}
+  >
+    <div className="reports-container">
       <Reports />
     </div>
-  </ApiConfigContext.Provider>;
+  </ApiConfigContext.Provider>
+);
 
 export default ReportsContainer;

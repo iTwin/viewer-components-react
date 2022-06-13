@@ -10,7 +10,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
 import { generateUrl, handleError, SkeletonBlock } from "./utils";
 import "./Extraction.scss";
-import { SvgStatusError, SvgStatusPending, SvgStatusPendingHollow, SvgStatusSuccess } from "@itwin/itwinui-icons-color-react";
+import {
+  SvgStatusError,
+  SvgStatusPending,
+  SvgStatusPendingHollow,
+  SvgStatusSuccess,
+} from "@itwin/itwinui-icons-color-react";
 import { useApiConfig } from "../context/ApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
@@ -23,7 +28,7 @@ export enum ExtractionStates {
   Queued,
   Running,
   Succeeded,
-  Failed
+  Failed,
 }
 interface ExtractionStatusProps {
   state: ExtractionStates;
@@ -31,7 +36,11 @@ interface ExtractionStatusProps {
   children?: React.ReactNode;
 }
 
-export const ExtractionStatus = ({ state, children, setExtractionState }: ExtractionStatusProps) => {
+export const ExtractionStatus = ({
+  state,
+  children,
+  setExtractionState,
+}: ExtractionStatusProps) => {
   const [fadeOut, setFadeOut] = useState<boolean>(false);
 
   const onAnimationEnd = () => {
@@ -54,54 +63,88 @@ export const ExtractionStatus = ({ state, children, setExtractionState }: Extrac
   switch (state) {
     case ExtractionStates.Starting:
       return (
-        <div title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Starting")} className="extraction-status">
-          <div
-            className="status-icon"
-          >
+        <div
+          title={ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:Starting"
+          )}
+          className="extraction-status"
+        >
+          <div className="status-icon">
             <SvgStatusPendingHollow />
           </div>
         </div>
       );
     case ExtractionStates.FetchingUpdate:
       return (
-        <div title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Loading")} className="extraction-status">
+        <div
+          title={ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:Loading"
+          )}
+          className="extraction-status"
+        >
           <ProgressRadial size="x-small" indeterminate />
         </div>
       );
     case ExtractionStates.Queued:
       return (
-        <div title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Queued")} className="extraction-status">
-          <div
-            className="status-icon"
-          >
+        <div
+          title={ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:Queued"
+          )}
+          className="extraction-status"
+        >
+          <div className="status-icon">
             <SvgStatusPending />
           </div>
         </div>
       );
     case ExtractionStates.Running:
       return (
-        <div title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Running")} className="extraction-status">
+        <div
+          title={ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:Running"
+          )}
+          className="extraction-status"
+        >
           <ProgressRadial size="x-small" indeterminate />
         </div>
       );
     case ExtractionStates.Succeeded:
       return (
-        <div title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Success")} className="extraction-status">
+        <div
+          title={ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:Success"
+          )}
+          className="extraction-status"
+        >
           <div
             className={`status-icon`}
-            style={{ animationName: fadeOut ? "rcw-fade-out" : "", animationDelay: "5s", animationDuration: "1s" }}
+            style={{
+              animationName: fadeOut ? "rcw-fade-out" : "",
+              animationDelay: "5s",
+              animationDuration: "1s",
+            }}
             onAnimationEnd={onAnimationEnd}
           >
             <SvgStatusSuccess />
           </div>
-        </div >
+        </div>
       );
     case ExtractionStates.Failed:
       return (
-        <div title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Failed")} className="extraction-status">
+        <div
+          title={ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:Failed"
+          )}
+          className="extraction-status"
+        >
           <div
             className={`status-icon`}
-            style={{ animationName: fadeOut ? "rcw-fade-out" : "", animationDelay: "5s", animationDuration: "1s" }}
+            style={{
+              animationName: fadeOut ? "rcw-fade-out" : "",
+              animationDelay: "5s",
+              animationDuration: "1s",
+            }}
             onAnimationEnd={onAnimationEnd}
           >
             <SvgStatusError />
@@ -121,7 +164,13 @@ interface ExtractionProps {
   isLoading: boolean;
 }
 
-export const Extraction = ({ iModels, setExtractingIModelId, extractionState, setExtractionState, isLoading }: ExtractionProps) => {
+export const Extraction = ({
+  iModels,
+  setExtractingIModelId,
+  extractionState,
+  setExtractionState,
+  isLoading,
+}: ExtractionProps) => {
   const jobId = useRef<string>("");
   const intervalId = useRef<number>();
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -132,13 +181,17 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
     try {
       setExtractionState(ExtractionStates.Starting);
       setExtractingIModelId(iModelId);
-      const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+      const reportingClientApi = new ReportingClient(
+        generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
+      );
       const accessToken = await apiConfig.getAccessToken();
-      const response = await reportingClientApi.runExtraction(accessToken, iModelId);
+      const response = await reportingClientApi.runExtraction(
+        accessToken,
+        iModelId
+      );
       jobId.current = response.run?.id ?? "";
       setIsRunning(true);
       setExtractionState(ExtractionStates.FetchingUpdate);
-
     } catch (error: any) {
       handleError(error.status);
       setExtractionState(ExtractionStates.Failed);
@@ -150,9 +203,14 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
   useEffect(() => {
     if (!intervalId.current && isRunning) {
       const newIntervalId = window.setInterval(async () => {
-        const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+        const reportingClientApi = new ReportingClient(
+          generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
+        );
         const accessToken = await apiConfig.getAccessToken();
-        const response = await reportingClientApi.getExtractionStatus(accessToken, jobId.current);
+        const response = await reportingClientApi.getExtractionStatus(
+          accessToken,
+          jobId.current
+        );
         if (response.status?.state === "Queued") {
           setExtractionState(ExtractionStates.Queued);
         } else if (response.status?.state === "Running") {
@@ -180,7 +238,12 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
     const newIModelOptions: SelectOption<string>[] = [];
 
     for (const [iModelId, iModelName] of iModels.entries()) {
-      newIModelOptions.push({ label: iModelName, value: iModelId, key: iModelId, disabled: extractionState !== ExtractionStates.None });
+      newIModelOptions.push({
+        label: iModelName,
+        value: iModelId,
+        key: iModelId,
+        disabled: extractionState !== ExtractionStates.None,
+      });
     }
     return newIModelOptions;
   }, [iModels, extractionState]);
@@ -188,42 +251,61 @@ export const Extraction = ({ iModels, setExtractingIModelId, extractionState, se
   return (
     <div className="extraction-container">
       <div className="extraction-combo-box" data-testid="extraction-combo-box">
-        <Label htmlFor='combo-input'>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:UpdateDataset")}</Label>
-        {
-          isLoading ? <SkeletonBlock /> :
-            <ComboBox
-              options={iModelOptions}
-              value={currentIModelId}
-              onChange={async (value) => {
-                setCurrentIModelId(value);
-                await runExtraction(value);
-              }}
-              inputProps={{
-                id: "combo-input",
-                placeholder: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:SelectIModel"),
-              }}
-              message={extractionState !== ExtractionStates.None && <StatusMessage>
-                <div className="extraction-status-container">
-                  <ExtractionStatus state={extractionState} setExtractionState={setExtractionState} />
-                  {(() => {
-                    switch (extractionState) {
-                      case ExtractionStates.Succeeded: {
-                        return ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Success");
+        <Label htmlFor="combo-input">
+          {ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:UpdateDataset"
+          )}
+        </Label>
+        {isLoading ? (
+          <SkeletonBlock />
+        ) : (
+          <ComboBox
+            options={iModelOptions}
+            value={currentIModelId}
+            onChange={async (value) => {
+              setCurrentIModelId(value);
+              await runExtraction(value);
+            }}
+            inputProps={{
+              id: "combo-input",
+              placeholder: ReportsConfigWidget.localization.getLocalizedString(
+                "ReportsConfigWidget:SelectIModel"
+              ),
+            }}
+            message={
+              extractionState !== ExtractionStates.None && (
+                <StatusMessage>
+                  <div className="extraction-status-container">
+                    <ExtractionStatus
+                      state={extractionState}
+                      setExtractionState={setExtractionState}
+                    />
+                    {(() => {
+                      switch (extractionState) {
+                        case ExtractionStates.Succeeded: {
+                          return ReportsConfigWidget.localization.getLocalizedString(
+                            "ReportsConfigWidget:Success"
+                          );
+                        }
+                        case ExtractionStates.Failed: {
+                          return ReportsConfigWidget.localization.getLocalizedString(
+                            "ReportsConfigWidget:Failed"
+                          );
+                        }
+                        default: {
+                          return ReportsConfigWidget.localization.getLocalizedString(
+                            "ReportsConfigWidget:UpdateInProgress"
+                          );
+                        }
                       }
-                      case ExtractionStates.Failed: {
-                        return ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Failed");
-                      }
-                      default: {
-                        return ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:UpdateInProgress");
-                      }
-                    }
-                  })()}
-
-                </div>
-              </StatusMessage>
-              }
-            />}
+                    })()}
+                  </div>
+                </StatusMessage>
+              )
+            }
+          />
+        )}
       </div>
-    </div >
+    </div>
   );
 };

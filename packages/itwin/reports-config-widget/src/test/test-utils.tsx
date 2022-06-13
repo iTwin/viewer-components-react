@@ -7,7 +7,11 @@ import { render as rtlRender } from "@testing-library/react";
 import { ApiConfigContext } from "../widget/context/ApiContext";
 import type { Store } from "redux";
 import { combineReducers, createStore } from "redux";
-import { FrameworkReducer, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
+import {
+  FrameworkReducer,
+  SyncUiEventDispatcher,
+  UiFramework,
+} from "@itwin/appui-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import userEvent from "@testing-library/user-event";
@@ -21,7 +25,14 @@ interface WrapperProps {
 
 function render(ui: React.ReactElement, { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (
-    <ApiConfigContext.Provider value={{ getAccessToken: mockAccessToken, baseUrl: REPORTS_CONFIG_BASE_URL }}>{children}</ApiConfigContext.Provider>
+    <ApiConfigContext.Provider
+      value={{
+        getAccessToken: mockAccessToken,
+        baseUrl: REPORTS_CONFIG_BASE_URL,
+      }}
+    >
+      {children}
+    </ApiConfigContext.Provider>
   );
 
   return {
@@ -35,14 +46,16 @@ export * from "@testing-library/react";
 export { render };
 
 export class TestUtils {
-
   public static createAppStore(): Store {
     const rootReducer = combineReducers({
       frameworkState: FrameworkReducer,
     });
 
-    return createStore(rootReducer,
-      (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__());
+    return createStore(
+      rootReducer,
+      (window as any).__REDUX_DEVTOOLS_EXTENSION__ &&
+        (window as any).__REDUX_DEVTOOLS_EXTENSION__()
+    );
   }
 
   public static async initializeUiFramework(_?: IModelConnection) {

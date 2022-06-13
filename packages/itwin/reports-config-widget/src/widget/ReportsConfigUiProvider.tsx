@@ -24,7 +24,10 @@ export class ReportsConfigProvider implements UiItemsProvider {
   private readonly _getAccessToken?: () => Promise<AccessToken>;
   private readonly _baseUrl: string;
 
-  constructor(getAccessToken?: () => Promise<AccessToken>, baseUrl: string = REPORTS_CONFIG_BASE_URL) {
+  constructor(
+    getAccessToken?: () => Promise<AccessToken>,
+    baseUrl: string = REPORTS_CONFIG_BASE_URL
+  ) {
     this._getAccessToken = getAccessToken;
     this._baseUrl = baseUrl;
   }
@@ -33,19 +36,26 @@ export class ReportsConfigProvider implements UiItemsProvider {
     _stageId: string,
     stageUsage: string,
     location: StagePanelLocation,
-    section?: StagePanelSection,
+    section?: StagePanelSection
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
     if (
-      (location === StagePanelLocation.Left &&
-        section === StagePanelSection.Start &&
-        stageUsage === StageUsage.General)
+      location === StagePanelLocation.Left &&
+      section === StagePanelSection.Start &&
+      stageUsage === StageUsage.General
     ) {
       const ReportsWidget: AbstractWidgetProps = {
         id: "reports-config-widget",
-        label: ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ReportsConfig"),
+        label: ReportsConfigWidget.localization.getLocalizedString(
+          "ReportsConfigWidget:ReportsConfig"
+        ),
         getWidgetContent: () => {
-          return <ReportsContainer getAccessToken={this._getAccessToken} baseUrl={this._baseUrl} />;
+          return (
+            <ReportsContainer
+              getAccessToken={this._getAccessToken}
+              baseUrl={this._baseUrl}
+            />
+          );
         },
       };
 

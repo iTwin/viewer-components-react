@@ -4,7 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
-import type { GetIModelListParams, IModelsClientOptions, MinimalIModel } from "@itwin/imodels-client-management";
+import type {
+  GetIModelListParams,
+  IModelsClientOptions,
+  MinimalIModel,
+} from "@itwin/imodels-client-management";
 import { Constants } from "@itwin/imodels-client-management";
 import { IModelsClient, toArray } from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
@@ -32,7 +36,9 @@ const fetchIModels = async (
     urlParams: { projectId: iTwinId },
     authorization,
   };
-  const iModels = await toArray(iModelsClient.iModels.getMinimalList(getiModelListParams));
+  const iModels = await toArray(
+    iModelsClient.iModels.getMinimalList(getiModelListParams)
+  );
   setiModels(iModels);
 };
 
@@ -41,7 +47,10 @@ interface SelectedIModelProps {
   setSelectedIModelId: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: SelectedIModelProps) => {
+export const SelectIModel = ({
+  selectedIModelId,
+  setSelectedIModelId,
+}: SelectedIModelProps) => {
   const apiConfig = useApiConfig();
   const iModelId = useActiveIModelConnection()?.iModelId ?? "";
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
@@ -60,12 +69,19 @@ export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: Selected
   }, [iModelId, iModels, setSelectedIModelId]);
 
   const iModelOptions = useMemo(() => {
-    return iModels.map((iModel) => ({ label: iModel.displayName, value: iModel.id }));
+    return iModels.map((iModel) => ({
+      label: iModel.displayName,
+      value: iModel.id,
+    }));
   }, [iModels]);
 
   return (
     <div className="reports-select-imodel">
-      <Label htmlFor='combo-input'>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:SelectIModel")}</Label>
+      <Label htmlFor="combo-input">
+        {ReportsConfigWidget.localization.getLocalizedString(
+          "ReportsConfigWidget:SelectIModel"
+        )}
+      </Label>
       <div className="combobox">
         <ComboBox<string>
           options={iModelOptions}
@@ -79,6 +95,6 @@ export const SelectIModel = ({ selectedIModelId, setSelectedIModelId }: Selected
           style={{ flexGrow: 1, maxWidth: "395px" }}
         />
       </div>
-    </div>);
-
+    </div>
+  );
 };

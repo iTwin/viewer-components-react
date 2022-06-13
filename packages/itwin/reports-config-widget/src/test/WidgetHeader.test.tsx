@@ -20,9 +20,7 @@ describe("Widget Header Component", () => {
 
   it("header allows return callback", async () => {
     const mockReturnFn = jest.fn();
-    const { user } = render(
-      <WidgetHeader title="" returnFn={mockReturnFn} />
-    );
+    const { user } = render(<WidgetHeader title="" returnFn={mockReturnFn} />);
 
     const returnBtn = screen.getByRole("button");
     await user.click(returnBtn);

@@ -11,12 +11,17 @@ export interface ApiConfig {
   baseUrl: string;
 }
 
-export const ApiConfigContext = createContext<ApiConfig>({ getAccessToken: async () => "", baseUrl: "" });
+export const ApiConfigContext = createContext<ApiConfig>({
+  getAccessToken: async () => "",
+  baseUrl: "",
+});
 
 export const useApiConfig = () => {
   const context = React.useContext(ApiConfigContext);
   if (!context) {
-    throw new Error("useApiConfig should be used within a ApiConfigContext provider");
+    throw new Error(
+      "useApiConfig should be used within a ApiConfigContext provider"
+    );
   }
   return context;
 };

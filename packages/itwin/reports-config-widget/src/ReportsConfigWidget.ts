@@ -22,12 +22,16 @@ export class ReportsConfigWidget {
     ReportsConfigWidget._localization = localization ?? IModelApp.localization;
     // Setup localization
     const ReportsWidgetNamespace = "ReportsConfigWidget";
-    await ReportsConfigWidget._localization.registerNamespace(ReportsWidgetNamespace);
+    await ReportsConfigWidget._localization.registerNamespace(
+      ReportsWidgetNamespace
+    );
 
     ReportsConfigWidget._localizationNamespace = ReportsWidgetNamespace;
   }
 
   public static terminate() {
-    ReportsConfigWidget._localization.unregisterNamespace(ReportsConfigWidget.localizationNamespace);
+    ReportsConfigWidget._localization.unregisterNamespace(
+      ReportsConfigWidget.localizationNamespace
+    );
   }
 }

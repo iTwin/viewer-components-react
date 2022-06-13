@@ -53,7 +53,9 @@ const fetchReports = async (
   try {
     if (!iTwinId) return;
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl));
+    const reportingClientApi = new ReportingClient(
+      generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl)
+    );
     const accessToken = await apiContext.getAccessToken();
     const reports = await reportingClientApi.getReports(accessToken, iTwinId);
     setReports(reports ?? []);
@@ -71,9 +73,9 @@ export const Reports = () => {
   const [reportsView, setReportsView] = useState<ReportsView>(
     ReportsView.REPORTS
   );
-  const [selectedReport, setSelectedReport] = useState<
-  Report | undefined
-  >(undefined);
+  const [selectedReport, setSelectedReport] = useState<Report | undefined>(
+    undefined
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
@@ -92,29 +94,42 @@ export const Reports = () => {
     setReportsView(ReportsView.ADDING);
   };
 
-  const filteredReports = useMemo(() => reports.filter((x) =>
-    [x.displayName, x.description]
-      .join(" ")
-      .toLowerCase()
-      .includes(searchValue.toLowerCase())), [reports, searchValue]);
+  const filteredReports = useMemo(
+    () =>
+      reports.filter((x) =>
+        [x.displayName, x.description]
+          .join(" ")
+          .toLowerCase()
+          .includes(searchValue.toLowerCase())
+      ),
+    [reports, searchValue]
+  );
 
   switch (reportsView) {
     case ReportsView.ADDING:
-      return iTwinId ? <ReportAction iTwinId={iTwinId ?? ""} returnFn={refresh} /> : null;
+      return iTwinId ? (
+        <ReportAction iTwinId={iTwinId ?? ""} returnFn={refresh} />
+      ) : null;
     case ReportsView.MODIFYING:
-      return iTwinId ?
+      return iTwinId ? (
         <ReportAction
           iTwinId={iTwinId}
           report={selectedReport}
           returnFn={refresh}
         />
-        : null;
+      ) : null;
     case ReportsView.REPORTSMAPPING:
-      return selectedReport ? <ReportMappings report={selectedReport} goBack={refresh} /> : null;
+      return selectedReport ? (
+        <ReportMappings report={selectedReport} goBack={refresh} />
+      ) : null;
     default:
       return (
         <>
-          <WidgetHeader title={ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ITwinReports")} />
+          <WidgetHeader
+            title={ReportsConfigWidget.localization.getLocalizedString(
+              "ReportsConfigWidget:ITwinReports"
+            )}
+          />
           <Surface className="reports-list-container">
             <div className="toolbar">
               <Button
@@ -122,86 +137,101 @@ export const Reports = () => {
                 onClick={() => addReport()}
                 styleType="high-visibility"
               >
-                {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:New")}
+                {ReportsConfigWidget.localization.getLocalizedString(
+                  "ReportsConfigWidget:New"
+                )}
               </Button>
               <div className="search-bar-container" data-testid="search-bar">
-                <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} disabled={isLoading} />
+                <SearchBar
+                  searchValue={searchValue}
+                  setSearchValue={setSearchValue}
+                  disabled={isLoading}
+                />
               </div>
             </div>
-            {isLoading ?
-              <LoadingOverlay /> :
-              reports.length === 0 ?
-                <EmptyMessage>
-                  <>
-                    {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:NoReports")}
-                    <div>
-                      <Button
-                        onClick={() => addReport()}
-                        styleType='cta'>
-                        {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CreateOneReportCTA")}
-                      </Button>
-                    </div>
-                  </>
-                </EmptyMessage> :
-                <div className="reports-list">
-                  {filteredReports.map((report) =>
-                    <HorizontalTile
-                      key={report.id}
-                      title={report.displayName ?? ""}
-                      subText={report.description ?? ""}
-                      subtextToolTip={report.description ?? ""}
-                      titleTooltip={report.displayName}
-                      onClickTitle={() => {
-                        setSelectedReport(report);
-                        setReportsView(ReportsView.REPORTSMAPPING);
-                      }}
-                      button={
-                        <DropdownMenu
-                          menuItems={(close: () => void) => [
-                            <MenuItem
-                              key={0}
-                              onClick={() => {
-                                setSelectedReport(report);
-                                setReportsView(ReportsView.MODIFYING);
-                              }}
-                              icon={<SvgEdit />}
-                            >
-                              {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Modify")}
-                            </MenuItem>,
-                            <MenuItem
-                              key={1}
-                              onClick={() => {
-                                setSelectedReport(report);
-                                setShowDeleteModal(true);
-                                close();
-                              }}
-                              icon={<SvgDelete />}
-                            >
-                              {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:Remove")}
-                            </MenuItem>,
-                          ]}
-                        >
-                          <IconButton styleType="borderless">
-                            <SvgMore
-                              style={{
-                                width: "16px",
-                                height: "16px",
-                              }}
-                            />
-                          </IconButton>
-                        </DropdownMenu>
-                      }
-                    />
+            {isLoading ? (
+              <LoadingOverlay />
+            ) : reports.length === 0 ? (
+              <EmptyMessage>
+                <>
+                  {ReportsConfigWidget.localization.getLocalizedString(
+                    "ReportsConfigWidget:NoReports"
                   )}
-                </div>
-            }
+                  <div>
+                    <Button onClick={() => addReport()} styleType="cta">
+                      {ReportsConfigWidget.localization.getLocalizedString(
+                        "ReportsConfigWidget:CreateOneReportCTA"
+                      )}
+                    </Button>
+                  </div>
+                </>
+              </EmptyMessage>
+            ) : (
+              <div className="reports-list">
+                {filteredReports.map((report) => (
+                  <HorizontalTile
+                    key={report.id}
+                    title={report.displayName ?? ""}
+                    subText={report.description ?? ""}
+                    subtextToolTip={report.description ?? ""}
+                    titleTooltip={report.displayName}
+                    onClickTitle={() => {
+                      setSelectedReport(report);
+                      setReportsView(ReportsView.REPORTSMAPPING);
+                    }}
+                    button={
+                      <DropdownMenu
+                        menuItems={(close: () => void) => [
+                          <MenuItem
+                            key={0}
+                            onClick={() => {
+                              setSelectedReport(report);
+                              setReportsView(ReportsView.MODIFYING);
+                            }}
+                            icon={<SvgEdit />}
+                          >
+                            {ReportsConfigWidget.localization.getLocalizedString(
+                              "ReportsConfigWidget:Modify"
+                            )}
+                          </MenuItem>,
+                          <MenuItem
+                            key={1}
+                            onClick={() => {
+                              setSelectedReport(report);
+                              setShowDeleteModal(true);
+                              close();
+                            }}
+                            icon={<SvgDelete />}
+                          >
+                            {ReportsConfigWidget.localization.getLocalizedString(
+                              "ReportsConfigWidget:Remove"
+                            )}
+                          </MenuItem>,
+                        ]}
+                      >
+                        <IconButton styleType="borderless">
+                          <SvgMore
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                            }}
+                          />
+                        </IconButton>
+                      </DropdownMenu>
+                    }
+                  />
+                ))}
+              </div>
+            )}
           </Surface>
           <DeleteModal
             entityName={selectedReport?.displayName ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = new ReportingClient(generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl));
+              const reportingClientApi = new ReportingClient(
+                generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
+              );
               const accessToken = await apiConfig.getAccessToken();
               await reportingClientApi.deleteReport(
                 accessToken,

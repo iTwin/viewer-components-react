@@ -5,22 +5,45 @@
 import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
-import type { IModelConnection, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
+import type {
+  IModelConnection,
+  SelectionSet,
+  SelectionSetEvent,
+} from "@itwin/core-frontend";
 import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { setupServer } from "msw/node";
-import { render, screen, TestUtils, waitForElementToBeRemoved, within } from "./test-utils";
+import {
+  render,
+  screen,
+  TestUtils,
+  waitForElementToBeRemoved,
+  within,
+} from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import type { RequestHandler } from "msw";
 import * as moq from "typemoq";
 import { rest } from "msw";
-import type { ExtractionStatus, Mapping, MappingCollection, MappingSingle, Report, ReportMappingCollection } from "@itwin/insights-client";
+import type {
+  ExtractionStatus,
+  Mapping,
+  MappingCollection,
+  MappingSingle,
+  Report,
+  ReportMappingCollection,
+} from "@itwin/insights-client";
 import { ReportMappings } from "../widget/components/ReportMappings";
 import { Constants, IModelState } from "@itwin/imodels-client-management";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 import { REFRESH_DELAY } from "../widget/components/Extraction";
-import type { SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
-import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
+import type {
+  SelectionManager,
+  SelectionScopesManager,
+} from "@itwin/presentation-frontend";
+import {
+  Presentation,
+  SelectionChangeEvent,
+} from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
 
 // For the extraction test
@@ -33,55 +56,60 @@ const mockIModelId2 = faker.datatype.uuid();
 
 const mockReportId = faker.datatype.uuid();
 
-const mockIModelsResponse = [{
-  iModel: {
-    id: mockIModelId1,
-    displayName: faker.random.alpha(10),
-    name: faker.random.alpha(10),
-    description: faker.random.words(10),
-    createdDateTime: "2021-10-04T22:13:50.397Z",
-    state: IModelState.Initialized,
-    projectId: mockITwinId,
-    extent: null,
-    _links: {
-      creator: {
-        href: "",
-      },
-      namedVersions: {
-        href: "",
-      },
-      changesets: {
-        href: "",
-      },
-    },
-  },
-},
-{
-  iModel: {
-    id: mockIModelId2,
-    displayName: faker.random.alpha(10),
-    name: faker.random.alpha(10),
-    description: faker.random.words(10),
-    createdDateTime: "2021-10-04T22:13:50.397Z",
-    state: IModelState.Initialized,
-    projectId: mockITwinId,
-    extent: null,
-    _links: {
-      creator: {
-        href: "",
-      },
-      namedVersions: {
-        href: "",
-      },
-      changesets: {
-        href: "",
+const mockIModelsResponse = [
+  {
+    iModel: {
+      id: mockIModelId1,
+      displayName: faker.random.alpha(10),
+      name: faker.random.alpha(10),
+      description: faker.random.words(10),
+      createdDateTime: "2021-10-04T22:13:50.397Z",
+      state: IModelState.Initialized,
+      projectId: mockITwinId,
+      extent: null,
+      _links: {
+        creator: {
+          href: "",
+        },
+        namedVersions: {
+          href: "",
+        },
+        changesets: {
+          href: "",
+        },
       },
     },
   },
-}];
+  {
+    iModel: {
+      id: mockIModelId2,
+      displayName: faker.random.alpha(10),
+      name: faker.random.alpha(10),
+      description: faker.random.words(10),
+      createdDateTime: "2021-10-04T22:13:50.397Z",
+      state: IModelState.Initialized,
+      projectId: mockITwinId,
+      extent: null,
+      _links: {
+        creator: {
+          href: "",
+        },
+        namedVersions: {
+          href: "",
+        },
+        changesets: {
+          href: "",
+        },
+      },
+    },
+  },
+];
 
 const mockProjectIModels = {
-  iModels: mockIModelsResponse.map((iModel) => ({ id: iModel.iModel.id, displayName: iModel.iModel.displayName })),
+  iModels: mockIModelsResponse.map((iModel) => ({
+    id: iModel.iModel.id,
+    displayName: iModel.iModel.displayName,
+  })),
   _links: {
     self: {
       href: "",
@@ -148,33 +176,40 @@ const mockReportMappingsFactory = (): ReportMappingCollection => {
   };
 };
 
-const mockMappingsFactory = (mockReportMappings: ReportMappingCollection): [MappingSingle[], RequestHandler[]] => {
-
-  const mockMappings: MappingSingle[] = mockReportMappings.mappings!.map((mapping) => ({
-    mapping: {
-      id: mapping.mappingId,
-      mappingName: faker.random.alpha(10),
-      description: faker.random.words(10),
-      extractionEnabled: false,
-      createdOn: "",
-      createdBy: "",
-      modifiedOn: "",
-      modifiedBy: "",
-      _links: {
-        imodel: {
-          // Tie the mapping to to the iModel Id
-          href: mapping.imodelId,
+const mockMappingsFactory = (
+  mockReportMappings: ReportMappingCollection
+): [MappingSingle[], RequestHandler[]] => {
+  const mockMappings: MappingSingle[] = mockReportMappings.mappings!.map(
+    (mapping) => ({
+      mapping: {
+        id: mapping.mappingId,
+        mappingName: faker.random.alpha(10),
+        description: faker.random.words(10),
+        extractionEnabled: false,
+        createdOn: "",
+        createdBy: "",
+        modifiedOn: "",
+        modifiedBy: "",
+        _links: {
+          imodel: {
+            // Tie the mapping to to the iModel Id
+            href: mapping.imodelId,
+          },
         },
       },
-    },
-  }));
+    })
+  );
 
-  const iModelHandlers: RequestHandler[] = mockMappings.map((mapping) => (rest.get(
-    `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mapping.mapping?._links?.imodel?.href ?? ""}/mappings/${mapping.mapping?.id}`,
-    async (_req, res, ctx) => {
-      return res(ctx.delay(), ctx.status(200), ctx.json(mapping));
-    },
-  )));
+  const iModelHandlers: RequestHandler[] = mockMappings.map((mapping) =>
+    rest.get(
+      `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${
+        mapping.mapping?._links?.imodel?.href ?? ""
+      }/mappings/${mapping.mapping?.id}`,
+      async (_req, res, ctx) => {
+        return res(ctx.delay(), ctx.status(200), ctx.json(mapping));
+      }
+    )
+  );
 
   return [mockMappings, iModelHandlers];
 };
@@ -199,14 +234,22 @@ beforeAll(async () => {
   const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
   selectionSet.setup((x) => x.elements).returns(() => new Set([]));
   selectionSet.setup((x) => x.onChanged).returns(() => onChanged.object);
-  connectionMock.setup((x) => x.selectionSet).returns(() => selectionSet.object);
+  connectionMock
+    .setup((x) => x.selectionSet)
+    .returns(() => selectionSet.object);
   connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId1);
   connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
 
-  selectionManagerMock.setup((x) => x.selectionChange).returns(() => new SelectionChangeEvent());
+  selectionManagerMock
+    .setup((x) => x.selectionChange)
+    .returns(() => new SelectionChangeEvent());
 
-  selectionScopesManagerMock.setup(async (x) => x.getSelectionScopes(connectionMock.object)).returns(async () => []);
-  selectionManagerMock.setup((x) => x.scopes).returns(() => selectionScopesManagerMock.object);
+  selectionScopesManagerMock
+    .setup(async (x) => x.getSelectionScopes(connectionMock.object))
+    .returns(async () => []);
+  selectionManagerMock
+    .setup((x) => x.scopes)
+    .returns(() => selectionScopesManagerMock.object);
 
   Presentation.setSelectionManager(selectionManagerMock.object);
   await TestUtils.initializeUiFramework(connectionMock.object);
@@ -223,29 +266,42 @@ afterEach(() => {
   server.resetHandlers();
 });
 
-describe(("Report Mappings View"), () => {
+describe("Report Mappings View", () => {
   it("shows all report mappings", async () => {
     const mockReportMappings = mockReportMappingsFactory();
-    const [mockMappings, iModelHandlers] = mockMappingsFactory(mockReportMappings);
+    const [mockMappings, iModelHandlers] =
+      mockMappingsFactory(mockReportMappings);
 
     server.use(
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockReportMappings));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockReportMappings)
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId1}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[0]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[0])
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId2}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[1]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[1])
+          );
+        }
       ),
       ...iModelHandlers
     );
@@ -260,66 +316,105 @@ describe(("Report Mappings View"), () => {
 
     for (const [index, horizontalTile] of horizontalTiles.entries()) {
       const reportMappingTile = within(horizontalTile);
-      const mockiModel = mockIModelsResponse.find((iModel) => iModel.iModel.id === mockMappings[index].mapping?._links?.imodel?.href);
-      expect(reportMappingTile.getByText(mockMappings[index].mapping?.mappingName ?? "")).toBeInTheDocument();
-      expect(reportMappingTile.getByTitle(mockMappings[index].mapping?.description ?? "")).toBeInTheDocument();
-      expect(reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")).toBeInTheDocument();
-
+      const mockiModel = mockIModelsResponse.find(
+        (iModel) =>
+          iModel.iModel.id === mockMappings[index].mapping?._links?.imodel?.href
+      );
+      expect(
+        reportMappingTile.getByText(
+          mockMappings[index].mapping?.mappingName ?? ""
+        )
+      ).toBeInTheDocument();
+      expect(
+        reportMappingTile.getByTitle(
+          mockMappings[index].mapping?.description ?? ""
+        )
+      ).toBeInTheDocument();
+      expect(
+        reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")
+      ).toBeInTheDocument();
     }
   });
 
   it("search for a report mapping", async () => {
     const mockReportMappings = mockReportMappingsFactory();
-    const [mockMappings, iModelHandlers] = mockMappingsFactory(mockReportMappings);
+    const [mockMappings, iModelHandlers] =
+      mockMappingsFactory(mockReportMappings);
 
     server.use(
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockReportMappings));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockReportMappings)
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId1}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[0]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[0])
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId2}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[1]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[1])
+          );
+        }
       ),
       ...iModelHandlers
     );
 
-    const { user } = render(<ReportMappings report={mockReport} goBack={jest.fn()} />);
+    const { user } = render(
+      <ReportMappings report={mockReport} goBack={jest.fn()} />
+    );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const searchButton = within(screen.getByTestId(/search-bar/i)).getByRole("button");
+    const searchButton = within(screen.getByTestId(/search-bar/i)).getByRole(
+      "button"
+    );
     await user.click(searchButton);
-    const searchInput = screen.getByRole("textbox", { name: /search\-textbox/i });
+    const searchInput = screen.getByRole("textbox", {
+      name: /search\-textbox/i,
+    });
 
     // Be an exact match on display name.
     await user.type(searchInput, mockMappings[0].mapping?.mappingName ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(screen.getByText(mockMappings[0].mapping?.mappingName ?? "")).toBeInTheDocument();
+    expect(
+      screen.getByText(mockMappings[0].mapping?.mappingName ?? "")
+    ).toBeInTheDocument();
 
     // Be an exact match on description.
     await user.clear(searchInput);
     await user.type(searchInput, mockMappings[0].mapping?.description ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(screen.getByTitle(mockMappings[0].mapping?.description ?? "")).toBeInTheDocument();
+    expect(
+      screen.getByTitle(mockMappings[0].mapping?.description ?? "")
+    ).toBeInTheDocument();
 
     // Be an exact match on iModel Name.
-    const iModel = mockIModelsResponse.find((mockIModel) => mockIModel.iModel.id === mockMappings[0].mapping?._links?.imodel?.href);
+    const iModel = mockIModelsResponse.find(
+      (mockIModel) =>
+        mockIModel.iModel.id === mockMappings[0].mapping?._links?.imodel?.href
+    );
     await user.clear(searchInput);
     await user.type(searchInput, iModel?.iModel.displayName ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
-    expect(screen.getByText(iModel?.iModel.displayName ?? "")).toBeInTheDocument();
-
+    expect(
+      screen.getByText(iModel?.iModel.displayName ?? "")
+    ).toBeInTheDocument();
   });
 
   it("remove a report mapping", async () => {
@@ -332,36 +427,58 @@ describe(("Report Mappings View"), () => {
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockReportMappings));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockReportMappings)
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId1}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[0]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[0])
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId2}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[1]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[1])
+          );
+        }
       ),
       ...iModelHandlers,
       rest.delete(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings/${mockReportMappings.mappings![0].mappingId ?? ""}`,
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings/${
+          mockReportMappings.mappings![0].mappingId ?? ""
+        }`,
         async (_req, res, ctx) => {
-          mockReportMappings.mappings = mockReportMappings.mappings!.filter((mapping) => mapping.mappingId !== mockReportMappings.mappings![0].mappingId ?? "");
+          mockReportMappings.mappings = mockReportMappings.mappings!.filter(
+            (mapping) =>
+              mapping.mappingId !== mockReportMappings.mappings![0].mappingId ??
+              ""
+          );
           return res(ctx.delay(100), ctx.status(204));
-        },
-      ),
+        }
+      )
     );
 
-    const { user } = render(<ReportMappings report={mockReport} goBack={jest.fn()} />);
+    const { user } = render(
+      <ReportMappings report={mockReport} goBack={jest.fn()} />
+    );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const firstMenuDropdown = within(screen.getAllByTestId(/tile-action-button/i)[0]).getByRole("button");
+    const firstMenuDropdown = within(
+      screen.getAllByTestId(/tile-action-button/i)[0]
+    ).getByRole("button");
     await user.click(firstMenuDropdown);
     const removeButton = screen.getByRole("menuitem", { name: /remove/i });
     await user.click(removeButton);
@@ -374,17 +491,21 @@ describe(("Report Mappings View"), () => {
 
     await user.click(deleteButton);
 
-    await waitForElementToBeRemoved(() => screen.getByTestId(/rcw-loading-delete/i));
+    await waitForElementToBeRemoved(() =>
+      screen.getByTestId(/rcw-loading-delete/i)
+    );
     await waitForElementToBeRemoved(() => screen.getByRole("dialog"));
 
     // Should be one less mapping
-    expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(mockReportMappingsOriginalSize - 1);
-
+    expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(
+      mockReportMappingsOriginalSize - 1
+    );
   });
 
   it("add mapping", async () => {
     const mockReportMappings = mockReportMappingsFactory();
-    const [mockMappings, iModelHandlers] = mockMappingsFactory(mockReportMappings);
+    const [mockMappings, iModelHandlers] =
+      mockMappingsFactory(mockReportMappings);
 
     // Adding an extra unmapped mapping.
     const extraMappingId = faker.datatype.uuid();
@@ -410,7 +531,9 @@ describe(("Report Mappings View"), () => {
 
     const mockMappingsResponse: MappingCollection = {
       // Type guarding
-      mappings: mockMappings.map((mapping) => mapping.mapping).filter((mapping): mapping is Mapping => !!mapping),
+      mappings: mockMappings
+        .map((mapping) => mapping.mapping)
+        .filter((mapping): mapping is Mapping => !!mapping),
       _links: {
         next: undefined,
         self: {
@@ -423,43 +546,62 @@ describe(("Report Mappings View"), () => {
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockReportMappings));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockReportMappings)
+          );
+        }
       ),
-      rest.get(
-        `${Constants.api.baseUrl}`,
-        async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockProjectIModels));
-        },
-      ),
+      rest.get(`${Constants.api.baseUrl}`, async (_req, res, ctx) => {
+        return res(ctx.delay(), ctx.status(200), ctx.json(mockProjectIModels));
+      }),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId1}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[0]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[0])
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId2}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[1]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[1])
+          );
+        }
       ),
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mockProjectIModels.iModels[0].id}/mappings`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockMappingsResponse));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockMappingsResponse)
+          );
+        }
       ),
       rest.post(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockReportMappings));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockReportMappings)
+          );
+        }
       ),
-      ...iModelHandlers,
+      ...iModelHandlers
     );
 
-    const { user } = render(<ReportMappings report={mockReport} goBack={jest.fn()} />);
+    const { user } = render(
+      <ReportMappings report={mockReport} goBack={jest.fn()} />
+    );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -469,7 +611,9 @@ describe(("Report Mappings View"), () => {
 
     await user.click(addMappingButton);
 
-    await waitForElementToBeRemoved(() => screen.getByTestId(/rcw-action-loading-spinner/i));
+    await waitForElementToBeRemoved(() =>
+      screen.getByTestId(/rcw-action-loading-spinner/i)
+    );
     // Add modal dialog should appear
     const modal = screen.getByRole("dialog");
     expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -485,21 +629,27 @@ describe(("Report Mappings View"), () => {
 
     // Already mapped mappings are disabled
     for (let i = 0; i < mockMappings.length - 1; i++) {
-
       const row = screen.getByRole("row", {
-        name: new RegExp(`toggle row selected ${mockMappings[i].mapping?.mappingName} ${mockMappings[i].mapping?.description}`, "i"),
+        name: new RegExp(
+          `toggle row selected ${mockMappings[i].mapping?.mappingName} ${mockMappings[i].mapping?.description}`,
+          "i"
+        ),
       });
 
       const checkbox = within(row).getByRole("checkbox", {
         name: /toggle row selected/i,
       });
       expect(checkbox).toBeDisabled();
-
     }
 
     // Click on checkbox on new mapping
     const unmappedRow = screen.getByRole("row", {
-      name: new RegExp(`toggle row selected ${mockMappings[mockMappings.length - 1].mapping?.mappingName} ${mockMappings[mockMappings.length - 1].mapping?.description}`, "i"),
+      name: new RegExp(
+        `toggle row selected ${
+          mockMappings[mockMappings.length - 1].mapping?.mappingName
+        } ${mockMappings[mockMappings.length - 1].mapping?.description}`,
+        "i"
+      ),
     });
 
     const enabledCheckbox = within(unmappedRow).getByRole("checkbox", {
@@ -510,7 +660,9 @@ describe(("Report Mappings View"), () => {
 
     await user.click(addButton);
     // Modal should go away
-    await waitForElementToBeRemoved(() => screen.getByTestId(/rcw-action-loading-spinner/i));
+    await waitForElementToBeRemoved(() =>
+      screen.getByTestId(/rcw-action-loading-spinner/i)
+    );
     await waitForElementToBeRemoved(() => screen.getByRole("dialog"));
   });
 
@@ -522,25 +674,39 @@ describe(("Report Mappings View"), () => {
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockReportMappings));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockReportMappings)
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId1}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[0]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[0])
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId2}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[1]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[1])
+          );
+        }
       ),
       ...iModelHandlers
     );
 
-    const { user } = render(<ReportMappings report={mockReport} goBack={jest.fn()} />);
+    const { user } = render(
+      <ReportMappings report={mockReport} goBack={jest.fn()} />
+    );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -548,7 +714,11 @@ describe(("Report Mappings View"), () => {
       name: /odatafeedurl/i,
     });
     expect(urlTextbox).toBeInTheDocument();
-    expect(screen.getByDisplayValue(`https://api.bentley.com/insights/reporting/odata/${mockReport.id}`)).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(
+        `https://api.bentley.com/insights/reporting/odata/${mockReport.id}`
+      )
+    ).toBeInTheDocument();
 
     const copyButton = screen.getByRole("button", {
       name: /copy/i,
@@ -597,34 +767,54 @@ describe(("Report Mappings View"), () => {
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockReportMappings));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockReportMappings)
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId1}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[0]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[0])
+          );
+        }
       ),
       rest.get(
         `${Constants.api.baseUrl}/${mockIModelId2}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockIModelsResponse[1]));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockIModelsResponse[1])
+          );
+        }
       ),
       ...iModelHandlers,
       rest.post(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mockIModel.id}/extraction/run`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockExtractionResponse));
-        },
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockExtractionResponse)
+          );
+        }
       ),
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/extraction/status/${mockRunId}`,
         async (_req, res, ctx) => {
-          return res(ctx.delay(), ctx.status(200), ctx.json(mockStatusResponse));
-        },
-      ),
+          return res(
+            ctx.delay(),
+            ctx.status(200),
+            ctx.json(mockStatusResponse)
+          );
+        }
+      )
     );
 
     render(<ReportMappings report={mockReport} goBack={jest.fn()} />);
@@ -647,7 +837,9 @@ describe(("Report Mappings View"), () => {
 
     // Combobox should have correct status
     const extractionComponent = screen.getByTestId("extraction-combo-box");
-    expect(within(extractionComponent).getByDisplayValue(mockIModel.displayName)).toBeInTheDocument();
+    expect(
+      within(extractionComponent).getByDisplayValue(mockIModel.displayName)
+    ).toBeInTheDocument();
     // Should be two in the document. One in the status and the other in the list.
     // TODO Assert that it is in the correct HorizontalTile
     expect(screen.getAllByTitle(/starting/i)).toHaveLength(2);
@@ -658,7 +850,9 @@ describe(("Report Mappings View"), () => {
     // act(() => {
     //   jest.advanceTimersByTime(2000)
     // });
-    const queuedStates = await screen.findAllByTitle(/queued/i, undefined, { timeout: delay });
+    const queuedStates = await screen.findAllByTitle(/queued/i, undefined, {
+      timeout: delay,
+    });
     expect(queuedStates).toHaveLength(2);
 
     mockStatusResponse = {
@@ -668,7 +862,9 @@ describe(("Report Mappings View"), () => {
       },
     };
 
-    const runningStates = await screen.findAllByTitle(/running/i, undefined, { timeout: delay });
+    const runningStates = await screen.findAllByTitle(/running/i, undefined, {
+      timeout: delay,
+    });
     expect(runningStates).toHaveLength(2);
 
     mockStatusResponse = {
@@ -678,9 +874,9 @@ describe(("Report Mappings View"), () => {
       },
     };
 
-    const succeededStates = await screen.findAllByTitle(/success/i, undefined, { timeout: delay });
+    const succeededStates = await screen.findAllByTitle(/success/i, undefined, {
+      timeout: delay,
+    });
     expect(succeededStates).toHaveLength(2);
-
   });
-
 });
