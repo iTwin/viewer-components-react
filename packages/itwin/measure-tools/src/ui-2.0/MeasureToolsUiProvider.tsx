@@ -77,6 +77,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
               "MeasureTools:MeasurementGroupButton.tooltip",
             ),
             ToolbarHelper.constructChildToolbarItems(tools),
+            { groupPriority: this._props.groupPriority },
           ),
         ];
       }
