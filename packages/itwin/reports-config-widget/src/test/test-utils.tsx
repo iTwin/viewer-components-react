@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { render as rtlRender } from "@testing-library/react";
-import { ApiConfigContext } from "../widget/context/ApiContext";
+import { ReportsApiConfigContext } from "../widget/context/ReportsApiConfigContext";
 import type { Store } from "redux";
 import { combineReducers, createStore } from "redux";
 import {
@@ -25,14 +25,14 @@ interface WrapperProps {
 
 function render(ui: React.ReactElement, { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (
-    <ApiConfigContext.Provider
+    <ReportsApiConfigContext.Provider
       value={{
         getAccessToken: mockAccessToken,
         baseUrl: REPORTS_CONFIG_BASE_URL,
       }}
     >
       {children}
-    </ApiConfigContext.Provider>
+    </ReportsApiConfigContext.Provider>
   );
 
   return {

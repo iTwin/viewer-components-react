@@ -20,7 +20,7 @@ import {
   SvgStatusPendingHollow,
   SvgStatusSuccess,
 } from "@itwin/itwinui-icons-color-react";
-import { useApiConfig } from "../context/ApiContext";
+import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export const REFRESH_DELAY = 2000;
@@ -71,9 +71,9 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Starting"
           )}
-          className='extraction-status'
+          className="extraction-status"
         >
-          <div className='status-icon'>
+          <div className="status-icon">
             <SvgStatusPendingHollow />
           </div>
         </div>
@@ -84,9 +84,9 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Loading"
           )}
-          className='extraction-status'
+          className="extraction-status"
         >
-          <ProgressRadial size='x-small' indeterminate />
+          <ProgressRadial size="x-small" indeterminate />
         </div>
       );
     case ExtractionStates.Queued:
@@ -95,9 +95,9 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Queued"
           )}
-          className='extraction-status'
+          className="extraction-status"
         >
-          <div className='status-icon'>
+          <div className="status-icon">
             <SvgStatusPending />
           </div>
         </div>
@@ -108,9 +108,9 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Running"
           )}
-          className='extraction-status'
+          className="extraction-status"
         >
-          <ProgressRadial size='x-small' indeterminate />
+          <ProgressRadial size="x-small" indeterminate />
         </div>
       );
     case ExtractionStates.Succeeded:
@@ -119,7 +119,7 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Success"
           )}
-          className='extraction-status'
+          className="extraction-status"
         >
           <div
             className={`status-icon`}
@@ -140,7 +140,7 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Failed"
           )}
-          className='extraction-status'
+          className="extraction-status"
         >
           <div
             className={`status-icon`}
@@ -179,7 +179,7 @@ export const Extraction = ({
   const intervalId = useRef<number>();
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [currentIModelId, setCurrentIModelId] = useState<string>();
-  const apiConfig = useApiConfig();
+  const apiConfig = useReportsApiConfig();
 
   const runExtraction = async (iModelId: string) => {
     try {
@@ -253,9 +253,9 @@ export const Extraction = ({
   }, [iModels, extractionState]);
 
   return (
-    <div className='extraction-container'>
-      <div className='extraction-combo-box' data-testid='extraction-combo-box'>
-        <Label htmlFor='combo-input'>
+    <div className="extraction-container">
+      <div className="extraction-combo-box" data-testid="extraction-combo-box">
+        <Label htmlFor="combo-input">
           {ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:UpdateDataset"
           )}
@@ -279,7 +279,7 @@ export const Extraction = ({
             message={
               extractionState !== ExtractionStates.None && (
                 <StatusMessage>
-                  <div className='extraction-status-container'>
+                  <div className="extraction-status-container">
                     <ExtractionStatus
                       state={extractionState}
                       setExtractionState={setExtractionState}

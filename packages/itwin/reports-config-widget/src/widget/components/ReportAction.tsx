@@ -15,7 +15,7 @@ import {
 import "./ReportAction.scss";
 import type { Report } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
-import { useApiConfig } from "../context/ApiContext";
+import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 interface ReportActionProps {
@@ -25,7 +25,7 @@ interface ReportActionProps {
 }
 
 const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
-  const apiConfig = useApiConfig();
+  const apiConfig = useReportsApiConfig();
   const [values, setValues] = useState({
     name: report?.displayName ?? "",
     description: report?.description ?? "",
@@ -77,21 +77,21 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         }
         returnFn={returnFn}
       />
-      <div className='rcw-details-form-container'>
+      <div className="rcw-details-form-container">
         <Fieldset
           legend={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:ReportDetails"
           )}
-          className='details-form'
+          className="details-form"
         >
-          <Small className='field-legend'>
+          <Small className="field-legend">
             {ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:MandatoryFields"
             )}
           </Small>
           <LabeledInput
-            id='name'
-            name='name'
+            id="name"
+            name="name"
             label={ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:Name"
             )}
@@ -117,8 +117,8 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
             }}
           />
           <LabeledInput
-            id='description'
-            name='description'
+            id="description"
+            name="description"
             label={ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:Description"
             )}

@@ -17,15 +17,15 @@ import {
 import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
-import type { ApiConfig } from "../context/ApiContext";
-import { useApiConfig } from "../context/ApiContext";
+import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import "./SelectIModel.scss";
 import { generateUrl } from "./utils";
 
 const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
   iTwinId: string,
-  apiContext: ApiConfig
+  apiContext: ReportsApiConfig
 ) => {
   const iModelClientOptions: IModelsClientOptions = {
     api: { baseUrl: generateUrl(Constants.api.baseUrl, apiContext.baseUrl) },
@@ -53,7 +53,7 @@ export const SelectIModel = ({
   selectedIModelId,
   setSelectedIModelId,
 }: SelectedIModelProps) => {
-  const apiConfig = useApiConfig();
+  const apiConfig = useReportsApiConfig();
   const iModelId = useActiveIModelConnection()?.iModelId ?? "";
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
@@ -78,13 +78,13 @@ export const SelectIModel = ({
   }, [iModels]);
 
   return (
-    <div className='reports-select-imodel'>
-      <Label htmlFor='combo-input'>
+    <div className="reports-select-imodel">
+      <Label htmlFor="combo-input">
         {ReportsConfigWidget.localization.getLocalizedString(
           "ReportsConfigWidget:SelectIModel"
         )}
       </Label>
-      <div className='combobox'>
+      <div className="combobox">
         <ComboBox<string>
           options={iModelOptions}
           value={selectedIModelId}

@@ -10,8 +10,8 @@ import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
 import type { ReportMappingAndMapping } from "./ReportMappings";
-import type { ApiConfig } from "../context/ApiContext";
-import { useApiConfig } from "../context/ApiContext";
+import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { SelectIModel } from "./SelectIModel";
 import type { CreateTypeFromInterface } from "./utils";
 import { generateUrl, handleError } from "./utils";
@@ -23,7 +23,7 @@ const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: ApiConfig
+  apiContext: ReportsApiConfig
 ) => {
   try {
     setIsLoading(true);
@@ -60,7 +60,7 @@ const AddMappingsModal = ({
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const [selectedIModelId, setSelectediModelId] = useState<string>("");
   const [mappings, setMappings] = useState<Mapping[]>([]);
-  const apiConfig = useApiConfig();
+  const apiConfig = useReportsApiConfig();
 
   useEffect(() => {
     if (selectedIModelId) {
@@ -135,7 +135,7 @@ const AddMappingsModal = ({
       }}
       style={{ display: "flex", flexDirection: "column", maxHeight: "77vh" }}
     >
-      <div className='add-mappings-container'>
+      <div className="add-mappings-container">
         <SelectIModel
           selectedIModelId={selectedIModelId}
           setSelectedIModelId={setSelectediModelId}
@@ -143,7 +143,7 @@ const AddMappingsModal = ({
         <Table<MappingType>
           data={isLoading ? [] : mappings}
           columns={mappingsColumns}
-          className='add-mappings-table'
+          className="add-mappings-table"
           emptyTableContent={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:NoMappingsAvailable"
           )}

@@ -6,7 +6,7 @@ import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import * as React from "react";
 import { Reports } from "../components/Reports";
-import { ApiConfigContext } from "../context/ApiContext";
+import { ReportsApiConfigContext } from "../context/ReportsApiConfigContext";
 import "./ReportsContainer.scss";
 
 interface ReportsContainerProps {
@@ -18,7 +18,7 @@ const ReportsContainer = ({
   getAccessToken,
   baseUrl,
 }: ReportsContainerProps) => (
-  <ApiConfigContext.Provider
+  <ReportsApiConfigContext.Provider
     value={{
       getAccessToken:
         getAccessToken ??
@@ -30,7 +30,7 @@ const ReportsContainer = ({
     <div className="reports-container">
       <Reports />
     </div>
-  </ApiConfigContext.Provider>
+  </ReportsApiConfigContext.Provider>
 );
 
 export default ReportsContainer;

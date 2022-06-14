@@ -2,56 +2,55 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
 import {
   SvgAdd,
   SvgDelete,
   SvgEdit,
   SvgMore,
-} from '@itwin/itwinui-icons-react';
+} from "@itwin/itwinui-icons-react";
 import {
   Button,
   DropdownMenu,
   IconButton,
   MenuItem,
   Surface,
-} from '@itwin/itwinui-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { CreateTypeFromInterface } from './utils';
+} from "@itwin/itwinui-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import type { CreateTypeFromInterface } from "./utils";
 import {
   EmptyMessage,
   generateUrl,
   handleError,
   LoadingOverlay,
   WidgetHeader,
-} from './utils';
-import './Reports.scss';
-import DeleteModal from './DeleteModal';
-import type { Report } from '@itwin/insights-client';
-import { REPORTING_BASE_PATH, ReportingClient } from '@itwin/insights-client';
-import ReportAction from './ReportAction';
-import { ReportMappings } from './ReportMappings';
-import { HorizontalTile } from './HorizontalTile';
-import { SearchBar } from './SearchBar';
-import type { ApiConfig } from '../context/ApiContext';
-import { useApiConfig } from '../context/ApiContext';
-import { ReportsConfigWidget } from '../../ReportsConfigWidget';
-import { useActiveIModelConnection } from '@itwin/appui-react';
+} from "./utils";
+import "./Reports.scss";
+import DeleteModal from "./DeleteModal";
+import type { Report } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
+import ReportAction from "./ReportAction";
+import { ReportMappings } from "./ReportMappings";
+import { HorizontalTile } from "./HorizontalTile";
+import { SearchBar } from "./SearchBar";
+import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
 enum ReportsView {
-  REPORTS = 'reports',
-  REPORTSMAPPING = 'reportsmapping',
-  ADDING = 'adding',
-  MODIFYING = 'modifying',
+  REPORTS = "reports",
+  REPORTSMAPPING = "reportsmapping",
+  ADDING = "adding",
+  MODIFYING = "modifying",
 }
 
 const fetchReports = async (
   setReports: React.Dispatch<React.SetStateAction<Report[]>>,
   iTwinId: string | undefined,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: ApiConfig
+  apiContext: ReportsApiConfig
 ) => {
   try {
     if (!iTwinId) return;
@@ -70,8 +69,8 @@ const fetchReports = async (
 };
 
 export const Reports = () => {
-  const iTwinId = useActiveIModelConnection()?.iTwinId ?? '';
-  const apiConfig = useApiConfig();
+  const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
+  const apiConfig = useReportsApiConfig();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [reportsView, setReportsView] = useState<ReportsView>(
     ReportsView.REPORTS
@@ -80,7 +79,7 @@ export const Reports = () => {
     undefined
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [searchValue, setSearchValue] = useState<string>('');
+  const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
 
   useEffect(() => {
@@ -101,7 +100,7 @@ export const Reports = () => {
     () =>
       reports.filter((x) =>
         [x.displayName, x.description]
-          .join(' ')
+          .join(" ")
           .toLowerCase()
           .includes(searchValue.toLowerCase())
       ),
@@ -111,7 +110,7 @@ export const Reports = () => {
   switch (reportsView) {
     case ReportsView.ADDING:
       return iTwinId ? (
-        <ReportAction iTwinId={iTwinId ?? ''} returnFn={refresh} />
+        <ReportAction iTwinId={iTwinId ?? ""} returnFn={refresh} />
       ) : null;
     case ReportsView.MODIFYING:
       return iTwinId ? (
@@ -130,21 +129,21 @@ export const Reports = () => {
         <>
           <WidgetHeader
             title={ReportsConfigWidget.localization.getLocalizedString(
-              'ReportsConfigWidget:ITwinReports'
+              "ReportsConfigWidget:ITwinReports"
             )}
           />
-          <Surface className='reports-list-container'>
-            <div className='toolbar'>
+          <Surface className="reports-list-container">
+            <div className="toolbar">
               <Button
                 startIcon={<SvgAdd />}
                 onClick={() => addReport()}
-                styleType='high-visibility'
+                styleType="high-visibility"
               >
                 {ReportsConfigWidget.localization.getLocalizedString(
-                  'ReportsConfigWidget:New'
+                  "ReportsConfigWidget:New"
                 )}
               </Button>
-              <div className='search-bar-container' data-testid='search-bar'>
+              <div className="search-bar-container" data-testid="search-bar">
                 <SearchBar
                   searchValue={searchValue}
                   setSearchValue={setSearchValue}
@@ -158,25 +157,25 @@ export const Reports = () => {
               <EmptyMessage>
                 <>
                   {ReportsConfigWidget.localization.getLocalizedString(
-                    'ReportsConfigWidget:NoReports'
+                    "ReportsConfigWidget:NoReports"
                   )}
                   <div>
-                    <Button onClick={() => addReport()} styleType='cta'>
+                    <Button onClick={() => addReport()} styleType="cta">
                       {ReportsConfigWidget.localization.getLocalizedString(
-                        'ReportsConfigWidget:CreateOneReportCTA'
+                        "ReportsConfigWidget:CreateOneReportCTA"
                       )}
                     </Button>
                   </div>
                 </>
               </EmptyMessage>
             ) : (
-              <div className='reports-list'>
+              <div className="reports-list">
                 {filteredReports.map((report) => (
                   <HorizontalTile
                     key={report.id}
-                    title={report.displayName ?? ''}
-                    subText={report.description ?? ''}
-                    subtextToolTip={report.description ?? ''}
+                    title={report.displayName ?? ""}
+                    subText={report.description ?? ""}
+                    subtextToolTip={report.description ?? ""}
                     titleTooltip={report.displayName}
                     onClickTitle={() => {
                       setSelectedReport(report);
@@ -194,7 +193,7 @@ export const Reports = () => {
                             icon={<SvgEdit />}
                           >
                             {ReportsConfigWidget.localization.getLocalizedString(
-                              'ReportsConfigWidget:Modify'
+                              "ReportsConfigWidget:Modify"
                             )}
                           </MenuItem>,
                           <MenuItem
@@ -207,16 +206,16 @@ export const Reports = () => {
                             icon={<SvgDelete />}
                           >
                             {ReportsConfigWidget.localization.getLocalizedString(
-                              'ReportsConfigWidget:Remove'
+                              "ReportsConfigWidget:Remove"
                             )}
                           </MenuItem>,
                         ]}
                       >
-                        <IconButton styleType='borderless'>
+                        <IconButton styleType="borderless">
                           <SvgMore
                             style={{
-                              width: '16px',
-                              height: '16px',
+                              width: "16px",
+                              height: "16px",
                             }}
                           />
                         </IconButton>
@@ -228,7 +227,7 @@ export const Reports = () => {
             )}
           </Surface>
           <DeleteModal
-            entityName={selectedReport?.displayName ?? ''}
+            entityName={selectedReport?.displayName ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
@@ -238,7 +237,7 @@ export const Reports = () => {
               const accessToken = await apiConfig.getAccessToken();
               await reportingClientApi.deleteReport(
                 accessToken,
-                selectedReport?.id ?? ''
+                selectedReport?.id ?? ""
               );
             }}
             refresh={refresh}

@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
 import {
   SvgAdd,
   SvgCopy,
@@ -42,8 +41,8 @@ import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import { HorizontalTile } from "./HorizontalTile";
 import { Extraction, ExtractionStates, ExtractionStatus } from "./Extraction";
 import { SearchBar } from "./SearchBar";
-import type { ApiConfig } from "../context/ApiContext";
-import { useApiConfig } from "../context/ApiContext";
+import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
@@ -65,7 +64,7 @@ const fetchReportMappings = async (
   >,
   reportId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: ApiConfig
+  apiContext: ReportsApiConfig
 ) => {
   try {
     setIsLoading(true);
@@ -129,7 +128,7 @@ interface ReportMappingsProps {
 }
 
 export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
-  const apiConfig = useApiConfig();
+  const apiConfig = useReportsApiConfig();
   const [reportMappingsView, setReportMappingsView] =
     useState<ReportMappingsView>(ReportMappingsView.REPORTMAPPINGS);
   const [selectedReportMapping, setSelectedReportMapping] = useState<
@@ -200,12 +199,12 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   return (
     <>
       <WidgetHeader title={report.displayName ?? ""} returnFn={goBack} />
-      <div className='report-mapping-misc'>
+      <div className="report-mapping-misc">
         <LabeledInput
           label={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:ODataFeedURL"
           )}
-          className='odata-url-input'
+          className="odata-url-input"
           readOnly={true}
           value={odataFeedUrl}
           svgIcon={
@@ -213,7 +212,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
               title={ReportsConfigWidget.localization.getLocalizedString(
                 "ReportsConfigWidget:Copy"
               )}
-              styleType='borderless'
+              styleType="borderless"
               onClick={async (_) => {
                 await navigator.clipboard.writeText(odataFeedUrl);
                 toaster.positive(
@@ -226,7 +225,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
               <SvgCopy />
             </IconButton>
           }
-          iconDisplayStyle='inline'
+          iconDisplayStyle="inline"
         />
         <Extraction
           iModels={uniqueIModels}
@@ -236,18 +235,18 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           isLoading={isLoading}
         />
       </div>
-      <Surface className='report-mappings-container'>
-        <div className='toolbar'>
+      <Surface className="report-mappings-container">
+        <div className="toolbar">
           <Button
             startIcon={<SvgAdd />}
             onClick={() => addMapping()}
-            styleType='high-visibility'
+            styleType="high-visibility"
           >
             {ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:AddMapping"
             )}
           </Button>
-          <div className='search-bar-container' data-testid='search-bar'>
+          <div className="search-bar-container" data-testid="search-bar">
             <SearchBar
               searchValue={searchValue}
               setSearchValue={setSearchValue}
@@ -266,7 +265,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
                 )}
               </Text>
               <div>
-                <Button onClick={() => addMapping()} styleType='cta'>
+                <Button onClick={() => addMapping()} styleType="cta">
                   {ReportsConfigWidget.localization.getLocalizedString(
                     "ReportsConfigWidget:LetsAddSomeMappingsCTA"
                   )}
@@ -275,7 +274,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
             </>
           </EmptyMessage>
         ) : (
-          <div className='mapping-list'>
+          <div className="mapping-list">
             {filteredReportMappings.map((mapping) => (
               <HorizontalTile
                 key={mapping.mappingId}
@@ -307,7 +306,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
                         </MenuItem>,
                       ]}
                     >
-                      <IconButton styleType='borderless'>
+                      <IconButton styleType="borderless">
                         <SvgMore
                           style={{
                             width: "16px",
