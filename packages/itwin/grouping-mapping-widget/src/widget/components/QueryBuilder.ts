@@ -3,7 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import type { InstanceKey, PropertiesField } from "@itwin/presentation-common";
+import type {
+  Descriptor,
+  InstanceKey,
+  PropertiesField,
+} from "@itwin/presentation-common";
 import type { Primitives, PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import "core-js/features/string/virtual";
@@ -25,6 +29,7 @@ export interface QueryProperty {
   name: string;
   value: Primitives.Value;
   needsQuote: boolean;
+  isCategory: boolean;
 }
 
 /* This class is to build adaptive and dynamic query for find similar property selections */
@@ -43,6 +48,24 @@ export class QueryBuilder {
    */
   constructor(provider: PresentationPropertyDataProvider | undefined) {
     this.dataProvider = provider;
+  }
+
+  public isCategory(
+    descriptor: Descriptor,
+    propertyField: PropertiesField,
+  ): boolean {
+    const classInfo = propertyField.properties[0].property
+      .navigationPropertyInfo?.classInfo as any;
+    return (
+      descriptor.selectClasses.find((c) =>
+        c.navigationPropertyClasses?.find(
+          (npc) =>
+            npc.relationshipInfo.id === classInfo &&
+            npc.relationshipInfo.name ===
+              "BisCore:GeometricElement3dIsInCategory",
+        ),
+      ) !== undefined
+    );
   }
 
   public async addProperty(prop: PropertyRecord): Promise<boolean> {
@@ -67,10 +90,13 @@ export class QueryBuilder {
       prop.value.value = replaceAll(prop.value.value.toString(), "'", "''");
     }
 
+    // get descriptor
+    const descriptor = await this.dataProvider?.getContentDescriptor();
     const propertyField = (await this.dataProvider?.getFieldByPropertyRecord(
       prop,
     )) as PropertiesField;
-    if (propertyField === undefined) {
+
+    if (!descriptor || !propertyField) {
       toaster.negative(
         "Error. Failed to fetch field for this property record.",
       );
@@ -80,9 +106,8 @@ export class QueryBuilder {
     // get the special cases
     const isNavigation: boolean =
       prop.property.typename.toLowerCase() === "navigation";
-    const isCategory: boolean = propertyField.properties[0].property.name
-      .toLowerCase()
-      .includes("category");
+    const isCategory: boolean =
+      isNavigation && this.isCategory(descriptor, propertyField);
     const isAspect: boolean =
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
@@ -104,9 +129,6 @@ export class QueryBuilder {
         : (prop.value.value as InstanceKey).id
       : prop.value.value;
 
-    // console.log(prop);
-    // console.log(propertyField);
-
     if (
       !isAspect &&
       propertyField.parent?.pathToPrimaryClass &&
@@ -125,6 +147,7 @@ export class QueryBuilder {
         propertyValue,
         isAspect,
         this._needsQuote(propertyField),
+        isCategory,
         false,
       );
     }
@@ -160,6 +183,7 @@ export class QueryBuilder {
           `${relClassName}.SourceECInstanceId`,
           isAspect,
           false,
+          false,
           true,
         );
         this.addPropertyToQuery(
@@ -167,6 +191,7 @@ export class QueryBuilder {
           `TargetECInstanceId`,
           `${sourceClassName}.ECInstanceId`,
           isAspect,
+          false,
           false,
           true,
         );
@@ -180,6 +205,7 @@ export class QueryBuilder {
             propertyValue,
             isAspect,
             this._needsQuote(propertyField),
+            false,
             true,
           );
         } else {
@@ -188,6 +214,7 @@ export class QueryBuilder {
             `ECInstanceId`,
             `${relClassName}.TargetECInstanceId`,
             isAspect,
+            false,
             false,
             true,
           );
@@ -199,6 +226,7 @@ export class QueryBuilder {
           `${relClassName}.TargetECInstanceId`,
           isAspect,
           false,
+          false,
           true,
         );
         this.addPropertyToQuery(
@@ -206,6 +234,7 @@ export class QueryBuilder {
           `SourceECInstanceId`,
           `${sourceClassName}.ECInstanceId`,
           isAspect,
+          false,
           false,
           true,
         );
@@ -219,6 +248,7 @@ export class QueryBuilder {
             propertyValue,
             isAspect,
             this._needsQuote(propertyField),
+            false,
             true,
           );
         } else {
@@ -227,6 +257,7 @@ export class QueryBuilder {
             `ECInstanceId`,
             `${relClassName}.SourceECInstanceId`,
             isAspect,
+            false,
             false,
             true,
           );
@@ -241,6 +272,7 @@ export class QueryBuilder {
     propertyValue: Primitives.Value,
     isAspect: boolean,
     needsQuote: boolean,
+    isCategory: boolean,
     isRelational?: boolean,
   ) {
     if (this.query === undefined || this.query.classes.length === 0) {
@@ -255,6 +287,7 @@ export class QueryBuilder {
                 name: propertyName,
                 value: propertyValue,
                 needsQuote,
+                isCategory,
               },
             ],
           },
@@ -273,6 +306,7 @@ export class QueryBuilder {
           name: propertyName,
           value: propertyValue,
           needsQuote,
+          isCategory,
         });
       }
     } else {
@@ -284,6 +318,7 @@ export class QueryBuilder {
             name: propertyName,
             value: propertyValue,
             needsQuote,
+            isCategory,
           },
         ],
         isAspect,
@@ -296,10 +331,11 @@ export class QueryBuilder {
       return;
     }
 
+    const descriptor = await this.dataProvider?.getContentDescriptor();
     const propertyField = (await this.dataProvider?.getFieldByPropertyRecord(
       prop,
     )) as PropertiesField;
-    if (propertyField === undefined) {
+    if (!descriptor || !propertyField) {
       return;
     }
 
@@ -310,12 +346,10 @@ export class QueryBuilder {
             QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
-    const isCategory: boolean = propertyField.properties[0].property.name
-      .toLowerCase()
-      .includes("category");
-
     const isNavigation: boolean =
       prop.property.typename.toLowerCase() === "navigation";
+    const isCategory: boolean =
+      isNavigation && this.isCategory(descriptor, propertyField);
 
     const propertyName = isNavigation
       ? isCategory
@@ -423,9 +457,7 @@ export class QueryBuilder {
         if (joinClass.isRelational) {
           queryString += ` JOIN ${joinClassName}`;
           if (joinClass.properties.length > 0) {
-            if (
-              joinClass.properties[0].name.toLowerCase().includes("category")
-            ) {
+            if (joinClass.properties[0].isCategory) {
               queryString += this.categoryQuery(
                 joinClass.properties[0].value.toString(),
               );
@@ -450,7 +482,7 @@ export class QueryBuilder {
             queryString += ` AND ${joinIdName} = ${baseIdName}`;
           }
           for (const property of joinClass.properties) {
-            if (property.name.toLowerCase().includes("category")) {
+            if (property.isCategory) {
               queryString += this.categoryQuery(property.value.toString());
             } else {
               if (property.needsQuote) {
@@ -471,7 +503,7 @@ export class QueryBuilder {
         } else {
           queryString += ` JOIN ${joinClassName} ON ${joinIdName} = ${baseIdName}`;
           for (const property of joinClass.properties) {
-            if (property.name.toLowerCase().includes("category")) {
+            if (property.isCategory) {
               queryString += this.categoryQuery(property.value.toString());
             } else {
               if (property.needsQuote) {
@@ -495,7 +527,7 @@ export class QueryBuilder {
 
     const properties = baseClass.properties;
     if (properties.length > 0) {
-      if (properties[0].name.toLowerCase().includes("category")) {
+      if (properties[0].isCategory) {
         queryString += this.categoryQuery(properties[0].value.toString());
       } else {
         if (properties[0].needsQuote) {
@@ -514,7 +546,7 @@ export class QueryBuilder {
       }
       if (properties.length > 1) {
         for (let i = 1; i < properties.length; i++) {
-          if (properties[i].name.toLowerCase().includes("category")) {
+          if (properties[i].isCategory) {
             queryString += this.categoryQuery(properties[i].value.toString());
           } else {
             if (properties[i].needsQuote) {
@@ -535,8 +567,6 @@ export class QueryBuilder {
       }
     }
 
-    // console.log(queryString);
-    // console.log(this.query);
     return queryString;
   }
 
