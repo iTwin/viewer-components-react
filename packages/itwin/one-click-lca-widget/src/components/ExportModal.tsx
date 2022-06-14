@@ -129,7 +129,7 @@ const ExportModal = (props: ExportProps) => {
           }
         } catch (e) {
           setJobStatus(JobStatus.StatusEnum.Failed);
-          toaster.negative("You do not have required permissions. Please contact project administrator.");
+          toaster.negative("You do not have the required permissions. Please contact the project administrator.");
           /* eslint-disable no-console */
           console.error(e);
         }
