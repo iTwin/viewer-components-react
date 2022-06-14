@@ -2,12 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Modal } from "@itwin/itwinui-react";
-import { Table, tableFilters } from "@itwin/itwinui-react";
+import { Modal, Table, tableFilters } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
 import type { Mapping } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
 import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
@@ -16,8 +14,7 @@ import type { ApiConfig } from "../context/ApiContext";
 import { useApiConfig } from "../context/ApiContext";
 import { SelectIModel } from "./SelectIModel";
 import type { CreateTypeFromInterface } from "./utils";
-import { generateUrl } from "./utils";
-import { handleError } from "./utils";
+import { generateUrl, handleError } from "./utils";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
@@ -138,7 +135,7 @@ const AddMappingsModal = ({
       }}
       style={{ display: "flex", flexDirection: "column", maxHeight: "77vh" }}
     >
-      <div className="add-mappings-container">
+      <div className='add-mappings-container'>
         <SelectIModel
           selectedIModelId={selectedIModelId}
           setSelectedIModelId={setSelectediModelId}
@@ -146,7 +143,7 @@ const AddMappingsModal = ({
         <Table<MappingType>
           data={isLoading ? [] : mappings}
           columns={mappingsColumns}
-          className="add-mappings-table"
+          className='add-mappings-table'
           emptyTableContent={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:NoMappingsAvailable"
           )}

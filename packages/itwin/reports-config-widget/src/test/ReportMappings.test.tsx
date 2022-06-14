@@ -8,9 +8,10 @@ import "@testing-library/jest-dom";
 import type {
   IModelConnection,
   SelectionSet,
-  SelectionSetEvent,
+  SelectionSetEvent} from "@itwin/core-frontend";
+import {
+  NoRenderApp,
 } from "@itwin/core-frontend";
-import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { setupServer } from "msw/node";
 import {
@@ -21,8 +22,8 @@ import {
   within,
 } from "./test-utils";
 import userEvent from "@testing-library/user-event";
-import type { RequestHandler } from "msw";
 import * as moq from "typemoq";
+import type { RequestHandler } from "msw";
 import { rest } from "msw";
 import type {
   ExtractionStatus,
@@ -38,8 +39,7 @@ import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 import { REFRESH_DELAY } from "../widget/components/Extraction";
 import type {
   SelectionManager,
-  SelectionScopesManager,
-} from "@itwin/presentation-frontend";
+  SelectionScopesManager} from "@itwin/presentation-frontend";
 import {
   Presentation,
   SelectionChangeEvent,

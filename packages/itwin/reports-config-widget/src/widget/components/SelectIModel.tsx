@@ -9,11 +9,13 @@ import type {
   IModelsClientOptions,
   MinimalIModel,
 } from "@itwin/imodels-client-management";
-import { Constants } from "@itwin/imodels-client-management";
-import { IModelsClient, toArray } from "@itwin/imodels-client-management";
+import {
+  Constants,
+  IModelsClient,
+  toArray,
+} from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
-import React, { useMemo } from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import type { ApiConfig } from "../context/ApiContext";
 import { useApiConfig } from "../context/ApiContext";
@@ -76,13 +78,13 @@ export const SelectIModel = ({
   }, [iModels]);
 
   return (
-    <div className="reports-select-imodel">
-      <Label htmlFor="combo-input">
+    <div className='reports-select-imodel'>
+      <Label htmlFor='combo-input'>
         {ReportsConfigWidget.localization.getLocalizedString(
           "ReportsConfigWidget:SelectIModel"
         )}
       </Label>
-      <div className="combobox">
+      <div className='combobox'>
         <ComboBox<string>
           options={iModelOptions}
           value={selectedIModelId}

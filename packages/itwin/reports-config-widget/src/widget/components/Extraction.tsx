@@ -3,8 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { SelectOption } from "@itwin/itwinui-react";
-import { Label, StatusMessage } from "@itwin/itwinui-react";
-import { ComboBox, ProgressRadial } from "@itwin/itwinui-react";
+import {
+  ComboBox,
+  Label,
+  ProgressRadial,
+  StatusMessage,
+} from "@itwin/itwinui-react";
 import * as React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
@@ -67,9 +71,9 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Starting"
           )}
-          className="extraction-status"
+          className='extraction-status'
         >
-          <div className="status-icon">
+          <div className='status-icon'>
             <SvgStatusPendingHollow />
           </div>
         </div>
@@ -80,9 +84,9 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Loading"
           )}
-          className="extraction-status"
+          className='extraction-status'
         >
-          <ProgressRadial size="x-small" indeterminate />
+          <ProgressRadial size='x-small' indeterminate />
         </div>
       );
     case ExtractionStates.Queued:
@@ -91,9 +95,9 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Queued"
           )}
-          className="extraction-status"
+          className='extraction-status'
         >
-          <div className="status-icon">
+          <div className='status-icon'>
             <SvgStatusPending />
           </div>
         </div>
@@ -104,9 +108,9 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Running"
           )}
-          className="extraction-status"
+          className='extraction-status'
         >
-          <ProgressRadial size="x-small" indeterminate />
+          <ProgressRadial size='x-small' indeterminate />
         </div>
       );
     case ExtractionStates.Succeeded:
@@ -115,7 +119,7 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Success"
           )}
-          className="extraction-status"
+          className='extraction-status'
         >
           <div
             className={`status-icon`}
@@ -136,7 +140,7 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Failed"
           )}
-          className="extraction-status"
+          className='extraction-status'
         >
           <div
             className={`status-icon`}
@@ -249,9 +253,9 @@ export const Extraction = ({
   }, [iModels, extractionState]);
 
   return (
-    <div className="extraction-container">
-      <div className="extraction-combo-box" data-testid="extraction-combo-box">
-        <Label htmlFor="combo-input">
+    <div className='extraction-container'>
+      <div className='extraction-combo-box' data-testid='extraction-combo-box'>
+        <Label htmlFor='combo-input'>
           {ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:UpdateDataset"
           )}
@@ -275,7 +279,7 @@ export const Extraction = ({
             message={
               extractionState !== ExtractionStates.None && (
                 <StatusMessage>
-                  <div className="extraction-status-container">
+                  <div className='extraction-status-container'>
                     <ExtractionStatus
                       state={extractionState}
                       setExtractionState={setExtractionState}

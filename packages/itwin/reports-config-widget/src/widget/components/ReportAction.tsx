@@ -14,8 +14,7 @@ import {
 } from "./utils";
 import "./ReportAction.scss";
 import type { Report } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
 import { useApiConfig } from "../context/ApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
@@ -78,21 +77,21 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         }
         returnFn={returnFn}
       />
-      <div className="rcw-details-form-container">
+      <div className='rcw-details-form-container'>
         <Fieldset
           legend={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:ReportDetails"
           )}
-          className="details-form"
+          className='details-form'
         >
-          <Small className="field-legend">
+          <Small className='field-legend'>
             {ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:MandatoryFields"
             )}
           </Small>
           <LabeledInput
-            id="name"
-            name="name"
+            id='name'
+            name='name'
             label={ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:Name"
             )}
@@ -118,8 +117,8 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
             }}
           />
           <LabeledInput
-            id="description"
-            name="description"
+            id='description'
+            name='description'
             label={ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:Description"
             )}
