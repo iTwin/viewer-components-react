@@ -1,0 +1,18 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "~@itwin/itwinui-css/scss/variables";
+
+.delete-modal-body-text {
+  display: flex;
+  gap: $iui-xs;
+  flex-wrap: wrap;
+  > strong {
+    min-width: 0px;
+  }
+}
+
+.rcw-loading-delete {
+  margin-right: $iui-s;
+}
