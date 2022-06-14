@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.3.5",
+      "tag": "@itwin/grouping-mapping-widget_v0.3.5",
+      "date": "Wed, 08 Jun 2022 20:23:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Changed the extraction enable toggle label"
+          },
+          {
+            "comment": "Formula validation fixes"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.4",
       "tag": "@itwin/grouping-mapping-widget_v0.3.4",
       "date": "Thu, 26 May 2022 15:54:07 GMT",
