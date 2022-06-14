@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/itwin/reports-config-widget-react"
+    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/itwin/reports-config-widget"
   },
   "license": "MIT",
   "author": {
