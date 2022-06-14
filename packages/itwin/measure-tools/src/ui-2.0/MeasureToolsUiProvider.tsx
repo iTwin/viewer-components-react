@@ -22,16 +22,16 @@ import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./Measur
 import { AbstractZoneLocation } from "@itwin/appui-abstract";
 import { UiFramework } from "@itwin/appui-react";
 
-interface Priority {
+export interface MeasureToolsUiProviderOptions {
   itemPriority?: number;
   groupPriority?: number;
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props;
+  private _props: MeasureToolsUiProviderOptions;
 
-  constructor(props?: Priority) {
+  constructor(props?: MeasureToolsUiProviderOptions) {
     this._props = {
       itemPriority: 500,
       groupPriority: 500,
@@ -71,7 +71,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         return [
           ToolbarItemUtilities.createGroupButton(
             "measure-tools-toolbar",
-            this._props.itemPriority,
+            this._props.itemPriority!,
             "icon-measure",
             MeasureTools.localization.getLocalizedString(
               "MeasureTools:MeasurementGroupButton.tooltip",
