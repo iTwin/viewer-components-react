@@ -29,14 +29,10 @@ export interface MeasureToolsUiProviderOptions {
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
-  private _props: MeasureToolsUiProviderOptions;
+  private _props?: MeasureToolsUiProviderOptions;
 
   constructor(props?: MeasureToolsUiProviderOptions) {
-    this._props = {
-      itemPriority: 500,
-      groupPriority: 500,
-      ...props,
-    };
+    this._props = props;
   }
 
   public provideToolbarButtonItems(
@@ -71,13 +67,13 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
         return [
           ToolbarItemUtilities.createGroupButton(
             "measure-tools-toolbar",
-            this._props.itemPriority!,
+            this._props?.itemPriority ?? 20,
             "icon-measure",
             MeasureTools.localization.getLocalizedString(
               "MeasureTools:MeasurementGroupButton.tooltip",
             ),
             ToolbarHelper.constructChildToolbarItems(tools),
-            { groupPriority: this._props.groupPriority },
+            { groupPriority: this._props?.groupPriority ?? 10 },
           ),
         ];
       }
