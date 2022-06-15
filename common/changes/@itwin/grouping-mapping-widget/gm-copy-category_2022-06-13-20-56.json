@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/grouping-mapping-widget",
       "comment": "fix copy category group bug",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/grouping-mapping-widget"
