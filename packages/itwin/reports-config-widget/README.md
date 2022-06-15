@@ -1,8 +1,8 @@
 # @itwin/reports-config-widget-react
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
-The Reports Config widget is a UI component for iTwin Viewer applications that simplifies how users (and developers) interface with the [Reporting Platform APIs](https://developer.bentley.com/apis/insights/overview/).
-The reports-config-widget package provides a UiProvider class - `ReportsConfigProvider` - which can be passed into the `uiProviders` prop of the iTwin Viewer's `<Viewer />` component.
+The Reports Config widget is one UI component for iTwin Viewer applications that simplifies how users (and developers) interface with the [Reporting Platform APIs](https://developer.bentley.com/apis/insights/overview/). This widget is one piece of the Reporting story which focuses on the configuration of Reports and the extraction thereof and it is a complement of the [Grouping & Mapping Widget](https://www.npmjs.com/package/@itwin/grouping-mapping-widget).
+The reports-config-widget-react package provides a UiProvider class - `ReportsConfigProvider` - which can be passed into the `uiProviders` prop of the iTwin Viewer's `<Viewer />` component.
 
 ## Getting Started
 
@@ -25,7 +25,7 @@ In addition, users must have the `imodels_read` and `imodels_write` [permissions
 ### Call ReportsConfigWidget.initialize() **_before_** making use of the provider
 
 ```ts
-import { ReportsConfigWidget } from '@itwin/reports-config-widget-react'
+import { ReportsConfigProvider, ReportsConfigWidget } from '@itwin/reports-config-widget-react'
 
 ...
 
