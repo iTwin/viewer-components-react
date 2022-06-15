@@ -30,11 +30,7 @@ interface CalculatedPropertyTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  setSelectedCalculatedProperty: React.Dispatch<
-    React.SetStateAction<
-      CreateTypeFromInterface<CalculatedPropertyType> | undefined
-    >
-  >;
+  setSelectedCalculatedProperty: React.Dispatch<React.SetStateAction<CreateTypeFromInterface<CalculatedPropertyType> | undefined>>;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
   onCalculatedPropertyModify: (value: CellProps<CalculatedPropertyType>) => void;
   isLoadingCalculatedProperties: boolean;

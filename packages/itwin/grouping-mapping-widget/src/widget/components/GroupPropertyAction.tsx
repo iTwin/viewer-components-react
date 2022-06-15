@@ -295,11 +295,7 @@ const GroupPropertyAction = ({
             ],
           }],
       };
-      const requestOptions: ContentDescriptorRequestOptions<
-        IModelConnection,
-        KeySet,
-        RulesetVariable
-      > = {
+      const requestOptions: ContentDescriptorRequestOptions<IModelConnection, KeySet, RulesetVariable> = {
         imodel: iModelConnection,
         keys: keySet,
         rulesetOrId: ruleSet,

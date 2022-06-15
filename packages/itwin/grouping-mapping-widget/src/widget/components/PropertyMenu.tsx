@@ -129,15 +129,12 @@ export const PropertyMenu = ({
   const [propertyMenuView, setPropertyMenuView] = useState<PropertyMenuView>(
     PropertyMenuView.DEFAULT,
   );
-  const [selectedGroupProperty, setSelectedGroupProperty] = useState<
-    GroupPropertyType | undefined
-  >(undefined);
-  const [selectedCalculatedProperty, setSelectedCalculatedProperty] = useState<
-    CalculatedPropertyType | undefined
-  >(undefined);
-  const [selectedCustomCalculation, setSelectedCustomCalculation] = useState<
-    CustomCalculationType | undefined
-  >(undefined);
+  const [selectedGroupProperty, setSelectedGroupProperty] =
+    useState<GroupPropertyType | undefined>(undefined);
+  const [selectedCalculatedProperty, setSelectedCalculatedProperty] =
+    useState<CalculatedPropertyType | undefined>(undefined);
+  const [selectedCustomCalculation, setSelectedCustomCalculation] =
+    useState<CustomCalculationType | undefined>(undefined);
   const [isInformationPanelOpen, setIsInformationPanelOpen] =
     useState<boolean>(false);
   const [resolvedHiliteIds, setResolvedHiliteIds] = useState<string[]>([]);

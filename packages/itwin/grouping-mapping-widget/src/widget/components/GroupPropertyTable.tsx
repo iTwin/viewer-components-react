@@ -29,11 +29,7 @@ interface GroupPropertyTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  setSelectedGroupProperty: React.Dispatch<
-    React.SetStateAction<
-      CreateTypeFromInterface<GroupPropertyType> | undefined
-    >
-  >;
+  setSelectedGroupProperty: React.Dispatch<React.SetStateAction<CreateTypeFromInterface<GroupPropertyType> | undefined>>;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
   onGroupPropertyModify: (value: CellProps<GroupPropertyType>) => void;
   isLoadingGroupProperties: boolean;

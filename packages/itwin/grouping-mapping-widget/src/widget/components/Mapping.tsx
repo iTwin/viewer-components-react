@@ -92,9 +92,8 @@ export const Mappings = () => {
   const [mappingView, setMappingView] = useState<MappingView>(
     MappingView.MAPPINGS
   );
-  const [selectedMapping, setSelectedMapping] = useState<
-    Mapping | undefined
-  >(undefined);
+  const [selectedMapping, setSelectedMapping] =
+    useState<Mapping | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 

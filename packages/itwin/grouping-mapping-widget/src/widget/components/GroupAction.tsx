@@ -55,9 +55,8 @@ const GroupAction = ({
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const [currentPropertyList, setCurrentPropertyList] = React.useState<
-    PropertyRecord[]
-  >([]);
+  const [currentPropertyList, setCurrentPropertyList] =
+    React.useState<PropertyRecord[]>([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
