@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fix copy category group bug and package bump",
-      "type": "minor"
+      "comment": "add unions of multiple selected classes",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/grouping-mapping-widget"
