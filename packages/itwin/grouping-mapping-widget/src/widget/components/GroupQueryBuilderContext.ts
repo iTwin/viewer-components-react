@@ -17,6 +17,7 @@ export interface PropertySelection {
   setQueryBuilder: React.Dispatch<React.SetStateAction<QueryBuilder>>;
   isLoading: boolean;
   isRendering: boolean;
+  resetView: () => Promise<void>;
 }
 export const GroupQueryBuilderContext = React.createContext<PropertySelection>({
   currentPropertyList: [],
@@ -27,4 +28,5 @@ export const GroupQueryBuilderContext = React.createContext<PropertySelection>({
   setQueryBuilder: () => new QueryBuilder(undefined),
   isLoading: false,
   isRendering: false,
+  resetView: async () => {},
 });

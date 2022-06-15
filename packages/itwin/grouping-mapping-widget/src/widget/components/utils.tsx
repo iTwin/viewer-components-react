@@ -146,6 +146,24 @@ export const handleError = (errorStatus: number) => {
 
 };
 
+export const LoadingOverlay = () => (
+  <div className='gm-center-overlay'>
+    <Text>Loading</Text>
+    <ProgressRadial indeterminate />
+    <Text>Please wait...</Text>
+  </div>
+);
+
+interface EmptyMessageProps {
+  message: string;
+}
+
+export const EmptyMessage = ({ message }: EmptyMessageProps) => (
+  <div className='gm-center-overlay'>
+    <Text>{message}</Text>
+  </div>
+);
+
 export const LoadingSpinner = () => {
   return (
     <div className="gm-loading-spinner">
