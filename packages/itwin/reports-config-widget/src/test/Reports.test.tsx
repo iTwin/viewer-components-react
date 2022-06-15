@@ -42,10 +42,10 @@ const mockIModelId = faker.datatype.uuid();
 const reportsFactory = (): ReportCollection => ({
   reports: Array.from(
     { length: faker.datatype.number({ min: 3, max: 5 }) },
-    () => ({
+    (_, index) => ({
       id: `${faker.datatype.uuid()}`,
-      displayName: faker.random.alpha(10),
-      description: faker.random.words(10),
+      displayName: `mOcKRePoRT${index}`,
+      description: `mOcKRePoRTDeScRiPtIoN${index}`,
     })
   ),
   _links: {
