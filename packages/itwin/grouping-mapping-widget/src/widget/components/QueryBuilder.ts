@@ -662,11 +662,11 @@ export class QueryBuilder {
             }
           }
         }
-        unionQuery += `${queryString} UNION `;
       }
-      unionQuery = unionQuery.slice(0, unionQuery.length - 7);
-      return unionQuery;
+      unionQuery += `${queryString} UNION `;
     }
+    unionQuery = unionQuery.slice(0, unionQuery.length - 7);
+    return unionQuery;
   }
 
   private _isFloat(n: unknown): boolean {
