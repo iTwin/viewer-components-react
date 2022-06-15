@@ -113,7 +113,7 @@ describe("Reports Action", () => {
   it("should be able to add report", async () => {
     const mockReport: Report = {
       id: faker.datatype.uuid(),
-      displayName: faker.random.word(),
+      displayName: "mOcKRePoRt1",
       description: "",
       deleted: false,
       _links: {
@@ -150,8 +150,8 @@ describe("Reports Action", () => {
       name: /description/i,
     });
 
-    await userEvent.type(nameInput, faker.random.word());
-    await userEvent.type(descriptionInput, faker.random.words());
+    await userEvent.type(nameInput, "mOcKTeXt");
+    await userEvent.type(descriptionInput, "moCk DeScRiPtIoN");
     expect(cancelButton).toBeEnabled();
     expect(addButton).toBeEnabled();
 
