@@ -9,7 +9,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from "re
 
 import { fetchIdsFromQuery, getReportingClient, WidgetHeader } from "./utils";
 import {
-  clearEmphasizedElements,
+  clearEmphasizedOverriddenElements,
   manufactureKeys,
   visualizeElements,
   visualizeElementsByKeys,
@@ -187,7 +187,7 @@ export const PropertyMenu = ({
           "GroupingMappingWidget",
           iModelConnection,
         );
-        clearEmphasizedElements();
+        clearEmphasizedOverriddenElements();
         const resolvedIds = await visualizeElementsByKeys(keys, "red");
         await zoomToElements(resolvedIds);
         setResolvedHiliteIds(resolvedIds);
