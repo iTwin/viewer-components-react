@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "fix copy category group bug",
+      "comment": "Fix copy category group bug and package bump",
       "type": "minor"
     }
   ],
