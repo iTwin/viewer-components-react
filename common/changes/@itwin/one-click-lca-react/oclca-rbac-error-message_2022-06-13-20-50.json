@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/one-click-lca-react",
+      "comment": "fix error message",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/one-click-lca-react"
+}
