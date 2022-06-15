@@ -387,8 +387,7 @@ export const PropertyMenu = ({
             <InformationPanelHeader
               onClose={() => setIsInformationPanelOpen(false)}
             >
-              <Text variant='subheading'>{`${group.groupName ?? ""
-                } Information`}</Text>
+              <Text variant='subheading'>{`${group.groupName ?? ""} Information`}</Text>
             </InformationPanelHeader>
             <InformationPanelBody>
               <div className='information-body'>

@@ -29,11 +29,11 @@ import DeleteModal from "./DeleteModal";
 import { Groupings } from "./Grouping";
 import MappingAction from "./MappingAction";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
-import { Api, MappingClientContext } from "./GroupingMapping";
-import { ApiContext } from "./GroupingMapping";
+import type { Api } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
-import { IMappingClient } from "../IMappingClient";
+import type { IMappingClient } from "../IMappingClient";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
 

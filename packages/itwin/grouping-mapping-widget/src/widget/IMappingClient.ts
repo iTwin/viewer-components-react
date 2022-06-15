@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { AccessToken } from "@itwin/core-bentley";
-import { CalculatedProperty, CalculatedPropertyCreate, CalculatedPropertySingle, CalculatedPropertyUpdate, CustomCalculation, CustomCalculationCreate, CustomCalculationSingle, CustomCalculationUpdate, Group, GroupCreate, GroupProperty, GroupPropertyCreate, GroupPropertySingle, GroupPropertyUpdate, GroupSingle, GroupUpdate, Mapping, MappingCopy, MappingCreate, MappingSingle, MappingUpdate } from "@itwin/insights-client";
+import type { AccessToken } from "@itwin/core-bentley";
+import type { CalculatedProperty, CalculatedPropertyCreate, CalculatedPropertySingle, CalculatedPropertyUpdate, CustomCalculation, CustomCalculationCreate, CustomCalculationSingle, CustomCalculationUpdate, Group, GroupCreate, GroupProperty, GroupPropertyCreate, GroupPropertySingle, GroupPropertyUpdate, GroupSingle, GroupUpdate, Mapping, MappingCopy, MappingCreate, MappingSingle, MappingUpdate } from "@itwin/insights-client";
 
 export interface IMappingClient {
   /**

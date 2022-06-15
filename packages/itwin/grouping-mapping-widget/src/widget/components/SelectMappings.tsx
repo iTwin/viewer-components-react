@@ -13,12 +13,12 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Mapping } from "@itwin/insights-client";
-import { Api, MappingClientContext } from "./GroupingMapping";
-import { ApiContext } from "./GroupingMapping";
+import type { Api } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 import type { MappingType } from "./Mapping";
 import "./SelectMapping.scss";
 import { handleError } from "./utils";
-import { IMappingClient } from "../IMappingClient";
+import type { IMappingClient } from "../IMappingClient";
 
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,

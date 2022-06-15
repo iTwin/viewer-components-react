@@ -12,7 +12,6 @@ import type {
 } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { QueryRowFormat } from "@itwin/core-common";
-import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
 
 export const onSelectionChanged = (
   evt: SelectionChangeEventArgs,

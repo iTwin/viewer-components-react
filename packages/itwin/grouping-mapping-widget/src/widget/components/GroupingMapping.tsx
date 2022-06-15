@@ -7,8 +7,8 @@ import { Mappings } from "./Mapping";
 import "./GroupingMapping.scss";
 import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { IMappingClient } from "../IMappingClient";
-import { ReportingClient, REPORTING_BASE_PATH } from "@itwin/insights-client";
+import type { IMappingClient } from "../IMappingClient";
+import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
 
 export interface Api {
   accessToken: AccessToken;

@@ -50,9 +50,9 @@ import {
 import { fetchIdsFromQuery, handleError, WidgetHeader } from "./utils";
 import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
-import { Api, MappingClientContext } from "./GroupingMapping";
-import { ApiContext } from "./GroupingMapping";
-import { IMappingClient } from "../IMappingClient";
+import type { Api } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import type { IMappingClient } from "../IMappingClient";
 
 export type GroupType = CreateTypeFromInterface<Group>;
 

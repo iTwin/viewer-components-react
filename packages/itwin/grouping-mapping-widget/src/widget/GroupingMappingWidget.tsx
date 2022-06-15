@@ -12,10 +12,11 @@ import {
   StagePanelSection,
   StageUsage,
 } from "@itwin/appui-abstract";
-import { AccessToken } from "@itwin/core-bentley";
+import type { AccessToken } from "@itwin/core-bentley";
 import React from "react";
-import GroupingMapping, { ClientPrefix } from "./components/GroupingMapping";
-import { IMappingClient } from "./IMappingClient";
+import GroupingMapping from "./components/GroupingMapping";
+import type { ClientPrefix } from "./components/GroupingMapping";
+import type { IMappingClient } from "./IMappingClient";
 
 export class GroupingMappingProvider implements UiItemsProvider {
   public readonly id = "GroupingMappingProvider";
