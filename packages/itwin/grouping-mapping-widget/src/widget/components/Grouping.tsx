@@ -2,33 +2,25 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type {
-  ActionType,
-  CellProps,
-  TableInstance,
-  TableState,
-} from "react-table";
-import {
-  actions,
-} from "react-table";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import {
   Button,
+  ButtonGroup,
   DropdownMenu,
   IconButton,
   MenuItem,
   ProgressRadial,
-  Table,
+  Surface,
   toaster,
+  ToggleSwitch,
 } from "@itwin/itwinui-react";
 import {
   SvgAdd,
@@ -36,6 +28,8 @@ import {
   SvgEdit,
   SvgList,
   SvgMore,
+  SvgVisibilityHide,
+  SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
 import DeleteModal from "./DeleteModal";
 import "./Grouping.scss";
@@ -43,15 +37,32 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import { PropertyMenu } from "./PropertyMenu";
 import {
   clearEmphasizedElements,
-  visualizeElements,
-  visualizeElementsById,
+  clearEmphasizedOverriddenElements,
+  clearHiddenElements,
+  clearOverriddenElements,
+  emphasisElementsById,
+  emphasizeElements,
+  getHiliteIds,
+  hideElements,
+  hideElementsById,
+  overrideElements,
+  overrideElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { fetchIdsFromQuery, getReportingClient, handleError, WidgetHeader } from "./utils";
+import {
+  EmptyMessage,
+  fetchIdsFromQuery,
+  getReportingClient,
+  handleError,
+  LoadingOverlay,
+  WidgetHeader,
+} from "./utils";
 import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
 import type { Api } from "./GroupingMapping";
 import { ApiContext } from "./GroupingMapping";
+import { FeatureOverrideType } from "@itwin/core-common";
+import { GroupTile } from "./GroupTile";
 
 export type GroupType = CreateTypeFromInterface<Group>;
 
@@ -67,23 +78,31 @@ interface GroupsTreeProps {
   goBack: () => Promise<void>;
 }
 
+const goldenAngle = 180 * (3 - Math.sqrt(5));
+
 const fetchGroups = async (
   setGroups: React.Dispatch<React.SetStateAction<GroupType[]>>,
   iModelId: string,
   mappingId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: Api
-) => {
+  apiContext: Api,
+): Promise<Group[] | undefined> => {
   try {
     setIsLoading(true);
     const reportingClientApi = getReportingClient(apiContext.prefix);
-    const groups = await reportingClientApi.getGroups(apiContext.accessToken, iModelId, mappingId);
+    const groups = await reportingClientApi.getGroups(
+      apiContext.accessToken,
+      iModelId,
+      mappingId,
+    );
     setGroups(groups);
+    return groups;
   } catch (error: any) {
     handleError(error.status);
   } finally {
     setIsLoading(false);
   }
+  return undefined;
 };
 
 export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
@@ -97,249 +116,268 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     undefined,
   );
   const hilitedElements = useRef<Map<string, string[]>>(new Map());
-  const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [hiddenGroupsIds, setHiddenGroupsIds] = useState<string[]>([]);
+  const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
 
   useEffect(() => {
-    void fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading, apiContext);
+    void fetchGroups(
+      setGroups,
+      iModelId,
+      mapping.id ?? "",
+      setIsLoading,
+      apiContext,
+    );
   }, [apiContext, iModelId, mapping.id, setIsLoading]);
+
+  const getGroupColor = function (index: number) {
+    return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
+  };
+
+  const visualizeGroupColors = useCallback(
+    async (viewGroups: Group[]) => {
+      setLoadingQuery(true);
+      clearEmphasizedOverriddenElements();
+      let allIds: string[] = [];
+      for (const group of viewGroups) {
+        const index =
+          viewGroups.length > groups.length
+            ? viewGroups.findIndex((g) => g.id === group.id)
+            : groups.findIndex((g) => g.id === group.id);
+        const query = group.query ?? "";
+        if (hilitedElements.current.has(query)) {
+          const hilitedIds = hilitedElements.current.get(query) ?? [];
+          overrideElements(
+            hilitedIds,
+            getGroupColor(index),
+            FeatureOverrideType.ColorAndAlpha,
+          );
+          emphasizeElements(hilitedIds, undefined);
+          if (!hiddenGroupsIds.includes(group.id ?? "")) {
+            allIds = allIds.concat(hilitedIds);
+          }
+        } else {
+          try {
+            const ids: string[] = await fetchIdsFromQuery(
+              query,
+              iModelConnection,
+            );
+            if (ids.length === 0) {
+              toaster.warning(
+                `${group.groupName}'s query is valid but produced no results.`,
+              );
+            }
+            await overrideElementsById(
+              iModelConnection,
+              ids,
+              getGroupColor(index),
+              FeatureOverrideType.ColorAndAlpha,
+            );
+            const hiliteIds = await emphasisElementsById(
+              iModelConnection,
+              ids,
+              undefined,
+            );
+            hilitedElements.current.set(query, hiliteIds);
+            if (!hiddenGroupsIds.includes(group.id ?? "")) {
+              allIds = allIds.concat(hiliteIds);
+            }
+          } catch {
+            toaster.negative(
+              `Could not load ${group.groupName}. Query could not be resolved.`,
+            );
+          }
+        }
+      }
+      await zoomToElements(allIds);
+      setLoadingQuery(false);
+    },
+    [iModelConnection, groups, hiddenGroupsIds],
+  );
+
+  const hideGroups = useCallback(
+    async (viewGroups: Group[], zoomTo: boolean = true) => {
+      setLoadingQuery(true);
+      let allIds: string[] = [];
+      for (const viewGroup of viewGroups) {
+        const query = viewGroup.query ?? "";
+        if (hilitedElements.current.has(query)) {
+          const hilitedIds = hilitedElements.current.get(query) ?? [];
+          hideElements(hilitedIds);
+          allIds = allIds.concat(hilitedIds);
+        } else {
+          try {
+            const ids: string[] = await fetchIdsFromQuery(
+              query,
+              iModelConnection,
+            );
+            if (ids.length === 0) {
+              toaster.warning(
+                `${viewGroup.groupName}'s query is valid but produced no results.`,
+              );
+            }
+            const hiliteIds = await hideElementsById(
+              ids,
+              iModelConnection,
+              false,
+            );
+            hilitedElements.current.set(query, hiliteIds);
+            allIds = allIds.concat(hiliteIds);
+          } catch {
+            toaster.negative(
+              `Could not hide/show ${viewGroup.groupName}. Query could not be resolved.`,
+            );
+          }
+        }
+      }
+      if (zoomTo) {
+        await zoomToElements(allIds);
+      }
+      setLoadingQuery(false);
+    },
+    [iModelConnection],
+  );
+
+  const showGroup = useCallback(
+    async (viewGroup: Group) => {
+      clearHiddenElements();
+      const newHiddenGroups: Group[] = [];
+      for (const id of hiddenGroupsIds) {
+        if (id === viewGroup.id) {
+          continue;
+        }
+        const newHiddenGroup = groups.find((g) => g.id === id);
+        if (newHiddenGroup) {
+          newHiddenGroups.push(newHiddenGroup);
+        }
+      }
+      await hideGroups(newHiddenGroups, false);
+
+      // zoom to showed elements
+      const query = viewGroup.query ?? "";
+      if (hilitedElements.current.has(query)) {
+        const hiliteIds = hilitedElements.current.get(query) ?? [];
+        await zoomToElements(hiliteIds);
+      } else {
+        try {
+          const ids: string[] = await fetchIdsFromQuery(
+            query,
+            iModelConnection,
+          );
+          if (ids.length === 0) {
+            toaster.warning(
+              `${viewGroup.groupName}'s query is valid but produced no results.`,
+            );
+          }
+          const hiliteIds = await getHiliteIds(ids, iModelConnection);
+          await zoomToElements(hiliteIds);
+        } catch {
+          toaster.negative(
+            `Could not hide/show ${viewGroup.groupName}. Query could not be resolved.`,
+          );
+        }
+      }
+    },
+    [groups, hiddenGroupsIds, hideGroups, iModelConnection, hilitedElements],
+  );
+
+  const addGroup = () => {
+    clearEmphasizedElements();
+    setGroupsView(GroupsView.ADD);
+  };
+
+  const onModify = async (group: Group) => {
+    setSelectedGroup(group);
+    setGroupsView(GroupsView.MODIFYING);
+    if (group?.id && hiddenGroupsIds.includes(group.id)) {
+      await showGroup(group);
+      setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
+    }
+    clearEmphasizedElements();
+  };
+
+  const openProperties = async (group: Group) => {
+    setSelectedGroup(group);
+    setGroupsView(GroupsView.PROPERTIES);
+    if (group?.id && hiddenGroupsIds.includes(group.id)) {
+      await showGroup(group);
+      setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
+    }
+  };
 
   const refresh = useCallback(async () => {
     setGroupsView(GroupsView.GROUPS);
     setSelectedGroup(undefined);
     setGroups([]);
-    await fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading, apiContext);
-  }, [apiContext, iModelId, mapping.id, setGroups]);
-
-  const addGroup = () => {
-    // TODO Retain selection in view without emphasizes. Goal is to make it so we can distinguish
-    // hilited elements from regular elements without emphasis due to it blocking selection. For now clearing
-    // selection.
-    clearEmphasizedElements();
-    setGroupsView(GroupsView.ADD);
-  };
-
-  const onModify = useCallback((value) => {
-    clearEmphasizedElements();
-    setSelectedGroup(value.row.original);
-    setGroupsView(GroupsView.MODIFYING);
-  }, []);
-
-  const openProperties = useCallback((value) => {
-    clearEmphasizedElements();
-    setSelectedGroup(value.row.original);
-    setGroupsView(GroupsView.PROPERTIES);
-  }, []);
-
-  const groupsColumns = useMemo(
-    () => [
-      {
-        Header: "Table",
-        columns: [
-          {
-            id: "groupName",
-            Header: "Group",
-            accessor: "groupName",
-            Cell: (value: CellProps<GroupType>) => (
-              <>
-                {isLoadingQuery ? (
-                  value.row.original.groupName
-                ) : (
-                  <div
-                    className='iui-anchor'
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openProperties(value);
-                    }}
-                  >
-                    {value.row.original.groupName}
-                  </div>
-                )}
-              </>
-            ),
-          },
-          {
-            id: "description",
-            Header: "Description",
-            accessor: "description",
-          },
-          {
-            id: "dropdown",
-            Header: "",
-            width: 80,
-            Cell: (value: CellProps<GroupType>) => {
-              return (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenu
-                    disabled={isLoadingQuery}
-                    menuItems={(close: () => void) => [
-                      <MenuItem
-                        key={0}
-                        onClick={() => onModify(value)}
-                        icon={<SvgEdit />}
-                      >
-                        Modify
-                      </MenuItem>,
-                      <MenuItem
-                        key={1}
-                        onClick={() => openProperties(value)}
-                        icon={<SvgList />}
-                      >
-                        Properties
-                      </MenuItem>,
-                      <MenuItem
-                        key={2}
-                        onClick={() => {
-                          setSelectedGroup(value.row.original);
-                          setShowDeleteModal(true);
-                          close();
-                        }}
-                        icon={<SvgDelete />}
-                      >
-                        Remove
-                      </MenuItem>,
-                    ]}
-                  >
-                    <IconButton
-                      disabled={isLoadingQuery}
-                      styleType='borderless'
-                    >
-                      <SvgMore
-                        style={{
-                          width: "16px",
-                          height: "16px",
-                        }}
-                      />
-                    </IconButton>
-                  </DropdownMenu>
-                </div>
-              );
-            },
-          },
-        ],
-      },
-    ],
-    [isLoadingQuery, onModify, openProperties],
-  );
-
-  // Temp
-  const stringToColor = function (str: string) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    const groups = await fetchGroups(
+      setGroups,
+      iModelId,
+      mapping.id ?? "",
+      setIsLoading,
+      apiContext,
+    );
+    if (groups) {
+      if (showGroupColor) {
+        await visualizeGroupColors(groups);
+      } else {
+        clearEmphasizedOverriddenElements();
+      }
     }
-    let colour = "#";
-    for (let i = 0; i < 3; i++) {
-      const value = (hash >> (i * 8)) & 0xff;
-      colour += (`00${value.toString(16)}`).substr(-2);
-    }
-    return colour;
-  };
+  }, [
+    apiContext,
+    iModelId,
+    mapping.id,
+    setGroups,
+    showGroupColor,
+    visualizeGroupColors,
+  ]);
 
-  const onSelect = useCallback(
-    async (selectedData: GroupType[] | undefined) => {
+  const resetView = async () => {
+    if (groups) {
+      if (showGroupColor) {
+        await visualizeGroupColors(groups);
+      } else {
+        clearOverriddenElements();
+      }
       clearEmphasizedElements();
-      if (selectedData && selectedData.length > 0) {
-        setLoadingQuery(true);
-        let allIds: string[] = [];
-        for (const row of selectedData) {
-          const query = row.query ?? "";
-          if (hilitedElements.current.has(query)) {
-            const hilitedIds = hilitedElements.current.get(query) ?? [];
-            visualizeElements(hilitedIds, stringToColor(row.id ?? ""));
-            allIds = allIds.concat(hilitedIds);
-          } else {
-            try {
-              const ids: string[] = await fetchIdsFromQuery(
-                query,
-                iModelConnection,
-              );
-              if (ids.length === 0) {
-                toaster.warning(`${row.groupName}'s query is valid but produced no results.`);
-              }
-              const hiliteIds = await visualizeElementsById(
-                ids,
-                stringToColor(row.id ?? ""),
-                iModelConnection,
-              );
-              hilitedElements.current.set(query, hiliteIds);
+    }
+  };
 
-              allIds = allIds.concat(ids);
-            } catch {
-              const index = groups.findIndex((group) => group.id === row.id);
-              setSelectedRows((rowIds) => {
-                const selectedRowIds = { ...rowIds };
-                delete selectedRowIds[index];
-                return selectedRowIds;
-              });
-              toaster.negative(`Could not load ${row.groupName}. Query could not be resolved.`);
+  const showAll = async () => {
+    setLoadingQuery(true);
 
-            }
-          }
-        }
-        await zoomToElements(allIds);
-        setLoadingQuery(false);
+    clearHiddenElements();
+    setHiddenGroupsIds([]);
+    await zoomToElements(Array.from(hilitedElements.current.values()).flat());
+
+    setLoadingQuery(false);
+  };
+
+  const hideAll = useCallback(async () => {
+    await hideGroups(groups);
+    setHiddenGroupsIds(
+      groups.map((g) => g.id).filter((id): id is string => !!id),
+    );
+  }, [setHiddenGroupsIds, groups, hideGroups]);
+
+  const toggleGroupColor = useCallback(
+    async (e: any) => {
+      if (e.target.checked) {
+        await visualizeGroupColors(groups);
+        setShowGroupColor(true);
+      } else {
+        clearEmphasizedOverriddenElements();
+        setShowGroupColor(false);
       }
     },
-    [iModelConnection, groups],
-  );
-
-  const controlledState = useCallback(
-    (state) => {
-      return {
-        ...state,
-        selectedRowIds: { ...selectedRows },
-      };
-    },
-    [selectedRows],
+    [groups, visualizeGroupColors, setShowGroupColor],
   );
 
   const propertyMenuGoBack = useCallback(async () => {
-    clearEmphasizedElements();
     setGroupsView(GroupsView.GROUPS);
     await refresh();
   }, [refresh]);
-
-  const tableStateReducer = (
-    newState: TableState,
-    action: ActionType,
-    _previousState: TableState,
-    instance?: TableInstance,
-  ): TableState => {
-    switch (action.type) {
-      case actions.toggleRowSelected: {
-        const newSelectedRows = {
-          ...selectedRows,
-        };
-        if (action.value) {
-          newSelectedRows[action.id] = true;
-        } else {
-          delete newSelectedRows[action.id];
-        }
-        setSelectedRows(newSelectedRows);
-        newState.selectedRowIds = newSelectedRows;
-        break;
-      }
-      case actions.toggleAllRowsSelected: {
-        if (!instance?.rowsById) {
-          break;
-        }
-        const newSelectedRows = {} as Record<string, boolean>;
-        if (action.value) {
-          Object.keys(instance.rowsById).forEach(
-            (id) => (newSelectedRows[id] = true),
-          );
-        }
-        setSelectedRows(newSelectedRows);
-        newState.selectedRowIds = newSelectedRows;
-        break;
-      }
-      default:
-        break;
-    }
-    return newState;
-  };
 
   switch (groupsView) {
     case GroupsView.ADD:
@@ -348,10 +386,10 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           iModelId={iModelId}
           mappingId={mapping.id ?? ""}
           goBack={async () => {
-            clearEmphasizedElements();
             setGroupsView(GroupsView.GROUPS);
             await refresh();
           }}
+          resetView={resetView}
         />
       );
     case GroupsView.MODIFYING:
@@ -361,10 +399,10 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           mappingId={mapping.id ?? ""}
           group={selectedGroup}
           goBack={async () => {
-            clearEmphasizedElements();
             setGroupsView(GroupsView.GROUPS);
             await refresh();
           }}
+          resetView={resetView}
         />
       ) : null;
     case GroupsView.PROPERTIES:
@@ -383,35 +421,149 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             title={mapping.mappingName ?? ""}
             disabled={isLoading || isLoadingQuery}
             returnFn={async () => {
-              clearEmphasizedElements();
+              clearEmphasizedOverriddenElements();
               await goBack();
             }}
           />
-          <div className='groups-container'>
-            <Button
-              startIcon={
-                isLoadingQuery ? <ProgressRadial size="small" indeterminate /> : <SvgAdd />
-              }
-              styleType='high-visibility'
-              disabled={isLoadingQuery}
-              onClick={() => addGroup()}
-            >
-              {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
-            </Button>
-            <Table<GroupType>
-              data={groups}
-              density='extra-condensed'
-              columns={groupsColumns}
-              emptyTableContent='No Groups available.'
-              isSortable
-              isSelectable
-              onSelect={onSelect}
-              isLoading={isLoading}
-              isRowDisabled={() => isLoadingQuery}
-              stateReducer={tableStateReducer}
-              useControlledState={controlledState}
-            />
-          </div>
+          <Surface className="groups-container">
+            <div className="toolbar">
+              <Button
+                startIcon={
+                  isLoadingQuery ? (
+                    <ProgressRadial size="small" indeterminate />
+                  ) : (
+                    <SvgAdd />
+                  )
+                }
+                styleType="high-visibility"
+                disabled={isLoadingQuery}
+                onClick={addGroup}
+              >
+                {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
+              </Button>
+              <ButtonGroup className="toolbar-buttons">
+                <ToggleSwitch
+                  label="Color by Group"
+                  labelPosition="left"
+                  className="group-view-icon toggle"
+                  disabled={isLoadingQuery}
+                  checked={showGroupColor}
+                  onChange={toggleGroupColor}
+                ></ToggleSwitch>
+                <IconButton
+                  title="Show All"
+                  onClick={showAll}
+                  disabled={isLoadingQuery}
+                  styleType="borderless"
+                  className="group-view-icon"
+                >
+                  <SvgVisibilityShow />
+                </IconButton>
+                <IconButton
+                  title="Hide All"
+                  onClick={hideAll}
+                  disabled={isLoadingQuery}
+                  styleType="borderless"
+                  className="group-view-icon"
+                >
+                  <SvgVisibilityHide />
+                </IconButton>
+              </ButtonGroup>
+            </div>
+            {isLoading ? (
+              <LoadingOverlay />
+            ) : groups.length === 0 ? (
+              <EmptyMessage message="No Groups available." />
+            ) : (
+              <div className="group-list">
+                {groups.map((g) => (
+                  <GroupTile
+                    key={g.id}
+                    title={g.groupName ? g.groupName : "Untitled"}
+                    subText={g.description}
+                    actionGroup={
+                      <div className="actions">
+                        {g.id && hiddenGroupsIds.includes(g.id) ? (
+                          <IconButton
+                            disabled={isLoadingQuery}
+                            styleType="borderless"
+                            className="group-view-icon"
+                            onClick={async () => {
+                              await showGroup(g);
+                              setHiddenGroupsIds(
+                                hiddenGroupsIds.filter((id) => g.id !== id),
+                              );
+                            }}
+                          >
+                            <SvgVisibilityHide />
+                          </IconButton>
+                        ) : (
+                          <IconButton
+                            disabled={isLoadingQuery}
+                            styleType="borderless"
+                            className="group-view-icon"
+                            onClick={async () => {
+                              await hideGroups([g]);
+                              setHiddenGroupsIds(
+                                hiddenGroupsIds.concat(g.id ? [g.id] : []),
+                              );
+                            }}
+                          >
+                            <SvgVisibilityShow />
+                          </IconButton>
+                        )}
+                        <DropdownMenu
+                          disabled={isLoadingQuery}
+                          menuItems={(close: () => void) => [
+                            <MenuItem
+                              key={0}
+                              onClick={async () => onModify(g)}
+                              icon={<SvgEdit />}
+                            >
+                              Modify
+                            </MenuItem>,
+                            <MenuItem
+                              key={1}
+                              onClick={async () => openProperties(g)}
+                              icon={<SvgList />}
+                            >
+                              Properties
+                            </MenuItem>,
+                            <MenuItem
+                              key={2}
+                              onClick={() => {
+                                setSelectedGroup(g);
+                                setShowDeleteModal(true);
+                                close();
+                              }}
+                              icon={<SvgDelete />}
+                            >
+                              Remove
+                            </MenuItem>,
+                          ]}
+                        >
+                          <IconButton
+                            disabled={isLoadingQuery}
+                            styleType="borderless"
+                          >
+                            <SvgMore
+                              style={{
+                                width: "16px",
+                                height: "16px",
+                              }}
+                            />
+                          </IconButton>
+                        </DropdownMenu>
+                      </div>
+                    }
+                    onClickTitle={
+                      isLoadingQuery ? undefined : async () => openProperties(g)
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </Surface>
           <DeleteModal
             entityName={selectedGroup?.groupName ?? ""}
             show={showDeleteModal}
