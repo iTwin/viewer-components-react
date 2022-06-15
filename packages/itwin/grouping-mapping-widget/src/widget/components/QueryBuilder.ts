@@ -4,17 +4,16 @@
 *--------------------------------------------------------------------------------------------*/
 import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { InstanceKey, PropertiesField } from "@itwin/presentation-common";
-import type {
-  Primitives,
-  PropertyRecord,
-} from "@itwin/appui-abstract";
-import {
-  PropertyValueFormat,
-} from "@itwin/appui-abstract";
+import type { Primitives, PropertyRecord } from "@itwin/appui-abstract";
+import { PropertyValueFormat } from "@itwin/appui-abstract";
 import "core-js/features/string/virtual";
 import { toaster } from "@itwin/itwinui-react";
 
 export interface Query {
+  unions: QueryUnion[];
+}
+
+export interface QueryUnion {
   classes: QueryClass[];
 }
 
@@ -52,9 +51,7 @@ export class QueryBuilder {
 
   public async addProperty(prop: PropertyRecord): Promise<boolean> {
     // TODO: only handle primitive properties now
-    if (
-      prop.value?.valueFormat !== PropertyValueFormat.Primitive
-    ) {
+    if (prop.value?.valueFormat !== PropertyValueFormat.Primitive) {
       toaster.warning("Only primitive types are supported for now.");
       return false;
     }
@@ -78,7 +75,9 @@ export class QueryBuilder {
       prop,
     )) as PropertiesField;
     if (propertyField === undefined) {
-      toaster.negative("Error. Failed to fetch field for this property record.");
+      toaster.negative(
+        "Error. Failed to fetch field for this property record.",
+      );
       return false;
     }
 
@@ -90,43 +89,48 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
 
-    const className =
-      propertyField.properties[0].property.classInfo.name.replace(":", ".");
-    const propertyName = isNavigation
-      ? `${propertyField.properties[0].property.name}.id`
-      : propertyField.properties[0].property.name;
-    const propertyValue = isNavigation
-      ? (prop.value.value as InstanceKey).id
-      : prop.value.value;
+    for (let i = 0; i < propertyField.properties.length; i++) {
+      const className = propertyField.properties[
+        i
+      ].property.classInfo.name.replace(":", ".");
+      const propertyName = isNavigation
+        ? `${propertyField.properties[i].property.name}.id`
+        : propertyField.properties[i].property.name;
+      const propertyValue = isNavigation
+        ? (prop.value.value as InstanceKey).id
+        : prop.value.value;
 
+      if (
+        !isAspect &&
+        propertyField.parent?.pathToPrimaryClass &&
+        propertyField.parent?.pathToPrimaryClass.length > 0
+      ) {
+        this.addRelatedProperty(
+          i,
+          propertyField,
+          propertyName,
+          propertyValue,
+          isAspect,
+        );
+      } else {
+        this.addPropertyToQuery(
+          i,
+          className,
+          propertyName,
+          propertyValue,
+          isAspect,
+          this._needsQuote(propertyField),
+          false,
+        );
+      }
+    }
     // console.log(prop);
     // console.log(propertyField);
 
-    if (
-      !isAspect &&
-      propertyField.parent?.pathToPrimaryClass &&
-      propertyField.parent?.pathToPrimaryClass.length > 0
-    ) {
-      this.addRelatedProperty(
-        propertyField,
-        propertyName,
-        propertyValue,
-        isAspect,
-      );
-    } else {
-      this.addPropertyToQuery(
-        className,
-        propertyName,
-        propertyValue,
-        isAspect,
-        this._needsQuote(propertyField),
-        false,
-      );
-    }
     return true;
   }
 
@@ -142,6 +146,7 @@ export class QueryBuilder {
   }
 
   public addRelatedProperty(
+    unionIndex: number,
     propertyField: PropertiesField,
     propertyName: string,
     propertyValue: Primitives.Value,
@@ -154,6 +159,7 @@ export class QueryBuilder {
       const relClassName = path.relationshipInfo?.name.replace(":", ".");
       if (!path.isForwardRelationship) {
         this.addPropertyToQuery(
+          unionIndex,
           targetClassName,
           `ECInstanceId`,
           `${relClassName}.SourceECInstanceId`,
@@ -162,6 +168,7 @@ export class QueryBuilder {
           true,
         );
         this.addPropertyToQuery(
+          unionIndex,
           relClassName,
           `TargetECInstanceId`,
           `${sourceClassName}.ECInstanceId`,
@@ -174,6 +181,7 @@ export class QueryBuilder {
           propertyField.parent?.contentClassInfo.name
         ) {
           this.addPropertyToQuery(
+            unionIndex,
             sourceClassName,
             propertyName,
             propertyValue,
@@ -183,6 +191,7 @@ export class QueryBuilder {
           );
         } else {
           this.addPropertyToQuery(
+            unionIndex,
             sourceClassName,
             `ECInstanceId`,
             `${relClassName}.TargetECInstanceId`,
@@ -193,6 +202,7 @@ export class QueryBuilder {
         }
       } else {
         this.addPropertyToQuery(
+          unionIndex,
           targetClassName,
           `ECInstanceId`,
           `${relClassName}.TargetECInstanceId`,
@@ -201,6 +211,7 @@ export class QueryBuilder {
           true,
         );
         this.addPropertyToQuery(
+          unionIndex,
           relClassName,
           `SourceECInstanceId`,
           `${sourceClassName}.ECInstanceId`,
@@ -213,6 +224,7 @@ export class QueryBuilder {
           propertyField.parent?.contentClassInfo.name
         ) {
           this.addPropertyToQuery(
+            unionIndex,
             sourceClassName,
             propertyName,
             propertyValue,
@@ -222,6 +234,7 @@ export class QueryBuilder {
           );
         } else {
           this.addPropertyToQuery(
+            unionIndex,
             sourceClassName,
             `ECInstanceId`,
             `${relClassName}.SourceECInstanceId`,
@@ -235,6 +248,7 @@ export class QueryBuilder {
   }
 
   public addPropertyToQuery(
+    unionIndex: number,
     className: string,
     propertyName: string,
     propertyValue: Primitives.Value,
@@ -242,8 +256,32 @@ export class QueryBuilder {
     needsQuote: boolean,
     isRelational?: boolean,
   ) {
-    if (this.query === undefined || this.query.classes.length === 0) {
+    if (this.query === undefined || this.query.unions.length === 0) {
       this.query = {
+        unions: [
+          {
+            classes: [
+              {
+                className,
+                isAspect,
+                isRelational,
+                properties: [
+                  {
+                    name: propertyName,
+                    value: propertyValue,
+                    needsQuote,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      return;
+    }
+
+    if (this.query.unions.length <= unionIndex) {
+      this.query.unions.push({
         classes: [
           {
             className,
@@ -258,11 +296,11 @@ export class QueryBuilder {
             ],
           },
         ],
-      };
+      });
       return;
     }
 
-    const foundClass = this.query.classes.find(
+    const foundClass = this.query.unions[unionIndex].classes.find(
       (c) => c.className === className,
     );
     if (foundClass) {
@@ -275,7 +313,7 @@ export class QueryBuilder {
         });
       }
     } else {
-      this.query.classes.push({
+      this.query.unions[unionIndex].classes.push({
         className,
         isRelational,
         properties: [
@@ -291,7 +329,13 @@ export class QueryBuilder {
   }
 
   public async removeProperty(prop: PropertyRecord) {
-    if (this.query === undefined || this.query.classes.length === 0) {
+    if (this.query === undefined || this.query.unions.length === 0) {
+      return;
+    }
+    if (
+      this.query.unions.length === 1 &&
+      this.query.unions[0].classes.length === 0
+    ) {
       return;
     }
 
@@ -306,31 +350,35 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
 
     const isNavigation: boolean =
       prop.property.typename.toLowerCase() === "navigation";
 
-    const propertyName = isNavigation
-      ? `${propertyField.properties[0].property.name}.id`
-      : propertyField.properties[0].property.name;
-    const className =
-      propertyField.properties[0].property.classInfo.name.replace(":", ".");
+    for (let i = 0; i < propertyField.properties.length; i++) {
+      const propertyName = isNavigation
+        ? `${propertyField.properties[i].property.name}.id`
+        : propertyField.properties[i].property.name;
+      const className = propertyField.properties[
+        i
+      ].property.classInfo.name.replace(":", ".");
 
-    if (
-      !isAspect &&
-      propertyField.parent?.pathToPrimaryClass &&
-      propertyField.parent?.pathToPrimaryClass.length > 0
-    ) {
-      this.removeRelatedProperty(propertyField, propertyName);
-    } else {
-      this.removePropertyFromQuery(className, propertyName);
+      if (
+        !isAspect &&
+        propertyField.parent?.pathToPrimaryClass &&
+        propertyField.parent?.pathToPrimaryClass.length > 0
+      ) {
+        this.removeRelatedProperty(i, propertyField, propertyName);
+      } else {
+        this.removePropertyFromQuery(i, className, propertyName);
+      }
     }
   }
 
   public removeRelatedProperty(
+    unionIndex: number,
     propertyField: PropertiesField,
     propertyName: string,
   ) {
@@ -340,33 +388,69 @@ export class QueryBuilder {
       const targetClassName = path.targetClassInfo?.name.replace(":", ".");
       const relClassName = path.relationshipInfo?.name.replace(":", ".");
       if (!path.isForwardRelationship) {
-        this.removePropertyFromQuery(targetClassName, `ECInstanceId`);
-        this.removePropertyFromQuery(relClassName, `TargetECInstanceId`);
+        this.removePropertyFromQuery(
+          unionIndex,
+          targetClassName,
+          `ECInstanceId`,
+        );
+        this.removePropertyFromQuery(
+          unionIndex,
+          relClassName,
+          `TargetECInstanceId`,
+        );
         if (
           path.sourceClassInfo?.name ===
           propertyField.parent?.contentClassInfo.name
         ) {
-          this.removePropertyFromQuery(sourceClassName, propertyName);
+          this.removePropertyFromQuery(
+            unionIndex,
+            sourceClassName,
+            propertyName,
+          );
         } else {
-          this.removePropertyFromQuery(sourceClassName, `ECInstanceId`);
+          this.removePropertyFromQuery(
+            unionIndex,
+            sourceClassName,
+            `ECInstanceId`,
+          );
         }
       } else {
-        this.removePropertyFromQuery(targetClassName, `ECInstanceId`);
-        this.removePropertyFromQuery(relClassName, `SourceECInstanceId`);
+        this.removePropertyFromQuery(
+          unionIndex,
+          targetClassName,
+          `ECInstanceId`,
+        );
+        this.removePropertyFromQuery(
+          unionIndex,
+          relClassName,
+          `SourceECInstanceId`,
+        );
         if (
           path.sourceClassInfo?.name ===
           propertyField.parent?.contentClassInfo.name
         ) {
-          this.removePropertyFromQuery(sourceClassName, propertyName);
+          this.removePropertyFromQuery(
+            unionIndex,
+            sourceClassName,
+            propertyName,
+          );
         } else {
-          this.removePropertyFromQuery(sourceClassName, `ECInstanceId`);
+          this.removePropertyFromQuery(
+            unionIndex,
+            sourceClassName,
+            `ECInstanceId`,
+          );
         }
       }
     });
   }
 
-  public removePropertyFromQuery(className: string, propertyName: string) {
-    const foundClass = this.query?.classes.find(
+  public removePropertyFromQuery(
+    unionIndex: number,
+    className: string,
+    propertyName: string,
+  ) {
+    const foundClass = this.query?.unions[unionIndex].classes.find(
       (c) => c.className === className,
     );
     if (foundClass) {
@@ -379,129 +463,143 @@ export class QueryBuilder {
       if (foundClass.properties.length === 0) {
         // remove the entire class if all properties are removed
         const foundClassIndex =
-          this.query?.classes.findIndex((c) => c.className === className) ?? -1;
+          this.query?.unions[unionIndex].classes.findIndex(
+            (c) => c.className === className,
+          ) ?? -1;
         if (foundClassIndex > -1) {
-          this.query?.classes.splice(foundClassIndex, 1);
+          this.query?.unions[unionIndex].classes.splice(foundClassIndex, 1);
         }
       }
     }
   }
 
   public buildQueryString() {
-    if (this.query === undefined || this.query.classes.length === 0) {
+    if (
+      this.query === undefined ||
+      this.query.unions.length === 0 ||
+      this.query.unions[0].classes.length === 0
+    ) {
       return "";
     }
 
-    const baseClass = this.query.classes[0];
-    const baseClassName = baseClass.className;
-    const baseIdName = baseClass.isAspect
-      ? `${baseClassName}.Element.id`
-      : `${baseClassName}.ECInstanceId`;
+    let unionQuery = "";
+    for (const union of this.query.unions) {
+      const baseClass = union.classes[0];
+      const baseClassName = baseClass.className;
+      const baseIdName = baseClass.isAspect
+        ? `${baseClassName}.Element.id`
+        : `${baseClassName}.ECInstanceId`;
 
-    let queryString = `SELECT ${baseIdName}${baseClass.isAspect ? " ECInstanceId" : ""} FROM ${baseClassName}`;
+      let queryString = `SELECT ${baseIdName}${
+        baseClass.isAspect ? " ECInstanceId" : ""
+      } FROM ${baseClassName}`;
 
-    if (this.query.classes.length > 1) {
-      for (let i = 1; i < this.query.classes.length; i++) {
-        const joinClass = this.query.classes[i];
-        const joinClassName = joinClass.className;
-        const joinIdName = joinClass.isAspect
-          ? `${joinClassName}.Element.id`
-          : `${joinClassName}.ECInstanceId`;
+      if (union.classes.length > 1) {
+        for (let i = 1; i < union.classes.length; i++) {
+          const joinClass = union.classes[i];
+          const joinClassName = joinClass.className;
+          const joinIdName = joinClass.isAspect
+            ? `${joinClassName}.Element.id`
+            : `${joinClassName}.ECInstanceId`;
 
-        if (joinClass.isRelational) {
-          queryString += ` JOIN ${joinClassName}`;
-          if (joinClass.properties.length > 0) {
-            if (joinClass.properties[0].needsQuote) {
-              queryString += ` ON ${joinClassName}.${joinClass.properties[0].name}='${joinClass.properties[0].value}'`;
-            } else {
-              if (this._isFloat(joinClass.properties[0].value)) {
-                queryString += ` ON ROUND(${joinClassName}.${joinClass.properties[0].name}, `;
-                queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-                queryString += `${Number(joinClass.properties[0].value).toFixed(
-                  QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-                )}`;
+          if (joinClass.isRelational) {
+            queryString += ` JOIN ${joinClassName}`;
+            if (joinClass.properties.length > 0) {
+              if (joinClass.properties[0].needsQuote) {
+                queryString += ` ON ${joinClassName}.${joinClass.properties[0].name}='${joinClass.properties[0].value}'`;
               } else {
-                queryString += ` ON ${joinClassName}.${joinClass.properties[0].name}=${joinClass.properties[0].value}`;
+                if (this._isFloat(joinClass.properties[0].value)) {
+                  queryString += ` ON ROUND(${joinClassName}.${joinClass.properties[0].name}, `;
+                  queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
+                  queryString += `${Number(
+                    joinClass.properties[0].value,
+                  ).toFixed(QueryBuilder.DEFAULT_DOUBLE_PRECISION)}`;
+                } else {
+                  queryString += ` ON ${joinClassName}.${joinClass.properties[0].name}=${joinClass.properties[0].value}`;
+                }
               }
             }
-          }
-          // when base is regular property, link base to first joined relational property
-          if (!baseClass.isRelational && i === 1) {
-            queryString += ` AND ${joinIdName} = ${baseIdName}`;
-          }
-          for (const property of joinClass.properties) {
-            if (property.needsQuote) {
-              queryString += ` AND ${joinClassName}.${property.name}='${property.value}'`;
-            } else {
-              if (this._isFloat(property.value)) {
-                queryString += ` AND ROUND(${joinClassName}.${property.name}, `;
-                queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-                queryString += `${Number(property.value).toFixed(
-                  QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-                )}`;
+            // when base is regular property, link base to first joined relational property
+            if (!baseClass.isRelational && i === 1) {
+              queryString += ` AND ${joinIdName} = ${baseIdName}`;
+            }
+            for (const property of joinClass.properties) {
+              if (property.needsQuote) {
+                queryString += ` AND ${joinClassName}.${property.name}='${property.value}'`;
               } else {
-                queryString += ` AND ${joinClassName}.${property.name}=${property.value}`;
+                if (this._isFloat(property.value)) {
+                  queryString += ` AND ROUND(${joinClassName}.${property.name}, `;
+                  queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
+                  queryString += `${Number(property.value).toFixed(
+                    QueryBuilder.DEFAULT_DOUBLE_PRECISION,
+                  )}`;
+                } else {
+                  queryString += ` AND ${joinClassName}.${property.name}=${property.value}`;
+                }
               }
             }
-          }
-        } else {
-          queryString += ` JOIN ${joinClassName} ON ${joinIdName} = ${baseIdName}`;
-          for (const property of joinClass.properties) {
-            if (property.needsQuote) {
-              queryString += ` AND ${joinClassName}.${property.name}='${property.value}'`;
-            } else {
-              if (this._isFloat(property.value)) {
-                queryString += ` AND ROUND(${joinClassName}.${property.name}, `;
-                queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-                queryString += `${Number(property.value).toFixed(
-                  QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-                )}`;
-              } else {
-                queryString += ` AND ${joinClassName}.${property.name}=${property.value}`;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    const properties = baseClass.properties;
-    if (properties.length > 0) {
-      if (properties[0].needsQuote) {
-        queryString += ` WHERE ${baseClassName}.${properties[0].name}='${properties[0].value}'`;
-      } else {
-        if (this._isFloat(properties[0].value)) {
-          queryString += ` WHERE ROUND(${baseClassName}.${properties[0].name}, `;
-          queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-          queryString += `${Number(properties[0].value).toFixed(
-            QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-          )}`;
-        } else {
-          queryString += ` WHERE ${baseClassName}.${properties[0].name}=${properties[0].value}`;
-        }
-      }
-      if (properties.length > 1) {
-        for (let i = 1; i < properties.length; i++) {
-          if (properties[i].needsQuote) {
-            queryString += ` AND ${baseClassName}.${properties[i].name}='${properties[i].value}'`;
           } else {
-            if (this._isFloat(properties[i].value)) {
-              queryString += ` AND ROUND(${baseClassName}.${properties[i].name}, `;
-              queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-              queryString += `${Number(properties[i].value).toFixed(
-                QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-              )}`;
-            } else {
-              queryString += ` AND ${baseClassName}.${properties[i].name}=${properties[i].value}`;
+            queryString += ` JOIN ${joinClassName} ON ${joinIdName} = ${baseIdName}`;
+            for (const property of joinClass.properties) {
+              if (property.needsQuote) {
+                queryString += ` AND ${joinClassName}.${property.name}='${property.value}'`;
+              } else {
+                if (this._isFloat(property.value)) {
+                  queryString += ` AND ROUND(${joinClassName}.${property.name}, `;
+                  queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
+                  queryString += `${Number(property.value).toFixed(
+                    QueryBuilder.DEFAULT_DOUBLE_PRECISION,
+                  )}`;
+                } else {
+                  queryString += ` AND ${joinClassName}.${property.name}=${property.value}`;
+                }
+              }
             }
           }
         }
       }
+
+      const properties = baseClass.properties;
+      if (properties.length > 0) {
+        if (properties[0].needsQuote) {
+          queryString += ` WHERE ${baseClassName}.${properties[0].name}='${properties[0].value}'`;
+        } else {
+          if (this._isFloat(properties[0].value)) {
+            queryString += ` WHERE ROUND(${baseClassName}.${properties[0].name}, `;
+            queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
+            queryString += `${Number(properties[0].value).toFixed(
+              QueryBuilder.DEFAULT_DOUBLE_PRECISION,
+            )}`;
+          } else {
+            queryString += ` WHERE ${baseClassName}.${properties[0].name}=${properties[0].value}`;
+          }
+        }
+        if (properties.length > 1) {
+          for (let i = 1; i < properties.length; i++) {
+            if (properties[i].needsQuote) {
+              queryString += ` AND ${baseClassName}.${properties[i].name}='${properties[i].value}'`;
+            } else {
+              if (this._isFloat(properties[i].value)) {
+                queryString += ` AND ROUND(${baseClassName}.${properties[i].name}, `;
+                queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
+                queryString += `${Number(properties[i].value).toFixed(
+                  QueryBuilder.DEFAULT_DOUBLE_PRECISION,
+                )}`;
+              } else {
+                queryString += ` AND ${baseClassName}.${properties[i].name}=${properties[i].value}`;
+              }
+            }
+          }
+        }
+      }
+      unionQuery += `${queryString} UNION `;
     }
+
+    unionQuery = unionQuery.slice(0, unionQuery.length - 7);
 
     // console.log(queryString);
     // console.log(this.query);
-    return queryString;
+    return unionQuery;
   }
 
   private _isFloat(n: unknown): boolean {
