@@ -26,10 +26,10 @@
 /common/changes/@itwin/one-click-lca-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1
 
 /packages/itwin/reports-config-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1
-/common/changes/@itwin/reports-config-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1
+/common/changes/@itwin/reports-config-widget-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1
 
-/packages/itwin/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty @DanishMehmood-bit
-/common/changes/@itwin/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @MeghaCBorty @DanishMehmood-bit
+/packages/itwin/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @DanishMehmood-bit
+/common/changes/@itwin/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @DanishMehmood-bit
 
 /packages/itwin/geo-tools  @itwin/viewer-components-reviewers @mdastous-bentley
 /common/changes/@itwin/geo-tools-react  @itwin/viewer-components-reviewers @mdastous-bentley
