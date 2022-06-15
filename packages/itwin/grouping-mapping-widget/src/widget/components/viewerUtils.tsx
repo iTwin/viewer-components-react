@@ -2,23 +2,242 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type {
-  IModelConnection,
-  ViewChangeOptions,
-} from "@itwin/core-frontend";
-import {
-  EmphasizeElements,
-  IModelApp,
-} from "@itwin/core-frontend";
-import type {
-  ElementProps,
-} from "@itwin/core-common";
-import {
-  ColorDef,
-  FeatureOverrideType,
-} from "@itwin/core-common";
+import type { ViewChangeOptions } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { EmphasizeElements, IModelApp } from "@itwin/core-frontend";
+import type { ElementProps, FeatureAppearance } from "@itwin/core-common";
+import { ColorDef, FeatureOverrideType } from "@itwin/core-common";
 import { KeySet } from "@itwin/presentation-common";
 import { HiliteSetProvider } from "@itwin/presentation-frontend";
+
+export const isolateElementsByKeys = async (
+  keySet: KeySet,
+  replace = false,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return [];
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+
+  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
+    imodel: vp.iModel,
+  });
+  const set = await hiliteProvider.getHiliteSet(keySet);
+  if (set.elements) {
+    const ids = [...set.elements];
+    isolateElements(ids, replace);
+    return ids;
+  }
+  return [];
+};
+
+export const isolateElementsById = async (
+  elementIds: string[],
+  iModelConnection: IModelConnection,
+  replace = false,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return [];
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+
+  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
+    imodel: vp.iModel,
+  });
+  const set = await hiliteProvider.getHiliteSet(keySet);
+  if (set.elements) {
+    const ids = [...set.elements];
+    isolateElements(ids, replace);
+    return ids;
+  }
+  return [];
+};
+
+export const isolateElements = (hilitedIds: string[], replace = false) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+
+  emph.isolateElements(hilitedIds, vp, replace);
+};
+
+export const clearIsolatedElements = () => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+  emph.clearIsolatedElements(vp);
+};
+
+export const hideElementsById = async (
+  elementIds: string[],
+  iModelConnection: IModelConnection,
+  replace = false,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return [];
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+
+  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
+    imodel: vp.iModel,
+  });
+  const set = await hiliteProvider.getHiliteSet(keySet);
+  if (set.elements) {
+    const ids = [...set.elements];
+    hideElements(ids, replace);
+    return ids;
+  }
+  return [];
+};
+
+export const hideElements = (hilitedIds: string[], replace = false) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+
+  emph.hideElements(hilitedIds, vp, replace);
+};
+
+export const clearHiddenElements = () => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+  emph.clearHiddenElements(vp);
+};
+
+export const overrideElementsById = async (
+  iModelConnection: IModelConnection,
+  elementIds: string[],
+  color: string,
+  overrideType = FeatureOverrideType.ColorOnly,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return [];
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+
+  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
+    imodel: vp.iModel,
+  });
+  const set = await hiliteProvider.getHiliteSet(keySet);
+  if (set.elements) {
+    const ids = [...set.elements];
+    overrideElements(ids, color, overrideType);
+    return ids;
+  }
+  return [];
+};
+
+export const overrideElements = (
+  hilitedIds: string[],
+  color: string,
+  overrideType = FeatureOverrideType.ColorOnly,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+
+  emph.overrideElements(
+    hilitedIds,
+    vp,
+    ColorDef.fromString(color),
+    overrideType,
+    true,
+  );
+};
+
+export const clearOverriddenElements = () => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+  emph.clearOverriddenElements(vp);
+};
+
+export const emphasizeElements = (
+  hilitedIds: string[],
+  defaultAppearance: FeatureAppearance | undefined = undefined,
+  replace = false,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+
+  emph.wantEmphasis = true;
+  emph.emphasizeElements(hilitedIds, vp, defaultAppearance, replace);
+};
+
+export const emphasisElementsById = async (
+  iModelConnection: IModelConnection,
+  elementIds: string[],
+  defaultAppearance: FeatureAppearance | undefined = undefined,
+  replace = false,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return [];
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+
+  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
+    imodel: vp.iModel,
+  });
+  const set = await hiliteProvider.getHiliteSet(keySet);
+  if (set.elements) {
+    const ids = [...set.elements];
+    emphasizeElements(ids, defaultAppearance, replace);
+    return ids;
+  }
+  return [];
+};
+
+export const emphasizeElementsByKeys = async (
+  keySet: KeySet,
+  defaultAppearance: FeatureAppearance | undefined = undefined,
+  replace = false,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return [];
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+
+  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
+    imodel: vp.iModel,
+  });
+  const set = await hiliteProvider.getHiliteSet(keySet);
+  if (set.elements) {
+    const ids = [...set.elements];
+    emphasizeElements(ids, defaultAppearance, replace);
+    return ids;
+  }
+  return [];
+};
 
 export const visualizeElementsById = async (
   elementIds: string[],
@@ -87,7 +306,7 @@ export const visualizeElements = (
     elementIds,
     vp,
     ColorDef.fromString(color),
-    FeatureOverrideType.ColorOnly,
+    FeatureOverrideType.ColorAndAlpha,
     true,
   );
   if (!wantEmphasis) {
@@ -95,6 +314,27 @@ export const visualizeElements = (
   }
   emph.wantEmphasis = true;
   emph.emphasizeElements(elementIds, vp, undefined, replace);
+};
+
+export const transparentOverriddenElements = () => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+  const ids = emph.getOverriddenElements()?.values();
+  if (ids) {
+    const toOverride = new Set<string>();
+    Array.from(ids).forEach((a) => a.forEach((id) => toOverride.add(id)));
+    emph.overrideElements(
+      toOverride,
+      vp,
+      ColorDef.red.withAlpha(50),
+      FeatureOverrideType.AlphaOnly,
+      true,
+    );
+  }
 };
 
 export const zoomToElements = async (elementIds: string[]) => {
@@ -108,6 +348,27 @@ export const zoomToElements = async (elementIds: string[]) => {
   // It was removed. Should be a prop to be passed to lookAtViewAlignedVolume within the implementation.
   // viewChangeOpts.marginPercent = new MarginPercent(0.1, 0.1, 0.1, 0.1);
   await vp.zoomToElements(elementIds, { ...viewChangeOpts });
+};
+
+export const getHiliteIds = async (
+  elementIds: string[],
+  iModelConnection: IModelConnection,
+) => {
+  if (!IModelApp.viewManager.selectedView) {
+    return [];
+  }
+
+  const vp = IModelApp.viewManager.selectedView;
+
+  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
+    imodel: vp.iModel,
+  });
+  const set = await hiliteProvider.getHiliteSet(keySet);
+  if (set.elements) {
+    return [...set.elements];
+  }
+  return [];
 };
 
 export const manufactureKeys = async (
@@ -164,5 +425,25 @@ export const clearEmphasizedElements = () => {
   const vp = IModelApp.viewManager.selectedView;
   const emph = EmphasizeElements.getOrCreate(vp);
   emph.clearEmphasizedElements(vp);
+};
+
+export const clearEmphasizedOverriddenElements = () => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+  emph.clearEmphasizedElements(vp);
   emph.clearOverriddenElements(vp);
+};
+
+export const clearAll = () => {
+  if (!IModelApp.viewManager.selectedView) {
+    return;
+  }
+  const vp = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(vp);
+  emph.clearEmphasizedElements(vp);
+  emph.clearOverriddenElements(vp);
+  emph.clearHiddenElements(vp);
 };

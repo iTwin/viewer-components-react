@@ -33,6 +33,7 @@ import type { Api } from "./GroupingMapping";
 import { ApiContext } from "./GroupingMapping";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
+import { clearAll } from "./viewerUtils";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
 
@@ -86,9 +87,7 @@ export const Mappings = () => {
   const [mappingView, setMappingView] = useState<MappingView>(
     MappingView.MAPPINGS
   );
-  const [selectedMapping, setSelectedMapping] = useState<
-  Mapping | undefined
-  >(undefined);
+  const [selectedMapping, setSelectedMapping] = useState<Mapping | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
@@ -105,6 +104,7 @@ export const Mappings = () => {
   }, []);
 
   const refresh = useCallback(async () => {
+    clearAll();
     setMappingView(MappingView.MAPPINGS);
     setSelectedMapping(undefined);
     setMappings([]);
