@@ -12,14 +12,14 @@ import {
 import React, { useContext, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { getReportingClient, handleError, WidgetHeader } from "./utils";
+import { handleError, WidgetHeader } from "./utils";
 import "./CalculatedPropertyAction.scss";
 import type { CustomCalculationType } from "./CustomCalculationTable";
 import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
 import type { PropertyMap } from "../../formula/Types";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
@@ -39,6 +39,7 @@ const CustomCalculationAction = ({
   returnFn,
 }: CalculatedPropertyActionProps) => {
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const [propertyName, setPropertyName] = useState<string>(
     customCalculation?.propertyName ?? "",
   );
@@ -61,10 +62,9 @@ const CustomCalculationAction = ({
     }
     try {
       setIsLoading(true);
-      const reportingClientApi = getReportingClient(apiContext.prefix);
 
       customCalculation
-        ? await reportingClientApi.updateCustomCalculation(
+        ? await mappingClient.updateCustomCalculation(
           apiContext.accessToken,
           iModelId,
           mappingId,
@@ -76,7 +76,7 @@ const CustomCalculationAction = ({
             quantityType,
           }
         )
-        : await reportingClientApi.createCustomCalculation(
+        : await mappingClient.createCustomCalculation(
           apiContext.accessToken,
           iModelId,
           mappingId,

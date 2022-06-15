@@ -153,15 +153,3 @@ export const LoadingSpinner = () => {
     </div>
   );
 };
-
-const prefixUrl = (baseUrl?: string, prefix?: string) => {
-  if (prefix && baseUrl) {
-    return baseUrl.replace("api.bentley.com", `${prefix}-api.bentley.com`);
-  }
-  return baseUrl;
-};
-
-export const getReportingClient = (prefix?: "" | "qa" | "dev") => {
-  const url = prefixUrl(REPORTING_BASE_PATH, prefix);
-  return new ReportingClient(url);
-};

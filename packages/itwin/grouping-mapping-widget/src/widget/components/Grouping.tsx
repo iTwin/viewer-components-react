@@ -47,11 +47,12 @@ import {
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { fetchIdsFromQuery, getReportingClient, handleError, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, handleError, WidgetHeader } from "./utils";
 import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
-import type { Api } from "./GroupingMapping";
+import { Api, MappingClientContext } from "./GroupingMapping";
 import { ApiContext } from "./GroupingMapping";
+import { IMappingClient } from "../IMappingClient";
 
 export type GroupType = CreateTypeFromInterface<Group>;
 
@@ -72,12 +73,12 @@ const fetchGroups = async (
   iModelId: string,
   mappingId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: Api
+  apiContext: Api,
+  mappingClient: IMappingClient
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = getReportingClient(apiContext.prefix);
-    const groups = await reportingClientApi.getGroups(apiContext.accessToken, iModelId, mappingId);
+    const groups = await mappingClient.getGroups(apiContext.accessToken, iModelId, mappingId);
     setGroups(groups);
   } catch (error: any) {
     handleError(error.status);
@@ -89,6 +90,7 @@ const fetchGroups = async (
 export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -102,15 +104,15 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const [groups, setGroups] = useState<Group[]>([]);
 
   useEffect(() => {
-    void fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading, apiContext);
-  }, [apiContext, iModelId, mapping.id, setIsLoading]);
+    void fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading, apiContext, mappingClient);
+  }, [apiContext, mappingClient, iModelId, mapping.id, setIsLoading]);
 
   const refresh = useCallback(async () => {
     setGroupsView(GroupsView.GROUPS);
     setSelectedGroup(undefined);
     setGroups([]);
-    await fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading, apiContext);
-  }, [apiContext, iModelId, mapping.id, setGroups]);
+    await fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading, apiContext, mappingClient);
+  }, [apiContext, mappingClient, iModelId, mapping.id, setGroups]);
 
   const addGroup = () => {
     // TODO Retain selection in view without emphasizes. Goal is to make it so we can distinguish
@@ -417,8 +419,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = getReportingClient(apiContext.prefix);
-              await reportingClientApi.deleteGroup(
+              await mappingClient.deleteGroup(
                 apiContext.accessToken,
                 iModelId,
                 mapping.id ?? "",

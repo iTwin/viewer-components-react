@@ -13,7 +13,7 @@ import {
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { fetchIdsFromQuery, getReportingClient, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -28,7 +28,7 @@ import {
   zoomToElements,
 } from "./viewerUtils";
 import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 
 interface GroupActionProps {
   iModelId: string;
@@ -45,6 +45,7 @@ const GroupAction = ({
 }: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const [details, setDetails] = useState({
     groupName: group?.groupName ?? "",
     description: group?.description ?? "",
@@ -55,7 +56,7 @@ const GroupAction = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
-  PropertyRecord[]
+    PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
@@ -82,8 +83,7 @@ const GroupAction = ({
         selectionProvider: ISelectionProvider,
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-        const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-        }` : "";
+        const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}` : "";
         setSimpleQuery(query);
       },
     );
@@ -171,17 +171,16 @@ const GroupAction = ({
     try {
       setIsLoading(true);
       const currentQuery = query || simpleQuery;
-      const reportingClientApi = getReportingClient(apiContext.prefix);
 
       group
-        ? await reportingClientApi.updateGroup(
+        ? await mappingClient.updateGroup(
           apiContext.accessToken,
           iModelId,
           mappingId,
           group.id ?? "",
           { ...details, query: currentQuery },
         )
-        : await reportingClientApi.createGroup(apiContext.accessToken, iModelId, mappingId, {
+        : await mappingClient.createGroup(apiContext.accessToken, iModelId, mappingId, {
           ...details,
           query: currentQuery,
         });
@@ -206,7 +205,7 @@ const GroupAction = ({
     simpleQuery,
     validator,
     apiContext.accessToken,
-    apiContext.prefix,
+    mappingClient,
   ]);
 
   const isBlockingActions = !(details.groupName && (query || simpleQuery) && !isRendering && !isLoading);

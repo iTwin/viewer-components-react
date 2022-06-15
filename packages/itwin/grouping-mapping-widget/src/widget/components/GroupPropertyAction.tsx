@@ -44,10 +44,10 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from "re
 
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { getReportingClient, handleError, WidgetHeader } from "./utils";
+import { handleError, WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
 import type { ECProperty, GroupPropertyCreate } from "@itwin/insights-client";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -267,6 +267,7 @@ const GroupPropertyAction = ({
 }: GroupPropertyActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const [propertyName, setPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<string | undefined>();
   const [quantityType, setQuantityType] = useState<string>("Undefined");
@@ -295,9 +296,9 @@ const GroupPropertyAction = ({
           }],
       };
       const requestOptions: ContentDescriptorRequestOptions<
-      IModelConnection,
-      KeySet,
-      RulesetVariable
+        IModelConnection,
+        KeySet,
+        RulesetVariable
       > = {
         imodel: iModelConnection,
         keys: keySet,
@@ -351,11 +352,10 @@ const GroupPropertyAction = ({
       setClassToPropertiesMapping(classToPropertiesMapping);
 
       let newEcProperties: ECProperty[];
-      const reportingClientApi = getReportingClient(apiContext.prefix);
       // Fetch already existing ec properties then add all classes from presentation
       if (groupPropertyId) {
         // TODO Error handling
-        const response = await reportingClientApi.getGroupProperty(
+        const response = await mappingClient.getGroupProperty(
           apiContext.accessToken,
           iModelId,
           mappingId,
@@ -402,7 +402,7 @@ const GroupPropertyAction = ({
       setIsLoading(false);
     };
     void getContent();
-  }, [apiContext.accessToken, apiContext.prefix, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
+  }, [apiContext.accessToken, mappingClient, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
 
   const onSave = async () => {
     const filteredEcProperties = ecProperties.filter(
@@ -423,9 +423,8 @@ const GroupPropertyAction = ({
         quantityType,
         ecProperties: filteredEcProperties,
       };
-      const reportingClientApi = getReportingClient(apiContext.prefix);
       groupPropertyId
-        ? await reportingClientApi.updateGroupProperty(
+        ? await mappingClient.updateGroupProperty(
           apiContext.accessToken,
           iModelId,
           mappingId,
@@ -433,7 +432,7 @@ const GroupPropertyAction = ({
           groupPropertyId,
           groupProperty
         )
-        : await reportingClientApi.createGroupProperty(
+        : await mappingClient.createGroupProperty(
           apiContext.accessToken,
           iModelId,
           mappingId,
