@@ -129,13 +129,13 @@ const ExportModal = (props: ExportProps) => {
           }
         } catch (e) {
           setJobStatus(JobStatus.StatusEnum.Failed);
-          toaster.negative("You are not authorized to create carbon calculation jobs. Please contact project administrator.");
+          toaster.negative("You do not have the required permissions. Please contact the project administrator.");
           /* eslint-disable no-console */
           console.error(e);
         }
       } else {
         setJobStatus(JobStatus.StatusEnum.Failed);
-        toaster.negative("Failed to get retrieve reportId or token. 😔");
+        toaster.negative("Invalid reportId.");
       }
     },
     [props, pinStatus, oneClickLCAClientApi]

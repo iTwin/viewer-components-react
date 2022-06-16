@@ -60,9 +60,9 @@ const mockIModelsResponse = [
   {
     iModel: {
       id: mockIModelId1,
-      displayName: faker.random.alpha(10),
-      name: faker.random.alpha(10),
-      description: faker.random.words(10),
+      displayName: "rAnDoMdIsPlAynAmE1",
+      name: "rAnDomName1",
+      description: "rAnDoMDeScRiPtIoN1",
       createdDateTime: "2021-10-04T22:13:50.397Z",
       state: IModelState.Initialized,
       projectId: mockITwinId,
@@ -83,9 +83,9 @@ const mockIModelsResponse = [
   {
     iModel: {
       id: mockIModelId2,
-      displayName: faker.random.alpha(10),
-      name: faker.random.alpha(10),
-      description: faker.random.words(10),
+      displayName: "rAnDoMdIsPlAynAmE2",
+      name: "rAnDomName2",
+      description: "rAnDoMDeScRiPtIoN2",
       createdDateTime: "2021-10-04T22:13:50.397Z",
       state: IModelState.Initialized,
       projectId: mockITwinId,
@@ -121,8 +121,8 @@ const mockProjectIModels = {
 
 const mockReport: Report = {
   id: mockReportId,
-  displayName: faker.random.alpha(10),
-  description: faker.random.words(10),
+  displayName: "mOcKRePoRt1",
+  description: "mOcKRePoRtDeScRiPtIoN1",
   deleted: false,
   _links: {
     project: {
@@ -180,11 +180,11 @@ const mockMappingsFactory = (
   mockReportMappings: ReportMappingCollection
 ): [MappingSingle[], RequestHandler[]] => {
   const mockMappings: MappingSingle[] = mockReportMappings.mappings!.map(
-    (mapping) => ({
+    (mapping, index) => ({
       mapping: {
         id: mapping.mappingId,
-        mappingName: faker.random.alpha(10),
-        description: faker.random.words(10),
+        mappingName: `mOcKMaPpIngNaMe${index}`,
+        description: `mOcKmApPInGDeScRiPtIoN${index}`,
         extractionEnabled: false,
         createdOn: "",
         createdBy: "",
@@ -509,13 +509,14 @@ describe("Report Mappings View", () => {
 
     // Adding an extra unmapped mapping.
     const extraMappingId = faker.datatype.uuid();
-    const extraMappingName = faker.random.alpha(10);
+    const extraMappingName = "mOcKNaMeExTrA";
+    const extraMappingDescription = "mOcKDeScRiPtIoNeXtRa";
 
     mockMappings.push({
       mapping: {
         id: extraMappingId,
         mappingName: extraMappingName,
-        description: faker.random.words(10),
+        description: extraMappingDescription,
         extractionEnabled: false,
         createdOn: "",
         createdBy: "",

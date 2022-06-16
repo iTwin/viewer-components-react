@@ -33,6 +33,7 @@ import type { Api } from "./GroupingMapping";
 import { ApiContext, MappingClientContext } from "./GroupingMapping";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
+import { clearAll } from "./viewerUtils";
 import type { IMappingClient } from "../IMappingClient";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
@@ -50,7 +51,7 @@ const fetchMappings = async (
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   apiContext: Api,
-  mappingClient: IMappingClient
+  mappingClient: IMappingClient,
 ) => {
   try {
     setIsLoading(true);
@@ -92,8 +93,7 @@ export const Mappings = () => {
   const [mappingView, setMappingView] = useState<MappingView>(
     MappingView.MAPPINGS
   );
-  const [selectedMapping, setSelectedMapping] =
-    useState<Mapping | undefined>(undefined);
+  const [selectedMapping, setSelectedMapping] = useState<Mapping | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
@@ -110,6 +110,7 @@ export const Mappings = () => {
   }, []);
 
   const refresh = useCallback(async () => {
+    clearAll();
     setMappingView(MappingView.MAPPINGS);
     setSelectedMapping(undefined);
     setMappings([]);
