@@ -40,13 +40,11 @@ import {
   clearEmphasizedOverriddenElements,
   clearHiddenElements,
   clearOverriddenElements,
-  emphasisElementsById,
   emphasizeElements,
   getHiliteIds,
   hideElements,
   hideElementsById,
   overrideElements,
-  overrideElementsById,
   zoomToElements,
 } from "./viewerUtils";
 import {
@@ -137,7 +135,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
   };
 
-  const getHiliteIdsFromGroups = async (groups: Group[]) => {
+  const getHiliteIdsFromGroups = useCallback(async (groups: Group[]) => {
     let allIds: string[] = [];
     for (const group of groups) {
       const query = group.query ?? "";
@@ -166,7 +164,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       allIds = allIds.concat(currentIds);
     }
     return allIds;
-  };
+  }, [iModelConnection, hilitedElements]);
 
   const visualizeGroupColors = useCallback(
     async (viewGroups: Group[]) => {
@@ -193,7 +191,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       await zoomToElements(allIds);
       setLoadingQuery(false);
     },
-    [iModelConnection, groups, hiddenGroupsIds],
+    [groups, hiddenGroupsIds, getHiliteIdsFromGroups],
   );
 
   const hideGroups = useCallback(
@@ -257,7 +255,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       hideElements(hiddenIds);
       await zoomToElements(viewIds);
     },
-    [groups, hiddenGroupsIds, hideGroups, iModelConnection, hilitedElements],
+    [groups, hiddenGroupsIds, getHiliteIdsFromGroups],
   );
 
   const addGroup = () => {
