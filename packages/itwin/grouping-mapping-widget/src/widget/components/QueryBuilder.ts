@@ -155,6 +155,7 @@ export class QueryBuilder {
           propertyValue,
           isAspect,
           this._needsQuote(propertyField),
+          isCategory,
           false,
         );
       }

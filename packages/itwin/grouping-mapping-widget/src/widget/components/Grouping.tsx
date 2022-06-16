@@ -40,13 +40,11 @@ import {
   clearEmphasizedOverriddenElements,
   clearHiddenElements,
   clearOverriddenElements,
-  emphasisElementsById,
   emphasizeElements,
   getHiliteIds,
   hideElements,
   hideElementsById,
   overrideElements,
-  overrideElementsById,
   zoomToElements,
 } from "./viewerUtils";
 import {
@@ -137,6 +135,37 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
   };
 
+  const getHiliteIdsFromGroups = useCallback(async (groups: Group[]) => {
+    let allIds: string[] = [];
+    for (const group of groups) {
+      const query = group.query ?? "";
+      let currentIds: string[] = [];
+      if (hilitedElements.current.has(query)) {
+        currentIds = hilitedElements.current.get(query) ?? [];
+      } else {
+        try {
+          const ids: string[] = await fetchIdsFromQuery(
+            query,
+            iModelConnection,
+          );
+          if (ids.length === 0) {
+            toaster.warning(
+              `${group.groupName}'s query is valid but produced no results.`,
+            );
+          }
+          currentIds = await getHiliteIds(ids, iModelConnection);
+          hilitedElements.current.set(query, currentIds);
+        } catch {
+          toaster.negative(
+            `Could not hide/show ${group.groupName}. Query could not be resolved.`,
+          );
+        }
+      }
+      allIds = allIds.concat(currentIds);
+    }
+    return allIds;
+  }, [iModelConnection, hilitedElements]);
+
   const visualizeGroupColors = useCallback(
     async (viewGroups: Group[]) => {
       setLoadingQuery(true);
@@ -147,55 +176,22 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           viewGroups.length > groups.length
             ? viewGroups.findIndex((g) => g.id === group.id)
             : groups.findIndex((g) => g.id === group.id);
-        const query = group.query ?? "";
-        if (hilitedElements.current.has(query)) {
-          const hilitedIds = hilitedElements.current.get(query) ?? [];
-          overrideElements(
-            hilitedIds,
-            getGroupColor(index),
-            FeatureOverrideType.ColorAndAlpha,
-          );
-          emphasizeElements(hilitedIds, undefined);
-          if (!hiddenGroupsIds.includes(group.id ?? "")) {
-            allIds = allIds.concat(hilitedIds);
-          }
-        } else {
-          try {
-            const ids: string[] = await fetchIdsFromQuery(
-              query,
-              iModelConnection,
-            );
-            if (ids.length === 0) {
-              toaster.warning(
-                `${group.groupName}'s query is valid but produced no results.`,
-              );
-            }
-            await overrideElementsById(
-              iModelConnection,
-              ids,
-              getGroupColor(index),
-              FeatureOverrideType.ColorAndAlpha,
-            );
-            const hiliteIds = await emphasisElementsById(
-              iModelConnection,
-              ids,
-              undefined,
-            );
-            hilitedElements.current.set(query, hiliteIds);
-            if (!hiddenGroupsIds.includes(group.id ?? "")) {
-              allIds = allIds.concat(hiliteIds);
-            }
-          } catch {
-            toaster.negative(
-              `Could not load ${group.groupName}. Query could not be resolved.`,
-            );
-          }
+        const hilitedIds = await getHiliteIdsFromGroups([group]);
+        overrideElements(
+          hilitedIds,
+          getGroupColor(index),
+          FeatureOverrideType.ColorAndAlpha,
+        );
+        emphasizeElements(hilitedIds, undefined);
+        if (!hiddenGroupsIds.includes(group.id ?? "")) {
+          allIds = allIds.concat(hilitedIds);
         }
       }
+
       await zoomToElements(allIds);
       setLoadingQuery(false);
     },
-    [iModelConnection, groups, hiddenGroupsIds],
+    [groups, hiddenGroupsIds, getHiliteIdsFromGroups],
   );
 
   const hideGroups = useCallback(
@@ -244,44 +240,22 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const showGroup = useCallback(
     async (viewGroup: Group) => {
       clearHiddenElements();
-      const newHiddenGroups: Group[] = [];
-      for (const id of hiddenGroupsIds) {
-        if (id === viewGroup.id) {
-          continue;
-        }
-        const newHiddenGroup = groups.find((g) => g.id === id);
-        if (newHiddenGroup) {
-          newHiddenGroups.push(newHiddenGroup);
-        }
-      }
-      await hideGroups(newHiddenGroups, false);
 
-      // zoom to showed elements
-      const query = viewGroup.query ?? "";
-      if (hilitedElements.current.has(query)) {
-        const hiliteIds = hilitedElements.current.get(query) ?? [];
-        await zoomToElements(hiliteIds);
-      } else {
-        try {
-          const ids: string[] = await fetchIdsFromQuery(
-            query,
-            iModelConnection,
-          );
-          if (ids.length === 0) {
-            toaster.warning(
-              `${viewGroup.groupName}'s query is valid but produced no results.`,
-            );
-          }
-          const hiliteIds = await getHiliteIds(ids, iModelConnection);
-          await zoomToElements(hiliteIds);
-        } catch {
-          toaster.negative(
-            `Could not hide/show ${viewGroup.groupName}. Query could not be resolved.`,
-          );
-        }
-      }
+      // hide group Ids filter
+      const newHiddenGroups: Group[] = hiddenGroupsIds
+        .map((id) => groups.find((g) => g.id === id))
+        .filter((g): g is Group => !!g && g.id !== viewGroup.id);
+
+      // view group Ids filter
+      const viewIds = await getHiliteIdsFromGroups(
+        groups.filter((g) => !newHiddenGroups.find((hg) => hg.id === g.id)),
+      );
+      let hiddenIds = await getHiliteIdsFromGroups(newHiddenGroups);
+      hiddenIds = hiddenIds.filter((id) => !viewIds.includes(id));
+      hideElements(hiddenIds);
+      await zoomToElements(viewIds);
     },
-    [groups, hiddenGroupsIds, hideGroups, iModelConnection, hilitedElements],
+    [groups, hiddenGroupsIds, getHiliteIdsFromGroups],
   );
 
   const addGroup = () => {
@@ -353,7 +327,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
 
     clearHiddenElements();
     setHiddenGroupsIds([]);
-    await zoomToElements(Array.from(hilitedElements.current.values()).flat());
+    const allIds = await getHiliteIdsFromGroups(groups);
+    await zoomToElements(allIds);
 
     setLoadingQuery(false);
   };

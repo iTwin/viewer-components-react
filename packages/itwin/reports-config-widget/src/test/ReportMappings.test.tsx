@@ -843,7 +843,8 @@ describe("Report Mappings View", () => {
     ).toBeInTheDocument();
     // Should be two in the document. One in the status and the other in the list.
     // TODO Assert that it is in the correct HorizontalTile
-    expect(screen.getAllByTitle(/starting/i)).toHaveLength(2);
+    const startingStates = await screen.findAllByTitle(/starting/i);
+    expect(startingStates).toHaveLength(2);
 
     const loadingStates = await screen.findAllByTitle(/loading/i);
     expect(loadingStates).toHaveLength(2);
