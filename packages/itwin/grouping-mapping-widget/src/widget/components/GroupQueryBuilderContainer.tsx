@@ -47,18 +47,21 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
     context.setQuery("");
     context.queryBuilder.query = undefined;
     context.setCurrentPropertyList([]);
-    context.resetView();
+    context.resetView().catch((e) =>
+      /* eslint-disable no-console */
+      console.error(e),
+    );
   };
 
   return (
-    <div className='find-similar-container'>
+    <div className="find-similar-container">
       <PropertyGridWrapperApp keys={keysState} imodel={iModelConnection} />
       {selected && (
-        <div className='button-container'>
+        <div className="button-container">
           <Button
-            styleType='default'
-            size='small'
-            className='reset-button'
+            styleType="default"
+            size="small"
+            className="reset-button"
             onClick={_onClickResetButton}
           >
             Reset
