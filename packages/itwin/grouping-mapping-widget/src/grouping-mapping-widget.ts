@@ -5,6 +5,11 @@
 /** UI Provider for iTwin Viewer Applications */
 export * from "./widget/GroupingMappingWidget";
 
+/** Interfaces for providing custom MappingClient */
+export { createDefaultMappingClient, ClientPrefix } from "./widget/components/GroupingMapping";
+export * from "@itwin/insights-client";
+export * from "./widget/IMappingClient";
+
 /** Internal components for custom UIs */
 export { Mappings } from "./widget/components/Mapping";
 export { Groupings } from "./widget/components/Grouping";

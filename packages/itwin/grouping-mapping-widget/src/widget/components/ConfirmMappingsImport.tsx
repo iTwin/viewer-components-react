@@ -15,8 +15,8 @@ import "./ConfirmMappingsImport.scss";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SvgStatusSuccessHollow } from "@itwin/itwinui-icons-react";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { getReportingClient, handleError } from "./utils";
-import { ApiContext } from "./GroupingMapping";
+import { handleError } from "./utils";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 
 interface ConfirmMappingImportProps {
   sourceiModelId: string;
@@ -41,6 +41,7 @@ const ConfirmMappingImport = ({
 }: ConfirmMappingImportProps) => {
   const iModelId = useActiveIModelConnection()?.iModelId;
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
 
   const [importCount, setImportCount] = useState<number>(0);
   const [currentlyImporting, setCurrentlyImporting] = useState<string>("");
@@ -75,10 +76,9 @@ const ConfirmMappingImport = ({
     }
     setImporting(true);
     try {
-      const reportingClientApi = getReportingClient(apiContext.prefix);
       for (const selectedMapping of selectedMappings) {
         setCurrentlyImporting(selectedMapping.mappingName ?? "");
-        await reportingClientApi.copyMapping(
+        await mappingClient.copyMapping(
           apiContext.accessToken,
           sourceiModelId,
           selectedMapping.id ?? "",

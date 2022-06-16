@@ -52,7 +52,6 @@ import {
 import {
   EmptyMessage,
   fetchIdsFromQuery,
-  getReportingClient,
   handleError,
   LoadingOverlay,
   WidgetHeader,
@@ -60,9 +59,10 @@ import {
 import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
 import type { Api } from "./GroupingMapping";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 import { FeatureOverrideType } from "@itwin/core-common";
 import { GroupTile } from "./GroupTile";
+import type { IMappingClient } from "../IMappingClient";
 
 export type GroupType = CreateTypeFromInterface<Group>;
 
@@ -86,11 +86,11 @@ const fetchGroups = async (
   mappingId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   apiContext: Api,
+  mappingClient: IMappingClient,
 ): Promise<Group[] | undefined> => {
   try {
     setIsLoading(true);
-    const reportingClientApi = getReportingClient(apiContext.prefix);
-    const groups = await reportingClientApi.getGroups(
+    const groups = await mappingClient.getGroups(
       apiContext.accessToken,
       iModelId,
       mappingId,
@@ -108,6 +108,7 @@ const fetchGroups = async (
 export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -128,8 +129,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       mapping.id ?? "",
       setIsLoading,
       apiContext,
+      mappingClient,
     );
-  }, [apiContext, iModelId, mapping.id, setIsLoading]);
+  }, [apiContext, mappingClient, iModelId, mapping.id, setIsLoading]);
 
   const getGroupColor = function (index: number) {
     return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
@@ -316,6 +318,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       mapping.id ?? "",
       setIsLoading,
       apiContext,
+      mappingClient,
     );
     if (groups) {
       if (showGroupColor) {
@@ -326,6 +329,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     }
   }, [
     apiContext,
+    mappingClient,
     iModelId,
     mapping.id,
     setGroups,
@@ -569,8 +573,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = getReportingClient(apiContext.prefix);
-              await reportingClientApi.deleteGroup(
+              await mappingClient.deleteGroup(
                 apiContext.accessToken,
                 iModelId,
                 mapping.id ?? "",

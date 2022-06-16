@@ -20,11 +20,11 @@ import {
   BboxDimensionsDecorator,
 } from "../../decorators/BboxDimensionsDecorator";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { getReportingClient, handleError, WidgetHeader } from "./utils";
+import { handleError, WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
 import type { CalculatedPropertyType } from "./CalculatedPropertyTable";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
@@ -44,6 +44,7 @@ const CalculatedPropertyAction = ({
   returnFn,
 }: CalculatedPropertyActionProps) => {
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const [propertyName, setPropertyName] = useState<string>(
     property?.propertyName ?? "",
   );
@@ -101,10 +102,8 @@ const CalculatedPropertyAction = ({
     try {
       setIsLoading(true);
 
-      const reportingClientApi = getReportingClient(apiContext.prefix);
-
       property
-        ? await reportingClientApi.updateCalculatedProperty(
+        ? await mappingClient.updateCalculatedProperty(
           apiContext.accessToken,
           iModelId,
           mappingId,
@@ -115,7 +114,7 @@ const CalculatedPropertyAction = ({
             type,
           },
         )
-        : await reportingClientApi.createCalculatedProperty(
+        : await mappingClient.createCalculatedProperty(
           apiContext.accessToken,
           iModelId,
           mappingId,

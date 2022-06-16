@@ -13,7 +13,7 @@ import {
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { fetchIdsFromQuery, getReportingClient, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -28,7 +28,7 @@ import {
   zoomToElements,
 } from "./viewerUtils";
 import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 
 interface GroupActionProps {
   iModelId: string;
@@ -47,6 +47,7 @@ const GroupAction = ({
 }: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const [details, setDetails] = useState({
     groupName: group?.groupName ?? "",
     description: group?.description ?? "",
@@ -175,17 +176,16 @@ const GroupAction = ({
     try {
       setIsLoading(true);
       const currentQuery = query || simpleQuery;
-      const reportingClientApi = getReportingClient(apiContext.prefix);
 
       group
-        ? await reportingClientApi.updateGroup(
+        ? await mappingClient.updateGroup(
           apiContext.accessToken,
           iModelId,
           mappingId,
           group.id ?? "",
           { ...details, query: currentQuery },
         )
-        : await reportingClientApi.createGroup(apiContext.accessToken, iModelId, mappingId, {
+        : await mappingClient.createGroup(apiContext.accessToken, iModelId, mappingId, {
           ...details,
           query: currentQuery,
         });
@@ -210,7 +210,7 @@ const GroupAction = ({
     simpleQuery,
     validator,
     apiContext.accessToken,
-    apiContext.prefix,
+    mappingClient,
   ]);
 
   const isBlockingActions = !(details.groupName && (query || simpleQuery) && !isRendering && !isLoading);
