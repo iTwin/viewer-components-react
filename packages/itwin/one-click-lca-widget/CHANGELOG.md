@@ -1,6 +1,13 @@
 # Change Log - @itwin/one-click-lca-react
 
-This log was last generated on Wed, 08 Jun 2022 20:23:10 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Jun 2022 14:09:35 GMT and should not be manually modified.
+
+## 0.1.5
+Thu, 16 Jun 2022 14:09:35 GMT
+
+### Patches
+
+- fix error message
 
 ## 0.1.4
 Wed, 08 Jun 2022 20:23:10 GMT

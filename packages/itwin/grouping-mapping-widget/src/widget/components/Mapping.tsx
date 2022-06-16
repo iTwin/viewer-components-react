@@ -23,16 +23,18 @@ import {
 import type { CellProps } from "react-table";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
-import { getReportingClient, handleError, onSelectionChanged, WidgetHeader } from "./utils";
+import { handleError, onSelectionChanged, WidgetHeader } from "./utils";
 import "./Mapping.scss";
 import DeleteModal from "./DeleteModal";
 import { Groupings } from "./Grouping";
 import MappingAction from "./MappingAction";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
 import type { Api } from "./GroupingMapping";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
+import { clearAll } from "./viewerUtils";
+import type { IMappingClient } from "../IMappingClient";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
 
@@ -48,12 +50,12 @@ const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: Api
+  apiContext: Api,
+  mappingClient: IMappingClient,
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = getReportingClient(apiContext.prefix);
-    const mappings = await reportingClientApi.getMappings(apiContext.accessToken, iModelId);
+    const mappings = await mappingClient.getMappings(apiContext.accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -62,11 +64,15 @@ const fetchMappings = async (
   }
 };
 
-const toggleExtraction = async (apiContext: Api, iModelId: string, mapping: Mapping) => {
+const toggleExtraction = async (
+  apiContext: Api,
+  mappingClient: IMappingClient,
+  iModelId: string,
+  mapping: Mapping
+) => {
   try {
     const newState = !mapping?.extractionEnabled;
-    const reportingClient = getReportingClient(apiContext.prefix);
-    await reportingClient.updateMapping(
+    await mappingClient.updateMapping(
       apiContext.accessToken,
       iModelId,
       mapping?.id ?? "",
@@ -79,6 +85,7 @@ const toggleExtraction = async (apiContext: Api, iModelId: string, mapping: Mapp
 
 export const Mappings = () => {
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
@@ -86,15 +93,13 @@ export const Mappings = () => {
   const [mappingView, setMappingView] = useState<MappingView>(
     MappingView.MAPPINGS
   );
-  const [selectedMapping, setSelectedMapping] = useState<
-  Mapping | undefined
-  >(undefined);
+  const [selectedMapping, setSelectedMapping] = useState<Mapping | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
   useEffect(() => {
-    void fetchMappings(setMappings, iModelId, setIsLoading, apiContext);
-  }, [apiContext, iModelId, setIsLoading]);
+    void fetchMappings(setMappings, iModelId, setIsLoading, apiContext, mappingClient);
+  }, [apiContext, mappingClient, iModelId, setIsLoading]);
 
   useEffect(() => {
     const removeListener =
@@ -105,11 +110,12 @@ export const Mappings = () => {
   }, []);
 
   const refresh = useCallback(async () => {
+    clearAll();
     setMappingView(MappingView.MAPPINGS);
     setSelectedMapping(undefined);
     setMappings([]);
-    await fetchMappings(setMappings, iModelId, setIsLoading, apiContext);
-  }, [apiContext, iModelId, setMappings]);
+    await fetchMappings(setMappings, iModelId, setIsLoading, apiContext, mappingClient);
+  }, [apiContext, mappingClient, iModelId, setMappings]);
 
   const addMapping = async () => {
     setMappingView(MappingView.ADDING);
@@ -166,7 +172,7 @@ export const Mappings = () => {
                         setSelectedMapping(value.row.original);
                         setShowBlockingOverlay(true);
                         close();
-                        await toggleExtraction(apiContext, iModelId, value.row.original);
+                        await toggleExtraction(apiContext, mappingClient, iModelId, value.row.original);
                         await refresh();
                         setShowBlockingOverlay(false);
                       }}
@@ -203,7 +209,7 @@ export const Mappings = () => {
         ],
       },
     ],
-    [apiContext, iModelId, refresh]
+    [apiContext, mappingClient, iModelId, refresh]
   );
 
   switch (mappingView) {
@@ -258,8 +264,7 @@ export const Mappings = () => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = getReportingClient(apiContext.prefix);
-              await reportingClientApi.deleteMapping(
+              await mappingClient.deleteMapping(
                 apiContext.accessToken,
                 iModelId,
                 selectedMapping?.id ?? ""

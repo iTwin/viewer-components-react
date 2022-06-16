@@ -7,9 +7,9 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import { fetchIdsFromQuery, getReportingClient, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, WidgetHeader } from "./utils";
 import {
-  clearEmphasizedElements,
+  clearEmphasizedOverriddenElements,
   manufactureKeys,
   visualizeElements,
   visualizeElementsByKeys,
@@ -46,7 +46,7 @@ import { KeySet } from "@itwin/presentation-common";
 import { SvgProperties } from "@itwin/itwinui-icons-react";
 import type { PossibleDataType, PropertyMap } from "../../formula/Types";
 import { useCombinedFetchRefresh } from "../hooks/useFetchData";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 
 interface PropertyModifyProps {
   iModelId: string;
@@ -123,20 +123,18 @@ export const PropertyMenu = ({
   const groupId = group.id ?? "";
 
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
 
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const [propertyMenuView, setPropertyMenuView] = useState<PropertyMenuView>(
     PropertyMenuView.DEFAULT,
   );
-  const [selectedGroupProperty, setSelectedGroupProperty] = useState<
-  GroupPropertyType | undefined
-  >(undefined);
-  const [selectedCalculatedProperty, setSelectedCalculatedProperty] = useState<
-  CalculatedPropertyType | undefined
-  >(undefined);
-  const [selectedCustomCalculation, setSelectedCustomCalculation] = useState<
-  CustomCalculationType | undefined
-  >(undefined);
+  const [selectedGroupProperty, setSelectedGroupProperty] =
+    useState<GroupPropertyType | undefined>(undefined);
+  const [selectedCalculatedProperty, setSelectedCalculatedProperty] =
+    useState<CalculatedPropertyType | undefined>(undefined);
+  const [selectedCustomCalculation, setSelectedCustomCalculation] =
+    useState<CustomCalculationType | undefined>(undefined);
   const [isInformationPanelOpen, setIsInformationPanelOpen] =
     useState<boolean>(false);
   const [resolvedHiliteIds, setResolvedHiliteIds] = useState<string[]>([]);
@@ -145,30 +143,27 @@ export const PropertyMenu = ({
 
   const fetchGroupProperties = useMemo(
     () => {
-      const reportingClientApi = getReportingClient(apiContext.prefix);
-      return async () => reportingClientApi.getGroupProperties(apiContext.accessToken, iModelId, mappingId, groupId);
+      return async () => mappingClient.getGroupProperties(apiContext.accessToken, iModelId, mappingId, groupId);
     },
-    [apiContext, iModelId, mappingId, groupId],
+    [apiContext, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingGroupProperties, data: groupProperties, refreshData: refreshGroupProperties } =
     useCombinedFetchRefresh<GroupPropertyType>(fetchGroupProperties);
 
   const fetchCalculatedProperties = useMemo(
     () => {
-      const reportingClientApi = getReportingClient(apiContext.prefix);
-      return async () => reportingClientApi.getCalculatedProperties(apiContext.accessToken, iModelId, mappingId, groupId);
+      return async () => mappingClient.getCalculatedProperties(apiContext.accessToken, iModelId, mappingId, groupId);
     },
-    [apiContext, iModelId, mappingId, groupId],
+    [apiContext, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingCalculatedProperties, data: calculatedProperties, refreshData: refreshCalculatedProperties } =
     useCombinedFetchRefresh<CalculatedPropertyType>(fetchCalculatedProperties);
 
   const fetchCustomCalculations = useMemo(
     () => {
-      const reportingClientApi = getReportingClient(apiContext.prefix);
-      return async () => reportingClientApi.getCustomCalculations(apiContext.accessToken, iModelId, mappingId, groupId);
+      return async () => mappingClient.getCustomCalculations(apiContext.accessToken, iModelId, mappingId, groupId);
     },
-    [apiContext, iModelId, mappingId, groupId],
+    [apiContext, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingCustomCalculations, data: customCalculations, refreshData: refreshCustomCalculations } =
     useCombinedFetchRefresh<CustomCalculationType>(fetchCustomCalculations);
@@ -187,7 +182,7 @@ export const PropertyMenu = ({
           "GroupingMappingWidget",
           iModelConnection,
         );
-        clearEmphasizedElements();
+        clearEmphasizedOverriddenElements();
         const resolvedIds = await visualizeElementsByKeys(keys, "red");
         await zoomToElements(resolvedIds);
         setResolvedHiliteIds(resolvedIds);
@@ -389,8 +384,7 @@ export const PropertyMenu = ({
             <InformationPanelHeader
               onClose={() => setIsInformationPanelOpen(false)}
             >
-              <Text variant='subheading'>{`${group.groupName ?? ""
-              } Information`}</Text>
+              <Text variant='subheading'>{`${group.groupName ?? ""} Information`}</Text>
             </InformationPanelHeader>
             <InformationPanelBody>
               <div className='information-body'>

@@ -1,6 +1,13 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Thu, 26 May 2022 15:54:07 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Jun 2022 14:09:35 GMT and should not be manually modified.
+
+## 0.7.3
+Thu, 16 Jun 2022 14:09:35 GMT
+
+### Patches
+
+- Add option to set itemPriority for MeasureToolsUiItemsProvider
 
 ## 0.7.2
 Thu, 26 May 2022 15:54:07 GMT

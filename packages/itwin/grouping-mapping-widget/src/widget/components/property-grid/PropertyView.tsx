@@ -179,6 +179,12 @@ export const PropertyView = (props: PropertyViewProps) => {
   );
 
   React.useEffect(() => {
+    if (!context.currentPropertyList.includes(props.propertyRecord)) {
+      setIsPropertySelected(false);
+    }
+  }, [context.currentPropertyList, props.propertyRecord]);
+
+  React.useEffect(() => {
     if (props?.propertyRecord) {
       if (isPropertySelected) {
         if (context.isRendering) {

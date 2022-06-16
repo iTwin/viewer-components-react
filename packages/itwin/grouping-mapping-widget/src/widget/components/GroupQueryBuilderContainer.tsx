@@ -47,6 +47,7 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
     context.setQuery("");
     context.queryBuilder.query = undefined;
     context.setCurrentPropertyList([]);
+    await context.resetView();
   };
 
   return (

@@ -13,7 +13,7 @@ import {
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { fetchIdsFromQuery, getReportingClient, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
+import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -23,18 +23,19 @@ import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
 import { GroupQueryBuilderContext } from "./GroupQueryBuilderContext";
 import { QueryBuilder } from "./QueryBuilder";
 import {
-  clearEmphasizedElements,
+  transparentOverriddenElements,
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
 import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
   group?: GroupType;
   goBack: () => Promise<void>;
+  resetView: () => Promise<void>;
 }
 
 const GroupAction = ({
@@ -42,9 +43,11 @@ const GroupAction = ({
   mappingId,
   group,
   goBack,
+  resetView,
 }: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const [details, setDetails] = useState({
     groupName: group?.groupName ?? "",
     description: group?.description ?? "",
@@ -54,16 +57,14 @@ const GroupAction = ({
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const [currentPropertyList, setCurrentPropertyList] = React.useState<
-  PropertyRecord[]
-  >([]);
+  const [currentPropertyList, setCurrentPropertyList] = React.useState<PropertyRecord[]>([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
   const [groupByType, setGroupByType] = React.useState("Selection");
   const [searchInput, setSearchInput] = React.useState("");
 
-  const changeGroupByType = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const changeGroupByType = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const {
       target: { value },
     } = event;
@@ -73,6 +74,7 @@ const GroupAction = ({
       iModelConnection,
     );
     setQuery("");
+    await resetView();
   };
 
   useEffect(() => {
@@ -82,8 +84,7 @@ const GroupAction = ({
         selectionProvider: ISelectionProvider,
       ) => {
         const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-        const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-        }` : "";
+        const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}` : "";
         setSimpleQuery(query);
       },
     );
@@ -95,12 +96,16 @@ const GroupAction = ({
   useEffect(() => {
     const reemphasize = async () => {
       try {
-        clearEmphasizedElements();
         if (!query || query === "") {
           return;
         }
 
+        if (groupByType === "Selection" && currentPropertyList.length === 0) {
+          return;
+        }
+
         setIsRendering(true);
+        transparentOverriddenElements();
         const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
         const resolvedHiliteIds = await visualizeElementsById(
           ids,
@@ -116,7 +121,7 @@ const GroupAction = ({
     };
 
     void reemphasize();
-  }, [iModelConnection, query]);
+  }, [iModelConnection, query, currentPropertyList, groupByType]);
 
   useEffect(() => {
     Presentation.selection.clearSelection(
@@ -171,17 +176,16 @@ const GroupAction = ({
     try {
       setIsLoading(true);
       const currentQuery = query || simpleQuery;
-      const reportingClientApi = getReportingClient(apiContext.prefix);
 
       group
-        ? await reportingClientApi.updateGroup(
+        ? await mappingClient.updateGroup(
           apiContext.accessToken,
           iModelId,
           mappingId,
           group.id ?? "",
           { ...details, query: currentQuery },
         )
-        : await reportingClientApi.createGroup(apiContext.accessToken, iModelId, mappingId, {
+        : await mappingClient.createGroup(apiContext.accessToken, iModelId, mappingId, {
           ...details,
           query: currentQuery,
         });
@@ -206,7 +210,7 @@ const GroupAction = ({
     simpleQuery,
     validator,
     apiContext.accessToken,
-    apiContext.prefix,
+    mappingClient,
   ]);
 
   const isBlockingActions = !(details.groupName && (query || simpleQuery) && !isRendering && !isLoading);
@@ -303,6 +307,7 @@ const GroupAction = ({
                 setQueryBuilder,
                 isLoading,
                 isRendering,
+                resetView,
               }}
             >
               <GroupQueryBuilderContainer />
@@ -321,9 +326,10 @@ const GroupAction = ({
                   <LoadingSpinner />
                 }
                 <Button disabled={isLoading || isRendering} onClick={() => generateSearchQuery(searchInput ? searchInput.replace(/(\r\n|\n|\r)/gm, "").trim().split(" ") : [])}>Apply</Button>
-                <Button disabled={isLoading || isRendering} onClick={() => {
+                <Button disabled={isLoading || isRendering} onClick={async () => {
                   setQuery("");
                   setSearchInput("");
+                  await resetView();
                 }}>Clear</Button>
               </div>
             </div>

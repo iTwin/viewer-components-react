@@ -2,6 +2,18 @@
   "name": "@itwin/one-click-lca-react",
   "entries": [
     {
+      "version": "0.1.5",
+      "tag": "@itwin/one-click-lca-react_v0.1.5",
+      "date": "Thu, 16 Jun 2022 14:09:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix error message"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.4",
       "tag": "@itwin/one-click-lca-react_v0.1.4",
       "date": "Wed, 08 Jun 2022 20:23:10 GMT",

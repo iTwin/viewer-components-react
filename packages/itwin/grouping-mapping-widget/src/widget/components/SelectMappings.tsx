@@ -14,21 +14,22 @@ import {
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Mapping } from "@itwin/insights-client";
 import type { Api } from "./GroupingMapping";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 import type { MappingType } from "./Mapping";
 import "./SelectMapping.scss";
-import { getReportingClient, handleError } from "./utils";
+import { handleError } from "./utils";
+import type { IMappingClient } from "../IMappingClient";
 
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: Api
+  apiContext: Api,
+  mappingClient: IMappingClient
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = getReportingClient(apiContext.prefix);
-    const mappings = await reportingClientApi.getMappings(apiContext.accessToken, iModelId);
+    const mappings = await mappingClient.getMappings(apiContext.accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -51,13 +52,14 @@ const SelectMappings = ({
   backFn,
 }: SelectMappingsProps) => {
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedMappings, setSelectedMappings] = useState<MappingType[]>([]);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
   useEffect(() => {
-    void fetchMappings(setMappings, iModelId, setIsLoading, apiContext);
-  }, [apiContext, iModelId, setIsLoading]);
+    void fetchMappings(setMappings, iModelId, setIsLoading, apiContext, mappingClient);
+  }, [apiContext, mappingClient, iModelId, setIsLoading]);
 
   const mappingsColumns = useMemo(
     () => [
