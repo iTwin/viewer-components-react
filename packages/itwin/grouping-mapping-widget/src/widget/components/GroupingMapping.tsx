@@ -46,12 +46,9 @@ interface GroupingMappingProps {
   client?: IMappingClient;
 }
 
-const GroupingMapping = (props: GroupingMappingProps) => {
+const GroupingMapping = ({ accessToken, prefix, client }: GroupingMappingProps) => {
   const [currentAccessToken, setCurrentAccessToken] = useState<string>("");
   const [mappingClient, setMappingClient] = useState<IMappingClient>(createDefaultMappingClient());
-
-  const { accessToken, prefix } = props;
-  const clientProp: IMappingClient | ClientPrefix = props.client ?? prefix;
 
   useEffect(() => {
     // If no access token is provided, fetch it from session
@@ -62,6 +59,7 @@ const GroupingMapping = (props: GroupingMappingProps) => {
     void fetchAccessToken();
   }, [accessToken, setCurrentAccessToken]);
 
+  const clientProp: IMappingClient | ClientPrefix = client ?? prefix;
   useEffect(() => {
     if (undefined === clientProp || typeof clientProp === "string") {
       setMappingClient(createDefaultMappingClient(clientProp as ClientPrefix));
