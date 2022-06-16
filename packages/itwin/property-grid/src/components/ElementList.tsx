@@ -137,8 +137,7 @@ export const ElementList = ({
   onSelect,
   rootClassName,
 }: ElementListProps) => {
-  const [dataProvider, setDataProvider] =
-    React.useState<SimpleTableDataProvider>();
+  const dataProvider = React.useRef<SimpleTableDataProvider>();
 
   const labelsProvider: PresentationLabelsProvider = React.useMemo(() => {
     return new PresentationLabelsProvider({
@@ -148,8 +147,7 @@ export const ElementList = ({
 
   React.useEffect(() => {
     const createAndSetDp = async () => {
-      const dp = await createDataProvider(labelsProvider, instanceKeys);
-      setDataProvider(dp);
+      dataProvider.current = await createDataProvider(labelsProvider, instanceKeys);
     };
 
     createAndSetDp().catch(() => {
@@ -198,10 +196,10 @@ export const ElementList = ({
         </div>
       </div>
       <div className="property-grid-react-element-list-container">
-        {dataProvider && (
+        {dataProvider.current && (
           /* eslint-disable-next-line deprecation/deprecation */
           <Table
-            dataProvider={dataProvider}
+            dataProvider={dataProvider.current}
             onRowsSelected={onRowsSelected}
             selectionMode={SelectionMode.Single}
             hideHeader={true}
