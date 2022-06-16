@@ -12,7 +12,6 @@ import type {
 } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { QueryRowFormat } from "@itwin/core-common";
-import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
 
 export const onSelectionChanged = (
   evt: SelectionChangeEventArgs,
@@ -170,16 +169,4 @@ export const LoadingSpinner = () => {
       <ProgressRadial size="small" indeterminate />
     </div>
   );
-};
-
-const prefixUrl = (baseUrl?: string, prefix?: string) => {
-  if (prefix && baseUrl) {
-    return baseUrl.replace("api.bentley.com", `${prefix}-api.bentley.com`);
-  }
-  return baseUrl;
-};
-
-export const getReportingClient = (prefix?: "" | "qa" | "dev") => {
-  const url = prefixUrl(REPORTING_BASE_PATH, prefix);
-  return new ReportingClient(url);
 };

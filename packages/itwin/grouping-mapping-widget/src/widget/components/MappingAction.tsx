@@ -6,9 +6,9 @@ import { Fieldset, LabeledInput, Small, ToggleSwitch } from "@itwin/itwinui-reac
 import React, { useContext, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { getReportingClient, handleError, handleInputChange, WidgetHeader } from "./utils";
+import { handleError, handleInputChange, WidgetHeader } from "./utils";
 import "./MappingAction.scss";
-import { ApiContext } from "./GroupingMapping";
+import { ApiContext, MappingClientContext } from "./GroupingMapping";
 import type { Mapping } from "@itwin/insights-client";
 
 interface MappingActionProps {
@@ -19,6 +19,7 @@ interface MappingActionProps {
 
 const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
   const apiContext = useContext(ApiContext);
+  const mappingClient = useContext(MappingClientContext);
   const [values, setValues] = useState({
     name: mapping?.mappingName ?? "",
     description: mapping?.description ?? "",
@@ -35,14 +36,13 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
         return;
       }
       setIsLoading(true);
-      const reportingClientApi = getReportingClient(apiContext.prefix);
       mapping
-        ? await reportingClientApi.updateMapping(apiContext.accessToken, iModelId, mapping.id ?? "", {
+        ? await mappingClient.updateMapping(apiContext.accessToken, iModelId, mapping.id ?? "", {
           mappingName: values.name,
           description: values.description,
           extractionEnabled: values.extractionEnabled,
         })
-        : await reportingClientApi.createMapping(apiContext.accessToken, iModelId, {
+        : await mappingClient.createMapping(apiContext.accessToken, iModelId, {
           mappingName: values.name,
           description: values.description,
           extractionEnabled: values.extractionEnabled,
