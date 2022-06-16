@@ -2,6 +2,29 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.4.0",
+      "date": "Thu, 16 Jun 2022 14:09:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enhanced category selection to match based on string in group by selection"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "add unions of multiple selected classes"
+          },
+          {
+            "comment": "enable group visibility and fix bugs"
+          },
+          {
+            "comment": "Added extension point to provide a custom IMappingClient implementation."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.5",
       "tag": "@itwin/grouping-mapping-widget_v0.3.5",
       "date": "Wed, 08 Jun 2022 20:23:10 GMT",

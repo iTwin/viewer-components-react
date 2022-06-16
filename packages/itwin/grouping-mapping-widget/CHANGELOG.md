@@ -1,6 +1,19 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 08 Jun 2022 20:23:10 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Jun 2022 14:09:35 GMT and should not be manually modified.
+
+## 0.4.0
+Thu, 16 Jun 2022 14:09:35 GMT
+
+### Minor changes
+
+- Enhanced category selection to match based on string in group by selection
+
+### Patches
+
+- add unions of multiple selected classes
+- enable group visibility and fix bugs
+- Added extension point to provide a custom IMappingClient implementation.
 
 ## 0.3.5
 Wed, 08 Jun 2022 20:23:10 GMT
