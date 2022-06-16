@@ -43,11 +43,11 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
     };
   }, [iModelConnection, context]);
 
-  const _onClickResetButton = async () => {
+  const _onClickResetButton = () => {
     context.setQuery("");
     context.queryBuilder.query = undefined;
     context.setCurrentPropertyList([]);
-    await context.resetView();
+    context.resetView();
   };
 
   return (
