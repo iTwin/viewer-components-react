@@ -733,7 +733,7 @@ describe("Report Mappings View", () => {
     const mockReportMappings = mockReportMappingsFactory();
     const [_, iModelHandlers] = mockMappingsFactory(mockReportMappings);
 
-    const delay = REFRESH_DELAY;
+    const delay = REFRESH_DELAY + 1000;
 
     // Faking timers currently makes all promise based queries from RTL become unpredictable.
     // https://github.com/testing-library/dom-testing-library/issues/988
@@ -800,7 +800,7 @@ describe("Report Mappings View", () => {
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mockIModel.id}/extraction/run`,
         async (_req, res, ctx) => {
           return res(
-            ctx.delay(),
+            ctx.delay(800),
             ctx.status(200),
             ctx.json(mockExtractionResponse)
           );
