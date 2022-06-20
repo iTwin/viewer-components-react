@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type {
-  Descriptor,
   InstanceKey,
   PropertiesField,
 } from "@itwin/presentation-common";
@@ -54,22 +53,10 @@ export class QueryBuilder {
     this.dataProvider = provider;
   }
 
-  public isCategory(
-    descriptor: Descriptor,
-    propertyField: PropertiesField,
-  ): boolean {
-    const classInfo = propertyField.properties[0].property
-      .navigationPropertyInfo?.classInfo as any;
-    return (
-      descriptor.selectClasses.find((c) =>
-        c.navigationPropertyClasses?.find(
-          (npc) =>
-            npc.relationshipInfo.id === classInfo &&
-            npc.relationshipInfo.name ===
-              "BisCore:GeometricElement3dIsInCategory",
-        ),
-      ) !== undefined
-    );
+  public isCategory(propertyField: PropertiesField): boolean {
+    const classInfo =
+      propertyField.properties[0].property.navigationPropertyInfo?.classInfo;
+    return classInfo?.name === "BisCore:GeometricElement3dIsInCategory";
   }
 
   public async addProperty(prop: PropertyRecord): Promise<boolean> {
@@ -110,8 +97,7 @@ export class QueryBuilder {
     // get the special cases
     const isNavigation: boolean =
       prop.property.typename.toLowerCase() === "navigation";
-    const isCategory: boolean =
-      isNavigation && this.isCategory(descriptor, propertyField);
+    const isCategory: boolean = isNavigation && this.isCategory(propertyField);
     const isAspect: boolean =
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
@@ -398,8 +384,7 @@ export class QueryBuilder {
       ) !== undefined;
     const isNavigation: boolean =
       prop.property.typename.toLowerCase() === "navigation";
-    const isCategory: boolean =
-      isNavigation && this.isCategory(descriptor, propertyField);
+    const isCategory: boolean = isNavigation && this.isCategory(propertyField);
 
     for (let i = 0; i < propertyField.properties.length; i++) {
       const propertyName = isNavigation
