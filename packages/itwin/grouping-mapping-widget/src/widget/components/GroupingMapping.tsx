@@ -12,7 +12,10 @@ import type { ClientPrefix } from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
 import { createDefaultMappingClient, MappingClientContext } from "./context/MappingClientContext";
 
-interface GroupingMappingProps {
+export interface GroupingMappingProps {
+  /**
+   * Custom callback to retrieve access token.
+   */
   getAccessToken?: () => Promise<AccessToken>;
   /**
    * Used for iTwin and iModel APIs.

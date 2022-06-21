@@ -15,7 +15,7 @@ import {
 import type { AccessToken } from "@itwin/core-bentley";
 import React from "react";
 import type { ClientPrefix } from "./components/context/GroupingApiConfigContext";
-import GroupingMapping from "./components/GroupingMapping";
+import GroupingMapping, { GroupingMappingProps } from "./components/GroupingMapping";
 import type { IMappingClient } from "./IMappingClient";
 
 export class GroupingMappingProvider implements UiItemsProvider {
@@ -25,7 +25,7 @@ export class GroupingMappingProvider implements UiItemsProvider {
   private readonly _prefix?: ClientPrefix;
   private readonly _client?: IMappingClient;
 
-  constructor(getAccessToken?: () => Promise<AccessToken>, prefix?: "" | "dev" | "qa", client?: IMappingClient) {
+  constructor({ getAccessToken, prefix, client }: GroupingMappingProps) {
     this._getAccessToken = getAccessToken;
     this._prefix = prefix;
     this._client = client;
