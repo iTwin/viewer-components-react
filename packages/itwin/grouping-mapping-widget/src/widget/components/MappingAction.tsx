@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Fieldset, LabeledInput, Small, ToggleSwitch } from "@itwin/itwinui-react";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, handleInputChange, WidgetHeader } from "./utils";

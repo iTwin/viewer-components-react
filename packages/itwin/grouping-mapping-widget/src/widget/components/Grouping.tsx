@@ -5,7 +5,6 @@
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, {
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,

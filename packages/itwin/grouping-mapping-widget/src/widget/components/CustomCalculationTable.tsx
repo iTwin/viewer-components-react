@@ -15,7 +15,7 @@ import {
   MenuItem,
   Table,
 } from "@itwin/itwinui-react";
-import React, { useContext, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";

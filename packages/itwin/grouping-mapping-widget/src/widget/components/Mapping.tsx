@@ -21,7 +21,7 @@ import {
   Table,
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import { handleError, onSelectionChanged, WidgetHeader } from "./utils";
 import "./Mapping.scss";

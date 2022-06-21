@@ -9,7 +9,7 @@ import {
   LabeledTextarea,
   Small,
 } from "@itwin/itwinui-react";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";

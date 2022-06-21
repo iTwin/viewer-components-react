@@ -11,7 +11,7 @@ import {
   tableFilters,
   TablePaginator,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { Mapping } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import type { MappingType } from "./Mapping";

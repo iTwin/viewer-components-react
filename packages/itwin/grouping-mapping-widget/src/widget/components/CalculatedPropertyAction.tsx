@@ -13,7 +13,7 @@ import {
   MenuItem,
   Small,
 } from "@itwin/itwinui-react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import {
   BboxDimension,

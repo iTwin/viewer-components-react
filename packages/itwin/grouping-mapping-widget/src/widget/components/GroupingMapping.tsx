@@ -12,8 +12,6 @@ import type { ClientPrefix } from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
 import { createDefaultMappingClient, MappingClientContext } from "./context/MappingClientContext";
 
-
-
 interface GroupingMappingProps {
   getAccessToken?: () => Promise<AccessToken>;
   /**

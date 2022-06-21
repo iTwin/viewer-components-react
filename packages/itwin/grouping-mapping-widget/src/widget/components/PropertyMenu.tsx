@@ -5,7 +5,7 @@
 import type { IModelConnection } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { fetchIdsFromQuery, WidgetHeader } from "./utils";
 import {

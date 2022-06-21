@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
-import { IMappingClient } from "../../IMappingClient";
-import { ClientPrefix } from "./GroupingApiConfigContext";
+import type { IMappingClient } from "../../IMappingClient";
+import type { ClientPrefix } from "./GroupingApiConfigContext";
 
 const prefixUrl = (baseUrl?: string, prefix?: string) => {
   if (prefix && baseUrl) {

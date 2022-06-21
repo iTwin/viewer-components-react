@@ -9,7 +9,7 @@ import {
   ProgressLinear,
   Text,
 } from "@itwin/itwinui-react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { MappingType } from "./Mapping";
 import "./ConfirmMappingsImport.scss";
 import { useActiveIModelConnection } from "@itwin/appui-react";

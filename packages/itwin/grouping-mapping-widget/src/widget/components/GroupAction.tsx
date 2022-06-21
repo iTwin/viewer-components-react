@@ -12,7 +12,7 @@ import {
 } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
