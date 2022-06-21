@@ -25,7 +25,7 @@ export class GroupingMappingProvider implements UiItemsProvider {
   private readonly _prefix?: ClientPrefix;
   private readonly _client?: IMappingClient;
 
-  constructor({ getAccessToken, prefix, client }: GroupingMappingProps) {
+  constructor({ getAccessToken, prefix, client }: GroupingMappingProps = {}) {
     this._getAccessToken = getAccessToken;
     this._prefix = prefix;
     this._client = client;
