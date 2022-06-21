@@ -53,7 +53,6 @@ const CustomCalculationTable = ({
   selectedCustomCalculation,
 }: CustomCalculationTableProps) => {
   const apiContext = useGroupingMappingApiConfig();
-
   const mappingClient = useMappingClient();
   const [
     showCustomCalculationDeleteModal,
