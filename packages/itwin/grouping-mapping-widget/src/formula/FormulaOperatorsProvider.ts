@@ -155,7 +155,7 @@ export function getOperatorReturnType(token: string, arg1: PossibleDataType, arg
   if (arg2 && !getBinaryOperator(token))
     return { errorMessage: `Binary operator "${token}" is not supported.` };
 
-  if ((arg1 === "undefined" || arg2 === "undefined") && (token !== "==" && token !== "!="))
+  if ((arg1 === "Undefined" || arg2 === "Undefined") && (token !== "==" && token !== "!="))
     return { errorMessage: `${!arg2 ? "Unary" : "Binary"} operator "${token}" does not support null operands.` };
 
   switch (token) {
@@ -163,18 +163,18 @@ export function getOperatorReturnType(token: string, arg1: PossibleDataType, arg
     case "*":
     case "/":
     case "%":
-      return arg1 === "string" || arg2 === "string" ?
+      return arg1 === "String" || arg2 === "String" ?
         { errorMessage: `Binary operator "${token}" does not support string operands.` } :
-        { value: "number" };
+        { value: "Number" };
     case "-":
-      return arg1 === "string" || arg2 === "string" ?
+      return arg1 === "String" || arg2 === "String" ?
         { errorMessage: `${!arg2 ? "Unary" : "Binary"} operator "${token}" does not support string operands.` } :
-        { value: "number" };
+        { value: "Number" };
     case "+":
       if (!arg2)
         return { value: arg1 as DataType };
       else
-        return arg1 === "string" || arg2 === "string" ? { value: "string" } : { value: "number" };
+        return arg1 === "String" || arg2 === "String" ? { value: "String" } : { value: "Number" };
     case "!":
     case "<":
     case "<=":
@@ -184,7 +184,7 @@ export function getOperatorReturnType(token: string, arg1: PossibleDataType, arg
     case "!=":
     case "&&":
     case "||":
-      return { value: "boolean" };
+      return { value: "Boolean" };
     default:
       return { errorMessage: `Operator "${token}" is not supported.` };
   }

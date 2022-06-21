@@ -35,21 +35,21 @@ export function resolveTokensDataType(formulaName: string, tokens: Queue<Token>,
 
     switch (token.type) {
       case TokenType.Number:
-        argStack.push("number");
+        argStack.push("Number");
         break;
       case TokenType.String:
-        argStack.push("string");
+        argStack.push("String");
         break;
       case TokenType.Boolean:
-        argStack.push("boolean");
+        argStack.push("Boolean");
         break;
       case TokenType.Null:
-        argStack.push("undefined");
+        argStack.push("Undefined");
         break;
       case TokenType.Variable:
         const isConstant = isNumericalConstant(token.value);
         if (isConstant) {
-          argStack.push("number");
+          argStack.push("Number");
         } else {
           if (token.value === formulaName)
             return { errorMessage: "Formula cannot reference itself." };
@@ -140,7 +140,7 @@ export function resolveTokensDataType(formulaName: string, tokens: Queue<Token>,
   }
 
   const resultType = argStack.pop();
-  if (!resultType || resultType === "undefined") {
+  if (!resultType || resultType === "Undefined") {
     return { errorMessage: "Formula cannot always return null." };
   }
 
