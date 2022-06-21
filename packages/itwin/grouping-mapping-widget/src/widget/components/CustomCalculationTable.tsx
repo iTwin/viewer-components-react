@@ -21,7 +21,7 @@ import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import type { CustomCalculation } from "@itwin/insights-client";
-import { MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export type CustomCalculationType =
@@ -54,7 +54,7 @@ const CustomCalculationTable = ({
 }: CustomCalculationTableProps) => {
   const apiContext = useGroupingMappingApiConfig();
 
-  const mappingClient = useContext(MappingClientContext);
+  const mappingClient = useMappingClient();
   const [
     showCustomCalculationDeleteModal,
     setShowCustomCalculationDeleteModal,

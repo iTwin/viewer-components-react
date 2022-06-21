@@ -19,7 +19,7 @@ import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
 import type { PropertyMap } from "../../formula/Types";
-import { MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface CalculatedPropertyActionProps {
@@ -40,7 +40,7 @@ const CustomCalculationAction = ({
   returnFn,
 }: CalculatedPropertyActionProps) => {
   const apiContext = useGroupingMappingApiConfig();
-  const mappingClient = useContext(MappingClientContext);
+  const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>(
     customCalculation?.propertyName ?? "",
   );

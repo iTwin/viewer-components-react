@@ -29,12 +29,12 @@ import DeleteModal from "./DeleteModal";
 import { Groupings } from "./Grouping";
 import MappingAction from "./MappingAction";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
-import { MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { clearAll } from "./viewerUtils";
 import type { IMappingClient } from "../IMappingClient";
-import type { GroupingMappingApiConfig} from "./context/GroupingApiConfigContext";
+import type { GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
@@ -88,7 +88,7 @@ const toggleExtraction = async (
 
 export const Mappings = () => {
   const apiContext = useGroupingMappingApiConfig();
-  const mappingClient = useContext(MappingClientContext);
+  const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);

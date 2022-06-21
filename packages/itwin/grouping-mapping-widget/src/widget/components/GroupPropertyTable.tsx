@@ -21,8 +21,8 @@ import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import { PropertyMenuView } from "./PropertyMenu";
 import type { GroupProperty } from "@itwin/insights-client";
-import { MappingClientContext } from "./GroupingMapping";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { MappingClientContext, useMappingClient } from "./context/MappingClientContext";
 
 export type GroupPropertyType = CreateTypeFromInterface<GroupProperty>;
 
@@ -52,7 +52,7 @@ const GroupPropertyTable = ({
   setGroupModifyView,
 }: GroupPropertyTableProps) => {
   const apiContext = useGroupingMappingApiConfig();
-  const mappingClient = useContext(MappingClientContext);
+  const mappingClient = useMappingClient();
   const [showGroupPropertyDeleteModal, setShowGroupPropertyDeleteModal] =
     useState<boolean>(false);
 

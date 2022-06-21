@@ -46,7 +46,7 @@ import { KeySet } from "@itwin/presentation-common";
 import { SvgProperties } from "@itwin/itwinui-icons-react";
 import type { PossibleDataType, PropertyMap } from "../../formula/Types";
 import { useCombinedFetchRefresh } from "../hooks/useFetchData";
-import { MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface PropertyModifyProps {
@@ -124,7 +124,7 @@ export const PropertyMenu = ({
   const groupId = group.id ?? "";
 
   const apiContext = useGroupingMappingApiConfig();
-  const mappingClient = useContext(MappingClientContext);
+  const mappingClient = useMappingClient();
 
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const [propertyMenuView, setPropertyMenuView] = useState<PropertyMenuView>(

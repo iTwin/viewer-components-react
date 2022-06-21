@@ -8,7 +8,7 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, handleInputChange, WidgetHeader } from "./utils";
 import "./MappingAction.scss";
-import { MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
@@ -20,7 +20,7 @@ interface MappingActionProps {
 
 const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
   const apiContext = useGroupingMappingApiConfig();
-  const mappingClient = useContext(MappingClientContext);
+  const mappingClient = useMappingClient();
   const [values, setValues] = useState({
     name: mapping?.mappingName ?? "",
     description: mapping?.description ?? "",

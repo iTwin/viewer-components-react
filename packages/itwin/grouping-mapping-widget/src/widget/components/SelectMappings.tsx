@@ -13,12 +13,12 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Mapping } from "@itwin/insights-client";
-import { MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
 import type { MappingType } from "./Mapping";
 import "./SelectMapping.scss";
 import { handleError } from "./utils";
 import type { IMappingClient } from "../IMappingClient";
-import type { GroupingMappingApiConfig} from "./context/GroupingApiConfigContext";
+import type { GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 const fetchMappings = async (
@@ -54,7 +54,7 @@ const SelectMappings = ({
   backFn,
 }: SelectMappingsProps) => {
   const apiContext = useGroupingMappingApiConfig();
-  const mappingClient = useContext(MappingClientContext);
+  const mappingClient = useMappingClient();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedMappings, setSelectedMappings] = useState<MappingType[]>([]);
   const [mappings, setMappings] = useState<Mapping[]>([]);

@@ -56,11 +56,11 @@ import {
 } from "./utils";
 import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
-import { MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
 import { FeatureOverrideType } from "@itwin/core-common";
 import { GroupTile } from "./GroupTile";
 import type { IMappingClient } from "../IMappingClient";
-import type { GroupingMappingApiConfig} from "./context/GroupingApiConfigContext";
+import type { GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export type GroupType = CreateTypeFromInterface<Group>;
@@ -108,7 +108,7 @@ const fetchGroups = async (
 export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const apiContext = useGroupingMappingApiConfig();
-  const mappingClient = useContext(MappingClientContext);
+  const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);

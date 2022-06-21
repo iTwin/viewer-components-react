@@ -23,7 +23,7 @@ export const useGroupingMappingApiConfig = () => {
   const context = React.useContext(GroupingMappingApiConfigContext);
   if (!context) {
     throw new Error(
-      "useApiConfig should be used within a ReportsApiConfigContext provider"
+      "useGroupingMappingApiConfig should be used within a GroupingMappingApiConfigContext provider"
     );
   }
   return context;

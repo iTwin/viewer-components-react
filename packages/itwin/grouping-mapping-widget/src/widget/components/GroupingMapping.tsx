@@ -2,29 +2,17 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { createContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Mappings } from "./Mapping";
 import "./GroupingMapping.scss";
 import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import type { IMappingClient } from "../IMappingClient";
-import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
-import type { ClientPrefix} from "./context/GroupingApiConfigContext";
+import type { ClientPrefix } from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
+import { createDefaultMappingClient, MappingClientContext } from "./context/MappingClientContext";
 
-const prefixUrl = (baseUrl?: string, prefix?: string) => {
-  if (prefix && baseUrl) {
-    return baseUrl.replace("api.bentley.com", `${prefix}-api.bentley.com`);
-  }
-  return baseUrl;
-};
 
-export const createDefaultMappingClient = (prefix?: ClientPrefix): IMappingClient => {
-  const url = prefixUrl(REPORTING_BASE_PATH, prefix);
-  return new ReportingClient(url);
-};
-
-export const MappingClientContext = createContext<IMappingClient>(createDefaultMappingClient());
 
 interface GroupingMappingProps {
   getAccessToken?: () => Promise<AccessToken>;

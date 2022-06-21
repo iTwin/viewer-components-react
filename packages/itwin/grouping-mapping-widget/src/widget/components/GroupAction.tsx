@@ -29,7 +29,7 @@ import {
 import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import { MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
 
 interface GroupActionProps {
   iModelId: string;
@@ -48,7 +48,7 @@ const GroupAction = ({
 }: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const apiContext = useGroupingMappingApiConfig();
-  const mappingClient = useContext(MappingClientContext);
+  const mappingClient = useMappingClient();
   const [details, setDetails] = useState({
     groupName: group?.groupName ?? "",
     description: group?.description ?? "",

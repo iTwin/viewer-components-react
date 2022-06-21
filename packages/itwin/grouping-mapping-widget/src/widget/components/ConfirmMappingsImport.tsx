@@ -16,7 +16,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SvgStatusSuccessHollow } from "@itwin/itwinui-icons-react";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError } from "./utils";
-import { MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface ConfirmMappingImportProps {
@@ -42,7 +42,7 @@ const ConfirmMappingImport = ({
 }: ConfirmMappingImportProps) => {
   const iModelId = useActiveIModelConnection()?.iModelId;
   const apiContext = useGroupingMappingApiConfig();
-  const mappingClient = useContext(MappingClientContext);
+  const mappingClient = useMappingClient();
 
   const [importCount, setImportCount] = useState<number>(0);
   const [currentlyImporting, setCurrentlyImporting] = useState<string>("");
