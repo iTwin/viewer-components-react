@@ -10,7 +10,7 @@ import { ActionButtonList } from "@itwin/components-react";
 
 import "./PropertyView.scss";
 import type { SharedRendererProps } from "./PropertyRender";
-import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
+import { GroupQueryBuilderContext } from "../context/GroupQueryBuilderContext";
 import { useCallback } from "react";
 import { PropertyGridColumnStyleProvider } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
 import { Checkbox } from "@itwin/itwinui-react";
@@ -96,7 +96,6 @@ export const PropertyView = (props: PropertyViewProps) => {
         !context.currentPropertyList.includes(prop) &&
         prop.value.valueFormat === PropertyValueFormat.Primitive
       ) {
-
         if (!(await context.queryBuilder.addProperty(prop))) {
           setIsCheckboxLoading(false);
           setIsPropertySelected(false);
@@ -204,8 +203,7 @@ export const PropertyView = (props: PropertyViewProps) => {
   ]);
 
   React.useEffect(() => {
-    if (!context.isRendering)
-      setIsCheckboxLoading(false);
+    if (!context.isRendering) setIsCheckboxLoading(false);
   }, [context.isRendering]);
 
   const _onPropertySelectionChanged = () => {
@@ -272,7 +270,7 @@ export const PropertyView = (props: PropertyViewProps) => {
     props.orientation,
     props.width,
     props.columnRatio,
-    props.columnInfo?.minLabelWidth,
+    props.columnInfo?.minLabelWidth
   );
 
   return (
@@ -288,17 +286,21 @@ export const PropertyView = (props: PropertyViewProps) => {
       onContextMenu={_onContextMenu}
       onMouseEnter={_onMouseEnter}
       onMouseLeave={_onMouseLeave}
-      role='presentation'
+      role="presentation"
     >
-      <div className='components-property-record-label'>
+      <div className="components-property-record-label">
         {props.propertyRecord.value.valueFormat ===
           PropertyValueFormat.Primitive && (
           <Checkbox
             style={{ marginLeft: offset }}
-            className='components-property-selection-checkbox'
+            className="components-property-selection-checkbox"
             checked={isPropertySelected}
             onChange={_onPropertySelectionChanged}
-            disabled={context.isLoading || context.isRendering || (props.propertyRecord.value.value === undefined)}
+            disabled={
+              context.isLoading ||
+              context.isRendering ||
+              props.propertyRecord.value.value === undefined
+            }
             isLoading={isCheckboxLoading}
           />
         )}
@@ -317,8 +319,8 @@ export const PropertyView = (props: PropertyViewProps) => {
         />
       ) : undefined}
       {props.propertyRecord.value.valueFormat ===
-        PropertyValueFormat.Primitive ? (
-          <div className='components-property-record-value'>
+      PropertyValueFormat.Primitive ? (
+          <div className="components-property-record-value">
             <span>
               {props.valueElementRenderer
                 ? props.valueElementRenderer()

@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import type { AccessToken } from "@itwin/core-bentley";
 import type {
   ApiOverrides,
   IModelFull,
@@ -10,8 +11,8 @@ import {
   IModelGrid,
 } from "@itwin/imodel-browser-react";
 import { Button } from "@itwin/itwinui-react";
-import React, { useContext, useMemo } from "react";
-import { ApiContext } from "./GroupingMapping";
+import React, { useMemo, useState } from "react";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import "./SelectIModel.scss";
 
 interface SelectIModelProps {
@@ -26,12 +27,21 @@ const SelectIModel = ({
   onCancel,
   backFn,
 }: SelectIModelProps) => {
-  const apiContext = useContext(ApiContext);
+  const apiContext = useGroupingMappingApiConfig();
+  const [accessToken, setAccessToken] = useState<AccessToken>();
 
   const apiOverrides = useMemo<ApiOverrides<IModelFull[]>>(
     () => ({ serverEnvironmentPrefix: apiContext.prefix }),
     [apiContext.prefix]
   );
+
+  useState(() => {
+    const fetchAccessToken = async () => {
+      const accessToken = await apiContext.getAccessToken();
+      setAccessToken(accessToken);
+    };
+    void fetchAccessToken();
+  });
 
   return (
     <div className='imodel-grid-container'>
@@ -39,7 +49,7 @@ const SelectIModel = ({
         <IModelGrid
           projectId={projectId}
           onThumbnailClick={onSelect}
-          accessToken={apiContext.accessToken}
+          accessToken={accessToken}
           apiOverrides={apiOverrides}
         />
       </div>

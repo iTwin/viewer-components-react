@@ -13,23 +13,25 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Mapping } from "@itwin/insights-client";
-import type { Api } from "./GroupingMapping";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { MappingClientContext } from "./GroupingMapping";
 import type { MappingType } from "./Mapping";
 import "./SelectMapping.scss";
 import { handleError } from "./utils";
 import type { IMappingClient } from "../IMappingClient";
+import type { GroupingMappingApiConfig} from "./context/GroupingApiConfigContext";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: Api,
+  apiContext: GroupingMappingApiConfig,
   mappingClient: IMappingClient
 ) => {
   try {
     setIsLoading(true);
-    const mappings = await mappingClient.getMappings(apiContext.accessToken, iModelId);
+    const accessToken = await apiContext.getAccessToken();
+    const mappings = await mappingClient.getMappings(accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -51,7 +53,7 @@ const SelectMappings = ({
   onCancel,
   backFn,
 }: SelectMappingsProps) => {
-  const apiContext = useContext(ApiContext);
+  const apiContext = useGroupingMappingApiConfig();
   const mappingClient = useContext(MappingClientContext);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedMappings, setSelectedMappings] = useState<MappingType[]>([]);

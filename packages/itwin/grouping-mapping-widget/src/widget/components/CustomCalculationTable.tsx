@@ -21,7 +21,8 @@ import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import type { CustomCalculation } from "@itwin/insights-client";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { MappingClientContext } from "./GroupingMapping";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export type CustomCalculationType =
   CreateTypeFromInterface<CustomCalculation>;
@@ -51,7 +52,8 @@ const CustomCalculationTable = ({
   refreshCustomCalculations,
   selectedCustomCalculation,
 }: CustomCalculationTableProps) => {
-  const apiContext = useContext(ApiContext);
+  const apiContext = useGroupingMappingApiConfig();
+
   const mappingClient = useContext(MappingClientContext);
   const [
     showCustomCalculationDeleteModal,
@@ -152,8 +154,9 @@ const CustomCalculationTable = ({
         show={showCustomCalculationDeleteModal}
         setShow={setShowCustomCalculationDeleteModal}
         onDelete={async () => {
+          const accessToken = await apiContext.getAccessToken();
           await mappingClient.deleteCustomCalculation(
-            apiContext.accessToken,
+            accessToken,
             iModelId,
             mappingId,
             groupId,

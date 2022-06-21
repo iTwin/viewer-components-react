@@ -14,19 +14,19 @@ import {
 } from "@itwin/appui-abstract";
 import type { AccessToken } from "@itwin/core-bentley";
 import React from "react";
+import type { ClientPrefix } from "./components/context/GroupingApiConfigContext";
 import GroupingMapping from "./components/GroupingMapping";
-import type { ClientPrefix } from "./components/GroupingMapping";
 import type { IMappingClient } from "./IMappingClient";
 
 export class GroupingMappingProvider implements UiItemsProvider {
   public readonly id = "GroupingMappingProvider";
 
-  private readonly _accessToken?: AccessToken;
+  private readonly _getAccessToken?: () => Promise<AccessToken>;
   private readonly _prefix?: ClientPrefix;
   private readonly _client?: IMappingClient;
 
-  constructor(accessToken?: AccessToken, prefix?: "" | "dev" | "qa", client?: IMappingClient) {
-    this._accessToken = accessToken;
+  constructor(getAccessToken?: () => Promise<AccessToken>, prefix?: "" | "dev" | "qa", client?: IMappingClient) {
+    this._getAccessToken = getAccessToken;
     this._prefix = prefix;
     this._client = client;
   }
@@ -49,7 +49,7 @@ export class GroupingMappingProvider implements UiItemsProvider {
         id: "GroupingMappingWidget",
         label: "Grouping & Mapping",
         getWidgetContent: () => {
-          return <GroupingMapping accessToken={this._accessToken} prefix={this._prefix} client={this._client} />;
+          return <GroupingMapping getAccessToken={this._getAccessToken} prefix={this._prefix} client={this._client} />;
         },
       };
 

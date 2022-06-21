@@ -10,17 +10,15 @@ import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
   CommonPropertyGridProps,
   PropertyCategory,
-  PropertyData} from "@itwin/components-react";
+  PropertyData,
+} from "@itwin/components-react";
 import {
   PropertyCategoryBlock,
   PropertyGridCommons,
   PropertyGridEventsRelatedPropsSupplier,
 } from "@itwin/components-react";
-import type {
-  ColumnResizeRelatedPropertyListProps} from "@itwin/components-react/lib/cjs/components-react/propertygrid/component/ColumnResizingPropertyListPropsSupplier";
-import {
-  ColumnResizingPropertyListPropsSupplier,
-} from "@itwin/components-react/lib/cjs/components-react/propertygrid/component/ColumnResizingPropertyListPropsSupplier";
+import type { ColumnResizeRelatedPropertyListProps } from "@itwin/components-react/lib/cjs/components-react/propertygrid/component/ColumnResizingPropertyListPropsSupplier";
+import { ColumnResizingPropertyListPropsSupplier } from "@itwin/components-react/lib/cjs/components-react/propertygrid/component/ColumnResizingPropertyListPropsSupplier";
 import { Orientation, ResizableContainerObserver } from "@itwin/core-react";
 
 import type { PropertyListProps } from "./PropertyList";
@@ -28,7 +26,7 @@ import { PropertyList } from "./PropertyList";
 import "./PropertyGrid.scss";
 
 import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
+import { GroupQueryBuilderContext } from "../context/GroupQueryBuilderContext";
 import { ProgressRadial } from "@itwin/itwinui-react";
 
 /** Properties for [[PropertyGrid]] React component
@@ -132,7 +130,7 @@ PropertyGridState
       this.props.orientation !== prevProps.orientation ||
       this.props.isOrientationFixed !== prevProps.isOrientationFixed ||
       this.props.horizontalOrientationMinWidth !==
-      prevProps.horizontalOrientationMinWidth
+        prevProps.horizontalOrientationMinWidth
     ) {
       this.updateOrientation(this.state.width);
     }
@@ -249,14 +247,14 @@ PropertyGridState
   public override render() {
     if (this.state.loadStart) {
       return (
-        <div className='gm-components-property-grid-loader'>
+        <div className="gm-components-property-grid-loader">
           <ProgressRadial indeterminate />
         </div>
       );
     }
 
     return (
-      <div className='table-box-inner'>
+      <div className="table-box-inner">
         <PropertyGridEventsRelatedPropsSupplier
           isPropertySelectionEnabled={
             this.props.isPropertySelectionEnabled ?? false
@@ -284,7 +282,7 @@ PropertyGridState
                   "components-smallEditor-host"
                 )}
               >
-                <div className='property-categories'>
+                <div className="property-categories">
                   {this.state.categories.map(
                     (categorizedRecords: CategorizedPropertyGridRecords) => (
                       <NestedCategoryBlock
@@ -384,7 +382,7 @@ const NestedCategoryBlock = (props: NestedCategoryBlockProps) => {
         </ColumnResizingPropertyListPropsSupplier>
       ) : undefined}
       {props.categorizedRecords.children.length ? (
-        <div className='property-categories'>
+        <div className="property-categories">
           {props.categorizedRecords.children.map((categorizedChildRecords) => (
             <NestedCategoryBlock
               {...props}

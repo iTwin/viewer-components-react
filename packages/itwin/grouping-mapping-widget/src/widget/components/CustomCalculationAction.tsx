@@ -19,7 +19,8 @@ import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
 import type { PropertyMap } from "../../formula/Types";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { MappingClientContext } from "./GroupingMapping";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
@@ -38,7 +39,7 @@ const CustomCalculationAction = ({
   customCalculation,
   returnFn,
 }: CalculatedPropertyActionProps) => {
-  const apiContext = useContext(ApiContext);
+  const apiContext = useGroupingMappingApiConfig();
   const mappingClient = useContext(MappingClientContext);
   const [propertyName, setPropertyName] = useState<string>(
     customCalculation?.propertyName ?? "",
@@ -62,10 +63,10 @@ const CustomCalculationAction = ({
     }
     try {
       setIsLoading(true);
-
+      const accessToken = await apiContext.getAccessToken();
       customCalculation
         ? await mappingClient.updateCustomCalculation(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,
@@ -77,7 +78,7 @@ const CustomCalculationAction = ({
           }
         )
         : await mappingClient.createCustomCalculation(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,

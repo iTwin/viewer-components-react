@@ -6,7 +6,8 @@
 export * from "./widget/GroupingMappingWidget";
 
 /** Interfaces for providing custom MappingClient */
-export { createDefaultMappingClient, ClientPrefix } from "./widget/components/GroupingMapping";
+export { createDefaultMappingClient } from "./widget/components/GroupingMapping";
+export { ClientPrefix } from "./widget/components/context/GroupingApiConfigContext";
 export * from "@itwin/insights-client";
 export * from "./widget/IMappingClient";
 

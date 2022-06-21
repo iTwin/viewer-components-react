@@ -24,7 +24,8 @@ import { handleError, WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
 import type { CalculatedPropertyType } from "./CalculatedPropertyTable";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { MappingClientContext } from "./GroupingMapping";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
@@ -43,7 +44,7 @@ const CalculatedPropertyAction = ({
   ids,
   returnFn,
 }: CalculatedPropertyActionProps) => {
-  const apiContext = useContext(ApiContext);
+  const apiContext = useGroupingMappingApiConfig();
   const mappingClient = useContext(MappingClientContext);
   const [propertyName, setPropertyName] = useState<string>(
     property?.propertyName ?? "",
@@ -102,9 +103,11 @@ const CalculatedPropertyAction = ({
     try {
       setIsLoading(true);
 
+      const accessToken = await apiContext.getAccessToken();
+
       property
         ? await mappingClient.updateCalculatedProperty(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,
@@ -115,7 +118,7 @@ const CalculatedPropertyAction = ({
           },
         )
         : await mappingClient.createCalculatedProperty(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,

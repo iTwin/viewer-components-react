@@ -29,12 +29,13 @@ import DeleteModal from "./DeleteModal";
 import { Groupings } from "./Grouping";
 import MappingAction from "./MappingAction";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
-import type { Api } from "./GroupingMapping";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { MappingClientContext } from "./GroupingMapping";
 import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { clearAll } from "./viewerUtils";
 import type { IMappingClient } from "../IMappingClient";
+import type { GroupingMappingApiConfig} from "./context/GroupingApiConfigContext";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
 
@@ -50,12 +51,13 @@ const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: Api,
+  apiContext: GroupingMappingApiConfig,
   mappingClient: IMappingClient,
 ) => {
   try {
     setIsLoading(true);
-    const mappings = await mappingClient.getMappings(apiContext.accessToken, iModelId);
+    const accessToken = await apiContext.getAccessToken();
+    const mappings = await mappingClient.getMappings(accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -65,15 +67,16 @@ const fetchMappings = async (
 };
 
 const toggleExtraction = async (
-  apiContext: Api,
+  apiContext: GroupingMappingApiConfig,
   mappingClient: IMappingClient,
   iModelId: string,
   mapping: Mapping
 ) => {
   try {
     const newState = !mapping?.extractionEnabled;
+    const accessToken = await apiContext.getAccessToken();
     await mappingClient.updateMapping(
-      apiContext.accessToken,
+      accessToken,
       iModelId,
       mapping?.id ?? "",
       { extractionEnabled: newState }
@@ -84,7 +87,7 @@ const toggleExtraction = async (
 };
 
 export const Mappings = () => {
-  const apiContext = useContext(ApiContext);
+  const apiContext = useGroupingMappingApiConfig();
   const mappingClient = useContext(MappingClientContext);
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -264,8 +267,9 @@ export const Mappings = () => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
+              const accessToken = await apiContext.getAccessToken();
               await mappingClient.deleteMapping(
-                apiContext.accessToken,
+                accessToken,
                 iModelId,
                 selectedMapping?.id ?? ""
               );

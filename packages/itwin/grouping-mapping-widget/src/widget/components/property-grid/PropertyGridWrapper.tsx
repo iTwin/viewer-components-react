@@ -9,7 +9,7 @@ import type { PropertyProps } from "../../../api/GroupQueryBuilderApi";
 import { GroupQueryBuilderApi } from "../../../api/GroupQueryBuilderApi";
 import { PropertyGrid } from "./PropertyGrid";
 import "../GroupQueryBuilder.scss";
-import { GroupQueryBuilderContext } from "../GroupQueryBuilderContext";
+import { GroupQueryBuilderContext } from "../context/GroupQueryBuilderContext";
 
 interface PropertyGridWrapperState {
   dataProvider?: PresentationPropertyDataProvider;
@@ -35,7 +35,7 @@ PropertyGridWrapperState
 
     const dataProvider = GroupQueryBuilderApi.createPropertyDataProvider(
       this.props.keys,
-      this.props.imodel,
+      this.props.imodel
     );
     this.context.queryBuilder.dataProvider = dataProvider;
 
@@ -60,7 +60,7 @@ PropertyGridWrapperState
       <>
         {dataProvider && <PropertyGrid dataProvider={dataProvider} />}
         {!dataProvider && (
-          <div className='select-element-hint'>
+          <div className="select-element-hint">
             <span>Select an element to see its properties.</span>
           </div>
         )}

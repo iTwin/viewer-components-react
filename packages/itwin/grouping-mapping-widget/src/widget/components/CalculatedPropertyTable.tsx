@@ -21,7 +21,8 @@ import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import type { CalculatedProperty } from "@itwin/insights-client";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { MappingClientContext } from "./GroupingMapping";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export type CalculatedPropertyType =
   CreateTypeFromInterface<CalculatedProperty>;
@@ -51,7 +52,7 @@ const CalculatedPropertyTable = ({
   refreshCalculatedProperties,
   selectedCalculatedProperty,
 }: CalculatedPropertyTableProps) => {
-  const apiContext = useContext(ApiContext);
+  const apiContext = useGroupingMappingApiConfig();
   const mappingClient = useContext(MappingClientContext);
   const [
     showCalculatedPropertyDeleteModal,
@@ -147,8 +148,9 @@ const CalculatedPropertyTable = ({
         show={showCalculatedPropertyDeleteModal}
         setShow={setShowCalculatedPropertyDeleteModal}
         onDelete={async () => {
+          const accessToken = await apiContext.getAccessToken();
           await mappingClient.deleteCalculatedProperty(
-            apiContext.accessToken,
+            accessToken,
             iModelId,
             mappingId,
             groupId,

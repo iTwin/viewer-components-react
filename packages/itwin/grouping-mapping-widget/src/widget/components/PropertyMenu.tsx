@@ -46,7 +46,8 @@ import { KeySet } from "@itwin/presentation-common";
 import { SvgProperties } from "@itwin/itwinui-icons-react";
 import type { PossibleDataType, PropertyMap } from "../../formula/Types";
 import { useCombinedFetchRefresh } from "../hooks/useFetchData";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { MappingClientContext } from "./GroupingMapping";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface PropertyModifyProps {
   iModelId: string;
@@ -122,7 +123,7 @@ export const PropertyMenu = ({
 }: PropertyModifyProps) => {
   const groupId = group.id ?? "";
 
-  const apiContext = useContext(ApiContext);
+  const apiContext = useGroupingMappingApiConfig();
   const mappingClient = useContext(MappingClientContext);
 
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
@@ -143,7 +144,7 @@ export const PropertyMenu = ({
 
   const fetchGroupProperties = useMemo(
     () => {
-      return async () => mappingClient.getGroupProperties(apiContext.accessToken, iModelId, mappingId, groupId);
+      return async () => mappingClient.getGroupProperties((await apiContext.getAccessToken()), iModelId, mappingId, groupId);
     },
     [apiContext, mappingClient, iModelId, mappingId, groupId],
   );
@@ -152,7 +153,7 @@ export const PropertyMenu = ({
 
   const fetchCalculatedProperties = useMemo(
     () => {
-      return async () => mappingClient.getCalculatedProperties(apiContext.accessToken, iModelId, mappingId, groupId);
+      return async () => mappingClient.getCalculatedProperties((await apiContext.getAccessToken()), iModelId, mappingId, groupId);
     },
     [apiContext, mappingClient, iModelId, mappingId, groupId],
   );
@@ -161,7 +162,7 @@ export const PropertyMenu = ({
 
   const fetchCustomCalculations = useMemo(
     () => {
-      return async () => mappingClient.getCustomCalculations(apiContext.accessToken, iModelId, mappingId, groupId);
+      return async () => mappingClient.getCustomCalculations((await apiContext.getAccessToken()), iModelId, mappingId, groupId);
     },
     [apiContext, mappingClient, iModelId, mappingId, groupId],
   );

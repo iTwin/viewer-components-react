@@ -41,13 +41,13 @@ import {
   Text,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
-
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
 import type { ECProperty, GroupPropertyCreate } from "@itwin/insights-client";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { MappingClientContext } from "./GroupingMapping";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -266,7 +266,7 @@ const GroupPropertyAction = ({
   returnFn,
 }: GroupPropertyActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
-  const apiContext = useContext(ApiContext);
+  const apiContext = useGroupingMappingApiConfig();
   const mappingClient = useContext(MappingClientContext);
   const [propertyName, setPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<string | undefined>();
@@ -350,9 +350,9 @@ const GroupPropertyAction = ({
       let newEcProperties: ECProperty[];
       // Fetch already existing ec properties then add all classes from presentation
       if (groupPropertyId) {
-        // TODO Error handling
+        const accessToken = await apiContext.getAccessToken();
         const response = await mappingClient.getGroupProperty(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,
@@ -398,7 +398,7 @@ const GroupPropertyAction = ({
       setIsLoading(false);
     };
     void getContent();
-  }, [apiContext.accessToken, mappingClient, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
+  }, [apiContext, mappingClient, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
 
   const onSave = async () => {
     const filteredEcProperties = ecProperties.filter(
@@ -413,6 +413,7 @@ const GroupPropertyAction = ({
     }
     try {
       setIsLoading(true);
+      const accessToken = await apiContext.getAccessToken();
       const groupProperty: GroupPropertyCreate = {
         propertyName,
         dataType,
@@ -421,7 +422,7 @@ const GroupPropertyAction = ({
       };
       groupPropertyId
         ? await mappingClient.updateGroupProperty(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,
@@ -429,7 +430,7 @@ const GroupPropertyAction = ({
           groupProperty
         )
         : await mappingClient.createGroupProperty(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,
