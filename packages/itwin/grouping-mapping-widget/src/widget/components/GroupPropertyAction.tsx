@@ -45,7 +45,7 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
-import type { ECProperty, GroupPropertyCreate } from "@itwin/insights-client";
+import type { ECProperty, GroupPropertyCreate, GroupPropertySingle } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
@@ -351,13 +351,23 @@ const GroupPropertyAction = ({
       // Fetch already existing ec properties then add all classes from presentation
       if (groupPropertyId) {
         const accessToken = await apiContext.getAccessToken();
-        const response = await mappingClient.getGroupProperty(
-          accessToken,
-          iModelId,
-          mappingId,
-          groupId,
-          groupPropertyId
-        );
+        let response: GroupPropertySingle | undefined
+        try {
+          response = await mappingClient.getGroupProperty(
+            accessToken,
+            iModelId,
+            mappingId,
+            groupId,
+            groupPropertyId
+          );
+        }
+        catch (error: any) {
+          handleError(error.status);
+        }
+
+        if (!response) {
+          return;
+        }
         newEcProperties = response.property?.ecProperties ?? [];
 
         let keys = Array.from(classToPropertiesMapping.keys()).reverse();
