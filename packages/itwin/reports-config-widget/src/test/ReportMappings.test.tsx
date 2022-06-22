@@ -733,7 +733,7 @@ describe("Report Mappings View", () => {
     const mockReportMappings = mockReportMappingsFactory();
     const [_, iModelHandlers] = mockMappingsFactory(mockReportMappings);
 
-    const delay = REFRESH_DELAY;
+    const delay = REFRESH_DELAY + 1000;
 
     // Faking timers currently makes all promise based queries from RTL become unpredictable.
     // https://github.com/testing-library/dom-testing-library/issues/988
@@ -800,7 +800,7 @@ describe("Report Mappings View", () => {
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mockIModel.id}/extraction/run`,
         async (_req, res, ctx) => {
           return res(
-            ctx.delay(),
+            ctx.delay(800),
             ctx.status(200),
             ctx.json(mockExtractionResponse)
           );
@@ -843,7 +843,8 @@ describe("Report Mappings View", () => {
     ).toBeInTheDocument();
     // Should be two in the document. One in the status and the other in the list.
     // TODO Assert that it is in the correct HorizontalTile
-    expect(screen.getAllByTitle(/starting/i)).toHaveLength(2);
+    const startingStates = await screen.findAllByTitle(/starting/i);
+    expect(startingStates).toHaveLength(2);
 
     const loadingStates = await screen.findAllByTitle(/loading/i);
     expect(loadingStates).toHaveLength(2);
