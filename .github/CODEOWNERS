@@ -22,11 +22,11 @@
 /packages/itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @Guillar1 @bingjiez @MindaugasButkus
 /common/changes/@itwin/grouping-mapping-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @Guillar1 @bingjiez @MindaugasButkus
 
-/packages/itwin/one-click-lca-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1
-/common/changes/@itwin/one-click-lca-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1
+/packages/itwin/one-click-lca-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
+/common/changes/@itwin/one-click-lca-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
 
-/packages/itwin/reports-config-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1
-/common/changes/@itwin/reports-config-widget-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1
+/packages/itwin/reports-config-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
+/common/changes/@itwin/reports-config-widget-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
 
 /packages/itwin/breakdown-trees  @itwin/viewer-components-reviewers @JValiunas @DanishMehmood-bit
 /common/changes/@itwin/breakdown-trees-react  @itwin/viewer-components-reviewers @JValiunas @DanishMehmood-bit
