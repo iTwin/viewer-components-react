@@ -351,7 +351,7 @@ const GroupPropertyAction = ({
       // Fetch already existing ec properties then add all classes from presentation
       if (groupPropertyId) {
         const accessToken = await apiContext.getAccessToken();
-        let response: GroupPropertySingle | undefined
+        let response: GroupPropertySingle | undefined;
         try {
           response = await mappingClient.getGroupProperty(
             accessToken,
@@ -360,8 +360,7 @@ const GroupPropertyAction = ({
             groupId,
             groupPropertyId
           );
-        }
-        catch (error: any) {
+        } catch (error: any) {
           handleError(error.status);
         }
 
