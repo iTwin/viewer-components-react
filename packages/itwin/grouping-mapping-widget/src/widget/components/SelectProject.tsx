@@ -5,6 +5,7 @@
 import type { AccessToken } from "@itwin/core-bentley";
 import type {
   ApiOverrides,
+  IModelFull,
   ProjectFull,
 } from "@itwin/imodel-browser-react";
 import {
@@ -23,7 +24,7 @@ import {
   LabeledInput,
   Tab,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import "./SelectProject.scss";
 
@@ -46,15 +47,9 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
   const [searchInput, setSearchInput] = useState<string>("");
   const [activeSearchInput, setActiveSearchInput] = useState<string>("");
   const [accessToken, setAccessToken] = useState<AccessToken>();
+  const [apiOverrides, setApiOverrides] = useState<ApiOverrides<IModelFull[]>>({ serverEnvironmentPrefix: prefix });
 
-  const startSearch = useCallback(() => {
-    setActiveSearchInput(searchInput);
-  }, [searchInput]);
-
-  const apiOverrides = useMemo<ApiOverrides<ProjectFull[]>>(
-    () => ({ serverEnvironmentPrefix: prefix }),
-    [prefix],
-  );
+  useEffect(() => setApiOverrides({ serverEnvironmentPrefix: prefix }), [prefix]);
 
   useEffect(() => {
     const fetchAccessToken = async () => {
@@ -63,6 +58,10 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
     };
     void fetchAccessToken();
   }, [getAccessToken]);
+
+  const startSearch = useCallback(() => {
+    setActiveSearchInput(searchInput);
+  }, [searchInput]);
 
   return (
     <div className='select-project-grid-container'>

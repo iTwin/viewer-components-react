@@ -2,13 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Mappings } from "./Mapping";
 import "./GroupingMapping.scss";
 import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import type { IMappingClient } from "../IMappingClient";
-import type { ClientPrefix } from "./context/GroupingApiConfigContext";
+import type { ClientPrefix, GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
 import { createDefaultMappingClient, MappingClientContext } from "./context/MappingClientContext";
 
@@ -28,8 +28,18 @@ export interface GroupingMappingProps {
   client?: IMappingClient;
 }
 
+const authorizationClientGetAccessToken = (async () => (await IModelApp.authorizationClient?.getAccessToken() ?? ""));
+
 const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProps) => {
   const [mappingClient, setMappingClient] = useState<IMappingClient>(createDefaultMappingClient());
+  const [apiConfig, setApiConfig] = useState<GroupingMappingApiConfig>({
+    getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
+    prefix,
+  });
+
+  useEffect(() => {
+    setApiConfig(() => ({ prefix, getAccessToken: getAccessToken ?? authorizationClientGetAccessToken }));
+  }, [getAccessToken, prefix]);
 
   const clientProp: IMappingClient | ClientPrefix = client ?? prefix;
   useEffect(() => {
@@ -40,14 +50,9 @@ const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProp
     }
   }, [clientProp]);
 
-  const getAccessTokenMemo = useCallback(getAccessToken ?? (async () => (await IModelApp.authorizationClient?.getAccessToken()) ?? ""), [getAccessToken]);
-
   return (
     <GroupingMappingApiConfigContext.Provider
-      value={{
-        getAccessToken: getAccessTokenMemo,
-        prefix,
-      }}
+      value={apiConfig}
     >
       <MappingClientContext.Provider value={mappingClient}>
         <div className='group-mapping-container'>

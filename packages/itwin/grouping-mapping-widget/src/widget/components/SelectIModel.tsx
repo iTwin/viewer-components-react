@@ -11,7 +11,7 @@ import {
   IModelGrid,
 } from "@itwin/imodel-browser-react";
 import { Button } from "@itwin/itwinui-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import "./SelectIModel.scss";
 
@@ -29,11 +29,11 @@ const SelectIModel = ({
 }: SelectIModelProps) => {
   const { getAccessToken, prefix } = useGroupingMappingApiConfig();
   const [accessToken, setAccessToken] = useState<AccessToken>();
-
-  const apiOverrides = useMemo<ApiOverrides<IModelFull[]>>(
-    () => ({ serverEnvironmentPrefix: prefix }),
-    [prefix]
+  const [apiOverrides, setApiOverrides] = useState<ApiOverrides<IModelFull[]>>(
+    () => ({ serverEnvironmentPrefix: prefix })
   );
+
+  useEffect(() => setApiOverrides(() => ({ serverEnvironmentPrefix: prefix })), [prefix]);
 
   useEffect(() => {
     const fetchAccessToken = async () => {
