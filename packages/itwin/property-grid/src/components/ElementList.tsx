@@ -98,10 +98,11 @@ export const ElementList = ({
           {title}
         </div>
       </div>
-      <div className="property-grid-react-element-list-container">
+      <div className="property-grid-react-element-list-container" role="list">
         {data?.map((label, index) => (
           <MenuItem
             key={index}
+            role="listitem"
             onClick={() => {
               onSelect(instanceKeys[index]);
             }}
