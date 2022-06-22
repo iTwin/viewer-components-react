@@ -19,11 +19,8 @@ import GroupingMapping from "./components/GroupingMapping";
 export class GroupingMappingProvider implements UiItemsProvider {
   public readonly id = "GroupingMappingProvider";
 
-  private readonly _props?
 
-  constructor(props: GroupingMappingProps = {}) {
-    this._props = props;
-  }
+  constructor(private readonly _props: GroupingMappingProps = {}) { }
 
   public provideWidgets(
     _stageId: string,
