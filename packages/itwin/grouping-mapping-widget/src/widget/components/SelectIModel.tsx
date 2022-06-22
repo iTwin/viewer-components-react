@@ -11,7 +11,7 @@ import {
   IModelGrid,
 } from "@itwin/imodel-browser-react";
 import { Button } from "@itwin/itwinui-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import "./SelectIModel.scss";
 
@@ -27,21 +27,21 @@ const SelectIModel = ({
   onCancel,
   backFn,
 }: SelectIModelProps) => {
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken, prefix } = useGroupingMappingApiConfig();
   const [accessToken, setAccessToken] = useState<AccessToken>();
 
   const apiOverrides = useMemo<ApiOverrides<IModelFull[]>>(
-    () => ({ serverEnvironmentPrefix: apiContext.prefix }),
-    [apiContext.prefix]
+    () => ({ serverEnvironmentPrefix: prefix }),
+    [prefix]
   );
 
-  useState(() => {
+  useEffect(() => {
     const fetchAccessToken = async () => {
-      const accessToken = await apiContext.getAccessToken();
+      const accessToken = await getAccessToken();
       setAccessToken(accessToken);
     };
     void fetchAccessToken();
-  });
+  }, [getAccessToken]);
 
   return (
     <div className='imodel-grid-container'>

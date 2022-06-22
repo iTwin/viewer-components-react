@@ -123,7 +123,7 @@ export const PropertyMenu = ({
 }: PropertyModifyProps) => {
   const groupId = group.id ?? "";
 
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
 
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
@@ -144,27 +144,27 @@ export const PropertyMenu = ({
 
   const fetchGroupProperties = useMemo(
     () => {
-      return async () => mappingClient.getGroupProperties((await apiContext.getAccessToken()), iModelId, mappingId, groupId);
+      return async () => mappingClient.getGroupProperties((await getAccessToken()), iModelId, mappingId, groupId);
     },
-    [apiContext, mappingClient, iModelId, mappingId, groupId],
+    [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingGroupProperties, data: groupProperties, refreshData: refreshGroupProperties } =
     useCombinedFetchRefresh<GroupPropertyType>(fetchGroupProperties);
 
   const fetchCalculatedProperties = useMemo(
     () => {
-      return async () => mappingClient.getCalculatedProperties((await apiContext.getAccessToken()), iModelId, mappingId, groupId);
+      return async () => mappingClient.getCalculatedProperties((await getAccessToken()), iModelId, mappingId, groupId);
     },
-    [apiContext, mappingClient, iModelId, mappingId, groupId],
+    [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingCalculatedProperties, data: calculatedProperties, refreshData: refreshCalculatedProperties } =
     useCombinedFetchRefresh<CalculatedPropertyType>(fetchCalculatedProperties);
 
   const fetchCustomCalculations = useMemo(
     () => {
-      return async () => mappingClient.getCustomCalculations((await apiContext.getAccessToken()), iModelId, mappingId, groupId);
+      return async () => mappingClient.getCustomCalculations((await getAccessToken()), iModelId, mappingId, groupId);
     },
-    [apiContext, mappingClient, iModelId, mappingId, groupId],
+    [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingCustomCalculations, data: customCalculations, refreshData: refreshCustomCalculations } =
     useCombinedFetchRefresh<CustomCalculationType>(fetchCustomCalculations);

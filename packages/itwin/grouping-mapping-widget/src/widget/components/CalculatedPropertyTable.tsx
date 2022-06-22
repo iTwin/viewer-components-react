@@ -52,7 +52,7 @@ const CalculatedPropertyTable = ({
   refreshCalculatedProperties,
   selectedCalculatedProperty,
 }: CalculatedPropertyTableProps) => {
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [
     showCalculatedPropertyDeleteModal,
@@ -148,7 +148,7 @@ const CalculatedPropertyTable = ({
         show={showCalculatedPropertyDeleteModal}
         setShow={setShowCalculatedPropertyDeleteModal}
         onDelete={async () => {
-          const accessToken = await apiContext.getAccessToken();
+          const accessToken = await getAccessToken();
           await mappingClient.deleteCalculatedProperty(
             accessToken,
             iModelId,

@@ -39,7 +39,7 @@ const CustomCalculationAction = ({
   customCalculation,
   returnFn,
 }: CalculatedPropertyActionProps) => {
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>(
     customCalculation?.propertyName ?? "",
@@ -63,7 +63,7 @@ const CustomCalculationAction = ({
     }
     try {
       setIsLoading(true);
-      const accessToken = await apiContext.getAccessToken();
+      const accessToken = await getAccessToken();
       customCalculation
         ? await mappingClient.updateCustomCalculation(
           accessToken,

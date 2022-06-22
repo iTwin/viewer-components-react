@@ -34,7 +34,7 @@ import type { Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { clearAll } from "./viewerUtils";
 import type { IMappingClient } from "../IMappingClient";
-import type { GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
@@ -51,12 +51,12 @@ const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: GroupingMappingApiConfig,
+  getAccessToken: GetAccessTokenFn,
   mappingClient: IMappingClient,
 ) => {
   try {
     setIsLoading(true);
-    const accessToken = await apiContext.getAccessToken();
+    const accessToken = await getAccessToken();
     const mappings = await mappingClient.getMappings(accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
@@ -67,14 +67,14 @@ const fetchMappings = async (
 };
 
 const toggleExtraction = async (
-  apiContext: GroupingMappingApiConfig,
+  getAccessToken: GetAccessTokenFn,
   mappingClient: IMappingClient,
   iModelId: string,
   mapping: Mapping
 ) => {
   try {
     const newState = !mapping?.extractionEnabled;
-    const accessToken = await apiContext.getAccessToken();
+    const accessToken = await getAccessToken();
     await mappingClient.updateMapping(
       accessToken,
       iModelId,
@@ -87,7 +87,7 @@ const toggleExtraction = async (
 };
 
 export const Mappings = () => {
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -101,8 +101,8 @@ export const Mappings = () => {
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
   useEffect(() => {
-    void fetchMappings(setMappings, iModelId, setIsLoading, apiContext, mappingClient);
-  }, [apiContext, mappingClient, iModelId, setIsLoading]);
+    void fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient);
+  }, [getAccessToken, mappingClient, iModelId, setIsLoading]);
 
   useEffect(() => {
     const removeListener =
@@ -117,8 +117,8 @@ export const Mappings = () => {
     setMappingView(MappingView.MAPPINGS);
     setSelectedMapping(undefined);
     setMappings([]);
-    await fetchMappings(setMappings, iModelId, setIsLoading, apiContext, mappingClient);
-  }, [apiContext, mappingClient, iModelId, setMappings]);
+    await fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient);
+  }, [getAccessToken, mappingClient, iModelId, setMappings]);
 
   const addMapping = async () => {
     setMappingView(MappingView.ADDING);
@@ -175,7 +175,7 @@ export const Mappings = () => {
                         setSelectedMapping(value.row.original);
                         setShowBlockingOverlay(true);
                         close();
-                        await toggleExtraction(apiContext, mappingClient, iModelId, value.row.original);
+                        await toggleExtraction(getAccessToken, mappingClient, iModelId, value.row.original);
                         await refresh();
                         setShowBlockingOverlay(false);
                       }}
@@ -212,7 +212,7 @@ export const Mappings = () => {
         ],
       },
     ],
-    [apiContext, mappingClient, iModelId, refresh]
+    [getAccessToken, mappingClient, iModelId, refresh]
   );
 
   switch (mappingView) {
@@ -267,7 +267,7 @@ export const Mappings = () => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const accessToken = await apiContext.getAccessToken();
+              const accessToken = await getAccessToken();
               await mappingClient.deleteMapping(
                 accessToken,
                 iModelId,

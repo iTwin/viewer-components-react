@@ -47,7 +47,7 @@ const GroupAction = ({
   resetView,
 }: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [details, setDetails] = useState({
     groupName: group?.groupName ?? "",
@@ -178,7 +178,7 @@ const GroupAction = ({
       setIsLoading(true);
       const currentQuery = query || simpleQuery;
 
-      const accessToken = await apiContext.getAccessToken();
+      const accessToken = await getAccessToken();
 
       group
         ? await mappingClient.updateGroup(
@@ -212,7 +212,7 @@ const GroupAction = ({
     showValidationMessage,
     simpleQuery,
     validator,
-    apiContext,
+    getAccessToken,
     mappingClient,
   ]);
 

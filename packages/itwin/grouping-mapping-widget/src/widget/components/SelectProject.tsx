@@ -23,7 +23,7 @@ import {
   LabeledInput,
   Tab,
 } from "@itwin/itwinui-react";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import "./SelectProject.scss";
 
@@ -41,7 +41,7 @@ interface SelectProjectProps {
   onCancel: () => void;
 }
 const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken, prefix } = useGroupingMappingApiConfig();
   const [projectType, setProjectType] = useState<number>(0);
   const [searchInput, setSearchInput] = useState<string>("");
   const [activeSearchInput, setActiveSearchInput] = useState<string>("");
@@ -52,17 +52,17 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
   }, [searchInput]);
 
   const apiOverrides = useMemo<ApiOverrides<ProjectFull[]>>(
-    () => ({ serverEnvironmentPrefix: apiContext.prefix }),
-    [apiContext.prefix],
+    () => ({ serverEnvironmentPrefix: prefix }),
+    [prefix],
   );
 
-  useState(() => {
+  useEffect(() => {
     const fetchAccessToken = async () => {
-      const accessToken = await apiContext.getAccessToken();
+      const accessToken = await getAccessToken();
       setAccessToken(accessToken);
     };
     void fetchAccessToken();
-  });
+  }, [getAccessToken]);
 
   return (
     <div className='select-project-grid-container'>

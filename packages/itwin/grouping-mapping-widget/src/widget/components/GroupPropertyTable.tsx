@@ -51,7 +51,7 @@ const GroupPropertyTable = ({
   refreshGroupProperties,
   setGroupModifyView,
 }: GroupPropertyTableProps) => {
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [showGroupPropertyDeleteModal, setShowGroupPropertyDeleteModal] =
     useState<boolean>(false);
@@ -144,7 +144,7 @@ const GroupPropertyTable = ({
         show={showGroupPropertyDeleteModal}
         setShow={setShowGroupPropertyDeleteModal}
         onDelete={async () => {
-          const accessToken = await apiContext.getAccessToken();
+          const accessToken = await getAccessToken();
           await mappingClient.deleteGroupProperty(
             accessToken,
             iModelId,

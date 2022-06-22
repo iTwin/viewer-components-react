@@ -41,7 +41,7 @@ const ConfirmMappingImport = ({
   onFinish,
 }: ConfirmMappingImportProps) => {
   const iModelId = useActiveIModelConnection()?.iModelId;
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
 
   const [importCount, setImportCount] = useState<number>(0);
@@ -79,7 +79,7 @@ const ConfirmMappingImport = ({
     try {
       for (const selectedMapping of selectedMappings) {
         setCurrentlyImporting(selectedMapping.mappingName ?? "");
-        const accessToken = await apiContext.getAccessToken();
+        const accessToken = await getAccessToken();
         await mappingClient.copyMapping(
           accessToken,
           sourceiModelId,

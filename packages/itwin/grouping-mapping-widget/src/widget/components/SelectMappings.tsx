@@ -18,19 +18,19 @@ import type { MappingType } from "./Mapping";
 import "./SelectMapping.scss";
 import { handleError } from "./utils";
 import type { IMappingClient } from "../IMappingClient";
-import type { GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  apiContext: GroupingMappingApiConfig,
+  getAccessToken: GetAccessTokenFn,
   mappingClient: IMappingClient
 ) => {
   try {
     setIsLoading(true);
-    const accessToken = await apiContext.getAccessToken();
+    const accessToken = await getAccessToken();
     const mappings = await mappingClient.getMappings(accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
@@ -53,15 +53,15 @@ const SelectMappings = ({
   onCancel,
   backFn,
 }: SelectMappingsProps) => {
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedMappings, setSelectedMappings] = useState<MappingType[]>([]);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
   useEffect(() => {
-    void fetchMappings(setMappings, iModelId, setIsLoading, apiContext, mappingClient);
-  }, [apiContext, mappingClient, iModelId, setIsLoading]);
+    void fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient);
+  }, [getAccessToken, mappingClient, iModelId, setIsLoading]);
 
   const mappingsColumns = useMemo(
     () => [

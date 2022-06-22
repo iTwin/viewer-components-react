@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Mappings } from "./Mapping";
 import "./GroupingMapping.scss";
 import type { AccessToken } from "@itwin/core-bentley";
@@ -40,13 +40,12 @@ const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProp
     }
   }, [clientProp]);
 
+  const getAccessTokenMemo = useCallback(getAccessToken ?? (async () => (await IModelApp.authorizationClient?.getAccessToken()) ?? ""), [getAccessToken]);
+
   return (
     <GroupingMappingApiConfigContext.Provider
       value={{
-        getAccessToken:
-          getAccessToken ??
-          (async () =>
-            (await IModelApp.authorizationClient?.getAccessToken()) ?? ""),
+        getAccessToken: getAccessTokenMemo,
         prefix,
       }}
     >

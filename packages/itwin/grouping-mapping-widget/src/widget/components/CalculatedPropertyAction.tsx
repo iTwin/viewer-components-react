@@ -44,7 +44,7 @@ const CalculatedPropertyAction = ({
   ids,
   returnFn,
 }: CalculatedPropertyActionProps) => {
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>(
     property?.propertyName ?? "",
@@ -103,7 +103,7 @@ const CalculatedPropertyAction = ({
     try {
       setIsLoading(true);
 
-      const accessToken = await apiContext.getAccessToken();
+      const accessToken = await getAccessToken();
 
       property
         ? await mappingClient.updateCalculatedProperty(

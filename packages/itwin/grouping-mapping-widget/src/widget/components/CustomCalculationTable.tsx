@@ -52,7 +52,7 @@ const CustomCalculationTable = ({
   refreshCustomCalculations,
   selectedCustomCalculation,
 }: CustomCalculationTableProps) => {
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [
     showCustomCalculationDeleteModal,
@@ -153,7 +153,7 @@ const CustomCalculationTable = ({
         show={showCustomCalculationDeleteModal}
         setShow={setShowCustomCalculationDeleteModal}
         onDelete={async () => {
-          const accessToken = await apiContext.getAccessToken();
+          const accessToken = await getAccessToken();
           await mappingClient.deleteCustomCalculation(
             accessToken,
             iModelId,

@@ -19,7 +19,7 @@ interface MappingActionProps {
 }
 
 const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
-  const apiContext = useGroupingMappingApiConfig();
+  const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [values, setValues] = useState({
     name: mapping?.mappingName ?? "",
@@ -37,7 +37,7 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
         return;
       }
       setIsLoading(true);
-      const accessToken = await apiContext.getAccessToken();
+      const accessToken = await getAccessToken();
       mapping
         ? await mappingClient.updateMapping(accessToken, iModelId, mapping.id ?? "", {
           mappingName: values.name,
