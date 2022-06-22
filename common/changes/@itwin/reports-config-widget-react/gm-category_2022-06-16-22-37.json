@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/reports-config-widget-react",
+      "comment": "Unit tests fix",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/reports-config-widget-react"
+}
