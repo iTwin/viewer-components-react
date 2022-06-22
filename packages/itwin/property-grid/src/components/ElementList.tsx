@@ -8,7 +8,7 @@ import "./ElementList.scss";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
-import { Table } from "@itwin/itwinui-react";
+import { MenuItem } from "@itwin/itwinui-react";
 import { Icon } from "@itwin/core-react";
 import classnames from "classnames";
 import * as React from "react";
@@ -53,21 +53,7 @@ export const ElementList = ({
   onSelect,
   rootClassName,
 }: ElementListProps) => {
-  const [data, setData] = React.useState<{ displayLabel: string }[]>([]);
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: "Header name",
-        columns: [
-          {
-            id: "displayLabel",
-            accessor: "displayLabel",
-          },
-        ],
-      },
-    ],
-    []
-  );
+  const [data, setData] = React.useState<string[]>();
 
   const labelsProvider: PresentationLabelsProvider = React.useMemo(() => {
     return new PresentationLabelsProvider({
@@ -78,11 +64,7 @@ export const ElementList = ({
   React.useEffect(() => {
     const createAndSetDp = async () => {
       const labels = await getLabels(labelsProvider, instanceKeys);
-      const rows: { displayLabel: string }[] = [];
-      for (const label of labels) {
-        rows.push({ displayLabel: label });
-      }
-      setData(rows);
+      setData(labels);
     };
 
     createAndSetDp().catch(() => {
@@ -92,17 +74,6 @@ export const ElementList = ({
       );
     });
   }, [labelsProvider, instanceKeys]);
-
-  const onRowClick = (event: React.MouseEvent) => {
-    const input = event.target as HTMLElement;
-    onSelect(
-      instanceKeys[
-        data.findIndex(
-          (x: { displayLabel: string }) => x.displayLabel === input.innerHTML
-        )
-      ]
-    );
-  };
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
 
@@ -128,17 +99,16 @@ export const ElementList = ({
         </div>
       </div>
       <div className="property-grid-react-element-list-container">
-        {data && (
-          <Table
-            columns={columns}
-            data={data}
-            emptyTableContent="No data."
-            density="extra-condensed"
-            selectionMode="single"
-            onRowClick={onRowClick}
-            // hideHeader={true}
-          />
-        )}
+        {data?.map((label, index) => (
+          <MenuItem
+            key={index}
+            onClick={() => {
+              onSelect(instanceKeys[index]);
+            }}
+          >
+            {label}
+          </MenuItem>
+        ))}
       </div>
     </div>
   );
