@@ -29,13 +29,19 @@ export function resolveFormulaDataType(formulaName: string, formula: string, pro
   try {
     infixFormulaTokens = splitFormula(formula);
   } catch (ex) {
-    return { errorMessage: (ex as Error).message };
+    if (ex instanceof Error) {
+      return { errorMessage: ex.message };
+    } else {
+      // eslint-disable-next-line no-console
+      console.error("Unknown error.", ex);
+      return { errorMessage: "Unknown error." };
+    }
   }
 
   const postfixFormulaTokens = convertInfixToPostfix(infixFormulaTokens);
 
   if (undefined === postfixFormulaTokens.value) {
-    return { errorMessage: postfixFormulaTokens.errorMessage ?? "Unknown error" };
+    return { errorMessage: postfixFormulaTokens.errorMessage ?? "Unknown error." };
   }
 
   return resolveTokensDataType(formulaName, postfixFormulaTokens.value, properties);
