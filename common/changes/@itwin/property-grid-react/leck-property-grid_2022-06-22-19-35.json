@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Replace deprecated Table with MenuItem from iTwinUI-React",
-      "type": "patch"
+      "comment": "Replaces deprecated Table with MenuItem from iTwinUI-React, and fixes warning about deprecated findDOMNode usage",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/property-grid-react"
