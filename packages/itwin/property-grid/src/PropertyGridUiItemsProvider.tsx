@@ -94,7 +94,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
 
   // When the provider is unloaded also remove the handler
   public onUnregister = () => {
-    this._removeListeners && this._removeListeners();
+    this._removeListeners?.();
   };
 
   public provideWidgets(
