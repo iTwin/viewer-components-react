@@ -8,7 +8,7 @@ import "./GroupingMapping.scss";
 import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import type { IMappingClient } from "../IMappingClient";
-import type { ClientPrefix, GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
 import { createDefaultMappingClient, MappingClientContext } from "./context/MappingClientContext";
 
@@ -16,7 +16,7 @@ export interface GroupingMappingProps {
   /**
    * Custom callback to retrieve access token.
    */
-  getAccessToken?: () => Promise<AccessToken>;
+  getAccessToken?: GetAccessTokenFn;
   /**
    * Used for iTwin and iModel APIs.
    * Also used for Mapping API if a custom {@link client} is not provided.
