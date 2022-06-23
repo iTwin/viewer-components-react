@@ -12,9 +12,10 @@ import {
   StageUsage,
   WidgetState,
 } from "@itwin/appui-abstract";
+import type { FrontstageDef, FrontstageReadyEventArgs } from "@itwin/appui-react";
 import { FrontstageManager, UiFramework } from "@itwin/appui-react";
 import { Id64 } from "@itwin/core-bentley";
-import type { InstanceKey } from "@itwin/presentation-common";
+import type { InstanceKey, KeySet } from "@itwin/presentation-common";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import * as React from "react";
@@ -23,11 +24,14 @@ import { MultiElementPropertyGrid, MultiElementPropertyGridId } from "./componen
 import { PropertyGridManager } from "./PropertyGridManager";
 import type { PropertyGridProps } from "./types";
 
-/** Listen for selection changes and when nothing is selection hide the Widget by calling widgetDef.setWidgetState  */
-const onPresentationSelectionChanged = async (evt: SelectionChangeEventArgs, selectionProvider: ISelectionProvider) => {
-  const widgetDef = FrontstageManager.activeFrontstageDef?.findWidgetDef(MultiElementPropertyGridId);
+/**
+ * Update the property grid widget state based on the current widget state and the selection set
+ * if no selection with non transient elements found, hide widget
+ * if some non transient elements are found and the widget isn't minimized, open widget
+ */
+const updateWidgetStateFromSelection = (selection: Readonly<KeySet>, frontstageDef?: FrontstageDef) => {
+  const widgetDef = frontstageDef?.findWidgetDef(MultiElementPropertyGridId);
   if (widgetDef) {
-    const selection = selectionProvider.getSelection(evt.imodel, evt.level);
     const instanceKeys: InstanceKey[] = [];
     selection.instanceKeys.forEach(
       (ids: Set<string>, className: string) => {
@@ -50,23 +54,47 @@ const onPresentationSelectionChanged = async (evt: SelectionChangeEventArgs, sel
   }
 };
 
+/** Listen for selection changes to refresh the property grid widget state  */
+const onPresentationSelectionChanged = (evt: SelectionChangeEventArgs, selectionProvider: ISelectionProvider) => {
+  const selection = selectionProvider.getSelection(evt.imodel, evt.level);
+  updateWidgetStateFromSelection(selection, FrontstageManager.activeFrontstageDef);
+};
+
+/**
+ * Listen for frontstage changes to refresh the property grid widget state
+ * This is required if a frontstage is opened while a selection is active to restore the correct widget state
+ * Note only needed in UI 1.0, otherwise the MultiElementPropertyGrid onSelectionChange useEffect would cover this since in UI 2.0 the widget stays mounted
+ */
+const onFrontstageReadyEvent = (args: FrontstageReadyEventArgs) => {
+  const iModel = UiFramework.getIModelConnection();
+  if (iModel) {
+    const selection = Presentation.selection.getSelection(iModel);
+    updateWidgetStateFromSelection(selection, args.frontstageDef);
+  }
+};
+
 /** Provides the property grid widget to zone 9 */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
   public static readonly providerId = "PropertyGridUiItemsProvider";
-  private _removeListenerFunc?: () => void;
+  private _removeListeners?: () => void;
   private _props?: PropertyGridProps;
 
   constructor(props?: PropertyGridProps) {
     this._props = props;
     if (UiFramework.uiVersion === "1") {
-      this._removeListenerFunc = Presentation.selection.selectionChange.addListener(onPresentationSelectionChanged);
+      const removePresentationListener = Presentation.selection.selectionChange.addListener(onPresentationSelectionChanged);
+      const removeFronstageReadyListener = FrontstageManager.onFrontstageReadyEvent.addListener(onFrontstageReadyEvent);
+      this._removeListeners = () => {
+        removePresentationListener();
+        removeFronstageReadyListener();
+      };
     }
   }
 
   // When the provider is unloaded also remove the handler
   public onUnregister = () => {
-    this._removeListenerFunc && this._removeListenerFunc();
+    this._removeListeners?.();
   };
 
   public provideWidgets(
