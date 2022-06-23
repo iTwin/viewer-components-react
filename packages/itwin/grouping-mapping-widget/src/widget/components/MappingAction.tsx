@@ -3,13 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Fieldset, LabeledInput, Small, ToggleSwitch } from "@itwin/itwinui-react";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, handleInputChange, WidgetHeader } from "./utils";
 import "./MappingAction.scss";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface MappingActionProps {
   iModelId: string;
@@ -18,8 +19,8 @@ interface MappingActionProps {
 }
 
 const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
-  const apiContext = useContext(ApiContext);
-  const mappingClient = useContext(MappingClientContext);
+  const { getAccessToken } = useGroupingMappingApiConfig();
+  const mappingClient = useMappingClient();
   const [values, setValues] = useState({
     name: mapping?.mappingName ?? "",
     description: mapping?.description ?? "",
@@ -36,13 +37,14 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
         return;
       }
       setIsLoading(true);
+      const accessToken = await getAccessToken();
       mapping
-        ? await mappingClient.updateMapping(apiContext.accessToken, iModelId, mapping.id ?? "", {
+        ? await mappingClient.updateMapping(accessToken, iModelId, mapping.id ?? "", {
           mappingName: values.name,
           description: values.description,
           extractionEnabled: values.extractionEnabled,
         })
-        : await mappingClient.createMapping(apiContext.accessToken, iModelId, {
+        : await mappingClient.createMapping(accessToken, iModelId, {
           mappingName: values.name,
           description: values.description,
           extractionEnabled: values.extractionEnabled,

@@ -2,8 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { ViewChangeOptions } from "@itwin/core-frontend";
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection, ViewChangeOptions } from "@itwin/core-frontend";
 import { EmphasizeElements, IModelApp } from "@itwin/core-frontend";
 import type { ElementProps, FeatureAppearance } from "@itwin/core-common";
 import { ColorDef, FeatureOverrideType } from "@itwin/core-common";

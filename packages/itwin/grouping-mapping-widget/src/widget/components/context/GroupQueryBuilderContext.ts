@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import { QueryBuilder } from "./QueryBuilder";
+import { QueryBuilder } from "../QueryBuilder";
 
 export interface PropertySelection {
   currentPropertyList: PropertyRecord[];
@@ -28,5 +28,5 @@ export const GroupQueryBuilderContext = React.createContext<PropertySelection>({
   setQueryBuilder: () => new QueryBuilder(undefined),
   isLoading: false,
   isRendering: false,
-  resetView: async () => {},
+  resetView: async () => { },
 });

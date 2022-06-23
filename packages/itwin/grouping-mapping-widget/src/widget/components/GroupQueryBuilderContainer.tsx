@@ -11,7 +11,7 @@ import type {
 import { KeySet } from "@itwin/presentation-common";
 import { GroupQueryBuilderApi } from "../../api/GroupQueryBuilderApi";
 import { PropertyGridWrapperApp } from "./property-grid/PropertyGridWrapper";
-import { GroupQueryBuilderContext } from "./GroupQueryBuilderContext";
+import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { Button } from "@itwin/itwinui-react";
 import "./GroupQueryBuilder.scss";
 
@@ -25,7 +25,7 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
   useEffect(() => {
     const _onSelectionChanged = async (
       evt: SelectionChangeEventArgs,
-      selectionProvider: ISelectionProvider,
+      selectionProvider: ISelectionProvider
     ) => {
       SetSelected(true);
       context.setCurrentPropertyList([]);
@@ -49,7 +49,7 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
     context.setCurrentPropertyList([]);
     context.resetView().catch((e) =>
       /* eslint-disable no-console */
-      console.error(e),
+      console.error(e)
     );
   };
 
