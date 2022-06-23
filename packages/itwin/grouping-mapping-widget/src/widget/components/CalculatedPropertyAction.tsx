@@ -13,7 +13,7 @@ import {
   MenuItem,
   Small,
 } from "@itwin/itwinui-react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import {
   BboxDimension,
@@ -24,7 +24,8 @@ import { handleError, WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
 import type { CalculatedPropertyType } from "./CalculatedPropertyTable";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
@@ -43,8 +44,8 @@ const CalculatedPropertyAction = ({
   ids,
   returnFn,
 }: CalculatedPropertyActionProps) => {
-  const apiContext = useContext(ApiContext);
-  const mappingClient = useContext(MappingClientContext);
+  const { getAccessToken } = useGroupingMappingApiConfig();
+  const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>(
     property?.propertyName ?? "",
   );
@@ -102,9 +103,11 @@ const CalculatedPropertyAction = ({
     try {
       setIsLoading(true);
 
+      const accessToken = await getAccessToken();
+
       property
         ? await mappingClient.updateCalculatedProperty(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,
@@ -115,7 +118,7 @@ const CalculatedPropertyAction = ({
           },
         )
         : await mappingClient.createCalculatedProperty(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,
