@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useEffect, useState } from "react";
-import { validateFormula } from "../../formula/FormulaValidator";
+import { resolveFormulaDataType } from "../../formula/FormulaDataTypeResolver";
 import type { PropertyMap } from "../../formula/Types";
 import { debounce } from "../utils";
 
@@ -14,7 +14,7 @@ function validate(formulaName: string, formula: string, properties: PropertyMap,
     return false;
   }
 
-  const error = validateFormula(formulaName, formula, properties);
+  const error = resolveFormulaDataType(formulaName, formula, properties).errorMessage ?? "";
   setFormulaErrorMessage(error);
   setIsValid(!error);
   return !error;

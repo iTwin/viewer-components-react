@@ -15,3 +15,8 @@ export * from "./widget/IMappingClient";
 export { Mappings } from "./widget/components/Mapping";
 export { Groupings } from "./widget/components/Grouping";
 export { PropertyMenu } from "./widget/components/PropertyMenu";
+
+/** Formula DataType resolver */
+export { resolveFormulaDataType } from "./formula/FormulaDataTypeResolver";
+export { DataType, PropertyMap } from "./formula/Types";
+export { IResult } from "./formula/IResult";
