@@ -70,14 +70,14 @@ export enum PropertyMenuView {
 
 const stringToPossibleDataType = (str?: string): PossibleDataType => {
   if (!str)
-    return "undefined";
+    return "Undefined";
 
   switch (str.toLowerCase()) {
     case "double":
-    case "number": return "number";
-    case "string": return "string";
-    case "boolean": return "boolean";
-    default: return "undefined";
+    case "number": return "Number";
+    case "string": return "String";
+    case "boolean": return "Boolean";
+    default: return "Undefined";
   }
 };
 
@@ -99,7 +99,7 @@ const convertToPropertyMap = (
   calculatedProperties.forEach((p) => {
     const lowerName = p.propertyName?.toLowerCase();
     if (lowerName)
-      map[lowerName] = "number";
+      map[lowerName] = "Number";
   });
 
   customCalculations.forEach((p) => {
