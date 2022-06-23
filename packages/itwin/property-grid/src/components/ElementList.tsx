@@ -62,15 +62,15 @@ export const ElementList = ({
   }, [iModelConnection]);
 
   React.useEffect(() => {
-    const createAndSetDp = async () => {
+    const createLabels = async () => {
       const labels = await getLabels(labelsProvider, instanceKeys);
       setData(labels);
     };
 
-    createAndSetDp().catch(() => {
+    createLabels().catch(() => {
       Logger.logError(
         "VCR:PropertyGridReact",
-        "ElementList: Failed to create Data Provider"
+        "ElementList: Failed to create labels"
       );
     });
   }, [labelsProvider, instanceKeys]);
