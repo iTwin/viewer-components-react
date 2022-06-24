@@ -2,6 +2,21 @@
   "name": "@itwin/reports-config-widget-react",
   "entries": [
     {
+      "version": "0.0.3",
+      "tag": "@itwin/reports-config-widget-react_v0.0.3",
+      "date": "Fri, 24 Jun 2022 16:51:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Unit tests fix"
+          },
+          {
+            "comment": "More unit test refinements "
+          }
+        ]
+      }
+    },
+    {
       "version": "0.0.2",
       "tag": "@itwin/reports-config-widget-react_v0.0.2",
       "date": "Thu, 16 Jun 2022 14:09:35 GMT",
