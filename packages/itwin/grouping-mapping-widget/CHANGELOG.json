@@ -2,6 +2,18 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.5.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.5.1",
+      "date": "Fri, 24 Jun 2022 21:18:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removed unneeded import"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.0",
       "tag": "@itwin/grouping-mapping-widget_v0.5.0",
       "date": "Fri, 24 Jun 2022 16:51:25 GMT",
