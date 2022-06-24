@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Point3d } from "@itwin/core-geometry";
+import { Point3d } from "@itwin/core-geometry";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import type { LocationMeasurementProps } from "../measurements/LocationMeasurement";
 import { LocationMeasurement } from "../measurements/LocationMeasurement";
@@ -31,13 +31,33 @@ export class MeasureLocationToolModel extends MeasurementToolModel<LocationMeasu
   public addLocation(props: AddLocationProps): void {
     const { viewType, ...rest } = props;
     const measurement = new LocationMeasurement(rest);
+    const dynamicMeasurement = this._currentMeasurement;
     measurement.viewTarget.include(viewType);
 
     // Set a temporary dynamic
     this._currentMeasurement = measurement;
     this.notifyNewMeasurement();
-    this._currentMeasurement = undefined;
+    this._currentMeasurement = dynamicMeasurement;
 
     this.addMeasurementAndReset(measurement);
   }
+
+  public setLocation(props: LocationMeasurementProps): boolean {
+
+    this._currentMeasurement!.changeLocation(props);
+    this.notifyDynamicMeasurementChanged();
+
+    return true;
+  }
+
+  // Measurement so that location is dynamically shown for mouse's location
+  public createDynamicMeasurement(): void {
+
+    this._currentMeasurement = new LocationMeasurement();
+    this._currentMeasurement.isDynamic = true;
+
+    this.notifyNewMeasurement();
+
+  }
+
 }

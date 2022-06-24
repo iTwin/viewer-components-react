@@ -157,6 +157,16 @@ export class LocationMeasurement extends Measurement {
     }
   }
 
+  public changeLocation(props: LocationMeasurementProps): boolean {
+
+    if (!this.isDynamic)
+      return false;
+
+    this.readFromJSON(props);
+    return true;
+
+  }
+
   public override testDecorationHit(
     pickContext: MeasurementPickContext
   ): boolean {
@@ -235,8 +245,21 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.coordinate_z"
         ),
         value: await FormatterUtils.formatLength(this._location.z),
-      },
+      }
     ];
+
+    if (this._isDynamic) {
+
+      entries.push(
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureLocation.slope"
+          ),
+          value: this._slope === undefined ? "" : await FormatterUtils.formatSlope(100 * this._slope, false),
+        }
+      )
+
+    }
 
     if (!this._textMarker) {
       const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -258,7 +281,7 @@ export class LocationMeasurement extends Measurement {
   }
 
   protected override async getDataForMeasurementWidgetInternal(): Promise<
-  MeasurementWidgetData | undefined
+    MeasurementWidgetData | undefined
   > {
     const fCoordinates = await FormatterUtils.formatCoordinates(this._location);
 

@@ -36,11 +36,13 @@ import { MeasureTools } from "../MeasureTools";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
-LocationMeasurement,
-MeasureLocationToolModel
+  LocationMeasurement,
+  MeasureLocationToolModel
 > {
   public static override toolId = "MeasureTools.MeasureLocation";
   public static override iconSpec = "icon-measure-location";
+
+  private promisedSnap: Promise<SnapDetail | undefined> | undefined;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -64,6 +66,9 @@ MeasureLocationToolModel
 
   constructor() {
     super();
+
+    this.promisedSnap = undefined;
+    this._toolModel.createDynamicMeasurement();
   }
 
   public async onRestartTool(): Promise<void> {
@@ -86,13 +91,43 @@ MeasureLocationToolModel
     await this._queryGeoLocation(props);
 
     // Perform a snap to get more information (such as the surface normal, if any)
-    const snap = await this.requestSnap(ev);
+    // Allow use of past snap
+    let pastSnap;
+    if (this.promisedSnap) {
+      pastSnap = await this.promisedSnap;
+    }
+    const snap = pastSnap ?? await this.requestSnap(ev);
     if (undefined !== snap && undefined !== snap.normal)
       props.slope = this.getSlopeFromNormal(snap.normal);
 
     this.toolModel.addLocation(props);
     this.updateToolAssistance();
     return EventHandled.Yes;
+  }
+
+  public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
+    if (undefined === ev.viewport)
+      return;
+
+    const props: AddLocationProps = {
+      location: ev.point.clone(),
+      viewType: MeasurementViewTarget.classifyViewport(ev.viewport),
+    };
+
+    await this._queryGeoLocation(props);
+
+    // Perform a snap to get more information (such as the surface normal, if any)
+    // Does not look for new snap point if already looking from past frame
+    if (!this.promisedSnap) {
+      this.promisedSnap = this.requestSnap(ev);
+      const snap = await this.promisedSnap;
+      if (undefined !== snap && undefined !== snap.normal)
+        props.slope = this.getSlopeFromNormal(snap.normal);
+      this.promisedSnap = undefined;
+    }
+
+    this.toolModel.setLocation(props);
+    ev.viewport.invalidateDecorations();
   }
 
   protected createToolModel(): MeasureLocationToolModel {

@@ -190,10 +190,10 @@ export abstract class PrimitiveToolBase extends PrimitiveTool {
 export abstract class MeasurementToolBase<
   T extends Measurement,
   ToolModel extends MeasurementToolModel<T>
->
+  >
   extends PrimitiveToolBase
   implements MeasurementTool {
-  private _toolModel: ToolModel;
+  protected _toolModel: ToolModel;
   private _selectionHolder: SelectionHolder;
 
   public get measurements(): ReadonlyArray<Measurement> {
@@ -368,7 +368,7 @@ export abstract class MeasurementToolBase<
     IModelApp.accuSnap.enableSnap(true);
   }
 
-  protected updateToolAssistance() {}
+  protected updateToolAssistance() { }
 
   protected abstract createToolModel(): ToolModel;
 
