@@ -2,6 +2,41 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.5.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.5.1",
+      "date": "Fri, 24 Jun 2022 21:18:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removed unneeded import"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.5.0",
+      "date": "Fri, 24 Jun 2022 16:51:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix category bug and reset button"
+          },
+          {
+            "comment": "fix category query "
+          },
+          {
+            "comment": "Exposed CustomCalculation formula DataType resolver."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Custom accessToken parameter now takes a callback function"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@itwin/grouping-mapping-widget_v0.4.0",
       "date": "Thu, 16 Jun 2022 14:09:35 GMT",

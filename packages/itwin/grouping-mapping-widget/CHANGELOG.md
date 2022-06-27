@@ -1,6 +1,26 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 16 Jun 2022 14:09:35 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Jun 2022 21:18:52 GMT and should not be manually modified.
+
+## 0.5.1
+Fri, 24 Jun 2022 21:18:52 GMT
+
+### Patches
+
+- Removed unneeded import
+
+## 0.5.0
+Fri, 24 Jun 2022 16:51:25 GMT
+
+### Minor changes
+
+- Custom accessToken parameter now takes a callback function
+
+### Patches
+
+- fix category bug and reset button
+- fix category query 
+- Exposed CustomCalculation formula DataType resolver.
 
 ## 0.4.0
 Thu, 16 Jun 2022 14:09:35 GMT

@@ -8,6 +8,7 @@ import "./MultiElementPropertyGrid.scss";
 import type { InstanceKey } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
+  FrontstageManager,
   UiFramework,
   useActiveFrontstageDef,
   useActiveIModelConnection,
@@ -71,8 +72,13 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
     // ensure this selection handling runs if component mounts after the selection event fires:
     onSelectionChange();
 
-    const removeListener = Presentation.selection.selectionChange.addListener(onSelectionChange);
-    return () => removeListener();
+    const removePresentationListener = Presentation.selection.selectionChange.addListener(onSelectionChange);
+    // if the frontstage changes and a selection set is already active we need to resync this widget's state with that selection
+    const removeFrontstageReadyListener = FrontstageManager.onFrontstageReadyEvent.addListener(onSelectionChange);
+    return () => {
+      removePresentationListener();
+      removeFrontstageReadyListener();
+    };
   }, [iModelConnection]);
 
   const items = [

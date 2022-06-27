@@ -5,7 +5,7 @@
 import type { IModelConnection } from "@itwin/core-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { fetchIdsFromQuery, WidgetHeader } from "./utils";
 import {
@@ -46,7 +46,8 @@ import { KeySet } from "@itwin/presentation-common";
 import { SvgProperties } from "@itwin/itwinui-icons-react";
 import type { PossibleDataType, PropertyMap } from "../../formula/Types";
 import { useCombinedFetchRefresh } from "../hooks/useFetchData";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface PropertyModifyProps {
   iModelId: string;
@@ -70,14 +71,14 @@ export enum PropertyMenuView {
 
 const stringToPossibleDataType = (str?: string): PossibleDataType => {
   if (!str)
-    return "undefined";
+    return "Undefined";
 
   switch (str.toLowerCase()) {
     case "double":
-    case "number": return "number";
-    case "string": return "string";
-    case "boolean": return "boolean";
-    default: return "undefined";
+    case "number": return "Number";
+    case "string": return "String";
+    case "boolean": return "Boolean";
+    default: return "Undefined";
   }
 };
 
@@ -99,7 +100,7 @@ const convertToPropertyMap = (
   calculatedProperties.forEach((p) => {
     const lowerName = p.propertyName?.toLowerCase();
     if (lowerName)
-      map[lowerName] = "number";
+      map[lowerName] = "Number";
   });
 
   customCalculations.forEach((p) => {
@@ -122,8 +123,8 @@ export const PropertyMenu = ({
 }: PropertyModifyProps) => {
   const groupId = group.id ?? "";
 
-  const apiContext = useContext(ApiContext);
-  const mappingClient = useContext(MappingClientContext);
+  const { getAccessToken } = useGroupingMappingApiConfig();
+  const mappingClient = useMappingClient();
 
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const [propertyMenuView, setPropertyMenuView] = useState<PropertyMenuView>(
@@ -143,27 +144,27 @@ export const PropertyMenu = ({
 
   const fetchGroupProperties = useMemo(
     () => {
-      return async () => mappingClient.getGroupProperties(apiContext.accessToken, iModelId, mappingId, groupId);
+      return async () => mappingClient.getGroupProperties((await getAccessToken()), iModelId, mappingId, groupId);
     },
-    [apiContext, mappingClient, iModelId, mappingId, groupId],
+    [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingGroupProperties, data: groupProperties, refreshData: refreshGroupProperties } =
     useCombinedFetchRefresh<GroupPropertyType>(fetchGroupProperties);
 
   const fetchCalculatedProperties = useMemo(
     () => {
-      return async () => mappingClient.getCalculatedProperties(apiContext.accessToken, iModelId, mappingId, groupId);
+      return async () => mappingClient.getCalculatedProperties((await getAccessToken()), iModelId, mappingId, groupId);
     },
-    [apiContext, mappingClient, iModelId, mappingId, groupId],
+    [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingCalculatedProperties, data: calculatedProperties, refreshData: refreshCalculatedProperties } =
     useCombinedFetchRefresh<CalculatedPropertyType>(fetchCalculatedProperties);
 
   const fetchCustomCalculations = useMemo(
     () => {
-      return async () => mappingClient.getCustomCalculations(apiContext.accessToken, iModelId, mappingId, groupId);
+      return async () => mappingClient.getCustomCalculations((await getAccessToken()), iModelId, mappingId, groupId);
     },
-    [apiContext, mappingClient, iModelId, mappingId, groupId],
+    [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingCustomCalculations, data: customCalculations, refreshData: refreshCustomCalculations } =
     useCombinedFetchRefresh<CustomCalculationType>(fetchCustomCalculations);

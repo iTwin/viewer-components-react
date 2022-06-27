@@ -9,7 +9,7 @@ import {
   LabeledTextarea,
   Small,
 } from "@itwin/itwinui-react";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
@@ -19,7 +19,8 @@ import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
 import type { PropertyMap } from "../../formula/Types";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
@@ -38,8 +39,8 @@ const CustomCalculationAction = ({
   customCalculation,
   returnFn,
 }: CalculatedPropertyActionProps) => {
-  const apiContext = useContext(ApiContext);
-  const mappingClient = useContext(MappingClientContext);
+  const { getAccessToken } = useGroupingMappingApiConfig();
+  const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>(
     customCalculation?.propertyName ?? "",
   );
@@ -62,10 +63,10 @@ const CustomCalculationAction = ({
     }
     try {
       setIsLoading(true);
-
+      const accessToken = await getAccessToken();
       customCalculation
         ? await mappingClient.updateCustomCalculation(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,
@@ -77,7 +78,7 @@ const CustomCalculationAction = ({
           }
         )
         : await mappingClient.createCustomCalculation(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           groupId,
