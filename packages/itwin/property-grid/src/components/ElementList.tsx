@@ -8,24 +8,7 @@ import "./ElementList.scss";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
-import type {
-  PropertyDescription,
-  PropertyEditorInfo,
-  PropertyValue,
-} from "@itwin/appui-abstract";
-import {
-  PropertyRecord,
-  PropertyValueFormat,
-} from "@itwin/appui-abstract";
-import type {
-  ColumnDescription,
-  RowItem,
-} from "@itwin/components-react";
-import {
-  SelectionMode,
-  SimpleTableDataProvider,
-  Table,
-} from "@itwin/components-react";
+import { MenuItem } from "@itwin/itwinui-react";
 import { Icon } from "@itwin/core-react";
 import classnames from "classnames";
 import * as React from "react";
@@ -41,55 +24,6 @@ export interface ElementListProps {
   onSelect: (instanceKey: InstanceKey) => void;
   rootClassName?: string;
 }
-
-/** Create simple property record */
-export const createPropertyRecord = (
-  name: string,
-  displayLabel: string,
-  value: number | string,
-  displayValue: string,
-  editor?: PropertyEditorInfo,
-  description?: PropertyDescription
-): PropertyRecord => {
-  const propValue: PropertyValue = {
-    valueFormat: PropertyValueFormat.Primitive,
-    displayValue,
-    value,
-  };
-  const propDescription: PropertyDescription = description ?? {
-    displayLabel,
-    name,
-    typename: "string",
-  };
-  propDescription.editor = editor;
-
-  const record = new PropertyRecord(propValue, propDescription);
-  record.isDisabled = false;
-  record.isReadonly = !editor;
-  return record;
-};
-
-/** Map element ids and requests labels */
-export const instanceKeysToRowItems = (
-  instanceKeys: InstanceKey[],
-  labels: string[]
-) => {
-  const rows = new Array<RowItem>();
-  for (let i = 0; i < instanceKeys.length; ++i) {
-    const instanceKey = instanceKeys[i];
-    const label = labels[i];
-    const row: RowItem = { key: instanceKey.id, cells: [] };
-    row.cells.push({
-      key: "srl-result",
-      record: createPropertyRecord("srl-result", label, label, label),
-    });
-    row.extendedData = {
-      key: instanceKey,
-    };
-    rows.push(row);
-  }
-  return rows;
-};
 
 /** Gets labels from presentation layer, chunks up requests if necessary */
 export const getLabels = async (
@@ -111,24 +45,6 @@ export const getLabels = async (
   }
 };
 
-/** Creates a data provider with the labels */
-export const createDataProvider = async (
-  labelsProvider: PresentationLabelsProvider,
-  instanceKeys: InstanceKey[]
-) => {
-  const columns: ColumnDescription[] = [
-    {
-      key: "srl-result",
-      label: "",
-    },
-  ];
-  const labels = await getLabels(labelsProvider, instanceKeys);
-  const rows = instanceKeysToRowItems(instanceKeys, labels);
-  const dataProvider = new SimpleTableDataProvider(columns);
-  dataProvider.setItems(rows);
-  return dataProvider;
-};
-
 /** Shows a list of elements to inspect properties for */
 export const ElementList = ({
   iModelConnection,
@@ -137,8 +53,7 @@ export const ElementList = ({
   onSelect,
   rootClassName,
 }: ElementListProps) => {
-  const [dataProvider, setDataProvider] =
-    React.useState<SimpleTableDataProvider>();
+  const [data, setData] = React.useState<string[]>();
 
   const labelsProvider: PresentationLabelsProvider = React.useMemo(() => {
     return new PresentationLabelsProvider({
@@ -147,32 +62,18 @@ export const ElementList = ({
   }, [iModelConnection]);
 
   React.useEffect(() => {
-    const createAndSetDp = async () => {
-      const dp = await createDataProvider(labelsProvider, instanceKeys);
-      setDataProvider(dp);
+    const createLabels = async () => {
+      const labels = await getLabels(labelsProvider, instanceKeys);
+      setData(labels);
     };
 
-    createAndSetDp().catch(() => {
+    createLabels().catch(() => {
       Logger.logError(
         "VCR:PropertyGridReact",
-        "ElementList: Failed to create Data Provider"
+        "ElementList: Failed to create labels"
       );
     });
   }, [labelsProvider, instanceKeys]);
-
-  /** On element selected in table, call the onSelect prop */
-  const onRowsSelected = React.useCallback(
-    async (rowIterator: AsyncIterableIterator<RowItem>, _replace: boolean) => {
-      for await (const row of rowIterator) {
-        if (row.extendedData?.key) {
-          onSelect(row.extendedData.key);
-          return false;
-        }
-      }
-      return false;
-    },
-    [onSelect]
-  );
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
 
@@ -197,16 +98,18 @@ export const ElementList = ({
           {title}
         </div>
       </div>
-      <div className="property-grid-react-element-list-container">
-        {dataProvider && (
-          /* eslint-disable-next-line deprecation/deprecation */
-          <Table
-            dataProvider={dataProvider}
-            onRowsSelected={onRowsSelected}
-            selectionMode={SelectionMode.Single}
-            hideHeader={true}
-          />
-        )}
+      <div className="property-grid-react-element-list-container" role="list">
+        {data?.map((label, index) => (
+          <MenuItem
+            key={index}
+            role="listitem"
+            onClick={() => {
+              onSelect(instanceKeys[index]);
+            }}
+          >
+            {label}
+          </MenuItem>
+        ))}
       </div>
     </div>
   );
