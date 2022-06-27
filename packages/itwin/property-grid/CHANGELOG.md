@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Wed, 08 Jun 2022 20:23:10 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Jun 2022 16:51:25 GMT and should not be manually modified.
+
+## 0.5.5
+Fri, 24 Jun 2022 16:51:25 GMT
+
+### Patches
+
+- refresh property grid when frontstage changes with active selection set
 
 ## 0.5.4
 Wed, 08 Jun 2022 20:23:10 GMT

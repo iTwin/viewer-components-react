@@ -9,7 +9,6 @@ import type {
 } from "@itwin/presentation-common";
 import type { Primitives, PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
-import "core-js/features/string/virtual";
 import { toaster } from "@itwin/itwinui-react";
 
 export interface Query {
