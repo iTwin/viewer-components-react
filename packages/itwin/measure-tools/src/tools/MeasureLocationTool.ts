@@ -43,6 +43,7 @@ export class MeasureLocationTool extends MeasurementToolBase<
   public static override iconSpec = "icon-measure-location";
 
   private promisedSnap: Promise<SnapDetail | undefined> | undefined;
+  private lastSnap: SnapDetail | undefined;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -91,14 +92,8 @@ export class MeasureLocationTool extends MeasurementToolBase<
     await this._queryGeoLocation(props);
 
     // Perform a snap to get more information (such as the surface normal, if any)
-    // Allow use of past snap
-    let pastSnap;
-    if (this.promisedSnap) {
-      pastSnap = await this.promisedSnap;
-    }
-    const snap = pastSnap ?? await this.requestSnap(ev);
-    if (undefined !== snap && undefined !== snap.normal)
-      props.slope = this.getSlopeFromNormal(snap.normal);
+    if (undefined !== this.lastSnap && undefined !== this.lastSnap.normal)
+      props.slope = this.getSlopeFromNormal(this.lastSnap.normal);
 
     this.toolModel.addLocation(props);
     this.updateToolAssistance();
@@ -116,18 +111,28 @@ export class MeasureLocationTool extends MeasurementToolBase<
 
     await this._queryGeoLocation(props);
 
+    this.checkIfLastSnapInvalid(ev);
+
     // Perform a snap to get more information (such as the surface normal, if any)
     // Does not look for new snap point if already looking from past frame
-    if (!this.promisedSnap) {
-      this.promisedSnap = this.requestSnap(ev);
-      const snap = await this.promisedSnap;
-      if (undefined !== snap && undefined !== snap.normal)
-        props.slope = this.getSlopeFromNormal(snap.normal);
-      this.promisedSnap = undefined;
+    if (!this.lastSnap) {
+      this.lastSnap = await this.requestSnap(ev);
     }
+
+    if (undefined !== this.lastSnap && undefined !== this.lastSnap.normal)
+      props.slope = this.getSlopeFromNormal(this.lastSnap.normal);
 
     this.toolModel.setLocation(props);
     ev.viewport.invalidateDecorations();
+  }
+
+  // Checks if last snap is invalid, if so set it to undefined
+  private checkIfLastSnapInvalid(ev: BeButtonEvent) {
+
+    if (this.lastSnap)
+      if (!ev.point.isAlmostEqual(this.lastSnap.hitPoint))
+        this.lastSnap = undefined;
+
   }
 
   protected createToolModel(): MeasureLocationToolModel {
