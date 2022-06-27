@@ -12,24 +12,14 @@ import {
   StagePanelSection,
   StageUsage,
 } from "@itwin/appui-abstract";
-import type { AccessToken } from "@itwin/core-bentley";
 import React from "react";
+import type { GroupingMappingProps } from "./components/GroupingMapping";
 import GroupingMapping from "./components/GroupingMapping";
-import type { ClientPrefix } from "./components/GroupingMapping";
-import type { IMappingClient } from "./IMappingClient";
 
 export class GroupingMappingProvider implements UiItemsProvider {
   public readonly id = "GroupingMappingProvider";
 
-  private readonly _accessToken?: AccessToken;
-  private readonly _prefix?: ClientPrefix;
-  private readonly _client?: IMappingClient;
-
-  constructor(accessToken?: AccessToken, prefix?: "" | "dev" | "qa", client?: IMappingClient) {
-    this._accessToken = accessToken;
-    this._prefix = prefix;
-    this._client = client;
-  }
+  constructor(private readonly _props: GroupingMappingProps = {}) { }
 
   public provideWidgets(
     _stageId: string,
@@ -49,7 +39,7 @@ export class GroupingMappingProvider implements UiItemsProvider {
         id: "GroupingMappingWidget",
         label: "Grouping & Mapping",
         getWidgetContent: () => {
-          return <GroupingMapping accessToken={this._accessToken} prefix={this._prefix} client={this._client} />;
+          return <GroupingMapping {...this._props} />;
         },
       };
 

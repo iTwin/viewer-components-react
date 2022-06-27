@@ -15,13 +15,14 @@ import {
   MenuItem,
   Table,
 } from "@itwin/itwinui-react";
-import React, { useContext, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import type { CalculatedProperty } from "@itwin/insights-client";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { useMappingClient } from "./context/MappingClientContext";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export type CalculatedPropertyType =
   CreateTypeFromInterface<CalculatedProperty>;
@@ -51,8 +52,8 @@ const CalculatedPropertyTable = ({
   refreshCalculatedProperties,
   selectedCalculatedProperty,
 }: CalculatedPropertyTableProps) => {
-  const apiContext = useContext(ApiContext);
-  const mappingClient = useContext(MappingClientContext);
+  const { getAccessToken } = useGroupingMappingApiConfig();
+  const mappingClient = useMappingClient();
   const [
     showCalculatedPropertyDeleteModal,
     setShowCalculatedPropertyDeleteModal,
@@ -147,8 +148,9 @@ const CalculatedPropertyTable = ({
         show={showCalculatedPropertyDeleteModal}
         setShow={setShowCalculatedPropertyDeleteModal}
         onDelete={async () => {
+          const accessToken = await getAccessToken();
           await mappingClient.deleteCalculatedProperty(
-            apiContext.accessToken,
+            accessToken,
             iModelId,
             mappingId,
             groupId,

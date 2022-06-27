@@ -2,39 +2,20 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { createContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Mappings } from "./Mapping";
 import "./GroupingMapping.scss";
-import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
 import type { IMappingClient } from "../IMappingClient";
-import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
+import type { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
+import { createDefaultMappingClient, MappingClientContext } from "./context/MappingClientContext";
 
-export interface Api {
-  accessToken: AccessToken;
-  prefix?: ClientPrefix;
-}
-
-const prefixUrl = (baseUrl?: string, prefix?: string) => {
-  if (prefix && baseUrl) {
-    return baseUrl.replace("api.bentley.com", `${prefix}-api.bentley.com`);
-  }
-  return baseUrl;
-};
-
-export const createDefaultMappingClient = (prefix?: ClientPrefix): IMappingClient => {
-  const url = prefixUrl(REPORTING_BASE_PATH, prefix);
-  return new ReportingClient(url);
-};
-
-export const ApiContext = createContext<Api>({ accessToken: "", prefix: undefined });
-
-export const MappingClientContext = createContext<IMappingClient>(createDefaultMappingClient());
-
-export type ClientPrefix = "" | "dev" | "qa" | undefined;
-
-interface GroupingMappingProps {
-  accessToken?: AccessToken;
+export interface GroupingMappingProps {
+  /**
+   * Custom callback to retrieve access token.
+   */
+  getAccessToken?: GetAccessTokenFn;
   /**
    * Used for iTwin and iModel APIs.
    * Also used for Mapping API if a custom {@link client} is not provided.
@@ -46,18 +27,18 @@ interface GroupingMappingProps {
   client?: IMappingClient;
 }
 
-const GroupingMapping = ({ accessToken, prefix, client }: GroupingMappingProps) => {
-  const [currentAccessToken, setCurrentAccessToken] = useState<string>("");
+const authorizationClientGetAccessToken = (async () => (await IModelApp.authorizationClient?.getAccessToken() ?? ""));
+
+const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProps) => {
   const [mappingClient, setMappingClient] = useState<IMappingClient>(createDefaultMappingClient());
+  const [apiConfig, setApiConfig] = useState<GroupingMappingApiConfig>({
+    getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
+    prefix,
+  });
 
   useEffect(() => {
-    // If no access token is provided, fetch it from session
-    const fetchAccessToken = async () => {
-      const token = accessToken ?? (await IModelApp.authorizationClient?.getAccessToken() ?? "");
-      setCurrentAccessToken(token);
-    };
-    void fetchAccessToken();
-  }, [accessToken, setCurrentAccessToken]);
+    setApiConfig(() => ({ prefix, getAccessToken: getAccessToken ?? authorizationClientGetAccessToken }));
+  }, [getAccessToken, prefix]);
 
   const clientProp: IMappingClient | ClientPrefix = client ?? prefix;
   useEffect(() => {
@@ -69,13 +50,15 @@ const GroupingMapping = ({ accessToken, prefix, client }: GroupingMappingProps) 
   }, [clientProp]);
 
   return (
-    currentAccessToken ? <ApiContext.Provider value={{ accessToken: currentAccessToken, prefix }}>
+    <GroupingMappingApiConfigContext.Provider
+      value={apiConfig}
+    >
       <MappingClientContext.Provider value={mappingClient}>
         <div className='group-mapping-container'>
           <Mappings />
         </div>
       </MappingClientContext.Provider>
-    </ApiContext.Provider> : null
+    </GroupingMappingApiConfigContext.Provider>
   );
 };
 

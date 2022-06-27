@@ -6,7 +6,8 @@
 export * from "./widget/GroupingMappingWidget";
 
 /** Interfaces for providing custom MappingClient */
-export { createDefaultMappingClient, ClientPrefix } from "./widget/components/GroupingMapping";
+export { createDefaultMappingClient } from "./widget/components/context/MappingClientContext";
+export { ClientPrefix } from "./widget/components/context/GroupingApiConfigContext";
 export * from "@itwin/insights-client";
 export * from "./widget/IMappingClient";
 
@@ -14,3 +15,8 @@ export * from "./widget/IMappingClient";
 export { Mappings } from "./widget/components/Mapping";
 export { Groupings } from "./widget/components/Grouping";
 export { PropertyMenu } from "./widget/components/PropertyMenu";
+
+/** Formula DataType resolver */
+export { resolveFormulaDataType } from "./formula/FormulaDataTypeResolver";
+export { DataType, PropertyMap } from "./formula/Types";
+export { IResult } from "./formula/IResult";

@@ -28,7 +28,7 @@ interface ArgumentValidationResult {
 
 function isValidArgument(arg: PossibleDataType, argPos: number, expectedArg: FormulaFunctionArgument): ArgumentValidationResult {
   let isValid: boolean;
-  if (arg === "undefined") {
+  if (arg === "Undefined") {
     isValid = !!expectedArg.canBeUndefined;
     return { isValid, invalidReason: isValid ? undefined : `Expected ${formatNumericalPositionString(argPos + 1)} argument to not be null.` };
   }
@@ -38,17 +38,17 @@ function isValidArgument(arg: PossibleDataType, argPos: number, expectedArg: For
 }
 
 function validateArgumentsWithTypeMatching(): (arg: PossibleDataType, argPos: number, expectedArg: FormulaFunctionArgument, shouldTypeMatch: boolean) => ArgumentValidationResult {
-  let matchType: PossibleDataType = "undefined";
+  let matchType: PossibleDataType = "Undefined";
   return (arg: PossibleDataType, argPos: number, expectedArg: FormulaFunctionArgument, shouldMatchType: boolean) => {
-    if (shouldMatchType && matchType === "undefined")
+    if (shouldMatchType && matchType === "Undefined")
       matchType = arg;
 
     const validation = isValidArgument(arg, argPos, expectedArg);
     if (!validation.isValid)
       return validation;
 
-    const isValid = (matchType === "undefined" || arg === matchType || (arg === "undefined" && !!expectedArg.canBeUndefined));
-    if (matchType !== "undefined" && !isValid)
+    const isValid = (matchType === "Undefined" || arg === matchType || (arg === "Undefined" && !!expectedArg.canBeUndefined));
+    if (matchType !== "Undefined" && !isValid)
       return {
         isValid,
         matchingType: matchType,
@@ -70,7 +70,7 @@ export function getFormulaFunctionReturnType(func: FormulaFunction, args: Possib
   if (!hasUnlimitedArguments && args.length > func.argumentCountBounds[1])
     return { errorMessage: `Too many arguments received. Expected a maximum of ${func.argumentCountBounds[1]} argument(s)` };
 
-  let returnType: PossibleDataType = func.returnType ?? "undefined";
+  let returnType: PossibleDataType = func.returnType ?? "Undefined";
   const validationFunc = func.typesMatchFromIndex === undefined ? isValidArgument : validateArgumentsWithTypeMatching();
 
   for (let i = 0; i < args.length; i++) {
@@ -82,7 +82,7 @@ export function getFormulaFunctionReturnType(func: FormulaFunction, args: Possib
       return { errorMessage: validationResult.invalidReason };
 
     if (func.isreturnTypeFromTypeMatch && shouldTypeMatch)
-      returnType = validationResult.matchingType ?? "undefined";
+      returnType = validationResult.matchingType ?? "Undefined";
   }
 
   return { value: returnType };
@@ -90,72 +90,72 @@ export function getFormulaFunctionReturnType(func: FormulaFunction, args: Possib
 
 function getNumericalFunction(name: string): FormulaFunction | undefined {
   switch (name) {
-    case "abs": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "acos": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "acosh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "asin": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "asinh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "atan": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "atanh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "atan2": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "number" }, { dataType: "number" }], returnType: "number" };
-    case "cbrt": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "ceil": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "clz32": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "cos": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "cosh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "exp": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "expm1": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "floor": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "fround": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "hypot": return { argumentCountBounds: [2, -1], expectedArguments: [{ dataType: "number" }, { dataType: "number" }], returnType: "number" };
-    case "imul": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "number" }, { dataType: "number" }], returnType: "number" };
-    case "log": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "log1p": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "log10": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "log2": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "max": return { argumentCountBounds: [2, -1], expectedArguments: [{ dataType: "number" }, { dataType: "number" }], returnType: "number" };
-    case "min": return { argumentCountBounds: [2, -1], expectedArguments: [{ dataType: "number" }, { dataType: "number" }], returnType: "number" };
-    case "pow": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "number" }, { dataType: "number" }], returnType: "number" };
-    case "random": return { argumentCountBounds: [0, 0], expectedArguments: [], returnType: "number" };
-    case "round": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "sign": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "sin": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "sinh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "sqrt": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "tan": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "tanh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
-    case "trunc": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "number" }], returnType: "number" };
+    case "abs": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "acos": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "acosh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "asin": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "asinh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "atan": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "atanh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "atan2": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "Number" }, { dataType: "Number" }], returnType: "Number" };
+    case "cbrt": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "ceil": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "clz32": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "cos": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "cosh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "exp": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "expm1": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "floor": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "fround": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "hypot": return { argumentCountBounds: [2, -1], expectedArguments: [{ dataType: "Number" }, { dataType: "Number" }], returnType: "Number" };
+    case "imul": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "Number" }, { dataType: "Number" }], returnType: "Number" };
+    case "log": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "log1p": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "log10": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "log2": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "max": return { argumentCountBounds: [2, -1], expectedArguments: [{ dataType: "Number" }, { dataType: "Number" }], returnType: "Number" };
+    case "min": return { argumentCountBounds: [2, -1], expectedArguments: [{ dataType: "Number" }, { dataType: "Number" }], returnType: "Number" };
+    case "pow": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "Number" }, { dataType: "Number" }], returnType: "Number" };
+    case "random": return { argumentCountBounds: [0, 0], expectedArguments: [], returnType: "Number" };
+    case "round": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "sign": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "sin": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "sinh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "sqrt": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "tan": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "tanh": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
+    case "trunc": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "Number" }], returnType: "Number" };
     default: return undefined;
   }
 }
 
 function getStringFunction(name: string): FormulaFunction | undefined {
   switch (name) {
-    case "charat": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "string" }, { dataType: "number" }], returnType: "string" };
-    case "concat": return { argumentCountBounds: [2, -1], expectedArguments: [{ dataType: "string" }, { dataType: "string" }], returnType: "string" };
-    case "padend": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "string" }, { dataType: "number" }, { dataType: "string" }], returnType: "string" };
-    case "padstart": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "string" }, { dataType: "number" }, { dataType: "string" }], returnType: "string" };
-    case "substring": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "string" }, { dataType: "number" }, { dataType: "number" }], returnType: "string" };
-    case "tolowercase": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "string" }], returnType: "string" };
-    case "touppercase": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "string" }], returnType: "string" };
-    case "trim": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "string" }], returnType: "string" };
-    case "trimend": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "string" }], returnType: "string" };
-    case "trimstart": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "string" }], returnType: "string" };
+    case "charat": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "String" }, { dataType: "Number" }], returnType: "String" };
+    case "concat": return { argumentCountBounds: [2, -1], expectedArguments: [{ dataType: "String" }, { dataType: "String" }], returnType: "String" };
+    case "padend": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "Number" }, { dataType: "String" }], returnType: "String" };
+    case "padstart": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "Number" }, { dataType: "String" }], returnType: "String" };
+    case "substring": return { argumentCountBounds: [2, 3], expectedArguments: [{ dataType: "String" }, { dataType: "Number" }, { dataType: "Number" }], returnType: "String" };
+    case "tolowercase": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
+    case "touppercase": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
+    case "trim": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
+    case "trimend": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
+    case "trimstart": return { argumentCountBounds: [1, 1], expectedArguments: [{ dataType: "String" }], returnType: "String" };
     default: return undefined;
   }
 }
 
 function getConditionalFunction(name: string): FormulaFunction | undefined {
   switch (name) {
-    case "if": return { argumentCountBounds: [3, 3], expectedArguments: [{ dataType: "boolean" }, { canBeAny: true, canBeUndefined: true }, { canBeAny: true, canBeUndefined: true }], typesMatchFromIndex: 1, isreturnTypeFromTypeMatch: true };
+    case "if": return { argumentCountBounds: [3, 3], expectedArguments: [{ dataType: "Boolean" }, { canBeAny: true, canBeUndefined: true }, { canBeAny: true, canBeUndefined: true }], typesMatchFromIndex: 1, isreturnTypeFromTypeMatch: true };
     case "ifnull": return { argumentCountBounds: [2, 2], expectedArguments: [{ canBeAny: true, canBeUndefined: true }, { canBeAny: true }], typesMatchFromIndex: 0, isreturnTypeFromTypeMatch: true };
     case "ifnotnull": return { argumentCountBounds: [2, 2], expectedArguments: [{ canBeAny: true, canBeUndefined: true }, { canBeAny: true }], typesMatchFromIndex: 0, isreturnTypeFromTypeMatch: true };
-    case "ifempty": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "string" }, { dataType: "string" }], returnType: "string" };
-    case "ifnotempty": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "string" }, { dataType: "string" }], returnType: "string" };
-    case "ifnullorempty": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "string", canBeUndefined: true }, { dataType: "string" }], returnType: "string" };
-    case "ifnotnullorempty": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "string", canBeUndefined: true }, { dataType: "string" }], returnType: "string" };
-    case "ifnullorwhitespace": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "string", canBeUndefined: true }, { dataType: "string" }], returnType: "string" };
-    case "ifnotnullorwhitespace": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "string", canBeUndefined: true }, { dataType: "string" }], returnType: "string" };
+    case "ifempty": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "String" }, { dataType: "String" }], returnType: "String" };
+    case "ifnotempty": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "String" }, { dataType: "String" }], returnType: "String" };
+    case "ifnullorempty": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "String", canBeUndefined: true }, { dataType: "String" }], returnType: "String" };
+    case "ifnotnullorempty": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "String", canBeUndefined: true }, { dataType: "String" }], returnType: "String" };
+    case "ifnullorwhitespace": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "String", canBeUndefined: true }, { dataType: "String" }], returnType: "String" };
+    case "ifnotnullorwhitespace": return { argumentCountBounds: [2, 2], expectedArguments: [{ dataType: "String", canBeUndefined: true }, { dataType: "String" }], returnType: "String" };
     default: return undefined;
   }
 }

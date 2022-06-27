@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { GeoServiceStatus } from "@itwin/core-bentley";
-import type { CurvePrimitive } from "@itwin/core-geometry";
+import type { CurvePrimitive, Point3d } from "@itwin/core-geometry";
 import { GeometryQuery, IModelJson, Vector3d } from "@itwin/core-geometry";
 import type { SnapRequestProps } from "@itwin/core-common";
 import { IModelError } from "@itwin/core-common";

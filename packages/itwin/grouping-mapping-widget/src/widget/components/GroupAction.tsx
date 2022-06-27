@@ -12,7 +12,7 @@ import {
 } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
@@ -20,7 +20,6 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
-import { GroupQueryBuilderContext } from "./GroupQueryBuilderContext";
 import { QueryBuilder } from "./QueryBuilder";
 import {
   transparentOverriddenElements,
@@ -28,7 +27,9 @@ import {
   zoomToElements,
 } from "./viewerUtils";
 import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
-import { ApiContext, MappingClientContext } from "./GroupingMapping";
+import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { useMappingClient } from "./context/MappingClientContext";
 
 interface GroupActionProps {
   iModelId: string;
@@ -46,8 +47,8 @@ const GroupAction = ({
   resetView,
 }: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
-  const apiContext = useContext(ApiContext);
-  const mappingClient = useContext(MappingClientContext);
+  const { getAccessToken } = useGroupingMappingApiConfig();
+  const mappingClient = useMappingClient();
   const [details, setDetails] = useState({
     groupName: group?.groupName ?? "",
     description: group?.description ?? "",
@@ -177,15 +178,17 @@ const GroupAction = ({
       setIsLoading(true);
       const currentQuery = query || simpleQuery;
 
+      const accessToken = await getAccessToken();
+
       group
         ? await mappingClient.updateGroup(
-          apiContext.accessToken,
+          accessToken,
           iModelId,
           mappingId,
           group.id ?? "",
           { ...details, query: currentQuery },
         )
-        : await mappingClient.createGroup(apiContext.accessToken, iModelId, mappingId, {
+        : await mappingClient.createGroup(accessToken, iModelId, mappingId, {
           ...details,
           query: currentQuery,
         });
@@ -209,7 +212,7 @@ const GroupAction = ({
     showValidationMessage,
     simpleQuery,
     validator,
-    apiContext.accessToken,
+    getAccessToken,
     mappingClient,
   ]);
 

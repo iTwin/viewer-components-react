@@ -255,7 +255,7 @@ export class LocationMeasurement extends Measurement {
           label: MeasureTools.localization.getLocalizedString(
             "MeasureTools:tools.MeasureLocation.slope"
           ),
-          value: this._slope === undefined ? "" : await FormatterUtils.formatSlope(100 * this._slope, false),
+          value: this._slope === undefined ? "" : FormatterUtils.formatSlope(100 * this._slope, false),
         }
       )
 
