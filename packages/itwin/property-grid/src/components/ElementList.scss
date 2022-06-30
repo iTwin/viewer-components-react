@@ -17,23 +17,18 @@ $header-height: 50px;
   align-items: center;
   height: $header-height;
   box-sizing: border-box;
-  margin-left: 6px;
+  margin-left: 4px;
   margin-right: 6px;
 }
 
-.property-grid-react-element-list-back-btn {
-  cursor: pointer;
-  display: flex;
-  padding: $uicore-xs;
+#property-grid-react-element-list-back-btn {
   margin-right: 2px;
-}
+  padding: 0 4px;
 
-.property-grid-react-element-list-icon {
-  color: $buic-icon-color;
-  font-size: 24px;
-
-  &:hover {
-    color: $buic-foreground-primary;
+  >svg {
+    width: 22px;
+    height: 22px;
+    margin: 0;
   }
 }
 

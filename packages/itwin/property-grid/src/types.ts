@@ -20,6 +20,7 @@ import type {
   StagePanelLocation,
   StagePanelSection,
 } from "@itwin/appui-abstract";
+import type React from "react";
 
 export type ContextMenuItemInfo = ContextMenuItemProps & React.Attributes & {
   label: string;
@@ -56,13 +57,13 @@ export interface PropertyGridProps {
   rulesetId?: string;
   rootClassName?: string;
   dataProvider?: PresentationPropertyDataProvider;
-  onInfoButton?: () => void;
   onBackButton?: () => void;
   disableUnifiedSelection?: boolean;
   // eslint-disable-next-line deprecation/deprecation
   defaultZoneLocation?: AbstractZoneLocation;
   /** If true, expands child categories (true by default)  */
   autoExpandChildCategories?: boolean;
+  headerContent?: JSX.Element;
 }
 
 export enum PropertyGridDefaultContextMenuKey {

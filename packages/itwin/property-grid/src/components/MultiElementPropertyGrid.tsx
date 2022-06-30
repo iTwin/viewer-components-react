@@ -5,7 +5,8 @@
 
 import "./MultiElementPropertyGrid.scss";
 
-import type { InstanceKey } from "@itwin/presentation-common";
+import type { InstanceKey, KeySet } from "@itwin/presentation-common";
+import type { SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
   FrontstageManager,
@@ -13,14 +14,23 @@ import {
   useActiveFrontstageDef,
   useActiveIModelConnection,
 } from "@itwin/appui-react";
+import {
+  SvgArrowDown,
+  SvgArrowUp,
+  SvgPropertiesList,
+} from "@itwin/itwinui-icons-react";
 
 import type { PropertyGridProps } from "../types";
 import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import classnames from "classnames";
 import { WidgetState } from "@itwin/appui-abstract";
 import { Id64 } from "@itwin/core-bentley";
+import { IconButton } from "@itwin/itwinui-react";
+import { PropertyGridManager } from "../PropertyGridManager";
+
+const ProprtyGridSelectionScope = "Property Grid";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
@@ -41,13 +51,14 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
     MultiElementPropertyContent.PropertyGrid
   );
   const [instanceKeys, setInstanceKeys] = useState<InstanceKey[]>([]);
-  const [moreThanOneElement, setMoreThanOneElement] = useState(false);
   const [selectedInstanceKey, setSelectedInstanceKey] =
     useState<InstanceKey>();
   const widgetDef = useSpecificWidgetDef(MultiElementPropertyGridId);
+  const [hasParent, setHasParent] = useState(true);
+  const [ancestorKeys, setAncestorKeys] = useState<InstanceKey[]>([]);
 
   useEffect(() => {
-    const onSelectionChange = () => {
+    const onSelectionChange = (args?: SelectionChangeEventArgs) => {
       setContent(MultiElementPropertyContent.PropertyGrid);
       if (iModelConnection) {
         const selectionSet =
@@ -63,10 +74,19 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
             });
           }
         );
+
+        // if selection is not from us, clear the ancestry
+        if (undefined === args || args.source !== ProprtyGridSelectionScope) {
+          setAncestorKeys([]);
+        }
+
         setInstanceKeys(instanceKeys);
-        setMoreThanOneElement(selectionSet.instanceKeysCount > 1);
         setSelectedInstanceKey(undefined);
       }
+    };
+
+    const onFrontstageReady = () => {
+      onSelectionChange();
     };
 
     // ensure this selection handling runs if component mounts after the selection event fires:
@@ -74,24 +94,148 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
 
     const removePresentationListener = Presentation.selection.selectionChange.addListener(onSelectionChange);
     // if the frontstage changes and a selection set is already active we need to resync this widget's state with that selection
-    const removeFrontstageReadyListener = FrontstageManager.onFrontstageReadyEvent.addListener(onSelectionChange);
+    const removeFrontstageReadyListener = FrontstageManager.onFrontstageReadyEvent.addListener(onFrontstageReady);
     return () => {
       removePresentationListener();
       removeFrontstageReadyListener();
     };
   }, [iModelConnection]);
 
+  useEffect(() => {
+    // update the ancestry when the instanceKeys change
+    if (instanceKeys.length === 1) {
+      const newAncestors = [...ancestorKeys, ...instanceKeys];
+      setAncestorKeys(newAncestors);
+    }
+  }, [instanceKeys]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const getSingleElementId = (keys?: KeySet): string | undefined => {
+      let elementIds = new Set<string>();
+      if (keys?.instanceKeysCount === 1) {
+        keys.instanceKeys.forEach((ids: Set<string>) => {
+          elementIds = new Set([...elementIds, ...ids]);
+        });
+        if (elementIds.size === 1) {
+          return [...elementIds][0];
+        }
+      }
+      return undefined;
+    };
+
+    // determine if the current instance key has a parent
+    if (PropertyGridManager.flags.enableAncestorNavigation) {
+      if (iModelConnection && instanceKeys?.length === 1) {
+        const elementId = instanceKeys[0].id;
+        Presentation.selection.scopes.computeSelection(
+          iModelConnection,
+          elementId,
+          { id: "element", ancestorLevel: 1 })
+          .then((parentKeys) => {
+            setHasParent(getSingleElementId(parentKeys) !== elementId);
+          })
+          .catch(() => { });
+      }
+    }
+  }, [iModelConnection, instanceKeys]);
+
+  const onInfoButton = () => {
+    setContent(MultiElementPropertyContent.ElementList);
+  };
+
+  const onNavigateUp = useCallback(
+    async () => {
+      if (!iModelConnection)
+        return;
+
+      const selectedId = instanceKeys[0].id;
+      if (selectedId) {
+        const parentKeys = await Presentation.selection.scopes.computeSelection(
+          iModelConnection,
+          selectedId,
+          { id: "element", ancestorLevel: 1 }
+        );
+        Presentation.selection.replaceSelection(
+          ProprtyGridSelectionScope,
+          iModelConnection,
+          parentKeys
+        );
+      }
+    },
+    [iModelConnection, instanceKeys]
+  );
+
+  const onNavigateDown = useCallback(
+    async () => {
+      if (!iModelConnection)
+        return;
+
+      const newAncestor = [...ancestorKeys];
+      // pop the top parent
+      newAncestor.pop();
+      // pop the next parent (which will be the selected instance key),
+      // it will be added back to ancestry in the selection listener (above).
+      const currentKey = newAncestor.pop();
+      setAncestorKeys(newAncestor);
+      // select the current instance key
+      if (currentKey) {
+        Presentation.selection.replaceSelection(
+          ProprtyGridSelectionScope,
+          iModelConnection,
+          [currentKey]
+        );
+      }
+    },
+    [iModelConnection, ancestorKeys]
+  );
+
   const items = [
     ...useMemo(() => {
+      const moreThanOneElement = instanceKeys.length > 1;
       const _items = [
         <PropertyGrid
           {...props}
-          onInfoButton={
+          headerContent={
             moreThanOneElement
-              ? () => {
-                setContent(MultiElementPropertyContent.ElementList);
-              }
-              : undefined
+              ?
+              <IconButton
+                className="property-grid-react-multi-select-icon"
+                size="small"
+                styleType="borderless"
+                onClick={onInfoButton}
+                onKeyDown={onInfoButton}
+                title={PropertyGridManager.translate("element-list.title")}
+                tabIndex={0}
+              >
+                <SvgPropertiesList />
+              </IconButton>
+              :
+              (PropertyGridManager.flags.enableAncestorNavigation && !moreThanOneElement)
+                ?
+                <>
+                  {hasParent &&
+                    <IconButton
+                      size="small"
+                      styleType="borderless"
+                      title={PropertyGridManager.translate("tools.navigateUpTooltip")}
+                      onClick={onNavigateUp}
+                      tabIndex={0}
+                    >
+                      <SvgArrowUp />
+                    </IconButton>
+                  }
+                  {ancestorKeys.length > 1 &&
+                    <IconButton
+                      size="small"
+                      styleType="borderless"
+                      title={PropertyGridManager.translate("tools.navigateDownTooltip")}
+                      onClick={onNavigateDown}
+                    >
+                      <SvgArrowDown />
+                    </IconButton>
+                  }
+                </>
+                : undefined
           }
           key={"PropertyGrid"}
         />,
@@ -115,7 +259,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
       }
 
       return _items;
-    }, [props, moreThanOneElement, iModelConnection, instanceKeys]),
+    }, [props, iModelConnection, instanceKeys, ancestorKeys, onNavigateUp, onNavigateDown, hasParent]),
   ];
 
   items.push(
