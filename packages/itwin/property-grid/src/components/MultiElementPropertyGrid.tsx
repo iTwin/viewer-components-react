@@ -30,7 +30,7 @@ import { Id64 } from "@itwin/core-bentley";
 import { IconButton } from "@itwin/itwinui-react";
 import { PropertyGridManager } from "../PropertyGridManager";
 
-const ProprtyGridSelectionScope = "Property Grid";
+const PropertyGridSelectionScope = "Property Grid";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
@@ -76,7 +76,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
         );
 
         // if selection is not from us, clear the ancestry
-        if (undefined === args || args.source !== ProprtyGridSelectionScope) {
+        if (undefined === args || args.source !== PropertyGridSelectionScope) {
           setAncestorKeys([]);
         }
 
@@ -156,7 +156,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
           { id: "element", ancestorLevel: 1 }
         );
         Presentation.selection.replaceSelection(
-          ProprtyGridSelectionScope,
+          PropertyGridSelectionScope,
           iModelConnection,
           parentKeys
         );
