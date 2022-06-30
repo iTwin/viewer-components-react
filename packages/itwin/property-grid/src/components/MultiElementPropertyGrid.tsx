@@ -46,6 +46,7 @@ function useSpecificWidgetDef(id: string) {
 export const MultiElementPropertyGridId = "vcr:MultiElementPropertyGrid";
 
 export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
+  const { enableAncestorNavigation } = props;
   const iModelConnection = useActiveIModelConnection();
   const [content, setContent] = useState<MultiElementPropertyContent>(
     MultiElementPropertyContent.PropertyGrid
@@ -124,7 +125,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
     };
 
     // determine if the current instance key has a parent
-    if (PropertyGridManager.flags.enableAncestorNavigation) {
+    if (enableAncestorNavigation) {
       if (iModelConnection && instanceKeys?.length === 1) {
         const elementId = instanceKeys[0].id;
         Presentation.selection.scopes.computeSelection(
@@ -137,7 +138,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
           .catch(() => { });
       }
     }
-  }, [iModelConnection, instanceKeys]);
+  }, [iModelConnection, instanceKeys, enableAncestorNavigation]);
 
   const onInfoButton = () => {
     setContent(MultiElementPropertyContent.ElementList);
@@ -180,7 +181,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
       // select the current instance key
       if (currentKey) {
         Presentation.selection.replaceSelection(
-          ProprtyGridSelectionScope,
+          PropertyGridSelectionScope,
           iModelConnection,
           [currentKey]
         );
@@ -210,7 +211,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
                 <SvgPropertiesList />
               </IconButton>
               :
-              (PropertyGridManager.flags.enableAncestorNavigation && !moreThanOneElement)
+              (enableAncestorNavigation && !moreThanOneElement)
                 ?
                 <>
                   {hasParent &&
@@ -259,7 +260,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
       }
 
       return _items;
-    }, [props, iModelConnection, instanceKeys, ancestorKeys, onNavigateUp, onNavigateDown, hasParent]),
+    }, [props, iModelConnection, instanceKeys, ancestorKeys, onNavigateUp, onNavigateDown, hasParent, enableAncestorNavigation]),
   ];
 
   items.push(
