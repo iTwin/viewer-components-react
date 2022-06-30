@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/property-grid-react",
       "comment": "Added ancestor navigation to the Property Grid.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/property-grid-react"
