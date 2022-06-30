@@ -211,7 +211,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
                 <SvgPropertiesList />
               </IconButton>
               :
-              (enableAncestorNavigation && !moreThanOneElement)
+              enableAncestorNavigation
                 ?
                 <>
                   {hasParent &&
