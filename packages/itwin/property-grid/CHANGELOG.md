@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Fri, 24 Jun 2022 16:51:25 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Jun 2022 20:00:02 GMT and should not be manually modified.
+
+## 0.6.0
+Mon, 27 Jun 2022 20:00:02 GMT
+
+### Minor changes
+
+- Replaces deprecated Table with MenuItem from iTwinUI-React, and fixes warning about deprecated findDOMNode usage
 
 ## 0.5.5
 Fri, 24 Jun 2022 16:51:25 GMT

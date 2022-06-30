@@ -2,6 +2,18 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@itwin/property-grid-react_v0.6.0",
+      "date": "Mon, 27 Jun 2022 20:00:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replaces deprecated Table with MenuItem from iTwinUI-React, and fixes warning about deprecated findDOMNode usage"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.5",
       "tag": "@itwin/property-grid-react_v0.5.5",
       "date": "Fri, 24 Jun 2022 16:51:25 GMT",
