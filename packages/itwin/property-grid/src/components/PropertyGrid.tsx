@@ -11,7 +11,7 @@ import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
   PropertyData,
   PropertyDataFiltererBase,
-  PropertyGridContextMenuArgs
+  PropertyGridContextMenuArgs,
 } from "@itwin/components-react";
 import {
   PropertyValueRendererManager,
@@ -106,12 +106,8 @@ export const PropertyGrid = ({
 
   const [title, setTitle] = useState<PropertyRecord>();
   const [className, setClassName] = useState<string>("");
-  const [contextMenu, setContextMenu] = useState<
-    PropertyGridContextMenuArgs | undefined
-  >(undefined);
-  const [contextMenuItemInfos, setContextMenuItemInfos] = useState<
-    ContextMenuItemInfo[] | undefined
-  >(undefined);
+  const [contextMenu, setContextMenu] = useState<PropertyGridContextMenuArgs | undefined>(undefined);
+  const [contextMenuItemInfos, setContextMenuItemInfos] = useState<ContextMenuItemInfo[] | undefined>(undefined);
   const [showNullValues, setShowNullValues] = useState<boolean>(true);
   const [filterer, setFilterer] = useState<PropertyDataFiltererBase>(
     new PlaceholderPropertyDataFilterer()
