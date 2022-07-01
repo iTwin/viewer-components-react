@@ -30,7 +30,7 @@ export interface GroupingMappingProps {
 const authorizationClientGetAccessToken = (async () => (await IModelApp.authorizationClient?.getAccessToken() ?? ""));
 
 const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProps) => {
-  const [mappingClient, setMappingClient] = useState<IMappingClient>(createDefaultMappingClient());
+  const [mappingClient, setMappingClient] = useState<IMappingClient | undefined>();
   const [apiConfig, setApiConfig] = useState<GroupingMappingApiConfig>({
     getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
     prefix,
@@ -53,11 +53,11 @@ const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProp
     <GroupingMappingApiConfigContext.Provider
       value={apiConfig}
     >
-      <MappingClientContext.Provider value={mappingClient}>
+      {mappingClient ? <MappingClientContext.Provider value={mappingClient}>
         <div className='group-mapping-container'>
           <Mappings />
         </div>
-      </MappingClientContext.Provider>
+      </MappingClientContext.Provider> : undefined}
     </GroupingMappingApiConfigContext.Provider>
   );
 };
