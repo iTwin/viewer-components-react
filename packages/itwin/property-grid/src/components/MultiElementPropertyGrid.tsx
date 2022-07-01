@@ -26,11 +26,12 @@ import { PropertyGrid } from "./PropertyGrid";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import classnames from "classnames";
 import { WidgetState } from "@itwin/appui-abstract";
-import { Id64 } from "@itwin/core-bentley";
+import { Id64, Logger } from "@itwin/core-bentley";
 import { IconButton } from "@itwin/itwinui-react";
 import { PropertyGridManager } from "../PropertyGridManager";
 
 const PropertyGridSelectionScope = "Property Grid";
+const LOGGER_CATEGORY = "PropertyGrid";
 
 enum MultiElementPropertyContent {
   PropertyGrid = 0,
@@ -78,6 +79,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
 
         // if selection is not from us, clear the ancestry
         if (undefined === args || args.source !== PropertyGridSelectionScope) {
+          setInstanceKeys([]);
           setAncestorKeys([]);
         }
 
@@ -104,11 +106,15 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
 
   useEffect(() => {
     // update the ancestry when the instanceKeys change
-    if (instanceKeys.length === 1) {
-      const newAncestors = [...ancestorKeys, ...instanceKeys];
-      setAncestorKeys(newAncestors);
+    if (enableAncestorNavigation) {
+      if (instanceKeys.length === 1) {
+        const currentKey = instanceKeys[0];
+        if (undefined === ancestorKeys.find((key) => key.id === currentKey.id && key.className === currentKey.className)) {
+          setAncestorKeys([...ancestorKeys, currentKey]);
+        }
+      }
     }
-  }, [instanceKeys]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [instanceKeys, ancestorKeys, enableAncestorNavigation]);
 
   useEffect(() => {
     const getSingleElementId = (keys?: KeySet): string | undefined => {
@@ -135,7 +141,9 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
           .then((parentKeys) => {
             setHasParent(getSingleElementId(parentKeys) !== elementId);
           })
-          .catch(() => { });
+          .catch((error) => {
+            Logger.logException(LOGGER_CATEGORY, error as Error);
+          });
       }
     }
   }, [iModelConnection, instanceKeys, enableAncestorNavigation]);
