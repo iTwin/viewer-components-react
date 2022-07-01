@@ -2,6 +2,18 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@itwin/property-grid-react_v0.7.0",
+      "date": "Fri, 01 Jul 2022 13:49:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added ancestor navigation to the Property Grid."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@itwin/property-grid-react_v0.6.0",
       "date": "Mon, 27 Jun 2022 20:00:02 GMT",
