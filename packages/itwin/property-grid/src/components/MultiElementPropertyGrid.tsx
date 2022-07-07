@@ -222,26 +222,28 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
               enableAncestorNavigation
                 ?
                 <>
-                  {hasParent &&
-                    <IconButton
-                      size="small"
-                      styleType="borderless"
-                      title={PropertyGridManager.translate("tools.navigateUpTooltip")}
-                      onClick={onNavigateUp}
-                      tabIndex={0}
-                    >
-                      <SvgArrowUp />
-                    </IconButton>
-                  }
-                  {ancestorKeys.length > 1 &&
-                    <IconButton
-                      size="small"
-                      styleType="borderless"
-                      title={PropertyGridManager.translate("tools.navigateDownTooltip")}
-                      onClick={onNavigateDown}
-                    >
-                      <SvgArrowDown />
-                    </IconButton>
+                  {(hasParent || ancestorKeys.length > 1) &&
+                    <>
+                      <IconButton
+                        size="small"
+                        styleType="borderless"
+                        title={PropertyGridManager.translate("tools.navigateUpTooltip")}
+                        onClick={onNavigateUp}
+                        tabIndex={0}
+                        disabled={!hasParent}
+                      >
+                        <SvgArrowUp />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        styleType="borderless"
+                        title={PropertyGridManager.translate("tools.navigateDownTooltip")}
+                        onClick={onNavigateDown}
+                        disabled={ancestorKeys.length < 2}
+                      >
+                        <SvgArrowDown />
+                      </IconButton>
+                    </>
                   }
                 </>
                 : undefined
