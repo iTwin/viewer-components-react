@@ -9,7 +9,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import type { IMappingClient } from "../IMappingClient";
 import type { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
-import { createDefaultMappingClient, createMappingClient, MappingClientContext } from "./context/MappingClientContext";
+import { createMappingClient, MappingClientContext } from "./context/MappingClientContext";
 
 export interface GroupingMappingProps {
   /**
@@ -41,9 +41,8 @@ const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProp
     setApiConfig(() => ({ prefix, getAccessToken: getAccessToken ?? authorizationClientGetAccessToken }));
   }, [getAccessToken, prefix]);
 
-
   useEffect(() => {
-    setMappingClient(createMappingClient(clientProp))
+    setMappingClient(createMappingClient(clientProp));
   }, [clientProp]);
 
   return (
