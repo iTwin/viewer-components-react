@@ -24,7 +24,7 @@ export const createMappingClient = (clientProp: IMappingClient | ClientPrefix) =
     return createDefaultMappingClient(clientProp as ClientPrefix);
   }
   return clientProp;
-}
+};
 export const MappingClientContext = createContext<IMappingClient>(createDefaultMappingClient());
 
 export const useMappingClient = () => {
