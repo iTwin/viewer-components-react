@@ -9,7 +9,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import type { IMappingClient } from "../IMappingClient";
 import type { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
-import { createDefaultMappingClient, MappingClientContext } from "./context/MappingClientContext";
+import { createDefaultMappingClient, createMappingClient, MappingClientContext } from "./context/MappingClientContext";
 
 export interface GroupingMappingProps {
   /**
@@ -30,7 +30,8 @@ export interface GroupingMappingProps {
 const authorizationClientGetAccessToken = (async () => (await IModelApp.authorizationClient?.getAccessToken() ?? ""));
 
 const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProps) => {
-  const [mappingClient, setMappingClient] = useState<IMappingClient | undefined>();
+  const clientProp: IMappingClient | ClientPrefix = client ?? prefix;
+  const [mappingClient, setMappingClient] = useState<IMappingClient>(createMappingClient(clientProp));
   const [apiConfig, setApiConfig] = useState<GroupingMappingApiConfig>({
     getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
     prefix,
@@ -40,24 +41,20 @@ const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProp
     setApiConfig(() => ({ prefix, getAccessToken: getAccessToken ?? authorizationClientGetAccessToken }));
   }, [getAccessToken, prefix]);
 
-  const clientProp: IMappingClient | ClientPrefix = client ?? prefix;
+
   useEffect(() => {
-    if (undefined === clientProp || typeof clientProp === "string") {
-      setMappingClient(createDefaultMappingClient(clientProp as ClientPrefix));
-    } else {
-      setMappingClient(clientProp);
-    }
+    setMappingClient(createMappingClient(clientProp))
   }, [clientProp]);
 
   return (
     <GroupingMappingApiConfigContext.Provider
       value={apiConfig}
     >
-      {mappingClient ? <MappingClientContext.Provider value={mappingClient}>
+      <MappingClientContext.Provider value={mappingClient}>
         <div className='group-mapping-container'>
           <Mappings />
         </div>
-      </MappingClientContext.Provider> : undefined}
+      </MappingClientContext.Provider>
     </GroupingMappingApiConfigContext.Provider>
   );
 };
