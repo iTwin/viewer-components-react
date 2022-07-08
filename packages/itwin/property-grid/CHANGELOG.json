@@ -2,6 +2,18 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "0.7.1",
+      "tag": "@itwin/property-grid-react_v0.7.1",
+      "date": "Fri, 08 Jul 2022 13:44:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Instead of hiding the down navigation button, show it disabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.0",
       "tag": "@itwin/property-grid-react_v0.7.0",
       "date": "Fri, 01 Jul 2022 13:49:17 GMT",
