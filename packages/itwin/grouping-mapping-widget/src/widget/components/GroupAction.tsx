@@ -54,7 +54,7 @@ const GroupAction = ({
     description: group?.description ?? "",
   });
   const [query, setQuery] = useState<string>("");
-  const [simpleQuery, setSimpleQuery] = useState<string>("");
+  const [simpleSelectionQuery, setSimpleSelectionQuery] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
@@ -62,19 +62,20 @@ const GroupAction = ({
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
-  const [groupByType, setGroupByType] = React.useState("Selection");
+  const [queryGenerationType, setQueryGenerationType] = React.useState("Selection");
   const [searchInput, setSearchInput] = React.useState("");
 
   const changeGroupByType = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const {
       target: { value },
     } = event;
-    setGroupByType(value);
+    setQueryGenerationType(value);
     Presentation.selection.clearSelection(
       "GroupingMappingWidget",
       iModelConnection,
     );
     setQuery("");
+    setSimpleSelectionQuery("");
     await resetView();
   };
 
@@ -84,15 +85,17 @@ const GroupAction = ({
         evt: SelectionChangeEventArgs,
         selectionProvider: ISelectionProvider,
       ) => {
-        const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-        const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}` : "";
-        setSimpleQuery(query);
+        if (queryGenerationType === "Selection") {
+          const selection = selectionProvider.getSelection(evt.imodel, evt.level);
+          const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}` : "";
+          setSimpleSelectionQuery(query);
+        }
       },
     );
     return () => {
       removeListener();
     };
-  }, [iModelConnection]);
+  }, [iModelConnection, queryGenerationType]);
 
   useEffect(() => {
     const reemphasize = async () => {
@@ -101,7 +104,7 @@ const GroupAction = ({
           return;
         }
 
-        if (groupByType === "Selection" && currentPropertyList.length === 0) {
+        if (queryGenerationType === "Selection" && currentPropertyList.length === 0) {
           return;
         }
 
@@ -122,7 +125,7 @@ const GroupAction = ({
     };
 
     void reemphasize();
-  }, [iModelConnection, query, currentPropertyList, groupByType]);
+  }, [iModelConnection, query, currentPropertyList, queryGenerationType]);
 
   useEffect(() => {
     Presentation.selection.clearSelection(
@@ -176,7 +179,7 @@ const GroupAction = ({
     }
     try {
       setIsLoading(true);
-      const currentQuery = query || simpleQuery;
+      const currentQuery = query || simpleSelectionQuery;
 
       const accessToken = await getAccessToken();
 
@@ -210,13 +213,13 @@ const GroupAction = ({
     mappingId,
     query,
     showValidationMessage,
-    simpleQuery,
+    simpleSelectionQuery,
     validator,
     getAccessToken,
     mappingClient,
   ]);
 
-  const isBlockingActions = !(details.groupName && (query || simpleQuery) && !isRendering && !isLoading);
+  const isBlockingActions = !(details.groupName && (query || simpleSelectionQuery) && !isRendering && !isLoading);
 
   return (
     <>
@@ -299,7 +302,7 @@ const GroupAction = ({
               disabled={isLoading || isRendering}
             />
           </RadioTileGroup>
-          {groupByType === "Selection" ?
+          {queryGenerationType === "Selection" ?
             <GroupQueryBuilderContext.Provider
               value={{
                 currentPropertyList,
@@ -328,7 +331,7 @@ const GroupAction = ({
                 {isRendering &&
                   <LoadingSpinner />
                 }
-                <Button disabled={isLoading || isRendering} onClick={() => generateSearchQuery(searchInput ? searchInput.replace(/(\r\n|\n|\r)/gm, "").trim().split(" ") : [])}>Apply</Button>
+                <Button disabled={isLoading || isRendering} onClick={() => generateSearchQuery(searchInput ? searchInput.replace(/(\r\n|\n|\r)/gm, "").trim().split(" ") : [])}>Generate Query</Button>
                 <Button disabled={isLoading || isRendering} onClick={async () => {
                   setQuery("");
                   setSearchInput("");
