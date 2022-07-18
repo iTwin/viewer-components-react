@@ -26,11 +26,12 @@ $header-height: 50px;
   overflow: hidden;
 }
 
-.virtualized-grid-node-content > .components--hoverable:hover {
-  background: $buic-row-hover !important;
+.virtualized-grid-node-content>.components--hoverable:hover {
+  background: $buic-row-hover  !important;
 }
 
 .property-grid-react-panel-label-and-class {
+  flex: 1;
   display: block;
   overflow: hidden;
 }
@@ -44,38 +45,9 @@ $header-height: 50px;
   white-space: nowrap;
 }
 
-.property-grid-react-panel-info-btn {
-  cursor: pointer;
-  margin-left: auto;
-  display: flex;
-  color: $buic-icon-color;
-  padding: 4px;
-  height: 100%;
-
-  &:hover {
-    color: $buic-foreground-primary;
-  }
-}
-
-.property-grid-react-panel-back-btn {
-  cursor: pointer;
-  padding: $uicore-xs;
-  display: flex;
-  color: $buic-icon-color;
-  margin-right: 2px;
-
-  &:hover {
-    color: $buic-foreground-primary;
-  }
-}
-
-.property-grid-react-panel-icon {
-  font-size: 24px;
-  margin: auto;
-}
-
 .property-grid-react-panel-header {
   display: flex;
+  align-items: center;
   margin-right: 6px;
   height: $header-height;
   box-sizing: border-box;
@@ -100,4 +72,15 @@ $header-height: 50px;
   font-size: 64px;
   color: RGBA(var(--buic-foreground-body-rgb), 0.3);
   margin-bottom: $uicore-m;
+}
+
+#property-grid-react-element-list-back-btn {
+  margin-right: 2px;
+  padding: 0 4px;
+
+  >svg {
+    width: 22px;
+    height: 22px;
+    margin: 0;
+  }
 }

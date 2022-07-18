@@ -1,6 +1,20 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Mon, 27 Jun 2022 20:00:02 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Jul 2022 13:44:34 GMT and should not be manually modified.
+
+## 0.7.1
+Fri, 08 Jul 2022 13:44:34 GMT
+
+### Patches
+
+- Instead of hiding the down navigation button, show it disabled
+
+## 0.7.0
+Fri, 01 Jul 2022 13:49:17 GMT
+
+### Minor changes
+
+- Added ancestor navigation to the Property Grid.
 
 ## 0.6.0
 Mon, 27 Jun 2022 20:00:02 GMT

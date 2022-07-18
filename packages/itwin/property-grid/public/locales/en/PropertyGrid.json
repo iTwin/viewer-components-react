@@ -3,6 +3,11 @@
   "element-list": {
     "title": "Selected Elements"
   },
+  "tools": {
+    "navigateUpTooltip": "Navigate Up",
+    "navigateDownTooltip": "Navigate Down",
+    "backTooltip": "Back"
+  },
   "context-menu": {
     "favorite": "Favorite",
     "add-favorite": {
