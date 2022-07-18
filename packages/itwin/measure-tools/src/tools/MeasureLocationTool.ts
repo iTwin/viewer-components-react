@@ -19,7 +19,6 @@ import {
   LocateResponse,
   OutputMessagePriority,
   SnapDetail,
-  SnapMode,
   SnapStatus,
   ToolAssistance,
   ToolAssistanceImage,
@@ -33,6 +32,8 @@ import type { LocationMeasurement } from "../measurements/LocationMeasurement";
 import type { AddLocationProps } from "../toolmodels/MeasureLocationToolModel";
 import { MeasureLocationToolModel } from "../toolmodels/MeasureLocationToolModel";
 import { MeasureTools } from "../MeasureTools";
+import type { DialogItem, DialogItemValue, DialogPropertySyncItem } from "@itwin/appui-abstract";
+import { PropertyDescriptionHelper } from "@itwin/appui-abstract";
 
 /** Tool that measure precise locations */
 export class MeasureLocationTool extends MeasurementToolBase<
@@ -41,6 +42,9 @@ MeasureLocationToolModel
 > {
   public static override toolId = "MeasureTools.MeasureLocation";
   public static override iconSpec = "icon-measure-location";
+  private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
+
+  private _useDynamicMeasurement: boolean = false;
 
   public static override get flyover() {
     return MeasureTools.localization.getLocalizedString(
@@ -78,21 +82,39 @@ MeasureLocationToolModel
   ): Promise<EventHandled> {
     if (!ev.viewport) return EventHandled.No;
 
-    const props: AddLocationProps = {
-      location: ev.point.clone(),
-      viewType: MeasurementViewTarget.classifyViewport(ev.viewport),
-    };
-
-    await this._queryGeoLocation(props);
-
-    // Perform a snap to get more information (such as the surface normal, if any)
-    const snap = await this.requestSnap(ev);
-    if (undefined !== snap && undefined !== snap.normal)
-      props.slope = this.getSlopeFromNormal(snap.normal);
-
-    this.toolModel.addLocation(props);
+    const props = await this.createLocationProps(ev, true);
+    this.toolModel.addLocation(props, false);
     this.updateToolAssistance();
     return EventHandled.Yes;
+  }
+
+  public override async onMouseMotion(ev: BeButtonEvent): Promise<void> {
+    if (undefined === ev.viewport || !this._useDynamicMeasurement)
+      return;
+
+    const props = await this.createLocationProps(ev, false);
+    this.toolModel.addLocation(props, true);
+    ev.viewport.invalidateDecorations();
+  }
+
+  private async createLocationProps(ev: BeButtonEvent, requestSnap: boolean): Promise<AddLocationProps> {
+    const props: AddLocationProps = {
+      location: ev.point.clone(),
+      viewType: MeasurementViewTarget.classifyViewport(ev.viewport!),
+    };
+
+    await this.queryGeoLocation(props);
+
+    // Perform a snap to get more information (such as the surface normal, if any)
+    // Does not look for new snap point if already looking from past frame
+    let snap = IModelApp.accuSnap.getCurrSnapDetail();
+    if (!snap && requestSnap)
+      snap = await this.requestSnap(ev);
+
+    if (snap?.normal)
+      props.slope = this.getSlopeFromNormal(snap.normal);
+
+    return props;
   }
 
   protected createToolModel(): MeasureLocationToolModel {
@@ -124,7 +146,7 @@ MeasureLocationToolModel
       closePoint: hit.hitPoint,
       worldToView: hit.viewport.worldToViewMap.transform0.toJSON(),
       viewFlags: hit.viewport.viewFlags,
-      snapModes: [SnapMode.Nearest],
+      snapModes: IModelApp.accuSnap.getActiveSnapModes(),
       snapAperture: hit.viewport.pixelsFromInches(0.1),
     };
 
@@ -164,7 +186,8 @@ MeasureLocationToolModel
     return snap;
   }
 
-  private async _queryGeoLocation(props: AddLocationProps): Promise<void> {
+  /** Update the props to add GeoLocation information when available */
+  private async queryGeoLocation(props: AddLocationProps): Promise<void> {
     let message = "";
     let priority: OutputMessagePriority;
 
@@ -274,4 +297,52 @@ MeasureLocationToolModel
     );
     IModelApp.notifications.setToolAssistance(instructions);
   }
+
+  public override async onPostInstall(): Promise<void> {
+    await super.onPostInstall();
+
+    const initialValue = IModelApp.toolAdmin.toolSettingsState.getInitialToolSettingValue(this.toolId, MeasureLocationTool.useDynamicMeasurementPropertyName);
+    if (initialValue)
+      this._useDynamicMeasurement = typeof initialValue.value === "boolean" ? initialValue.value : false;
+  }
+
+  public override async onCleanup(): Promise<void> {
+    const propertyName = MeasureLocationTool.useDynamicMeasurementPropertyName;
+    const value: DialogItemValue = { value: this._useDynamicMeasurement };
+    IModelApp.toolAdmin.toolSettingsState.saveToolSettingProperty(this.toolId, { propertyName, value });
+
+    return super.onCleanup();
+  }
+
+  public override supplyToolSettingsProperties(): DialogItem[] {
+    const toolSettings: DialogItem[] = [];
+
+    const propertyLabel = MeasureTools.localization.getLocalizedString(
+      "MeasureTools:tools.MeasureLocation.useDynamicMeasurement"
+    );
+    toolSettings.push({
+      value: { value: this._useDynamicMeasurement },
+      property: PropertyDescriptionHelper.buildToggleDescription(MeasureLocationTool.useDynamicMeasurementPropertyName, propertyLabel),
+      editorPosition: { rowPriority: 0, columnIndex: 0 },
+      isDisabled: false,
+    });
+
+    return toolSettings;
+  }
+
+  public override async applyToolSettingPropertyChange(updatedValue: DialogPropertySyncItem): Promise<boolean> {
+    if (MeasureLocationTool.useDynamicMeasurementPropertyName === updatedValue.propertyName) {
+      const value = updatedValue.value.value;
+      if (typeof value !== "boolean")
+        return false;
+
+      this._useDynamicMeasurement = value;
+      if (!this._useDynamicMeasurement)
+        this.toolModel.reset(false);
+      return true;
+    }
+
+    return super.applyToolSettingPropertyChange(updatedValue);
+  }
+
 }
