@@ -20,7 +20,9 @@ export class PropertyGridManager {
    * Called by IModelApp to initialize PropertyGridManager
    * @param i18n - The internationalization service created by the IModelApp.
    */
-  public static async initialize(i18n?: Localization): Promise<void> {
+  public static async initialize(
+    i18n?: Localization,
+  ): Promise<void> {
     if (this._initialized) return;
 
     this._initialized = true;

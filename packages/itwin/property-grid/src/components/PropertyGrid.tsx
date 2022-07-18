@@ -20,7 +20,6 @@ import {
 import {
   ContextMenuItem,
   GlobalContextMenu,
-  Icon,
   Orientation,
   useOptionalDisposable,
   useResizeObserver,
@@ -30,6 +29,8 @@ import {
   useActiveIModelConnection,
 } from "@itwin/appui-react";
 import type { ReactNode } from "react";
+import { IconButton } from "@itwin/itwinui-react";
+import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { copyToClipboard } from "../api/WebUtilities";
@@ -69,11 +70,11 @@ export const PropertyGrid = ({
   rulesetId,
   rootClassName,
   dataProvider: propDataProvider,
-  onInfoButton,
   onBackButton,
   disableUnifiedSelection,
   instanceKey,
   autoExpandChildCategories,
+  headerContent,
 }: PropertyGridPropsWithSingleElement) => {
   const iModelConnection = useActiveIModelConnection();
   const createDataProvider = useCallback(() => {
@@ -91,7 +92,7 @@ export const PropertyGrid = ({
     if (dp) {
       dp.pagingSize = 50;
       dp.isNestedPropertyCategoryGroupingEnabled =
-      !!enablePropertyGroupNesting;
+        !!enablePropertyGroupNesting;
 
       // Set selected instance as the key (for Single Element Property Grid)
       if (instanceKey) {
@@ -105,12 +106,8 @@ export const PropertyGrid = ({
 
   const [title, setTitle] = useState<PropertyRecord>();
   const [className, setClassName] = useState<string>("");
-  const [contextMenu, setContextMenu] = useState<
-  PropertyGridContextMenuArgs | undefined
-  >(undefined);
-  const [contextMenuItemInfos, setContextMenuItemInfos] = useState<
-  ContextMenuItemInfo[] | undefined
-  >(undefined);
+  const [contextMenu, setContextMenu] = useState<PropertyGridContextMenuArgs | undefined>(undefined);
+  const [contextMenuItemInfos, setContextMenuItemInfos] = useState<ContextMenuItemInfo[] | undefined>(undefined);
   const [showNullValues, setShowNullValues] = useState<boolean>(true);
   const [filterer, setFilterer] = useState<PropertyDataFiltererBase>(
     new PlaceholderPropertyDataFilterer()
@@ -167,7 +164,7 @@ export const PropertyGrid = ({
     const setDefaultShowNullValues = async () => {
       if (persistNullValueToggle) {
         const res = await getShowNullValuesPreference();
-        if(res !== undefined) {
+        if (res !== undefined) {
           res ? setFilterer(new PlaceholderPropertyDataFilterer()) : setFilterer(new NonEmptyValuesPropertyDataFilterer());
           setShowNullValues(res);
         }
@@ -227,7 +224,7 @@ export const PropertyGrid = ({
     setShowNullValues(value);
 
     // Persist hide/show value
-    if(persistNullValueToggle) {
+    if (persistNullValueToggle) {
       await saveShowNullValuesPreference(value);
     }
   }, [persistNullValueToggle]);
@@ -311,7 +308,7 @@ export const PropertyGrid = ({
               },
             };
             // If option needs to go in a specific position in the list, put it there. otherwise just push.
-            if(option.forcePosition !== undefined) {
+            if (option.forcePosition !== undefined) {
               items.splice(option.forcePosition, 0, newItem);
             } else {
               items.push(newItem);
@@ -320,12 +317,12 @@ export const PropertyGrid = ({
         }
 
         // Do any overrides on default menu options
-        if (defaultContextMenuOptions?.size && defaultContextMenuOptions.size > 0 ) {
+        if (defaultContextMenuOptions?.size && defaultContextMenuOptions.size > 0) {
           for (const key of Object.values(PropertyGridDefaultContextMenuKey)) {
             const overrides = defaultContextMenuOptions?.get(key);
             if (overrides) {
               const itemIndex = items.map((item) => item.key).indexOf(key);
-              items[itemIndex] = { ...items[itemIndex], ...overrides};
+              items[itemIndex] = { ...items[itemIndex], ...overrides };
             }
           }
         }
@@ -407,18 +404,16 @@ export const PropertyGrid = ({
     return (
       <div className="property-grid-react-panel-header">
         {onBackButton !== undefined && (
-          <div
-            className="property-grid-react-panel-back-btn"
+          <IconButton
+            id="property-grid-react-element-list-back-btn"
+            styleType="borderless"
             onClick={onBackButton}
             onKeyDown={onBackButton}
-            role="button"
             tabIndex={0}
+            title={PropertyGridManager.translate("tools.backTooltip")}
           >
-            <Icon
-              className="property-grid-react-panel-icon"
-              iconSpec="icon-progress-backward"
-            />
-          </div>
+            <SvgProgressBackwardCircular />
+          </IconButton>
         )}
         <div className="property-grid-react-panel-label-and-class">
           <div className="property-grid-react-panel-label">
@@ -426,21 +421,7 @@ export const PropertyGrid = ({
           </div>
           <div className="property-grid-react-panel-class">{className}</div>
         </div>
-        {onInfoButton !== undefined && (
-          <div
-            className="property-grid-react-panel-info-btn"
-            onClick={onInfoButton}
-            onKeyDown={onInfoButton}
-            title={PropertyGridManager.translate("element-list.title")}
-            role="button"
-            tabIndex={0}
-          >
-            <Icon
-              className="property-grid-react-panel-icon"
-              iconSpec="icon-info-hollow"
-            />
-          </div>
-        )}
+        {headerContent}
       </div>
     );
   };

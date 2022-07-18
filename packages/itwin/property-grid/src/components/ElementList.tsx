@@ -8,13 +8,13 @@ import "./ElementList.scss";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
-import { MenuItem } from "@itwin/itwinui-react";
-import { Icon } from "@itwin/core-react";
+import { IconButton, MenuItem } from "@itwin/itwinui-react";
 import classnames from "classnames";
 import * as React from "react";
 
 import { PropertyGridManager } from "../PropertyGridManager";
 import { Logger } from "@itwin/core-bentley";
+import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
 
 export interface ElementListProps {
   iModelConnection: IModelConnection;
@@ -82,18 +82,16 @@ export const ElementList = ({
       className={classnames("property-grid-react-element-list", rootClassName)}
     >
       <div className="property-grid-react-element-list-header">
-        <div
-          className="property-grid-react-element-list-back-btn"
+        <IconButton
+          id="property-grid-react-element-list-back-btn"
+          styleType="borderless"
           onClick={onBack}
           onKeyDown={onBack}
-          role="button"
           tabIndex={0}
+          title={PropertyGridManager.translate("tools.backTooltip")}
         >
-          <Icon
-            className="property-grid-react-element-list-icon"
-            iconSpec="icon-progress-backward"
-          />
-        </div>
+          <SvgProgressBackwardCircular />
+        </IconButton>
         <div className="property-grid-react-element-list-title">
           {title}
         </div>
