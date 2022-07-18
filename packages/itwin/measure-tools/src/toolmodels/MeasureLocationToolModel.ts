@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@itwin/core-geometry";
+import type { Point3d } from "@itwin/core-geometry";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import type { LocationMeasurementProps } from "../measurements/LocationMeasurement";
 import { LocationMeasurement } from "../measurements/LocationMeasurement";
@@ -28,36 +28,28 @@ export class MeasureLocationToolModel extends MeasurementToolModel<LocationMeasu
     super();
   }
 
-  public addLocation(props: AddLocationProps): void {
+  public addLocation(props: AddLocationProps, isDynamic: boolean): void {
     const { viewType, ...rest } = props;
-    const measurement = new LocationMeasurement(rest);
-    const dynamicMeasurement = this._currentMeasurement;
-    measurement.viewTarget.include(viewType);
 
-    // Set a temporary dynamic
-    this._currentMeasurement = measurement;
-    this.notifyNewMeasurement();
-    this._currentMeasurement = dynamicMeasurement;
+    if (!this._currentMeasurement) {
+      this._currentMeasurement = new LocationMeasurement(rest);
+      this._currentMeasurement.viewTarget.include(viewType);
+      this._currentMeasurement.isDynamic = isDynamic;
+      this.notifyNewMeasurement();
+    } else {
+      this._currentMeasurement.changeLocation(props);
+      this.notifyDynamicMeasurementChanged();
+    }
 
-    this.addMeasurementAndReset(measurement);
+    if (isDynamic)
+      return;
+
+    this._currentMeasurement.isDynamic = false;
+    this.addMeasurementAndReset(this._currentMeasurement);
   }
 
-  public setLocation(props: LocationMeasurementProps): boolean {
-
-    this._currentMeasurement!.changeLocation(props);
-    this.notifyDynamicMeasurementChanged();
-
-    return true;
+  public override reset(clearMeasurements: boolean): void {
+    super.reset(clearMeasurements);
+    this._currentMeasurement = undefined;
   }
-
-  // Measurement so that location is dynamically shown for mouse's location
-  public createDynamicMeasurement(): void {
-
-    this._currentMeasurement = new LocationMeasurement();
-    this._currentMeasurement.isDynamic = true;
-
-    this.notifyNewMeasurement();
-
-  }
-
 }
