@@ -2,6 +2,18 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@itwin/measure-tools-react_v0.8.0",
+      "date": "Mon, 18 Jul 2022 13:24:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added toolsettings to the MeasureLocationTool."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.3",
       "tag": "@itwin/measure-tools-react_v0.7.3",
       "date": "Thu, 16 Jun 2022 14:09:35 GMT",
