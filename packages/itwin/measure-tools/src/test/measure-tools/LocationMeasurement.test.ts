@@ -75,19 +75,27 @@ describe("LocationMeasurement tests", () => {
     assert.lengthOf(model.measurements, 0);
     assert.isUndefined(model.dynamicMeasurement);
 
-    model.addLocation({location: Point3d.create(10, 20, 10), viewType: WellKnownViewType.XSection, slope: 2, station: 100, offset: 50});
+    model.addLocation({ location: Point3d.create(10, 20, 10), viewType: WellKnownViewType.XSection, slope: 2, station: 100, offset: 50 }, false);
     assert.lengthOf(model.measurements, 1);
-    assert.isUndefined(model.dynamicMeasurement); // Currently unused by location measurement models
+    assert.isUndefined(model.dynamicMeasurement);
     assert.isDefined(model.measurements[0].slope);
     assert.isTrue(model.measurements[0].viewTarget.primary === WellKnownViewType.XSection);
 
-    model.addLocation({location: Point3d.create(100, 50, 0), viewType: WellKnownViewType.Profile});
+    model.addLocation({ location: Point3d.create(100, 50, 0), viewType: WellKnownViewType.Profile }, false);
     assert.lengthOf(model.measurements, 2);
     assert.isTrue(model.measurements[1].viewTarget.primary === WellKnownViewType.Profile);
 
     assert.isTrue(model.undoMeasurement());
     assert.lengthOf(model.measurements, 1);
     assert.isTrue(model.undoMeasurement());
+    assert.lengthOf(model.measurements, 0);
+    assert.isFalse(model.undoMeasurement());
+
+    // Try with dynamic measurement
+    model.addLocation({ location: Point3d.create(10, 20, 10), viewType: WellKnownViewType.XSection, slope: 2, station: 100, offset: 50 }, true);
+    assert.lengthOf(model.measurements, 0);
+    assert.isFalse(model.undoMeasurement());
+    model.addLocation({ location: Point3d.create(10, 20, 10), viewType: WellKnownViewType.XSection, slope: 2, station: 40, offset: 50 }, true);
     assert.lengthOf(model.measurements, 0);
     assert.isFalse(model.undoMeasurement());
   });
