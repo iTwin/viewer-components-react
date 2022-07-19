@@ -7,7 +7,12 @@
 import * as React from "react";
 import classnames from "classnames";
 import type { CommonProps } from "@itwin/core-react";
-import { IconButton } from "../IconButton";
+import { IconButton } from "@itwin/itwinui-react";
+import {
+  SvgChevronDown,
+  SvgChevronUp,
+  SvgClose,
+} from "@itwin/itwinui-icons-react";
 import "./SearchBox.scss";
 import { TreeWidget } from "../../TreeWidget";
 
@@ -38,6 +43,8 @@ export interface SearchBoxProps extends CommonProps {
   resultCount: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged: (index: number) => void;
+  /** Enable filter navigation (previous/next buttons) */
+  enableFiltering?: boolean;
 }
 
 /**
@@ -221,36 +228,52 @@ SearchBoxState
           onPaste={this._trackChange}
           onCut={this._trackChange}
           placeholder={
-            placeholder ? placeholder : TreeWidget.translate("searchbox.search")
+            placeholder ? placeholder : TreeWidget.translate("search")
           }
         />
-        <div className="searchbox-stepping-container">
-          {showCount && (
-            <span className="searchbox-stepping-count">{`${selectedIndex}/${resultCount}`}</span>
+        {this.props.enableFiltering && (
+          <>
+            {showCount && (
+              <span className="searchbox-stepping-count">{`${selectedIndex}/${resultCount}`}</span>
+            )}
+            <div className="searchbox-separator" />
+          </>
+        )}
+        <div className="searchbox-icons-container">
+          {this.props.enableFiltering && (
+            <>
+              <IconButton
+                size="small"
+                styleType="borderless"
+                disabled={!isPrevEnabled}
+                onClick={this._onPrevClick}
+                title={TreeWidget.translate("previous")}
+              >
+                <SvgChevronUp />
+              </IconButton>
+              <IconButton
+                size="small"
+                styleType="borderless"
+                disabled={!isNextEnabled}
+                onClick={this._onNextClick}
+                title={TreeWidget.translate("next")}
+              >
+                <SvgChevronDown />
+              </IconButton>
+            </>
           )}
-          <div className="searchbox-separator" />
           <IconButton
-            className="searchbox-step-button"
-            icon="icon-chevron-up"
-            disabled={!isPrevEnabled}
-            onClick={this._onPrevClick}
-            title="Previous"
-          />
-          <IconButton
-            className="searchbox-step-button"
-            icon="icon-chevron-down"
-            disabled={!isNextEnabled}
-            onClick={this._onNextClick}
-            title="Next"
-          />
+            size="small"
+            styleType="borderless"
+            className="searchbox-close-button"
+            onClick={this._handleIconClick}
+            onKeyDown={this._handleIconClick}
+            tabIndex={0}
+            title={TreeWidget.translate("close")}
+          >
+            <SvgClose />
+          </IconButton>
         </div>
-        <span
-          className="searchbox-step-button icon icon-close searchbox-close-button"
-          onClick={this._handleIconClick}
-          onKeyDown={this._handleIconClick}
-          role="button"
-          tabIndex={0}
-        />
       </div>
     );
   }

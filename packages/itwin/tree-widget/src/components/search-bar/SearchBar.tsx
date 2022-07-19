@@ -2,29 +2,42 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import * as React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
 import type { CommonProps } from "@itwin/core-react";
-import { RelativePosition } from "@itwin/appui-abstract";
-import { Popup } from "./Popup";
 import { SearchBox } from "./SearchBox";
-import { IconButton } from "../IconButton";
+import {
+  SvgMore,
+  SvgSearch,
+} from "@itwin/itwinui-icons-react";
+import {
+  Button,
+  ButtonGroup,
+  DropdownMenu,
+  IconButton,
+  MenuDivider,
+  MenuItem,
+} from "@itwin/itwinui-react";
 import "./SearchBar.scss";
 
-export enum Alignment {
-  Left = 0,
-  Right = 1,
+export interface ButtonInfo {
+  /** Optional icon (recommended) */
+  icon?: JSX.Element;
+  /** Optional label (placed before the icon) */
+  label?: string;
+  /** Optional tooltip (also shown in the overflow dropdown) */
+  tooltip?: string;
+  /** Optional click handler */
+  onClick?: () => void;
+  /** Optional display the tool as a separator */
+  isSeparator?: boolean;
 }
 
 export interface SearchBarProps extends CommonProps {
   /** value to set SearchBox */
   value?: string;
-  /** Enable or disable dropdown functionality. If disabled, searchbox simply expands without displaying the group button */
-  enableGrouping: boolean;
   /** show the search box in the open (expanded) state */
   showSearch?: boolean;
-  /** alignment content to the left or right of the search bar */
-  alignment?: Alignment;
   /** searchbox frequency to poll for changes in value (milliseconds) */
   valueChangedDelay?: number;
   /** searchbox placeholder value to show in gray before anything is entered in */
@@ -43,136 +56,185 @@ export interface SearchBarProps extends CommonProps {
   resultCount: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged: (index: number) => void;
-}
-
-interface SearchBarState {
-  showSearch: boolean;
-  showDropdown: boolean;
+  /** Enable filter navigation (previous/next buttons) */
+  enableFiltering?: boolean;
+  /** Toolbar buttons */
+  buttons: ButtonInfo[];
 }
 
 /** SearchBox with expanding search box capability */
-export class SearchBar extends React.PureComponent<
-SearchBarProps,
-SearchBarState
-> {
-  private _target: HTMLElement | null = null;
-  private _searchBox = React.createRef<SearchBox>();
+export const SearchBar = (props: SearchBarProps) => {
+  const {
+    className,
+    enableFiltering,
+    value,
+    valueChangedDelay,
+    placeholder,
+    title,
+    buttons,
+    onFilterStart,
+    onSelectedChanged,
+    onFilterCancel,
+    onFilterClear,
+    resultCount,
+  } = props;
 
-  public static defaultProps: Partial<SearchBarProps> = {
-    alignment: Alignment.Left,
-    enableGrouping: true,
-  };
+  const searchBox = useRef<SearchBox>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(props.showSearch);
 
-  constructor(props: any) {
-    super(props);
-
-    this.state = { showSearch: props.showSearch, showDropdown: false };
-  }
-
-  public async componentDidUpdate(prevProps: SearchBarProps) {
-    if (prevProps.value !== this.props.value) {
+  useEffect(() => {
+    if (isSearchOpen) {
+      setTimeout(() => {
+        if (searchBox.current) searchBox.current.focus();
+      }, 250); // timeout allows the search bar animation to complete!
     }
-  }
+  }, [isSearchOpen]);
 
-  private _onToggleSearch = (
+  const onToggleSearch = (
     _event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    const showSearch = !this.state.showSearch;
-    this.setState({ showSearch }, () => {
-      if (showSearch && this._searchBox.current)
-        setTimeout(() => {
-          if (this._searchBox.current) this._searchBox.current.focus();
-        }, 100); // timeout allows the search bar animation to complete!
-    });
+    setIsSearchOpen(!isSearchOpen);
   };
 
-  private _onCloseDropdown = () => {
-    this.setState({ showDropdown: false });
-  };
+  const renderButton = (button: ButtonInfo, index: number) => {
+    if (button.isSeparator) {
+      return (
+        <div className="search-bar-separator" />
+      );
+    }
 
-  private _onToggleDropdown = () => {
-    this.setState((prevState) => ({ showDropdown: !prevState.showDropdown }));
-  };
-
-  public render() {
-    const {
-      value,
-      alignment,
-      valueChangedDelay,
-      placeholder,
-      enableGrouping,
-      title,
-    } = this.props;
-    const { showSearch, showDropdown } = this.state;
-
-    const classes = classnames("tree-widget-search-bar", this.props.className);
-    const searchBoxClassName = classnames(
-      "search-bar-search-box",
-      showSearch && "show"
-    );
-    const searchIconClassName = classnames(
-      "search-bar-search-icon",
-      showSearch ? "hide" : "show"
-    );
-    const groupButtonClassName = classnames(
-      "search-bar-group-button2",
-      showSearch && enableGrouping && "show"
-    );
-    const contentClassName = classnames(
-      "search-bar-button-container",
-      showSearch && "hide",
-      alignment === Alignment.Right && "right"
-    );
-    const searchBarContainerClassName = classnames(
-      "search-bar-search-container",
-      enableGrouping && "search-bar-grouping-enabled",
-    );
+    if (button.label) {
+      return (
+        <Button
+          key={index}
+          size="small"
+          styleType="borderless"
+          endIcon={button.icon}
+          title={button.tooltip}
+          onClick={button.onClick}
+        >
+          {button.label}
+        </Button>
+      );
+    }
 
     return (
-      <div className={classes}>
-        <div
-          className={groupButtonClassName}
-          ref={(element) => {
-            this._target = element;
-          }}
-        >
-          <IconButton icon="icon-more-2" onClick={this._onToggleDropdown} />
-        </div>
-        <div className={contentClassName}>{this.props.children}</div>
-        <div className={searchBarContainerClassName}>
-          <SearchBox
-            ref={this._searchBox}
-            className={searchBoxClassName}
-            searchText={value}
-            valueChangedDelay={valueChangedDelay}
-            placeholder={placeholder}
-            onFilterCancel={this.props.onFilterCancel}
-            onFilterClear={this.props.onFilterClear}
-            onFilterStart={this.props.onFilterStart}
-            resultCount={this.props.resultCount}
-            onIconClick={this._onToggleSearch}
-            onSelectedChanged={this.props.onSelectedChanged}
-          />
-        </div>
-        <IconButton
-          className={searchIconClassName}
-          icon="icon-search"
-          onClick={this._onToggleSearch}
-          title={title}
-        />
-        {showSearch && (
-          <Popup
-            isShown={showDropdown}
-            position={RelativePosition.BottomLeft}
-            onClose={this._onCloseDropdown}
-            context={this._target}
-          >
-            <div className="search-bar-dropdown-container">
-              {this.props.children}
-            </div>
-          </Popup>
-        )}
-      </div>
+      <IconButton
+        key={index}
+        size="small"
+        styleType="borderless"
+        title={button.tooltip}
+        onClick={button.onClick}
+      >
+        {button.icon}
+      </IconButton>
     );
-  }
-}
+  };
+
+  const renderDropdown = (overflowStart: number) => {
+    return (
+      <DropdownMenu
+        menuItems={(close: () => void) =>
+          Array(buttons.length - overflowStart + 1)
+            .fill(null)
+            .map((_, _index) => {
+              const index = overflowStart + _index - 1;
+
+              // currently a bug in ButtonGroup, index
+              // should never be -1
+              if (index === -1)
+                return (
+                  <MenuDivider key={index} />
+                );
+
+              const tool = buttons[index];
+              if (tool.isSeparator)
+                return (
+                  <MenuDivider key={index} />
+                );
+              else {
+                return (
+                  <MenuItem
+                    key={index}
+                    onClick={() => {
+                      close();
+                      tool.onClick?.();
+                    }}
+                    icon={tool.icon}
+                  >
+                    {tool.tooltip}
+                  </MenuItem>
+                );
+              }
+            })
+        }
+      >
+        <IconButton
+          size="small"
+          styleType="borderless"
+          onClick={() => { }}
+        >
+          <SvgMore />
+        </IconButton>
+      </DropdownMenu>
+    );
+  };
+
+  const searchBoxClassName = classnames(
+    "search-bar-search-box",
+    isSearchOpen && "show"
+  );
+
+  const searchIconClassName = classnames(
+    "search-bar-search-icon",
+    !isSearchOpen && "show"
+  );
+  const contentClassName = classnames(
+    "search-bar-button-group",
+    isSearchOpen && "hide",
+  );
+
+  return (
+    <div className={classnames("filtering-search-bar", className)}>
+      <ButtonGroup
+        className={contentClassName}
+        orientation="horizontal"
+        overflowPlacement="end"
+        overflowButton={(overflowStart: number) => (
+          renderDropdown(overflowStart)
+        )}
+      >
+        {buttons.map((tool: ButtonInfo, index: number) => {
+          return (
+            renderButton(tool, index)
+          );
+        })}
+      </ButtonGroup>
+      <div className="search-bar-search-container">
+        <SearchBox
+          ref={searchBox}
+          className={searchBoxClassName}
+          searchText={value}
+          valueChangedDelay={valueChangedDelay}
+          placeholder={placeholder}
+          onFilterCancel={onFilterCancel}
+          onFilterClear={onFilterClear}
+          onFilterStart={onFilterStart}
+          resultCount={resultCount}
+          onIconClick={onToggleSearch}
+          onSelectedChanged={onSelectedChanged}
+          enableFiltering={enableFiltering}
+        />
+      </div>
+      <IconButton
+        size="small"
+        styleType="borderless"
+        className={searchIconClassName}
+        onClick={onToggleSearch}
+        title={title}
+      >
+        <SvgSearch />
+      </IconButton>
+    </div>
+  );
+};

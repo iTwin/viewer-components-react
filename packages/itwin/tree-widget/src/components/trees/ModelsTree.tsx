@@ -12,6 +12,7 @@ import type {
   GeometricModel3dProps,
   ModelQueryParams,
 } from "@itwin/core-common";
+import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { TreeHeaderComponent } from "../header/TreeHeader";
 import type { ModelTreeProps } from "../../types";
 import { AutoSizer } from "../utils/AutoSizer";
@@ -24,8 +25,8 @@ interface TreeViewModelInfo {
 export const ModelsTreeComponent = (props: ModelTreeProps) => {
   const [is2dToggleActive, setIs2dToggleActive] = useState<boolean>(false);
   const [is3dToggleActive, setIs3dToggleActive] = useState<boolean>(false);
-  const [icon2dToggle, setIcon2dToggle] = useState<string>("icon-visibility");
-  const [icon3dToggle, setIcon3dToggle] = useState<string>("icon-visibility");
+  const [icon2dToggle, setIcon2dToggle] = useState(<SvgVisibilityShow />);
+  const [icon3dToggle, setIcon3dToggle] = useState(<SvgVisibilityShow />);
 
   const [available2dModels, setAvailable2dModels] = useState<string[]>([]);
   const [available3dModels, setAvailable3dModels] = useState<string[]>([]);
@@ -97,11 +98,11 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     if (is2dToggleActive) {
       viewport?.changeModelDisplay(available2dModels, false);
       setIs2dToggleActive(false);
-      setIcon2dToggle("icon-visibility-hide-2");
+      setIcon2dToggle(<SvgVisibilityHide />);
     } else {
       await viewport?.addViewedModels(available2dModels);
       setIs2dToggleActive(true);
-      setIcon2dToggle("icon-visibility");
+      setIcon2dToggle(<SvgVisibilityShow />);
     }
     viewport?.invalidateScene();
   }, [is2dToggleActive, viewport, available2dModels]);
@@ -110,11 +111,11 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     if (is3dToggleActive) {
       viewport?.changeModelDisplay(available3dModels, false);
       setIs3dToggleActive(false);
-      setIcon3dToggle("icon-visibility-hide-2");
+      setIcon3dToggle(<SvgVisibilityHide />);
     } else {
       await viewport?.addViewedModels(available3dModels);
       setIs3dToggleActive(true);
-      setIcon3dToggle("icon-visibility");
+      setIcon3dToggle(<SvgVisibilityShow />);
     }
     viewport?.invalidateScene();
   }, [is3dToggleActive, viewport, available3dModels]);
@@ -128,24 +129,26 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
             showAll={showAll}
             hideAll={hideAll}
             invert={invert}
-            toggle2D={viewToggle2D}
+            toggle2D={props.enable2d3dTools ? viewToggle2D : undefined}
             toggle2DIcon={icon2dToggle}
-            toggle3D={viewToggle3D}
+            toggle3D={props.enable2d3dTools ? viewToggle3D : undefined}
             toggle3DIcon={icon3dToggle}
           />
-          <AutoSizer>
-            {({ width, height }) => (
-              <ModelsTree
-                {...props}
-                iModel={iModel}
-                activeView={viewport}
-                width={width}
-                height={height}
-                filterInfo={{ filter: filterString, activeMatchIndex }}
-                onFilterApplied={onFilterApplied}
-              />
-            )}
-          </AutoSizer>
+          <div className="tree-widget-models-tree-container">
+            <AutoSizer>
+              {({ width, height }) => (
+                <ModelsTree
+                  {...props}
+                  iModel={iModel}
+                  activeView={viewport}
+                  width={width}
+                  height={height}
+                  filterInfo={{ filter: filterString, activeMatchIndex }}
+                  onFilterApplied={onFilterApplied}
+                />
+              )}
+            </AutoSizer>
+          </div>
         </>
       }
     </>

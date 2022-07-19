@@ -3,12 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "~@itwin/core-react/lib/cjs/core-react/index";
-
 .tree-widget-models-tree-container {
   flex: 1;
-}
-
-.tree-widget-models-tree-toolbar-icon {
-  color: $buic-icon-color;
+  overflow: hidden;
 }

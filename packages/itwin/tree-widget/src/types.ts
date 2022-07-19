@@ -16,7 +16,7 @@ export interface IModelContentTreeProps
   iModel: IModelConnection;
 }
 
-export type ModelTreeProps = Omit<
+export interface ModelTreeProps extends Omit<
 ModelsTreeProps,
 | "iModel"
 | "activeView"
@@ -24,9 +24,12 @@ ModelsTreeProps,
 | "height"
 | "filterInfo"
 | "onFilterApplied"
->;
+> {
+  /** Enable the 2D & 3D tools */
+  enable2d3dTools?: boolean;
+}
 
-export type CategoriesTreeProps = Omit<
+export interface CategoriesTreeProps extends Omit<
 CategoryTreeProps,
 | "iModel"
 | "activeView"
@@ -34,7 +37,10 @@ CategoryTreeProps,
 | "height"
 | "filterInfo"
 | "onFilterApplied"
->;
+> {
+  /** Enable the 2D & 3D tools */
+  enable2d3dTools?: boolean;
+}
 
 export type SpatialTreeProps = Omit<
 SpatialContainmentTreeProps,
@@ -55,4 +61,5 @@ export interface TreeWidgetOptions {
     categoriesTree?: boolean;
     spatialTree?: boolean;
   };
+  enable2d3dTools?: boolean;
 }

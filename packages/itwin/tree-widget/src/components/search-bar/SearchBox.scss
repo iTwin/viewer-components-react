@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/core-react/lib/cjs/core-react/index";
+@import "~@itwin/itwinui-css/scss/style/theme";
 
 .tree-widget-searchbox {
   @include uicore-font-family;
@@ -15,7 +16,8 @@
   font-size: $uicore-font-size;
   color: $buic-text-color-reverse;
   background: $buic-background-control;
-  border: 1px solid $buic-inputs-border;
+  border: 1px solid var(--iui-color-background-border);
+  border-radius: 4px;
 
   input {
     padding: 0 $uicore-s;
@@ -47,45 +49,33 @@
     }
   }
 
-  .searchbox-stepping-container {
-    display: flex;
-    align-items: center;
-    right: 32px;
-    height: 100%;
-
-    .searchbox-stepping-count {
-      font-size: 12px;
-      color: $buic-text-color;
-      margin-right: $uicore-xs;
-      position: relative;
-      word-wrap: none;
-    }
-
-    .searchbox-separator {
-      height: 75%;
-      width: 1px;
-      margin: 0 $uicore-s;
-      background: $buic-inputs-border;
-    }
+  .searchbox-stepping-count {
+    font-size: 12px;
+    color: $buic-text-color;
+    margin-right: $uicore-xs;
+    position: relative;
+    word-wrap: none;
   }
 
-  .searchbox-step-button {
-    height: 100%;
-    width: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    color: $buic-icon-color;
-    font-size: $uicore-font-size-small;
-    cursor: pointer;
-
-    &:hover {
-      color: $buic-accessory-primary;
-    }
+  .searchbox-separator {
+    height: 75%;
+    width: 1px;
+    margin: 0 $uicore-s;
+    background: var(--iui-color-background-border)
   }
 
-  .searchbox-close-button {
-    z-index: 1000;
+  .searchbox-icons-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .iui-button.iui-borderless.iui-small>svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .searchbox-close-button {
+      z-index: 1;
+    }
   }
 }

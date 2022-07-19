@@ -12,5 +12,8 @@
   "modeltree": "Model Tree",
   "categories": "Categories",
   "containment": "Spatial Containment",
-  "treeview": "Tree View"
+  "treeview": "Tree View",
+  "previous": "Previous Match",
+  "next": "Next Match",
+  "close": "Close"
 }

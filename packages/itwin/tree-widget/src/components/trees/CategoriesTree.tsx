@@ -90,18 +90,20 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
             hideAll={hideAll}
             invert={invert}
           />
-          <AutoSizer>
-            {({ width, height }) => (
-              <CategoryTree
-                {...props}
-                iModel={iModel}
-                width={width}
-                height={height}
-                filterInfo={{ filter: filterString, activeMatchIndex }}
-                onFilterApplied={onFilterApplied}
-              />
-            )}
-          </AutoSizer>
+          <div className="tree-widget-categories-tree-container">
+            <AutoSizer>
+              {({ width, height }) => (
+                <CategoryTree
+                  {...props}
+                  iModel={iModel}
+                  width={width}
+                  height={height}
+                  filterInfo={{ filter: filterString, activeMatchIndex }}
+                  onFilterApplied={onFilterApplied}
+                />
+              )}
+            </AutoSizer>
+          </div>
         </>
       }
     </>

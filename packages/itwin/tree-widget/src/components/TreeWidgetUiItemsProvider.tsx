@@ -62,6 +62,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
                   : ClassGroupingOption.No
               }
               {...this._treeWidgetOptions?.modelsTreeProps}
+              enable2d3dTools={this._treeWidgetOptions?.enable2d3dTools}
             />
           ),
         });
@@ -72,7 +73,10 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
           label: TreeWidget.translate("categories"),
           id: "categories-tree",
           render: () => (
-            <CategoriesTreeComponent {...this._treeWidgetOptions?.categoriesTreeProps} />
+            <CategoriesTreeComponent
+              {...this._treeWidgetOptions?.categoriesTreeProps}
+              enable2d3dTools={this._treeWidgetOptions?.enable2d3dTools}
+            />
           ),
         });
       }
