@@ -325,8 +325,8 @@ const GroupAction = ({
         return (
           <div className="search-form">
             <Text>
-              Generate a query by keywords. Keywords wrapped in double
-              quotes will be considered a required criteria.
+              Generate a query by keywords. Keywords wrapped in double quotes
+              will be considered a required criteria.
             </Text>
             <LabeledTextarea
               label="Query Keywords"
@@ -368,14 +368,10 @@ const GroupAction = ({
         );
       }
       case "Manual": {
-        return (
-          <ManualQuery query={query} setQuery={setQuery}></ManualQuery>
-        );
+        return <ManualQuery query={query} setQuery={setQuery}></ManualQuery>;
       }
       default: {
-        return (
-          <EmptyMessage message="No query generation method selected. " />
-        );
+        return <EmptyMessage message="No query generation method selected. " />;
       }
     }
   };
