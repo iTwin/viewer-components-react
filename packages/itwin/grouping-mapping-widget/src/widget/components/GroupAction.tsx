@@ -39,12 +39,9 @@ import {
   visualizeElementsById,
   zoomToElements,
 } from "./viewerUtils";
-import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
-import { ManualQuery } from "./ManualQueryComponent";
-
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
@@ -81,6 +78,7 @@ const GroupAction = ({
     new QueryBuilder(undefined),
   );
   const [searchInput, setSearchInput] = React.useState("");
+  const [manualInput, setManualInput] = React.useState("");
 
   useEffect(() => {
     const removeListener = Presentation.selection.selectionChange.addListener(
@@ -368,7 +366,41 @@ const GroupAction = ({
         );
       }
       case "Manual": {
-        return <ManualQuery query={query} setQuery={setQuery}></ManualQuery>;
+        return (
+          <div className="search-form">
+            <Text>
+              Generate group by user defined ECSQL query. Please select
+              ECInstanceId column in the query.
+            </Text>
+            <LabeledTextarea
+              label="Query"
+              required
+              value={manualInput}
+              onChange={(event) => setManualInput(event.target.value)}
+              disabled={isLoading || isRendering}
+              placeholder={`E.g. "Select ECInstanceId From Biscore.Element`}
+            />
+            <div className="search-actions">
+              {isRendering && <LoadingSpinner />}
+              <Button
+                disabled={isLoading || isRendering}
+                onClick={() => setQuery(manualInput)}
+              >
+                Apply
+              </Button>
+              <Button
+                disabled={isLoading || isRendering}
+                onClick={async () => {
+                  setQuery("");
+                  setManualInput("");
+                  await resetView();
+                }}
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        );
       }
       default: {
         return <EmptyMessage message="No query generation method selected. " />;
