@@ -48,3 +48,10 @@
     cursor: pointer;
   }
 }
+
+.nest-menu-item {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0 13px;
+  gap: 8px;
+}

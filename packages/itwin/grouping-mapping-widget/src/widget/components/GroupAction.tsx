@@ -7,13 +7,26 @@ import type {
   ISelectionProvider,
   SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";
-import {
-  Presentation,
-} from "@itwin/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
+import {
+  Button,
+  Fieldset,
+  LabeledInput,
+  LabeledTextarea,
+  Small,
+  Text,
+  toaster,
+} from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
-import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
+import {
+  fetchIdsFromQuery,
+  handleError,
+  handleInputChange,
+  LoadingSpinner,
+  WidgetHeader,
+  EmptyMessage,
+} from "./utils";
 import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -30,11 +43,13 @@ import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
+import { ManualQuery } from "./ManualQueryComponent";
 
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
   group?: GroupType;
+  queryGenerationType?: string;
   goBack: () => Promise<void>;
   resetView: () => Promise<void>;
 }
@@ -43,6 +58,7 @@ const GroupAction = ({
   iModelId,
   mappingId,
   group,
+  queryGenerationType,
   goBack,
   resetView,
 }: GroupActionProps) => {
@@ -58,26 +74,13 @@ const GroupAction = ({
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const [currentPropertyList, setCurrentPropertyList] = React.useState<PropertyRecord[]>([]);
+  const [currentPropertyList, setCurrentPropertyList] = React.useState<
+    PropertyRecord[]
+  >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
-  const [queryGenerationType, setQueryGenerationType] = React.useState("Selection");
   const [searchInput, setSearchInput] = React.useState("");
-
-  const changeGroupByType = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const {
-      target: { value },
-    } = event;
-    setQueryGenerationType(value);
-    Presentation.selection.clearSelection(
-      "GroupingMappingWidget",
-      iModelConnection,
-    );
-    setQuery("");
-    setSimpleSelectionQuery("");
-    await resetView();
-  };
 
   useEffect(() => {
     const removeListener = Presentation.selection.selectionChange.addListener(
@@ -86,8 +89,15 @@ const GroupAction = ({
         selectionProvider: ISelectionProvider,
       ) => {
         if (queryGenerationType === "Selection") {
-          const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-          const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}` : "";
+          const selection = selectionProvider.getSelection(
+            evt.imodel,
+            evt.level,
+          );
+          const query =
+            selection.instanceKeys.size > 0
+              ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
+              }`
+              : "";
           setSimpleSelectionQuery(query);
         }
       },
@@ -104,7 +114,10 @@ const GroupAction = ({
           return;
         }
 
-        if (queryGenerationType === "Selection" && currentPropertyList.length === 0) {
+        if (
+          queryGenerationType === "Selection" &&
+          currentPropertyList.length === 0
+        ) {
           return;
         }
 
@@ -138,7 +151,13 @@ const GroupAction = ({
     return text.startsWith(`"`) && text.endsWith(`"`);
   };
 
-  const needsAndOperator = (token: string, index: number, searchQuery: string[]) => isWrappedInQuotes(token) || (index === 1 && isWrappedInQuotes(searchQuery[0]));
+  const needsAndOperator = (
+    token: string,
+    index: number,
+    searchQuery: string[],
+  ) =>
+    isWrappedInQuotes(token) ||
+    (index === 1 && isWrappedInQuotes(searchQuery[0]));
   // Temporary until ECViews become available for use.
   const generateSearchQuery = (searchQuery: string[]) => {
     if (searchQuery.length === 0) {
@@ -146,28 +165,90 @@ const GroupAction = ({
       return;
     }
 
-    let generatedSearchQuery =
-      `SELECT be.ECInstanceId, be.ECClassId FROM bis.geometricelement3d be `;
+    let generatedSearchQuery = `SELECT be.ECInstanceId, be.ECClassId FROM bis.geometricelement3d be `;
     generatedSearchQuery += `LEFT JOIN bis.SpatialCategory cat ON be.Category.Id = cat.ECInstanceID LEFT JOIN ecdbmeta.ECClassDef ecc ON be.ECClassId = ecc.ECInstanceId `;
     generatedSearchQuery += `LEFT JOIN bis.PhysicalType pt ON be.TypeDefinition.Id = pt.ECInstanceID`;
     generatedSearchQuery += ` WHERE `;
-    generatedSearchQuery += `((${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} be.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")}) OR (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")})) OR ((${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} cat.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")}) OR (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} cat.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")})) OR (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} ecc.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")})`;
+    generatedSearchQuery += `((${searchQuery
+      .map(
+        (token, index) =>
+          `${index === 0
+            ? ""
+            : needsAndOperator(token, index, searchQuery)
+              ? "AND"
+              : "OR"
+          } be.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+          }%'`,
+      )
+      .join(" ")}) OR (${searchQuery
+        .map(
+          (token, index) =>
+            `${index === 0
+              ? ""
+              : needsAndOperator(token, index, searchQuery)
+                ? "AND"
+                : "OR"
+            } be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+            }%'`,
+        )
+        .join(" ")})) OR ((${searchQuery
+          .map(
+            (token, index) =>
+              `${index === 0
+                ? ""
+                : needsAndOperator(token, index, searchQuery)
+                  ? "AND"
+                  : "OR"
+              } cat.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+              }%'`,
+          )
+          .join(" ")}) OR (${searchQuery
+            .map(
+              (token, index) =>
+                `${index === 0
+                  ? ""
+                  : needsAndOperator(token, index, searchQuery)
+                    ? "AND"
+                    : "OR"
+                } cat.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+                }%'`,
+            )
+            .join(" ")})) OR (${searchQuery
+              .map(
+                (token, index) =>
+                  `${index === 0
+                    ? ""
+                    : needsAndOperator(token, index, searchQuery)
+                      ? "AND"
+                      : "OR"
+                  } ecc.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+                  }%'`,
+              )
+              .join(" ")})`;
     // Physical Types
-    generatedSearchQuery += ` OR ((${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} pt.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")}) OR (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} pt.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")})) `;
+    generatedSearchQuery += ` OR ((${searchQuery
+      .map(
+        (token, index) =>
+          `${index === 0
+            ? ""
+            : needsAndOperator(token, index, searchQuery)
+              ? "AND"
+              : "OR"
+          } pt.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+          }%'`,
+      )
+      .join(" ")}) OR (${searchQuery
+        .map(
+          (token, index) =>
+            `${index === 0
+              ? ""
+              : needsAndOperator(token, index, searchQuery)
+                ? "AND"
+                : "OR"
+            } pt.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+            }%'`,
+        )
+        .join(" ")})) `;
 
     setQuery(generatedSearchQuery);
   };
@@ -219,7 +300,92 @@ const GroupAction = ({
     mappingClient,
   ]);
 
-  const isBlockingActions = !(details.groupName && (query || simpleSelectionQuery) && !isRendering && !isLoading);
+  const queryGenerationComponent = () => {
+    switch (queryGenerationType) {
+      case "Selection": {
+        return (
+          <GroupQueryBuilderContext.Provider
+            value={{
+              currentPropertyList,
+              setCurrentPropertyList,
+              query,
+              setQuery,
+              queryBuilder,
+              setQueryBuilder,
+              isLoading,
+              isRendering,
+              resetView,
+            }}
+          >
+            <GroupQueryBuilderContainer />
+          </GroupQueryBuilderContext.Provider>
+        );
+      }
+      case "Search": {
+        return (
+          <div className="search-form">
+            <Text>
+              Generate a query by keywords. Keywords wrapped in double
+              quotes will be considered a required criteria.
+            </Text>
+            <LabeledTextarea
+              label="Query Keywords"
+              required
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              disabled={isLoading || isRendering}
+              placeholder={`E.g. "red" chair`}
+            />
+            <div className="search-actions">
+              {isRendering && <LoadingSpinner />}
+              <Button
+                disabled={isLoading || isRendering}
+                onClick={() =>
+                  generateSearchQuery(
+                    searchInput
+                      ? searchInput
+                        .replace(/(\r\n|\n|\r)/gm, "")
+                        .trim()
+                        .split(" ")
+                      : [],
+                  )
+                }
+              >
+                Apply
+              </Button>
+              <Button
+                disabled={isLoading || isRendering}
+                onClick={async () => {
+                  setQuery("");
+                  setSearchInput("");
+                  await resetView();
+                }}
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        );
+      }
+      case "Manual": {
+        return (
+          <ManualQuery query={query} setQuery={setQuery}></ManualQuery>
+        );
+      }
+      default: {
+        return (
+          <EmptyMessage message="No query generation method selected. " />
+        );
+      }
+    }
+  };
+
+  const isBlockingActions = !(
+    details.groupName &&
+    (query || simpleSelectionQuery) &&
+    !isRendering &&
+    !isLoading
+  );
 
   return (
     <>
@@ -233,15 +399,15 @@ const GroupAction = ({
           await goBack();
         }}
       />
-      <div className='group-add-modify-container'>
-        <Fieldset legend='Group Details' className='group-details'>
-          <Small className='field-legend'>
+      <div className="group-add-modify-container">
+        <Fieldset legend="Group Details" className="group-details">
+          <Small className="field-legend">
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
-            id='groupName'
-            name='groupName'
-            label='Name'
+            id="groupName"
+            name="groupName"
+            label="Name"
             value={details.groupName}
             required
             onChange={(event) => {
@@ -271,75 +437,17 @@ const GroupAction = ({
             }}
           />
           <LabeledInput
-            id='description'
-            name='description'
-            label='Description'
+            id="description"
+            name="description"
+            label="Description"
             value={details.description}
             onChange={(event) => {
               handleInputChange(event, details, setDetails);
             }}
           />
         </Fieldset>
-        <Fieldset legend='Group By' className='query-builder-container'>
-          <RadioTileGroup
-            className="radio-group-tile"
-            required>
-            <RadioTile
-              name={"groupby"}
-              icon={<SvgCursor />}
-              onChange={changeGroupByType}
-              defaultChecked
-              value={"Selection"}
-              label={"Selection"}
-              disabled={isLoading || isRendering}
-            />
-            <RadioTile
-              icon={<SvgSearch />}
-              name={"groupby"}
-              onChange={changeGroupByType}
-              value={"Query Keywords"}
-              label={"Query Keywords"}
-              disabled={isLoading || isRendering}
-            />
-          </RadioTileGroup>
-          {queryGenerationType === "Selection" ?
-            <GroupQueryBuilderContext.Provider
-              value={{
-                currentPropertyList,
-                setCurrentPropertyList,
-                query,
-                setQuery,
-                queryBuilder,
-                setQueryBuilder,
-                isLoading,
-                isRendering,
-                resetView,
-              }}
-            >
-              <GroupQueryBuilderContainer />
-            </GroupQueryBuilderContext.Provider> :
-            <div className="search-form">
-              <Text>Generate a query by keywords. Keywords wrapped in double quotes will be considered a required criteria.</Text>
-              <LabeledTextarea
-                label="Query Keywords"
-                required
-                value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
-                disabled={isLoading || isRendering}
-                placeholder={`E.g. "red" chair`} />
-              <div className="search-actions">
-                {isRendering &&
-                  <LoadingSpinner />
-                }
-                <Button disabled={isLoading || isRendering} onClick={() => generateSearchQuery(searchInput ? searchInput.replace(/(\r\n|\n|\r)/gm, "").trim().split(" ") : [])}>Generate Query</Button>
-                <Button disabled={isLoading || isRendering} onClick={async () => {
-                  setQuery("");
-                  setSearchInput("");
-                  await resetView();
-                }}>Clear</Button>
-              </div>
-            </div>
-          }
+        <Fieldset legend="Group By" className="query-builder-container">
+          {queryGenerationComponent()}
         </Fieldset>
       </div>
       <ActionPanel
@@ -353,9 +461,7 @@ const GroupAction = ({
           );
           await goBack();
         }}
-        isSavingDisabled={
-          isBlockingActions
-        }
+        isSavingDisabled={isBlockingActions}
         isCancelDisabled={isBlockingActions}
         isLoading={isLoading}
       />

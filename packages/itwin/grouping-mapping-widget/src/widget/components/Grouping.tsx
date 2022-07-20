@@ -2,13 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useActiveIModelConnection } from "@itwin/appui-react";
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { MenuButton, useActiveIModelConnection } from "@itwin/appui-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import {
   Button,
@@ -16,7 +11,6 @@ import {
   DropdownMenu,
   IconButton,
   MenuItem,
-  ProgressRadial,
   Surface,
   toaster,
   ToggleSwitch,
@@ -24,9 +18,11 @@ import {
 import {
   SvgAdd,
   SvgDelete,
+  SvgDraw,
   SvgEdit,
   SvgList,
   SvgMore,
+  SvgSearch,
   SvgVisibilityHide,
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
@@ -121,6 +117,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const [hiddenGroupsIds, setHiddenGroupsIds] = useState<string[]>([]);
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
 
+  const [queryGenerationType, setQueryGenerationType] =
+    useState<string>("Selection");
+
   useEffect(() => {
     void fetchGroups(
       setGroups,
@@ -136,36 +135,39 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
   };
 
-  const getHiliteIdsFromGroups = useCallback(async (groups: Group[]) => {
-    let allIds: string[] = [];
-    for (const group of groups) {
-      const query = group.query ?? "";
-      let currentIds: string[] = [];
-      if (hilitedElements.current.has(query)) {
-        currentIds = hilitedElements.current.get(query) ?? [];
-      } else {
-        try {
-          const ids: string[] = await fetchIdsFromQuery(
-            query,
-            iModelConnection,
-          );
-          if (ids.length === 0) {
-            toaster.warning(
-              `${group.groupName}'s query is valid but produced no results.`,
+  const getHiliteIdsFromGroups = useCallback(
+    async (groups: Group[]) => {
+      let allIds: string[] = [];
+      for (const group of groups) {
+        const query = group.query ?? "";
+        let currentIds: string[] = [];
+        if (hilitedElements.current.has(query)) {
+          currentIds = hilitedElements.current.get(query) ?? [];
+        } else {
+          try {
+            const ids: string[] = await fetchIdsFromQuery(
+              query,
+              iModelConnection,
+            );
+            if (ids.length === 0) {
+              toaster.warning(
+                `${group.groupName}'s query is valid but produced no results.`,
+              );
+            }
+            currentIds = await getHiliteIds(ids, iModelConnection);
+            hilitedElements.current.set(query, currentIds);
+          } catch {
+            toaster.negative(
+              `Could not hide/show ${group.groupName}. Query could not be resolved.`,
             );
           }
-          currentIds = await getHiliteIds(ids, iModelConnection);
-          hilitedElements.current.set(query, currentIds);
-        } catch {
-          toaster.negative(
-            `Could not hide/show ${group.groupName}. Query could not be resolved.`,
-          );
         }
+        allIds = allIds.concat(currentIds);
       }
-      allIds = allIds.concat(currentIds);
-    }
-    return allIds;
-  }, [iModelConnection, hilitedElements]);
+      return allIds;
+    },
+    [iModelConnection, hilitedElements],
+  );
 
   const visualizeGroupColors = useCallback(
     async (viewGroups: Group[]) => {
@@ -259,12 +261,14 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     [groups, hiddenGroupsIds, getHiliteIdsFromGroups],
   );
 
-  const addGroup = () => {
+  const addGroup = (type: string) => {
+    setQueryGenerationType(type);
     clearEmphasizedElements();
     setGroupsView(GroupsView.ADD);
   };
 
-  const onModify = async (group: Group) => {
+  const onModify = async (group: Group, type: string) => {
+    setQueryGenerationType(type);
     setSelectedGroup(group);
     setGroupsView(GroupsView.MODIFYING);
     if (group?.id && hiddenGroupsIds.includes(group.id)) {
@@ -365,6 +369,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
         <GroupAction
           iModelId={iModelId}
           mappingId={mapping.id ?? ""}
+          queryGenerationType={queryGenerationType}
           goBack={async () => {
             setGroupsView(GroupsView.GROUPS);
             await refresh();
@@ -378,6 +383,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           iModelId={iModelId}
           mappingId={mapping.id ?? ""}
           group={selectedGroup}
+          queryGenerationType={queryGenerationType}
           goBack={async () => {
             setGroupsView(GroupsView.GROUPS);
             await refresh();
@@ -407,20 +413,53 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           />
           <Surface className="groups-container">
             <div className="toolbar">
-              <Button
-                startIcon={
-                  isLoadingQuery ? (
-                    <ProgressRadial size="small" indeterminate />
-                  ) : (
-                    <SvgAdd />
-                  )
-                }
-                styleType="high-visibility"
+              <DropdownMenu
                 disabled={isLoadingQuery}
-                onClick={addGroup}
+                menuItems={() => [
+                  <MenuItem
+                    key={0}
+                    onClick={() => addGroup("Selection")}
+                    icon={<SvgAdd />}
+                    style={{
+                      "paddingLeft": "16px"
+                    }}
+                  >
+                    Selection
+                  </MenuItem>,
+                  <MenuItem
+                    key={1}
+                    onClick={() => addGroup("Search")}
+                    icon={<SvgSearch />}
+                    style={{
+                      "paddingLeft": "16px"
+                    }}
+                  >
+                    Search
+                  </MenuItem>,
+                  <MenuItem
+                    key={2}
+                    onClick={() => addGroup("Manual")}
+                    icon={<SvgDraw />}
+                    style={{
+                      "paddingLeft": "16px"
+                    }}
+                  >
+                    Manual
+                  </MenuItem>,
+                ]}
               >
-                {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
-              </Button>
+                <IconButton
+                  disabled={isLoadingQuery}
+                  styleType="high-visibility"
+                >
+                  <SvgAdd
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                    }}
+                  />
+                </IconButton>
+              </DropdownMenu>
               <ButtonGroup className="toolbar-buttons">
                 <ToggleSwitch
                   label="Color by Group"
@@ -450,99 +489,155 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 </IconButton>
               </ButtonGroup>
             </div>
-            {isLoading ? (
-              <LoadingOverlay />
-            ) : groups.length === 0 ? (
-              <EmptyMessage message="No Groups available." />
-            ) : (
-              <div className="group-list">
-                {groups.map((g) => (
-                  <GroupTile
-                    key={g.id}
-                    title={g.groupName ? g.groupName : "Untitled"}
-                    subText={g.description}
-                    actionGroup={
-                      <div className="actions">
-                        {g.id && hiddenGroupsIds.includes(g.id) ? (
-                          <IconButton
-                            disabled={isLoadingQuery}
-                            styleType="borderless"
-                            className="group-view-icon"
-                            onClick={async () => {
-                              await showGroup(g);
-                              setHiddenGroupsIds(
-                                hiddenGroupsIds.filter((id) => g.id !== id),
-                              );
-                            }}
-                          >
-                            <SvgVisibilityHide />
-                          </IconButton>
-                        ) : (
-                          <IconButton
-                            disabled={isLoadingQuery}
-                            styleType="borderless"
-                            className="group-view-icon"
-                            onClick={async () => {
-                              await hideGroups([g]);
-                              setHiddenGroupsIds(
-                                hiddenGroupsIds.concat(g.id ? [g.id] : []),
-                              );
-                            }}
-                          >
-                            <SvgVisibilityShow />
-                          </IconButton>
-                        )}
-                        <DropdownMenu
-                          disabled={isLoadingQuery}
-                          menuItems={(close: () => void) => [
-                            <MenuItem
-                              key={0}
-                              onClick={async () => onModify(g)}
-                              icon={<SvgEdit />}
-                            >
-                              Modify
-                            </MenuItem>,
-                            <MenuItem
-                              key={1}
-                              onClick={async () => openProperties(g)}
-                              icon={<SvgList />}
-                            >
-                              Properties
-                            </MenuItem>,
-                            <MenuItem
-                              key={2}
-                              onClick={() => {
-                                setSelectedGroup(g);
-                                setShowDeleteModal(true);
-                                close();
+            {
+              isLoading ? (
+                <LoadingOverlay />
+              ) : groups.length === 0 ? (
+                <EmptyMessage message="No Groups available." />
+              ) : (
+                <div className="group-list">
+                  {groups.map((g) => (
+                    <GroupTile
+                      key={g.id}
+                      title={g.groupName ? g.groupName : "Untitled"}
+                      subText={g.description}
+                      actionGroup={
+                        <div className="actions">
+                          {g.id && hiddenGroupsIds.includes(g.id) ? (
+                            <IconButton
+                              disabled={isLoadingQuery}
+                              styleType="borderless"
+                              className="group-view-icon"
+                              onClick={async () => {
+                                await showGroup(g);
+                                setHiddenGroupsIds(
+                                  hiddenGroupsIds.filter((id) => g.id !== id),
+                                );
                               }}
-                              icon={<SvgDelete />}
                             >
-                              Remove
-                            </MenuItem>,
-                          ]}
-                        >
-                          <IconButton
-                            disabled={isLoadingQuery}
-                            styleType="borderless"
-                          >
-                            <SvgMore
-                              style={{
-                                width: "16px",
-                                height: "16px",
+                              <SvgVisibilityHide />
+                            </IconButton>
+                          ) : (
+                            <IconButton
+                              disabled={isLoadingQuery}
+                              styleType="borderless"
+                              className="group-view-icon"
+                              onClick={async () => {
+                                await hideGroups([g]);
+                                setHiddenGroupsIds(
+                                  hiddenGroupsIds.concat(g.id ? [g.id] : []),
+                                );
                               }}
-                            />
-                          </IconButton>
-                        </DropdownMenu>
-                      </div>
-                    }
-                    onClickTitle={
-                      isLoadingQuery ? undefined : async () => openProperties(g)
-                    }
-                  />
-                ))}
-              </div>
-            )}
+                            >
+                              <SvgVisibilityShow />
+                            </IconButton>
+                          )}
+                          <DropdownMenu
+                            disabled={isLoadingQuery}
+                            menuItems={(close: () => void) => [
+                              <DropdownMenu
+                                key={0}
+                                placement="right-end"
+                                disabled={isLoadingQuery}
+                                menuItems={() => [
+                                  <MenuItem
+                                    key={0}
+                                    onClick={async () => onModify(g, "Selection")}
+                                    icon={<SvgAdd />}
+                                    style={{
+                                      "paddingLeft": "16px"
+                                    }}
+                                  >
+                                    Selection
+                                  </MenuItem>,
+                                  <MenuItem
+                                    key={1}
+                                    onClick={async () => onModify(g, "Search")}
+                                    icon={<SvgSearch />}
+                                    style={{
+                                      "paddingLeft": "16px"
+                                    }}
+                                  >
+                                    Search
+                                  </MenuItem>,
+                                  <MenuItem
+                                    key={2}
+                                    onClick={async () => onModify(g, "Manual")}
+                                    icon={<SvgDraw />}
+                                    style={{
+                                      "paddingLeft": "16px"
+                                    }}
+                                  >
+                                    Manual
+                                  </MenuItem>,
+                                ]}
+                              >
+                                <Button
+                                  disabled={isLoadingQuery}
+                                  styleType="borderless"
+                                  style={{
+                                    "width": "100%",
+                                    "justifyContent": "flex-start",
+                                    "padding": "0 13px",
+                                    "gap": "8px"
+                                  }}
+                                >
+                                  <span style={{
+                                    "display": "flex",
+                                    "alignItems": "center",
+                                  }}>
+                                    <SvgEdit
+                                      style={{
+                                        "width": "16px",
+                                        "height": "16px",
+                                        "margin": "0 8px 0 0",
+                                      }}
+                                    />
+                                    Edit
+                                  </span>
+                                </Button>
+                              </DropdownMenu>,
+                              <MenuItem
+                                key={1}
+                                onClick={async () => openProperties(g)}
+                                icon={<SvgList />}
+                              >
+                                Properties
+                              </MenuItem>,
+                              <MenuItem
+                                key={2}
+                                onClick={() => {
+                                  setSelectedGroup(g);
+                                  setShowDeleteModal(true);
+                                  close();
+                                }}
+                                icon={<SvgDelete />}
+                              >
+                                Remove
+                              </MenuItem>,
+                            ]}
+                          >
+                            <IconButton
+                              disabled={isLoadingQuery}
+                              styleType="borderless"
+                            >
+                              <SvgMore
+                                style={{
+                                  width: "16px",
+                                  height: "16px",
+                                }}
+                              />
+                            </IconButton>
+                          </DropdownMenu>
+                        </div>
+                      }
+                      onClickTitle={
+                        isLoadingQuery ? undefined : async () => openProperties(g)
+                      }
+                    />
+                  ))}
+                </div>
+              )}
           </Surface>
           <DeleteModal
             entityName={selectedGroup?.groupName ?? ""}
