@@ -42,6 +42,7 @@ import {
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
+import { GroupExtension, GroupExtensionProps } from "../utils";
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
@@ -49,6 +50,7 @@ interface GroupActionProps {
   queryGenerationType?: string;
   goBack: () => Promise<void>;
   resetView: () => Promise<void>;
+  extensions?: GroupExtension[];
 }
 
 const GroupAction = ({
@@ -58,6 +60,7 @@ const GroupAction = ({
   queryGenerationType,
   goBack,
   resetView,
+  extensions,
 }: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
@@ -251,6 +254,13 @@ const GroupAction = ({
     setQuery(generatedSearchQuery);
   };
 
+  const updateQuery = useCallback(
+    (newQuery: string) => {
+      setQuery(newQuery);
+    },
+    [setQuery],
+  );
+
   const save = useCallback(async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
@@ -403,6 +413,16 @@ const GroupAction = ({
         );
       }
       default: {
+        if (queryGenerationType && queryGenerationType.length > 0) {
+          const selectedExtension = extensions?.find(
+            (e) => e.name === queryGenerationType,
+          );
+          if (selectedExtension) {
+            return React.createElement(selectedExtension.uiComponent, {
+              updateQuery: updateQuery,
+            });
+          }
+        }
         return <EmptyMessage message="No query generation method selected. " />;
       }
     }

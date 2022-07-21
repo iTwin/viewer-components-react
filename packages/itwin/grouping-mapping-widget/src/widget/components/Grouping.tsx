@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { MenuButton, useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import type { CreateTypeFromInterface } from "../utils";
+import type { CreateTypeFromInterface, GroupExtension } from "../utils";
 import {
   Button,
   ButtonGroup,
@@ -71,6 +71,7 @@ enum GroupsView {
 interface GroupsTreeProps {
   mapping: Mapping;
   goBack: () => Promise<void>;
+  extensions?: GroupExtension[];
 }
 
 const goldenAngle = 180 * (3 - Math.sqrt(5));
@@ -101,7 +102,7 @@ const fetchGroups = async (
   return undefined;
 };
 
-export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
+export const Groupings = ({ mapping, goBack, extensions }: GroupsTreeProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -376,6 +377,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             await refresh();
           }}
           resetView={resetView}
+          extensions={extensions}
         />
       );
     case GroupsView.MODIFYING:
@@ -390,6 +392,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             await refresh();
           }}
           resetView={resetView}
+          extensions={extensions}
         />
       ) : null;
     case GroupsView.PROPERTIES:
@@ -412,42 +415,59 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               await goBack();
             }}
           />
+
           <Surface className="groups-container">
             <div className="toolbar">
               <DropdownMenu
                 disabled={isLoadingQuery}
-                menuItems={() => [
-                  <MenuItem
-                    key={0}
-                    onClick={() => addGroup("Selection")}
-                    icon={<SvgAdd />}
-                    style={{
-                      paddingLeft: "16px",
-                    }}
-                  >
-                    Selection
-                  </MenuItem>,
-                  <MenuItem
-                    key={1}
-                    onClick={() => addGroup("Search")}
-                    icon={<SvgSearch />}
-                    style={{
-                      paddingLeft: "16px",
-                    }}
-                  >
-                    Search
-                  </MenuItem>,
-                  <MenuItem
-                    key={2}
-                    onClick={() => addGroup("Manual")}
-                    icon={<SvgDraw />}
-                    style={{
-                      paddingLeft: "16px",
-                    }}
-                  >
-                    Manual
-                  </MenuItem>,
-                ]}
+                menuItems={() =>
+                  (extensions
+                    ? extensions.map((ext) => (
+                      <MenuItem
+                        key={ext.name}
+                        onClick={() => addGroup(ext.name)}
+                        icon={ext.icon}
+                        style={{
+                          paddingLeft: "16px",
+                        }}
+                      >
+                        {ext.displayLabel}
+                      </MenuItem>
+                    ))
+                    : []
+                  ).concat([
+                    <MenuItem
+                      key={0}
+                      onClick={() => addGroup("Selection")}
+                      icon={<SvgAdd />}
+                      style={{
+                        paddingLeft: "16px",
+                      }}
+                    >
+                      Selection
+                    </MenuItem>,
+                    <MenuItem
+                      key={1}
+                      onClick={() => addGroup("Search")}
+                      icon={<SvgSearch />}
+                      style={{
+                        paddingLeft: "16px",
+                      }}
+                    >
+                      Search
+                    </MenuItem>,
+                    <MenuItem
+                      key={2}
+                      onClick={() => addGroup("Manual")}
+                      icon={<SvgDraw />}
+                      style={{
+                        paddingLeft: "16px",
+                      }}
+                    >
+                      Manual
+                    </MenuItem>,
+                  ])
+                }
               >
                 <IconButton
                   disabled={isLoadingQuery}
@@ -542,7 +562,21 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                             <MenuItem
                               key={0}
                               disabled={isLoadingQuery}
-                              subMenuItems={[
+                              subMenuItems={(extensions
+                                ? extensions.map((ext) => (
+                                  <MenuItem
+                                    key={ext.name}
+                                    onClick={() => addGroup(ext.name)}
+                                    icon={ext.icon}
+                                    style={{
+                                      paddingLeft: "16px",
+                                    }}
+                                  >
+                                    {ext.displayLabel}
+                                  </MenuItem>
+                                ))
+                                : []
+                              ).concat([
                                 <MenuItem
                                   key={0}
                                   onClick={async () => onModify(g, "Selection")}
@@ -573,7 +607,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                 >
                                   Manual
                                 </MenuItem>,
-                              ]}
+                              ])}
                             >
                               <SvgEdit
                                 style={{

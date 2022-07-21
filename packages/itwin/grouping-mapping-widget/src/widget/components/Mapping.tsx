@@ -22,7 +22,7 @@ import {
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { CreateTypeFromInterface } from "../utils";
+import type { CreateTypeFromInterface, GroupExtension } from "../utils";
 import { handleError, onSelectionChanged, WidgetHeader } from "./utils";
 import "./Mapping.scss";
 import DeleteModal from "./DeleteModal";
@@ -70,7 +70,7 @@ const toggleExtraction = async (
   getAccessToken: GetAccessTokenFn,
   mappingClient: IMappingClient,
   iModelId: string,
-  mapping: Mapping
+  mapping: Mapping,
 ) => {
   try {
     const newState = !mapping?.extractionEnabled;
@@ -79,29 +79,42 @@ const toggleExtraction = async (
       accessToken,
       iModelId,
       mapping?.id ?? "",
-      { extractionEnabled: newState }
+      { extractionEnabled: newState },
     );
   } catch (error: any) {
     handleError(error.status);
   }
 };
 
-export const Mappings = () => {
+export interface MappingsProps {
+  extensions?: GroupExtension[];
+}
+
+export const Mappings = ({ extensions }: MappingsProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
-  const [showBlockingOverlay, setShowBlockingOverlay] = useState<boolean>(false);
+  const [showBlockingOverlay, setShowBlockingOverlay] =
+    useState<boolean>(false);
   const [mappingView, setMappingView] = useState<MappingView>(
-    MappingView.MAPPINGS
+    MappingView.MAPPINGS,
   );
-  const [selectedMapping, setSelectedMapping] = useState<Mapping | undefined>(undefined);
+  const [selectedMapping, setSelectedMapping] = useState<Mapping | undefined>(
+    undefined,
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
   useEffect(() => {
-    void fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient);
+    void fetchMappings(
+      setMappings,
+      iModelId,
+      setIsLoading,
+      getAccessToken,
+      mappingClient,
+    );
   }, [getAccessToken, mappingClient, iModelId, setIsLoading]);
 
   useEffect(() => {
@@ -117,7 +130,13 @@ export const Mappings = () => {
     setMappingView(MappingView.MAPPINGS);
     setSelectedMapping(undefined);
     setMappings([]);
-    await fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient);
+    await fetchMappings(
+      setMappings,
+      iModelId,
+      setIsLoading,
+      getAccessToken,
+      mappingClient,
+    );
   }, [getAccessToken, mappingClient, iModelId, setMappings]);
 
   const addMapping = async () => {
@@ -133,7 +152,7 @@ export const Mappings = () => {
             id: "mappingName",
             Header: "Mapping Name",
             accessor: "mappingName",
-            Cell: (value: CellProps<{ mappingName: string }>) => (
+            Cell: (value: CellProps<{ mappingName: string; }>) => (
               <div
                 className="iui-anchor"
                 onClick={() => {
@@ -175,13 +194,20 @@ export const Mappings = () => {
                         setSelectedMapping(value.row.original);
                         setShowBlockingOverlay(true);
                         close();
-                        await toggleExtraction(getAccessToken, mappingClient, iModelId, value.row.original);
+                        await toggleExtraction(
+                          getAccessToken,
+                          mappingClient,
+                          iModelId,
+                          value.row.original,
+                        );
                         await refresh();
                         setShowBlockingOverlay(false);
                       }}
                       icon={<SvgProcess />}
                     >
-                      {value.row.original.extractionEnabled ? "Disable extraction" : "Enable extraction"}
+                      {value.row.original.extractionEnabled
+                        ? "Disable extraction"
+                        : "Enable extraction"}
                     </MenuItem>,
 
                     <MenuItem
@@ -212,7 +238,7 @@ export const Mappings = () => {
         ],
       },
     ],
-    [getAccessToken, mappingClient, iModelId, refresh]
+    [getAccessToken, mappingClient, iModelId, refresh],
   );
 
   switch (mappingView) {
@@ -230,6 +256,7 @@ export const Mappings = () => {
       return (
         <Groupings
           mapping={selectedMapping as Mapping}
+          extensions={extensions}
           goBack={refresh}
         />
       );
@@ -271,7 +298,7 @@ export const Mappings = () => {
               await mappingClient.deleteMapping(
                 accessToken,
                 iModelId,
-                selectedMapping?.id ?? ""
+                selectedMapping?.id ?? "",
               );
             }}
             refresh={refresh}
