@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Persist show/hide null value toggle per user and not per iTwin/iModel",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
