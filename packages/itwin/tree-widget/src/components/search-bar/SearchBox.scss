@@ -49,6 +49,12 @@
     }
   }
 
+  .searchbox-spinner {
+    width: 16px;
+    height: 16px;
+    margin-right: $uicore-xs;
+  }
+
   .searchbox-stepping-count {
     font-size: 12px;
     color: $buic-text-color;
@@ -68,14 +74,15 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    margin-right: 4px;
+  }
 
-    .iui-button.iui-borderless.iui-small>svg {
-      width: 12px;
-      height: 12px;
-    }
+  .searchbox-close-button {
+    z-index: 1;
+  }
 
-    .searchbox-close-button {
-      z-index: 1;
-    }
+  .iui-button.iui-borderless.iui-small>svg {
+    width: 12px;
+    height: 12px;
   }
 }

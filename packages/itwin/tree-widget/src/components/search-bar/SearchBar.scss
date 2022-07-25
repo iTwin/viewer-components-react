@@ -6,63 +6,70 @@
 
 .filtering-search-bar {
   display: flex;
-  align-items: center;
-  position: relative;
-  height: 32px;
-  overflow: hidden;
+  flex-direction: column;
 
-  .search-bar-button-group {
-    flex: 1;
-    gap: 2px;
+  .filtering-search-bar-row1 {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 32px;
     overflow: hidden;
-    transition: all 0.2s ease;
-    opacity: 1;
-    z-index: 1;
 
-    &.hide {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .search-bar-separator {
-      height: 14px;
-      width: 1px;
-      margin: 0 6px;
-      background: $buic-inputs-border;
-    }
-  }
-
-  .search-bar-search-icon {
-    flex: initial;
-    opacity: 0;
-    transition: all 0.2s ease;
-    margin-left: auto;
-
-    &.show {
-      opacity: 1;
-    }
-  }
-
-  .search-bar-search-container {
-    flex: 1;
-    height: 100%;
-    position: absolute;
-    left: 0;
-    right: 0;
-
-    .search-bar-search-box {
-      height: 100%;
-      float: right;
-      margin-right: 0;
-      box-sizing: border-box;
-      width: 0px;
-      opacity: 0;
+    .search-bar-button-group {
+      flex: 1;
+      gap: 2px;
       overflow: hidden;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
+      opacity: 1;
+      z-index: 1;
+
+      &.hide {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .search-bar-separator {
+        height: 14px;
+        width: 1px;
+        margin: 0 6px;
+        background: $buic-inputs-border;
+      }
+    }
+
+    .search-bar-search-icon {
+      flex: initial;
+      opacity: 0;
+      transition: all 0.2s ease;
+      margin-left: auto;
+      pointer-events: none;
 
       &.show {
         opacity: 1;
-        width: 100%;
+        pointer-events: all;
+      }
+    }
+
+    .search-bar-search-container {
+      flex: 1;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      right: 0;
+
+      .search-bar-search-box {
+        height: 100%;
+        float: right;
+        margin-right: 0;
+        box-sizing: border-box;
+        width: 0px;
+        opacity: 0;
+        overflow: hidden;
+        transition: all 0.25s ease;
+
+        &.show {
+          opacity: 1;
+          width: 100%;
+        }
       }
     }
   }

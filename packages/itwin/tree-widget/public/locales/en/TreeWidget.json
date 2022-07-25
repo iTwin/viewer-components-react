@@ -15,5 +15,7 @@
   "treeview": "Tree View",
   "previous": "Previous Match",
   "next": "Next Match",
-  "close": "Close"
+  "close": "Close",
+  "clear": "Clear",
+  "searchFor": "Search for"
 }

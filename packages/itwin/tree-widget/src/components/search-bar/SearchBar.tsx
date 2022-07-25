@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import classnames from "classnames";
 import type { CommonProps } from "@itwin/core-react";
 import { SearchBox } from "./SearchBox";
@@ -18,6 +18,8 @@ import {
   MenuDivider,
   MenuItem,
 } from "@itwin/itwinui-react";
+import FilterBar from "./FilterBar";
+
 import "./SearchBar.scss";
 
 export interface ButtonInfo {
@@ -48,10 +50,6 @@ export interface SearchBarProps extends CommonProps {
   filteringInProgress?: boolean;
   /** Filtering is cleared after everything's loaded */
   onFilterStart: (newFilter: string) => void;
-  /** Filtering is cleared after everything's loaded */
-  onFilterCancel?: () => void;
-  /** Filtering is cleared after everything's loaded */
-  onFilterClear?: () => void;
   /** Total number of results/entries */
   resultCount: number;
   /** Callback to currently selected result/entry change */
@@ -74,27 +72,30 @@ export const SearchBar = (props: SearchBarProps) => {
     buttons,
     onFilterStart,
     onSelectedChanged,
-    onFilterCancel,
-    onFilterClear,
     resultCount,
+    filteringInProgress,
   } = props;
 
-  const searchBox = useRef<SearchBox>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(props.showSearch);
+  const [text, setText] = useState(value);
+  const [focus, setFocus] = useState(false);
 
-  useEffect(() => {
-    if (isSearchOpen) {
-      setTimeout(() => {
-        if (searchBox.current) searchBox.current.focus();
-      }, 250); // timeout allows the search bar animation to complete!
-    }
-  }, [isSearchOpen]);
-
-  const onToggleSearch = (
-    _event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  const onToggleSearch = (_event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setIsSearchOpen(!isSearchOpen);
   };
+
+  const onFilterClear = () => {
+    _onFilterStart("");
+  };
+
+  const _onFilterStart = (newFilter: string) => {
+    onFilterStart(newFilter);
+    setText(newFilter);
+  };
+
+  useEffect(() => {
+    setFocus(!!isSearchOpen);
+  }, [isSearchOpen]);
 
   const renderButton = (button: ButtonInfo, index: number) => {
     if (button.isSeparator) {
@@ -195,46 +196,50 @@ export const SearchBar = (props: SearchBarProps) => {
   );
 
   return (
-    <div className={classnames("filtering-search-bar", className)}>
-      <ButtonGroup
-        className={contentClassName}
-        orientation="horizontal"
-        overflowPlacement="end"
-        overflowButton={(overflowStart: number) => (
-          renderDropdown(overflowStart)
-        )}
-      >
-        {buttons.map((tool: ButtonInfo, index: number) => {
-          return (
-            renderButton(tool, index)
-          );
-        })}
-      </ButtonGroup>
-      <div className="search-bar-search-container">
-        <SearchBox
-          ref={searchBox}
-          className={searchBoxClassName}
-          searchText={value}
-          valueChangedDelay={valueChangedDelay}
-          placeholder={placeholder}
-          onFilterCancel={onFilterCancel}
-          onFilterClear={onFilterClear}
-          onFilterStart={onFilterStart}
-          resultCount={resultCount}
-          onIconClick={onToggleSearch}
-          onSelectedChanged={onSelectedChanged}
-          enableFiltering={enableFiltering}
-        />
+    <div className="filtering-search-bar">
+      <div className={classnames("filtering-search-bar-row1", className)}>
+        <ButtonGroup
+          className={contentClassName}
+          orientation="horizontal"
+          overflowPlacement="end"
+          overflowButton={(overflowStart: number) => (
+            renderDropdown(overflowStart)
+          )}
+        >
+          {buttons.map((tool: ButtonInfo, index: number) => {
+            return (
+              renderButton(tool, index)
+            );
+          })}
+        </ButtonGroup>
+        <div className="search-bar-search-container">
+          <SearchBox
+            className={searchBoxClassName}
+            searchText={text}
+            valueChangedDelay={valueChangedDelay}
+            placeholder={placeholder}
+            onChange={_onFilterStart}
+            resultCount={resultCount}
+            onClose={onToggleSearch}
+            onSelectedChanged={onSelectedChanged}
+            enableFiltering={enableFiltering}
+            isLoading={filteringInProgress}
+            setFocus={focus}
+          />
+        </div>
+        <IconButton
+          size="small"
+          styleType="borderless"
+          className={searchIconClassName}
+          onClick={onToggleSearch}
+          title={title}
+        >
+          <SvgSearch />
+        </IconButton>
       </div>
-      <IconButton
-        size="small"
-        styleType="borderless"
-        className={searchIconClassName}
-        onClick={onToggleSearch}
-        title={title}
-      >
-        <SvgSearch />
-      </IconButton>
+      {(!isSearchOpen && text && text.length > 0) && (
+        <FilterBar text={text} onClose={onFilterClear} onClick={onToggleSearch} />
+      )}
     </div>
   );
 };

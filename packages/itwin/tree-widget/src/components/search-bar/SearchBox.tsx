@@ -4,17 +4,17 @@
 *--------------------------------------------------------------------------------------------*/
 /** @module SearchBox */
 
-import * as React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
 import type { CommonProps } from "@itwin/core-react";
-import { IconButton } from "@itwin/itwinui-react";
+import { IconButton, ProgressRadial } from "@itwin/itwinui-react";
 import {
   SvgChevronDown,
   SvgChevronUp,
   SvgClose,
 } from "@itwin/itwinui-icons-react";
-import "./SearchBox.scss";
 import { TreeWidget } from "../../TreeWidget";
+import "./SearchBox.scss";
 
 export interface SearchBoxProps extends CommonProps {
   /** value to set SearchBox */
@@ -27,254 +27,156 @@ export interface SearchBoxProps extends CommonProps {
   onEnterPressed?: () => void;
   /** listens for <Esc> keypress */
   onEscPressed?: () => void;
-  /** listens for onClick event for Clear (x) icon */
-  onClear?: () => void;
-  /** Search or clear icon click */
-  onIconClick?: () => void;
-  /** Filtering is cleared after everything's loaded */
-  onFilterStart: (newFilter: string) => void;
-  /** Filtering is cleared after everything's loaded */
-  onFilterClear?: () => void;
-  /** Filtering is cleared after everything's loaded */
-  onFilterCancel?: () => void;
+  /** Close (x) icon click */
+  onClose?: () => void;
+  /** Callback when text has changed */
+  onChange: (newFilter: string) => void;
   /** Tells the component if parent component is still handling the filtering */
-  filteringInProgress?: boolean;
+  isLoading?: boolean;
   /** Total number of results/entries */
   resultCount: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged: (index: number) => void;
   /** Enable filter navigation (previous/next buttons) */
   enableFiltering?: boolean;
+  /** Set focus to the input component */
+  setFocus?: boolean;
 }
 
-/**
- * Enumeration of possible component contexts
- * @internal
- */
-export enum InputContext {
-  /** Component is ready to filter */
-  ReadyToFilter,
-  /** Component's parent is currently filtering */
-  FilteringInProgress,
-  /** Component's parent has finished filtering */
-  FilteringFinished,
-  /** Component's parent has finished filtering, but ResultSelector(stepping through results) is not enabled */
-  FilteringFinishedWithNoStepping,
-}
+export const SearchBox = (props: SearchBoxProps) => {
+  const {
+    enableFiltering,
+    searchText,
+    className,
+    style,
+    placeholder,
+    isLoading,
+    onClose,
+    onEnterPressed,
+    onEscPressed,
+    onChange,
+    onSelectedChanged,
+    resultCount,
+    setFocus,
+    valueChangedDelay,
+  } = props;
 
-interface SearchBoxState {
-  searchText?: string;
-  /** @internal */
-  context: InputContext;
-  /** Currently selected index */
-  selectedIndex: number;
-}
+  const inputElement = useRef<HTMLInputElement>(null);
+  const [timeoutId, setTimeoutId] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [_searchText, setSearchText] = useState(searchText);
 
-export class SearchBox extends React.PureComponent<
-SearchBoxProps,
-SearchBoxState
-> {
-  private _inputElement: HTMLInputElement | null = null;
-  private _timeoutId: number = 0;
-
-  constructor(props: SearchBoxProps) {
-    super(props);
-
-    this.state = {
-      searchText: this.props.searchText,
-      context: InputContext.ReadyToFilter,
-      selectedIndex: 0,
-    };
-  }
-
-  public focus() {
-    // istanbul ignore else
-    if (this._inputElement) {
-      this._inputElement.focus();
+  const trackChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = event.target.value;
+    setSearchText(value);
+    if (valueChangedDelay) {
+      if (timeoutId)
+        window.clearTimeout(timeoutId);
+      const id = window.setTimeout(() => {
+        setSelectedIndex(0);
+        onSelectedChanged(0);
+        onChange(value);
+      }, valueChangedDelay);
+      setTimeoutId(id);
+    } else {
+      onChange(value);
     }
-  }
-
-  private _trackChange = (_event?: any): void => {
-    let searchText = "";
-
-    // istanbul ignore else
-    if (this._inputElement) searchText = this._inputElement.value;
-
-    this.setState(
-      (_prevState) => {
-        return { searchText };
-      },
-      () => {
-        if (this.props.valueChangedDelay) {
-          this._unsetTimeout();
-          this._timeoutId = window.setTimeout(() => {
-            this.setState({
-              context: InputContext.ReadyToFilter,
-              selectedIndex: 0,
-            });
-            this.props.onSelectedChanged(0);
-            this.props.onFilterStart(this.state.searchText!);
-          }, this.props.valueChangedDelay);
-        } else {
-          this.setState({ context: InputContext.ReadyToFilter });
-          this.props.onFilterStart(this.state.searchText!);
-        }
-      }
-    );
   };
 
-  private _handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     switch (e.key) {
       case "Escape":
-        // istanbul ignore else
-        if (this.props.onEscPressed) this.props.onEscPressed();
+        onEscPressed?.();
         break;
       case "Enter":
-        // istanbul ignore else
-        if (this.props.onEnterPressed) this.props.onEnterPressed();
+        onEnterPressed?.();
         break;
     }
   };
 
-  private _handleIconClick = (): void => {
-    // istanbul ignore else
-    if (this._inputElement) {
-      const clear = this.state.searchText !== "";
-      this._inputElement.value = "";
-      // istanbul ignore else
-      if (clear && this.props.onClear) this.props.onClear();
-      this._inputElement.focus();
-    }
-    this._trackChange();
-    if (this.props.onIconClick) this.props.onIconClick();
-  };
-
-  private _unsetTimeout = (): void => {
-    if (this._timeoutId) {
-      window.clearTimeout(this._timeoutId);
-      this._timeoutId = 0;
+  const onPrevClick = () => {
+    if (selectedIndex > 1) {
+      onSelectedChanged(selectedIndex - 1);
+      setSelectedIndex(selectedIndex - 1);
     }
   };
 
-  public async componentDidUpdate(prevProps: SearchBoxProps) {
-    if (prevProps.searchText !== this.props.searchText) {
-      const searchText = this.props.searchText;
-      this.setState({ searchText });
-    }
-
-    this.focus();
-  }
-
-  public componentWillUnmount() {
-    this._unsetTimeout();
-  }
-
-  /** @internal */
-  public static getDerivedStateFromProps(
-    props: SearchBoxProps,
-    state: SearchBoxState
-  ) {
-    if (
-      state.context === InputContext.FilteringInProgress &&
-      !props.filteringInProgress
-    ) {
-      if (state.searchText) return { context: InputContext.FilteringFinished };
-      else return { context: InputContext.FilteringFinishedWithNoStepping };
-    } else if (
-      state.context === InputContext.ReadyToFilter &&
-      props.filteringInProgress
-    ) {
-      return { context: InputContext.FilteringInProgress };
-    }
-    return null;
-  }
-
-  private _onPrevClick = () => {
-    if (this.state.selectedIndex > 1) {
-      this.props.onSelectedChanged(this.state.selectedIndex - 1);
-      this.setState((state) => ({ selectedIndex: state.selectedIndex - 1 }));
+  const onNextClick = () => {
+    if (selectedIndex < resultCount) {
+      onSelectedChanged(selectedIndex + 1);
+      setSelectedIndex(selectedIndex + 1);
     }
   };
 
-  private _onNextClick = () => {
-    if (this.state.selectedIndex < this.props.resultCount) {
-      this.props.onSelectedChanged(this.state.selectedIndex + 1);
-      this.setState((state) => ({ selectedIndex: state.selectedIndex + 1 }));
+  useEffect(() => {
+    if (setFocus) {
+      inputElement.current?.focus();
     }
-  };
+  }, [inputElement, setFocus]);
 
-  public render() {
-    const {
-      className,
-      style,
-      resultCount,
-      placeholder,
-    } = this.props;
-    const { searchText, selectedIndex } = this.state;
-    const searchClassName = classnames("tree-widget-searchbox", className);
-    const showCount = resultCount > 0;
-    const isPrevEnabled = selectedIndex > 1;
-    const isNextEnabled = selectedIndex < resultCount;
+  useEffect(() => {
+    setSearchText(searchText);
+  }, [searchText]);
 
-    return (
-      <div className={searchClassName} style={style}>
-        <input
-          value={searchText}
-          ref={(el) => {
-            this._inputElement = el;
-          }}
-          onChange={this._trackChange}
-          onKeyDown={this._handleKeyDown}
-          onPaste={this._trackChange}
-          onCut={this._trackChange}
-          placeholder={
-            placeholder ? placeholder : TreeWidget.translate("search")
-          }
-        />
-        {this.props.enableFiltering && (
-          <>
-            {showCount && (
-              <span className="searchbox-stepping-count">{`${selectedIndex}/${resultCount}`}</span>
-            )}
-            <div className="searchbox-separator" />
-          </>
-        )}
-        <div className="searchbox-icons-container">
-          {this.props.enableFiltering && (
-            <>
-              <IconButton
-                size="small"
-                styleType="borderless"
-                disabled={!isPrevEnabled}
-                onClick={this._onPrevClick}
-                title={TreeWidget.translate("previous")}
-              >
-                <SvgChevronUp />
-              </IconButton>
-              <IconButton
-                size="small"
-                styleType="borderless"
-                disabled={!isNextEnabled}
-                onClick={this._onNextClick}
-                title={TreeWidget.translate("next")}
-              >
-                <SvgChevronDown />
-              </IconButton>
-            </>
+  const searchClassName = classnames("tree-widget-searchbox", className);
+  const showCount = resultCount > 0;
+  const isPrevEnabled = selectedIndex > 1;
+  const isNextEnabled = selectedIndex < resultCount;
+
+  return (
+    <div className={searchClassName} style={style}>
+      <input
+        value={_searchText}
+        ref={inputElement}
+        onChange={trackChange}
+        onKeyDown={handleKeyDown}
+        placeholder={
+          placeholder ? placeholder : TreeWidget.translate("search")
+        }
+      />
+      {isLoading && (
+        <ProgressRadial className="searchbox-spinner" indeterminate />
+      )}
+      {enableFiltering && (
+        <>
+          {showCount && (
+            <span className="searchbox-stepping-count">{`${selectedIndex}/${resultCount}`}</span>
           )}
-          <IconButton
-            size="small"
-            styleType="borderless"
-            className="searchbox-close-button"
-            onClick={this._handleIconClick}
-            onKeyDown={this._handleIconClick}
-            tabIndex={0}
-            title={TreeWidget.translate("close")}
-          >
-            <SvgClose />
-          </IconButton>
-        </div>
-      </div>
-    );
-  }
-}
+          <div className="searchbox-separator" />
+          <div className="searchbox-icons-container">
+            <IconButton
+              size="small"
+              styleType="borderless"
+              disabled={!isPrevEnabled}
+              onClick={onPrevClick}
+              title={TreeWidget.translate("previous")}
+            >
+              <SvgChevronUp />
+            </IconButton>
+            <IconButton
+              size="small"
+              styleType="borderless"
+              disabled={!isNextEnabled}
+              onClick={onNextClick}
+              title={TreeWidget.translate("next")}
+            >
+              <SvgChevronDown />
+            </IconButton>
+          </div>
+        </>
+      )}
+      <IconButton
+        size="small"
+        styleType="borderless"
+        className="searchbox-close-button"
+        onClick={onClose}
+        onKeyDown={onClose}
+        tabIndex={0}
+        title={TreeWidget.translate("close")}
+      >
+        <SvgClose />
+      </IconButton>
+    </div>
+  );
+};
+
