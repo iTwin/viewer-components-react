@@ -2,6 +2,18 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.5.3",
+      "tag": "@itwin/grouping-mapping-widget_v0.5.3",
+      "date": "Fri, 22 Jul 2022 18:27:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "group ordering by name"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.2",
       "tag": "@itwin/grouping-mapping-widget_v0.5.2",
       "date": "Mon, 18 Jul 2022 13:24:31 GMT",

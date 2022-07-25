@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 18 Jul 2022 13:24:31 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Jul 2022 18:27:54 GMT and should not be manually modified.
+
+## 0.5.3
+Fri, 22 Jul 2022 18:27:54 GMT
+
+### Patches
+
+- group ordering by name
 
 ## 0.5.2
 Mon, 18 Jul 2022 13:24:31 GMT
