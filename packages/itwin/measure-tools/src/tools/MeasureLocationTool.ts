@@ -44,6 +44,7 @@ MeasureLocationToolModel
   public static override iconSpec = "icon-measure-location";
   private static readonly useDynamicMeasurementPropertyName = "useDynamicMeasurement";
 
+  private static _isUserNotifiedOfGeolocationFailure = false;
   private _useDynamicMeasurement: boolean = false;
 
   public static override get flyover() {
@@ -189,7 +190,15 @@ MeasureLocationToolModel
   /** Update the props to add GeoLocation information when available */
   private async queryGeoLocation(props: AddLocationProps): Promise<void> {
     let message = "";
-    let priority: OutputMessagePriority;
+    let priority: OutputMessagePriority | undefined;
+
+    if (!this.iModel.isGeoLocated) {
+      if (MeasureLocationTool._isUserNotifiedOfGeolocationFailure)
+        return;
+
+      // Only notify user once
+      MeasureLocationTool._isUserNotifiedOfGeolocationFailure = true;
+    }
 
     try {
       props.geoLocation = await this.iModel.spatialToCartographic(
@@ -221,7 +230,8 @@ MeasureLocationToolModel
       }
     }
 
-    if (0 < message.length) this.showMessage(priority!, message);
+    if (0 < message.length && undefined !== priority)
+      this.showMessage(priority, message);
   }
 
   private getSlopeFromNormal(normal: Vector3d): number | undefined {
@@ -298,12 +308,15 @@ MeasureLocationToolModel
     IModelApp.notifications.setToolAssistance(instructions);
   }
 
-  public override async onPostInstall(): Promise<void> {
-    await super.onPostInstall();
+  public override async onInstall(): Promise<boolean> {
+    if (!await super.onInstall())
+      return false;
 
     const initialValue = IModelApp.toolAdmin.toolSettingsState.getInitialToolSettingValue(this.toolId, MeasureLocationTool.useDynamicMeasurementPropertyName);
     if (initialValue)
       this._useDynamicMeasurement = typeof initialValue.value === "boolean" ? initialValue.value : false;
+
+    return true;
   }
 
   public override async onCleanup(): Promise<void> {
