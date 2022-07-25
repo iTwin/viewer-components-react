@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Fri, 08 Jul 2022 13:44:34 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Jul 2022 18:27:54 GMT and should not be manually modified.
+
+## 0.8.0
+Fri, 22 Jul 2022 18:27:54 GMT
+
+### Minor changes
+
+- Persist show/hide null value toggle per user and not per iTwin/iModel
 
 ## 0.7.1
 Fri, 08 Jul 2022 13:44:34 GMT
