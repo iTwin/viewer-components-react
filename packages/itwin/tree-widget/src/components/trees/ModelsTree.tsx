@@ -25,8 +25,6 @@ interface TreeViewModelInfo {
 export const ModelsTreeComponent = (props: ModelTreeProps) => {
   const [is2dToggleActive, setIs2dToggleActive] = useState<boolean>(false);
   const [is3dToggleActive, setIs3dToggleActive] = useState<boolean>(false);
-  const [icon2dToggle, setIcon2dToggle] = useState(<SvgVisibilityShow />);
-  const [icon3dToggle, setIcon3dToggle] = useState(<SvgVisibilityShow />);
 
   const [available2dModels, setAvailable2dModels] = useState<string[]>([]);
   const [available3dModels, setAvailable3dModels] = useState<string[]>([]);
@@ -98,11 +96,9 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     if (is2dToggleActive) {
       viewport?.changeModelDisplay(available2dModels, false);
       setIs2dToggleActive(false);
-      setIcon2dToggle(<SvgVisibilityHide />);
     } else {
       await viewport?.addViewedModels(available2dModels);
       setIs2dToggleActive(true);
-      setIcon2dToggle(<SvgVisibilityShow />);
     }
     viewport?.invalidateScene();
   }, [is2dToggleActive, viewport, available2dModels]);
@@ -111,14 +107,15 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     if (is3dToggleActive) {
       viewport?.changeModelDisplay(available3dModels, false);
       setIs3dToggleActive(false);
-      setIcon3dToggle(<SvgVisibilityHide />);
     } else {
       await viewport?.addViewedModels(available3dModels);
       setIs3dToggleActive(true);
-      setIcon3dToggle(<SvgVisibilityShow />);
     }
     viewport?.invalidateScene();
   }, [is3dToggleActive, viewport, available3dModels]);
+
+  const icon2d = is2dToggleActive ? <SvgVisibilityHide /> : <SvgVisibilityShow />;
+  const icon3d = is3dToggleActive ? <SvgVisibilityHide /> : <SvgVisibilityShow />;
 
   return (
     <>
@@ -130,9 +127,9 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
             hideAll={hideAll}
             invert={invert}
             toggle2D={props.enable2d3dTools ? viewToggle2D : undefined}
-            toggle2DIcon={icon2dToggle}
+            toggle2DIcon={icon2d}
             toggle3D={props.enable2d3dTools ? viewToggle3D : undefined}
-            toggle3DIcon={icon3dToggle}
+            toggle3DIcon={icon3d}
           />
           <div className="tree-widget-models-tree-container">
             <AutoSizer>
