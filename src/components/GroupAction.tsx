@@ -22,8 +22,6 @@ import { ReportingClient } from "@itwin/insights-client";
 //import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 
-// Cia reikia labai daug taisyt
-// visu pirma: kad grupes itemas gali turet daug materialu poru Ir tada prasideda reikalai su ui...
 //
 // ADDD VALIDATOR!!!!
 
@@ -113,10 +111,12 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
   //const [selectedGroup, setGroup] = useState<Group>();
   //const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [availableGroups, setGroups] = useState<string[]>([]);
+  const [availableGroups, setGroups] = useState<string[]>();
   const [availableColumns, setColumns] = useState<string[]>([]);
   //const [selector, setSelector] = useState<Selector>();
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
+
+  //setGroups(fetchGroups());
 
 
   //setSelector(selectorClient.getSelector(props.templateId));
@@ -158,7 +158,38 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
     }
 
 
-    selector.groups.push(selectedGroup);
+    /*
+    var updated = false;
+    for (var g of selector.groups) {
+      if (g.groupName === selectedGroup.groupName) {
+        g = selectedGroup;
+        updated = true;
+        break;
+      }
+    }
+
+    if (!updated) {
+      selector.groups.push(selectedGroup);
+    }
+    */
+
+    // TODO
+    // add group ID and compare it instead of group Name
+    var updated = false;
+    for (let i = 0; i < selector.groups.length; i++) {
+      if (selector.groups[i].groupName === selectedGroup.groupName) {
+        selector.groups[i] = selectedGroup;
+        updated = true;
+        break;
+      }
+    }
+    if (!updated) {
+      selector.groups.push(selectedGroup);
+    }
+
+    //selector.updateGroup(selectedGroup);
+
+    //selector.groups.push(selectedGroup);
     //selector.groups.push(groupLabel);
     selectorClient.updateSelector(selector);
     await goBack();
@@ -207,7 +238,7 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
 
         if (elems.length > 0) {
           const columns = Array.from(elems[0].children).map(x => x.attributes[0].value);
-          columns.push(selector.groups[0].groupName);
+          //columns.push(selector.groups[0].groupName);
           setColumns(columns);
         }
 
@@ -221,6 +252,14 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
   }
 
   const groupOptions = useMemo(() => {
+
+    //const groups = await fetchGroups();
+    return availableGroups?.map((g) => ({
+      label: g,
+      value: g,
+    })) ?? [];
+
+    /*
     const newGroupOptions: SelectOption<string>[] = [];
 
 
@@ -232,20 +271,36 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
       });
     }
     return newGroupOptions;
+*/
   }, [availableGroups]);
 
-  const ColumnOptions = useMemo(() => {
-    const newGroupOptions: SelectOption<string>[] = [];
 
+  const ColumnOptions = useMemo(() => {
+
+    return availableColumns?.map((col) => ({
+      label: col,
+      value: col,
+    })) ?? [];
+
+
+    /*
+
+    return iModels.map((iModel) => ({
+      label: iModel.displayName,
+      value: iModel.id,
+    }));*/
+    /*
+    const newColumnOptions: SelectOption<string>[] = [];
 
     for (const name of availableColumns) {
-      newGroupOptions.push({
+      newColumnOptions.push({
         label: name,
         value: name,
         key: name,
       });
     }
-    return newGroupOptions;
+    return newColumnOptions;
+    */
   }, [availableColumns]);
 
   const load = (() => {
@@ -283,7 +338,13 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
               );
               //setGroups(groupItems)
 
-              const filteredGroups: string[] = [];
+              //const fg: string[] = {"asd", "asd"};
+
+              //var fg:string[] = ["op", "a"]
+              const filteredGroups: string[] = group ? [group.groupName] : [];
+              //const filteredGroups: string[] = [group?.groupName??null];
+
+              //const filteredGroups: string[] = [];
 
               for (const g of groupItems) {
                 if (selector?.groups.filter(x => x.groupName == g).length == 0) {
@@ -291,31 +352,99 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
                 }
               }
 
-              if (groupName)
-                filteredGroups.push(groupName);
 
+              //if (group)
+              //filteredGroups.push(group.groupName);
+              //if (!availableGroups)
               setGroups(filteredGroups);
             }
+
           })
           .catch((err) => {
             toaster.negative("You are not authorized to get metadata for this report. Please contact project administrator.");
-            /* eslint-disable no-console */
             console.error(err);
           });
       })
       .catch((err) => {
         toaster.negative("You are not authorized to use this system.");
-        /* eslint-disable no-console */
         console.error(err);
       });
 
+
     setIsLoading(false);
+    //return [];
   })
 
+  /*
   useEffect(() => {
-    load();
-  }, [reportingClientApi]);
 
+    if (group && !groupName) {
+      setGroupName(group.groupName);
+      setElementColumn(group.itemName);
+      setMaterialColumn(group.pairs[0].material);
+      setQuantityColumn(group.pairs[0].quantity);
+    }
+
+  }, [group]);
+  */
+
+  useEffect(() => {
+
+
+    if (!IModelApp.authorizationClient)
+      throw new Error(
+        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
+      );
+    if (!selector.reportId)
+      throw new Error(
+        "Invalid report."
+      );
+
+    IModelApp.authorizationClient
+      .getAccessToken()
+      .then((token: string) => {
+        reportingClientApi
+          .getODataReport(token, selector.reportId)
+          .then(async (data) => {
+            if (data) {
+              const reportData = data ?? "";
+              const groupItems = reportData.value.map(data =>
+                data.name ?? ""
+              );
+              const filteredGroups: string[] = group ? [group.groupName] : [];
+              for (const g of groupItems) {
+                if (selector?.groups.filter(x => x.groupName == g).length == 0) {
+                  filteredGroups.push(g);
+                }
+              }
+
+              if (!availableGroups)
+                setGroups(filteredGroups);
+            }
+
+          })
+          .catch((err) => {
+            toaster.negative("You are not authorized to get metadata for this report. Please contact project administrator.");
+            console.error(err);
+          });
+      })
+      .catch((err) => {
+        toaster.negative("You are not authorized to use this system.");
+        console.error(err);
+      });
+  }, []);
+
+  /*
+  useEffect(() => {
+
+
+
+    if (!availableGroups)
+      load();
+    //const groups = fetchGroups();
+    //setGroups(groups);
+  }, []);
+*/
   return (
     <>
       <WidgetHeader
@@ -333,7 +462,7 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
           </Label>
           <ComboBox
             options={groupOptions}
-            value={groupName}
+            value={group?.groupName}
             onChange={async (value) => {
               //setGroupName(value);
               updateColumns(value);
@@ -355,7 +484,7 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
           </Label>
           <ComboBox
             options={ColumnOptions}
-            value={elementColumn}
+            value={group?.itemName}
             onChange={async (value) => {
               setElementColumn(value);
               //groupLabel?.element.material = value;
@@ -374,7 +503,7 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
           </Label>
           <ComboBox
             options={ColumnOptions}
-            value={material}
+            value={group?.pairs[0].material}
             onChange={async (value) => {
               setMaterialColumn(value);
               //groupLabel?.element.material = value;
@@ -393,7 +522,7 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
           </Label>
           <ComboBox
             options={ColumnOptions}
-            value={quantity}
+            value={group?.pairs[0].quantity}
             onChange={async (value) => {
               setQuantityColumn(value);
               //values.quantity = value;
