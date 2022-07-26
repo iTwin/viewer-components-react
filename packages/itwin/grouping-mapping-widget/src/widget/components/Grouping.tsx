@@ -3,12 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import {
   Button,
@@ -27,6 +22,7 @@ import {
   SvgEdit,
   SvgList,
   SvgMore,
+  SvgRectangle,
   SvgVisibilityHide,
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
@@ -136,36 +132,39 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
   };
 
-  const getHiliteIdsFromGroups = useCallback(async (groups: Group[]) => {
-    let allIds: string[] = [];
-    for (const group of groups) {
-      const query = group.query ?? "";
-      let currentIds: string[] = [];
-      if (hilitedElements.current.has(query)) {
-        currentIds = hilitedElements.current.get(query) ?? [];
-      } else {
-        try {
-          const ids: string[] = await fetchIdsFromQuery(
-            query,
-            iModelConnection,
-          );
-          if (ids.length === 0) {
-            toaster.warning(
-              `${group.groupName}'s query is valid but produced no results.`,
+  const getHiliteIdsFromGroups = useCallback(
+    async (groups: Group[]) => {
+      let allIds: string[] = [];
+      for (const group of groups) {
+        const query = group.query ?? "";
+        let currentIds: string[] = [];
+        if (hilitedElements.current.has(query)) {
+          currentIds = hilitedElements.current.get(query) ?? [];
+        } else {
+          try {
+            const ids: string[] = await fetchIdsFromQuery(
+              query,
+              iModelConnection,
+            );
+            if (ids.length === 0) {
+              toaster.warning(
+                `${group.groupName}'s query is valid but produced no results.`,
+              );
+            }
+            currentIds = await getHiliteIds(ids, iModelConnection);
+            hilitedElements.current.set(query, currentIds);
+          } catch {
+            toaster.negative(
+              `Could not hide/show ${group.groupName}. Query could not be resolved.`,
             );
           }
-          currentIds = await getHiliteIds(ids, iModelConnection);
-          hilitedElements.current.set(query, currentIds);
-        } catch {
-          toaster.negative(
-            `Could not hide/show ${group.groupName}. Query could not be resolved.`,
-          );
         }
+        allIds = allIds.concat(currentIds);
       }
-      allIds = allIds.concat(currentIds);
-    }
-    return allIds;
-  }, [iModelConnection, hilitedElements]);
+      return allIds;
+    },
+    [iModelConnection, hilitedElements],
+  );
 
   const visualizeGroupColors = useCallback(
     async (viewGroups: Group[]) => {
@@ -466,6 +465,19 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                         subText={g.description}
                         actionGroup={
                           <div className="actions">
+                            {showGroupColor && (
+                              <IconButton
+                                styleType="borderless"
+                                className="group-view-icon"
+                              >
+                                <SvgRectangle
+                                  stroke-width="100"
+                                  stroke={getGroupColor(
+                                    groups.findIndex((group) => g.id === group.id),
+                                  )}
+                                />
+                              </IconButton>
+                            )}
                             {g.id && hiddenGroupsIds.includes(g.id) ? (
                               <IconButton
                                 disabled={isLoadingQuery}
