@@ -87,10 +87,20 @@ const toggleExtraction = async (
 };
 
 export interface MappingsProps {
+  /**
+   * Group extensions
+   */
   extensions?: GroupExtension[];
+  /**
+   * Whether to keep default extensions
+   */
+  extendsDefault?: boolean;
 }
 
-export const Mappings = ({ extensions }: MappingsProps) => {
+export const Mappings = ({
+  extensions,
+  extendsDefault = true,
+}: MappingsProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
@@ -257,6 +267,7 @@ export const Mappings = ({ extensions }: MappingsProps) => {
         <Groupings
           mapping={selectedMapping as Mapping}
           extensions={extensions}
+          extendsDefault={extendsDefault}
           goBack={refresh}
         />
       );

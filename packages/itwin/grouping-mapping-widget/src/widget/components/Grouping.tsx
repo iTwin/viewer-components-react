@@ -72,6 +72,7 @@ interface GroupsTreeProps {
   mapping: Mapping;
   goBack: () => Promise<void>;
   extensions?: GroupExtension[];
+  extendsDefault?: boolean;
 }
 
 const goldenAngle = 180 * (3 - Math.sqrt(5));
@@ -102,7 +103,12 @@ const fetchGroups = async (
   return undefined;
 };
 
-export const Groupings = ({ mapping, goBack, extensions }: GroupsTreeProps) => {
+export const Groupings = ({
+  mapping,
+  goBack,
+  extensions,
+  extendsDefault = true,
+}: GroupsTreeProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -435,55 +441,57 @@ export const Groupings = ({ mapping, goBack, extensions }: GroupsTreeProps) => {
                       </MenuItem>
                     ))
                     : []
-                  ).concat([
-                    <MenuItem
-                      key={0}
-                      onClick={() => addGroup("Selection")}
-                      icon={<SvgAdd />}
-                      style={{
-                        paddingLeft: "16px",
-                      }}
-                    >
-                      Selection
-                    </MenuItem>,
-                    <MenuItem
-                      key={1}
-                      onClick={() => addGroup("Search")}
-                      icon={<SvgSearch />}
-                      style={{
-                        paddingLeft: "16px",
-                      }}
-                    >
-                      Search
-                    </MenuItem>,
-                    <MenuItem
-                      key={2}
-                      onClick={() => addGroup("Manual")}
-                      icon={<SvgDraw />}
-                      style={{
-                        paddingLeft: "16px",
-                      }}
-                    >
-                      Manual
-                    </MenuItem>,
-                  ])
+                  ).concat(
+                    extendsDefault
+                      ? [
+                        <MenuItem
+                          key={0}
+                          onClick={() => addGroup("Selection")}
+                          icon={<SvgAdd />}
+                          style={{
+                            paddingLeft: "16px",
+                          }}
+                        >
+                          Selection
+                        </MenuItem>,
+                        <MenuItem
+                          key={1}
+                          onClick={() => addGroup("Search")}
+                          icon={<SvgSearch />}
+                          style={{
+                            paddingLeft: "16px",
+                          }}
+                        >
+                          Search
+                        </MenuItem>,
+                        <MenuItem
+                          key={2}
+                          onClick={() => addGroup("Manual")}
+                          icon={<SvgDraw />}
+                          style={{
+                            paddingLeft: "16px",
+                          }}
+                        >
+                          Manual
+                        </MenuItem>,
+                      ]
+                      : [],
+                  )
                 }
               >
-                <IconButton
-                  disabled={isLoadingQuery}
+                <Button
+                  startIcon={
+                    isLoadingQuery ? (
+                      <ProgressRadial size="small" indeterminate />
+                    ) : (
+                      <SvgAdd />
+                    )
+                  }
                   styleType="high-visibility"
+                  disabled={isLoadingQuery}
                 >
-                  {isLoadingQuery ? (
-                    <ProgressRadial size="small" indeterminate />
-                  ) : (
-                    <SvgAdd
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                      }}
-                    />
-                  )}
-                </IconButton>
+                  {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
+                </Button>
               </DropdownMenu>
               <ButtonGroup className="toolbar-buttons">
                 <ToggleSwitch
@@ -576,38 +584,48 @@ export const Groupings = ({ mapping, goBack, extensions }: GroupsTreeProps) => {
                                   </MenuItem>
                                 ))
                                 : []
-                              ).concat([
-                                <MenuItem
-                                  key={0}
-                                  onClick={async () => onModify(g, "Selection")}
-                                  icon={<SvgAdd />}
-                                  style={{
-                                    paddingLeft: "16px",
-                                  }}
-                                >
-                                  Selection
-                                </MenuItem>,
-                                <MenuItem
-                                  key={1}
-                                  onClick={async () => onModify(g, "Search")}
-                                  icon={<SvgSearch />}
-                                  style={{
-                                    paddingLeft: "16px",
-                                  }}
-                                >
-                                  Search
-                                </MenuItem>,
-                                <MenuItem
-                                  key={2}
-                                  onClick={async () => onModify(g, "Manual")}
-                                  icon={<SvgDraw />}
-                                  style={{
-                                    paddingLeft: "16px",
-                                  }}
-                                >
-                                  Manual
-                                </MenuItem>,
-                              ])}
+                              ).concat(
+                                extendsDefault
+                                  ? [
+                                    <MenuItem
+                                      key={0}
+                                      onClick={async () =>
+                                        onModify(g, "Selection")
+                                      }
+                                      icon={<SvgAdd />}
+                                      style={{
+                                        paddingLeft: "16px",
+                                      }}
+                                    >
+                                      Selection
+                                    </MenuItem>,
+                                    <MenuItem
+                                      key={1}
+                                      onClick={async () =>
+                                        onModify(g, "Search")
+                                      }
+                                      icon={<SvgSearch />}
+                                      style={{
+                                        paddingLeft: "16px",
+                                      }}
+                                    >
+                                      Search
+                                    </MenuItem>,
+                                    <MenuItem
+                                      key={2}
+                                      onClick={async () =>
+                                        onModify(g, "Manual")
+                                      }
+                                      icon={<SvgDraw />}
+                                      style={{
+                                        paddingLeft: "16px",
+                                      }}
+                                    >
+                                      Manual
+                                    </MenuItem>,
+                                  ]
+                                  : [],
+                              )}
                             >
                               <SvgEdit
                                 style={{

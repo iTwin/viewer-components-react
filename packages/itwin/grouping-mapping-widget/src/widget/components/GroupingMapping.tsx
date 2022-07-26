@@ -37,6 +37,10 @@ export interface GroupingMappingProps {
    * Extensions to add and update groups
    */
   extensions?: GroupExtension[];
+  /**
+   * Config if default extensions are kept
+   */
+  extendsDefault?: boolean;
 }
 
 const authorizationClientGetAccessToken = async () =>
@@ -47,6 +51,7 @@ const GroupingMapping = ({
   prefix,
   client,
   extensions,
+  extendsDefault = true,
 }: GroupingMappingProps) => {
   const clientProp: IMappingClient | ClientPrefix = client ?? prefix;
   const [mappingClient, setMappingClient] = useState<IMappingClient>(
@@ -72,7 +77,7 @@ const GroupingMapping = ({
     <GroupingMappingApiConfigContext.Provider value={apiConfig}>
       <MappingClientContext.Provider value={mappingClient}>
         <div className="group-mapping-container">
-          <Mappings extensions={extensions} />
+          <Mappings extensions={extensions} extendsDefault={extendsDefault} />
         </div>
       </MappingClientContext.Provider>
     </GroupingMappingApiConfigContext.Provider>
