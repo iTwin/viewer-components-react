@@ -19,6 +19,12 @@ export const createDefaultMappingClient = (prefix?: ClientPrefix): IMappingClien
   return new ReportingClient(url);
 };
 
+export const createMappingClient = (clientProp: IMappingClient | ClientPrefix) => {
+  if (undefined === clientProp || typeof clientProp === "string") {
+    return createDefaultMappingClient(clientProp as ClientPrefix);
+  }
+  return clientProp;
+};
 export const MappingClientContext = createContext<IMappingClient>(createDefaultMappingClient());
 
 export const useMappingClient = () => {
