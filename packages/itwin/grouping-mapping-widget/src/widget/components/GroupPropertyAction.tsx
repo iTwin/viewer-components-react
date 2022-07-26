@@ -27,12 +27,12 @@ import {
   SvgChevronUp,
   SvgRemove,
 } from "@itwin/itwinui-icons-react";
-import type {
+import {
+  Select,
   SelectOption,
 } from "@itwin/itwinui-react";
 import {
   Alert,
-  ComboBox,
   Fieldset,
   IconButton,
   LabeledInput,
@@ -603,14 +603,14 @@ const GroupPropertyAction = ({
                 </Text>
 
                 <div className='selection-and-reorder'>
-                  <ComboBox<string>
+                  <Select<string>
                     options={propertyOptions[index]}
                     value={getValue(ecProperty, index)}
-                    onChange={(value) => onChange(value, index)}
-                    inputProps={{
-                      placeholder: "<No Property Mapped>",
-                    }}
+                    onChange={(value) => { value && onChange(value, index) }}
+                    placeholder="<No Property Mapped>"
                     style={{ width: "100%" }}
+                    onShow={() => { }}
+                    onHide={() => { }}
                   />
                   <IconButton
                     onClick={() => {
