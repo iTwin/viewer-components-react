@@ -250,7 +250,7 @@ export const Extraction = ({
     }
 
     return newIModelOptions;
-  }, [iModels]);
+  }, [iModels, extractionState]);
 
   return (
     <div className="extraction-container">
