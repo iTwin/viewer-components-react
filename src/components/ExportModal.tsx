@@ -33,7 +33,7 @@ import logo from "../public/logo/eC3Logo.png";
 interface ExportProps {
   isOpen: boolean;
   close: () => void;
-  reportId: string | undefined;
+  templateId: string | undefined;
 }
 
 interface E_c_3TokenCache {
@@ -115,12 +115,12 @@ const ExportModal = (props: ExportProps) => {
     async (token: string) => {
       const accessToken =
         (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
-      if (props.reportId && token) {
+      if (props.templateId && token) {
         try {
           const jobCreated = await eC3ClientApi.createEc3Job(
             accessToken,
             {
-              reportId: props.reportId,
+              reportId: props.templateId,
               token,
             }
           );

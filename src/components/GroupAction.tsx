@@ -92,6 +92,7 @@ const GroupAction = ({ selector, goBack, group, resetView }: GroupActionProps) =
 
   const [groupName, setGroupName] = useState<string>();
   const [elementColumn, setElementColumn] = useState<string>();
+  const [elementQuantity, setElementQuantity] = useState<string>();
   const [selectedPair, setSelectedPair] = useState<Pair>();
   //const [material, setMaterialColumn] = useState<string>();
   //const [quantity, setQuantityColumn] = useState<string>();
@@ -128,7 +129,9 @@ const GroupAction = ({ selector, goBack, group, resetView }: GroupActionProps) =
   //const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [availableGroups, setGroups] = useState<string[]>();
-  const [availableColumns, setColumns] = useState<string[]>([]);
+  //const [availableColumns, setColumns] = useState<string[]>([]);
+  const [availableStringColumns, setStringColumns] = useState<string[]>([]);
+  const [availableNumericalColumns, setNumericalColumns] = useState<string[]>([]);
   //const [selector, setSelector] = useState<Selector>();
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
 
@@ -205,6 +208,7 @@ const GroupAction = ({ selector, goBack, group, resetView }: GroupActionProps) =
     const selectedGroup: Group = {
       groupName: groupName ?? "",
       itemName: elementColumn ?? "",
+      itemQuantity: elementQuantity ?? "",
       pairs: (pairs ?? []),
     }
 
@@ -288,9 +292,16 @@ const GroupAction = ({ selector, goBack, group, resetView }: GroupActionProps) =
 
 
         if (elems.length > 0) {
-          const columns = Array.from(elems[0].children).map(x => x.attributes[0].value);
+
+          const columns = Array.from(elems[0].children).map(x => x.attributes);
+          const stringColumns = columns.filter(x => x[1].value == "Edm.String").map(x => x[0].value);
+          const numericalColumns = columns.filter(x => x[1].value == "Edm.Double").map(x => x[0].value);
+
+          setStringColumns(stringColumns);
+          setNumericalColumns(numericalColumns);
+
           //columns.push(selector.groups[0].groupName);
-          setColumns(columns);
+          //setColumns(columns);
         }
 
       })
@@ -326,33 +337,23 @@ const GroupAction = ({ selector, goBack, group, resetView }: GroupActionProps) =
   }, [availableGroups]);
 
 
-  const ColumnOptions = useMemo(() => {
+  const StringColumnOptions = useMemo(() => {
 
-    return availableColumns?.map((col) => ({
+    return availableStringColumns?.map((col) => ({
       label: col,
       value: col,
     })) ?? [];
 
+  }, [availableStringColumns]);
 
-    /*
+  const NumericalColumnOptions = useMemo(() => {
 
-    return iModels.map((iModel) => ({
-      label: iModel.displayName,
-      value: iModel.id,
-    }));*/
-    /*
-    const newColumnOptions: SelectOption<string>[] = [];
+    return availableNumericalColumns?.map((col) => ({
+      label: col,
+      value: col,
+    })) ?? [];
 
-    for (const name of availableColumns) {
-      newColumnOptions.push({
-        label: name,
-        value: name,
-        key: name,
-      });
-    }
-    return newColumnOptions;
-    */
-  }, [availableColumns]);
+  }, [availableNumericalColumns]);
 
   const load = (async () => {
 
@@ -515,6 +516,7 @@ console.error(err);
             Asterisk * indicates mandatory fields.
           </Small>
 
+
           <Label htmlFor="group-combo-input">
             Label
           </Label>
@@ -536,93 +538,110 @@ console.error(err);
             }}
           />
 
+          <div className="body">
+            <div className="combo-field">
+              <Label htmlFor="item-combo-input">
+                Element
+              </Label>
+              <ComboBox
+                options={StringColumnOptions}
+                value={group?.itemName ?? elementColumn ?? "UserLabel"}
+                onChange={async (value) => {
+                  setElementColumn(value);
+                  //groupLabel?.element.material = value;
+                  //handleInputChange(event, value, setGroup);
+                  //setMaterialColumn(value);
+                  //await runExtraction(value);
+                }}
+                inputProps={{
+                  id: "item-combo-input",
+                  placeholder: "Element",
+                }}
+              />
+            </div>
 
-          <Label htmlFor="item-combo-input">
-            Element
-          </Label>
-          <ComboBox
-            options={ColumnOptions}
-            value={group?.itemName ?? "UserLabel" ?? elementColumn}
-            onChange={async (value) => {
-              setElementColumn(value);
-              //groupLabel?.element.material = value;
-              //handleInputChange(event, value, setGroup);
-              //setMaterialColumn(value);
-              //await runExtraction(value);
-            }}
-            inputProps={{
-              id: "item-combo-input",
-              placeholder: "Element",
-            }}
-          />
-
+            <div className="combo-field">
+              <Label htmlFor="item-combo-input">
+                Element quantity
+              </Label>
+              <ComboBox
+                options={NumericalColumnOptions}
+                value={group?.itemQuantity ?? elementQuantity}
+                onChange={async (value) => {
+                  setElementQuantity(value);
+                  //groupLabel?.element.material = value;
+                  //handleInputChange(event, value, setGroup);
+                  //setMaterialColumn(value);
+                  //await runExtraction(value);
+                }}
+                inputProps={{
+                  id: "item-combo-input",
+                  placeholder: "Element quantity",
+                }}
+              />
+            </div>
+          </div>
+          <div className="pair-list">
+            {pairs.map((pair) => (
+              <DropdownTile
+                stringColumnOptions={StringColumnOptions}
+                numericalColumnOptions={NumericalColumnOptions}
+                materialValue={pair.material ?? ""}
+                quantityValue={pair.quantity ?? ""}
+                onMaterialChange={(value) => {
+                  //setMaterialColumn(value);
+                  pair.material = value;
+                }}
+                onQuantityChange={(value) => {
+                  //setMaterialColumn(value);
+                  pair.quantity = value;
+                }}
+                actionGroup={
+                  <div className="actions">
+                    <DropdownMenu
+                      disabled={isLoading}
+                      menuItems={(close: () => void) => [
+                        <MenuItem
+                          key={0}
+                          onClick={() => {
+                            setSelectedPair(pair);
+                            setShowDeleteModal(true);
+                            close();
+                          }}
+                          icon={<SvgDelete />}
+                        >
+                          Remove
+                        </MenuItem>,
+                      ]}
+                    >
+                      <IconButton
+                        styleType="borderless"
+                      >
+                        <SvgMore
+                          style={{
+                            width: "16px",
+                            height: "16px",
+                          }}
+                        />
+                      </IconButton>
+                    </DropdownMenu>
+                  </div>
+                }
+              />
+            ))}
+            <Button
+              className="button"
+              startIcon={<SvgAdd />}
+              onClick={() => { addPair() }}
+              styleType="high-visibility"
+            >
+              {"Add pair"}
+            </Button>
+          </div>
 
 
         </Fieldset>
       </div>
-
-      <Surface className="pairs-container">
-        <div className="toolbar">
-          <Button
-            startIcon={<SvgAdd />}
-            onClick={() => { addPair() }}
-            styleType="high-visibility"
-          >
-            {"Add pair"}
-          </Button>
-        </div>
-        <div className="pair-list">
-          {pairs.map((pair) => (
-            <DropdownTile
-              columnOptions={ColumnOptions}
-              materialValue={pair.material ?? ""}
-              quantityValue={pair.quantity ?? ""}
-              onMaterialChange={(value) => {
-                //setMaterialColumn(value);
-                pair.material = value;
-              }}
-              onQuantityChange={(value) => {
-                //setMaterialColumn(value);
-                pair.quantity = value;
-              }}
-              actionGroup={
-                <div className="actions">
-                  <DropdownMenu
-                    disabled={isLoading}
-                    menuItems={(close: () => void) => [
-                      <MenuItem
-                        key={0}
-                        onClick={() => {
-                          setSelectedPair(pair);
-                          setShowDeleteModal(true);
-                          close();
-                        }}
-                        icon={<SvgDelete />}
-                      >
-                        Remove
-                      </MenuItem>,
-                    ]}
-                  >
-                    <IconButton
-                      styleType="borderless"
-                    >
-                      <SvgMore
-                        style={{
-                          width: "16px",
-                          height: "16px",
-                        }}
-                      />
-                    </IconButton>
-                  </DropdownMenu>
-                </div>
-              }
-            />
-
-
-
-          ))}
-        </div>
-      </Surface>
 
       <DeleteModal
         entityName={selectedPair?.material + " - " + selectedPair?.quantity ?? ""}

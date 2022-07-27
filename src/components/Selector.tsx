@@ -13,6 +13,7 @@ export interface Selector {
 export interface Group {
   groupName: string;
   itemName: string;
+  itemQuantity: string;
   pairs: Pair[];
 }
 

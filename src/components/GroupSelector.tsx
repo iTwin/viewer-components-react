@@ -126,6 +126,8 @@ const GroupSelector = (props: SelectorProps) => {
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [selectedGroup, setSelectedGroup] = useState<Group>();
+  const [modalIsOpen, openModal] = useState(false);
+
 
   const [groupsView, setGroupsView] = useState<GroupsView>(
     GroupsView.GROUPS
@@ -345,12 +347,16 @@ toaster.negative("You are not authorized to use this system.");
           <Button
             styleType="high-visibility"
             onClick={() => {
-              //setTemplateView(TemplateView.CREATE);
-              //refresh();
+              openModal(true)
             }}
           >
             {"Export"}
           </Button>
+          <ExportModal
+            isOpen={modalIsOpen}
+            close={() => openModal(false)}
+            templateId={props.selector.id}
+          />
           <Surface className="groups-container">
             <div className="toolbar">
               <Button

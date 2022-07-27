@@ -9,7 +9,8 @@ import "./DropdownTile.scss";
 
 
 interface DropdownTileProps {
-  columnOptions: SelectOption<string>[];
+  stringColumnOptions: SelectOption<string>[];
+  numericalColumnOptions: SelectOption<string>[];
   materialValue: string;
   quantityValue: string;
   onQuantityChange: (value: string) => void;
@@ -30,7 +31,8 @@ export const DropdownTile = ({
   //titleTooltip,
   //subtextToolTip,
   //button,
-  columnOptions,
+  stringColumnOptions,
+  numericalColumnOptions,
   materialValue,
   quantityValue,
   onQuantityChange,
@@ -49,7 +51,7 @@ export const DropdownTile = ({
             Material
           </Text>
           <ComboBox
-            options={columnOptions}
+            options={stringColumnOptions}
             value={materialValue}
             onChange={onMaterialChange}
 
@@ -65,7 +67,7 @@ export const DropdownTile = ({
             Quantity
           </Text>
           <ComboBox
-            options={columnOptions}
+            options={numericalColumnOptions}
             value={quantityValue}
             onChange={onQuantityChange}
 

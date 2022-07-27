@@ -6,7 +6,7 @@
 
 .details-form-container {
   overflow-x: auto;
-  height: 50%;
+  height: 100%;
 
   .details-form {
     display: flex;
@@ -36,19 +36,34 @@
     flex-wrap: wrap;
   }
 
-  .pair-list {
-    display: flex;
-    flex-direction: column;
-    overflow-y: overlay;
-    gap: 7.5px;
-    margin-top: 7.5px;
-    gap: $iui-baseline;
-    height: auto;
-  }
+
 
   .search-bar-container {
     flex-basis: $iui-3xl;
     flex-shrink: 1;
     flex-grow: 1;
   }
+}
+
+.pair-list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: overlay;
+  gap: 7.5px;
+  margin-top: 7.5px;
+  gap: $iui-baseline;
+  height: auto;
+}
+
+.combo-field {
+  margin-left: 0;
+  align-self: center;
+  min-width: 36px;
+  margin-right: $iui-xs;
+  width: 49%;
+  display: inline-block;
+}
+
+.button {
+  min-height: 38px;
 }
