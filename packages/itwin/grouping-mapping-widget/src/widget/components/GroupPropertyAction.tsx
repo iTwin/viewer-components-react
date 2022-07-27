@@ -27,11 +27,8 @@ import {
   SvgChevronUp,
   SvgRemove,
 } from "@itwin/itwinui-icons-react";
-import type {
-  SelectOption} from "@itwin/itwinui-react";
-import {
-  Select,
-} from "@itwin/itwinui-react";
+import type { SelectOption } from "@itwin/itwinui-react";
+import { Select } from "@itwin/itwinui-react";
 import {
   Alert,
   Fieldset,
