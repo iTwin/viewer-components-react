@@ -2,21 +2,26 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-export interface Selector {
-  templateName: string;
-  templateDescription: string;
-  id?: string;
-  reportId: string;
-  groups: Group[];
+@import "~@itwin/itwinui-css/scss/variables";
+
+@keyframes rcw-expand {
+  0% {
+    opacity: 0;
+    width: 20%;
+  }
+  100% {
+    opacity: 1;
+    width: 100%;
+  }
 }
 
-export interface Group {
-  groupName: string;
-  itemName: string;
-  pairs: Pair[];
-}
-
-export interface Pair {
-  material: string | undefined;
-  quantity: string | undefined;
+@keyframes rcw-shrink {
+  100% {
+    opacity: 0;
+    width: 20%;
+  }
+  0% {
+    opacity: 1;
+    width: 100%;
+  }
 }

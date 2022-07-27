@@ -6,11 +6,49 @@
 
 .details-form-container {
   overflow-x: auto;
-  height: 100%;
+  height: 50%;
 
   .details-form {
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
+  }
+}
+
+.pairs-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: $iui-baseline $iui-m;
+  min-height: 0;
+  height: 49%;
+
+  .odata-url-input {
+    margin-bottom: $iui-baseline * 2;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: $iui-s;
+    border-bottom: 1px solid var(--iui-color-background-4);
+    padding-bottom: $iui-baseline;
+    flex-wrap: wrap;
+  }
+
+  .pair-list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: overlay;
+    gap: 7.5px;
+    margin-top: 7.5px;
+    gap: $iui-baseline;
+    height: auto;
+  }
+
+  .search-bar-container {
+    flex-basis: $iui-3xl;
+    flex-shrink: 1;
+    flex-grow: 1;
   }
 }

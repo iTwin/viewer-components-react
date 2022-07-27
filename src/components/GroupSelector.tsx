@@ -342,13 +342,22 @@ toaster.negative("You are not authorized to use this system.");
               await props.goBack();
             }}
           />
+          <Button
+            styleType="high-visibility"
+            onClick={() => {
+              //setTemplateView(TemplateView.CREATE);
+              //refresh();
+            }}
+          >
+            {"Export"}
+          </Button>
           <Surface className="groups-container">
             <div className="toolbar">
               <Button
                 styleType="high-visibility"
                 onClick={addGroup}
               >
-                {"Add Group"}
+                {"Add Label"}
               </Button>
             </div>
             {isLoading ? (

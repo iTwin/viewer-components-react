@@ -3,11 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { DropdownMenu, Fieldset, LabeledInput, Small, ToggleSwitch, ComboBox, SelectOption } from "@itwin/itwinui-react";
-import React, { useState, useMemo, useEffect } from "react";
+import {
+  SvgAdd,
+  SvgCopy,
+  SvgDelete,
+  SvgMore,
+} from "@itwin/itwinui-icons-react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { SearchBox } from "@itwin/core-react";
 import ActionPanel from "./ActionPanel";
 import { IModelApp } from "@itwin/core-frontend";
 import { ODataItem } from "@itwin/insights-client";
-import { Button, Table, toaster, Label } from "@itwin/itwinui-react";
+import { Button, Table, toaster, Label, Surface, MenuItem, IconButton } from "@itwin/itwinui-react";
 //import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleInputChange, WidgetHeader } from "./utils";
 import "./GroupAction.scss";
@@ -18,6 +25,10 @@ import SelectorClient from "./selectorClient"
 import { Guid } from "@itwin/core-bentley";
 //import { Group } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
+import { DropdownTile } from "./DropdrownTile";
+import { SearchBar } from "./SearchBar";
+import DeleteModal from "./DeleteModal";
+import { clearAll } from "./viewerUtils";
 //import { DropdownInput } from "@itwin/itwinui-react";
 //import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
@@ -52,7 +63,7 @@ async function fetchMetadata(token: string, reportingClientApi: ReportingClient,
   return (await reportingClientApi.getODataReportMetadata(token, reportId)).text();
 }
 
-const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
+const GroupAction = ({ selector, goBack, group, resetView }: GroupActionProps) => {
   const selectorClient = new SelectorClient();
 
 
@@ -81,8 +92,13 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
 
   const [groupName, setGroupName] = useState<string>();
   const [elementColumn, setElementColumn] = useState<string>();
-  const [material, setMaterialColumn] = useState<string>();
-  const [quantity, setQuantityColumn] = useState<string>();
+  const [selectedPair, setSelectedPair] = useState<Pair>();
+  //const [material, setMaterialColumn] = useState<string>();
+  //const [quantity, setQuantityColumn] = useState<string>();
+
+  const [pairs, setPairs] = useState<(Pair)[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  //const [group, setGroup] = useState<Group | undefined>(selGroup);
 
   /*
   if (group)
@@ -116,10 +132,43 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
   //const [selector, setSelector] = useState<Selector>();
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
 
+
   //setGroups(fetchGroups());
 
 
   //setSelector(selectorClient.getSelector(props.templateId));
+
+  const tableStateSingleSelectReducer = (newState: any, action: any): any => {
+    switch (action.type) {
+      case "toggleRowSelected": {
+        return { ...newState, selectedRowIds: { [action.id]: action.value } };
+      }
+      default:
+        break;
+    }
+    return newState;
+  };
+
+  const groupColumns = useMemo(
+    () => [
+      {
+        Header: "Table",
+        columns: [
+          {
+            id: "displayName",
+            Header: "Name",
+            accessor: "displayName",
+          },
+          {
+            id: "description",
+            Header: "Description",
+            accessor: "description",
+          },
+        ],
+      },
+    ],
+    []
+  );
 
   const onSave = async () => {
 
@@ -142,19 +191,21 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
       selectedGroup.groupName = groupName;
     */
 
-    const pairs: Pair[] = [];
+    /*
+  const pairs: Pair[] = [];
 
-    const pair: Pair = {
-      material: material ?? "",
-      quantity: quantity ?? "",
-    }
+  const pair: Pair = {
+    material: material ?? "",
+    quantity: quantity ?? "",
+  }
+  */
 
-    pairs.push(pair);
+    //pairs.push(pair);
 
     const selectedGroup: Group = {
       groupName: groupName ?? "",
       itemName: elementColumn ?? "",
-      pairs: pairs,
+      pairs: (pairs ?? []),
     }
 
 
@@ -192,7 +243,7 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
     //selector.groups.push(selectedGroup);
     //selector.groups.push(groupLabel);
     selectorClient.updateSelector(selector);
-    await goBack();
+
 
 
     /*
@@ -303,18 +354,10 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
     */
   }, [availableColumns]);
 
-  const load = (() => {
-    setIsLoading(true);
+  const load = (async () => {
 
-
-    if (group) {
-      setGroupName(group.groupName);
-      setElementColumn(group.itemName);
-      setMaterialColumn(group.pairs[0].material);
-      setQuantityColumn(group.pairs[0].quantity);
-    }
-
-    //setGroup(groupLabel);
+    //setPairs(group?.pairs ?? []);
+    //setGroups
 
     if (!IModelApp.authorizationClient)
       throw new Error(
@@ -325,54 +368,63 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
         "Invalid report."
       );
 
-    IModelApp.authorizationClient
-      .getAccessToken()
-      .then((token: string) => {
-        reportingClientApi
-          .getODataReport(token, selector.reportId)
-          .then(async (data) => {
-            if (data) {
-              const reportData = data ?? "";
-              const groupItems = reportData.value.map(data =>
-                data.name ?? ""
-              );
-              //setGroups(groupItems)
+    const token = await IModelApp.authorizationClient
+      .getAccessToken();
+    //.then((token: string) => {
+    const data = await reportingClientApi
+      .getODataReport(token, selector.reportId);
+    //.then(async (data) => {
+    if (data) {
+      const reportData = data ?? "";
+      const groupItems = reportData.value.map(data =>
+        data.name ?? ""
+      );
+      const filteredGroups: string[] = group ? [group.groupName] : [];
+      for (const g of groupItems) {
+        if (selector?.groups.filter(x => x.groupName == g).length == 0) {
+          filteredGroups.push(g);
+        }
+      }
 
-              //const fg: string[] = {"asd", "asd"};
+      if (!availableGroups)
+        setGroups(filteredGroups);
+    }
 
-              //var fg:string[] = ["op", "a"]
-              const filteredGroups: string[] = group ? [group.groupName] : [];
-              //const filteredGroups: string[] = [group?.groupName??null];
-
-              //const filteredGroups: string[] = [];
-
-              for (const g of groupItems) {
-                if (selector?.groups.filter(x => x.groupName == g).length == 0) {
-                  filteredGroups.push(g);
-                }
-              }
-
-
-              //if (group)
-              //filteredGroups.push(group.groupName);
-              //if (!availableGroups)
-              setGroups(filteredGroups);
-            }
-
-          })
-          .catch((err) => {
-            toaster.negative("You are not authorized to get metadata for this report. Please contact project administrator.");
-            console.error(err);
-          });
-      })
-      .catch((err) => {
-        toaster.negative("You are not authorized to use this system.");
-        console.error(err);
-      });
+  })
+  /*
+  .catch((err) => {
+    toaster.negative("You are not authorized to get metadata for this report. Please contact project administrator.");
+    console.error(err);
+  });
+})
+.catch((err) => {
+toaster.negative("You are not authorized to use this system.");
+console.error(err);
+});
+*/
 
 
-    setIsLoading(false);
-    //return [];
+
+  const refresh = useCallback(async () => {
+    //clearAll();
+    //setSelectedPair(undefined);
+    //setGroups([]);
+    //setColumns([]);
+    await load();
+  }, []);
+
+  const addPair = (() => {
+    const pair: Pair = {
+      material: undefined,
+      quantity: undefined,
+    };
+
+    pairs.push(pair);
+    //onSave();
+    //resetView();
+    refresh();
+    //GroupAction({selector, goBack, group} : GroupActionProps);
+
   })
 
   /*
@@ -390,6 +442,8 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
 
   useEffect(() => {
 
+    setPairs(group?.pairs ?? []);
+    //setGroups
 
     if (!IModelApp.authorizationClient)
       throw new Error(
@@ -434,6 +488,10 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
       });
   }, []);
 
+  useEffect(() => {
+
+  }, [pairs]);
+
   /*
   useEffect(() => {
 
@@ -444,7 +502,7 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
     //const groups = fetchGroups();
     //setGroups(groups);
   }, []);
-*/
+  */
   return (
     <>
       <WidgetHeader
@@ -462,7 +520,7 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
           </Label>
           <ComboBox
             options={groupOptions}
-            value={group?.groupName}
+            value={group?.groupName ?? groupName}
             onChange={async (value) => {
               //setGroupName(value);
               updateColumns(value);
@@ -484,7 +542,7 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
           </Label>
           <ComboBox
             options={ColumnOptions}
-            value={group?.itemName}
+            value={group?.itemName ?? "UserLabel" ?? elementColumn}
             onChange={async (value) => {
               setElementColumn(value);
               //groupLabel?.element.material = value;
@@ -498,48 +556,95 @@ const GroupAction = ({ selector, goBack, group }: GroupActionProps) => {
             }}
           />
 
-          <Label htmlFor="material-combo-input">
-            Material column
-          </Label>
-          <ComboBox
-            options={ColumnOptions}
-            value={group?.pairs[0].material}
-            onChange={async (value) => {
-              setMaterialColumn(value);
-              //groupLabel?.element.material = value;
-              //handleInputChange(event, value, setGroup);
-              //setMaterialColumn(value);
-              //await runExtraction(value);
-            }}
-            inputProps={{
-              id: "material-combo-input",
-              placeholder: "Material column",
-            }}
-          />
 
-          <Label htmlFor="quantity-combo-input">
-            Quantity column
-          </Label>
-          <ComboBox
-            options={ColumnOptions}
-            value={group?.pairs[0].quantity}
-            onChange={async (value) => {
-              setQuantityColumn(value);
-              //values.quantity = value;
-              //handleInputChange(event, value, setGroup);
-              //setQuantityColumn(value);
-              //await runExtraction(value);
-            }}
-            inputProps={{
-              id: "quantity-combo-input",
-              placeholder: "Quantity column",
-            }}
-          />
 
         </Fieldset>
       </div>
+
+      <Surface className="pairs-container">
+        <div className="toolbar">
+          <Button
+            startIcon={<SvgAdd />}
+            onClick={() => { addPair() }}
+            styleType="high-visibility"
+          >
+            {"Add pair"}
+          </Button>
+        </div>
+        <div className="pair-list">
+          {pairs.map((pair) => (
+            <DropdownTile
+              columnOptions={ColumnOptions}
+              materialValue={pair.material ?? ""}
+              quantityValue={pair.quantity ?? ""}
+              onMaterialChange={(value) => {
+                //setMaterialColumn(value);
+                pair.material = value;
+              }}
+              onQuantityChange={(value) => {
+                //setMaterialColumn(value);
+                pair.quantity = value;
+              }}
+              actionGroup={
+                <div className="actions">
+                  <DropdownMenu
+                    disabled={isLoading}
+                    menuItems={(close: () => void) => [
+                      <MenuItem
+                        key={0}
+                        onClick={() => {
+                          setSelectedPair(pair);
+                          setShowDeleteModal(true);
+                          close();
+                        }}
+                        icon={<SvgDelete />}
+                      >
+                        Remove
+                      </MenuItem>,
+                    ]}
+                  >
+                    <IconButton
+                      styleType="borderless"
+                    >
+                      <SvgMore
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                        }}
+                      />
+                    </IconButton>
+                  </DropdownMenu>
+                </div>
+              }
+            />
+
+
+
+          ))}
+        </div>
+      </Surface>
+
+      <DeleteModal
+        entityName={selectedPair?.material + " - " + selectedPair?.quantity ?? ""}
+        show={showDeleteModal}
+        setShow={setShowDeleteModal}
+        onDelete={async () => {
+          setPairs(pairs.filter(x => x.material !== selectedPair?.material || x.quantity !== selectedPair?.quantity));
+          /*
+          if (selectedPair && group)
+            selectorClient.deletePair(selector, group, pairs, selectedPair);
+            */
+        }}
+        refresh={refresh}
+      />
+
+
       <ActionPanel
-        onSave={onSave}
+        onSave={async () => {
+          onSave();
+          await goBack();
+        }
+        }
         onCancel={goBack}
         //isSavingDisabled={!groupName}
         isLoading={isLoading}

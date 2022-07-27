@@ -30,6 +30,7 @@ import DumbClient from "../dumb-client";
 import SelectorClient from "./selectorClient";
 import { Selector } from "./Selector"
 import TemplateAction from "./TemplateAction";
+import { TemplateViewer } from "./TemplateViewer";
 
 
 type CreateTypeFromInterface<Interface> = {
@@ -92,6 +93,18 @@ const Templates = () => {
             id: "templateName",
             Header: "Template Name",
             accessor: "templateName",
+            Cell: (value: CellProps<Selector>) => (
+              <div
+                className="iui-anchor"
+                onClick={() => {
+                  setSelectedTemplate(value.row.original);
+
+                  setTemplateView(TemplateView.CONFIGURE);
+                }}
+              >
+                {value.row.original.templateName}
+              </div>
+            ),
           },
           {
             id: "templateDescription",
@@ -281,6 +294,17 @@ const Templates = () => {
         />
       );
 
+    case TemplateView.VIEW:
+      return (
+        <TemplateViewer
+          template={selectedTemplate}
+          goBack={async () => {
+            setTemplateView(TemplateView.TEMPLATES);
+            await refresh();
+          }}
+        />
+      );
+
     default:
       return (
         <>
@@ -312,7 +336,6 @@ const Templates = () => {
                 columns={templatesColumns}
                 emptyTableContent="No items available."
                 isSortable
-                onRowClick={onTemplateRowClick}
                 stateReducer={tableStateSingleSelectReducer}
                 isLoading={isLoading}
                 selectRowOnClick={true}

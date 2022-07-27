@@ -33,6 +33,8 @@ const TemplateAction = ({ selector, returnFn }: TemplateActionProps) => {
     name: selector?.templateName ?? "",
     description: selector?.templateDescription ?? "",
     reportId: selector?.reportId ?? "",
+    groups: selector?.groups ?? [],
+    id: selector?.id,
   });
   //const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -44,14 +46,21 @@ const TemplateAction = ({ selector, returnFn }: TemplateActionProps) => {
   const onSave = async () => {
 
     const selector: Selector = {
+      id: values.id,
       templateName: values.name,
       templateDescription: values.description,
       reportId: values.reportId,
-      groups: []
+      groups: values.groups,
     }
 
     const selectorClient = new SelectorClient;
-    selectorClient.createSelector(selector);
+
+    if (selector.id)
+      selectorClient.updateSelector(selector);
+    else
+      selectorClient.createSelector(selector);
+
+
     returnFn();
     /*
     try {

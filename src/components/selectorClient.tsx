@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Guid } from "@itwin/core-bentley";
-import { Selector } from "./Selector"
+import { Selector, Group, Pair } from "./Selector"
 
 // For now only one selector for each report.
 
@@ -78,6 +78,7 @@ export default class SelectorClient {
     //const key = "selector";
 
     //console.log("set (" + key + "): " + text);
+    localStorage.removeItem("sel." + key);
     localStorage.setItem("sel." + key, text);
 
     return key ?? "";
@@ -93,6 +94,7 @@ export default class SelectorClient {
     //const key = "selector";
 
     //console.log("set (" + key + "): " + text);
+    localStorage.removeItem("sel." + key);
     localStorage.setItem("sel." + key, text);
 
     return key;
@@ -106,6 +108,17 @@ export default class SelectorClient {
       selector.groups = groups.filter(x => x.groupName !== groupId);
       this.updateSelector(selector);
     }
+  }
+
+  deletePair(selector: Selector, group: Group, pairs: Pair[], pair: Pair) {
+    //const selector = this.getSelector(selectorId);
+
+    group.pairs = pairs.filter(x => x.material !== pair.material || x.quantity !== pair.quantity);
+    this.deleteGroup(selector.id ?? "", group.groupName);
+    selector.groups = selector.groups.filter(x => x.groupName !== group.groupName);
+    //selector = this.getSelector(selector.)
+    selector.groups.push(group);
+    this.updateSelector(selector);
   }
 
   deleteSelector(selectorId: string) {
