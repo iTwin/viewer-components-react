@@ -79,7 +79,8 @@
       "altitude": "Altitude",
       "iModelNotGeoLocated": "iModel is not GeoLocated",
       "locationOutOfGCSRange": "Location is outside the valid range of the Geographic Coordinate System",
-      "unhandledGeoLocationError": "Failed to convert coordinates to GeoLocation"
+      "unhandledGeoLocationError": "Failed to convert coordinates to GeoLocation",
+      "useDynamicMeasurement": "Dynamic measurement"
     },
     "MeasureRadius": {
       "keyin": "Radius",

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Query Keywords by default no longer takes selection when no keywords are applied",
+      "comment": "add color legends for groups",
       "type": "patch"
     }
   ],

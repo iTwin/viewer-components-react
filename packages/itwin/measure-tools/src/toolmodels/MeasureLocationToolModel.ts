@@ -28,16 +28,28 @@ export class MeasureLocationToolModel extends MeasurementToolModel<LocationMeasu
     super();
   }
 
-  public addLocation(props: AddLocationProps): void {
+  public addLocation(props: AddLocationProps, isDynamic: boolean): void {
     const { viewType, ...rest } = props;
-    const measurement = new LocationMeasurement(rest);
-    measurement.viewTarget.include(viewType);
 
-    // Set a temporary dynamic
-    this._currentMeasurement = measurement;
-    this.notifyNewMeasurement();
+    if (!this._currentMeasurement) {
+      this._currentMeasurement = new LocationMeasurement(rest);
+      this._currentMeasurement.viewTarget.include(viewType);
+      this._currentMeasurement.isDynamic = isDynamic;
+      this.notifyNewMeasurement();
+    } else {
+      this._currentMeasurement.changeLocation(props);
+      this.notifyDynamicMeasurementChanged();
+    }
+
+    if (isDynamic)
+      return;
+
+    this._currentMeasurement.isDynamic = false;
+    this.addMeasurementAndReset(this._currentMeasurement);
+  }
+
+  public override reset(clearMeasurements: boolean): void {
+    super.reset(clearMeasurements);
     this._currentMeasurement = undefined;
-
-    this.addMeasurementAndReset(measurement);
   }
 }
