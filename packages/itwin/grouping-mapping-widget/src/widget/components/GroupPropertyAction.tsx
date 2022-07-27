@@ -27,9 +27,10 @@ import {
   SvgChevronUp,
   SvgRemove,
 } from "@itwin/itwinui-icons-react";
+import type {
+  SelectOption} from "@itwin/itwinui-react";
 import {
   Select,
-  SelectOption,
 } from "@itwin/itwinui-react";
 import {
   Alert,
@@ -606,7 +607,7 @@ const GroupPropertyAction = ({
                   <Select<string>
                     options={propertyOptions[index]}
                     value={getValue(ecProperty, index)}
-                    onChange={(value) => { value && onChange(value, index) }}
+                    onChange={(value) => { value && onChange(value, index); }}
                     placeholder="<No Property Mapped>"
                     style={{ width: "100%" }}
                     onShow={() => { }}

@@ -4,10 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Reports } from "../components/Reports";
+import type {
+  ReportsApiConfig} from "../context/ReportsApiConfigContext";
 import {
-  ReportsApiConfig,
   ReportsApiConfigContext,
 } from "../context/ReportsApiConfigContext";
 import "./ReportsContainer.scss";
