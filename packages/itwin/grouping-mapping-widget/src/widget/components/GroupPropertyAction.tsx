@@ -28,7 +28,6 @@ import {
   SvgRemove,
 } from "@itwin/itwinui-icons-react";
 import type { SelectOption } from "@itwin/itwinui-react";
-import { Select } from "@itwin/itwinui-react";
 import {
   Alert,
   Fieldset,
@@ -36,6 +35,7 @@ import {
   LabeledInput,
   LabeledSelect,
   Small,
+  Select,
   Text,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
