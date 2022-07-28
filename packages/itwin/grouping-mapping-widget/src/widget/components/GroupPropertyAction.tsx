@@ -34,8 +34,8 @@ import {
   IconButton,
   LabeledInput,
   LabeledSelect,
-  Small,
   Select,
+  Small,
   Text,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
