@@ -238,7 +238,6 @@ export const Extraction = ({
   }, [apiConfig, isRunning, jobId, setExtractionState]);
 
   const iModelOptions = useMemo(() => {
-    // TODO Report ComboBox bug. Unique key error happens when the options list becomes reduced.
     const newIModelOptions: SelectOption<string>[] = [];
 
     for (const [iModelId, iModelName] of iModels.entries()) {
@@ -249,6 +248,7 @@ export const Extraction = ({
         disabled: extractionState !== ExtractionStates.None,
       });
     }
+
     return newIModelOptions;
   }, [iModels, extractionState]);
 
@@ -268,7 +268,7 @@ export const Extraction = ({
             value={currentIModelId}
             onChange={async (value) => {
               setCurrentIModelId(value);
-              await runExtraction(value);
+              value && await runExtraction(value);
             }}
             inputProps={{
               id: "combo-input",
