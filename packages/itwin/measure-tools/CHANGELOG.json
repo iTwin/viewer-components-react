@@ -2,6 +2,18 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@itwin/measure-tools-react_v0.9.0",
+      "date": "Thu, 28 Jul 2022 13:50:39 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix obtaining the initial tool settings value. onPostInstall is called after the tool settings is created. Ensure we only notify user once if the iModel is not geolocated. Found a problem where we would output a message on each mouse motion (using dynamic measurement) which would clutter the whole screen."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.0",
       "tag": "@itwin/measure-tools-react_v0.8.0",
       "date": "Mon, 18 Jul 2022 13:24:31 GMT",

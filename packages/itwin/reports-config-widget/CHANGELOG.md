@@ -1,6 +1,13 @@
 # Change Log - @itwin/reports-config-widget-react
 
-This log was last generated on Fri, 24 Jun 2022 16:51:25 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Jul 2022 13:50:39 GMT and should not be manually modified.
+
+## 0.0.4
+Thu, 28 Jul 2022 13:50:39 GMT
+
+### Patches
+
+- Fixed infinite loop in Report Mappings
 
 ## 0.0.3
 Fri, 24 Jun 2022 16:51:25 GMT

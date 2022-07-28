@@ -1,6 +1,13 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Mon, 18 Jul 2022 13:24:31 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Jul 2022 13:50:39 GMT and should not be manually modified.
+
+## 0.9.0
+Thu, 28 Jul 2022 13:50:39 GMT
+
+### Minor changes
+
+- Fix obtaining the initial tool settings value. onPostInstall is called after the tool settings is created. Ensure we only notify user once if the iModel is not geolocated. Found a problem where we would output a message on each mouse motion (using dynamic measurement) which would clutter the whole screen.
 
 ## 0.8.0
 Mon, 18 Jul 2022 13:24:31 GMT
