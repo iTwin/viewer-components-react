@@ -69,6 +69,18 @@ export const handleInputChange = <T,>(
   });
 };
 
+export const handleSelectChange = <T,>(
+  value: string,
+  name: string,
+  values: T,
+  setValues: React.Dispatch<React.SetStateAction<T>>,
+) => {
+  setValues({
+    ...values,
+    [name]: value,
+  });
+};
+
 export const LoadingSpinner = () => {
   return (
     <div className="gm-loading-spinner">

@@ -25,12 +25,11 @@ import ExportModal from "./ExportModal";
 import { clearAll } from "./viewerUtils";
 import DataSelector from "./DataSelector";
 import "./Reports.scss";
-import GroupSelector from "./GroupSelector";
 import DumbClient from "../dumb-client";
 import SelectorClient from "./selectorClient";
 import { Selector } from "./Selector"
-import TemplateAction from "./TemplateAction";
-import { TemplateViewer } from "./TemplateViewer";
+//import TemplateAction from "./TemplateAction";
+import TemplateMenu from "./TemplateMenu";
 
 
 type CreateTypeFromInterface<Interface> = {
@@ -42,9 +41,10 @@ type TemplateType = CreateTypeFromInterface<Selector>;
 enum TemplateView {
   TEMPLATES = "templates",
   CREATE = "create",
-  VIEW = "view",
-  EDIT = "edit",
-  CONFIGURE = "configure",
+  //VIEW = "view",
+  //EDIT = "edit",
+  //CONFIGURE = "configure",
+  MENU = "menu",
 }
 
 const Templates = () => {
@@ -79,7 +79,7 @@ const Templates = () => {
 
 
 
-    const selectors = selectorClient.getSelectors();
+    const selectors = selectorClient.getSelectorsT();
     setTemplates(selectors);
     setIsLoading(false);
   }
@@ -99,7 +99,7 @@ const Templates = () => {
                 onClick={() => {
                   setSelectedTemplate(value.row.original);
 
-                  setTemplateView(TemplateView.CONFIGURE);
+                  setTemplateView(TemplateView.MENU);
                 }}
               >
                 {value.row.original.templateName}
@@ -119,28 +119,6 @@ const Templates = () => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
-                    <MenuItem
-                      key={0}
-                      onClick={() => {
-                        //setSelectedMapping(value.row.original);
-                        setTemplateView(TemplateView.EDIT);
-                      }}
-                      icon={<SvgEdit />}
-                    >
-                      Edit
-                    </MenuItem>,
-
-                    <MenuItem
-                      key={1}
-                      onClick={() => {
-                        setTemplateView(TemplateView.CONFIGURE);
-                        //setSelectedMapping(value.row.original);
-                        //setMappingView(MappingView.MODIFYING);
-                      }}
-                      icon={<SvgConfiguration />}
-                    >
-                      Configure
-                    </MenuItem>,
 
                     <MenuItem
                       key={2}
@@ -195,20 +173,6 @@ const Templates = () => {
     return newState;
   };
 
-  const onTemplateRowClick = useMemo(
-    () => (_: any, row: any) => {
-      if (row.original === selectedTemplate) {
-        disableButton(!buttonIsDisabled);
-        row.toggleRowSelected();
-      } else {
-        disableButton(false);
-        row.toggleRowSelected(true);
-      }
-      setSelectedTemplate(row.original);
-      setTemplateView(TemplateView.VIEW);
-    },
-    [buttonIsDisabled, selectedTemplate]
-  );
 
   const createTemplate = (() => {
     setTemplateView(TemplateView.CREATE);
@@ -263,28 +227,44 @@ const Templates = () => {
 
     case TemplateView.CREATE:
       return (
-        <TemplateAction
-          returnFn={async () => {
+        <TemplateMenu
+          selector={undefined}
+          goBack={async () => {
             setTemplateView(TemplateView.TEMPLATES);
             await refresh();
           }}
         />
       );
+    /*
+        case TemplateView.EDIT:
+          return (
+            <TemplateAction
+              selector={selectedTemplate}
+              returnFn={async () => {
+                setTemplateView(TemplateView.TEMPLATES);
+                await refresh();
+              }}
+            />
+          );
+          */
 
-    case TemplateView.EDIT:
-      return (
-        <TemplateAction
-          selector={selectedTemplate}
-          returnFn={async () => {
-            setTemplateView(TemplateView.TEMPLATES);
-            await refresh();
-          }}
-        />
-      );
+    /*
+  case TemplateView.CONFIGURE:
+    return (
+      <GroupSelector
+        selector={selectedTemplate!}
+        //templateId={selectedTemplate!.id!}
+        goBack={async () => {
+          setTemplateView(TemplateView.TEMPLATES);
+          await refresh();
+        }}
+      />
+    );
+    */
 
-    case TemplateView.CONFIGURE:
+    case TemplateView.MENU:
       return (
-        <GroupSelector
+        <TemplateMenu
           selector={selectedTemplate!}
           //templateId={selectedTemplate!.id!}
           goBack={async () => {
@@ -294,16 +274,18 @@ const Templates = () => {
         />
       );
 
-    case TemplateView.VIEW:
-      return (
-        <TemplateViewer
-          template={selectedTemplate}
-          goBack={async () => {
-            setTemplateView(TemplateView.TEMPLATES);
-            await refresh();
-          }}
-        />
-      );
+    /*
+  case TemplateView.VIEW:
+    return (
+      <TemplateViewer
+        template={selectedTemplate}
+        goBack={async () => {
+          setTemplateView(TemplateView.TEMPLATES);
+          await refresh();
+        }}
+      />
+    );
+    */
 
     default:
       return (
@@ -349,7 +331,7 @@ const Templates = () => {
             setShow={setShowDeleteModal}
             onDelete={() => {
               if (selectedTemplate && selectedTemplate.id) {
-                selectorClient.deleteSelector(
+                selectorClient.deleteSelectorDep(
                   selectedTemplate.id
                 );
               }

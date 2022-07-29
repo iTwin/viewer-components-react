@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import React from "react";
 import { Text, ComboBox, SelectOption } from "@itwin/itwinui-react";
 import "./DropdownTile.scss";
+import { CssProperties } from "@itwin/appui-layout-react";
 
 
 interface DropdownTileProps {
@@ -62,7 +63,9 @@ export const DropdownTile = ({
           />
         </div>
 
-        <div className="combo-field">
+
+        <div className="combo-field-invisible"
+        >
           <Text>
             Quantity
           </Text>

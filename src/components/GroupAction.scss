@@ -64,6 +64,16 @@
   display: inline-block;
 }
 
+.combo-field-invisible {
+  margin-left: 0;
+  align-self: center;
+  min-width: 36px;
+  margin-right: $iui-xs;
+  width: 49%;
+  display: inline-block;
+  visibility: hidden;
+}
+
 .button {
   min-height: 38px;
 }

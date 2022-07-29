@@ -8,7 +8,7 @@ import { Selector, Group, Pair } from "./Selector"
 // For now only one selector for each report.
 
 export default class SelectorClient {
-  getSelectors(): Selector[] {
+  getSelectorsT(): Selector[] {
 
     var selectors: Selector[] = [];
 
@@ -33,7 +33,7 @@ export default class SelectorClient {
   }
 
 
-  getSelector(selectorId: string): Selector | undefined {
+  getSelectorT(selectorId: string): Selector | undefined {
 
     const value = localStorage.getItem("sel." + selectorId);
 
@@ -71,13 +71,17 @@ export default class SelectorClient {
   //  return JSON.parse(text ?? "");
   //}
 
-  updateSelector(selector: Selector): string {
-    const text = JSON.stringify(selector);
+  createUpdateSelector(selector: Selector): string {
+
+    if (!selector.id)
+      selector.id = Guid.createValue()
+
     const key = selector.id;
     //const key = "sel." + reportId //Guid.createValue();
     //const key = "selector";
 
     //console.log("set (" + key + "): " + text);
+    const text = JSON.stringify(selector);
     localStorage.removeItem("sel." + key);
     localStorage.setItem("sel." + key, text);
 
@@ -85,7 +89,7 @@ export default class SelectorClient {
   }
 
 
-  createSelector(selector: Selector): string {
+  createSelectorDep(selector: Selector): string {
     const key = Guid.createValue();
     selector.id = key;
     const text = JSON.stringify(selector);
@@ -100,28 +104,28 @@ export default class SelectorClient {
     return key;
   }
 
-  deleteGroup(selectorId: string, groupId: string) {
-    const selector = this.getSelector(selectorId);
+  deleteGroupDep(selectorId: string, groupId: string) {
+    const selector = this.getSelectorT(selectorId);
 
     if (selector) {
       const groups = selector.groups;
       selector.groups = groups.filter(x => x.groupName !== groupId);
-      this.updateSelector(selector);
+      //this.updateSelectorDep(selector);
     }
   }
 
-  deletePair(selector: Selector, group: Group, pairs: Pair[], pair: Pair) {
+  deletePairDep(selector: Selector, group: Group, pairs: Pair[], pair: Pair) {
     //const selector = this.getSelector(selectorId);
 
     group.pairs = pairs.filter(x => x.material !== pair.material || x.quantity !== pair.quantity);
-    this.deleteGroup(selector.id ?? "", group.groupName);
+    //this.deleteGroup(selector.id ?? "", group.groupName);
     selector.groups = selector.groups.filter(x => x.groupName !== group.groupName);
     //selector = this.getSelector(selector.)
     selector.groups.push(group);
-    this.updateSelector(selector);
+    //this.updateSelector(selector);
   }
 
-  deleteSelector(selectorId: string) {
+  deleteSelectorDep(selectorId: string) {
     localStorage.removeItem("sel." + selectorId);
   }
 }

@@ -8,7 +8,8 @@
 
 .e_c_3-widget-header-container {
   display: flex;
-  margin-bottom: $iui-baseline * 3;
+
+  //margin-bottom: $iui-baseline * 3;
   .e_c_3-chevron {
     @include iui-icons-large();
     cursor: pointer;
@@ -18,9 +19,11 @@
 
   .e_c_3-chevron-disabled {
     @include iui-icons-large();
+
     @include themed {
       fill: t(iui-icons-color-actionable-disabled);
     }
+
     cursor: not-allowed;
 
     align-self: center;

@@ -21,7 +21,7 @@ import "./GroupAction.scss";
 //import { useMappingClient } from "./context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
 import { Selector, Group, Pair } from "./Selector"
-import SelectorClient from "./selectorClient"
+//import SelectorClient from "./selectorClient"
 import { Guid } from "@itwin/core-bentley";
 //import { Group } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
@@ -44,6 +44,7 @@ interface GroupActionProps {
   group: Group | undefined;
   goBack: () => Promise<void>;
   resetView: () => Promise<void>;
+  setSelector: (sel: Selector) => void;
 }
 
 
@@ -63,8 +64,8 @@ async function fetchMetadata(token: string, reportingClientApi: ReportingClient,
   return (await reportingClientApi.getODataReportMetadata(token, reportId)).text();
 }
 
-const GroupAction = ({ selector, goBack, group, resetView }: GroupActionProps) => {
-  const selectorClient = new SelectorClient();
+const GroupAction = ({ selector, goBack, group, resetView, setSelector }: GroupActionProps) => {
+  //const selectorClient = new SelectorClient();
 
 
   /*
@@ -175,36 +176,6 @@ const GroupAction = ({ selector, goBack, group, resetView }: GroupActionProps) =
 
   const onSave = async () => {
 
-    /*
-    const groupLabel: GroupLabel = {
-      name: values.name ?? "",
-
-    }
-    */
-
-    //groupLabel?.element.material = selectedm
-    /////////////////////////////////////////////////////
-    //CHECK IF selector GROUP CHANGED
-
-
-
-
-    /*
-    if (groupName)
-      selectedGroup.groupName = groupName;
-    */
-
-    /*
-  const pairs: Pair[] = [];
-
-  const pair: Pair = {
-    material: material ?? "",
-    quantity: quantity ?? "",
-  }
-  */
-
-    //pairs.push(pair);
-
     const selectedGroup: Group = {
       groupName: groupName ?? "",
       itemName: elementColumn ?? "",
@@ -212,24 +183,6 @@ const GroupAction = ({ selector, goBack, group, resetView }: GroupActionProps) =
       pairs: (pairs ?? []),
     }
 
-
-    /*
-    var updated = false;
-    for (var g of selector.groups) {
-      if (g.groupName === selectedGroup.groupName) {
-        g = selectedGroup;
-        updated = true;
-        break;
-      }
-    }
-
-    if (!updated) {
-      selector.groups.push(selectedGroup);
-    }
-    */
-
-    // TODO
-    // add group ID and compare it instead of group Name
     var updated = false;
     for (let i = 0; i < selector.groups.length; i++) {
       if (selector.groups[i].groupName === selectedGroup.groupName) {
@@ -242,26 +195,7 @@ const GroupAction = ({ selector, goBack, group, resetView }: GroupActionProps) =
       selector.groups.push(selectedGroup);
     }
 
-    //selector.updateGroup(selectedGroup);
-
-    //selector.groups.push(selectedGroup);
-    //selector.groups.push(groupLabel);
-    selectorClient.updateSelector(selector);
-
-
-
-    /*
-  if (selector) {
-
-
-  }
-  else {
-    console.error("selector is undefined!!!");
-  }
-  */
-
-
-
+    setSelector(selector);
   };
 
 
@@ -635,7 +569,7 @@ console.error(err);
               onClick={() => { addPair() }}
               styleType="high-visibility"
             >
-              {"Add pair"}
+              {"Add material"}
             </Button>
           </div>
 
