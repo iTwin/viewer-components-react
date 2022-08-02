@@ -1,0 +1,85 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+import {
+  Button,
+  Leading,
+  MiddleTextTruncation,
+  Modal,
+  ModalButtonBar,
+} from "@itwin/itwinui-react";
+import React, { useState } from "react";
+import "./DeleteModal.scss";
+import { handleError, LoadingSpinner } from "./utils";
+
+export interface ReportConfirmModalProps {
+  entityName: string;
+  show: boolean;
+  setShow: React.Dispatch<React.SetStateAction<boolean>>;
+  onDelete: () => void;
+  refresh: () => Promise<void>;
+}
+
+export const ReportConfirmModal = ({
+  entityName,
+  show,
+  setShow,
+  onDelete,
+  refresh,
+}: ReportConfirmModalProps) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const deleteCallback = async () => {
+    try {
+      setIsLoading(true);
+      await onDelete();
+      setShow(false);
+      await refresh();
+    } catch (error: any) {
+      handleError(error.status);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Modal
+        title='Confirm'
+        modalRootId='grouping-mapping-widget'
+        isOpen={show}
+        isDismissible={!isLoading}
+        onClose={() => {
+          setShow(false);
+        }}
+      >
+        <div className="delete-modal-body-text">
+          <Leading>
+            Are you sure you want to change template report? All labels will be reset.
+          </Leading>
+        </div>
+        <ModalButtonBar>
+          {isLoading &&
+            <div className="loading-delete">
+              <LoadingSpinner />
+            </div>}
+          <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>
+            Confirm
+          </Button>
+          <Button
+            styleType='default'
+            onClick={() => {
+              setShow(false);
+            }}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+        </ModalButtonBar>
+      </Modal>
+    </>
+  );
+};
+
+export default ReportConfirmModal;

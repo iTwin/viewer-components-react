@@ -4,10 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 import type { ReactNode } from "react";
 import React from "react";
-import { Text, ComboBox, SelectOption } from "@itwin/itwinui-react";
+import { Text, ComboBox, SelectOption, LabeledSelect } from "@itwin/itwinui-react";
 import "./DropdownTile.scss";
 import { CssProperties } from "@itwin/appui-layout-react";
-
+import useValidator, { NAME_REQUIREMENTS } from "./hooks/useValidator";
+import SimpleReactValidator from "simple-react-validator";
 
 interface DropdownTileProps {
   stringColumnOptions: SelectOption<string>[];
@@ -17,6 +18,7 @@ interface DropdownTileProps {
   onQuantityChange: (value: string) => void;
   onMaterialChange: (value: string) => void;
   actionGroup: ReactNode;
+  validator: SimpleReactValidator;
   //title: string;
   //button: ReactNode;
   //subText?: string;
@@ -38,6 +40,7 @@ export const DropdownTile = ({
   quantityValue,
   onQuantityChange,
   onMaterialChange,
+  validator,
   actionGroup,
 }: DropdownTileProps) => {
   return (
@@ -48,17 +51,29 @@ export const DropdownTile = ({
       <div className="body">
 
         <div className="combo-field">
-          <Text>
-            Material
-          </Text>
-          <ComboBox
+          <LabeledSelect
+            label="Material"
+            id='material'
+            required
             options={stringColumnOptions}
             value={materialValue}
-            onChange={onMaterialChange}
-
-            inputProps={{
-              id: "element-combo-input",
-              placeholder: "Element",
+            onChange={(value) => { onMaterialChange(value) }}
+            message={validator.message(
+              "materialValue",
+              materialValue,
+              NAME_REQUIREMENTS,
+            )}
+            status={
+              validator.message(
+                "materialValue",
+                materialValue,
+                NAME_REQUIREMENTS,
+              )
+                ? "negative"
+                : undefined
+            }
+            onBlur={() => {
+              validator.showMessageFor("materialValue");
             }}
           />
         </div>

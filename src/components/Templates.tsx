@@ -290,7 +290,7 @@ const Templates = () => {
     default:
       return (
         <>
-          <WidgetHeader title="Reports" />
+          <WidgetHeader title="Templates" />
 
           <div className="toolbar">
             <Button

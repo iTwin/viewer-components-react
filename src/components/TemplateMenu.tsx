@@ -24,6 +24,7 @@ import DeleteModal from "./DeleteModal";
 import { handleError, handleInputChange } from "./utils";
 import ActionPanel from "./ActionPanel";
 import TemplateActionPanel from "./TemplateActionPanel";
+import ReportConfirmModal from "./ReportConfirmModal";
 
 import {
   clearEmphasizedElements,
@@ -91,7 +92,9 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
   const [selectedGroup, setSelectedGroup] = useState<Group>();
+  const [selectedReport, setSelectedReport] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
   const [availableReports, setReports] = useState<Report[]>([]);
 
@@ -241,6 +244,51 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
     setIsLoading(false);
   })
 
+  const authenticateClientCredentials = ((): Promise<string> => {
+    if (!window) {
+      //return "";
+    }
+
+    //const uri = `https://${window.location.hostname}/signin-oauth/credentials/${authorizationServer.id}`;
+    const uri = `https://buildingtransparency.org/auth/login`;
+
+    return new Promise<string>((resolve) => {
+      const authWindow = window.open(uri, '_blank', 'width=400,height=500');
+      console.log(authWindow);
+
+      if (authWindow) {
+        authWindow.onclose = (() => {
+          console.log(authWindow);
+        })
+      }
+      //authWindow?.
+
+      const loadWindow = async (event: any) => {
+        console.log(event);
+      };
+
+      /*
+      const receiveMessage = async (event: MessageEvent) => {
+        if (!event.data['accessToken']) {
+          return;
+        }
+
+        const accessToken = event.data['accessToken'];
+        const accessTokenType = event.data['accessTokenType'];
+        resolve(`${accessTokenType} ${accessToken}`);
+        if (authWindow && !authWindow.closed) {
+          authWindow.close();
+        }
+      };
+      */
+
+
+
+
+      window?.addEventListener('message', loadWindow, false);
+    });
+  })
+
   useEffect(() => {
     load();
 
@@ -296,8 +344,11 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
           <TemplateActionPanel
             onSave={onSave}
             onCancel={goBack}
-            onExport={() => {
-              openModal(true)
+            onExport={async () => {
+
+              const res = await authenticateClientCredentials();
+              console.log(res);
+              //openModal(true)
             }}
             isSavingDisabled={!childSelector.templateName || !childSelector.reportId}
             isLoading={isLoading}
@@ -331,10 +382,18 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
               <LabeledSelect
                 label="Report"
                 id='reportId'
+                required
                 options={ReportOptions}
                 value={childSelector.reportId}
                 onChange={async (value) => {
-                  handleSelectChange(value, "reportId", childSelector, setChildSelector);
+
+                  if (selector && value !== selector.reportId) {
+                    setSelectedReport(value);
+                    setShowReportConfirmModal(true);
+                  }
+                  else {
+                    handleSelectChange(value, "reportId", childSelector, setChildSelector);
+                  }
                 }}
               />
 
@@ -345,7 +404,7 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
                   childSelector.groups
                     .map((g) => (
                       <GroupTile
-                        title={g.groupName ?? ""}
+                        title={g.customName === "" ? g.groupName : g.customName}
                         actionGroup={
                           <div className="actions">
                             <DropdownMenu
@@ -415,6 +474,22 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
                   selectedGroup.groupName,
                 );
                 */
+            }
+            }
+            refresh={refresh}
+          />
+
+          <ReportConfirmModal
+            entityName={selectedGroup?.groupName ?? ""}
+            show={showReportConfirmModal}
+            setShow={setShowReportConfirmModal}
+            onDelete={() => {
+              if (selectedReport) {
+                childSelector.groups = [];
+                handleSelectChange(selectedReport, "reportId", childSelector, setChildSelector);
+              }
+              //childSelector.groups = childSelector.groups.filter(x => x.groupName != selectedGroup?.groupName);
+
             }
             }
             refresh={refresh}

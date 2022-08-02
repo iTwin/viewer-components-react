@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { DropdownMenu, Fieldset, LabeledInput, Small, ToggleSwitch, ComboBox, SelectOption } from "@itwin/itwinui-react";
+import { DropdownMenu, Fieldset, LabeledInput, Small, ToggleSwitch, ComboBox, SelectOption, LabeledSelect } from "@itwin/itwinui-react";
 import {
   SvgAdd,
   SvgCopy,
@@ -16,7 +16,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { ODataItem } from "@itwin/insights-client";
 import { Button, Table, toaster, Label, Surface, MenuItem, IconButton } from "@itwin/itwinui-react";
 //import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleInputChange, WidgetHeader } from "./utils";
+import { handleError, handleInputChange, WidgetHeader } from "./utils";
 import "./GroupAction.scss";
 //import { useMappingClient } from "./context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
@@ -29,6 +29,7 @@ import { DropdownTile } from "./DropdrownTile";
 import { SearchBar } from "./SearchBar";
 import DeleteModal from "./DeleteModal";
 import { clearAll } from "./viewerUtils";
+import useValidator, { NAME_REQUIREMENTS } from "./hooks/useValidator";
 //import { DropdownInput } from "@itwin/itwinui-react";
 //import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
@@ -92,14 +93,20 @@ const GroupAction = ({ selector, goBack, group, resetView, setSelector }: GroupA
   //var selectedGroup: Group | undefined;
 
   const [groupName, setGroupName] = useState<string>();
-  const [elementColumn, setElementColumn] = useState<string>();
+  const [customName, setCustomName] = useState<string>();
+  const [element, setElement] = useState<string>();
   const [elementQuantity, setElementQuantity] = useState<string>();
   const [selectedPair, setSelectedPair] = useState<Pair>();
   //const [material, setMaterialColumn] = useState<string>();
   //const [quantity, setQuantityColumn] = useState<string>();
 
-  const [pairs, setPairs] = useState<(Pair)[]>([]);
+  const [pairs, setPairs] = useState<Pair[]>([]);
+  //const [pair, setPair] = useState<Pair>();
+  //const [pairs, setPairs] = useState<pair>();
+
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+
+  const [validator, showValidationMessage] = useValidator();
   //const [group, setGroup] = useState<Group | undefined>(selGroup);
 
   /*
@@ -176,22 +183,33 @@ const GroupAction = ({ selector, goBack, group, resetView, setSelector }: GroupA
 
   const onSave = async () => {
 
+    /*
+    if (group) {
+      group.groupName = groupName ?? group.groupName;
+      group.customName = customName ?? group.customName;
+      group.itemName = elementColumn ?? group.groupName;
+      group.itemQuantity = elementQuantity ?? group.itemQuantity;
+      group.pairs = pairs ?? group.pairs;
+    }
+    */
+
     const selectedGroup: Group = {
-      groupName: groupName ?? "",
-      itemName: elementColumn ?? "",
-      itemQuantity: elementQuantity ?? "",
-      pairs: (pairs ?? []),
+      groupName: groupName ?? group?.groupName ?? "",
+      customName: customName ?? group?.customName ?? "",
+      itemName: element ?? group?.itemName ?? "",
+      itemQuantity: elementQuantity ?? group?.itemQuantity ?? "",
+      pairs: pairs ?? group?.pairs ?? [],
     }
 
-    var updated = false;
-    for (let i = 0; i < selector.groups.length; i++) {
-      if (selector.groups[i].groupName === selectedGroup.groupName) {
-        selector.groups[i] = selectedGroup;
-        updated = true;
-        break;
+    if (group) {
+      for (let i = 0; i < selector.groups.length; i++) {
+        if (selector.groups[i].groupName === group.groupName) {
+          selector.groups[i] = selectedGroup;
+          break;
+        }
       }
     }
-    if (!updated) {
+    else {
       selector.groups.push(selectedGroup);
     }
 
@@ -273,19 +291,35 @@ const GroupAction = ({ selector, goBack, group, resetView, setSelector }: GroupA
 
   const StringColumnOptions = useMemo(() => {
 
-    return availableStringColumns?.map((col) => ({
+    const options = availableStringColumns?.map((col) => ({
       label: col,
       value: col,
     })) ?? [];
+
+
+
+    if (availableStringColumns.indexOf(element ?? "") == -1) {
+      setElement(undefined);
+    }
+
+
+    return options;
 
   }, [availableStringColumns]);
 
   const NumericalColumnOptions = useMemo(() => {
-
-    return availableNumericalColumns?.map((col) => ({
+    const options = availableNumericalColumns?.map((col) => ({
       label: col,
       value: col,
     })) ?? [];
+
+
+
+    if (availableNumericalColumns.indexOf(elementQuantity ?? "") == -1) {
+      setElementQuantity(undefined);
+    }
+
+    return options;
 
   }, [availableNumericalColumns]);
 
@@ -377,7 +411,20 @@ console.error(err);
 
   useEffect(() => {
 
-    setPairs(group?.pairs ?? []);
+    if (group) {
+      setGroupName(group.groupName);
+      setCustomName(group.customName);
+      setElement(group.itemName);
+      setElementQuantity(group.itemQuantity);
+      setPairs(group.pairs.map(x => { return { material: x.material, quantity: x.quantity } })); // creating a copy of array, so original isn't modified
+      updateColumns(group.groupName);
+    }
+    else {
+      setElement("UserLabel");
+    }
+
+    //setPairs(group?.pairs ?? []);
+
     //setGroups
 
     if (!IModelApp.authorizationClient)
@@ -450,70 +497,132 @@ console.error(err);
             Asterisk * indicates mandatory fields.
           </Small>
 
-
-          <Label htmlFor="group-combo-input">
-            Label
-          </Label>
-          <ComboBox
+          <LabeledSelect
+            label="Label"
+            id='label'
+            required
             options={groupOptions}
-            value={group?.groupName ?? groupName}
+            value={groupName}
             onChange={async (value) => {
-              //setGroupName(value);
-              updateColumns(value);
-              setGroupName(value);
-              //setSelectedGroupName(value);
-              //selectedGroup.groupName = value;
-              //setGroup(value);
 
+
+              setGroupName(value);
+              updateColumns(value);
+
+              /*
+              if (element) {
+                if (availableStringColumns.indexOf(element) == -1) {
+                  setElement(undefined);
+                }
+              }
+
+              pairs.forEach(pair => {
+                if (pair.material) {
+                  if (availableStringColumns.indexOf(pair.material) == -1) {
+                    pair.material = undefined;
+                  }
+                }
+              });
+
+              refresh();
+              */
             }}
-            inputProps={{
-              id: "group-combo-input",
-              placeholder: "Label",
+            message={validator.message(
+              "label",
+              groupName,
+              NAME_REQUIREMENTS,
+            )}
+            status={
+              validator.message(
+                "label",
+                groupName,
+                NAME_REQUIREMENTS,
+              )
+                ? "negative"
+                : undefined
+            }
+            onBlur={() => {
+              validator.showMessageFor("label");
+            }}
+
+          />
+
+          <LabeledInput
+            id='customLabel'
+            name='customLabel'
+            label='Custom label'
+            value={customName}
+            onChange={(event) => {
+              setCustomName(event.target.value);
+              //handleInputChange(event, childSelector, setChildSelector);
             }}
           />
 
           <div className="body">
             <div className="combo-field">
-              <Label htmlFor="item-combo-input">
-                Element
-              </Label>
-              <ComboBox
+              <LabeledSelect
+                label="Element"
+                id='element'
+                required
                 options={StringColumnOptions}
-                value={group?.itemName ?? elementColumn ?? "UserLabel"}
+                value={element}
                 onChange={async (value) => {
-                  setElementColumn(value);
-                  //groupLabel?.element.material = value;
-                  //handleInputChange(event, value, setGroup);
-                  //setMaterialColumn(value);
-                  //await runExtraction(value);
+                  setElement(value);
                 }}
-                inputProps={{
-                  id: "item-combo-input",
-                  placeholder: "Element",
+                message={validator.message(
+                  "element",
+                  element,
+                  NAME_REQUIREMENTS,
+                )}
+                status={
+                  validator.message(
+                    "element",
+                    element,
+                    NAME_REQUIREMENTS,
+                  )
+                    ? "negative"
+                    : undefined
+                }
+                onBlur={() => {
+                  validator.showMessageFor("element");
                 }}
               />
             </div>
 
+
+
             <div className="combo-field">
-              <Label htmlFor="item-combo-input">
-                Element quantity
-              </Label>
-              <ComboBox
+              <LabeledSelect
+                label="Element quantity"
+                id='elementQuantity'
+                required
                 options={NumericalColumnOptions}
-                value={group?.itemQuantity ?? elementQuantity}
+                value={elementQuantity}
                 onChange={async (value) => {
                   setElementQuantity(value);
-                  //groupLabel?.element.material = value;
-                  //handleInputChange(event, value, setGroup);
-                  //setMaterialColumn(value);
-                  //await runExtraction(value);
+                  console.log(value);
                 }}
-                inputProps={{
-                  id: "item-combo-input",
-                  placeholder: "Element quantity",
+                message={validator.message(
+                  "elementQuantity",
+                  elementQuantity,
+                  NAME_REQUIREMENTS,
+                )}
+                status={
+                  validator.message(
+                    "elementQuantity",
+                    elementQuantity,
+                    NAME_REQUIREMENTS,
+                  )
+                    ? "negative"
+                    : undefined
+                }
+                onBlur={() => {
+                  validator.showMessageFor("elementQuantity");
                 }}
               />
             </div>
+
+
           </div>
           <div className="pair-list">
             {pairs.map((pair) => (
@@ -522,9 +631,13 @@ console.error(err);
                 numericalColumnOptions={NumericalColumnOptions}
                 materialValue={pair.material ?? ""}
                 quantityValue={pair.quantity ?? ""}
+                validator={validator}
                 onMaterialChange={(value) => {
                   //setMaterialColumn(value);
                   pair.material = value;
+                  //setMaterial(value);
+                  //pairs = [];
+                  refresh();
                 }}
                 onQuantityChange={(value) => {
                   //setMaterialColumn(value);
@@ -562,11 +675,12 @@ console.error(err);
                   </div>
                 }
               />
+
             ))}
             <Button
               className="button"
               startIcon={<SvgAdd />}
-              onClick={() => { addPair() }}
+              onClick={addPair}
               styleType="high-visibility"
             >
               {"Add material"}
@@ -594,8 +708,37 @@ console.error(err);
 
       <ActionPanel
         onSave={async () => {
-          onSave();
-          await goBack();
+
+          /*
+          if (element && availableStringColumns.indexOf(element) === -1) {
+            setElement("");
+          }
+
+          if (elementQuantity && availableNumericalColumns.indexOf(elementQuantity) === -1) {
+
+            setElementQuantity(undefined);
+          }
+          */
+
+          var valid = true;
+          pairs.forEach(pair => {
+            if (availableStringColumns.indexOf(pair.material ?? "") === -1) {
+              toaster.negative("Not all materials are selected")
+              valid = false;
+            }
+          });
+
+
+
+          if (!validator.allValid()) {
+            showValidationMessage(true);
+            return;
+          }
+
+          if (valid) {
+            onSave();
+            await goBack();
+          }
         }
         }
         onCancel={goBack}

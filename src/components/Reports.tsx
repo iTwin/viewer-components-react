@@ -14,7 +14,7 @@ import ExportModal from "./ExportModal";
 import { clearAll } from "./viewerUtils";
 import DataSelector from "./DataSelector";
 import "./Reports.scss";
-import GroupSelector from "./GroupSelector";
+//import GroupSelector from "./GroupSelector";
 
 type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
@@ -211,7 +211,7 @@ const Reports = () => {
           <ExportModal
             isOpen={modalIsOpen}
             close={() => openModal(false)}
-            reportId={selectedReport?.id}
+            templateId={selectedReport?.id}
           />
         </>
       );
