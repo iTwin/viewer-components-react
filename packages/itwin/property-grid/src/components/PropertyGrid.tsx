@@ -15,7 +15,6 @@ import type {
 } from "@itwin/components-react";
 import {
   PropertyValueRendererManager,
-  VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
 import {
   ContextMenuItem,
@@ -71,7 +70,6 @@ export const PropertyGrid = ({
   rootClassName,
   dataProvider: propDataProvider,
   onBackButton,
-  disableUnifiedSelection,
   instanceKey,
   autoExpandChildCategories,
   headerContent,
@@ -433,33 +431,19 @@ export const PropertyGrid = ({
 
     return (
       <div ref={ref} style={{ width: "100%", height: "100%" }}>
-        {disableUnifiedSelection ? (
-          <VirtualizedPropertyGridWithDataProvider
-            orientation={orientation ?? Orientation.Horizontal}
-            isOrientationFixed={isOrientationFixed ?? true}
-            dataProvider={dataProvider}
-            isPropertyHoverEnabled={true}
-            isPropertySelectionEnabled={true}
-            onPropertyContextMenu={onPropertyContextMenu}
-            actionButtonRenderers={actionButtonRenderers}
-            width={width}
-            height={height}
-          />
-        ) : (
-          <FilteringPropertyGridWithUnifiedSelection
-            orientation={orientation ?? Orientation.Horizontal}
-            isOrientationFixed={isOrientationFixed ?? true}
-            dataProvider={dataProvider}
-            filterer={filterer}
-            isPropertyHoverEnabled={true}
-            isPropertySelectionEnabled={true}
-            onPropertyContextMenu={onPropertyContextMenu}
-            actionButtonRenderers={actionButtonRenderers}
-            width={width}
-            height={height}
-            autoExpandChildCategories={autoExpandChildCategories}
-          />
-        )}
+        <FilteringPropertyGridWithUnifiedSelection
+          orientation={orientation ?? Orientation.Horizontal}
+          isOrientationFixed={isOrientationFixed ?? true}
+          dataProvider={dataProvider}
+          filterer={filterer}
+          isPropertyHoverEnabled={true}
+          isPropertySelectionEnabled={true}
+          onPropertyContextMenu={onPropertyContextMenu}
+          actionButtonRenderers={actionButtonRenderers}
+          width={width}
+          height={height}
+          autoExpandChildCategories={autoExpandChildCategories}
+        />
       </div>
     );
   };
