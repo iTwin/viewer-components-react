@@ -32,8 +32,8 @@ async function fetchMetadata(token: string, reportingClientApi: ReportingClient,
 }
 
 const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps) => {
-  const [groupName, setGroupName] = useState<string>(group?.groupName ?? "");
-  const [customName, setCustomName] = useState<string>(group?.customName ?? "");
+  const [reportTable, setReportTable] = useState<string>(group?.groupName ?? "");
+  const [label, setLabel] = useState<string>(group?.customName ?? "");
   const [element, setElement] = useState<string>(group?.itemName ?? "UserLabel");
   const [elementQuantity, setElementQuantity] = useState<string>(group?.itemQuantity ?? "");
   const [selectedPair, setSelectedPair] = useState<Pair>();
@@ -49,8 +49,8 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
 
   const onSave = async () => {
     const selectedGroup: Group = {
-      groupName: groupName,
-      customName: customName,
+      groupName: reportTable,
+      customName: label,
       itemName: element,
       itemQuantity: elementQuantity,
       pairs: pairs,
@@ -111,6 +111,7 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
   }, [availableGroups]);
 
 
+
   const StringColumnOptions = useMemo(() => {
     const options = availableStringColumns?.map((col) => ({
       label: col,
@@ -123,6 +124,18 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
 
     return options;
   }, [availableStringColumns]);
+
+  const getStringColumnOptions = ((material: string | undefined) => {
+    const options = StringColumnOptions
+      .filter(x => pairs.filter(p => p.material === x.label).length === 0)
+      .filter(x => x.label !== element);
+
+
+    if (material)
+      options.push({ label: material, value: material });
+    return options;
+  })
+
 
   const NumericalColumnOptions = useMemo(() => {
     const options = availableNumericalColumns?.map((col) => ({
@@ -185,8 +198,8 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
 
 
     if (group) {
-      setGroupName(group.groupName);
-      setCustomName(group.customName);
+      setReportTable(group.groupName);
+      setLabel(group.customName);
       setElement(group.itemName);
       setElementQuantity(group.itemQuantity);
       setPairs(group.pairs.map(x => { return { material: x.material, quantity: x.quantity } })); // creating a copy of array, so original isn't modified
@@ -253,24 +266,29 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
           </Small>
 
           <LabeledSelect
-            label="Label"
-            id='label'
+            label="Report table"
+            id='reportTable'
             required
             options={groupOptions}
-            value={groupName}
+            value={reportTable}
             onChange={async (value) => {
-              setGroupName(value);
+              if (value !== reportTable) {
+                setPairs([]);
+                setLabel(value);
+              }
+
+              setReportTable(value);
               updateColumns(value);
             }}
             message={validator.message(
-              "label",
-              groupName,
+              "reportTable",
+              reportTable,
               NAME_REQUIREMENTS,
             )}
             status={
               validator.message(
-                "label",
-                groupName,
+                "reportTable",
+                reportTable,
                 NAME_REQUIREMENTS,
               )
                 ? "negative"
@@ -281,12 +299,12 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
             }}
           />
           <LabeledInput
-            id='customLabel'
-            name='customLabel'
-            label='Custom label'
-            value={customName}
+            id='label'
+            name='label'
+            label='Label'
+            value={label}
             onChange={(event) => {
-              setCustomName(event.target.value);
+              setLabel(event.target.value);
             }}
           />
           <div className="body">
@@ -295,7 +313,7 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
                 label="Element"
                 id='element'
                 required
-                options={StringColumnOptions}
+                options={getStringColumnOptions(element)}
                 value={element}
                 onChange={async (value) => {
                   setElement(value);
@@ -354,17 +372,27 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
           <div className="pair-list">
             {pairs.map((pair) => (
               <DropdownTile
-                stringColumnOptions={StringColumnOptions}
+                stringColumnOptions={getStringColumnOptions(pair.material)}
                 numericalColumnOptions={NumericalColumnOptions}
                 materialValue={pair.material ?? ""}
                 quantityValue={pair.quantity ?? ""}
                 validator={validator}
-                onMaterialChange={(value) => {
-                  pair.material = value;
-                  refresh();
+                onMaterialChange={async (value) => {
+                  const newPairs = pairs.map(x => { return { material: x.material, quantity: x.quantity } });
+                  newPairs.forEach(p => {
+                    if (p.material === pair.material)
+                      p.material = value;
+                  });
+
+                  //pair.material = value;//setState
+                  setPairs(newPairs);
+                  //console.log(pairs);
+                  //refresh();
                 }}
                 onQuantityChange={(value) => {
+
                   pair.quantity = value;
+
                 }}
                 actionGroup={
                   <div className="actions">
@@ -422,6 +450,7 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
 
       <ActionPanel
         onSave={async () => {
+          /*
           var valid = true;
           pairs.forEach(pair => {
             if (availableStringColumns.indexOf(pair.material ?? "") === -1) {
@@ -429,15 +458,14 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
               valid = false;
             }
           });
+          */
           if (!validator.allValid()) {
             showValidationMessage(true);
             return;
           }
 
-          if (valid) {
-            onSave();
-            await goBack();
-          }
+          onSave();
+          await goBack();
         }
         }
         onCancel={goBack}

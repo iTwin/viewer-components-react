@@ -200,16 +200,6 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
               await goBack();
             }}
           />
-          <TemplateActionPanel
-            onSave={onSave}
-            onCancel={goBack}
-            onExport={async () => {
-              //const res = await authenticateClientCredentials();
-              //console.log(res);
-            }}
-            isSavingDisabled={!childSelector.templateName || !childSelector.reportId}
-            isLoading={isLoading}
-          />
           <div className='details-form-container'>
             <Fieldset legend='Template Details' className='details-form'>
               <Small className='field-legend'>
@@ -308,6 +298,16 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
               </Surface>
             </Fieldset>
           </div>
+          <TemplateActionPanel
+            onSave={onSave}
+            onCancel={goBack}
+            onExport={async () => {
+              //const res = await authenticateClientCredentials();
+              //console.log(res);
+            }}
+            isSavingDisabled={!childSelector.templateName || !childSelector.reportId}
+            isLoading={isLoading}
+          />
 
           <ExportModal
             isOpen={modalIsOpen}
