@@ -397,59 +397,60 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
                 }}
               />
 
-            </Fieldset>
-            <Surface className="groups-container">
-              <div className="group-list">
-                {
-                  childSelector.groups
-                    .map((g) => (
-                      <GroupTile
-                        title={g.customName === "" ? g.groupName : g.customName}
-                        actionGroup={
-                          <div className="actions">
-                            <DropdownMenu
-                              menuItems={(close: () => void) => [
-                                <MenuItem
-                                  key={2}
-                                  onClick={() => {
-                                    setSelectedGroup(g);
-                                    setShowDeleteModal(true);
-                                    close();
-                                  }}
-                                  icon={<SvgDelete />}
-                                >
-                                  Remove
-                                </MenuItem>,
-                              ]}
-                            >
-                              <IconButton
-                                styleType="borderless"
+
+              <Surface className="groups-container">
+                <div className="group-list">
+                  {
+                    childSelector.groups
+                      .map((g) => (
+                        <GroupTile
+                          title={g.customName === "" ? g.groupName : g.customName}
+                          actionGroup={
+                            <div className="actions">
+                              <DropdownMenu
+                                menuItems={(close: () => void) => [
+                                  <MenuItem
+                                    key={2}
+                                    onClick={() => {
+                                      setSelectedGroup(g);
+                                      setShowDeleteModal(true);
+                                      close();
+                                    }}
+                                    icon={<SvgDelete />}
+                                  >
+                                    Remove
+                                  </MenuItem>,
+                                ]}
                               >
-                                <SvgMore
-                                  style={{
-                                    width: "16px",
-                                    height: "16px",
-                                  }}
-                                />
-                              </IconButton>
-                            </DropdownMenu>
-                          </div>
-                        }
-                        onClickTitle={() => {
-                          setSelectedGroup(g);
-                          setGroupsView(GroupsView.MODIFY);
-                          refresh();
-                        }}
-                      />
-                    ))}
-                <Button
-                  styleType="high-visibility"
-                  onClick={addGroup}
-                >
-                  {"Add Label"}
-                </Button>
-              </div>
-            </Surface>
+                                <IconButton
+                                  styleType="borderless"
+                                >
+                                  <SvgMore
+                                    style={{
+                                      width: "16px",
+                                      height: "16px",
+                                    }}
+                                  />
+                                </IconButton>
+                              </DropdownMenu>
+                            </div>
+                          }
+                          onClickTitle={() => {
+                            setSelectedGroup(g);
+                            setGroupsView(GroupsView.MODIFY);
+                            refresh();
+                          }}
+                        />
+                      ))}
+                  <Button
+                    styleType="high-visibility"
+                    onClick={addGroup}
+                  >
+                    {"Add Label"}
+                  </Button>
+                </div>
+              </Surface>
+            </Fieldset>
           </div>
 
 

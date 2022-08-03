@@ -81,6 +81,7 @@ const Templates = () => {
 
     const selectors = selectorClient.getSelectorsT();
     setTemplates(selectors);
+    setFilteredTemplates(selectors);
     setIsLoading(false);
   }
 
@@ -313,7 +314,7 @@ const Templates = () => {
             <div className="e_c_3-scrollable-table">
               <Table<TemplateType>
                 className="e_c_3-reports-table"
-                data={templates}
+                data={filteredTemplates}
                 density="extra-condensed"
                 columns={templatesColumns}
                 emptyTableContent="No items available."
