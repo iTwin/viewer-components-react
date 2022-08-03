@@ -70,6 +70,7 @@ export const PropertyGrid = ({
   rootClassName,
   dataProvider: propDataProvider,
   onBackButton,
+  disableUnifiedSelection,
   instanceKey,
   autoExpandChildCategories,
   headerContent,
@@ -443,6 +444,7 @@ export const PropertyGrid = ({
           width={width}
           height={height}
           autoExpandChildCategories={autoExpandChildCategories}
+          disableUnifiedSelection={disableUnifiedSelection}
         />
       </div>
     );

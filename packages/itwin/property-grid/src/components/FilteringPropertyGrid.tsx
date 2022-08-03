@@ -71,11 +71,11 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
 }
 
 type CustomPropertyDataProvider<TPropertyData> = IDisposable &
-Omit<IPropertyDataProvider, "getData"> & {
-  getData: () => Promise<TPropertyData>;
-};
+  Omit<IPropertyDataProvider, "getData"> & {
+    getData: () => Promise<TPropertyData>;
+  };
 class AutoExpandingPropertyFilterDataProvider<TPropertyData extends PropertyData>
-implements IPropertyDataProvider, IDisposable {
+  implements IPropertyDataProvider, IDisposable {
   public onDataChanged = new PropertyDataChangeEvent();
   private _removeListener: () => void;
   private _autoExpandChildCategories = true;
@@ -116,6 +116,7 @@ interface FilteringPropertyGrid
   extends VirtualizedPropertyGridWithDataProviderProps {
   filterer: PropertyDataFiltererBase;
   autoExpandChildCategories?: boolean;
+  disableUnifiedSelection?: boolean;
 }
 
 export const FilteringPropertyGridWithUnifiedSelection = (
@@ -130,7 +131,7 @@ export const FilteringPropertyGridWithUnifiedSelection = (
     ),
   }), []);
 
-  const { isOverLimit } = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider as IPresentationPropertyDataProvider });
+  const { isOverLimit } = props.disableUnifiedSelection ? { isOverLimit: false } : usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider as IPresentationPropertyDataProvider });
 
   const filteringDataProvider = useDisposable(useCallback(
     () => new FilteringPropertyDataProvider(
