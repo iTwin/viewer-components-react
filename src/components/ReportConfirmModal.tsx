@@ -14,26 +14,24 @@ import "./DeleteModal.scss";
 import { handleError, LoadingSpinner } from "./utils";
 
 export interface ReportConfirmModalProps {
-  entityName: string;
   show: boolean;
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
-  onDelete: () => void;
+  onConfirm: () => void;
   refresh: () => Promise<void>;
 }
 
 export const ReportConfirmModal = ({
-  entityName,
   show,
   setShow,
-  onDelete,
+  onConfirm,
   refresh,
 }: ReportConfirmModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const deleteCallback = async () => {
+  const confirmCallback = async () => {
     try {
       setIsLoading(true);
-      await onDelete();
+      await onConfirm();
       setShow(false);
       await refresh();
     } catch (error: any) {
@@ -64,7 +62,7 @@ export const ReportConfirmModal = ({
             <div className="loading-delete">
               <LoadingSpinner />
             </div>}
-          <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>
+          <Button styleType='high-visibility' onClick={confirmCallback} disabled={isLoading}>
             Confirm
           </Button>
           <Button

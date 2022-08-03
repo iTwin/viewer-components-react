@@ -2,78 +2,45 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Fieldset, LabeledInput, LabeledSelect, Small, ComboBox, SelectOption, Label } from "@itwin/itwinui-react";
-import { SearchBox } from "@itwin/core-react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { Fieldset, LabeledInput, LabeledSelect, Small, SelectOption } from "@itwin/itwinui-react";
 import { IModelApp } from "@itwin/core-frontend";
-import { GroupItem, useActiveIModelConnection } from "@itwin/appui-react";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { Report } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
-import { WidgetHeader, LoadingOverlay, EmptyMessage, handleSelectChange } from "./utils";
-import { ODataItem } from "@itwin/insights-client";
-import { ODataResponse } from "@itwin/insights-client";
-//import { Group } from "@itwin/insights-client";
-import { ReportSingle } from "@itwin/insights-client";
+import { WidgetHeader, handleSelectChange } from "./utils";
 import ExportModal from "./ExportModal";
-import { ECProperty } from "@itwin/insights-client";
 import SelectorClient from "./selectorClient";
 import GroupAction from "./GroupAction";
 import { Selector, Group } from "./Selector"
 import { GroupTile } from "./GroupTile";
 import DeleteModal from "./DeleteModal";
-import { handleError, handleInputChange } from "./utils";
-import ActionPanel from "./ActionPanel";
+import { handleInputChange } from "./utils";
 import TemplateActionPanel from "./TemplateActionPanel";
 import ReportConfirmModal from "./ReportConfirmModal";
 
 import {
   clearEmphasizedElements,
   clearEmphasizedOverriddenElements,
-  clearHiddenElements,
-  clearOverriddenElements,
-  emphasizeElements,
-  getHiliteIds,
-  hideElements,
-  hideElementsById,
-  overrideElements,
-  zoomToElements,
 } from "./viewerUtils";
 
 import {
-  SvgAdd,
   SvgDelete,
-  SvgEdit,
-  SvgList,
   SvgMore,
-  SvgVisibilityHide,
-  SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
 
 import {
   Button,
-  ButtonGroup,
   DropdownMenu,
   IconButton,
   MenuItem,
-  ProgressRadial,
   Surface,
   toaster,
-  ToggleSwitch,
 } from "@itwin/itwinui-react";
-
-import Items from "./Items";
 import "./Reports.scss";
-
-
-//type CreateTypeFromInterface<Interface> = {
-//  [Property in keyof Interface]: Interface[Property];
-//};
 
 interface SelectorProps {
   selector?: Selector;
-  //templateId: string;
-  //reportId: string;
-  //reportName: string;
   goBack: () => Promise<void>;
 }
 
@@ -82,9 +49,6 @@ enum GroupsView {
   ADD = "add",
   MODIFY = "modify"
 }
-
-
-
 
 const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
   const selectorClient = new SelectorClient();
@@ -97,8 +61,6 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
   const [selectedReport, setSelectedReport] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
   const [availableReports, setReports] = useState<Report[]>([]);
-
-
   const [childSelector, setChildSelector] = useState<Selector>(selector ?? {
     reportId: "",
     templateDescription: "",
@@ -106,63 +68,17 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
     groups: []
   });
 
-  //const [report, setReport] = useState<string>();
-
-  /*
-  const [values, setValues] = useState({
-    name: selector?.templateName ?? "",
-    description: selector?.templateDescription ?? "",
-    reportId: selector?.reportId ?? "",
-    //groups: selector?.groups ?? [],
-    //id: selector?.id,
-  });
-  */
   const [groupsView, setGroupsView] = useState<GroupsView>(
     GroupsView.GROUPS
   );
 
   const onSave = async () => {
-
-    /*
-    const selector: Selector = {
-      //id: values.id,
-      templateName: values.name,
-      templateDescription: values.description,
-      reportId: values.reportId,
-      //groups: values.groups,
-    }
-    */
-    /*
-     if (childSelector) {
-       childSelector.reportId = values.reportId;
-       childSelector.templateDescription = values.description;
-       childSelector.templateName = values.name;
-     }
-     else {
-       setChildSelector({
-         reportId: values.reportId,
-         templateDescription: values.description,
-         templateName: values.name,
-         groups: []
-       })
-     }*/
-
-    //childSelector.reportId = values.reportId;
-    //childSelector.templateDescription = values.description;
-    //childSelector.templateName = values.name;
-
-    selectorClient.createUpdateSelector(childSelector!);
-    /*
-    if (selector.id)
-      selectorClient.updateSelector(selector);
-    else
-      selectorClient.createSelector(selector);
-    */
-
+    selectorClient.createUpdateSelector(childSelector);
     goBack();
   };
 
   useEffect(() => {
+    setIsLoading(true);
 
     if (!IModelApp.authorizationClient)
       throw new Error(
@@ -175,10 +91,8 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
           .getReports(token, projectId)
           .then((data) => {
             if (data) {
-              const fetchedReports = data ?? [];
-              //const reports = fetchedReports.map(x => x.displayName ?? "");
+              const fetchedReports = data;
               setReports(fetchedReports);
-              //setFilteredReports(fetchedReports);
               setIsLoading(false);
             }
           })
@@ -194,29 +108,7 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
         /* eslint-disable no-console */
         console.error(err);
       });
-    //load();
   }, []);
-
-  const groupColumns = useMemo(
-    () => [
-      {
-        Header: "Table",
-        columns: [
-          {
-            id: "groupName",
-            Header: "GroupName",
-            accessor: "groupName",
-          },
-          {
-            id: "description",
-            Header: "Description",
-            accessor: "description",
-          },
-        ],
-      },
-    ],
-    []
-  );
 
   const addGroup = () => {
     clearEmphasizedElements();
@@ -225,7 +117,6 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
 
   const ReportOptions = useMemo(() => {
     const newGroupOptions: SelectOption<string>[] = [];
-
 
     for (const name of availableReports) {
       newGroupOptions.push({
@@ -237,8 +128,6 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
     return newGroupOptions;
   }, [availableReports]);
 
-
-
   const load = (() => {
     setIsLoading(true);
     setIsLoading(false);
@@ -246,10 +135,9 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
 
   const authenticateClientCredentials = ((): Promise<string> => {
     if (!window) {
-      //return "";
+
     }
 
-    //const uri = `https://${window.location.hostname}/signin-oauth/credentials/${authorizationServer.id}`;
     const uri = `https://buildingtransparency.org/auth/login`;
 
     return new Promise<string>((resolve) => {
@@ -261,47 +149,20 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
           console.log(authWindow);
         })
       }
-      //authWindow?.
-
       const loadWindow = async (event: any) => {
         console.log(event);
       };
-
-      /*
-      const receiveMessage = async (event: MessageEvent) => {
-        if (!event.data['accessToken']) {
-          return;
-        }
-
-        const accessToken = event.data['accessToken'];
-        const accessTokenType = event.data['accessTokenType'];
-        resolve(`${accessTokenType} ${accessToken}`);
-        if (authWindow && !authWindow.closed) {
-          authWindow.close();
-        }
-      };
-      */
-
-
-
-
       window?.addEventListener('message', loadWindow, false);
     });
   })
 
   useEffect(() => {
     load();
-
   }, []);
 
   const refresh = useCallback(async () => {
     load();
   }, []);
-
-  const resetView = async () => {
-    clearOverriddenElements();
-    clearEmphasizedElements();
-  }
 
   switch (groupsView) {
     case GroupsView.ADD:
@@ -313,20 +174,18 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
             setGroupsView(GroupsView.GROUPS);
             await refresh();
           }}
-          resetView={resetView}
           setSelector={setChildSelector}
         />
       );
     case GroupsView.MODIFY:
       return (
         <GroupAction
-          group={childSelector.groups.filter(x => x.groupName == selectedGroup?.groupName)[0]}
+          group={childSelector.groups.filter(x => x.groupName === selectedGroup?.groupName)[0]}
           selector={childSelector}
           goBack={async () => {
             setGroupsView(GroupsView.GROUPS);
             await refresh();
           }}
-          resetView={resetView}
           setSelector={setChildSelector}
         />
       );
@@ -334,7 +193,7 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
       return (
         <>
           <WidgetHeader
-            title={childSelector.templateName ?? "Create template"}
+            title={childSelector.templateName === "" ? "Create template" : childSelector.templateName}
             disabled={isLoading}
             returnFn={async () => {
               clearEmphasizedOverriddenElements();
@@ -345,10 +204,8 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
             onSave={onSave}
             onCancel={goBack}
             onExport={async () => {
-
-              const res = await authenticateClientCredentials();
-              console.log(res);
-              //openModal(true)
+              //const res = await authenticateClientCredentials();
+              //console.log(res);
             }}
             isSavingDisabled={!childSelector.templateName || !childSelector.reportId}
             isLoading={isLoading}
@@ -396,7 +253,6 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
                   }
                 }}
               />
-
 
               <Surface className="groups-container">
                 <div className="group-list">
@@ -446,13 +302,12 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
                     styleType="high-visibility"
                     onClick={addGroup}
                   >
-                    {"Add Label"}
+                    Add Label
                   </Button>
                 </div>
               </Surface>
             </Fieldset>
           </div>
-
 
           <ExportModal
             isOpen={modalIsOpen}
@@ -466,33 +321,19 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
             setShow={setShowDeleteModal}
             onDelete={() => {
               childSelector.groups = childSelector.groups.filter(x => x.groupName != selectedGroup?.groupName);
-
-
-              /*
-              if (selector.id && selectedGroup && selectedGroup.groupName) {
-                selectorClient.deleteGroup(
-                  selector.id,
-                  selectedGroup.groupName,
-                );
-                */
-            }
-            }
+            }}
             refresh={refresh}
           />
 
           <ReportConfirmModal
-            entityName={selectedGroup?.groupName ?? ""}
             show={showReportConfirmModal}
             setShow={setShowReportConfirmModal}
-            onDelete={() => {
+            onConfirm={() => {
               if (selectedReport) {
                 childSelector.groups = [];
                 handleSelectChange(selectedReport, "reportId", childSelector, setChildSelector);
               }
-              //childSelector.groups = childSelector.groups.filter(x => x.groupName != selectedGroup?.groupName);
-
-            }
-            }
+            }}
             refresh={refresh}
           />
         </>

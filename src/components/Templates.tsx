@@ -2,33 +2,20 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { SearchBox } from "@itwin/core-react";
-import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import DeleteModal from "./DeleteModal";
-import { Button, Label, Table, toaster, DropdownMenu, MenuItem, IconButton } from "@itwin/itwinui-react";
+import { Button, Table, DropdownMenu, MenuItem, IconButton } from "@itwin/itwinui-react";
 import {
-  SvgAdd,
   SvgDelete,
-  SvgEdit,
-  SvgConfiguration,
-  SvgImport,
   SvgMore,
-  SvgProcess,
 } from "@itwin/itwinui-icons-react";
-import type { Report } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
 import type { CellProps } from "react-table";
 import { WidgetHeader } from "./utils";
-import ExportModal from "./ExportModal";
-import { clearAll } from "./viewerUtils";
-import DataSelector from "./DataSelector";
 import "./Reports.scss";
-import DumbClient from "../dumb-client";
 import SelectorClient from "./selectorClient";
 import { Selector } from "./Selector"
-//import TemplateAction from "./TemplateAction";
 import TemplateMenu from "./TemplateMenu";
 
 
@@ -41,9 +28,6 @@ type TemplateType = CreateTypeFromInterface<Selector>;
 enum TemplateView {
   TEMPLATES = "templates",
   CREATE = "create",
-  //VIEW = "view",
-  //EDIT = "edit",
-  //CONFIGURE = "configure",
   MENU = "menu",
 }
 
@@ -51,11 +35,8 @@ const Templates = () => {
 
   const selectorClient = new SelectorClient;
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  //const reportingClientApi = useMemo(() => new ReportingClient(), []);
-
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [templates, setTemplates] = useState<Selector[]>([]);
-  const [buttonIsDisabled, disableButton] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [filteredTemplates, setFilteredTemplates] = useState<Selector[]>(templates);
   const [selectedTemplate, setSelectedTemplate] = useState<Selector>();
@@ -63,22 +44,13 @@ const Templates = () => {
     TemplateView.TEMPLATES
   );
 
-  const [modalIsOpen, openModal] = useState(false);
-
   const refresh = useCallback(async () => {
-    //clearAll();
     setTemplateView(TemplateView.TEMPLATES);
-    //setSelectedTemplate(undefined);
-    //setTemplates([]);
     load();
-
   }, []);
 
   function load() {
     setIsLoading(true);
-
-
-
     const selectors = selectorClient.getSelectorsT();
     setTemplates(selectors);
     setFilteredTemplates(selectors);
@@ -99,7 +71,6 @@ const Templates = () => {
                 className="iui-anchor"
                 onClick={() => {
                   setSelectedTemplate(value.row.original);
-
                   setTemplateView(TemplateView.MENU);
                 }}
               >
@@ -127,7 +98,6 @@ const Templates = () => {
                         setSelectedTemplate(value.row.original);
                         setShowDeleteModal(true);
                         close();
-                        //refresh();
                       }}
                       icon={<SvgDelete />}
                     >
@@ -154,7 +124,6 @@ const Templates = () => {
   );
 
   const onSearchBoxValueChanged = async (value: string) => {
-    disableButton(true);
     const filterTemplates = templates.filter(
       (x) =>
         x.templateName &&
@@ -174,95 +143,21 @@ const Templates = () => {
     return newState;
   };
 
-
-  const createTemplate = (() => {
-    setTemplateView(TemplateView.CREATE);
-    refresh();
-  })
-
   useEffect(() => {
     load();
-
-    /*
-    if (!IModelApp.authorizationClient)
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
-      */
-
-
-    /*
-  IModelApp.authorizationClient
-    .getAccessToken()
-    .then((token: string) => {
-      reportingClientApi
-        .getReports(token, projectId)
-        .then((data) => {
-          if (data) {
-            const fetchedReports = data ?? [];
-            setReports(fetchedReports);
-            setFilteredReports(fetchedReports);
-            setIsLoading(false);
-          }
-        })
-        .catch((err) => {
-          setIsLoading(false);
-          toaster.negative("You are not authorized to get reports for this projects. Please contact project administrator.");
-
-          console.error(err);
-        });
-    })
-    .catch((err) => {
-      toaster.negative("You are not authorized to use this system.");
-
-      //console.error(err);
-    });
-    */
   }, [projectId]);
 
-
-
   switch (templateView) {
-
-
 
     case TemplateView.CREATE:
       return (
         <TemplateMenu
-          selector={undefined}
           goBack={async () => {
             setTemplateView(TemplateView.TEMPLATES);
             await refresh();
           }}
         />
       );
-    /*
-        case TemplateView.EDIT:
-          return (
-            <TemplateAction
-              selector={selectedTemplate}
-              returnFn={async () => {
-                setTemplateView(TemplateView.TEMPLATES);
-                await refresh();
-              }}
-            />
-          );
-          */
-
-    /*
-  case TemplateView.CONFIGURE:
-    return (
-      <GroupSelector
-        selector={selectedTemplate!}
-        //templateId={selectedTemplate!.id!}
-        goBack={async () => {
-          setTemplateView(TemplateView.TEMPLATES);
-          await refresh();
-        }}
-      />
-    );
-    */
-
     case TemplateView.MENU:
       return (
         <TemplateMenu
@@ -274,20 +169,6 @@ const Templates = () => {
           }}
         />
       );
-
-    /*
-  case TemplateView.VIEW:
-    return (
-      <TemplateViewer
-        template={selectedTemplate}
-        goBack={async () => {
-          setTemplateView(TemplateView.TEMPLATES);
-          await refresh();
-        }}
-      />
-    );
-    */
-
     default:
       return (
         <>
@@ -298,7 +179,6 @@ const Templates = () => {
               styleType="high-visibility"
               onClick={() => {
                 setTemplateView(TemplateView.CREATE);
-                //refresh();
               }}
             >
               {"Create Template"}
