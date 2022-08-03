@@ -1,6 +1,20 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Mon, 18 Jul 2022 13:24:31 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Aug 2022 16:36:24 GMT and should not be manually modified.
+
+## 0.10.0
+Wed, 03 Aug 2022 16:36:24 GMT
+
+### Minor changes
+
+- Temporarily fix a problem in core-geometry where Ray3d.createStartEnd captures the origin point instead of copying it. This solves an issue where the DistanceMeasurement's start point was being modified when it shouldn't have. (This will be fixed with PR #4012 on itwinjs-core.)
+
+## 0.9.0
+Thu, 28 Jul 2022 13:50:39 GMT
+
+### Minor changes
+
+- Fix obtaining the initial tool settings value. onPostInstall is called after the tool settings is created. Ensure we only notify user once if the iModel is not geolocated. Found a problem where we would output a message on each mouse motion (using dynamic measurement) which would clutter the whole screen.
 
 ## 0.8.0
 Mon, 18 Jul 2022 13:24:31 GMT

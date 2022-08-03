@@ -307,7 +307,7 @@ export class DistanceMeasurement extends Measurement {
       return Point3d.createAdd2Scaled(this._startPoint, 0.5, this._endPoint, 0.5);
 
     const range = Range1d.createNull();
-    let ray = Ray3d.createStartEnd(this._startPoint, this._endPoint);
+    let ray = Ray3d.createStartEnd(this._startPoint.clone(), this._endPoint);
 
     // Either start/end or BOTH are outside the clip planes. If nothing intersects, don't bother displaying anything.
     if (!clipPlanes.hasIntersectionWithRay(ray, range))
@@ -322,7 +322,7 @@ export class DistanceMeasurement extends Measurement {
     }
 
     if (!endIn) {
-      ray = Ray3d.createStartEnd(this._endPoint, this._startPoint, ray);
+      ray = Ray3d.createStartEnd(this._endPoint.clone(), this._startPoint);
       if (clipPlanes.hasIntersectionWithRay(ray, range))
         clampedEndPoint = ray.fractionToPoint(range.high);
     }

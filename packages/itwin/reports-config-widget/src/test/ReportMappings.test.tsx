@@ -202,8 +202,7 @@ const mockMappingsFactory = (
 
   const iModelHandlers: RequestHandler[] = mockMappings.map((mapping) =>
     rest.get(
-      `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${
-        mapping.mapping?._links?.imodel?.href ?? ""
+      `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mapping.mapping?._links?.imodel?.href ?? ""
       }/mappings/${mapping.mapping?.id}`,
       async (_req, res, ctx) => {
         return res(ctx.delay(), ctx.status(200), ctx.json(mapping));
@@ -456,8 +455,7 @@ describe("Report Mappings View", () => {
       ),
       ...iModelHandlers,
       rest.delete(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings/${
-          mockReportMappings.mappings![0].mappingId ?? ""
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings/${mockReportMappings.mappings![0].mappingId ?? ""
         }`,
         async (_req, res, ctx) => {
           mockReportMappings.mappings = mockReportMappings.mappings!.filter(
@@ -632,30 +630,25 @@ describe("Report Mappings View", () => {
     for (let i = 0; i < mockMappings.length - 1; i++) {
       const row = screen.getByRole("row", {
         name: new RegExp(
-          `toggle row selected ${mockMappings[i].mapping?.mappingName} ${mockMappings[i].mapping?.description}`,
+          `${mockMappings[i].mapping?.mappingName} ${mockMappings[i].mapping?.description}`,
           "i"
         ),
       });
 
-      const checkbox = within(row).getByRole("checkbox", {
-        name: /toggle row selected/i,
-      });
+      const checkbox = within(row).getByRole("checkbox");
       expect(checkbox).toBeDisabled();
     }
 
     // Click on checkbox on new mapping
     const unmappedRow = screen.getByRole("row", {
       name: new RegExp(
-        `toggle row selected ${
-          mockMappings[mockMappings.length - 1].mapping?.mappingName
+        `${mockMappings[mockMappings.length - 1].mapping?.mappingName
         } ${mockMappings[mockMappings.length - 1].mapping?.description}`,
         "i"
       ),
     });
 
-    const enabledCheckbox = within(unmappedRow).getByRole("checkbox", {
-      name: /toggle row selected/i,
-    });
+    const enabledCheckbox = within(unmappedRow).getByRole("checkbox");
 
     await user.click(enabledCheckbox);
 
@@ -830,7 +823,7 @@ describe("Report Mappings View", () => {
     });
     await user.type(comboBox, mockIModel.displayName);
 
-    const option = screen.getByRole("option", {
+    const option = screen.getByRole("menuitem", {
       name: mockIModel.displayName,
     });
 

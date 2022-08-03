@@ -2,6 +2,18 @@
   "name": "@itwin/reports-config-widget-react",
   "entries": [
     {
+      "version": "0.0.4",
+      "tag": "@itwin/reports-config-widget-react_v0.0.4",
+      "date": "Thu, 28 Jul 2022 13:50:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed infinite loop in Report Mappings"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.0.3",
       "tag": "@itwin/reports-config-widget-react_v0.0.3",
       "date": "Fri, 24 Jun 2022 16:51:25 GMT",
