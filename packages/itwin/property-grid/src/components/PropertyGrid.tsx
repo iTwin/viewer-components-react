@@ -41,7 +41,7 @@ import type {
 } from "../types";
 import { PropertyGridDefaultContextMenuKey } from "../types";
 import {
-  FilteringPropertyGridWithUnifiedSelection,
+  FilteringPropertyGrid,
   NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
@@ -432,7 +432,7 @@ export const PropertyGrid = ({
 
     return (
       <div ref={ref} style={{ width: "100%", height: "100%" }}>
-        <FilteringPropertyGridWithUnifiedSelection
+        <FilteringPropertyGrid
           orientation={orientation ?? Orientation.Horizontal}
           isOrientationFixed={isOrientationFixed ?? true}
           dataProvider={dataProvider}

@@ -112,15 +112,15 @@ class AutoExpandingPropertyFilterDataProvider<TPropertyData extends PropertyData
   }
 }
 
-interface FilteringPropertyGrid
+interface FilteringPropertyGridProps
   extends VirtualizedPropertyGridWithDataProviderProps {
   filterer: PropertyDataFiltererBase;
   autoExpandChildCategories?: boolean;
   disableUnifiedSelection?: boolean;
 }
 
-export const FilteringPropertyGridWithUnifiedSelection = (
-  props: FilteringPropertyGrid
+export const FilteringPropertyGrid = (
+  props: FilteringPropertyGridProps
 ) => {
   const localizations = useMemo(() => ({
     tooManySelected: PropertyGridManager.translate(
@@ -131,7 +131,11 @@ export const FilteringPropertyGridWithUnifiedSelection = (
     ),
   }), []);
 
-  const { isOverLimit } = props.disableUnifiedSelection ? { isOverLimit: false } : usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider as IPresentationPropertyDataProvider });
+  let isOverLimit = false;
+  if (!props.disableUnifiedSelection) {
+    const res = usePropertyDataProviderWithUnifiedSelection({ dataProvider: props.dataProvider as IPresentationPropertyDataProvider });
+    isOverLimit = res.isOverLimit;
+  }
 
   const filteringDataProvider = useDisposable(useCallback(
     () => new FilteringPropertyDataProvider(
@@ -151,7 +155,7 @@ export const FilteringPropertyGridWithUnifiedSelection = (
       {isOverLimit ? (
         <FillCentered style={{ flexDirection: "column" }}>
           <div className="property-grid-react-filtering-pg-label">
-            { localizations.tooManySelected }
+            {localizations.tooManySelected}
           </div>
         </FillCentered>
       ) : (
