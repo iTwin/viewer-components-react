@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/property-grid-react",
-      "comment": "Using disableUnifiedSelection property to get FilteringPropertyGrid to work with multiple elements",
+      "comment": "Created FilteringPropertyGrid which is called directly when disableUnifiedSelection is true or called through FilteringPropertyGridWithUnifiedSelection when false",
       "type": "patch"
     }
   ],
