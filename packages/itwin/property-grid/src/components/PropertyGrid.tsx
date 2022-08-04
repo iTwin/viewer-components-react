@@ -42,6 +42,7 @@ import type {
 import { PropertyGridDefaultContextMenuKey } from "../types";
 import {
   FilteringPropertyGrid,
+  FilteringPropertyGridWithUnifiedSelection,
   NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
@@ -432,20 +433,35 @@ export const PropertyGrid = ({
 
     return (
       <div ref={ref} style={{ width: "100%", height: "100%" }}>
-        <FilteringPropertyGrid
-          orientation={orientation ?? Orientation.Horizontal}
-          isOrientationFixed={isOrientationFixed ?? true}
-          dataProvider={dataProvider}
-          filterer={filterer}
-          isPropertyHoverEnabled={true}
-          isPropertySelectionEnabled={true}
-          onPropertyContextMenu={onPropertyContextMenu}
-          actionButtonRenderers={actionButtonRenderers}
-          width={width}
-          height={height}
-          autoExpandChildCategories={autoExpandChildCategories}
-          disableUnifiedSelection={disableUnifiedSelection}
-        />
+        {disableUnifiedSelection ? (
+          <FilteringPropertyGrid
+            orientation={orientation ?? Orientation.Horizontal}
+            isOrientationFixed={isOrientationFixed ?? true}
+            dataProvider={dataProvider}
+            filterer={filterer}
+            isPropertyHoverEnabled={true}
+            isPropertySelectionEnabled={true}
+            onPropertyContextMenu={onPropertyContextMenu}
+            actionButtonRenderers={actionButtonRenderers}
+            width={width}
+            height={height}
+            autoExpandChildCategories={autoExpandChildCategories}
+          />
+        ) : (
+          <FilteringPropertyGridWithUnifiedSelection
+            orientation={orientation ?? Orientation.Horizontal}
+            isOrientationFixed={isOrientationFixed ?? true}
+            dataProvider={dataProvider}
+            filterer={filterer}
+            isPropertyHoverEnabled={true}
+            isPropertySelectionEnabled={true}
+            onPropertyContextMenu={onPropertyContextMenu}
+            actionButtonRenderers={actionButtonRenderers}
+            width={width}
+            height={height}
+            autoExpandChildCategories={autoExpandChildCategories}
+          />
+        )}
       </div>
     );
   };
