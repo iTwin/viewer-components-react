@@ -155,7 +155,7 @@ export const FilteringPropertyGrid = (
       {isOverLimit ? (
         <FillCentered style={{ flexDirection: "column" }}>
           <div className="property-grid-react-filtering-pg-label">
-            {localizations.tooManySelected}
+            { localizations.tooManySelected }
           </div>
         </FillCentered>
       ) : (
