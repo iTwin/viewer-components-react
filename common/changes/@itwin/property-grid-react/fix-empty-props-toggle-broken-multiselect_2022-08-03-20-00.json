@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Created FilteringPropertyGrid which is called directly when disableUnifiedSelection is true or called through FilteringPropertyGridWithUnifiedSelection when false",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
