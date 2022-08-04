@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.details-form-container {
+.label-details-container {
   overflow-x: auto;
   height: 100%;
 
-  .details-form {
+  .label-details {
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
@@ -23,10 +23,6 @@
   min-height: 0;
   height: 49%;
 
-  .odata-url-input {
-    margin-bottom: $iui-baseline * 2;
-  }
-
   .toolbar {
     display: flex;
     justify-content: space-between;
@@ -35,8 +31,6 @@
     padding-bottom: $iui-baseline;
     flex-wrap: wrap;
   }
-
-
 
   .search-bar-container {
     flex-basis: $iui-3xl;
@@ -62,16 +56,6 @@
   margin-right: $iui-xs;
   width: 49%;
   display: inline-block;
-}
-
-.combo-field-invisible {
-  margin-left: 0;
-  align-self: center;
-  min-width: 36px;
-  margin-right: $iui-xs;
-  width: 49%;
-  display: inline-block;
-  visibility: hidden;
 }
 
 .button {

@@ -5,9 +5,9 @@
 import type { ReactNode } from "react";
 import React from "react";
 import { Text } from "@itwin/itwinui-react";
-import "./GroupTile.scss";
+import "./LabelTile.scss";
 
-interface GroupTileProps {
+interface LabelTileProps {
   title: string;
   actionGroup: ReactNode;
   subText?: string;
@@ -16,10 +16,10 @@ interface GroupTileProps {
   subtextToolTip?: string;
 }
 
-export const GroupTile = ({ title, subText, onClickTitle, titleTooltip, subtextToolTip, actionGroup }: GroupTileProps) => {
+export const LabelTile = ({ title, subText, onClickTitle, titleTooltip, subtextToolTip, actionGroup }: LabelTileProps) => {
 
   return (
-    <div className="gmw-group-tile-container" data-testid="group-tile">
+    <div className="gmw-label-tile-container" data-testid="label-tile">
       <div className="body">
         <Text className={`body-text ${onClickTitle ? "iui-anchor" : ""}`} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
         {subText && <Text className="body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}

@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.e_c_3 {
+.template {
   &-scrollable-table {
     overflow-y: scroll;
     max-height: 90%;
@@ -40,5 +40,33 @@
     box-sizing: border-box;
     height: 100%;
     overflow: auto;
+  }
+}
+
+.template-details-container {
+  overflow-x: auto;
+  height: 100%;
+
+  .template-details {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline;
+  }
+}
+
+.labels-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: $iui-baseline $iui-m;
+  min-height: 0;
+
+  .labels-list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: overlay;
+    gap: 7.5px;
+    margin-top: 7.5px;
+
   }
 }

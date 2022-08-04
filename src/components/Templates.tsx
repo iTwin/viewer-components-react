@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SearchBox } from "@itwin/core-react";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import DeleteModal from "./DeleteModal";
 import { Button, Table, DropdownMenu, MenuItem, IconButton } from "@itwin/itwinui-react";
 import {
@@ -13,9 +12,9 @@ import {
 } from "@itwin/itwinui-icons-react";
 import type { CellProps } from "react-table";
 import { WidgetHeader } from "./utils";
-import "./Reports.scss";
-import SelectorClient from "./selectorClient";
-import { Selector } from "./Selector"
+import "./Templates.scss";
+import TemplateClient from "./templateClient";
+import { Template } from "./Template"
 import TemplateMenu from "./TemplateMenu";
 
 
@@ -23,7 +22,7 @@ type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
 };
 
-type TemplateType = CreateTypeFromInterface<Selector>;
+type TemplateType = CreateTypeFromInterface<Template>;
 
 enum TemplateView {
   TEMPLATES = "templates",
@@ -33,29 +32,32 @@ enum TemplateView {
 
 const Templates = () => {
 
-  const selectorClient = new SelectorClient;
-  const projectId = useActiveIModelConnection()?.iTwinId as string;
+  const templateClient = useMemo(() => { return new TemplateClient() }, []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [templates, setTemplates] = useState<Selector[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [filteredTemplates, setFilteredTemplates] = useState<Selector[]>(templates);
-  const [selectedTemplate, setSelectedTemplate] = useState<Selector>();
+  const [filteredTemplates, setFilteredTemplates] = useState<Template[]>(templates);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template>();
   const [templateView, setTemplateView] = useState<TemplateView>(
     TemplateView.TEMPLATES
   );
 
+
+  const load = useCallback(() => {
+    setIsLoading(true);
+    const templates = templateClient.getTemplatesT();
+    setTemplates(templates);
+    setFilteredTemplates(templates);
+    setIsLoading(false);
+  }, [templateClient])
+
+
   const refresh = useCallback(async () => {
     setTemplateView(TemplateView.TEMPLATES);
     load();
-  }, []);
+  }, [load]);
 
-  function load() {
-    setIsLoading(true);
-    const selectors = selectorClient.getSelectorsT();
-    setTemplates(selectors);
-    setFilteredTemplates(selectors);
-    setIsLoading(false);
-  }
+
 
   const templatesColumns = useMemo(
     () => [
@@ -66,7 +68,7 @@ const Templates = () => {
             id: "templateName",
             Header: "Template Name",
             accessor: "templateName",
-            Cell: (value: CellProps<Selector>) => (
+            Cell: (value: CellProps<Template>) => (
               <div
                 className="iui-anchor"
                 onClick={() => {
@@ -87,7 +89,7 @@ const Templates = () => {
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<Selector>) => {
+            Cell: (value: CellProps<Template>) => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
@@ -145,7 +147,7 @@ const Templates = () => {
 
   useEffect(() => {
     load();
-  }, [projectId]);
+  }, [load]);
 
   switch (templateView) {
 
@@ -161,7 +163,7 @@ const Templates = () => {
     case TemplateView.MENU:
       return (
         <TemplateMenu
-          selector={selectedTemplate!}
+          template={selectedTemplate!}
           //templateId={selectedTemplate!.id!}
           goBack={async () => {
             setTemplateView(TemplateView.TEMPLATES);
@@ -184,7 +186,7 @@ const Templates = () => {
               {"Create Template"}
             </Button>
           </div>
-          <div className="e_c_3-reports-container">
+          <div className="e_c_3-template-container">
             <div className="e_c_3-searchbox-container">
               <SearchBox
                 onValueChanged={onSearchBoxValueChanged}
@@ -212,7 +214,7 @@ const Templates = () => {
             setShow={setShowDeleteModal}
             onDelete={() => {
               if (selectedTemplate && selectedTemplate.id) {
-                selectorClient.deleteSelectorDep(
+                templateClient.deleteTemplateDep(
                   selectedTemplate.id
                 );
               }

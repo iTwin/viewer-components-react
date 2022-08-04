@@ -13,70 +13,70 @@ import ActionPanel from "./ActionPanel";
 import { IModelApp } from "@itwin/core-frontend";
 import { Button, toaster, MenuItem, IconButton } from "@itwin/itwinui-react";
 import { WidgetHeader } from "./utils";
-import "./GroupAction.scss";
-import { Selector, Group, Pair } from "./Selector"
+import "./LabelAction.scss";
+import { Template, Label, Material } from "./Template"
 import { ReportingClient } from "@itwin/insights-client";
 import { DropdownTile } from "./DropdrownTile";
 import DeleteModal from "./DeleteModal";
 import useValidator, { NAME_REQUIREMENTS } from "./hooks/useValidator";
 
-interface GroupActionProps {
-  selector: Selector;
-  group: Group | undefined;
+interface LabelActionProps {
+  template: Template;
+  label: Label | undefined;
   goBack: () => Promise<void>;
-  setSelector: (sel: Selector) => void;
+  setTemplate: (sel: Template) => void;
 }
 
 async function fetchMetadata(token: string, reportingClientApi: ReportingClient, reportId: string) {
   return (await reportingClientApi.getODataReportMetadata(token, reportId)).text();
 }
 
-const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps) => {
-  const [reportTable, setReportTable] = useState<string>(group?.groupName ?? "");
-  const [label, setLabel] = useState<string>(group?.customName ?? "");
-  const [element, setElement] = useState<string>(group?.itemName ?? "UserLabel");
-  const [elementQuantity, setElementQuantity] = useState<string>(group?.itemQuantity ?? "");
-  const [selectedPair, setSelectedPair] = useState<Pair>();
+const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps) => {
+  const [reportTable, setReportTable] = useState<string>(label?.reportTable ?? "");
+  const [name, setName] = useState<string>(label?.customName ?? "");
+  const [itemName, setItemName] = useState<string>(label?.itemName ?? "UserLabel");
+  const [itemQuantity, setItemQuantity] = useState<string>(label?.itemQuantity ?? "");
+  const [selectedMaterial, setSelectedMaterial] = useState<Material>();
 
   // creating a copy of an array, so original isn't modified
-  const [pairs, setPairs] = useState<Pair[]>(group?.pairs.map(x => { return { material: x.material, quantity: x.quantity } }) ?? []);
+  const [materials, setMaterials] = useState<Material[]>(label?.materials.map(x => { return { name: x.name } }) ?? []);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
-  const [availableGroups, setGroups] = useState<string[]>();
+  const [availableLabels, setLabels] = useState<string[]>();
   const [availableStringColumns, setStringColumns] = useState<string[]>([]);
   const [availableNumericalColumns, setNumericalColumns] = useState<string[]>([]);
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
 
   const onSave = async () => {
-    const selectedGroup: Group = {
-      groupName: reportTable,
-      customName: label,
-      itemName: element,
-      itemQuantity: elementQuantity,
-      pairs: pairs,
+    const selectedLabel: Label = {
+      reportTable: reportTable,
+      customName: name,
+      itemName: itemName,
+      itemQuantity: itemQuantity,
+      materials: materials,
     }
 
-    if (group) {
-      for (let i = 0; i < selector.groups.length; i++) {
-        if (selector.groups[i].groupName === group.groupName) {
-          selector.groups[i] = selectedGroup;
+    if (label) {
+      for (let i = 0; i < template.labels.length; i++) {
+        if (template.labels[i].reportTable === label.reportTable) {
+          template.labels[i] = selectedLabel;
           break;
         }
       }
     }
     else {
-      selector.groups.push(selectedGroup);
+      template.labels.push(selectedLabel);
     }
 
-    setSelector(selector);
+    setTemplate(template);
   };
 
-  function updateColumns(groupName: string) {
+  function updateColumns(labelName: string) {
     if (!IModelApp.authorizationClient)
       throw new Error(
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
-    if (!selector.reportId)
+    if (!template.reportId)
       throw new Error(
         "Invalid report."
       );
@@ -84,14 +84,14 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
     IModelApp.authorizationClient
       .getAccessToken()
       .then(async (token: string) => {
-        const responseText = await fetchMetadata(token, reportingClientApi, selector.reportId);
+        const responseText = await fetchMetadata(token, reportingClientApi, template.reportId);
         const dom = new DOMParser().parseFromString(responseText, "text/xml");
-        const elems = Array.from(dom.getElementsByTagName("EntityType")).filter(x => x.attributes[0].value == groupName);
+        const elems = Array.from(dom.getElementsByTagName("EntityType")).filter(x => x.attributes[0].value === labelName);
 
         if (elems.length > 0) {
           const columns = Array.from(elems[0].children).map(x => x.attributes);
-          const stringColumns = columns.filter(x => x[1].value == "Edm.String").map(x => x[0].value);
-          const numericalColumns = columns.filter(x => x[1].value == "Edm.Double").map(x => x[0].value);
+          const stringColumns = columns.filter(x => x[1].value === "Edm.String").map(x => x[0].value);
+          const numericalColumns = columns.filter(x => x[1].value === "Edm.Double").map(x => x[0].value);
           setStringColumns(stringColumns);
           setNumericalColumns(numericalColumns);
         }
@@ -103,12 +103,12 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
       });
   }
 
-  const groupOptions = useMemo(() => {
-    return availableGroups?.map((g) => ({
+  const labelOptions = useMemo(() => {
+    return availableLabels?.map((g) => ({
       label: g,
       value: g,
     })) ?? [];
-  }, [availableGroups]);
+  }, [availableLabels]);
 
 
 
@@ -118,8 +118,8 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
       value: col,
     })) ?? [];
 
-    if (availableStringColumns.indexOf(element) == -1) {
-      setElement("");
+    if (availableStringColumns.indexOf(itemName) === -1) {
+      setItemName("");
     }
 
     return options;
@@ -127,8 +127,8 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
 
   const getStringColumnOptions = ((material: string | undefined) => {
     const options = StringColumnOptions
-      .filter(x => pairs.filter(p => p.material === x.label).length === 0)
-      .filter(x => x.label !== element);
+      .filter(x => materials.filter(p => p.name === x.label).length === 0)
+      .filter(x => x.label !== itemName);
 
 
     if (material)
@@ -143,18 +143,20 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
       value: col,
     })) ?? [];
 
-    if (availableNumericalColumns.indexOf(elementQuantity) == -1) {
-      setElementQuantity("");
+    if (availableNumericalColumns.indexOf(itemQuantity) === -1) {
+      setItemQuantity("");
     }
     return options;
   }, [availableNumericalColumns]);
+
+
 
   const load = (async () => {
     if (!IModelApp.authorizationClient)
       throw new Error(
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
-    if (!selector.reportId)
+    if (!template.reportId)
       throw new Error(
         "Invalid report."
       );
@@ -162,21 +164,21 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
     const token = await IModelApp.authorizationClient
       .getAccessToken();
     const data = await reportingClientApi
-      .getODataReport(token, selector.reportId);
+      .getODataReport(token, template.reportId);
     if (data) {
       const reportData = data;
-      const groupItems = reportData.value.map(data =>
+      const labelItems = reportData.value.map(data =>
         data.name ?? ""
       );
-      const filteredGroups: string[] = group ? [group.groupName] : [];
-      for (const g of groupItems) {
-        if (selector?.groups.filter(x => x.groupName === g).length == 0) {
-          filteredGroups.push(g);
+      const filteredLabels: string[] = label ? [label.reportTable] : [];
+      for (const g of labelItems) {
+        if (template.labels.filter(x => x.reportTable === g).length === 0) {
+          filteredLabels.push(g);
         }
       }
 
-      if (!availableGroups)
-        setGroups(filteredGroups);
+      if (!availableLabels)
+        setLabels(filteredLabels);
     }
   })
 
@@ -185,38 +187,33 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
   }, []);
 
   const addPair = (() => {
-    const pair: Pair = {
-      material: undefined,
-      quantity: undefined,
+    const pair: Material = {
+      name: undefined,
     };
 
-    pairs.push(pair);
+    materials.push(pair);
     refresh();
   })
 
   useEffect(() => {
-
-
-    if (group) {
-      setReportTable(group.groupName);
-      setLabel(group.customName);
-      setElement(group.itemName);
-      setElementQuantity(group.itemQuantity);
-      setPairs(group.pairs.map(x => { return { material: x.material, quantity: x.quantity } })); // creating a copy of array, so original isn't modified
-      updateColumns(group.groupName);
+    if (label) {
+      setReportTable(label.reportTable);
+      setName(label.customName);
+      setItemName(label.itemName);
+      setItemQuantity(label.itemQuantity);
+      setMaterials(label.materials.map(x => { return { name: x.name } })); // creating a copy of array, so original isn't modified
+      updateColumns(label.reportTable);
     }
     else {
-      setElement("UserLabel");
+      setItemName("UserLabel");
     }
 
-
-    //updateColumns(groupName);
 
     if (!IModelApp.authorizationClient)
       throw new Error(
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
-    if (!selector.reportId)
+    if (!template.reportId)
       throw new Error(
         "Invalid report."
       );
@@ -225,21 +222,21 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
       .getAccessToken()
       .then((token: string) => {
         reportingClientApi
-          .getODataReport(token, selector.reportId)
+          .getODataReport(token, template.reportId)
           .then(async (data) => {
             if (data) {
               const reportData = data;
-              const groupItems = reportData.value.map(data =>
+              const labelItems = reportData.value.map(data =>
                 data.name ?? ""
               );
-              const filteredGroups: string[] = group ? [group.groupName] : [];
-              for (const g of groupItems) {
-                if (selector.groups.filter(x => x.groupName === g).length === 0) {
-                  filteredGroups.push(g);
+              const filteredLabels: string[] = label ? [label.reportTable] : [];
+              for (const g of labelItems) {
+                if (template.labels.filter(x => x.reportTable === g).length === 0) {
+                  filteredLabels.push(g);
                 }
               }
-              if (!availableGroups)
-                setGroups(filteredGroups);
+              if (!availableLabels)
+                setLabels(filteredLabels);
             }
           })
           .catch((err) => {
@@ -256,11 +253,11 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
   return (
     <>
       <WidgetHeader
-        title={"Select group"}
+        title={label?.customName ?? "Label"}
         returnFn={goBack}
       />
-      <div className='details-form-container'>
-        <Fieldset legend='Group' className='details-form'>
+      <div className='label-details-container'>
+        <Fieldset legend='Label' className='label-details'>
           <Small className='field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
@@ -269,12 +266,12 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
             label="Report table"
             id='reportTable'
             required
-            options={groupOptions}
+            options={labelOptions}
             value={reportTable}
             onChange={async (value) => {
               if (value !== reportTable) {
-                setPairs([]);
-                setLabel(value);
+                setMaterials([]);
+                setName(value);
               }
 
               setReportTable(value);
@@ -295,16 +292,16 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
                 : undefined
             }
             onBlur={() => {
-              validator.showMessageFor("label");
+              validator.showMessageFor("reportTable");
             }}
           />
           <LabeledInput
-            id='label'
-            name='label'
-            label='Label'
-            value={label}
+            id='name'
+            name='name'
+            label='Name'
+            value={name}
             onChange={(event) => {
-              setLabel(event.target.value);
+              setName(event.target.value);
             }}
           />
           <div className="body">
@@ -313,20 +310,20 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
                 label="Element"
                 id='element'
                 required
-                options={getStringColumnOptions(element)}
-                value={element}
+                options={getStringColumnOptions(itemName)}
+                value={itemName}
                 onChange={async (value) => {
-                  setElement(value);
+                  setItemName(value);
                 }}
                 message={validator.message(
                   "element",
-                  element,
+                  itemName,
                   NAME_REQUIREMENTS,
                 )}
                 status={
                   validator.message(
                     "element",
-                    element,
+                    itemName,
                     NAME_REQUIREMENTS,
                   )
                     ? "negative"
@@ -343,20 +340,20 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
                 id='elementQuantity'
                 required
                 options={NumericalColumnOptions}
-                value={elementQuantity}
+                value={itemQuantity}
                 onChange={async (value) => {
-                  setElementQuantity(value);
+                  setItemQuantity(value);
                   console.log(value);
                 }}
                 message={validator.message(
                   "elementQuantity",
-                  elementQuantity,
+                  itemQuantity,
                   NAME_REQUIREMENTS,
                 )}
                 status={
                   validator.message(
                     "elementQuantity",
-                    elementQuantity,
+                    itemQuantity,
                     NAME_REQUIREMENTS,
                   )
                     ? "negative"
@@ -370,29 +367,22 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
 
           </div>
           <div className="pair-list">
-            {pairs.map((pair) => (
+            {materials.map((material) => (
               <DropdownTile
-                stringColumnOptions={getStringColumnOptions(pair.material)}
-                numericalColumnOptions={NumericalColumnOptions}
-                materialValue={pair.material ?? ""}
-                quantityValue={pair.quantity ?? ""}
+                stringColumnOptions={getStringColumnOptions(material.name)}
+                materialValue={material.name ?? ""}
                 validator={validator}
                 onMaterialChange={async (value) => {
-                  const newPairs = pairs.map(x => { return { material: x.material, quantity: x.quantity } });
+                  const newPairs = materials.map(x => { return { name: x.name } });
                   newPairs.forEach(p => {
-                    if (p.material === pair.material)
-                      p.material = value;
+                    if (p.name === material.name)
+                      p.name = value;
                   });
 
                   //pair.material = value;//setState
-                  setPairs(newPairs);
+                  setMaterials(newPairs);
                   //console.log(pairs);
                   //refresh();
-                }}
-                onQuantityChange={(value) => {
-
-                  pair.quantity = value;
-
                 }}
                 actionGroup={
                   <div className="actions">
@@ -401,7 +391,7 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
                         <MenuItem
                           key={0}
                           onClick={() => {
-                            setSelectedPair(pair);
+                            setSelectedMaterial(material);
                             setShowDeleteModal(true);
                             close();
                           }}
@@ -439,26 +429,17 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
       </div>
 
       <DeleteModal
-        entityName={selectedPair?.material /*+ " - " + selectedPair?.quantity */ ?? ""}
+        entityName={selectedMaterial?.name /*+ " - " + selectedPair?.quantity */ ?? ""}
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
-          setPairs(pairs.filter(x => x.material !== selectedPair?.material || x.quantity !== selectedPair?.quantity));
+          setMaterials(materials.filter(x => x.name !== selectedMaterial?.name));
         }}
         refresh={refresh}
       />
 
       <ActionPanel
         onSave={async () => {
-          /*
-          var valid = true;
-          pairs.forEach(pair => {
-            if (availableStringColumns.indexOf(pair.material ?? "") === -1) {
-              toaster.negative("Not all materials are selected")
-              valid = false;
-            }
-          });
-          */
           if (!validator.allValid()) {
             showValidationMessage(true);
             return;
@@ -474,4 +455,4 @@ const GroupAction = ({ selector, goBack, group, setSelector }: GroupActionProps)
   );
 };
 
-export default GroupAction;
+export default LabelAction;

@@ -5,7 +5,6 @@
 import {
   Button,
   Leading,
-  MiddleTextTruncation,
   Modal,
   ModalButtonBar,
 } from "@itwin/itwinui-react";

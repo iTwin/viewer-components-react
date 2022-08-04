@@ -2,23 +2,22 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-export interface Selector {
+export interface Template {
   templateName: string;
   templateDescription: string;
   id?: string;
   reportId: string;
-  groups: Group[];
+  labels: Label[];
 }
 
-export interface Group {
-  groupName: string;
+export interface Label {
+  reportTable: string;
   customName: string;
   itemName: string;
   itemQuantity: string;
-  pairs: Pair[];
+  materials: Material[];
 }
 
-export interface Pair {
-  material: string | undefined;
-  quantity: string | undefined;
+export interface Material {
+  name: string | undefined;
 }

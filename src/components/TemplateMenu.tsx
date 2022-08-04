@@ -10,19 +10,14 @@ import type { Report } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 import { WidgetHeader, handleSelectChange } from "./utils";
 import ExportModal from "./ExportModal";
-import SelectorClient from "./selectorClient";
-import GroupAction from "./GroupAction";
-import { Selector, Group } from "./Selector"
-import { GroupTile } from "./GroupTile";
+import TemplateClient from "./templateClient";
+import LabelAction from "./LabelAction";
+import { Template, Label } from "./Template"
+import { LabelTile } from "./LabelTile";
 import DeleteModal from "./DeleteModal";
 import { handleInputChange } from "./utils";
 import TemplateActionPanel from "./TemplateActionPanel";
 import ReportConfirmModal from "./ReportConfirmModal";
-
-import {
-  clearEmphasizedElements,
-  clearEmphasizedOverriddenElements,
-} from "./viewerUtils";
 
 import {
   SvgDelete,
@@ -37,43 +32,43 @@ import {
   Surface,
   toaster,
 } from "@itwin/itwinui-react";
-import "./Reports.scss";
+import "./TemplateMenu.scss";
 
-interface SelectorProps {
-  selector?: Selector;
+interface TemplateProps {
+  template?: Template;
   goBack: () => Promise<void>;
 }
 
-enum GroupsView {
-  GROUPS = "groups",
+enum LabelView {
+  LABELS = "labels",
   ADD = "add",
   MODIFY = "modify"
 }
 
-const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
-  const selectorClient = new SelectorClient();
+const TemplateMenu = ({ template, goBack }: TemplateProps) => {
+  const templateClient = new TemplateClient();
   const projectId = useActiveIModelConnection()?.iTwinId as string;
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
-  const [selectedGroup, setSelectedGroup] = useState<Group>();
+  const [selectedLabel, setSelectedLabel] = useState<Label>();
   const [selectedReport, setSelectedReport] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
   const [availableReports, setReports] = useState<Report[]>([]);
-  const [childSelector, setChildSelector] = useState<Selector>(selector ?? {
+  const [childTemplate, setChildTemplate] = useState<Template>(template ?? {
     reportId: "",
     templateDescription: "",
     templateName: "",
-    groups: []
+    labels: []
   });
 
-  const [groupsView, setGroupsView] = useState<GroupsView>(
-    GroupsView.GROUPS
+  const [labelsView, setLabelsView] = useState<LabelView>(
+    LabelView.LABELS
   );
 
   const onSave = async () => {
-    selectorClient.createUpdateSelector(childSelector);
+    templateClient.createUpdateTemplate(childTemplate);
     goBack();
   };
 
@@ -108,52 +103,28 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
         /* eslint-disable no-console */
         console.error(err);
       });
-  }, []);
+  }, [projectId, reportingClientApi]);
 
-  const addGroup = () => {
-    clearEmphasizedElements();
-    setGroupsView(GroupsView.ADD);
+  const addLabel = () => {
+    setLabelsView(LabelView.ADD);
   };
 
   const ReportOptions = useMemo(() => {
-    const newGroupOptions: SelectOption<string>[] = [];
+    const newReportOptions: SelectOption<string>[] = [];
 
     for (const name of availableReports) {
-      newGroupOptions.push({
+      newReportOptions.push({
         label: name.displayName ?? "",
         value: name.id ?? "",
         key: name.id,
       });
     }
-    return newGroupOptions;
+    return newReportOptions;
   }, [availableReports]);
 
   const load = (() => {
     setIsLoading(true);
     setIsLoading(false);
-  })
-
-  const authenticateClientCredentials = ((): Promise<string> => {
-    if (!window) {
-
-    }
-
-    const uri = `https://buildingtransparency.org/auth/login`;
-
-    return new Promise<string>((resolve) => {
-      const authWindow = window.open(uri, '_blank', 'width=400,height=500');
-      console.log(authWindow);
-
-      if (authWindow) {
-        authWindow.onclose = (() => {
-          console.log(authWindow);
-        })
-      }
-      const loadWindow = async (event: any) => {
-        console.log(event);
-      };
-      window?.addEventListener('message', loadWindow, false);
-    });
   })
 
   useEffect(() => {
@@ -164,44 +135,43 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
     load();
   }, []);
 
-  switch (groupsView) {
-    case GroupsView.ADD:
+  switch (labelsView) {
+    case LabelView.ADD:
       return (
-        <GroupAction
-          selector={childSelector}
-          group={undefined}
+        <LabelAction
+          template={childTemplate}
+          label={undefined}
           goBack={async () => {
-            setGroupsView(GroupsView.GROUPS);
+            setLabelsView(LabelView.LABELS);
             await refresh();
           }}
-          setSelector={setChildSelector}
+          setTemplate={setChildTemplate}
         />
       );
-    case GroupsView.MODIFY:
+    case LabelView.MODIFY:
       return (
-        <GroupAction
-          group={childSelector.groups.filter(x => x.groupName === selectedGroup?.groupName)[0]}
-          selector={childSelector}
+        <LabelAction
+          label={childTemplate.labels.filter(x => x.reportTable === selectedLabel?.reportTable)[0]}
+          template={childTemplate}
           goBack={async () => {
-            setGroupsView(GroupsView.GROUPS);
+            setLabelsView(LabelView.LABELS);
             await refresh();
           }}
-          setSelector={setChildSelector}
+          setTemplate={setChildTemplate}
         />
       );
     default:
       return (
         <>
           <WidgetHeader
-            title={childSelector.templateName === "" ? "Create template" : childSelector.templateName}
+            title={childTemplate.templateName === "" ? "Create template" : childTemplate.templateName}
             disabled={isLoading}
             returnFn={async () => {
-              clearEmphasizedOverriddenElements();
               await goBack();
             }}
           />
-          <div className='details-form-container'>
-            <Fieldset legend='Template Details' className='details-form'>
+          <div className='template-details-container'>
+            <Fieldset legend='Template Details' className='template-details'>
               <Small className='field-legend'>
                 Asterisk * indicates mandatory fields.
               </Small>
@@ -209,10 +179,10 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
                 id='templateName'
                 name='templateName'
                 label='Template name'
-                value={childSelector.templateName}
+                value={childTemplate.templateName}
                 required
                 onChange={(event) => {
-                  handleInputChange(event, childSelector, setChildSelector);
+                  handleInputChange(event, childTemplate, setChildTemplate);
                 }}
 
               />
@@ -220,9 +190,9 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
                 id='templateDescription'
                 name='templateDescription'
                 label='Template description'
-                value={childSelector.templateDescription}
+                value={childTemplate.templateDescription}
                 onChange={(event) => {
-                  handleInputChange(event, childSelector, setChildSelector);
+                  handleInputChange(event, childTemplate, setChildTemplate);
                 }}
               />
 
@@ -231,26 +201,26 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
                 id='reportId'
                 required
                 options={ReportOptions}
-                value={childSelector.reportId}
+                value={childTemplate.reportId}
                 onChange={async (value) => {
 
-                  if (selector && value !== selector.reportId) {
+                  if (template && value !== template.reportId) {
                     setSelectedReport(value);
                     setShowReportConfirmModal(true);
                   }
                   else {
-                    handleSelectChange(value, "reportId", childSelector, setChildSelector);
+                    handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
                   }
                 }}
               />
 
-              <Surface className="groups-container">
-                <div className="group-list">
+              <Surface className="labels-container">
+                <div className="labels-list">
                   {
-                    childSelector.groups
+                    childTemplate.labels
                       .map((g) => (
-                        <GroupTile
-                          title={g.customName === "" ? g.groupName : g.customName}
+                        <LabelTile
+                          title={g.customName === "" ? g.reportTable : g.customName}
                           actionGroup={
                             <div className="actions">
                               <DropdownMenu
@@ -258,7 +228,7 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
                                   <MenuItem
                                     key={2}
                                     onClick={() => {
-                                      setSelectedGroup(g);
+                                      setSelectedLabel(g);
                                       setShowDeleteModal(true);
                                       close();
                                     }}
@@ -282,15 +252,15 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
                             </div>
                           }
                           onClickTitle={() => {
-                            setSelectedGroup(g);
-                            setGroupsView(GroupsView.MODIFY);
+                            setSelectedLabel(g);
+                            setLabelsView(LabelView.MODIFY);
                             refresh();
                           }}
                         />
                       ))}
                   <Button
                     styleType="high-visibility"
-                    onClick={addGroup}
+                    onClick={addLabel}
                   >
                     Add Label
                   </Button>
@@ -305,22 +275,22 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
               //const res = await authenticateClientCredentials();
               //console.log(res);
             }}
-            isSavingDisabled={!childSelector.templateName || !childSelector.reportId}
+            isSavingDisabled={!childTemplate.templateName || !childTemplate.reportId}
             isLoading={isLoading}
           />
 
           <ExportModal
             isOpen={modalIsOpen}
             close={() => openModal(false)}
-            templateId={childSelector.id}
+            templateId={childTemplate.id}
           />
 
           <DeleteModal
-            entityName={selectedGroup?.groupName ?? ""}
+            entityName={selectedLabel?.customName === "" ? selectedLabel.reportTable : selectedLabel?.customName ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={() => {
-              childSelector.groups = childSelector.groups.filter(x => x.groupName != selectedGroup?.groupName);
+              childTemplate.labels = childTemplate.labels.filter(x => x.reportTable !== selectedLabel?.reportTable);
             }}
             refresh={refresh}
           />
@@ -330,8 +300,8 @@ const TemplateMenu = ({ selector, goBack }: SelectorProps) => {
             setShow={setShowReportConfirmModal}
             onConfirm={() => {
               if (selectedReport) {
-                childSelector.groups = [];
-                handleSelectChange(selectedReport, "reportId", childSelector, setChildSelector);
+                childTemplate.labels = [];
+                handleSelectChange(selectedReport, "reportId", childTemplate, setChildTemplate);
               }
             }}
             refresh={refresh}

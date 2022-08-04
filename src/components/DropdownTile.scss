@@ -17,6 +17,7 @@
     flex-direction: row;
     min-width: 0;
     justify-content: left;
+    width: 100%;
 
     &-text {
       overflow: hidden;
@@ -38,5 +39,9 @@
     align-self: center;
     min-width: 36px;
     margin-right: $iui-xs;
+  }
+
+  .material-combo {
+    width: 100%;
   }
 }
