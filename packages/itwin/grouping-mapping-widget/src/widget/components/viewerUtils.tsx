@@ -5,8 +5,7 @@
 import type { IModelConnection, ViewChangeOptions } from "@itwin/core-frontend";
 import { EmphasizeElements, IModelApp } from "@itwin/core-frontend";
 import type { FeatureAppearance } from "@itwin/core-common";
-import { QueryRowFormat } from "@itwin/core-common";
-import { ColorDef, FeatureOverrideType } from "@itwin/core-common";
+import { ColorDef, FeatureOverrideType, QueryRowFormat } from "@itwin/core-common";
 import type { InstanceKey } from "@itwin/presentation-common";
 import { KeySet } from "@itwin/presentation-common";
 import { HiliteSetProvider } from "@itwin/presentation-frontend";
