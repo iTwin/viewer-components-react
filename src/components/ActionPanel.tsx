@@ -6,6 +6,10 @@ import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
 import "./ActionPanel.scss";
 import { LoadingSpinner } from "./utils";
+import {
+  SvgSave,
+  SvgExit
+} from "@itwin/itwinui-icons-react";
 
 export interface ActionPanelProps {
   onSave: () => void;
@@ -23,12 +27,13 @@ const ActionPanel = ({
   isLoading = false,
 }: ActionPanelProps): JSX.Element => {
   return (
-    <div id='action' className='action-panel-container'>
+    <div id='action'>
       <div className='action-panel'>
         {isLoading &&
           <LoadingSpinner />
         }
         <Button
+          startIcon={<SvgSave />}
           disabled={isSavingDisabled || isLoading}
           styleType='high-visibility'
           id='save-app'
@@ -37,6 +42,7 @@ const ActionPanel = ({
           Save
         </Button>
         <Button
+          startIcon={<SvgExit />}
           styleType='default'
           type='button'
           id='cancel'

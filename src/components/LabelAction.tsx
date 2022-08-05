@@ -187,12 +187,17 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   }, []);
 
   const addPair = (() => {
-    const pair: Material = {
-      name: undefined,
-    };
+    if (materials.filter(x => x.name === undefined).length === 0) {
 
-    materials.push(pair);
-    refresh();
+      const pair: Material = {
+        name: undefined,
+      };
+
+      const newMaterials = materials.map((x) => { return { name: x.name } });
+
+      newMaterials.push(pair);
+      setMaterials(newMaterials);
+    }
   })
 
   useEffect(() => {
@@ -201,7 +206,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       setName(label.customName);
       setItemName(label.itemName);
       setItemQuantity(label.itemQuantity);
-      setMaterials(label.materials.map(x => { return { name: x.name } })); // creating a copy of array, so original isn't modified
+      setMaterials(label.materials.map(x => { return { name: x.name } })); // creating a copy of array, so original (in the parent) isn't modified
       updateColumns(label.reportTable);
     }
     else {
@@ -367,8 +372,9 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
 
           </div>
           <div className="pair-list">
-            {materials.map((material) => (
+            {materials.map((material, index) => (
               <DropdownTile
+                key={index}
                 stringColumnOptions={getStringColumnOptions(material.name)}
                 materialValue={material.name ?? ""}
                 validator={validator}

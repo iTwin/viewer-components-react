@@ -46,6 +46,13 @@ const TemplateActionPanel = ({
           Save
         </Button>
         <Button
+          startIcon={<SvgExport />}
+          styleType="high-visibility"
+          onClick={onExport}
+        >
+          Export
+        </Button>
+        <Button
           startIcon={<SvgExit />}
           styleType='default'
           type='button'
@@ -54,13 +61,6 @@ const TemplateActionPanel = ({
           disabled={isCancelDisabled || isLoading}
         >
           Cancel
-        </Button>
-        <Button
-          startIcon={<SvgExport />}
-          styleType="high-visibility"
-          onClick={onExport}
-        >
-          Export
         </Button>
       </div>
     </div>

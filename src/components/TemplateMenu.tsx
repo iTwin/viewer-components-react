@@ -220,6 +220,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                     childTemplate.labels
                       .map((g) => (
                         <LabelTile
+                          key={g.reportTable}
                           title={g.customName === "" ? g.reportTable : g.customName}
                           actionGroup={
                             <div className="actions">
