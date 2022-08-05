@@ -333,7 +333,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     );
     const allIds = await getHiliteIdsFromGroups(groups);
     await zoomToElements(allIds);
-  }, [setHiddenGroupsIds, groups, hideGroups]);
+  }, [setHiddenGroupsIds, groups, hideGroups, getHiliteIdsFromGroups]);
 
   const toggleGroupColor = useCallback(
     async (e: any) => {
