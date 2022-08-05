@@ -388,11 +388,7 @@ export const manufactureKeys = async (
 
   const keys: InstanceKey[] = [];
 
-  while (true) {
-    const { done, value } = await rowIterator.next();
-    if (done) {
-      break;
-    }
+  for await (const value of rowIterator) {
     keys.push({ id: value[0], className: value[1] });
   }
 
