@@ -4,8 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 import type { IModelConnection, ViewChangeOptions } from "@itwin/core-frontend";
 import { EmphasizeElements, IModelApp } from "@itwin/core-frontend";
-import type { ElementProps, FeatureAppearance } from "@itwin/core-common";
+import type { FeatureAppearance } from "@itwin/core-common";
+import { QueryRowFormat } from "@itwin/core-common";
 import { ColorDef, FeatureOverrideType } from "@itwin/core-common";
+import type { InstanceKey } from "@itwin/presentation-common";
 import { KeySet } from "@itwin/presentation-common";
 import { HiliteSetProvider } from "@itwin/presentation-frontend";
 
@@ -31,8 +33,8 @@ export const isolateElementsByKeys = async (
   return [];
 };
 
-export const isolateElementsById = async (
-  elementIds: string[],
+export const isolateElementsByQuery = async (
+  query: string,
   iModelConnection: IModelConnection,
   replace = false,
 ) => {
@@ -42,7 +44,7 @@ export const isolateElementsById = async (
 
   const vp = IModelApp.viewManager.selectedView;
 
-  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const keySet = await manufactureKeys(query, iModelConnection);
   const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
     imodel: vp.iModel,
   });
@@ -75,8 +77,8 @@ export const clearIsolatedElements = () => {
   emph.clearIsolatedElements(vp);
 };
 
-export const hideElementsById = async (
-  elementIds: string[],
+export const hideElementsByQuery = async (
+  query: string,
   iModelConnection: IModelConnection,
   replace = false,
 ) => {
@@ -86,7 +88,7 @@ export const hideElementsById = async (
 
   const vp = IModelApp.viewManager.selectedView;
 
-  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const keySet = await manufactureKeys(query, iModelConnection);
   const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
     imodel: vp.iModel,
   });
@@ -119,9 +121,9 @@ export const clearHiddenElements = () => {
   emph.clearHiddenElements(vp);
 };
 
-export const overrideElementsById = async (
+export const overrideElementsByQuery = async (
   iModelConnection: IModelConnection,
-  elementIds: string[],
+  query: string,
   color: string,
   overrideType = FeatureOverrideType.ColorOnly,
 ) => {
@@ -131,7 +133,7 @@ export const overrideElementsById = async (
 
   const vp = IModelApp.viewManager.selectedView;
 
-  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const keySet = await manufactureKeys(query, iModelConnection);
   const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
     imodel: vp.iModel,
   });
@@ -190,9 +192,9 @@ export const emphasizeElements = (
   emph.emphasizeElements(hilitedIds, vp, defaultAppearance, replace);
 };
 
-export const emphasisElementsById = async (
+export const emphasisElementsByQuery = async (
   iModelConnection: IModelConnection,
-  elementIds: string[],
+  query: string,
   defaultAppearance: FeatureAppearance | undefined = undefined,
   replace = false,
 ) => {
@@ -202,7 +204,7 @@ export const emphasisElementsById = async (
 
   const vp = IModelApp.viewManager.selectedView;
 
-  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const keySet = await manufactureKeys(query, iModelConnection);
   const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
     imodel: vp.iModel,
   });
@@ -238,8 +240,8 @@ export const emphasizeElementsByKeys = async (
   return [];
 };
 
-export const visualizeElementsById = async (
-  elementIds: string[],
+export const visualizeElementsByQuery = async (
+  query: string,
   color: string,
   iModelConnection: IModelConnection,
   replace = false,
@@ -251,7 +253,7 @@ export const visualizeElementsById = async (
 
   const vp = IModelApp.viewManager.selectedView;
 
-  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const keySet = await manufactureKeys(query, iModelConnection);
   const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
     imodel: vp.iModel,
   });
@@ -350,7 +352,7 @@ export const zoomToElements = async (elementIds: string[]) => {
 };
 
 export const getHiliteIds = async (
-  elementIds: string[],
+  query: string,
   iModelConnection: IModelConnection,
 ) => {
   if (!IModelApp.viewManager.selectedView) {
@@ -359,7 +361,7 @@ export const getHiliteIds = async (
 
   const vp = IModelApp.viewManager.selectedView;
 
-  const keySet = await manufactureKeys(elementIds, iModelConnection);
+  const keySet = await manufactureKeys(query, iModelConnection);
   const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
     imodel: vp.iModel,
   });
@@ -371,49 +373,30 @@ export const getHiliteIds = async (
 };
 
 export const manufactureKeys = async (
-  elementIds: string[],
+  query: string,
   iModelConnection: IModelConnection,
 ): Promise<KeySet> => {
-  // segment ids into batches
-  const batches: string[][] = [];
-  let currBatch: string[] = [];
-  const batchSize = 100000;
-  for (const id of elementIds) {
-    if (currBatch.length < batchSize) {
-      currBatch.push(id);
-    } else {
-      batches.push(currBatch);
-      currBatch = [id];
+  query;
+  iModelConnection;
+  if (query === "") {
+    new KeySet();
+  }
+  const queryWithIdAndECClassName = `SELECT q.ECInstanceId, ec_classname(e.ECClassId) FROM (${query}) q JOIN BisCore.Element e on e.ECInstanceId = q.ECInstanceId`;
+
+  const rowIterator = iModelConnection.query(queryWithIdAndECClassName, undefined, {
+    rowFormat: QueryRowFormat.UseECSqlPropertyIndexes,
+  });
+
+  const keys: InstanceKey[] = [];
+
+  while (true) {
+    const { done, value } = await rowIterator.next();
+    if (done) {
+      break;
     }
-  }
-  if (currBatch.length > 0 && currBatch.length <= batchSize) {
-    batches.push(currBatch);
+    keys.push({ id: value[0], className: value[1] });
   }
 
-  // retrieve element properties in batches
-  let elemProps: ElementProps[] = [];
-  for (const batch of batches) {
-    const props = await iModelConnection.elements.getProps(batch);
-    elemProps = elemProps.concat(props);
-  }
-
-  const isElementId = (elem: {
-    id: string | undefined;
-    className: string;
-  }): elem is {
-    id: string;
-    className: string;
-  } => {
-    return elem.id !== undefined;
-  };
-
-  // create keyset from the element properties
-  const keys = elemProps
-    .map((elem: ElementProps) => ({
-      id: elem.id,
-      className: elem.classFullName,
-    }))
-    .filter(isElementId);
   return new KeySet(keys);
 };
 

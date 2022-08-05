@@ -13,7 +13,7 @@ import {
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
-import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
+import { handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -23,7 +23,7 @@ import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
 import { QueryBuilder } from "./QueryBuilder";
 import {
   transparentOverriddenElements,
-  visualizeElementsById,
+  visualizeElementsByQuery,
   zoomToElements,
 } from "./viewerUtils";
 import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
@@ -110,9 +110,8 @@ const GroupAction = ({
 
         setIsRendering(true);
         transparentOverriddenElements();
-        const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
-        const resolvedHiliteIds = await visualizeElementsById(
-          ids,
+        const resolvedHiliteIds = await visualizeElementsByQuery(
+          query,
           "red",
           iModelConnection,
         );

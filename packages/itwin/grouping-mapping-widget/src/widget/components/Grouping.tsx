@@ -38,13 +38,12 @@ import {
   emphasizeElements,
   getHiliteIds,
   hideElements,
-  hideElementsById,
+  hideElementsByQuery,
   overrideElements,
   zoomToElements,
 } from "./viewerUtils";
 import {
   EmptyMessage,
-  fetchIdsFromQuery,
   handleError,
   LoadingOverlay,
   WidgetHeader,
@@ -142,16 +141,13 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           currentIds = hilitedElements.current.get(query) ?? [];
         } else {
           try {
-            const ids: string[] = await fetchIdsFromQuery(
-              query,
-              iModelConnection,
-            );
-            if (ids.length === 0) {
+            const queryRowCount = await iModelConnection.queryRowCount(query);
+            if (queryRowCount === 0) {
               toaster.warning(
                 `${group.groupName}'s query is valid but produced no results.`,
               );
             }
-            currentIds = await getHiliteIds(ids, iModelConnection);
+            currentIds = await getHiliteIds(query, iModelConnection);
             hilitedElements.current.set(query, currentIds);
           } catch {
             toaster.negative(
@@ -206,17 +202,14 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           allIds = allIds.concat(hilitedIds);
         } else {
           try {
-            const ids: string[] = await fetchIdsFromQuery(
-              query,
-              iModelConnection,
-            );
-            if (ids.length === 0) {
+            const queryRowCount = await iModelConnection.queryRowCount(query);
+            if (queryRowCount === 0) {
               toaster.warning(
                 `${viewGroup.groupName}'s query is valid but produced no results.`,
               );
             }
-            const hiliteIds = await hideElementsById(
-              ids,
+            const hiliteIds = await hideElementsByQuery(
+              query,
               iModelConnection,
               false,
             );
