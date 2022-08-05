@@ -1,6 +1,13 @@
 # Change Log - @itwin/reports-config-widget-react
 
-This log was last generated on Thu, 28 Jul 2022 13:50:39 GMT and should not be manually modified.
+This log was last generated on Thu, 04 Aug 2022 20:07:49 GMT and should not be manually modified.
+
+## 0.0.5
+Thu, 04 Aug 2022 20:07:49 GMT
+
+### Patches
+
+- Added a missing dev dep
 
 ## 0.0.4
 Thu, 28 Jul 2022 13:50:39 GMT
