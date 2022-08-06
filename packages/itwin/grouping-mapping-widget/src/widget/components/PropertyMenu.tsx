@@ -7,7 +7,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import { fetchIdsFromQuery, WidgetHeader } from "./utils";
+import { WidgetHeader } from "./utils";
 import {
   clearEmphasizedOverriddenElements,
   manufactureKeys,
@@ -172,12 +172,13 @@ export const PropertyMenu = ({
   useEffect(() => {
     const initialize = async () => {
       try {
-        const ids = await fetchIdsFromQuery(group.query ?? "", iModelConnection);
-        if (ids.length === 0) {
+        const query = group.query ?? "";
+        const queryRowCount = await iModelConnection.queryRowCount(query);
+        if (queryRowCount === 0) {
           toaster.warning("The query is valid but produced no results.");
           await goBack();
         }
-        const keys = await manufactureKeys(ids, iModelConnection);
+        const keys = await manufactureKeys(query, iModelConnection);
         setKeySet(keys);
         Presentation.selection.clearSelection(
           "GroupingMappingWidget",
