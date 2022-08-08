@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import type { CreateTypeFromInterface } from "../utils";
+import type { CreateTypeFromInterface, GroupExtension } from "../utils";
 import {
   Button,
   ButtonGroup,

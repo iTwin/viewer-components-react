@@ -1,9 +1,9 @@
-import { ReactElement } from "react";
-
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import type { ReactElement } from "react";
+
 export type CreateTypeFromInterface<Interface> = {
   [Property in keyof Interface]: Interface[Property];
 };
@@ -22,7 +22,7 @@ export function debounce<F extends (...args: any[]) => void>(
 /**
  * Group Extension type definition
  */
-export type GroupExtension = {
+export interface GroupExtension {
   /**
    * unique identifier of the extension
    */
@@ -40,14 +40,14 @@ export type GroupExtension = {
    * Optional icon, will be shown before display label in widget
    */
   icon?: ReactElement;
-};
+}
 
 /**
  * Group extension component props
  */
-export type GroupExtensionProps = {
+export interface GroupExtensionProps {
   /**
    * function to validate and update current query
    */
   updateQuery: (query: string) => void;
-};
+}
