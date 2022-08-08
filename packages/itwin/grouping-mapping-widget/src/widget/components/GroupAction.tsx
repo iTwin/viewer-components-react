@@ -19,14 +19,7 @@ import {
   toaster,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  fetchIdsFromQuery,
-  handleError,
-  handleInputChange,
-  LoadingSpinner,
-  WidgetHeader,
-  EmptyMessage,
-} from "./utils";
+import { handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
 import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -36,13 +29,14 @@ import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
 import { QueryBuilder } from "./QueryBuilder";
 import {
   transparentOverriddenElements,
-  visualizeElementsById,
+  visualizeElementsByQuery,
   zoomToElements,
 } from "./viewerUtils";
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
-import { GroupExtension, GroupExtensionProps } from "../utils";
+import type { GroupExtension } from "../utils";
+import { GroupExtensionProps } from "../utils";
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
@@ -124,9 +118,8 @@ const GroupAction = ({
 
         setIsRendering(true);
         transparentOverriddenElements();
-        const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
-        const resolvedHiliteIds = await visualizeElementsById(
-          ids,
+        const resolvedHiliteIds = await visualizeElementsByQuery(
+          query,
           "red",
           iModelConnection,
         );
@@ -419,7 +412,7 @@ const GroupAction = ({
           );
           if (selectedExtension) {
             return React.createElement(selectedExtension.uiComponent, {
-              updateQuery: updateQuery,
+              updateQuery,
             });
           }
         }

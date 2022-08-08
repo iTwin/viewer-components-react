@@ -1,6 +1,29 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 18 Jul 2022 13:24:31 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Aug 2022 11:57:54 GMT and should not be manually modified.
+
+## 0.5.5
+Mon, 08 Aug 2022 11:57:54 GMT
+
+### Patches
+
+- remove zoom on individual visibility change
+- Optimized group hiliting
+
+## 0.5.4
+Thu, 28 Jul 2022 13:50:39 GMT
+
+### Patches
+
+- Fixed select in group properties
+- add color legends for groups
+
+## 0.5.3
+Fri, 22 Jul 2022 18:27:54 GMT
+
+### Patches
+
+- group ordering by name
 
 ## 0.5.2
 Mon, 18 Jul 2022 13:24:31 GMT
