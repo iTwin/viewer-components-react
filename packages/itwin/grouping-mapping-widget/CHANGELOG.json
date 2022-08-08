@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.5.5",
+      "tag": "@itwin/grouping-mapping-widget_v0.5.5",
+      "date": "Mon, 08 Aug 2022 11:57:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "remove zoom on individual visibility change"
+          },
+          {
+            "comment": "Optimized group hiliting"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.4",
       "tag": "@itwin/grouping-mapping-widget_v0.5.4",
       "date": "Thu, 28 Jul 2022 13:50:39 GMT",

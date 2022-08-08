@@ -2,6 +2,18 @@
   "name": "@itwin/reports-config-widget-react",
   "entries": [
     {
+      "version": "0.0.6",
+      "tag": "@itwin/reports-config-widget-react_v0.0.6",
+      "date": "Mon, 08 Aug 2022 11:57:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added missing dev dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.0.5",
       "tag": "@itwin/reports-config-widget-react_v0.0.5",
       "date": "Thu, 04 Aug 2022 20:07:49 GMT",
