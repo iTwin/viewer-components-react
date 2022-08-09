@@ -5,8 +5,9 @@
 import type { ReactNode } from "react";
 import { SelectOption, LabeledSelect } from "@itwin/itwinui-react";
 import "./DropdownTile.scss";
-import { NAME_REQUIREMENTS } from "./hooks/useValidator";
+import { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import SimpleReactValidator from "simple-react-validator";
+import React from "react";
 
 interface DropdownTileProps {
   stringColumnOptions: SelectOption<string>[];

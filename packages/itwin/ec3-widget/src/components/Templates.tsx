@@ -16,6 +16,7 @@ import "./Templates.scss";
 import TemplateClient from "./templateClient";
 import { Template } from "./Template"
 import TemplateMenu from "./TemplateMenu";
+import React from "react";
 
 
 type CreateTypeFromInterface<Interface> = {

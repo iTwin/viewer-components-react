@@ -3,4 +3,4 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 /** UI Provider for iTwin Viewer Applications */
-export * from "./widgets/EC3Widget";
+export * from "./widget/EC3Widget";

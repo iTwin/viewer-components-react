@@ -33,6 +33,7 @@ import {
   toaster,
 } from "@itwin/itwinui-react";
 import "./TemplateMenu.scss";
+import React from "react";
 
 interface TemplateProps {
   template?: Template;
@@ -48,6 +49,7 @@ enum LabelView {
 const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   const templateClient = new TemplateClient();
   const projectId = useActiveIModelConnection()?.iTwinId as string;
+  //const reportingClientApi = useMemo(() => new ReportingClient, []);
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -93,7 +95,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
           })
           .catch((err) => {
             setIsLoading(false);
-            toaster.negative("You are not authorized to get reports for this projects. Please contact project administrator.");
+            toaster.negative("You are not authorized to get reports for this projects. Please contact project administrator." + err + " " + projectId);
             /* eslint-disable no-console */
             console.error(err);
           });
@@ -202,6 +204,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                 required
                 options={ReportOptions}
                 value={childTemplate.reportId}
+                placeholder="Select report"
                 onChange={async (value) => {
 
                   if (template && value !== template.reportId) {

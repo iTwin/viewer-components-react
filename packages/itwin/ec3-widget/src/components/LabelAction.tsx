@@ -18,7 +18,8 @@ import { Template, Label, Material } from "./Template"
 import { ReportingClient } from "@itwin/insights-client";
 import { DropdownTile } from "./DropdrownTile";
 import DeleteModal from "./DeleteModal";
-import useValidator, { NAME_REQUIREMENTS } from "./hooks/useValidator";
+import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
+import React from "react";
 
 interface LabelActionProps {
   template: Template;

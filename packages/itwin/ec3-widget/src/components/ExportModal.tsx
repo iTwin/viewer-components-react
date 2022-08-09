@@ -27,8 +27,8 @@ import {
 } from "@itwin/itwinui-icons-react";
 import type { JobCreation, Link } from "@itwin/insights-client";
 import { JobStatus } from "@itwin/insights-client";
-import DumbClient from "../dumb-client";
-import logo from "../public/logo/eC3Logo.png";
+import EC3Client from "./EC3/EC3Client";
+//import logo from "../public/logo/eC3Logo.png";
 
 interface ExportProps {
   isOpen: boolean;
@@ -45,8 +45,8 @@ const ExportModal = (props: ExportProps) => {
   const MILI_SECONDS = 1000;
   const PIN_INTERVAL = 1000;
 
-  const eC3ClientApi = useMemo(() => new DumbClient(), []);
-  //const eC3ClientApi = useMemo(() => new EC3Client(), []);
+  //const eC3ClientApi = useMemo(() => new DumbClient(), []);
+  const eC3ClientApi = useMemo(() => new EC3Client(), []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -92,7 +92,7 @@ const ExportModal = (props: ExportProps) => {
           (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
         if (job.id && token) {
           const currentJobStatus =
-            await eC3ClientApi.getEc3JobStatus(token, job?.id);
+            await eC3ClientApi.getEC3JobStatus(token, job?.id);
           if (currentJobStatus.job?.status) {
             if (
               currentJobStatus.job?.status === JobStatus.StatusEnum.Succeeded
@@ -117,7 +117,7 @@ const ExportModal = (props: ExportProps) => {
         (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       if (props.templateId && token) {
         try {
-          const jobCreated = await eC3ClientApi.createEc3Job(
+          const jobCreated = await eC3ClientApi.createEC3Job(
             accessToken,
             {
               reportId: props.templateId,
@@ -145,11 +145,16 @@ const ExportModal = (props: ExportProps) => {
   );
 
   const signin = useCallback(
-    async (e) => {
+    async (e: any) => {
       e.preventDefault();
+
+      const result = await eC3ClientApi.getEC3AccessToken(email, password);
+      console.log(result);
+
+      /*
       startSigningIn(true);
       try {
-        const result = await eC3ClientApi.getEc3AccessToken(
+        const result = await eC3ClientApi.getEC3AccessToken(
           email,
           password
         );
@@ -165,10 +170,10 @@ const ExportModal = (props: ExportProps) => {
         }
       } catch (err) {
         toaster.negative("Failed to sign in E C 3.");
-        /* eslint-disable no-console */
         console.error(err);
       }
       startSigningIn(false);
+      */
     },
     [
       email,
@@ -291,7 +296,7 @@ const ExportModal = (props: ExportProps) => {
         <div className="e_c_3-signin">
           <img
             className="e_c_3-signin-icon"
-            src={logo}
+            src="https://buildingtransparency.org/assets/svg/ec3.svg"
             alt="E C 3® software"
             data-height-percentage="80"
             data-actual-width="1200"

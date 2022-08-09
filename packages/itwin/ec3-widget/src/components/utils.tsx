@@ -81,6 +81,10 @@ export const handleSelectChange = <T,>(
   });
 };
 
+export const generateUrl = (baseUrl: string, newBaseUrl: string) => {
+  return baseUrl.replace("https://api.bentley.com", newBaseUrl);
+};
+
 export const LoadingSpinner = () => {
   return (
     <div className="gm-loading-spinner">
