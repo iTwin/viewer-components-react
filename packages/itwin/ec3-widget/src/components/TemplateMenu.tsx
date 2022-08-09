@@ -48,7 +48,7 @@ enum LabelView {
 
 const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   const templateClient = new TemplateClient();
-  const projectId = useActiveIModelConnection()?.iTwinId as string;
+  const projectId = useActiveIModelConnection()?.iTwinId ?? "";
   //const reportingClientApi = useMemo(() => new ReportingClient, []);
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -76,35 +76,30 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
 
   useEffect(() => {
     setIsLoading(true);
+    const fetchReports = async () => {
+      
+      if (!IModelApp.authorizationClient)
+        throw new Error(
+          "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
+        );
 
-    if (!IModelApp.authorizationClient)
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
-    IModelApp.authorizationClient
-      .getAccessToken()
-      .then((token: string) => {
-        reportingClientApi
-          .getReports(token, projectId)
-          .then((data) => {
-            if (data) {
-              const fetchedReports = data;
-              setReports(fetchedReports);
-              setIsLoading(false);
-            }
-          })
-          .catch((err) => {
-            setIsLoading(false);
-            toaster.negative("You are not authorized to get reports for this projects. Please contact project administrator." + err + " " + projectId);
-            /* eslint-disable no-console */
-            console.error(err);
-          });
-      })
-      .catch((err) => {
+      try {
+        const accessToken = await IModelApp.authorizationClient.getAccessToken();
+        const data = await reportingClientApi.getReports(accessToken, projectId);
+        if (data) {
+          const fetchedReports = data;
+          setReports(fetchedReports);
+          setIsLoading(false);
+        }
+      }
+      catch (err) {
+        setIsLoading(false);
         toaster.negative("You are not authorized to use this system.");
         /* eslint-disable no-console */
         console.error(err);
-      });
+      }
+    }
+    void fetchReports();
   }, [projectId, reportingClientApi]);
 
   const addLabel = () => {
@@ -204,7 +199,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                 required
                 options={ReportOptions}
                 value={childTemplate.reportId}
-                placeholder="Select report"
+                placeholder={isLoading ? "Loading" : "Select report"}
                 onChange={async (value) => {
 
                   if (template && value !== template.reportId) {
