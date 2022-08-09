@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
-import { ThematicSensors } from "@itwin/core-frontend/lib/cjs/render/webgl/ThematicSensors";
 import type {
   ApiOverrides,
   IModelFull,
@@ -14,10 +13,10 @@ import {
 } from "@itwin/imodel-browser-react";
 import {
   SvgCalendar,
+  SvgClose,
   SvgList,
   SvgSearch,
   SvgStarHollow,
-  SvgClose,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
@@ -52,7 +51,6 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
   const [apiOverrides, setApiOverrides] = useState<ApiOverrides<IModelFull[]>>({ serverEnvironmentPrefix: prefix });
   const [searched, setSearched] = useState<boolean>(false);
 
-
   useEffect(() => setApiOverrides({ serverEnvironmentPrefix: prefix }), [prefix]);
 
   useEffect(() => {
@@ -72,28 +70,26 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
     setSearchInput("");
     setActiveSearchInput("");
     setSearched(false);
-  }, [searchInput]);
+  }, []);
 
   const runLabel = useCallback(() => {
-    if(searched === false)
-    {
+    if(searched === false) {
       return (
-      <IconButton onClick={() => startSearch() } styleType='borderless'>
-        <SvgSearch />
-      </IconButton>
-      )
+        <IconButton onClick={() => startSearch() } styleType='borderless'>
+          <SvgSearch />
+        </IconButton>
+      );
     }
-    if(searchInput.length === 0)
-    {
+    if(searchInput.length === 0) {
       setSearched(false);
     }
     return (
       <IconButton onClick={() => clearSearch() } styleType='borderless'>
         <SvgClose />
       </IconButton>
-    )
+    );
 
-  }, [searched, searchInput]);
+  }, [searched, clearSearch, startSearch, searchInput]);
 
   return (
     <div className='select-project-grid-container'>
