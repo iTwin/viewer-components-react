@@ -1,8 +1,8 @@
 {
-  "name": "ec3-react",
+  "name": "@itwin/ec3-react",
   "version": "1.0.0",
   "description": "",
-  "main": "lib/cjs/reports-config-widget-react.js",
+  "main": "lib/cjs/e-c-3-widget.js",
   "directories": {
     "test": "jest"
   },
@@ -11,8 +11,8 @@
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
-  "module": "lib/esm/reports-config-widget-react.js",
-  "typings": "lib/cjs/reports-config-widget-react",
+  "module": "lib/esm/e-c-3-widget.js",
+  "typings": "lib/cjs/e-c-3-widget",
   "scripts": {
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",

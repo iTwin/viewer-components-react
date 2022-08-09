@@ -214,8 +214,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                   else {
                     handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
                   }
-                }}
-              />
+                } } onShow={() => {}} onHide={() => {}}              />
 
               <Surface className="labels-container">
                 <div className="labels-list">

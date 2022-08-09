@@ -38,25 +38,22 @@ export const DropdownTile = ({
             required
             options={stringColumnOptions}
             value={materialValue}
-            onChange={(value) => { onMaterialChange(value) }}
+            onChange={(value) => { onMaterialChange(value); } }
             message={validator.message(
               "materialValue",
               materialValue,
-              NAME_REQUIREMENTS,
+              NAME_REQUIREMENTS
             )}
-            status={
-              validator.message(
-                "materialValue",
-                materialValue,
-                NAME_REQUIREMENTS,
-              )
-                ? "negative"
-                : undefined
-            }
+            status={validator.message(
+              "materialValue",
+              materialValue,
+              NAME_REQUIREMENTS
+            )
+              ? "negative"
+              : undefined}
             onBlur={() => {
               validator.showMessageFor("materialValue");
-            }}
-          />
+            } } onShow={() => {}} onHide={() => {}}          />
         </div>
         <div className="action-button" data-testid="tile-action-button">
           {actionGroup}

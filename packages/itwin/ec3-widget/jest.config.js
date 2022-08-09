@@ -14,6 +14,7 @@ module.exports = {
     "\\.(scss|sass|css)$": "jest-transform-stub",
   },
   roots: [
-    ".",
+    "./src/",
   ],
+  
 }

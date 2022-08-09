@@ -282,25 +282,22 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
 
               setReportTable(value);
               updateColumns(value);
-            }}
+            } }
             message={validator.message(
               "reportTable",
               reportTable,
-              NAME_REQUIREMENTS,
+              NAME_REQUIREMENTS
             )}
-            status={
-              validator.message(
-                "reportTable",
-                reportTable,
-                NAME_REQUIREMENTS,
-              )
-                ? "negative"
-                : undefined
-            }
+            status={validator.message(
+              "reportTable",
+              reportTable,
+              NAME_REQUIREMENTS
+            )
+              ? "negative"
+              : undefined}
             onBlur={() => {
               validator.showMessageFor("reportTable");
-            }}
-          />
+            } } onShow={() => {}} onHide={() => {}}          />
           <LabeledInput
             id='name'
             name='name'
@@ -320,25 +317,22 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 value={itemName}
                 onChange={async (value) => {
                   setItemName(value);
-                }}
+                } }
                 message={validator.message(
                   "element",
                   itemName,
-                  NAME_REQUIREMENTS,
+                  NAME_REQUIREMENTS
                 )}
-                status={
-                  validator.message(
-                    "element",
-                    itemName,
-                    NAME_REQUIREMENTS,
-                  )
-                    ? "negative"
-                    : undefined
-                }
+                status={validator.message(
+                  "element",
+                  itemName,
+                  NAME_REQUIREMENTS
+                )
+                  ? "negative"
+                  : undefined}
                 onBlur={() => {
                   validator.showMessageFor("element");
-                }}
-              />
+                } } onShow={() => {}} onHide={() => {}}              />
             </div>
             <div className="combo-field">
               <LabeledSelect
@@ -350,25 +344,22 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 onChange={async (value) => {
                   setItemQuantity(value);
                   console.log(value);
-                }}
+                } }
                 message={validator.message(
                   "elementQuantity",
                   itemQuantity,
-                  NAME_REQUIREMENTS,
+                  NAME_REQUIREMENTS
                 )}
-                status={
-                  validator.message(
-                    "elementQuantity",
-                    itemQuantity,
-                    NAME_REQUIREMENTS,
-                  )
-                    ? "negative"
-                    : undefined
-                }
+                status={validator.message(
+                  "elementQuantity",
+                  itemQuantity,
+                  NAME_REQUIREMENTS
+                )
+                  ? "negative"
+                  : undefined}
                 onBlur={() => {
                   validator.showMessageFor("elementQuantity");
-                }}
-              />
+                } } onShow={() => {}} onHide={() => {}}              />
             </div>
 
           </div>
