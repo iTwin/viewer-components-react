@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
+import { ThematicSensors } from "@itwin/core-frontend/lib/cjs/render/webgl/ThematicSensors";
 import type {
   ApiOverrides,
   IModelFull,
@@ -16,6 +17,7 @@ import {
   SvgList,
   SvgSearch,
   SvgStarHollow,
+  SvgClose,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
@@ -48,6 +50,8 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
   const [activeSearchInput, setActiveSearchInput] = useState<string>("");
   const [accessToken, setAccessToken] = useState<AccessToken>();
   const [apiOverrides, setApiOverrides] = useState<ApiOverrides<IModelFull[]>>({ serverEnvironmentPrefix: prefix });
+  const [searched, setSearched] = useState<boolean>(false);
+
 
   useEffect(() => setApiOverrides({ serverEnvironmentPrefix: prefix }), [prefix]);
 
@@ -61,7 +65,35 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
 
   const startSearch = useCallback(() => {
     setActiveSearchInput(searchInput);
+    setSearched(true);
   }, [searchInput]);
+
+  const clearSearch = useCallback(() => {
+    setSearchInput("");
+    setActiveSearchInput("");
+    setSearched(false);
+  }, [searchInput]);
+
+  const runLabel = useCallback(() => {
+    if(searched === false)
+    {
+      return (
+      <IconButton onClick={() => startSearch() } styleType='borderless'>
+        <SvgSearch />
+      </IconButton>
+      )
+    }
+    if(searchInput.length === 0)
+    {
+      setSearched(false);
+    }
+    return (
+      <IconButton onClick={() => clearSearch() } styleType='borderless'>
+        <SvgClose />
+      </IconButton>
+    )
+
+  }, [searched, searchInput]);
 
   return (
     <div className='select-project-grid-container'>
@@ -78,6 +110,7 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
           className='search-input'
           label='Search'
           value={searchInput}
+          placeholder="Search...."
           onChange={(event) => {
             const {
               target: { value },
@@ -88,16 +121,8 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
             if (event.key === "Enter") {
               startSearch();
             }
-            if (event.key === "Escape") {
-              setSearchInput("");
-              setActiveSearchInput("");
-            }
           }}
-          svgIcon={
-            <IconButton onClick={() => startSearch()} styleType='borderless'>
-              <SvgSearch />
-            </IconButton>
-          }
+          svgIcon={runLabel()}
         />
       </HorizontalTabs>
       <div className='project-grid'>
