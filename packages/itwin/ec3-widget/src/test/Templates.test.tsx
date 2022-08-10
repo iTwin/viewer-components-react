@@ -108,7 +108,7 @@ describe("Templates view", function () {
   
   it("Templates view should render successfully", function () {
     render(<Templates />);
-    expect(screen.getByText("Template Name")).toBeDefined();
+    expect(screen.getByText("Templates")).toBeDefined();
   });
 
   it("Template Menu should render successfully", async () => {

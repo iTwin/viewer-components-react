@@ -66,6 +66,11 @@
       "packageName": "@itwin/infrastructure-iot-react",
       "projectFolder": "packages/itwin/infrastructure-iot",
       "versionPolicyName": "infrastructure-iot"
+    },
+    {
+      "packageName": "@itwin/ec3-react",
+      "projectFolder": "packages/itwin/ec3-widget",
+      "versionPolicyName": "ec3-widget"
     }
   ]
 }

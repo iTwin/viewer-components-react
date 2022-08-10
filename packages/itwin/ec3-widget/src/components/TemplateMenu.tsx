@@ -48,8 +48,7 @@ enum LabelView {
 
 const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   const templateClient = new TemplateClient();
-  const projectId = useActiveIModelConnection()?.iTwinId ?? "";
-  //const reportingClientApi = useMemo(() => new ReportingClient, []);
+  const projectId = useActiveIModelConnection()?.iTwinId as string;
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -119,19 +118,6 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
     return newReportOptions;
   }, [availableReports]);
 
-  const load = (() => {
-    setIsLoading(true);
-    setIsLoading(false);
-  })
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  const refresh = useCallback(async () => {
-    load();
-  }, []);
-
   switch (labelsView) {
     case LabelView.ADD:
       return (
@@ -140,7 +126,6 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
           label={undefined}
           goBack={async () => {
             setLabelsView(LabelView.LABELS);
-            await refresh();
           }}
           setTemplate={setChildTemplate}
         />
@@ -152,7 +137,6 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
           template={childTemplate}
           goBack={async () => {
             setLabelsView(LabelView.LABELS);
-            await refresh();
           }}
           setTemplate={setChildTemplate}
         />
@@ -252,13 +236,13 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                           onClickTitle={() => {
                             setSelectedLabel(g);
                             setLabelsView(LabelView.MODIFY);
-                            refresh();
                           }}
                         />
                       ))}
                   <Button
                     styleType="high-visibility"
                     onClick={addLabel}
+                    disabled={!childTemplate.reportId}
                   >
                     Add Label
                   </Button>
@@ -270,8 +254,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
             onSave={onSave}
             onCancel={goBack}
             onExport={async () => {
-              //const res = await authenticateClientCredentials();
-              //console.log(res);
+              openModal(true);
             }}
             isSavingDisabled={!childTemplate.templateName || !childTemplate.reportId}
             isLoading={isLoading}
@@ -290,7 +273,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
             onDelete={() => {
               childTemplate.labels = childTemplate.labels.filter(x => x.reportTable !== selectedLabel?.reportTable);
             }}
-            refresh={refresh}
+            refresh={async () => { }}
           />
 
           <ReportConfirmModal
@@ -302,7 +285,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                 handleSelectChange(selectedReport, "reportId", childTemplate, setChildTemplate);
               }
             }}
-            refresh={refresh}
+            refresh={async () => { }}
           />
         </>
       );

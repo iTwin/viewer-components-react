@@ -42,3 +42,35 @@
     overflow: auto;
   }
 }
+
+
+.templates-list-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: $iui-baseline $iui-m;
+  min-height: 0;
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: $iui-s;
+    border-bottom: 1px solid var(--iui-color-background-4);
+    padding-bottom: $iui-baseline;
+    flex-wrap: wrap;
+  }
+
+  .search-bar-container {
+    flex-basis: $iui-3xl;
+    flex-shrink: 1;
+    flex-grow: 1;
+  }
+
+  .templates-list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: overlay;
+    gap: 7.5px;
+    margin-top: 7.5px;
+  }
+}

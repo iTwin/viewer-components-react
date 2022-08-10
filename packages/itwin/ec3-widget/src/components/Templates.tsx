@@ -3,27 +3,22 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { SearchBox } from "@itwin/core-react";
 import DeleteModal from "./DeleteModal";
-import { Button, Table, DropdownMenu, MenuItem, IconButton } from "@itwin/itwinui-react";
+import { Button, Table, DropdownMenu, MenuItem, IconButton, Surface } from "@itwin/itwinui-react";
 import {
   SvgDelete,
   SvgMore,
+  SvgAdd
 } from "@itwin/itwinui-icons-react";
-import type { CellProps } from "react-table";
-import { WidgetHeader } from "./utils";
+import { WidgetHeader, LoadingOverlay, EmptyMessage } from "./utils";
 import "./Templates.scss";
 import TemplateClient from "./templateClient";
 import { Template } from "./Template"
 import TemplateMenu from "./TemplateMenu";
+import { SearchBar } from "./SearchBar";
+import { HorizontalTile } from "./HorizontalTile";
 import React from "react";
 
-
-type CreateTypeFromInterface<Interface> = {
-  [Property in keyof Interface]: Interface[Property];
-};
-
-type TemplateType = CreateTypeFromInterface<Template>;
 
 enum TemplateView {
   TEMPLATES = "templates",
@@ -37,18 +32,16 @@ const Templates = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [filteredTemplates, setFilteredTemplates] = useState<Template[]>(templates);
   const [selectedTemplate, setSelectedTemplate] = useState<Template>();
+  const [searchValue, setSearchValue] = useState<string>("");
   const [templateView, setTemplateView] = useState<TemplateView>(
     TemplateView.TEMPLATES
   );
-
 
   const load = useCallback(() => {
     setIsLoading(true);
     const templates = templateClient.getTemplatesT();
     setTemplates(templates);
-    setFilteredTemplates(templates);
     setIsLoading(false);
   }, [templateClient])
 
@@ -59,92 +52,16 @@ const Templates = () => {
   }, [load]);
 
 
-
-  const templatesColumns = useMemo(
-    () => [
-      {
-        Header: "Table",
-        columns: [
-          {
-            id: "templateName",
-            Header: "Template Name",
-            accessor: "templateName",
-            Cell: (value: CellProps<Template>) => (
-              <div
-                className="iui-anchor"
-                onClick={() => {
-                  setSelectedTemplate(value.row.original);
-                  setTemplateView(TemplateView.MENU);
-                }}
-              >
-                {value.row.original.templateName}
-              </div>
-            ),
-          },
-          {
-            id: "templateDescription",
-            Header: "Template Description",
-            accessor: "templateDescription",
-          },
-          {
-            id: "dropdown",
-            Header: "",
-            width: 80,
-            Cell: (value: CellProps<Template>) => {
-              return (
-                <DropdownMenu
-                  menuItems={(close: () => void) => [
-
-                    <MenuItem
-                      key={2}
-                      onClick={() => {
-                        setSelectedTemplate(value.row.original);
-                        setShowDeleteModal(true);
-                        close();
-                      }}
-                      icon={<SvgDelete />}
-                    >
-                      Remove
-                    </MenuItem>,
-                  ]}
-                >
-                  <IconButton styleType="borderless">
-                    <SvgMore
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                      }}
-                    />
-                  </IconButton>
-                </DropdownMenu>
-              );
-            },
-          },
-        ],
-      },
-    ],
-    []
+  const filteredTemplates = useMemo(
+    () =>
+      templates.filter((x) =>
+        [x.templateName, x.templateDescription]
+          .join(" ")
+          .toLowerCase()
+          .includes(searchValue.toLowerCase())
+      ),
+    [templates, searchValue]
   );
-
-  const onSearchBoxValueChanged = async (value: string) => {
-    const filterTemplates = templates.filter(
-      (x) =>
-        x.templateName &&
-        x.templateName.toLowerCase()?.indexOf(value.toLowerCase()) > -1
-    );
-    setFilteredTemplates(filterTemplates);
-  };
-
-  const tableStateSingleSelectReducer = (newState: any, action: any): any => {
-    switch (action.type) {
-      case "toggleRowSelected": {
-        return { ...newState, selectedRowIds: { [action.id]: action.value } };
-      }
-      default:
-        break;
-    }
-    return newState;
-  };
 
   useEffect(() => {
     load();
@@ -177,38 +94,73 @@ const Templates = () => {
         <>
           <WidgetHeader title="Templates" />
 
-          <div className="toolbar">
-            <Button
-              styleType="high-visibility"
-              onClick={() => {
-                setTemplateView(TemplateView.CREATE);
-              }}
-            >
-              {"Create Template"}
-            </Button>
-          </div>
-          <div className="e_c_3-template-container">
-            <div className="e_c_3-searchbox-container">
-              <SearchBox
-                onValueChanged={onSearchBoxValueChanged}
-                placeholder={"Search templates"}
-              />
+          <Surface className="templates-list-container">
+            <div className="toolbar">
+              <Button
+                startIcon={<SvgAdd />}
+                onClick={() => setTemplateView(TemplateView.CREATE)}
+                styleType="high-visibility"
+              >
+                Create Template
+              </Button>
+              <div className="search-bar-container" data-testid="search-bar">
+                <SearchBar
+                  searchValue={searchValue}
+                  setSearchValue={setSearchValue}
+                  disabled={isLoading}
+                />
+              </div>
             </div>
-            <div className="e_c_3-scrollable-table">
-              <Table<TemplateType>
-                className="e_c_3-reports-table"
-                data={filteredTemplates}
-                density="extra-condensed"
-                columns={templatesColumns}
-                emptyTableContent="No items available."
-                isSortable
-                stateReducer={tableStateSingleSelectReducer}
-                isLoading={isLoading}
-                selectRowOnClick={true}
-                selectSubRows={false}
+            {isLoading ? (
+              <LoadingOverlay />
+            ) : templates.length === 0 ? (
+              <EmptyMessage
+                message="No templates available"
               />
-            </div>
-          </div>
+            ) : (
+              <div className="templates-list">
+                {filteredTemplates.map((template) => (
+                  <HorizontalTile
+                    key={template.id}
+                    title={template.templateName}
+                    subText={template.templateDescription}
+                    subtextToolTip={template.templateDescription}
+                    titleTooltip={template.templateName}
+                    onClickTitle={() => {
+                      setSelectedTemplate(template);
+                      setTemplateView(TemplateView.MENU);
+                    }}
+                    button={
+                      <DropdownMenu
+                        menuItems={(close: () => void) => [
+                          <MenuItem
+                            key={0}
+                            onClick={() => {
+                              setSelectedTemplate(template);
+                              setShowDeleteModal(true);
+                              close();
+                            }}
+                            icon={<SvgDelete />}
+                          >
+                            Delete
+                          </MenuItem>,
+                        ]}
+                      >
+                        <IconButton styleType="borderless">
+                          <SvgMore
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                            }}
+                          />
+                        </IconButton>
+                      </DropdownMenu>
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </Surface>
           <DeleteModal
             entityName={selectedTemplate?.templateName ?? ""}
             show={showDeleteModal}
