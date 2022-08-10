@@ -29,6 +29,7 @@ import MappingAction from "./MappingAction";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
 import { useMappingClient } from "./context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
+import { BlockingOverlay } from "./BlockingOverlay";
 import { HorizontalTile } from "./HorizontalTile";
 import { clearAll } from "./viewerUtils";
 import type { IMappingClient } from "../IMappingClient";
@@ -90,6 +91,7 @@ export const Mappings = () => {
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
+  const [showBlockingOverlay, setShowBlockingOverlay] = useState<boolean>(false);
   const [mappingView, setMappingView] = useState<MappingView>(
     MappingView.MAPPINGS
   );
@@ -142,6 +144,7 @@ export const Mappings = () => {
     default:
       return (
         <>
+          <BlockingOverlay isVisible={showBlockingOverlay} />
           <WidgetHeader title="Mappings" />
           <Surface className="gmw-mappings-container">
             <div className="table-toolbar">
@@ -197,9 +200,11 @@ export const Mappings = () => {
                               key={1}
                               onClick={async () => {
                                 setSelectedMapping(mapping);
+                                setShowBlockingOverlay(true);
                                 close();
                                 await toggleExtraction(getAccessToken, mappingClient, iModelId, mapping);
                                 await refresh();
+                                setShowBlockingOverlay(false);
                               }}
                               icon={<SvgProcess />}
                             >
