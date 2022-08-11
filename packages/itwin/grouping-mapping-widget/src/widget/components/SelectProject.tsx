@@ -1,16 +1,14 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
 import type {
   ApiOverrides,
   IModelFull,
   ProjectFull,
 } from "@itwin/imodel-browser-react";
-import {
-  ProjectGrid,
-} from "@itwin/imodel-browser-react";
+import { ProjectGrid } from "@itwin/imodel-browser-react";
 import {
   SvgCalendar,
   SvgClose,
@@ -31,12 +29,12 @@ import "./SelectProject.scss";
 
 const tabsWithIcons = [
   <Tab
-    key='favorite'
-    label='Favorite projects'
+    key="favorite"
+    label="Favorite projects"
     startIcon={<SvgStarHollow />}
   />,
-  <Tab key='recents' label='Recent projects' startIcon={<SvgCalendar />} />,
-  <Tab key='all' label='My projects' startIcon={<SvgList />} />,
+  <Tab key="recents" label="Recent projects" startIcon={<SvgCalendar />} />,
+  <Tab key="all" label="My projects" startIcon={<SvgList />} />,
 ];
 interface SelectProjectProps {
   onSelect: (project: ProjectFull) => void;
@@ -48,10 +46,15 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
   const [searchInput, setSearchInput] = useState<string>("");
   const [activeSearchInput, setActiveSearchInput] = useState<string>("");
   const [accessToken, setAccessToken] = useState<AccessToken>();
-  const [apiOverrides, setApiOverrides] = useState<ApiOverrides<IModelFull[]>>({ serverEnvironmentPrefix: prefix });
+  const [apiOverrides, setApiOverrides] = useState<ApiOverrides<IModelFull[]>>({
+    serverEnvironmentPrefix: prefix,
+  });
   const [searched, setSearched] = useState<boolean>(false);
 
-  useEffect(() => setApiOverrides({ serverEnvironmentPrefix: prefix }), [prefix]);
+  useEffect(
+    () => setApiOverrides({ serverEnvironmentPrefix: prefix }),
+    [prefix]
+  );
 
   useEffect(() => {
     const fetchAccessToken = async () => {
@@ -72,39 +75,27 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
     setSearched(false);
   }, []);
 
-  const runLabel = useCallback(() => {
-    if(searched === false) {
-      return (
-        <IconButton onClick={() => startSearch() } styleType='borderless'>
-          <SvgSearch />
-        </IconButton>
-      );
-    }
-    if(searchInput.length === 0) {
+  useEffect(() => {
+    if (searchInput.length === 0) {
       setSearched(false);
+      clearSearch();
     }
-    return (
-      <IconButton onClick={() => clearSearch() } styleType='borderless'>
-        <SvgClose />
-      </IconButton>
-    );
-
-  }, [searched, clearSearch, startSearch, searchInput]);
+  }, [searchInput, setSearched, clearSearch]);
 
   return (
-    <div className='select-project-grid-container'>
+    <div className="select-project-grid-container">
       <HorizontalTabs
         labels={tabsWithIcons}
         onTabSelected={setProjectType}
         activeIndex={projectType}
         type={"borderless"}
-        contentClassName='grid-holding-tab'
+        contentClassName="grid-holding-tab"
       >
         <LabeledInput
-          displayStyle='inline'
-          iconDisplayStyle='inline'
-          className='search-input'
-          label='Search'
+          displayStyle="inline"
+          iconDisplayStyle="inline"
+          className="search-input"
+          label="Search"
           value={searchInput}
           placeholder="Search...."
           onChange={(event) => {
@@ -118,25 +109,31 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
               startSearch();
             }
           }}
-          svgIcon={runLabel()}
+          svgIcon={
+            searched ? (
+              <IconButton onClick={clearSearch} styleType="borderless">
+                <SvgClose />
+              </IconButton>
+            ) : (
+              <IconButton onClick={startSearch} styleType="borderless">
+                <SvgSearch />
+              </IconButton>
+            )
+          }
         />
       </HorizontalTabs>
-      <div className='project-grid'>
+      <div className="project-grid">
         <ProjectGrid
           onThumbnailClick={onSelect}
           accessToken={accessToken}
           apiOverrides={apiOverrides}
           filterOptions={activeSearchInput}
           requestType={
-            projectType === 0
-              ? "favorites"
-              : projectType === 1
-                ? "recents"
-                : ""
+            projectType === 0 ? "favorites" : projectType === 1 ? "recents" : ""
           }
         />
       </div>
-      <div className='select-project-action-panel'>
+      <div className="select-project-action-panel">
         <Button onClick={onCancel}>Cancel</Button>
       </div>
     </div>
