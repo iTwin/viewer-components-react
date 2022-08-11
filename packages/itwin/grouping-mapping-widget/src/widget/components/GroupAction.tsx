@@ -355,7 +355,6 @@ const GroupAction = ({
         isSavingDisabled={
           isBlockingActions
         }
-        isCancelDisabled={isBlockingActions}
         isLoading={isLoading}
       />
     </>
