@@ -69,7 +69,7 @@ const GroupAction = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = React.useState<
-  PropertyRecord[]
+    PropertyRecord[]
   >([]);
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
@@ -175,50 +175,50 @@ const GroupAction = ({
           }%'`,
       )
       .join(" ")}) OR (${searchQuery
-      .map(
-        (token, index) =>
-          `${index === 0
-            ? ""
-            : needsAndOperator(token, index, searchQuery)
-              ? "AND"
-              : "OR"
-          } be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-          }%'`,
-      )
-      .join(" ")})) OR ((${searchQuery
-      .map(
-        (token, index) =>
-          `${index === 0
-            ? ""
-            : needsAndOperator(token, index, searchQuery)
-              ? "AND"
-              : "OR"
-          } cat.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-          }%'`,
-      )
-      .join(" ")}) OR (${searchQuery
-      .map(
-        (token, index) =>
-          `${index === 0
-            ? ""
-            : needsAndOperator(token, index, searchQuery)
-              ? "AND"
-              : "OR"
-          } cat.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-          }%'`,
-      )
-      .join(" ")})) OR (${searchQuery
-      .map(
-        (token, index) =>
-          `${index === 0
-            ? ""
-            : needsAndOperator(token, index, searchQuery)
-              ? "AND"
-              : "OR"
-          } ecc.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-          }%'`,
-      )
-      .join(" ")})`;
+        .map(
+          (token, index) =>
+            `${index === 0
+              ? ""
+              : needsAndOperator(token, index, searchQuery)
+                ? "AND"
+                : "OR"
+            } be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+            }%'`,
+        )
+        .join(" ")})) OR ((${searchQuery
+          .map(
+            (token, index) =>
+              `${index === 0
+                ? ""
+                : needsAndOperator(token, index, searchQuery)
+                  ? "AND"
+                  : "OR"
+              } cat.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+              }%'`,
+          )
+          .join(" ")}) OR (${searchQuery
+            .map(
+              (token, index) =>
+                `${index === 0
+                  ? ""
+                  : needsAndOperator(token, index, searchQuery)
+                    ? "AND"
+                    : "OR"
+                } cat.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+                }%'`,
+            )
+            .join(" ")})) OR (${searchQuery
+              .map(
+                (token, index) =>
+                  `${index === 0
+                    ? ""
+                    : needsAndOperator(token, index, searchQuery)
+                      ? "AND"
+                      : "OR"
+                  } ecc.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+                  }%'`,
+              )
+              .join(" ")})`;
     // Physical Types
     generatedSearchQuery += ` OR ((${searchQuery
       .map(
@@ -232,17 +232,17 @@ const GroupAction = ({
           }%'`,
       )
       .join(" ")}) OR (${searchQuery
-      .map(
-        (token, index) =>
-          `${index === 0
-            ? ""
-            : needsAndOperator(token, index, searchQuery)
-              ? "AND"
-              : "OR"
-          } pt.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-          }%'`,
-      )
-      .join(" ")})) `;
+        .map(
+          (token, index) =>
+            `${index === 0
+              ? ""
+              : needsAndOperator(token, index, searchQuery)
+                ? "AND"
+                : "OR"
+            } pt.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+            }%'`,
+        )
+        .join(" ")})) `;
 
     setQuery(generatedSearchQuery);
   };
@@ -502,8 +502,9 @@ const GroupAction = ({
           );
           await goBack();
         }}
-        isSavingDisabled={isBlockingActions}
-        isCancelDisabled={isBlockingActions}
+        isSavingDisabled={
+          isBlockingActions
+        }
         isLoading={isLoading}
       />
     </>
