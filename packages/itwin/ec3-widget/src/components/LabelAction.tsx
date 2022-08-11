@@ -38,7 +38,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   const [itemName, setItemName] = useState<string>(label?.itemName ?? "UserLabel");
   const [itemQuantity, setItemQuantity] = useState<string>(label?.itemQuantity ?? "");
   const [selectedMaterial, setSelectedMaterial] = useState<Material>();
-
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   // creating a copy of an array, so original isn't modified
   const [materials, setMaterials] = useState<Material[]>(label?.materials.map(x => { return { name: x.name } }) ?? []);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -72,36 +72,49 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     setTemplate(template);
   };
 
-  function updateColumns(labelName: string) {
-    if (!IModelApp.authorizationClient)
+  async function updateColumns(labelName: string) {
+    setIsLoading(true);
+
+    if (!IModelApp.authorizationClient) {
+      setIsLoading(false);
       throw new Error(
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
-    if (!template.reportId)
+    }
+
+
+    if (!template.reportId) {
+      setIsLoading(false);
       throw new Error(
         "Invalid report."
       );
+    }
 
-    IModelApp.authorizationClient
-      .getAccessToken()
-      .then(async (token: string) => {
-        const responseText = await fetchMetadata(token, reportingClientApi, template.reportId);
-        const dom = new DOMParser().parseFromString(responseText, "text/xml");
-        const elems = Array.from(dom.getElementsByTagName("EntityType")).filter(x => x.attributes[0].value === labelName);
+    try {
+      const accessToken = await IModelApp.authorizationClient
+        .getAccessToken();
 
-        if (elems.length > 0) {
-          const columns = Array.from(elems[0].children).map(x => x.attributes);
-          const stringColumns = columns.filter(x => x[1].value === "Edm.String").map(x => x[0].value);
-          const numericalColumns = columns.filter(x => x[1].value === "Edm.Double").map(x => x[0].value);
-          setStringColumns(stringColumns);
-          setNumericalColumns(numericalColumns);
-        }
-      })
-      .catch((err) => {
-        toaster.negative("You are not authorized to use this system.");
-        /* eslint-disable no-console */
-        console.error(err);
-      });
+      const responseText = await fetchMetadata(accessToken, reportingClientApi, template.reportId);
+      const dom = new DOMParser().parseFromString(responseText, "text/xml");
+
+      const c = dom.getElementsByTagName("EntityType");
+
+      const elems = Array.from(dom.getElementsByTagName("EntityType")).filter(x => x.attributes[0].value === labelName);
+
+      if (elems.length > 0) {
+        const columns = Array.from(elems[0].children).map(x => x.attributes);
+        const stringColumns = columns.filter(x => x[1].value === "Edm.String").map(x => x[0].value);
+        const numericalColumns = columns.filter(x => x[1].value === "Edm.Double").map(x => x[0].value);
+        setStringColumns(stringColumns);
+        setNumericalColumns(numericalColumns);
+      }
+    }
+    catch (err) {
+      toaster.negative("You are not authorized to use this system.");
+      /* eslint-disable no-console */
+      console.error(err);
+    }
+    setIsLoading(false);
   }
 
   const labelOptions = useMemo(() => {
@@ -167,8 +180,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     const data = await reportingClientApi
       .getODataReport(token, template.reportId);
     if (data) {
-      const reportData = data;
-      const labelItems = reportData.value.map(data =>
+      const labelItems = data.value.map(data =>
         data.name ?? ""
       );
       const filteredLabels: string[] = label ? [label.reportTable] : [];
@@ -202,6 +214,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   })
 
   useEffect(() => {
+    setIsLoading(true);
     if (label) {
       setReportTable(label.reportTable);
       setName(label.customName);
@@ -214,46 +227,51 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       setItemName("UserLabel");
     }
 
+    const fetchMappings = async () => {
+      if (!IModelApp.authorizationClient) {
+        setIsLoading(false);
+        throw new Error(
+          "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
+        );
+      }
 
-    if (!IModelApp.authorizationClient)
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
-    if (!template.reportId)
-      throw new Error(
-        "Invalid report."
-      );
+      if (!template.reportId) {
+        setIsLoading(false);
+        throw new Error(
+          "Invalid report."
+        );
+      }
 
-    IModelApp.authorizationClient
-      .getAccessToken()
-      .then((token: string) => {
-        reportingClientApi
-          .getODataReport(token, template.reportId)
-          .then(async (data) => {
-            if (data) {
-              const reportData = data;
-              const labelItems = reportData.value.map(data =>
-                data.name ?? ""
-              );
-              const filteredLabels: string[] = label ? [label.reportTable] : [];
-              for (const g of labelItems) {
-                if (template.labels.filter(x => x.reportTable === g).length === 0) {
-                  filteredLabels.push(g);
-                }
-              }
-              if (!availableLabels)
-                setLabels(filteredLabels);
+      try {
+        const accessToken = await IModelApp.authorizationClient
+          .getAccessToken();
+
+        const ODataReport = await reportingClientApi
+          .getODataReport(accessToken, template.reportId);
+
+        if (ODataReport) {
+          const labelItems = ODataReport.value.map(data =>
+            data.name ?? ""
+          );
+          const filteredLabels: string[] = label ? [label.reportTable] : [];
+          for (const g of labelItems) {
+            if (template.labels.filter(x => x.reportTable === g).length === 0) {
+              filteredLabels.push(g);
             }
-          })
-          .catch((err) => {
-            toaster.negative("You are not authorized to get metadata for this report. Please contact project administrator.");
-            console.error(err);
-          });
-      })
-      .catch((err) => {
-        toaster.negative("You are not authorized to use this system.");
+          }
+          if (!availableLabels)
+            setLabels(filteredLabels);
+        }
+      }
+      catch (err) {
+        toaster.negative("You are not authorized to get metadata for this report. Please contact project administrator.");
         console.error(err);
-      });
+      }
+
+      setIsLoading(false);
+    }
+
+    void fetchMappings();
   }, []);
 
   return (
@@ -261,6 +279,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       <WidgetHeader
         title={label?.customName ?? "Label"}
         returnFn={goBack}
+        disabled={isLoading}
       />
       <div className='label-details-container'>
         <Fieldset legend='Label' className='label-details'>
@@ -271,6 +290,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
           <LabeledSelect
             label="Report table"
             id='reportTable'
+            placeholder={isLoading ? "Loading report tables" : "Select report table"}
             required
             options={labelOptions}
             value={reportTable}
@@ -282,19 +302,21 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
 
               setReportTable(value);
               updateColumns(value);
-            } }
+            }}
             message={validator.message(
               "reportTable",
               reportTable,
-              NAME_REQUIREMENTS
+              NAME_REQUIREMENTS,
             )}
-            status={validator.message(
-              "reportTable",
-              reportTable,
-              NAME_REQUIREMENTS
-            )
-              ? "negative"
-              : undefined}
+            status={
+              validator.message(
+                "reportTable",
+                reportTable,
+                NAME_REQUIREMENTS,
+              )
+                ? "negative"
+                : undefined
+            }
             onBlur={() => {
               validator.showMessageFor("reportTable");
             } } onShow={() => {}} onHide={() => {}}          />
@@ -317,19 +339,21 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 value={itemName}
                 onChange={async (value) => {
                   setItemName(value);
-                } }
+                }}
                 message={validator.message(
                   "element",
                   itemName,
-                  NAME_REQUIREMENTS
+                  NAME_REQUIREMENTS,
                 )}
-                status={validator.message(
-                  "element",
-                  itemName,
-                  NAME_REQUIREMENTS
-                )
-                  ? "negative"
-                  : undefined}
+                status={
+                  validator.message(
+                    "element",
+                    itemName,
+                    NAME_REQUIREMENTS,
+                  )
+                    ? "negative"
+                    : undefined
+                }
                 onBlur={() => {
                   validator.showMessageFor("element");
                 } } onShow={() => {}} onHide={() => {}}              />
@@ -338,25 +362,28 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
               <LabeledSelect
                 label="Element quantity"
                 id='elementQuantity'
+                placeholder={isLoading ? "Loading elements" : "Select element quantity"}
                 required
                 options={NumericalColumnOptions}
                 value={itemQuantity}
                 onChange={async (value) => {
                   setItemQuantity(value);
                   console.log(value);
-                } }
+                }}
                 message={validator.message(
                   "elementQuantity",
                   itemQuantity,
-                  NAME_REQUIREMENTS
+                  NAME_REQUIREMENTS,
                 )}
-                status={validator.message(
-                  "elementQuantity",
-                  itemQuantity,
-                  NAME_REQUIREMENTS
-                )
-                  ? "negative"
-                  : undefined}
+                status={
+                  validator.message(
+                    "elementQuantity",
+                    itemQuantity,
+                    NAME_REQUIREMENTS,
+                  )
+                    ? "negative"
+                    : undefined
+                }
                 onBlur={() => {
                   validator.showMessageFor("elementQuantity");
                 } } onShow={() => {}} onHide={() => {}}              />
@@ -376,11 +403,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                     if (p.name === material.name)
                       p.name = value;
                   });
-
-                  //pair.material = value;//setState
                   setMaterials(newPairs);
-                  //console.log(pairs);
-                  //refresh();
                 }}
                 actionGroup={
                   <div className="actions">
@@ -427,7 +450,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       </div>
 
       <DeleteModal
-        entityName={selectedMaterial?.name /*+ " - " + selectedPair?.quantity */ ?? ""}
+        entityName={selectedMaterial?.name ?? ""}
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
@@ -448,6 +471,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
         }
         }
         onCancel={goBack}
+        isLoading={isLoading}
       />
     </>
   );
