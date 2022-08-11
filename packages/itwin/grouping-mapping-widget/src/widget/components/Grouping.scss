@@ -19,6 +19,11 @@
     padding-bottom: $iui-baseline;
     flex-wrap: wrap;
 
+    .add-load-button {
+      width: 125px;
+      text-align: center;
+    }
+
     .toolbar-buttons {
       margin-right: $iui-sm;
 
