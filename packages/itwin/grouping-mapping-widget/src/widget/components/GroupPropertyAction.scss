@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
+@import "~@itwin/itwinui-css/scss/variables";
 
 .group-property-action-container {
   display: flex;
@@ -21,14 +21,11 @@
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
-
-    .property-select-item {
-      .selection-and-reorder {
-        display: flex;
-        gap: $iui-s;
-      }
-    }
   }
+}
+.gm-gp-menu-item {
+  display: flex;
+  justify-content: space-between;
 }
 
 .iui-text-leading {
