@@ -47,11 +47,15 @@ export interface GroupExtension {
  */
 export interface GroupExtensionProps {
   /**
-   * function to validate and update current query
+   * to validate and update current query
    */
   updateQuery: (query: string) => void;
   /**
    * to get the query loading status
    */
   isUpdating?: boolean;
+  /**
+   * to reset the viewer
+   */
+  resetView?: () => Promise<void>;
 }

@@ -42,6 +42,7 @@ import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupExtension } from "./context/GroupExtensionContext";
+import ManualExtension from "./extension/ManualExtension";
 
 interface GroupActionProps {
   iModelId: string;
@@ -79,7 +80,6 @@ const GroupAction = ({
     new QueryBuilder(undefined),
   );
   const [searchInput, setSearchInput] = React.useState("");
-  const [manualInput, setManualInput] = React.useState("");
 
   const groupExtension = useGroupExtension();
 
@@ -260,6 +260,8 @@ const GroupAction = ({
     [setQuery],
   );
 
+  const isUpdating = isLoading || isRendering;
+
   const save = useCallback(async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
@@ -376,39 +378,11 @@ const GroupAction = ({
       }
       case "Manual": {
         return (
-          <div className="search-form">
-            <Text>
-              Generate group by user defined ECSQL query. Please select
-              ECInstanceId column in the query.
-            </Text>
-            <LabeledTextarea
-              label="Query"
-              required
-              value={manualInput}
-              onChange={(event) => setManualInput(event.target.value)}
-              disabled={isLoading || isRendering}
-              placeholder={`E.g. "Select ECInstanceId From Biscore.Element`}
-            />
-            <div className="search-actions">
-              {isRendering && <LoadingSpinner />}
-              <Button
-                disabled={isLoading || isRendering}
-                onClick={() => setQuery(manualInput)}
-              >
-                Apply
-              </Button>
-              <Button
-                disabled={isLoading || isRendering}
-                onClick={async () => {
-                  setQuery("");
-                  setManualInput("");
-                  await resetView();
-                }}
-              >
-                Clear
-              </Button>
-            </div>
-          </div>
+          <ManualExtension
+            updateQuery={updateQuery}
+            isUpdating={isUpdating}
+            resetView={resetView}
+          />
         );
       }
       default: {
@@ -419,7 +393,7 @@ const GroupAction = ({
           if (selectedExtension) {
             return React.createElement(selectedExtension.uiComponent, {
               updateQuery,
-              isUpdating: (isLoading || isRendering),
+              isUpdating: isLoading || isRendering,
             });
           }
         }
