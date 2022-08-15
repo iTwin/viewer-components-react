@@ -25,7 +25,9 @@
     }
 
     .toolbar-buttons {
+      display:flex;
       margin-right: $iui-sm;
+      flex-wrap: wrap;
 
       .toggle {
         margin-right: $iui-xs;
