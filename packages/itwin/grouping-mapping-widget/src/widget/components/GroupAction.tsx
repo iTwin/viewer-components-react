@@ -19,7 +19,13 @@ import {
   toaster,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
-import { EmptyMessage, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
+import {
+  EmptyMessage,
+  handleError,
+  handleInputChange,
+  LoadingSpinner,
+  WidgetHeader,
+} from "./utils";
 import type { GroupType } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
@@ -35,7 +41,7 @@ import {
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
-import type { GroupExtension } from "../utils";
+import { useGroupExtension } from "./context/GroupExtensionContext";
 
 interface GroupActionProps {
   iModelId: string;
@@ -44,7 +50,6 @@ interface GroupActionProps {
   queryGenerationType?: string;
   goBack: () => Promise<void>;
   resetView: () => Promise<void>;
-  extensions?: GroupExtension[];
 }
 
 const GroupAction = ({
@@ -54,7 +59,6 @@ const GroupAction = ({
   queryGenerationType,
   goBack,
   resetView,
-  extensions,
 }: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
@@ -76,6 +80,8 @@ const GroupAction = ({
   );
   const [searchInput, setSearchInput] = React.useState("");
   const [manualInput, setManualInput] = React.useState("");
+
+  const groupExtension = useGroupExtension();
 
   useEffect(() => {
     const removeListener = Presentation.selection.selectionChange.addListener(
@@ -407,12 +413,13 @@ const GroupAction = ({
       }
       default: {
         if (queryGenerationType && queryGenerationType.length > 0) {
-          const selectedExtension = extensions?.find(
+          const selectedExtension = groupExtension.extensions?.find(
             (e) => e.name === queryGenerationType,
           );
           if (selectedExtension) {
             return React.createElement(selectedExtension.uiComponent, {
               updateQuery,
+              isRendering,
             });
           }
         }
@@ -502,9 +509,7 @@ const GroupAction = ({
           );
           await goBack();
         }}
-        isSavingDisabled={
-          isBlockingActions
-        }
+        isSavingDisabled={isBlockingActions}
         isLoading={isLoading}
       />
     </>

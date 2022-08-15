@@ -22,7 +22,7 @@ import {
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { CreateTypeFromInterface, GroupExtension } from "../utils";
+import type { CreateTypeFromInterface } from "../utils";
 import { handleError, onSelectionChanged, WidgetHeader } from "./utils";
 import "./Mapping.scss";
 import DeleteModal from "./DeleteModal";
@@ -86,21 +86,7 @@ const toggleExtraction = async (
   }
 };
 
-export interface MappingsProps {
-  /**
-   * Group extensions
-   */
-  extensions?: GroupExtension[];
-  /**
-   * Whether to keep default extensions
-   */
-  extendsDefault?: boolean;
-}
-
-export const Mappings = ({
-  extensions,
-  extendsDefault = true,
-}: MappingsProps) => {
+export const Mappings = () => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
@@ -162,7 +148,7 @@ export const Mappings = ({
             id: "mappingName",
             Header: "Mapping Name",
             accessor: "mappingName",
-            Cell: (value: CellProps<{ mappingName: string; }>) => (
+            Cell: (value: CellProps<{ mappingName: string }>) => (
               <div
                 className="iui-anchor"
                 onClick={() => {
@@ -266,8 +252,6 @@ export const Mappings = ({
       return (
         <Groupings
           mapping={selectedMapping as Mapping}
-          extensions={extensions}
-          extendsDefault={extendsDefault}
           goBack={refresh}
         />
       );

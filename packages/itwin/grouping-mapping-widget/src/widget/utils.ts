@@ -50,4 +50,8 @@ export interface GroupExtensionProps {
    * function to validate and update current query
    */
   updateQuery: (query: string) => void;
+  /**
+   * to get the query loading status
+   */
+  isRendering?: boolean;
 }

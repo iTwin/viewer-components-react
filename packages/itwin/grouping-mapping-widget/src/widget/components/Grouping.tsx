@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import type { CreateTypeFromInterface, GroupExtension } from "../utils";
+import type { CreateTypeFromInterface } from "../utils";
 import {
   Button,
   ButtonGroup,
@@ -58,6 +58,7 @@ import { GroupTile } from "./GroupTile";
 import type { IMappingClient } from "../IMappingClient";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { useGroupExtension } from "./context/GroupExtensionContext";
 
 export type GroupType = CreateTypeFromInterface<Group>;
 
@@ -71,8 +72,6 @@ enum GroupsView {
 interface GroupsTreeProps {
   mapping: Mapping;
   goBack: () => Promise<void>;
-  extensions?: GroupExtension[];
-  extendsDefault?: boolean;
 }
 
 const goldenAngle = 180 * (3 - Math.sqrt(5));
@@ -106,8 +105,6 @@ const fetchGroups = async (
 export const Groupings = ({
   mapping,
   goBack,
-  extensions,
-  extendsDefault = true,
 }: GroupsTreeProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
@@ -124,6 +121,8 @@ export const Groupings = ({
   const [groups, setGroups] = useState<Group[]>([]);
   const [hiddenGroupsIds, setHiddenGroupsIds] = useState<string[]>([]);
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
+
+  const groupExtension = useGroupExtension();
 
   const [queryGenerationType, setQueryGenerationType] =
     useState<string>("Selection");
@@ -372,7 +371,6 @@ export const Groupings = ({
             await refresh();
           }}
           resetView={resetView}
-          extensions={extensions}
         />
       );
     case GroupsView.MODIFYING:
@@ -387,7 +385,6 @@ export const Groupings = ({
             await refresh();
           }}
           resetView={resetView}
-          extensions={extensions}
         />
       ) : null;
     case GroupsView.PROPERTIES:
@@ -416,30 +413,26 @@ export const Groupings = ({
               <DropdownMenu
                 disabled={isLoadingQuery}
                 menuItems={() =>
-                  (extensions
-                    ? extensions.map((ext) => (
+                  (groupExtension?.extensions
+                    ? groupExtension.extensions.map((ext) => (
                       <MenuItem
                         key={ext.name}
                         onClick={() => addGroup(ext.name)}
                         icon={ext.icon}
-                        style={{
-                          paddingLeft: "16px",
-                        }}
+                        className="menu-item"
                       >
                         {ext.displayLabel}
                       </MenuItem>
                     ))
                     : []
                   ).concat(
-                    extendsDefault
+                    groupExtension.extendsDefault
                       ? [
                         <MenuItem
                           key={0}
                           onClick={() => addGroup("Selection")}
                           icon={<SvgAdd />}
-                          style={{
-                            paddingLeft: "16px",
-                          }}
+                          className="menu-item"
                         >
                           Selection
                         </MenuItem>,
@@ -447,9 +440,7 @@ export const Groupings = ({
                           key={1}
                           onClick={() => addGroup("Search")}
                           icon={<SvgSearch />}
-                          style={{
-                            paddingLeft: "16px",
-                          }}
+                          className="menu-item"
                         >
                           Search
                         </MenuItem>,
@@ -457,9 +448,7 @@ export const Groupings = ({
                           key={2}
                           onClick={() => addGroup("Manual")}
                           icon={<SvgDraw />}
-                          style={{
-                            paddingLeft: "16px",
-                          }}
+                          className="menu-item"
                         >
                           Manual
                         </MenuItem>,
@@ -579,32 +568,27 @@ export const Groupings = ({
                               <MenuItem
                                 key={0}
                                 disabled={isLoadingQuery}
-                                subMenuItems={(extensions
-                                  ? extensions.map((ext) => (
+                                subMenuItems={(groupExtension.extensions
+                                  ? groupExtension.extensions.map((ext) => (
                                     <MenuItem
+                                      className="menu-item"
                                       key={ext.name}
                                       onClick={() => addGroup(ext.name)}
                                       icon={ext.icon}
-                                      style={{
-                                        paddingLeft: "16px",
-                                      }}
                                     >
                                       {ext.displayLabel}
                                     </MenuItem>
                                   ))
                                   : []
                                 ).concat(
-                                  extendsDefault
+                                  groupExtension.extendsDefault
                                     ? [
                                       <MenuItem
                                         key={0}
                                         onClick={async () =>
                                           onModify(g, "Selection")
                                         }
-                                        icon={<SvgAdd />}
-                                        style={{
-                                          paddingLeft: "16px",
-                                        }}
+                                        icon={<SvgAdd />} className="menu-item"
                                       >
                                         Selection
                                       </MenuItem>,
@@ -613,10 +597,7 @@ export const Groupings = ({
                                         onClick={async () =>
                                           onModify(g, "Search")
                                         }
-                                        icon={<SvgSearch />}
-                                        style={{
-                                          paddingLeft: "16px",
-                                        }}
+                                        icon={<SvgSearch />} className="menu-item"
                                       >
                                         Search
                                       </MenuItem>,
@@ -625,10 +606,7 @@ export const Groupings = ({
                                         onClick={async () =>
                                           onModify(g, "Manual")
                                         }
-                                        icon={<SvgDraw />}
-                                        style={{
-                                          paddingLeft: "16px",
-                                        }}
+                                        icon={<SvgDraw />} className="menu-item"
                                       >
                                         Manual
                                       </MenuItem>,
