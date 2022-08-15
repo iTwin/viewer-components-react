@@ -113,7 +113,7 @@ export class PropertyList extends React.Component<PropertyListProps> {
   /** @internal */
   public override render() {
     const propertyListClassName = classnames(
-      (this.props.orientation === Orientation.Horizontal) ? "components-property-list--horizontal" : "components-property-list--vertical",
+      (this.props.orientation === Orientation.Horizontal) ? "gmw-components-property-list--horizontal" : "gmw-components-property-list--vertical",
       this.props.className,
     );
 
