@@ -53,5 +53,5 @@ export interface GroupExtensionProps {
   /**
    * to get the query loading status
    */
-  isRendering?: boolean;
+  isUpdating?: boolean;
 }

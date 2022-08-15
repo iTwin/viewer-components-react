@@ -419,7 +419,7 @@ const GroupAction = ({
           if (selectedExtension) {
             return React.createElement(selectedExtension.uiComponent, {
               updateQuery,
-              isRendering,
+              isUpdating: (isLoading || isRendering),
             });
           }
         }
