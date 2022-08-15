@@ -156,7 +156,6 @@ export const Mappings = () => {
                 >
                   New
                 </Button>
-
                 <IconButton title="Import Mappings"
                   onClick={() => setShowImportModal(true)}>
                   <SvgImport />
@@ -195,7 +194,6 @@ export const Mappings = () => {
                             >
                               Modify
                             </MenuItem>,
-
                             <MenuItem
                               key={1}
                               onClick={async () => {
@@ -210,7 +208,6 @@ export const Mappings = () => {
                             >
                               {mapping.extractionEnabled ? "Disable extraction" : "Enable extraction"}
                             </MenuItem>,
-
                             <MenuItem
                               key={2}
                               onClick={() => {
@@ -233,7 +230,6 @@ export const Mappings = () => {
                             />
                           </IconButton>
                         </DropdownMenu>
-
                       }
                     />
                   ))}
