@@ -43,6 +43,7 @@ import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext"
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupExtension } from "./context/GroupExtensionContext";
 import ManualExtension from "./extension/ManualExtension";
+import SearchExtension from "./extension/SearchExtension";
 
 interface GroupActionProps {
   iModelId: string;
@@ -79,7 +80,6 @@ const GroupAction = ({
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
-  const [searchInput, setSearchInput] = React.useState("");
 
   const groupExtension = useGroupExtension();
 
@@ -146,112 +146,6 @@ const GroupAction = ({
       iModelConnection,
     );
   }, [iModelConnection]);
-
-  const isWrappedInQuotes = (text: string) => {
-    return text.startsWith(`"`) && text.endsWith(`"`);
-  };
-
-  const needsAndOperator = (
-    token: string,
-    index: number,
-    searchQuery: string[],
-  ) =>
-    isWrappedInQuotes(token) ||
-    (index === 1 && isWrappedInQuotes(searchQuery[0]));
-  // Temporary until ECViews become available for use.
-  const generateSearchQuery = (searchQuery: string[]) => {
-    if (searchQuery.length === 0) {
-      setQuery("");
-      return;
-    }
-
-    let generatedSearchQuery = `SELECT be.ECInstanceId, be.ECClassId FROM bis.geometricelement3d be `;
-    generatedSearchQuery += `LEFT JOIN bis.SpatialCategory cat ON be.Category.Id = cat.ECInstanceID LEFT JOIN ecdbmeta.ECClassDef ecc ON be.ECClassId = ecc.ECInstanceId `;
-    generatedSearchQuery += `LEFT JOIN bis.PhysicalType pt ON be.TypeDefinition.Id = pt.ECInstanceID`;
-    generatedSearchQuery += ` WHERE `;
-    generatedSearchQuery += `((${searchQuery
-      .map(
-        (token, index) =>
-          `${index === 0
-            ? ""
-            : needsAndOperator(token, index, searchQuery)
-              ? "AND"
-              : "OR"
-          } be.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-          }%'`,
-      )
-      .join(" ")}) OR (${searchQuery
-        .map(
-          (token, index) =>
-            `${index === 0
-              ? ""
-              : needsAndOperator(token, index, searchQuery)
-                ? "AND"
-                : "OR"
-            } be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-            }%'`,
-        )
-        .join(" ")})) OR ((${searchQuery
-          .map(
-            (token, index) =>
-              `${index === 0
-                ? ""
-                : needsAndOperator(token, index, searchQuery)
-                  ? "AND"
-                  : "OR"
-              } cat.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-              }%'`,
-          )
-          .join(" ")}) OR (${searchQuery
-            .map(
-              (token, index) =>
-                `${index === 0
-                  ? ""
-                  : needsAndOperator(token, index, searchQuery)
-                    ? "AND"
-                    : "OR"
-                } cat.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-                }%'`,
-            )
-            .join(" ")})) OR (${searchQuery
-              .map(
-                (token, index) =>
-                  `${index === 0
-                    ? ""
-                    : needsAndOperator(token, index, searchQuery)
-                      ? "AND"
-                      : "OR"
-                  } ecc.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-                  }%'`,
-              )
-              .join(" ")})`;
-    // Physical Types
-    generatedSearchQuery += ` OR ((${searchQuery
-      .map(
-        (token, index) =>
-          `${index === 0
-            ? ""
-            : needsAndOperator(token, index, searchQuery)
-              ? "AND"
-              : "OR"
-          } pt.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-          }%'`,
-      )
-      .join(" ")}) OR (${searchQuery
-        .map(
-          (token, index) =>
-            `${index === 0
-              ? ""
-              : needsAndOperator(token, index, searchQuery)
-                ? "AND"
-                : "OR"
-            } pt.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-            }%'`,
-        )
-        .join(" ")})) `;
-
-    setQuery(generatedSearchQuery);
-  };
 
   const updateQuery = useCallback(
     (newQuery: string) => {
@@ -332,48 +226,11 @@ const GroupAction = ({
       }
       case "Search": {
         return (
-          <div className="search-form">
-            <Text>
-              Generate a query by keywords. Keywords wrapped in double quotes
-              will be considered a required criteria.
-            </Text>
-            <LabeledTextarea
-              label="Query Keywords"
-              required
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              disabled={isLoading || isRendering}
-              placeholder={`E.g. "red" chair`}
-            />
-            <div className="search-actions">
-              {isRendering && <LoadingSpinner />}
-              <Button
-                disabled={isLoading || isRendering}
-                onClick={() =>
-                  generateSearchQuery(
-                    searchInput
-                      ? searchInput
-                        .replace(/(\r\n|\n|\r)/gm, "")
-                        .trim()
-                        .split(" ")
-                      : [],
-                  )
-                }
-              >
-                Apply
-              </Button>
-              <Button
-                disabled={isLoading || isRendering}
-                onClick={async () => {
-                  setQuery("");
-                  setSearchInput("");
-                  await resetView();
-                }}
-              >
-                Clear
-              </Button>
-            </div>
-          </div>
+          <SearchExtension
+            updateQuery={updateQuery}
+            isUpdating={isUpdating}
+            resetView={resetView}
+          />
         );
       }
       case "Manual": {
