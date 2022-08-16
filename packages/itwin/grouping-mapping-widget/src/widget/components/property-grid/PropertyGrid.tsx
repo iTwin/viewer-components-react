@@ -254,7 +254,7 @@ PropertyGridState
     }
 
     return (
-      <div className="table-box-inner">
+      <div className="gmw-table-box-inner">
         <PropertyGridEventsRelatedPropsSupplier
           isPropertySelectionEnabled={
             this.props.isPropertySelectionEnabled ?? false
