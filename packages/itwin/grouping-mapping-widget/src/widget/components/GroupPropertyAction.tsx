@@ -83,7 +83,7 @@ const convertType = (type: string) =>{
   switch (type) {
     case "int":
     case "long":
-      return "number";
+      return "integer";
     case "enum":
       return "string";
     default:
