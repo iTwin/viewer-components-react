@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "scss updated to match requested changes",
+      "comment": "Updated css classnames to be scoped to this package only",
       "type": "patch"
     }
   ],
