@@ -10,12 +10,11 @@ import type {
 import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import {
-  Button,
   Fieldset,
   LabeledInput,
-  LabeledTextarea,
+  RadioTile,
+  RadioTileGroup,
   Small,
-  Text,
   toaster,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
@@ -23,7 +22,6 @@ import {
   EmptyMessage,
   handleError,
   handleInputChange,
-  LoadingSpinner,
   WidgetHeader,
 } from "./utils";
 import type { GroupType } from "./Grouping";
@@ -44,6 +42,11 @@ import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupExtension } from "./context/GroupExtensionContext";
 import ManualExtension from "./extension/ManualExtension";
 import SearchExtension from "./extension/SearchExtension";
+import {
+  SvgCursor,
+  SvgHand,
+  SvgSearch,
+} from "@itwin/itwinui-icons-react";
 
 interface GroupActionProps {
   iModelId: string;
@@ -65,6 +68,8 @@ const GroupAction = ({
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
+  const groupExtension = useGroupExtension();
+
   const [details, setDetails] = useState({
     groupName: group?.groupName ?? "",
     description: group?.description ?? "",
@@ -80,8 +85,24 @@ const GroupAction = ({
   const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
+  const [localQueryGenerationType, setQueryGenerationType] =
+    React.useState(queryGenerationType);
 
-  const groupExtension = useGroupExtension();
+  const changeGroupByType = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const {
+      target: { value },
+    } = event;
+    setQueryGenerationType(value);
+    Presentation.selection.clearSelection(
+      "GroupingMappingWidget",
+      iModelConnection,
+    );
+    setQuery("");
+    setSimpleSelectionQuery("");
+    await resetView();
+  };
 
   useEffect(() => {
     const removeListener = Presentation.selection.selectionChange.addListener(
@@ -89,7 +110,7 @@ const GroupAction = ({
         evt: SelectionChangeEventArgs,
         selectionProvider: ISelectionProvider,
       ) => {
-        if (queryGenerationType === "Selection") {
+        if (localQueryGenerationType === "Selection") {
           const selection = selectionProvider.getSelection(
             evt.imodel,
             evt.level,
@@ -106,7 +127,7 @@ const GroupAction = ({
     return () => {
       removeListener();
     };
-  }, [iModelConnection, queryGenerationType]);
+  }, [iModelConnection, localQueryGenerationType]);
 
   useEffect(() => {
     const reemphasize = async () => {
@@ -116,7 +137,7 @@ const GroupAction = ({
         }
 
         if (
-          queryGenerationType === "Selection" &&
+          localQueryGenerationType === "Selection" &&
           currentPropertyList.length === 0
         ) {
           return;
@@ -138,7 +159,7 @@ const GroupAction = ({
     };
 
     void reemphasize();
-  }, [iModelConnection, query, currentPropertyList, queryGenerationType]);
+  }, [iModelConnection, query, currentPropertyList, localQueryGenerationType]);
 
   useEffect(() => {
     Presentation.selection.clearSelection(
@@ -204,7 +225,7 @@ const GroupAction = ({
   ]);
 
   const queryGenerationComponent = () => {
-    switch (queryGenerationType) {
+    switch (localQueryGenerationType) {
       case "Selection": {
         return (
           <GroupQueryBuilderContext.Provider
@@ -243,14 +264,15 @@ const GroupAction = ({
         );
       }
       default: {
-        if (queryGenerationType && queryGenerationType.length > 0) {
+        if (localQueryGenerationType && localQueryGenerationType.length > 0) {
           const selectedExtension = groupExtension.extensions?.find(
-            (e) => e.name === queryGenerationType,
+            (e) => e.name === localQueryGenerationType,
           );
           if (selectedExtension) {
             return React.createElement(selectedExtension.uiComponent, {
               updateQuery,
               isUpdating: isLoading || isRendering,
+              resetView,
             });
           }
         }
@@ -326,7 +348,52 @@ const GroupAction = ({
           />
         </Fieldset>
         <Fieldset legend="Group By" className="query-builder-container">
-          {queryGenerationComponent()}
+          <RadioTileGroup className="radio-group-tile" required>
+            {groupExtension.extendsDefault && (
+              <>
+                <RadioTile
+                  name={"groupby"}
+                  icon={<SvgCursor />}
+                  onChange={changeGroupByType}
+                  value={"Selection"}
+                  label={"Selection"}
+                  disabled={isLoading || isRendering}
+                  checked={localQueryGenerationType === "Selection"}
+                />
+                <RadioTile
+                  icon={<SvgSearch />}
+                  name={"groupby"}
+                  onChange={changeGroupByType}
+                  value={"Search"}
+                  label={"Query Keywords"}
+                  disabled={isLoading || isRendering}
+                  checked={localQueryGenerationType === "Search"}
+                />
+                <RadioTile
+                  icon={<SvgHand />}
+                  name={"groupby"}
+                  onChange={changeGroupByType}
+                  value={"Manual"}
+                  label={"Manual Query"}
+                  disabled={isLoading || isRendering}
+                  checked={localQueryGenerationType === "Manual"}
+                />
+                {groupExtension.extensions?.map((ext) => (
+                  <RadioTile
+                    key={ext.name}
+                    icon={ext.icon}
+                    name={"groupby"}
+                    onChange={changeGroupByType}
+                    value={ext.name}
+                    label={ext.displayLabel}
+                    disabled={isLoading || isRendering}
+                    checked={localQueryGenerationType === ext.name}
+                  />
+                ))}
+              </>
+            )}
+          </RadioTileGroup>
+          {localQueryGenerationType && queryGenerationComponent()}
         </Fieldset>
       </div>
       <ActionPanel
