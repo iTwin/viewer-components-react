@@ -10,15 +10,11 @@
   width: 100%;
 }
 
-.group-mapping-container {
+.gmw-group-mapping-container {
   display: flex;
   flex-direction: column;
   padding: $iui-baseline $iui-m;
   box-sizing: border-box;
   height: 100%;
   overflow: auto;
-}
-
-.field-legend {
-  color: $iui-color-system-gray;
 }

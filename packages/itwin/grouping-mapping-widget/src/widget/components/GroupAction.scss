@@ -4,35 +4,35 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.group-add-modify-container {
+.gmw-group-add-modify-container {
   display: flex;
   flex-direction: column;
   gap: $iui-baseline;
   overflow-x: auto;
   height: 100%;
 
-  .group-details {
+  .gmw-group-details {
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
   }
 
-  .query-builder-container {
+  .gmw-query-builder-container {
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
 
-    .radio-group-tile {
+    .gmw-radio-group-tile {
       display: flex;
       justify-content: center;
     }
 
-    .search-form {
+    .gmw-search-form {
       display: flex;
       flex-direction: column;
       gap: $iui-baseline;
       margin-top: $iui-baseline;
-      > .search-actions {
+      > .gmw-search-actions {
         display: flex;
         justify-content: flex-end;
         gap: $iui-s;

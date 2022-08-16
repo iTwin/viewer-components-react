@@ -238,8 +238,8 @@ export const Mappings = () => {
         <>
           <BlockingOverlay isVisible={showBlockingOverlay} />
           <WidgetHeader title="Mappings" />
-          <div className="mappings-container">
-            <div className="table-toolbar">
+          <div className="gmw-mappings-container">
+            <div className="gmw-table-toolbar">
               <Button
                 startIcon={<SvgAdd />}
                 onClick={async () => addMapping()}

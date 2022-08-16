@@ -100,9 +100,9 @@ const ConfirmMappingImport = ({
   return (
     <>
       {importing ? (
-        <div className='import-progress-container'>
-          <div className='import-progress-bar'>
-            <div className='import-progress-bar-description'>
+        <div className='gmw-import-progress-container'>
+          <div className='gmw-import-progress-bar'>
+            <div className='gmw-import-progress-bar-description'>
               {
                 !errored ? importCount !== selectedMappings.length ? (
                   <>
@@ -139,7 +139,7 @@ const ConfirmMappingImport = ({
               }
             />
           </div>
-          <div className='import-action-panel'>
+          <div className='gmw-import-action-panel'>
             <Button
               disabled={!errored && importCount !== selectedMappings.length}
               onClick={() => {
@@ -161,18 +161,18 @@ const ConfirmMappingImport = ({
           </div>
         </div>
       ) : (
-        <div className='rename-confirm-container '>
-          <div className='mapping-rename-container'>
-            <div className='mapping-row-header-container'>
-              <div className='mapping-row'>
+        <div className='gmw-rename-confirm-container '>
+          <div className='gmw-mapping-rename-container'>
+            <div className='gmw-mapping-row-header-container'>
+              <div className='gmw-mapping-row'>
                 <Text variant='leading'>Mapping </Text>
                 <Text variant='leading'>Description</Text>
               </div>
             </div>
-            <div className='mapping-row-body'>
+            <div className='gmw-mapping-row-body'>
               {selectedMappings.map((mapping, index) => (
-                <div className='mapping-row-container' key={mapping.id}>
-                  <div className='mapping-row'>
+                <div className='gmw-mapping-row-container' key={mapping.id}>
+                  <div className='gmw-mapping-row'>
                     <LabeledInput
                       value={mapping.mappingName}
                       name={`mapping_${mapping.id}`}
@@ -205,12 +205,12 @@ const ConfirmMappingImport = ({
                     />
                     <div>{mapping.description}</div>
                   </div>
-                  <div className='border-div' />
+                  <div className='gmw-border-div' />
                 </div>
               ))}
             </div>
           </div>
-          <div className='import-action-panel'>
+          <div className='gmw-import-action-panel'>
             <Button onClick={backFn}>Back</Button>
             <Button styleType='high-visibility' onClick={async () => onImport()}>
               Import

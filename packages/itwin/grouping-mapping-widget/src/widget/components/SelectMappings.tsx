@@ -95,11 +95,11 @@ const SelectMappings = ({
   );
 
   return (
-    <div className='select-mapping-container'>
+    <div className='gmw-select-mapping-container'>
       <Table<MappingType>
         data={mappings}
         columns={mappingsColumns}
-        className='select-mapping-table'
+        className='gmw-select-mapping-table'
         emptyTableContent='No Mappings available.'
         isSortable
         isSelectable
@@ -109,7 +109,7 @@ const SelectMappings = ({
         }}
         paginatorRenderer={paginator}
       />
-      <div className='import-action-panel'>
+      <div className='gmw-import-action-panel'>
         <Button onClick={backFn}>Back</Button>
         <Button
           styleType='high-visibility'

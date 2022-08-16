@@ -11,7 +11,7 @@
   background-color: var(--iui-color-background-2);
   height: $iui-baseline * 4;
   padding: 5.5px 8px;
-  .body {
+  .gmw-body {
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -22,7 +22,7 @@
       text-overflow: ellipsis;
     }
   }
-  .action-button {
+  .gmw-action-button {
     margin-left: 0;
     align-self: center;
     min-width: 36px;

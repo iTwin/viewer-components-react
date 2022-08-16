@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.group-mapping-blocking-overlay {
+.gmw-group-mapping-blocking-overlay {
   background-color: black;
   position: absolute;
   height: inherit;
@@ -19,7 +19,7 @@
   }
 }
 
-.group-mapping-blocking-overlay-spinner {
+.gmw-group-mapping-blocking-overlay-spinner {
   display: flex;
   justify-content: center;
   height: inherit;

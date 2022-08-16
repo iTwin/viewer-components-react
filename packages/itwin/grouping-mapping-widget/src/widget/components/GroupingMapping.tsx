@@ -50,7 +50,7 @@ const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProp
       value={apiConfig}
     >
       <MappingClientContext.Provider value={mappingClient}>
-        <div className='group-mapping-container'>
+        <div className='gmw-group-mapping-container'>
           <Mappings />
         </div>
       </MappingClientContext.Provider>

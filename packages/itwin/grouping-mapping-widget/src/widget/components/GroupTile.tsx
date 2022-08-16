@@ -20,11 +20,11 @@ export const GroupTile = ({ title, subText, onClickTitle, titleTooltip, subtextT
 
   return (
     <div className="gmw-group-tile-container" data-testid="group-tile">
-      <div className="body">
+      <div className="gmw-body">
         <Text className={`body-text ${onClickTitle ? "iui-anchor" : ""}`} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
         {subText && <Text className="body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
       </div>
-      <div className="action-button" data-testid="tile-action-button">
+      <div className="gmw-action-button" data-testid="tile-action-button">
         {actionGroup}
       </div>
     </div>
