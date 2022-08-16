@@ -442,7 +442,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             ) : groups.length === 0 ? (
               <EmptyMessage message="No Groups available." />
             ) : (
-              <div className="group-list">
+              <div className="gmw-group-list">
                 {
                   groups
                     .sort((a, b) => a.groupName?.localeCompare(b.groupName ?? "") ?? 1)
@@ -452,11 +452,11 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                         title={g.groupName ? g.groupName : "Untitled"}
                         subText={g.description}
                         actionGroup={
-                          <div className="actions">
+                          <div className="gmw-actions">
                             {showGroupColor && (
                               <IconButton
                                 styleType="borderless"
-                                className="group-view-icon"
+                                className="gmw-group-view-icon"
                               >
                                 <SvgRectangle
                                   stroke-width="100"
@@ -470,7 +470,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                               <IconButton
                                 disabled={isLoadingQuery}
                                 styleType="borderless"
-                                className="group-view-icon"
+                                className="gmw-group-view-icon"
                                 onClick={async () => {
                                   await showGroup(g);
                                   setHiddenGroupsIds(
@@ -484,7 +484,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                               <IconButton
                                 disabled={isLoadingQuery}
                                 styleType="borderless"
-                                className="group-view-icon"
+                                className="gmw-group-view-icon"
                                 onClick={async () => {
                                   await hideGroups([g]);
                                   setHiddenGroupsIds(
