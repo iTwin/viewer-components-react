@@ -54,7 +54,7 @@ import GroupAction from "./GroupAction";
 import type { Group, Mapping } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { FeatureOverrideType } from "@itwin/core-common";
-import { GroupTile } from "./GroupTile";
+import { HorizontalTile } from "./HorizontalTile";
 import type { IMappingClient } from "../IMappingClient";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
@@ -510,7 +510,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                       a.groupName?.localeCompare(b.groupName ?? "") ?? 1,
                   )
                   .map((g) => (
-                    <GroupTile
+                    <HorizontalTile
                       key={g.id}
                       title={g.groupName ? g.groupName : "Untitled"}
                       subText={g.description}
