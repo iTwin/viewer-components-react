@@ -4,18 +4,37 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.mappings-container {
+.gmw-mappings-container {
   display: flex;
   flex-direction: column;
-  gap: $iui-baseline;
+  flex-grow: 1;
+  padding: $iui-baseline $iui-m;
+  min-height: 0;;
 
   .table-toolbar {
     display: flex;
+    justify-content: space-between;
     gap: $iui-s;
+    border-bottom: 1px solid var(--iui-color-background-4);
+    padding-bottom: $iui-baseline;
+    flex-wrap: wrap;
+
+    .gmw-button-spacing {
+      display: flex;
+      gap: $iui-s;
+    }
   }
 
   button {
     align-self: flex-start;
+  }
+
+  .mappings-list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: overlay;
+    gap: 7.5px;
+    margin-top: 7.5px;
   }
 }
 
