@@ -8,7 +8,7 @@ import "./Templates.scss";
 
 const EC3 = () => {
   return (
-    <div className="e_c_3-container">
+    <div className="ec3-container">
       <Templates />
     </div>
   );

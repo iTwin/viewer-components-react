@@ -10,7 +10,7 @@ import type { Report } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 import { WidgetHeader, handleSelectChange } from "./utils";
 import ExportModal from "./ExportModal";
-import TemplateClient from "./templateClient";
+import TemplateClient from "./TemplateClient";
 import LabelAction from "./LabelAction";
 import { Template, Label } from "./Template"
 import { LabelTile } from "./LabelTile";
@@ -76,7 +76,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   useEffect(() => {
     setIsLoading(true);
     const fetchReports = async () => {
-      
+
       if (!IModelApp.authorizationClient)
         throw new Error(
           "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
@@ -193,7 +193,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                   else {
                     handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
                   }
-                } } onShow={() => {}} onHide={() => {}}              />
+                }} onShow={() => { }} onHide={() => { }} />
 
               <Surface className="labels-container">
                 <div className="labels-list">

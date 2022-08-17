@@ -10,7 +10,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { IModelApp } from "@itwin/core-frontend";
 import {
   Alert,
   Button,
@@ -18,17 +17,16 @@ import {
   Modal,
   ProgressLinear,
   ProgressRadial,
-  Text,
-  toaster,
+  Text
 } from "@itwin/itwinui-react";
 import {
   SvgVisibilityHide,
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
-import type { JobCreation, Link } from "@itwin/insights-client";
+import type { Link } from "@itwin/insights-client";
 import { JobStatus } from "@itwin/insights-client";
 import EC3Client from "./EC3/EC3Client";
-//import logo from "../public/logo/eC3Logo.png";
+import logo from '../../public/logo/EC3Logo.png';
 
 interface ExportProps {
   isOpen: boolean;
@@ -42,11 +40,7 @@ interface E_c_3TokenCache {
 }
 
 const ExportModal = (props: ExportProps) => {
-  const MILI_SECONDS = 1000;
-  const PIN_INTERVAL = 1000;
-
-  //const eC3ClientApi = useMemo(() => new DumbClient(), []);
-  const eC3ClientApi = useMemo(() => new EC3Client(), []);
+  const EC3ClientApi = useMemo(() => new EC3Client(), []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -85,95 +79,11 @@ const ExportModal = (props: ExportProps) => {
     showSigninError(false);
   }, [setEmail, setPassword, showPassword, showSigninError]);
 
-  const pinStatus = useCallback(
-    (job: JobCreation) => {
-      const intervalId = window.setInterval(async () => {
-        const token =
-          (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
-        if (job.id && token) {
-          const currentJobStatus =
-            await eC3ClientApi.getEC3JobStatus(token, job?.id);
-          if (currentJobStatus.job?.status) {
-            if (
-              currentJobStatus.job?.status === JobStatus.StatusEnum.Succeeded
-            ) {
-              setJobLink(currentJobStatus?.job._links?.ec3);
-            }
-            setJobStatus(currentJobStatus.job?.status);
-          } else {
-            setJobStatus(JobStatus.StatusEnum.Failed);
-            toaster.negative("Failed to get job status. 😔");
-          }
-        }
-      }, PIN_INTERVAL);
-      intervalRef.current = intervalId;
-    },
-    [setJobLink, setJobStatus, eC3ClientApi]
-  );
-
-  const runJob = useCallback(
-    async (token: string) => {
-      const accessToken =
-        (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
-      if (props.templateId && token) {
-        try {
-          const jobCreated = await eC3ClientApi.createEC3Job(
-            accessToken,
-            {
-              reportId: props.templateId,
-              token,
-            }
-          );
-          if (jobCreated?.job?.id) {
-            pinStatus(jobCreated?.job);
-          } else {
-            setJobStatus(JobStatus.StatusEnum.Failed);
-            toaster.negative("Failed to create e c 3 job. 😔");
-          }
-        } catch (e) {
-          setJobStatus(JobStatus.StatusEnum.Failed);
-          toaster.negative("You do not have the required permissions. Please contact the project administrator.");
-          /* eslint-disable no-console */
-          console.error(e);
-        }
-      } else {
-        setJobStatus(JobStatus.StatusEnum.Failed);
-        toaster.negative("Invalid reportId.");
-      }
-    },
-    [props, pinStatus, eC3ClientApi]
-  );
-
   const signin = useCallback(
     async (e: any) => {
       e.preventDefault();
-
-      const result = await eC3ClientApi.getEC3AccessToken(email, password);
+      const result = await EC3ClientApi.getEC3AccessToken(email, password);
       console.log(result);
-
-      /*
-      startSigningIn(true);
-      try {
-        const result = await eC3ClientApi.getEC3AccessToken(
-          email,
-          password
-        );
-        if (result && result.access_token && result.expires_in) {
-          cacheToken({
-            token: result.access_token,
-            exp: Date.now() + result.expires_in * MILI_SECONDS,
-          });
-          resetSignin();
-          setIsSignedIn(true);
-        } else {
-          showSigninError(true);
-        }
-      } catch (err) {
-        toaster.negative("Failed to sign in E C 3.");
-        console.error(err);
-      }
-      startSigningIn(false);
-      */
     },
     [
       email,
@@ -181,7 +91,7 @@ const ExportModal = (props: ExportProps) => {
       resetSignin,
       cacheToken,
       showSigninError,
-      eC3ClientApi,
+      EC3ClientApi,
     ]
   );
 
@@ -253,28 +163,6 @@ const ExportModal = (props: ExportProps) => {
   );
 
   useEffect(() => {
-    if (props.isOpen && isSignedIn && cache?.token) {
-      runJob(cache.token).catch((err) => {
-        setJobStatus(JobStatus.StatusEnum.Failed);
-        toaster.negative("Error occurs while running the job. 😔");
-        /* eslint-disable no-console */
-        console.error(err);
-      });
-    }
-  }, [props.isOpen, isSignedIn, cache, runJob]);
-
-  useEffect(() => {
-    if (
-      jobStatus === JobStatus.StatusEnum.Succeeded ||
-      jobStatus === JobStatus.StatusEnum.Failed
-    ) {
-      if (intervalRef.current) {
-        window.clearInterval(intervalRef.current);
-      }
-    }
-  }, [jobStatus]);
-
-  useEffect(() => {
     if (email !== "") {
       const timeoutId = setTimeout(() => setEmailError(!isValidEmail()), 1000);
       return () => clearTimeout(timeoutId);
@@ -296,7 +184,7 @@ const ExportModal = (props: ExportProps) => {
         <div className="e_c_3-signin">
           <img
             className="e_c_3-signin-icon"
-            src="https://buildingtransparency.org/assets/svg/ec3.svg"
+            src={logo}
             alt="E C 3® software"
             data-height-percentage="80"
             data-actual-width="1200"

@@ -1,8 +1,15 @@
 {
-  "name": "@itwin/ec3-react",
-  "version": "1.0.0",
-  "description": "",
-  "main": "lib/cjs/e-c-3-widget.js",
+  "name": "@itwin/ec3-widget-react",
+  "version": "0.0.0",
+  "description": "An iTwin.js 3D Viewer Widget that interfaces with the EC3 Carbon Calculation.",
+  "keywords": [
+    "Bentley",
+    "BIM",
+    "iModel",
+    "iTwin.js",
+    "Carbon Calculation"
+  ],
+  "main": "lib/cjs/ec3-widget.js",
   "directories": {
     "test": "jest"
   },
@@ -11,8 +18,8 @@
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
-  "module": "lib/esm/e-c-3-widget.js",
-  "typings": "lib/cjs/e-c-3-widget",
+  "module": "lib/esm/ec3-widget.js",
+  "typings": "lib/cjs/ec3-widget",
   "scripts": {
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",
@@ -43,13 +50,10 @@
     }
   },
   "dependencies": {
-    "@itwin/imodels-access-frontend": "^1.0.1",
-    "@itwin/imodels-client-management": "^1.0.1",
     "@itwin/insights-client": "^0.2.0",
-    "@itwin/itwinui-icons-color-react": "^1.0.1",
     "@itwin/itwinui-icons-react": "^1.7.0",
     "@itwin/itwinui-react": "~1.42.0",
-    "react-redux": "^8.0.2",
+    "react-redux": "^7.2.2",
     "simple-react-validator": "^1.6.1"
   },
   "devDependencies": {
@@ -77,26 +81,18 @@
     "@testing-library/jest-dom": "^5.16.3",
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^14.1.1",
-    "@types/i18next": "^8.4.2",
     "@types/jest": "^27.5.2",
     "@types/node": "^14.14.20",
     "@types/react": "^18.0.15",
-    "@types/react-dom": "^18.0.6",
-    "@types/react-table": "^7.7.0",
     "@types/testing-library__jest-dom": "^5.14.3",
-    "@typescript-eslint/eslint-plugin": "^5.3.1",
-    "@typescript-eslint/parser": "^5.10.1",
     "cpx2": "^3.0.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-react": "^7.25.1",
-    "eslint-plugin-react-hooks": "^4.2.0",
     "jest": "^27.5.1",
     "jest-cli": "^27.5.1",
     "jest-transform-stub": "^2.0.0",
     "msw": "^0.39.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
     "redux": "^4.0.4",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.3",

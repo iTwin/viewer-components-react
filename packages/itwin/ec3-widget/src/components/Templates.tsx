@@ -12,7 +12,7 @@ import {
 } from "@itwin/itwinui-icons-react";
 import { WidgetHeader, LoadingOverlay, EmptyMessage } from "./utils";
 import "./Templates.scss";
-import TemplateClient from "./templateClient";
+import TemplateClient from "./TemplateClient";
 import { Template } from "./Template"
 import TemplateMenu from "./TemplateMenu";
 import { SearchBar } from "./SearchBar";
@@ -40,7 +40,7 @@ const Templates = () => {
 
   const load = useCallback(() => {
     setIsLoading(true);
-    const templates = templateClient.getTemplatesT();
+    const templates = templateClient.getTemplates();
     setTemplates(templates);
     setIsLoading(false);
   }, [templateClient])
@@ -167,7 +167,7 @@ const Templates = () => {
             setShow={setShowDeleteModal}
             onDelete={() => {
               if (selectedTemplate && selectedTemplate.id) {
-                templateClient.deleteTemplateDep(
+                templateClient.deleteTemplate(
                   selectedTemplate.id
                 );
               }
