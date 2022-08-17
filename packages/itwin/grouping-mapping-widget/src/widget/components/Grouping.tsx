@@ -411,6 +411,7 @@ export const Groupings = ({
           <Surface className="groups-container">
             <div className="toolbar">
               <DropdownMenu
+                className="gmw-extension-dropdown"
                 disabled={isLoadingQuery}
                 menuItems={() =>
                   (groupExtension?.extensions
@@ -563,6 +564,7 @@ export const Groupings = ({
                             </IconButton>
                           )}
                           <DropdownMenu
+                            className="gmw-extension-dropdown"
                             disabled={isLoadingQuery}
                             menuItems={(close: () => void) => [
                               <MenuItem

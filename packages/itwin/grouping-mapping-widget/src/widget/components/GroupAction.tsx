@@ -14,6 +14,8 @@ import {
   LabeledInput,
   RadioTile,
   RadioTileGroup,
+  SidenavButton,
+  SideNavigation,
   Small,
   toaster,
 } from "@itwin/itwinui-react";
@@ -44,7 +46,7 @@ import ManualExtension from "./extension/ManualExtension";
 import SearchExtension from "./extension/SearchExtension";
 import {
   SvgCursor,
-  SvgHand,
+  SvgDraw,
   SvgSearch,
 } from "@itwin/itwinui-icons-react";
 
@@ -350,6 +352,38 @@ const GroupAction = ({
         <Fieldset legend="Group By" className="query-builder-container">
           <RadioTileGroup className="radio-group-tile" required>
             {groupExtension.extendsDefault && (
+              // <>
+              //   <SideNavigation
+              //     items={[
+              //       <SidenavButton
+              //         key="Selection"
+              //         name={"groupby"}
+              //         startIcon={<SvgCursor />}
+              //         disabled={isLoading || isRendering}
+              //         isActive={localQueryGenerationType === "Selection"}
+              //       >
+              //         Selection
+              //       </SidenavButton>,
+              //       <SidenavButton
+              //         key="Search"
+              //         name={"groupby"}
+              //         startIcon={<SvgSearch />}
+              //         disabled={isLoading || isRendering}
+              //         isActive={localQueryGenerationType === "Search"}
+              //       >
+              //         Search
+              //       </SidenavButton>,
+              //       <SidenavButton
+              //         key="Manual"
+              //         name={"groupby"}
+              //         startIcon={<SvgHand />}
+              //         disabled={isLoading || isRendering}
+              //         isActive={localQueryGenerationType === "Manual"}
+              //       >
+              //         Manual
+              //       </SidenavButton>,
+              //     ]} />
+              // </>
               <>
                 <RadioTile
                   name={"groupby"}
@@ -370,7 +404,7 @@ const GroupAction = ({
                   checked={localQueryGenerationType === "Search"}
                 />
                 <RadioTile
-                  icon={<SvgHand />}
+                  icon={<SvgDraw />}
                   name={"groupby"}
                   onChange={changeGroupByType}
                   value={"Manual"}
