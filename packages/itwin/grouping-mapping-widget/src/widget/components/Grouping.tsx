@@ -102,14 +102,13 @@ const fetchGroups = async (
   return undefined;
 };
 
-export const Groupings = ({
-  mapping,
-  goBack,
-}: GroupsTreeProps) => {
+export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
+  const groupExtension = useGroupExtension();
+
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [groupsView, setGroupsView] = useState<GroupsView>(GroupsView.GROUPS);
@@ -121,8 +120,6 @@ export const Groupings = ({
   const [groups, setGroups] = useState<Group[]>([]);
   const [hiddenGroupsIds, setHiddenGroupsIds] = useState<string[]>([]);
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
-
-  const groupExtension = useGroupExtension();
 
   const [queryGenerationType, setQueryGenerationType] =
     useState<string>("Selection");
@@ -408,10 +405,10 @@ export const Groupings = ({
             }}
           />
 
-          <Surface className="groups-container">
-            <div className="toolbar">
+          <Surface className='groups-container'>
+            <div className='toolbar'>
               <DropdownMenu
-                className="gmw-extension-dropdown"
+                className='gmw-extension-dropdown'
                 disabled={isLoadingQuery}
                 menuItems={() =>
                   (groupExtension?.extensions
@@ -420,7 +417,7 @@ export const Groupings = ({
                         key={ext.name}
                         onClick={() => addGroup(ext.name)}
                         icon={ext.icon}
-                        className="menu-item"
+                        className='gmw-menu-item'
                       >
                         {ext.displayLabel}
                       </MenuItem>
@@ -433,7 +430,7 @@ export const Groupings = ({
                           key={0}
                           onClick={() => addGroup("Selection")}
                           icon={<SvgAdd />}
-                          className="menu-item"
+                          className='gmw-menu-item'
                         >
                           Selection
                         </MenuItem>,
@@ -441,7 +438,7 @@ export const Groupings = ({
                           key={1}
                           onClick={() => addGroup("Search")}
                           icon={<SvgSearch />}
-                          className="menu-item"
+                          className='gmw-menu-item'
                         >
                           Search
                         </MenuItem>,
@@ -449,7 +446,7 @@ export const Groupings = ({
                           key={2}
                           onClick={() => addGroup("Manual")}
                           icon={<SvgDraw />}
-                          className="menu-item"
+                          className='gmw-menu-item'
                         >
                           Manual
                         </MenuItem>,
@@ -461,41 +458,41 @@ export const Groupings = ({
                 <Button
                   startIcon={
                     isLoadingQuery ? (
-                      <ProgressRadial size="small" indeterminate />
+                      <ProgressRadial size='small' indeterminate />
                     ) : (
                       <SvgAdd />
                     )
                   }
-                  styleType="high-visibility"
+                  styleType='high-visibility'
                   disabled={isLoadingQuery}
                 >
                   {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
                 </Button>
               </DropdownMenu>
-              <ButtonGroup className="toolbar-buttons">
+              <ButtonGroup className='toolbar-buttons'>
                 <ToggleSwitch
-                  label="Color by Group"
-                  labelPosition="left"
-                  className="group-view-icon toggle"
+                  label='Color by Group'
+                  labelPosition='left'
+                  className='group-view-icon toggle'
                   disabled={isLoadingQuery}
                   checked={showGroupColor}
                   onChange={toggleGroupColor}
                 ></ToggleSwitch>
                 <IconButton
-                  title="Show All"
+                  title='Show All'
                   onClick={showAll}
                   disabled={isLoadingQuery}
-                  styleType="borderless"
-                  className="group-view-icon"
+                  styleType='borderless'
+                  className='group-view-icon'
                 >
                   <SvgVisibilityShow />
                 </IconButton>
                 <IconButton
-                  title="Hide All"
+                  title='Hide All'
                   onClick={hideAll}
                   disabled={isLoadingQuery}
-                  styleType="borderless"
-                  className="group-view-icon"
+                  styleType='borderless'
+                  className='group-view-icon'
                 >
                   <SvgVisibilityHide />
                 </IconButton>
@@ -504,9 +501,9 @@ export const Groupings = ({
             {isLoading ? (
               <LoadingOverlay />
             ) : groups.length === 0 ? (
-              <EmptyMessage message="No Groups available." />
+              <EmptyMessage message='No Groups available.' />
             ) : (
-              <div className="group-list">
+              <div className='group-list'>
                 {groups
                   .sort(
                     (a, b) =>
@@ -518,14 +515,14 @@ export const Groupings = ({
                       title={g.groupName ? g.groupName : "Untitled"}
                       subText={g.description}
                       actionGroup={
-                        <div className="actions">
+                        <div className='actions'>
                           {showGroupColor && (
                             <IconButton
-                              styleType="borderless"
-                              className="group-view-icon"
+                              styleType='borderless'
+                              className='group-view-icon'
                             >
                               <SvgRectangle
-                                stroke-width="100"
+                                stroke-width='100'
                                 stroke={getGroupColor(
                                   groups.findIndex(
                                     (group) => g.id === group.id,
@@ -537,8 +534,8 @@ export const Groupings = ({
                           {g.id && hiddenGroupsIds.includes(g.id) ? (
                             <IconButton
                               disabled={isLoadingQuery}
-                              styleType="borderless"
-                              className="group-view-icon"
+                              styleType='borderless'
+                              className='group-view-icon'
                               onClick={async () => {
                                 await showGroup(g);
                                 setHiddenGroupsIds(
@@ -551,8 +548,8 @@ export const Groupings = ({
                           ) : (
                             <IconButton
                               disabled={isLoadingQuery}
-                              styleType="borderless"
-                              className="group-view-icon"
+                              styleType='borderless'
+                              className='group-view-icon'
                               onClick={async () => {
                                 await hideGroups([g]);
                                 setHiddenGroupsIds(
@@ -564,7 +561,7 @@ export const Groupings = ({
                             </IconButton>
                           )}
                           <DropdownMenu
-                            className="gmw-extension-dropdown"
+                            className='gmw-extension-dropdown'
                             disabled={isLoadingQuery}
                             menuItems={(close: () => void) => [
                               <MenuItem
@@ -573,7 +570,7 @@ export const Groupings = ({
                                 subMenuItems={(groupExtension.extensions
                                   ? groupExtension.extensions.map((ext) => (
                                     <MenuItem
-                                      className="menu-item"
+                                      className='gmw-menu-item'
                                       key={ext.name}
                                       onClick={() => addGroup(ext.name)}
                                       icon={ext.icon}
@@ -590,7 +587,8 @@ export const Groupings = ({
                                         onClick={async () =>
                                           onModify(g, "Selection")
                                         }
-                                        icon={<SvgAdd />} className="menu-item"
+                                        icon={<SvgAdd />}
+                                        className='gmw-menu-item'
                                       >
                                         Selection
                                       </MenuItem>,
@@ -599,7 +597,8 @@ export const Groupings = ({
                                         onClick={async () =>
                                           onModify(g, "Search")
                                         }
-                                        icon={<SvgSearch />} className="menu-item"
+                                        icon={<SvgSearch />}
+                                        className='gmw-menu-item'
                                       >
                                         Search
                                       </MenuItem>,
@@ -608,7 +607,8 @@ export const Groupings = ({
                                         onClick={async () =>
                                           onModify(g, "Manual")
                                         }
-                                        icon={<SvgDraw />} className="menu-item"
+                                        icon={<SvgDraw />}
+                                        className='gmw-menu-item'
                                       >
                                         Manual
                                       </MenuItem>,
@@ -647,7 +647,7 @@ export const Groupings = ({
                           >
                             <IconButton
                               disabled={isLoadingQuery}
-                              styleType="borderless"
+                              styleType='borderless'
                             >
                               <SvgMore
                                 style={{
@@ -660,13 +660,15 @@ export const Groupings = ({
                         </div>
                       }
                       onClickTitle={
-                        isLoadingQuery ? undefined : async () => openProperties(g)
+                        isLoadingQuery
+                          ? undefined
+                          : async () => openProperties(g)
                       }
                     />
                   ))}
               </div>
             )}
-          </Surface >
+          </Surface>
           <DeleteModal
             entityName={selectedGroup?.groupName ?? ""}
             show={showDeleteModal}

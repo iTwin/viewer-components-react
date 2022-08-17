@@ -14,8 +14,6 @@ import {
   LabeledInput,
   RadioTile,
   RadioTileGroup,
-  SidenavButton,
-  SideNavigation,
   Small,
   toaster,
 } from "@itwin/itwinui-react";
@@ -274,7 +272,7 @@ const GroupAction = ({
             });
           }
         }
-        return <EmptyMessage message="No query generation method selected. " />;
+        return <EmptyMessage message='No query generation method selected. ' />;
       }
     }
   };
@@ -298,15 +296,15 @@ const GroupAction = ({
           await goBack();
         }}
       />
-      <div className="group-add-modify-container">
-        <Fieldset legend="Group Details" className="group-details">
-          <Small className="field-legend">
+      <div className='group-add-modify-container'>
+        <Fieldset legend='Group Details' className='group-details'>
+          <Small className='field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
-            id="groupName"
-            name="groupName"
-            label="Name"
+            id='groupName'
+            name='groupName'
+            label='Name'
             value={details.groupName}
             required
             onChange={(event) => {
@@ -336,17 +334,17 @@ const GroupAction = ({
             }}
           />
           <LabeledInput
-            id="description"
-            name="description"
-            label="Description"
+            id='description'
+            name='description'
+            label='Description'
             value={details.description}
             onChange={(event) => {
               handleInputChange(event, details, setDetails);
             }}
           />
         </Fieldset>
-        <Fieldset legend="Group By" className="query-builder-container">
-          <RadioTileGroup className="radio-group-tile" required>
+        <Fieldset legend='Group By' className='query-builder-container'>
+          <RadioTileGroup className='radio-group-tile' required>
             {groupExtension.extendsDefault && (
               <>
                 <RadioTile
@@ -376,20 +374,20 @@ const GroupAction = ({
                   disabled={isLoading || isRendering}
                   checked={localQueryGenerationType === "Manual"}
                 />
-                {groupExtension.extensions?.map((ext) => (
-                  <RadioTile
-                    key={ext.name}
-                    icon={ext.icon}
-                    name={"groupby"}
-                    onChange={changeGroupByType}
-                    value={ext.name}
-                    label={ext.displayLabel}
-                    disabled={isLoading || isRendering}
-                    checked={localQueryGenerationType === ext.name}
-                  />
-                ))}
               </>
             )}
+            {groupExtension.extensions?.map((ext) => (
+              <RadioTile
+                key={ext.name}
+                icon={ext.icon}
+                name={"groupby"}
+                onChange={changeGroupByType}
+                value={ext.name}
+                label={ext.displayLabel}
+                disabled={isLoading || isRendering}
+                checked={localQueryGenerationType === ext.name}
+              />
+            ))}
           </RadioTileGroup>
           {localQueryGenerationType && queryGenerationComponent()}
         </Fieldset>
