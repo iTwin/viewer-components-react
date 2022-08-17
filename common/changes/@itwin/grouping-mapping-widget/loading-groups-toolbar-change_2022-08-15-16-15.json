@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Improved button wrapping for the widget",
+      "comment": "Improved button wrapping in Groups view toolbar",
       "type": "patch"
     }
   ],
