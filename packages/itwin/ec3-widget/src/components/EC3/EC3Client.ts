@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { CC_BASE_PATH } from "./generated/api";
 
 const ACCEPT = "application/vnd.bentley.itwin-platform.v1+json";
 

@@ -4,127 +4,20 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { cleanup, render, screen, waitForElementToBeRemoved, waitFor } from "@testing-library/react";
+import { render, screen, waitForElementToBeRemoved, waitFor } from "@testing-library/react";
 import Templates from "../components/Templates";
 import TemplateMenu from "../components/TemplateMenu";
 import * as moq from "typemoq";
 import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { AuthorizationClient} from "@itwin/core-common";
-import { Guid } from "@itwin/core-bentley";
-import { ODataEntityResponse, ODataItem, ODataResponse, ReportingClient } from "@itwin/insights-client";
-import { useActiveIModelConnection } from "@itwin/appui-react";
-import type { ReportCollection } from "@itwin/insights-client";
+import { AuthorizationClient } from "@itwin/core-common";
+import { ReportingClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
-import {  LabeledSelect } from "@itwin/itwinui-react";
 import { setupServer } from "msw/node";
-import { rest } from "msw";
 import userEvent from "@testing-library/user-event";
-//import type { ODataResponse } from "./generated/api";
+import sampleMetadata from "./metadataSample";
 
-afterAll(() => {
-  //server.close();
-});
-
-afterEach(() => {
-  server.resetHandlers();
-  cleanup();
-});
-
-const server = setupServer();
-
-const REPORTS_CONFIG_BASE_URL = "https://api.bentley.com";
-
-const reportsFactory = (): ReportCollection => ({
-  reports: Array.from(
-    { length: faker.datatype.number({ min: 3, max: 5 }) },
-    (_, index) => ({
-      id: `${faker.datatype.uuid()}`,
-      displayName: `mOcKRePoRT${index}`,
-      description: `mOcKRePoRTDeScRiPtIoN${index}`,
-    })
-  ),
-  _links: {
-    next: undefined,
-    self: {
-      href: "",
-    },
-  },
-});
-
-
-const ODataResponseFactory = (): ODataResponse  => ({
-  "@odata.context": "context",
-  value: Array.from(
-    { length: faker.datatype.number({ min: 3, max: 5 }) },
-    (_, index) => ({
-      name: `mapping${index}`
-    })
-  ),
-});
-
-const headers = (): Headers => ({
-  append: jest.fn(),
-  delete: jest.fn(),
-  get: jest.fn(),
-  has: jest.fn(),
-  set: jest.fn(),
-  forEach: jest.fn(),
-  entries: jest.fn(),
-  keys: jest.fn(),
-  values: jest.fn(),
-  [Symbol.iterator]: jest.fn(),
-});
-
-const headersA = async (): Promise<Headers> => ({
-  append: jest.fn(),
-  delete: jest.fn(),
-  get: jest.fn(),
-  has: jest.fn(),
-  set: jest.fn(),
-  forEach: jest.fn(),
-  entries: jest.fn(),
-  keys: jest.fn(),
-  values: jest.fn(),
-  [Symbol.iterator]: jest.fn(),
-});
-
-//const metadataText = async (): Promise<string> => "<?xml version=\"1.0\" encoding=\"utf-8\"?><edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\"><edmx:DataServices><Schema Namespace=\"Insights_and_Reporting_Extractor\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\"><EntityType Name=\"map0\"><Property Name=\"ECInstanceId\" Type=\"Edm.String\" /><Property Name=\"ECClassId\" Type=\"Edm.String\" /><Property Name=\"UserLabel\" Type=\"Edm.String\" /><Property Name=\"BBoxLow\" Type=\"Edm.String\" /><Property Name=\"BBoxHigh\" Type=\"Edm.String\" /><Property Name=\"Area\" Type=\"Edm.Double\" /></EntityType></EntityContainer></Schema></edmx:DataServices></edmx:Edmx>"
-const metadataText = async (): Promise<string> => "<?xml version=\"1.0\" encoding=\"utf-8\"?><edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\"><edmx:DataServices><Schema Namespace=\"Insights_and_Reporting_Extractor\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\"><EntityType Name=\"mapping0\"><Property Name=\"ECInstanceId\" Type=\"Edm.String\" /><Property Name=\"ECClassId\" Type=\"Edm.String\" /><Property Name=\"UserLabel\" Type=\"Edm.String\" /><Property Name=\"BBoxLow\" Type=\"Edm.String\" /><Property Name=\"BBoxHigh\" Type=\"Edm.String\" /><Property Name=\"Area\" Type=\"Edm.Double\" /></EntityType><EntityType Name=\"Demo_RailColumn_Mapping_bd2cc9f9ab5c42e6bc1757b7b7ca5bad\"><Property Name=\"ECInstanceId\" Type=\"Edm.String\" /><Property Name=\"ECClassId\" Type=\"Edm.String\" /><Property Name=\"UserLabel\" Type=\"Edm.String\" /><Property Name=\"BBoxLow\" Type=\"Edm.String\" /><Property Name=\"BBoxHigh\" Type=\"Edm.String\" /><Property Name=\"Heigth\" Type=\"Edm.Double\" /></EntityType><EntityType Name=\"Demo_RoofBeam_Mapping_bd2cc9f9ab5c42e6bc1757b7b7ca5bad\"><Property Name=\"ECInstanceId\" Type=\"Edm.String\" /><Property Name=\"ECClassId\" Type=\"Edm.String\" /><Property Name=\"UserLabel\" Type=\"Edm.String\" /><Property Name=\"BBoxLow\" Type=\"Edm.String\" /><Property Name=\"BBoxHigh\" Type=\"Edm.String\" /><Property Name=\"Length\" Type=\"Edm.Double\" /></EntityType><EntityType Name=\"Demo_Slabs_Mapping_bd2cc9f9ab5c42e6bc1757b7b7ca5bad\"><Property Name=\"ECInstanceId\" Type=\"Edm.String\" /><Property Name=\"ECClassId\" Type=\"Edm.String\" /><Property Name=\"UserLabel\" Type=\"Edm.String\" /><Property Name=\"BBoxLow\" Type=\"Edm.String\" /><Property Name=\"BBoxHigh\" Type=\"Edm.String\" /><Property Name=\"volume\" Type=\"Edm.Double\" /></EntityType></Schema><Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\"><EntityContainer Name=\"Container\"><EntitySet Name=\"mapping0\" EntityType=\"Insights_and_Reporting_Extractor.mapping0\" /><EntitySet Name=\"Demo_RailColumn_Mapping_bd2cc9f9ab5c42e6bc1757b7b7ca5bad\" EntityType=\"Insights_and_Reporting_Extractor.Demo_RailColumn_Mapping_bd2cc9f9ab5c42e6bc1757b7b7ca5bad\" /><EntitySet Name=\"Demo_RoofBeam_Mapping_bd2cc9f9ab5c42e6bc1757b7b7ca5bad\" EntityType=\"Insights_and_Reporting_Extractor.Demo_RoofBeam_Mapping_bd2cc9f9ab5c42e6bc1757b7b7ca5bad\" /><EntitySet Name=\"Demo_Slabs_Mapping_bd2cc9f9ab5c42e6bc1757b7b7ca5bad\" EntityType=\"Insights_and_Reporting_Extractor.Demo_Slabs_Mapping_bd2cc9f9ab5c42e6bc1757b7b7ca5bad\" /></EntityContainer></Schema></edmx:DataServices></edmx:Edmx>";
-
-const fakedMetadata = (): Response => ({
-  headers: headers(),
-  ok: true,
-  redirected: false,
-  status: 200,
-  statusText: "",
-  url: "",
-  clone: jest.fn(),
-  //response: "",
-  type: "basic",
-  body: null,
-  bodyUsed: false,
-  arrayBuffer: jest.fn(),
-  blob: jest.fn(),
-  formData: jest.fn(),
-  json: jest.fn(),
-  trailer: headersA(),
-  text: metadataText,
-});
-
-const mockedReports: ReportCollection = reportsFactory();
-const mockedResponses: ODataResponse = ODataResponseFactory();
-
-beforeEach(async () => {
-})
-
-const iTwinId = faker.datatype.uuid();
-const accessToken = faker.datatype.uuid(); 
-
-const authClient = moq.Mock.ofType<AuthorizationClient>();
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const reportingClient = moq.Mock.ofType<ReportingClient>();
-
-const firstMapping = mockedResponses.value[0].name!;
 
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
@@ -136,21 +29,58 @@ jest.mock("@itwin/insights-client", () => ({
   ReportingClient: jest.fn().mockImplementation(() => reportingClient.object)
 }));
 
-beforeAll(async () => {      
 
-  authClient.setup((x) => x.getAccessToken()).returns(async () => accessToken);
-  IModelApp.authorizationClient = authClient.object;
+describe("Templates view", () => {
+  const mockedReports = ({
+    reports: Array.from(
+      { length: faker.datatype.number({ min: 3, max: 5 }) },
+      (_, index) => ({
+        id: `${faker.datatype.uuid()}`,
+        displayName: `mOcKRePoRT${index}`,
+        description: `mOcKRePoRTDeScRiPtIoN${index}`,
+      })
+    ),
+    _links: {
+      next: undefined,
+      self: {
+        href: "",
+      },
+    },
+  });
 
-  activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
-  
-  reportingClient.setup((x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports?.reports!);
-  const reportId = mockedReports.reports![0].id!;
-  reportingClient.setup((x) => x.getODataReport(accessToken, reportId)).returns(async () => mockedResponses);
+  const mockedResponses = ({
+    "@odata.context": "context",
+    value: Array.from(
+      { length: faker.datatype.number({ min: 3, max: 5 }) },
+      (_, index) => ({
+        name: `mapping${index}`
+      })
+    ),
+  });
 
-  reportingClient.setup((x) => x.getODataReportMetadata(accessToken, reportId)).returns(async () => fakedMetadata());
-});
+  var firstMapping = mockedResponses.value[0].name!;
+  const iTwinId = faker.datatype.uuid();
+  const accessToken = faker.datatype.uuid();
+  const authClient = moq.Mock.ofType<AuthorizationClient>();
+  const server = setupServer();
 
-describe("Templates view", function () {
+  beforeAll(async () => {
+    const metadata: Response = {
+      text: async () => { return sampleMetadata },
+    } as unknown as Response;
+
+    authClient.setup((x) => x.getAccessToken()).returns(async () => accessToken);
+    IModelApp.authorizationClient = authClient.object;
+    activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
+    reportingClient.setup((x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports?.reports!);
+    const reportId = mockedReports.reports![0].id!;
+    reportingClient.setup((x) => x.getODataReport(accessToken, reportId)).returns(async () => mockedResponses);
+    reportingClient.setup((x) => x.getODataReportMetadata(accessToken, reportId)).returns(async () => metadata);
+  });
+
+  afterEach(() => {
+    server.resetHandlers();
+  });
 
   it("Templates view should render successfully", function () {
     render(<Templates />);
@@ -158,8 +88,8 @@ describe("Templates view", function () {
   });
 
   it("Template Menu should render successfully", async () => {
-    const returnfn = async () => {};
-    render(<TemplateMenu goBack={returnfn}/>);
+    const returnfn = async () => { };
+    render(<TemplateMenu goBack={returnfn} />);
     expect(screen.getByText("Create template")).toBeInTheDocument();
   });
 
@@ -171,7 +101,7 @@ describe("Templates view", function () {
   });
 
   it("Reports dropdown should be populated with data", async () => {
-    const returnfn = async () => {};
+    const returnfn = async () => { };
     render(<TemplateMenu goBack={returnfn} />);
     await waitForElementToBeRemoved(() => screen.getByText("Loading"));
     const dropdown = screen.getByText("Select report");
@@ -181,9 +111,7 @@ describe("Templates view", function () {
     });
   });
 
-  
   it("Created template should appear in the list", async () => {
-    //await new Promise(resolve => setTimeout(resolve, 1000));
     const user = render(<Templates />);
     const button = screen.getByText("Create Template");
     button.click();
@@ -215,7 +143,6 @@ describe("Templates view", function () {
     expect(screen.getByText(templateDescription)).toBeInTheDocument();
   });
 
-
   it("Added label should appear in the list", async () => {
     const user = render(<Templates />);
     const button = screen.getByText("Create Template");
@@ -223,7 +150,7 @@ describe("Templates view", function () {
     await waitForElementToBeRemoved(() => screen.getByText("Loading"));
     const dropdown = screen.getByText("Select report");
     dropdown.click();
-  
+
     const report = mockedReports.reports![0];
     const option = user.getAllByRole("option")[0];
     option.scrollIntoView = jest.fn();
@@ -256,7 +183,7 @@ describe("Templates view", function () {
     const quantityOption = user.getAllByRole("option")[0];
     quantityOption.scrollIntoView = jest.fn();
     quantityOption.click();
-    
+
     const saveButton = screen.getByText("Save");
     saveButton.click();
 

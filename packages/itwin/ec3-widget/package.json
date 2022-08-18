@@ -9,7 +9,7 @@
     "iTwin.js",
     "Carbon Calculation"
   ],
-  "main": "lib/cjs/ec3-widget.js",
+  "main": "lib/cjs/ec3-widget-react.js",
   "directories": {
     "test": "jest"
   },
@@ -18,8 +18,8 @@
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
-  "module": "lib/esm/ec3-widget.js",
-  "typings": "lib/cjs/ec3-widget",
+  "module": "lib/esm/ec3-widget-react.js",
+  "typings": "lib/cjs/ec3-widget-react",
   "scripts": {
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",
@@ -53,10 +53,10 @@
     "@itwin/insights-client": "^0.2.0",
     "@itwin/itwinui-icons-react": "^1.7.0",
     "@itwin/itwinui-react": "~1.42.0",
-    "react-redux": "^7.2.2",
     "simple-react-validator": "^1.6.1"
   },
   "devDependencies": {
+    "react-redux": "^7.2.2",
     "@faker-js/faker": "^6.3.1",
     "@itwin/appui-abstract": "^3.0.0",
     "@itwin/appui-layout-react": "^3.0.0",
