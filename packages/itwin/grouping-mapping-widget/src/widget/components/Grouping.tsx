@@ -395,6 +395,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           <Surface className="groups-container">
             <div className="toolbar">
               <Button
+                className = "add-load-button"
                 startIcon={
                   isLoadingQuery ? (
                     <ProgressRadial size="small" indeterminate />
@@ -406,7 +407,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 disabled={isLoadingQuery}
                 onClick={addGroup}
               >
-                {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
+                {isLoadingQuery ? "Loading" : "Add Group"}
               </Button>
               <ButtonGroup className="toolbar-buttons">
                 <ToggleSwitch
