@@ -5,14 +5,14 @@
 @import '~@itwin/core-react/lib/cjs/core-react/expandable/list';
 @import '~@itwin/core-react/lib/cjs/core-react/scrollbar';
 
-.gm-components-property-grid-loader {
+.gmw-components-property-grid-loader {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.components-property-grid {
-  .property-categories {
+.gmw-components-property-grid {
+  .gmw-property-categories {
     @include uicore-expandable-blocks-list;
 
     display: grid;
@@ -27,7 +27,7 @@
   color: $buic-foreground-body;
 }
 
-.components-property-grid-wrapper {
+.gmw-components-property-grid-wrapper {
   width: 100%;
   height: 100%;
   overflow-y: auto;
@@ -36,15 +36,15 @@
   @include uicore-scrollbar();
 }
 
-@mixin components-property-list {
+@mixin gmw-components-property-list {
   width: 100%;
 
-  .components--selected {
+  .gmw-components--selected {
     background-color: $buic-row-selection;
     outline: 1px solid $buic-foreground-primary;
   }
 
-  .components--clickable {
+  .gmw-components--clickable {
     cursor: pointer;
 
     &:hover {
@@ -52,20 +52,20 @@
     }
   }
 
-  .components--hoverable:hover {
+  .gmw-components--hoverable:hover {
     background-color: $buic-row-hover;
   }
 }
 
-.components-property-list--horizontal {
-  @include components-property-list;
+.gmw-components-property-list--horizontal {
+  @include gmw-components-property-list;
 
   display: grid;
   grid-row-gap: 0px;
   overflow: hidden;
 }
 
-.components-property-list--vertical {
-  @include components-property-list;
+.gmw-components-property-list--vertical {
+  @include gmw-components-property-list;
   // margin-top: -13px;
 }
