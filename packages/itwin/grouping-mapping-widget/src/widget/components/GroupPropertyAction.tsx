@@ -501,8 +501,8 @@ const GroupPropertyAction = ({
         title={groupPropertyName ?? "Add Property"}
         returnFn={async () => returnFn(false)}
       />
-      <div className='group-property-action-container'>
-        <Fieldset disabled={isLoading} className='property-options' legend='Property Details'>
+      <div className='gmw-group-property-action-container'>
+        <Fieldset disabled={isLoading} className='gmw-property-options' legend='Property Details'>
           <Small className='field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
@@ -566,14 +566,14 @@ const GroupPropertyAction = ({
 
         </Fieldset>
         {groupPropertyId && !isLoading  && !selectedProperty && <Alert type="warning">Property could not be found. Warning: Overwriting will occur.</Alert>}
-        <Fieldset className='property-selection-container' legend="Properties">
+        <Fieldset className='gmw-property-selection-container' legend="Properties">
           <Label as="span">Selected Property</Label>
           <HorizontalTile
             title={selectedProperty?.label ?? "No Selection"}
             subText={selectedProperty?.parentPropertyClassName ?? "Parent: "}
             actionGroup={null}
           />
-          <div className="available-properties">
+          <div className="gmw-available-properties">
             <Label as="span">Available Properties</Label>
             <LabeledInput
               displayStyle="inline"
@@ -606,7 +606,7 @@ const GroupPropertyAction = ({
               }
             />
           </div>
-          <div className="properties-list">
+          <div className="gmw-properties-list">
             {filteredProperties.map((property) => (
               <HorizontalTile
                 key={property.key}
