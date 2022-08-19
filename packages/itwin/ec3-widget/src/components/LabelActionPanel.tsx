@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
-import "./ActionPanel.scss";
+import "./LabelActionPanel.scss";
 import { LoadingSpinner } from "./utils";
 import {
   SvgSave,
@@ -28,7 +28,7 @@ const ActionPanel = ({
 }: ActionPanelProps): JSX.Element => {
   return (
     <div id='action'>
-      <div className='action-panel'>
+      <div className='ec3-label-action-panel'>
         {isLoading &&
           <LoadingSpinner />
         }

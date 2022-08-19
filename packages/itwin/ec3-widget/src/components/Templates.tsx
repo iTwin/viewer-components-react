@@ -93,8 +93,7 @@ const Templates = () => {
       return (
         <>
           <WidgetHeader title="Templates" />
-
-          <Surface className="templates-list-container">
+          <Surface className="ec3-templates-list-container">
             <div className="toolbar">
               <Button
                 startIcon={<SvgAdd />}

@@ -24,7 +24,7 @@ export const SearchBar = ({
   return searchBarOpen || searchValue ? (
     <div
       style={{
-        animation: searchBarClosing ? "rcw-shrink .5s" : "rcw-expand .5s",
+        animation: searchBarClosing ? "ec3-shrink .5s" : "ec3-expand .5s",
       }}
       onAnimationEnd={() => {
         if (searchBarClosing) {

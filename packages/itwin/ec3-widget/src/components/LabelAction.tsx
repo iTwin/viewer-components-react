@@ -9,7 +9,7 @@ import {
   SvgMore,
 } from "@itwin/itwinui-icons-react";
 import { useState, useMemo, useEffect, useCallback } from "react";
-import ActionPanel from "./ActionPanel";
+import LabelActionPanel from "./LabelActionPanel";
 import { IModelApp } from "@itwin/core-frontend";
 import { Button, toaster, MenuItem, IconButton } from "@itwin/itwinui-react";
 import { WidgetHeader } from "./utils";
@@ -281,9 +281,9 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
         returnFn={goBack}
         disabled={isLoading}
       />
-      <div className='label-details-container'>
-        <Fieldset legend='Label' className='label-details'>
-          <Small className='field-legend'>
+      <div className='ec3-label-details-container'>
+        <Fieldset legend='Label' className='ec3-label-details'>
+          <Small className='ec3-label-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
 
@@ -319,7 +319,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
             }
             onBlur={() => {
               validator.showMessageFor("reportTable");
-            } } onShow={() => {}} onHide={() => {}}          />
+            }} onShow={() => { }} onHide={() => { }} />
           <LabeledInput
             id='name'
             name='name'
@@ -330,7 +330,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
             }}
           />
           <div className="body">
-            <div className="combo-field">
+            <div className="ec3-label-combo-field">
               <LabeledSelect
                 label="Element"
                 id='element'
@@ -356,9 +356,9 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 }
                 onBlur={() => {
                   validator.showMessageFor("element");
-                } } onShow={() => {}} onHide={() => {}}              />
+                }} onShow={() => { }} onHide={() => { }} />
             </div>
-            <div className="combo-field">
+            <div className="ec3-label-combo-field">
               <LabeledSelect
                 label="Element quantity"
                 id='elementQuantity'
@@ -386,11 +386,11 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 }
                 onBlur={() => {
                   validator.showMessageFor("elementQuantity");
-                } } onShow={() => {}} onHide={() => {}}              />
+                }} onShow={() => { }} onHide={() => { }} />
             </div>
 
           </div>
-          <div className="pair-list">
+          <div className="ec3-pair-list">
             {materials.map((material, index) => (
               <DropdownTile
                 key={index}
@@ -438,7 +438,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
               />
             ))}
             <Button
-              className="button"
+              className="ec3-label-button"
               startIcon={<SvgAdd />}
               onClick={addPair}
               styleType="high-visibility"
@@ -459,7 +459,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
         refresh={refresh}
       />
 
-      <ActionPanel
+      <LabelActionPanel
         onSave={async () => {
           if (!validator.allValid()) {
             showValidationMessage(true);

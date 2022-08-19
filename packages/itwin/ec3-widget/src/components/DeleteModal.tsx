@@ -47,7 +47,7 @@ export const DeleteModal = ({
     <>
       <Modal
         title='Confirm'
-        modalRootId='grouping-mapping-widget'
+        modalRootId='ec3-widget-react'
         isOpen={show}
         isDismissible={!isLoading}
         onClose={() => {

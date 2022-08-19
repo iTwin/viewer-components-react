@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.e_c_3 {
+.ec3 {
   &-signin {
     display: flex;
     flex-direction: column;
@@ -56,6 +56,7 @@
   &-report-button {
     margin: $iui-l;
     text-decoration: none;
+
     :hover {
       cursor: pointer;
     }

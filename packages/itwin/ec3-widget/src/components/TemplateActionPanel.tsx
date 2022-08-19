@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
-import "./ActionPanel.scss";
+import "./TemplateActionPanel.scss";
 import { LoadingSpinner } from "./utils";
 
 import {
@@ -32,7 +32,7 @@ const TemplateActionPanel = ({
 }: TemplateActionPanelProps): JSX.Element => {
   return (
     <div id='action' className='action-panel-container'>
-      <div className='action-panel'>
+      <div className='ec3-template-action-panel'>
         {isLoading &&
           <LoadingSpinner />
         }

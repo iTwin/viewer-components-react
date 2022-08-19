@@ -26,7 +26,7 @@ export const DropdownTile = ({
 }: DropdownTileProps) => {
   return (
     <div
-      className="rcw-dropdown-tile-container"
+      className="ec3-dropdown-tile-container"
       data-testid="horizontal-tile"
     >
       <div className="body">
@@ -38,7 +38,7 @@ export const DropdownTile = ({
             required
             options={stringColumnOptions}
             value={materialValue}
-            onChange={(value) => { onMaterialChange(value); } }
+            onChange={(value) => { onMaterialChange(value); }}
             message={validator.message(
               "materialValue",
               materialValue,
@@ -53,7 +53,7 @@ export const DropdownTile = ({
               : undefined}
             onBlur={() => {
               validator.showMessageFor("materialValue");
-            } } onShow={() => {}} onHide={() => {}}          />
+            }} onShow={() => { }} onHide={() => { }} />
         </div>
         <div className="action-button" data-testid="tile-action-button">
           {actionGroup}

@@ -20,17 +20,17 @@ export const WidgetHeader = ({
   returnFn,
 }: WidgetHeaderProps) => {
   return (
-    <div className="e_c_3-widget-header-container">
+    <div className="ec3-widget-header-container">
       {returnFn && (
         <div
-          className={disabled ? "e_c_3-chevron-disabled" : "e_c_3-chevron"}
+          className={disabled ? "ec3-chevron-disabled" : "ec3-chevron"}
           onClick={disabled ? undefined : returnFn}
           onKeyUp={disabled ? undefined : returnFn}
         >
           <SvgChevronLeft />
         </div>
       )}
-      <Text className="e_c_3-title" variant="title">
+      <Text className="ec3-title" variant="title">
         {title}
       </Text>
     </div>

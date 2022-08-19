@@ -151,9 +151,9 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
               await goBack();
             }}
           />
-          <div className='template-details-container'>
-            <Fieldset legend='Template Details' className='template-details'>
-              <Small className='field-legend'>
+          <div className='ec3-template-details-container'>
+            <Fieldset legend='Template Details' className='ec3-template-details'>
+              <Small className='ec3-template-field-legend'>
                 Asterisk * indicates mandatory fields.
               </Small>
               <LabeledInput
@@ -195,8 +195,8 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                   }
                 }} onShow={() => { }} onHide={() => { }} />
 
-              <Surface className="labels-container">
-                <div className="labels-list">
+              <Surface className="ec3-labels-container">
+                <div className="ec3-labels-list">
                   {
                     childTemplate.labels
                       .map((g) => (

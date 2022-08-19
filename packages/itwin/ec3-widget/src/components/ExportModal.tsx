@@ -34,7 +34,7 @@ interface ExportProps {
   templateId: string | undefined;
 }
 
-interface E_c_3TokenCache {
+interface ec3TokenCache {
   token: string;
   exp: number;
 }
@@ -47,7 +47,7 @@ const ExportModal = (props: ExportProps) => {
   const [passwordIsVisible, showPassword] = useState(false);
   const [signinError, showSigninError] = useState(false);
   const [emailError, setEmailError] = useState(false);
-  const [cache, cacheToken] = useState<E_c_3TokenCache>();
+  const [cache, cacheToken] = useState<ec3TokenCache>();
 
   const [jobStatus, setJobStatus] = useState<JobStatus.StatusEnum>();
   const [jobLink, setJobLink] = useState<Link>();
@@ -110,18 +110,18 @@ const ExportModal = (props: ExportProps) => {
       switch (status) {
         case JobStatus.StatusEnum.Queued:
           return (
-            <div className="e_c_3-progress-radial-container">
+            <div className="ec3-progress-radial-container">
               <ProgressRadial indeterminate size="small" value={50} />
-              <Text variant="leading" className="e_c_3-status-text">
+              <Text variant="leading" className="ec3-status-text">
                 Export queued
               </Text>
             </div>
           );
         case JobStatus.StatusEnum.Running:
           return (
-            <div className="e_c_3-progress-linear-container">
+            <div className="ec3-progress-linear-container">
               <ProgressLinear indeterminate />
-              <Text variant="leading" className="e_c_3-status-text">
+              <Text variant="leading" className="ec3-status-text">
                 Export running
               </Text>
             </div>
@@ -129,10 +129,10 @@ const ExportModal = (props: ExportProps) => {
         case JobStatus.StatusEnum.Succeeded:
           return (
             link && (
-              <div className="e_c_3-progress-radial-container">
+              <div className="ec3-progress-radial-container">
                 <ProgressRadial status="positive" size="small" value={50} />
                 <a
-                  className="e_c_3-report-button"
+                  className="ec3-report-button"
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -144,16 +144,16 @@ const ExportModal = (props: ExportProps) => {
           );
         case JobStatus.StatusEnum.Failed:
           return (
-            <div className="e_c_3-progress-radial-container">
+            <div className="ec3-progress-radial-container">
               <ProgressRadial status="negative" size="small" value={100} />
-              <Text variant="leading" className="e_c_3-status-text">
+              <Text variant="leading" className="ec3-status-text">
                 Export failed
               </Text>
             </div>
           );
         default:
           return (
-            <div className="e_c_3-progress-radial-container">
+            <div className="ec3-progress-radial-container">
               <Text>Invalid Job Status <span role="img" aria-label="sad">😔</span></Text>
             </div>
           );
@@ -181,23 +181,23 @@ const ExportModal = (props: ExportProps) => {
       closeOnExternalClick={false}
     >
       {!isSignedIn && (
-        <div className="e_c_3-signin">
+        <div className="ec3-signin">
           <img
-            className="e_c_3-signin-icon"
+            className="ec3-signin-icon"
             src={logo}
             alt="E C 3® software"
             data-height-percentage="80"
             data-actual-width="1200"
             data-actual-height="600"
           />
-          <form onSubmit={signin} className="e_c_3-signin-form">
-            <div className="e_c_3-signin-prompt">Sign in to E C 3.</div>
+          <form onSubmit={signin} className="ec3-signin-form">
+            <div className="ec3-signin-prompt">Sign in to E C 3.</div>
             {signinError && (
-              <Alert type="negative" className="e_c_3-signin-error">
+              <Alert type="negative" className="ec3-signin-error">
                 Incorrect email or password.
               </Alert>
             )}
-            <div className="e_c_3-signin-input">
+            <div className="ec3-signin-input">
               <LabeledInput
                 label="Email"
                 value={email}
@@ -208,7 +208,7 @@ const ExportModal = (props: ExportProps) => {
                 required
               />
             </div>
-            <div className="e_c_3-signin-input">
+            <div className="ec3-signin-input">
               <LabeledInput
                 label="Password"
                 value={password}
@@ -228,16 +228,16 @@ const ExportModal = (props: ExportProps) => {
               />
             </div>
 
-            <div className="e_c_3-signin-button-container">
+            <div className="ec3-signin-button-container">
               <Button
-                className="e_c_3-signin-button"
+                className="ec3-signin-button"
                 type="submit"
                 styleType="cta"
                 disabled={!isValidSignin()}
               >
                 {isSigningIn ? (
                   <ProgressRadial
-                    className="e_c_3-signin-wait"
+                    className="ec3-signin-wait"
                     indeterminate
                     size="small"
                     value={50}
@@ -251,7 +251,7 @@ const ExportModal = (props: ExportProps) => {
         </div>
       )}
       {isSignedIn && !jobStatus && (
-        <div className="e_c_3-progress-radial-container">
+        <div className="ec3-progress-radial-container">
           <ProgressRadial indeterminate size="large" value={50} />
         </div>
       )}

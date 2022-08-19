@@ -19,7 +19,7 @@ interface LabelTileProps {
 export const LabelTile = ({ title, subText, onClickTitle, titleTooltip, subtextToolTip, actionGroup }: LabelTileProps) => {
 
   return (
-    <div className="gmw-label-tile-container" data-testid="label-tile">
+    <div className="ec3-label-tile-container" data-testid="label-tile">
       <div className="body">
         <Text className={`body-text ${onClickTitle ? "iui-anchor" : ""}`} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
         {subText && <Text className="body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}

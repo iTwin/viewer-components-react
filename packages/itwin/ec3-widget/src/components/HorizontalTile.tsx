@@ -26,7 +26,7 @@ export const HorizontalTile = ({
 }: HorizontalTileProps) => {
   return (
     <div
-      className="rcw-horizontal-tile-container"
+      className="ec3-horizontal-tile-container"
       data-testid="horizontal-tile"
     >
       <div className="body">
