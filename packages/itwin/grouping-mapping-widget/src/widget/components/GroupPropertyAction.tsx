@@ -23,24 +23,26 @@ import {
 import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { SelectOption } from "@itwin/itwinui-react";
-import { MenuItem } from "@itwin/itwinui-react";
-import { ComboBox } from "@itwin/itwinui-react";
+import { Alert } from "@itwin/itwinui-react";
+import { IconButton } from "@itwin/itwinui-react";
+import { Label } from "@itwin/itwinui-react";
 import {
-  Alert,
   Fieldset,
   LabeledInput,
   LabeledSelect,
   Small,
-  Text,
 } from "@itwin/itwinui-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
-import type { ECProperty, GroupPropertyCreate } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { HorizontalTile } from "./HorizontalTile";
+import type { ECProperty, GroupPropertyCreate, GroupPropertySingle } from "@itwin/insights-client";
+import { SvgClose, SvgSearch } from "@itwin/itwinui-icons-react";
+import { deepEqual } from "fast-equals";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -77,17 +79,19 @@ interface PropertyMetaData {
   propertyTraversal: Array<string>;
   // The type of primitive navigation from Presentation
   primitiveNavigationClass: string;
+  key: string;
 }
 
-const convertType = (type: string) =>{
+const convertType = (type: string) => {
   switch (type) {
     case "int":
     case "long":
-      return "integer";
+      return "Integer";
     case "enum":
-      return "string";
+      return "String";
     default:
-      return type;
+      // Capitilize first letter
+      return `${type[0].toUpperCase()}${type.slice(1).toLowerCase()}`;
   }
 };
 
@@ -95,16 +99,16 @@ const extractPrimitive = (
   propertyTraversal: Array<string>,
   propertyField: PropertiesField
 ): PropertyMetaData => {
-  const propertyName =  propertyField.properties[0].property.name;
+  const propertyName = propertyField.properties[0].property.name;
   const label = propertyField.label;
-  const type = convertType(propertyField.properties[0].property.type);
   //  It belongs to this parent class
   const parentPropertyClassName = propertyField.parent?.contentClassInfo.name ?? "*";
   const primitiveNavigationClass = propertyField.properties[0].property.navigationPropertyInfo?.classInfo.name ?? "";
+  const type = primitiveNavigationClass ? "String" : convertType(propertyField.properties[0].property.type);
 
   propertyTraversal.push(propertyName);
 
-  return { label, schema: "*", className:"*", propertyTraversal, type, primitiveNavigationClass, parentPropertyClassName};
+  return { label, schema: "*", className: "*", propertyTraversal, type, primitiveNavigationClass, parentPropertyClassName, key: propertyField.name };
 };
 
 const extractPrimitiveStructProperties = (
@@ -116,11 +120,11 @@ const extractPrimitiveStructProperties = (
   for (const member of members) {
     if (member.type.valueFormat === PropertyValueFormat.Primitive) {
 
-      const propertyName =  member.name;
+      const propertyName = member.name;
       const label = member.label;
       const type = convertType(member.type.typeName);
 
-      ecPropertyMetaDetaList.push({ label, schema: "*", className:"*", propertyTraversal: [...propertyTraversal, propertyName], type, primitiveNavigationClass:"", parentPropertyClassName});
+      ecPropertyMetaDetaList.push({ label, schema: "*", className: "*", propertyTraversal: [...propertyTraversal, propertyName], type, primitiveNavigationClass: "", parentPropertyClassName, key: member.name });
     } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
       ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
         propertyTraversal,
@@ -132,7 +136,7 @@ const extractPrimitiveStructProperties = (
   return ecPropertyMetaDetaList;
 };
 
-const extractNested = ( propertyTraversal: Array<string>, propertyFields: Field[]) => {
+const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]) => {
   const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
   for (const property of propertyFields) {
 
@@ -148,7 +152,7 @@ const extractNested = ( propertyTraversal: Array<string>, propertyFields: Field[
         // Only handling single path and not handling nested content fields within navigations
         if (
           nestedContentField.pathToPrimaryClass &&
-            nestedContentField.pathToPrimaryClass.length > 1
+          nestedContentField.pathToPrimaryClass.length > 1
         ) {
           break;
         }
@@ -158,9 +162,9 @@ const extractNested = ( propertyTraversal: Array<string>, propertyFields: Field[
           // Navigation properties
           case RelationshipMeaning.RelatedInstance: {
             if (
-            // Deal with a TypeDefinition
+              // Deal with a TypeDefinition
               nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
-                "BisCore:GeometricElement3dHasTypeDefinition"
+              "BisCore:GeometricElement3dHasTypeDefinition"
             ) {
               ecPropertyMetaDetaList.push(...extractNested([...propertyTraversal, "TypeDefinition"], nestedContentField.nestedFields));
             }
@@ -189,7 +193,7 @@ const extractNested = ( propertyTraversal: Array<string>, propertyFields: Field[
 
 };
 
-const convertPresentationProperties = (propertyFields: Field[])=>{
+const convertPresentationFields = (propertyFields: Field[]) => {
 
   const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
 
@@ -200,8 +204,8 @@ const convertPresentationProperties = (propertyFields: Field[])=>{
       case PropertyValueFormat.Primitive: {
 
         const extractedPrimitive = extractPrimitive([], property as PropertiesField);
-        extractedPrimitive.schema="*";
-        extractedPrimitive.className="*";
+        extractedPrimitive.schema = "*";
+        extractedPrimitive.className = "*";
         ecPropertyMetaDetaList.push(extractedPrimitive);
         break;
       }
@@ -211,7 +215,7 @@ const convertPresentationProperties = (propertyFields: Field[])=>{
         // Only handling single path and not handling nested content fields within navigations
         if (
           nestedContentField.pathToPrimaryClass &&
-            nestedContentField.pathToPrimaryClass.length > 1
+          nestedContentField.pathToPrimaryClass.length > 1
         ) {
           break;
         }
@@ -222,14 +226,14 @@ const convertPresentationProperties = (propertyFields: Field[])=>{
             if (
               (nestedContentField.pathToPrimaryClass[0].relationshipInfo
                 .name === "BisCore:ElementOwnsUniqueAspect" ||
-                  nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                    .name === "BisCore:ElementOwnsMultiAspects")
+                nestedContentField.pathToPrimaryClass[0].relationshipInfo
+                  .name === "BisCore:ElementOwnsMultiAspects")
             ) {
               const fullClassName = nestedContentField.contentClassInfo.name;
-              const schema= fullClassName.split(":")[0];
-              const className= fullClassName.split(":")[1];
+              const schema = fullClassName.split(":")[0];
+              const className = fullClassName.split(":")[1];
               const extractedNested = extractNested([], nestedContentField.nestedFields);
-              const aspectExtractedNested = extractedNested.map((ecProperty)=>({...ecProperty, schema, className}));
+              const aspectExtractedNested = extractedNested.map((ecProperty) => ({ ...ecProperty, schema, className }));
               ecPropertyMetaDetaList.push(...aspectExtractedNested);
 
             }
@@ -238,9 +242,9 @@ const convertPresentationProperties = (propertyFields: Field[])=>{
           // Navigation properties
           case RelationshipMeaning.RelatedInstance: {
             if (
-            // Deal with a TypeDefinition
+              // Deal with a TypeDefinition
               nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
-                "BisCore:GeometricElement3dHasTypeDefinition"
+              "BisCore:GeometricElement3dHasTypeDefinition"
             ) {
               ecPropertyMetaDetaList.push(...extractNested(["TypeDefinition"], nestedContentField.nestedFields));
             }
@@ -265,6 +269,77 @@ const convertPresentationProperties = (propertyFields: Field[])=>{
   return ecPropertyMetaDetaList;
 };
 
+const convertECProperties = (property: PropertyMetaData): Array<ECProperty> => {
+  const ecProperty: ECProperty = {
+    ecSchemaName: property.schema,
+    ecClassName: property.className,
+    ecPropertyType: property.type,
+  };
+  switch (property.primitiveNavigationClass) {
+    case "BisCore:ModelContainsElements": {
+      return [
+        {
+          ...ecProperty,
+          ecPropertyName: [
+            ...property.propertyTraversal,
+            "ModeledElement",
+            "UserLabel",
+          ].join("."),
+        },
+        {
+          ...ecProperty,
+          ecPropertyName: [
+            ...property.propertyTraversal,
+            "ModeledElement",
+            "CodeValue",
+          ].join("."),
+        },
+      ];
+    }
+    case "BisCore:GeometricElement3dIsInCategory":
+      return [
+        {
+          ...ecProperty,
+          ecPropertyName: [...property.propertyTraversal, "UserLabel"].join("."),
+        },
+        {
+          ...ecProperty,
+          ecPropertyName: [...property.propertyTraversal, "CodeValue"].join("."),
+        },
+      ];
+    case "BisCore:PhysicalElementIsOfPhysicalMaterial": {
+      return [
+        {
+          ...ecProperty,
+          ecPropertyName: [...property.propertyTraversal.slice(0, -1), "Material", "UserLabel"].join("."),
+        },
+        {
+          ...ecProperty,
+          ecPropertyName: [...property.propertyTraversal.slice(0, -1), "Material", "CodeValue"].join("."),
+        },
+      ];
+    }
+    default: {
+      return [
+        {
+          ...ecProperty,
+          ecPropertyName: property.propertyTraversal.join("."),
+        },
+      ];
+    }
+  }
+};
+
+const findPropertyNaive = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[])=>{
+  for(const property of propertiesMetaData ){
+    const convertedECProperty = convertECProperties(property);
+    if(deepEqual(convertedECProperty, ecProperties)){
+      return property;
+    }
+  }
+  return undefined;
+};
+
 const GroupPropertyAction = ({
   iModelId,
   mappingId,
@@ -280,16 +355,29 @@ const GroupPropertyAction = ({
   const [propertyName, setPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<string | undefined>();
   const [quantityType, setQuantityType] = useState<string>("Undefined");
-  // const [classToPropertiesMapping, setClassToPropertiesMapping] =
-  //   useState<Map<string, Property[]>>();
+  const [selectedProperty, setSelectedProperty] = useState<PropertyMetaData>();
   const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>(
     []
   );
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchInput, setSearchInput] = useState<string>("");
+  const [activeSearchInput, setActiveSearchInput] = useState<string>("");
+  const [searched, setSearched] = useState<boolean>(false);
+
+  const filteredProperties = useMemo(
+    () =>
+      propertiesMetaData.filter((p) =>
+        [p.label, p.parentPropertyClassName, p.schema, p.className]
+          .join(" ")
+          .toLowerCase()
+          .includes(activeSearchInput.toLowerCase())
+      ),
+    [activeSearchInput, propertiesMetaData]
+  );
 
   useEffect(() => {
-    const getContent = async () => {
+    const generatedProperties = async () => {
       setIsLoading(true);
       const ruleSet: Ruleset = {
         id: "element-properties",
@@ -321,45 +409,67 @@ const GroupPropertyAction = ({
             field.type.valueFormat === PropertyValueFormat.Struct
         ) ?? [];
 
-      const propertiesMetaData = convertPresentationProperties(propertyFields);
+      const propertiesMetaData = convertPresentationFields(propertyFields);
 
       setPropertiesMetaData(propertiesMetaData);
 
+      if (groupPropertyId) {
+        const accessToken = await getAccessToken();
+        let response: GroupPropertySingle | undefined;
+        try {
+          response = await mappingClient.getGroupProperty(
+            accessToken,
+            iModelId,
+            mappingId,
+            groupId,
+            groupPropertyId
+          );
+
+          setPropertyName(response.property?.propertyName ?? "");
+          setDataType(response.property?.dataType ?? "");
+          setQuantityType(response.property?.quantityType ?? "");
+          const property = findPropertyNaive(response.property?.ecProperties??[], propertiesMetaData);
+          setSelectedProperty(property);
+        } catch (error: any) {
+          handleError(error.status);
+        }
+      }
+
       setIsLoading(false);
     };
-    void getContent();
+    void generatedProperties();
   }, [getAccessToken, mappingClient, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
 
   const onSave = async () => {
 
-    if ( !validator.allValid()) {
+    if (!validator.allValid()) {
       showValidationMessage(true);
     }
     try {
       setIsLoading(true);
-      // const accessToken = await getAccessToken();
-      // const groupProperty: GroupPropertyCreate = {
-      //   propertyName,
-      //   dataType,
-      //   quantityType,
-      //   ecProperties: filteredEcProperties,
-      // };
-      // groupPropertyId
-      //   ? await mappingClient.updateGroupProperty(
-      //     accessToken,
-      //     iModelId,
-      //     mappingId,
-      //     groupId,
-      //     groupPropertyId,
-      //     groupProperty
-      //   )
-      //   : await mappingClient.createGroupProperty(
-      //     accessToken,
-      //     iModelId,
-      //     mappingId,
-      //     groupId,
-      //     groupProperty
-      //   );
+      const accessToken = await getAccessToken();
+      const groupProperty: GroupPropertyCreate = {
+        propertyName,
+        dataType,
+        quantityType,
+        ecProperties: selectedProperty && convertECProperties(selectedProperty),
+      };
+      groupPropertyId
+        ? await mappingClient.updateGroupProperty(
+          accessToken,
+          iModelId,
+          mappingId,
+          groupId,
+          groupPropertyId,
+          groupProperty
+        )
+        : await mappingClient.createGroupProperty(
+          accessToken,
+          iModelId,
+          mappingId,
+          groupId,
+          groupProperty
+        );
       await returnFn(true);
     } catch (error: any) {
       handleError(error.status);
@@ -367,10 +477,23 @@ const GroupPropertyAction = ({
     }
   };
 
-  const options = useMemo(()=>propertiesMetaData.map((property)=>({
-    label:property.label,
-    value: property,
-  })),[propertiesMetaData]);
+  const startSearch = useCallback(() => {
+    setActiveSearchInput(searchInput);
+    setSearched(true);
+  }, [searchInput]);
+
+  const clearSearch = useCallback(() => {
+    setSearchInput("");
+    setActiveSearchInput("");
+    setSearched(false);
+  }, []);
+
+  useEffect(() => {
+    if (searchInput.length === 0) {
+      setSearched(false);
+      clearSearch();
+    }
+  }, [searchInput, setSearched, clearSearch]);
 
   return (
     <>
@@ -379,7 +502,7 @@ const GroupPropertyAction = ({
         returnFn={async () => returnFn(false)}
       />
       <div className='group-property-action-container'>
-        <Fieldset className='property-options' legend='Property Details'>
+        <Fieldset disabled={isLoading} className='property-options' legend='Property Details'>
           <Small className='field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
@@ -388,7 +511,6 @@ const GroupPropertyAction = ({
             label='Property Name'
             value={propertyName}
             required
-            disabled={isLoading}
             onChange={(event) => {
               setPropertyName(event.target.value);
               validator.showMessageFor("propertyName");
@@ -410,7 +532,6 @@ const GroupPropertyAction = ({
           <LabeledSelect<string>
             label={"Data Type"}
             id='dataType'
-            disabled={isLoading}
             options={[
               { value: "Boolean", label: "Boolean" },
               { value: "Number", label: "Number" },
@@ -436,37 +557,77 @@ const GroupPropertyAction = ({
           />
           <LabeledSelect<string>
             label='Quantity Type'
-            disabled={isLoading}
             options={quantityTypesSelectionOptions}
             value={quantityType}
             onChange={setQuantityType}
             onShow={() => { }}
             onHide={() => { }}
           />
+
         </Fieldset>
-        <Fieldset className='property-selection-container' legend='Properties'>
-          <ComboBox
-            options={options}
-            itemRenderer={(option: SelectOption<PropertyMetaData>) => (
-              <MenuItem>
-                <div className='gm-gp-menu-item'>
-                  <div>{option.label}</div>
-                  <div>{option.value.parentPropertyClassName}</div>
-                </div>
-              </MenuItem>
-            )}
+        {groupPropertyId && !isLoading  && !selectedProperty && <Alert type="warning">Property could not be found. Warning: Overwriting will occur.</Alert>}
+        <Fieldset className='property-selection-container' legend="Properties">
+          <Label as="span">Selected Property</Label>
+          <HorizontalTile
+            title={selectedProperty?.label ?? "No Selection"}
+            subText={selectedProperty?.parentPropertyClassName ?? "Parent: "}
+            actionGroup={null}
           />
-          {isLoading &&
+          <div className="available-properties">
+            <Label as="span">Available Properties</Label>
+            <LabeledInput
+              displayStyle="inline"
+              iconDisplayStyle="inline"
+              className="search-input"
+              value={searchInput}
+              size="small"
+              placeholder="Search...."
+              onChange={(event) => {
+                const {
+                  target: { value },
+                } = event;
+                setSearchInput(value);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  startSearch();
+                }
+              }}
+              svgIcon={
+                searched ? (
+                  <IconButton onClick={clearSearch} styleType="borderless">
+                    <SvgClose />
+                  </IconButton>
+                ) : (
+                  <IconButton onClick={startSearch} styleType="borderless">
+                    <SvgSearch />
+                  </IconButton>
+                )
+              }
+            />
+          </div>
+          <div className="properties-list">
+            {filteredProperties.map((property) => (
+              <HorizontalTile
+                key={property.key}
+                title={property.label}
+                subText={`Parent: ${property.parentPropertyClassName}`}
+                actionGroup={`${property.type}`}
+                selected={selectedProperty?.key === property.key}
+                onClick={() => setSelectedProperty(property)}
+              />
+            ))}
+          </div>
+          {/* {isLoading &&
             Array(3)
               .fill(null)
               .map((_, index) => (
                 <Text key={index} variant='headline' isSkeleton>
                   LOADING SKELETON
                 </Text>
-              ))}
+              ))} */}
         </Fieldset>
       </div>
-      {/* TODO: Disable when no properties are selected. Will do when I rework property selection. */}
       <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} />
     </>
   );
