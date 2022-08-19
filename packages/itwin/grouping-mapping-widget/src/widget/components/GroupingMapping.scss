@@ -6,9 +6,6 @@
 
 // Widgets by default don't get horizontal scrollbars...
 /* stylelint-disable-next-line selector-class-pattern */
-.nz-widget-contentRenderer {
-  width: 100%;
-}
 
 .gmw-group-mapping-container {
   display: flex;
@@ -17,4 +14,8 @@
   box-sizing: border-box;
   height: 100%;
   overflow: auto;
+}
+
+.gmw-field-legend {
+  color: $iui-color-system-gray;
 }

@@ -21,8 +21,8 @@ export const HorizontalTile = ({ title, subText, onClickTitle, titleTooltip, sub
   return (
     <div className="gmw-horizontal-tile-container" data-testid="gmw-horizontal-tile">
       <div className="gmw-body">
-        <Text className={`body-text ${onClickTitle ? "iui-anchor" : ""}`} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
-        {subText && <Text className="body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
+        <Text className={`gmw-body-text ${onClickTitle ? "iui-anchor" : ""}`} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
+        {subText && <Text className="gmw-body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
       </div>
       <div className="gmw-action-button" data-testid="tile-action-button">
         {actionGroup}
