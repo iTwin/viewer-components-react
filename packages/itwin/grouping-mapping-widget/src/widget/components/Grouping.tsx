@@ -456,6 +456,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 }
               >
                 <Button
+                  className="add-load-button"
                   startIcon={
                     isLoadingQuery ? (
                       <ProgressRadial size='small' indeterminate />
@@ -466,7 +467,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   styleType='high-visibility'
                   disabled={isLoadingQuery}
                 >
-                  {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
+                  {isLoadingQuery ? "Loading" : "Add Group"}
                 </Button>
               </DropdownMenu>
               <ButtonGroup className='toolbar-buttons'>
