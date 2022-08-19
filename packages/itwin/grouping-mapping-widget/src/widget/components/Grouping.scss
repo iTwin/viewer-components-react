@@ -21,6 +21,7 @@
 
     .gmw-toolbar-buttons {
       margin-right: $iui-sm;
+      flex-wrap: wrap;
 
       .gmw-toggle {
         margin-right: $iui-xs;
