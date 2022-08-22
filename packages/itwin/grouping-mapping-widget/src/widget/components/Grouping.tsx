@@ -405,8 +405,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             }}
           />
 
-          <Surface className='groups-container'>
-            <div className='toolbar'>
+          <Surface className='gmw-groups-container'>
+            <div className='gmw-toolbar'>
               <DropdownMenu
                 className='gmw-extension-dropdown'
                 disabled={isLoadingQuery}
@@ -470,7 +470,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   {isLoadingQuery ? "Loading" : "Add Group"}
                 </Button>
               </DropdownMenu>
-              <ButtonGroup className='toolbar-buttons'>
+              <ButtonGroup className='gmw-toolbar-buttons'>
                 <ToggleSwitch
                   label="Color by Group"
                   labelPosition="left"
