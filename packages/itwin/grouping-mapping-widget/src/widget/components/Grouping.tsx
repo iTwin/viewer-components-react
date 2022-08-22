@@ -411,7 +411,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               </Button>
               <ButtonGroup className="gmw-toolbar-buttons">
                 <ToggleSwitch
-                  label="Color by Group"
+                  label="Group by Color"
                   labelPosition="left"
                   className="gmw-toggle"
                   disabled={isLoadingQuery}
