@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 22 Aug 2022 18:03:47 GMT and should not be manually modified.
+This log was last generated on Mon, 22 Aug 2022 19:37:22 GMT and should not be manually modified.
+
+## 0.5.7
+Mon, 22 Aug 2022 19:37:22 GMT
+
+### Patches
+
+- Updated the classNames within the grouping and mapping components to use `gmw-` prefix, added quick update to property-grid to return code to working state
 
 ## 0.5.6
 Mon, 22 Aug 2022 18:03:47 GMT

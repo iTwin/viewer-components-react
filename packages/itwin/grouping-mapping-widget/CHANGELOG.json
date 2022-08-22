@@ -2,6 +2,18 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.5.7",
+      "tag": "@itwin/grouping-mapping-widget_v0.5.7",
+      "date": "Mon, 22 Aug 2022 19:37:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated the classNames within the grouping and mapping components to use `gmw-` prefix, added quick update to property-grid to return code to working state"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.6",
       "tag": "@itwin/grouping-mapping-widget_v0.5.6",
       "date": "Mon, 22 Aug 2022 18:03:47 GMT",
