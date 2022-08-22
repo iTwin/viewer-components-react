@@ -71,6 +71,7 @@ interface PropertyMetaData {
   // ECProperty source schema:class
   schema: string;
   className: string;
+  categoryLabel: string;
   // Property Type
   type: string;
   // The parent class of the property
@@ -102,19 +103,20 @@ const extractPrimitive = (
   const propertyName = propertyField.properties[0].property.name;
   const label = propertyField.label;
   //  It belongs to this parent class
-  const parentPropertyClassName = propertyField.parent?.contentClassInfo.name ?? "*";
+  const parentPropertyClassName = propertyField.parent?.contentClassInfo.name ?? "No Parent";
   const primitiveNavigationClass = propertyField.properties[0].property.navigationPropertyInfo?.classInfo.name ?? "";
   const type = primitiveNavigationClass ? "String" : convertType(propertyField.properties[0].property.type);
 
   propertyTraversal.push(propertyName);
 
-  return { label, schema: "*", className: "*", propertyTraversal, type, primitiveNavigationClass, parentPropertyClassName, key: propertyField.name };
+  return { label, schema: "*", className: "*", propertyTraversal, type, primitiveNavigationClass, parentPropertyClassName, key: propertyField.name, categoryLabel: propertyField.category.label };
 };
 
 const extractPrimitiveStructProperties = (
   propertyTraversal: Array<string>,
   members: StructFieldMemberDescription[],
-  parentPropertyClassName: string = "*"
+  categoryLabel: string,
+  parentPropertyClassName: string = "*",
 ) => {
   const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
   for (const member of members) {
@@ -124,7 +126,7 @@ const extractPrimitiveStructProperties = (
       const label = member.label;
       const type = convertType(member.type.typeName);
 
-      ecPropertyMetaDetaList.push({ label, schema: "*", className: "*", propertyTraversal: [...propertyTraversal, propertyName], type, primitiveNavigationClass: "", parentPropertyClassName, key: member.name });
+      ecPropertyMetaDetaList.push({ label, schema: "*", className: "*", propertyTraversal: [...propertyTraversal, propertyName], type, primitiveNavigationClass: "", parentPropertyClassName, key: member.name, categoryLabel});
     } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
       ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
         propertyTraversal,
@@ -179,6 +181,7 @@ const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]
               ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
                 [...propertyTraversal, columnName],
                 property.type.members,
+                property.category.label,
                 // It belongs to this parent class
                 property.parent?.contentClassInfo.name
               ));
@@ -259,6 +262,7 @@ const convertPresentationFields = (propertyFields: Field[]) => {
               ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
                 [columnName],
                 property.type.members,
+                property.category.label,
               ));
             }
           }
@@ -368,7 +372,7 @@ const GroupPropertyAction = ({
   const filteredProperties = useMemo(
     () =>
       propertiesMetaData.filter((p) =>
-        [p.label, p.parentPropertyClassName, p.schema, p.className]
+        [p.label, p.categoryLabel]
           .join(" ")
           .toLowerCase()
           .includes(activeSearchInput.toLowerCase())
@@ -570,8 +574,8 @@ const GroupPropertyAction = ({
           <Label as="span">Selected Property</Label>
           <HorizontalTile
             title={selectedProperty?.label ?? "No Selection"}
-            subText={selectedProperty?.parentPropertyClassName ?? "Parent: "}
-            actionGroup={null}
+            subText={selectedProperty?.parentPropertyClassName ?? "No Type"}
+            actionGroup={"Category"}
           />
           <div className="gmw-available-properties">
             <Label as="span">Available Properties</Label>
@@ -611,8 +615,9 @@ const GroupPropertyAction = ({
               <HorizontalTile
                 key={property.key}
                 title={property.label}
-                subText={`Parent: ${property.parentPropertyClassName}`}
-                actionGroup={`${property.type}`}
+                titleTooltip={`Parent: ${property.parentPropertyClassName}`}
+                subText={`${property.type}`}
+                actionGroup={`${property.categoryLabel}`}
                 selected={selectedProperty?.key === property.key}
                 onClick={() => setSelectedProperty(property)}
               />
