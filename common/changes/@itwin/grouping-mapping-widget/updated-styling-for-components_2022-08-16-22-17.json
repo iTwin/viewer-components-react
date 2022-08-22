@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Updated the classNames within the grouping and mapping components to use `gmw-` prefix",
+      "comment": "Updated the classNames within the grouping and mapping components to use `gmw-` prefix, added quick update to property-grid to return code to working state",
       "type": "patch"
     }
   ],
