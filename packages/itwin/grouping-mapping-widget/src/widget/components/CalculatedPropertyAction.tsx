@@ -155,9 +155,9 @@ const CalculatedPropertyAction = ({
         }
         returnFn={async () => returnFn(false)}
       />
-      <div className='calculated-properties-action-container'>
-        <Fieldset legend='Calculated Property Details' className='details-form'>
-          <Small className='field-legend'>
+      <div className='gmw-calculated-properties-action-container'>
+        <Fieldset legend='Calculated Property Details' className='gmw-details-form'>
+          <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
@@ -223,14 +223,14 @@ const CalculatedPropertyAction = ({
             onChange={setType}
             itemRenderer={(option: SelectOption<string>) => (
               <MenuItem>
-                <div className='gr-cp-menu-item'>
+                <div className='gmw-gr-cp-menu-item'>
                   <div>{option.label}</div>
                   {getSpatialData(option.value)}
                 </div>
               </MenuItem>
             )}
             selectedItemRenderer={(option: SelectOption<string>) => (
-              <div className='select-item'>
+              <div className='gmw-select-item'>
                 <div>{option.label}</div>
                 {getSpatialData(option.value)}
               </div>

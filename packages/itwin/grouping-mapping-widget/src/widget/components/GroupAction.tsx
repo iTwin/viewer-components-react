@@ -296,9 +296,9 @@ const GroupAction = ({
           await goBack();
         }}
       />
-      <div className='group-add-modify-container'>
-        <Fieldset legend='Group Details' className='group-details'>
-          <Small className='field-legend'>
+      <div className='gmw-group-add-modify-container'>
+        <Fieldset legend='Group Details' className='gmw-group-details'>
+          <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
@@ -343,8 +343,8 @@ const GroupAction = ({
             }}
           />
         </Fieldset>
-        <Fieldset legend='Group By' className='query-builder-container'>
-          <RadioTileGroup className='radio-group-tile' required>
+        <Fieldset legend='Group By' className='gmw-query-builder-container'>
+          <RadioTileGroup className='gmw-radio-group-tile' required>
             {groupExtension.extendsDefault && (
               <>
                 <RadioTile

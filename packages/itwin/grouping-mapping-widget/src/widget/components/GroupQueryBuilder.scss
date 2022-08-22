@@ -4,19 +4,19 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.find-similar-container {
+.gmw-find-similar-container {
   color: var(--buic-foreground-body);
 }
 
-.button-container {
+.gmw-button-container {
   text-align: right;
 }
 
-.reset-button {
+.gmw-reset-button {
   margin-left: 10px;
 }
 
-.select-element-hint {
+.gmw-select-element-hint {
   display: flex;
   height: 300px;
   justify-content: center;

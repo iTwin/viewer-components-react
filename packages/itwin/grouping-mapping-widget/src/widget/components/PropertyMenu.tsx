@@ -240,7 +240,7 @@ export const PropertyMenu = ({
 
   if (isLoading) {
     return (
-      <div className='loading-overlay'>
+      <div className='gmw-loading-overlay'>
         <Text>Loading Group</Text>
         <ProgressRadial indeterminate />
         <Text>Please wait...</Text>
@@ -315,8 +315,8 @@ export const PropertyMenu = ({
       );
     default:
       return (
-        <InformationPanelWrapper className='property-menu-wrapper'>
-          <div className='property-header'>
+        <InformationPanelWrapper className='gmw-property-menu-wrapper'>
+          <div className='gmw-property-header'>
             <WidgetHeader
               title={`${group.groupName ?? ""}`}
               returnFn={goBack}
@@ -328,9 +328,9 @@ export const PropertyMenu = ({
               <SvgProperties />
             </IconButton>
           </div>
-          <div className='property-menu-container'>
+          <div className='gmw-property-menu-container'>
             {!hideGroupProps && (
-              <div className='property-table'>
+              <div className='gmw-property-table'>
                 <GroupPropertyTable
                   iModelId={iModelId}
                   mappingId={mappingId}
@@ -347,7 +347,7 @@ export const PropertyMenu = ({
             )}
 
             {!hideCalculatedProps && (
-              <div className='property-table'>
+              <div className='gmw-property-table'>
                 <CalculatedPropertyTable
                   iModelId={iModelId}
                   mappingId={mappingId}
@@ -363,7 +363,7 @@ export const PropertyMenu = ({
               </div>
             )}
             {!hideCustomCalculationProps && (
-              <div className='property-table'>
+              <div className='gmw-property-table'>
                 <CustomCalculationTable
                   iModelId={iModelId}
                   mappingId={mappingId}
@@ -380,7 +380,7 @@ export const PropertyMenu = ({
             )}
           </div>
           <InformationPanel
-            className='information-panel'
+            className='gmw-information-panel'
             isOpen={isInformationPanelOpen}
           >
             <InformationPanelHeader
@@ -389,7 +389,7 @@ export const PropertyMenu = ({
               <Text variant='subheading'>{`${group.groupName ?? ""} Information`}</Text>
             </InformationPanelHeader>
             <InformationPanelBody>
-              <div className='information-body'>
+              <div className='gmw-information-body'>
                 <LabeledTextarea
                   label='Query'
                   rows={15}

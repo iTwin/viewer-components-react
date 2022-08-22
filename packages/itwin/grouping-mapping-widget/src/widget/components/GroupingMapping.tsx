@@ -81,7 +81,7 @@ const GroupingMapping = ({
     <GroupingMappingApiConfigContext.Provider value={apiConfig}>
       <MappingClientContext.Provider value={mappingClient}>
         <GroupExtensionContext.Provider value={groupExtension}>
-          <div className="group-mapping-container">
+          <div className="gmw-group-mapping-container">
             <Mappings />
           </div>
         </GroupExtensionContext.Provider>

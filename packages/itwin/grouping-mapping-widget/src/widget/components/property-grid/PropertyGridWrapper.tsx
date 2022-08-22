@@ -60,7 +60,7 @@ PropertyGridWrapperState
       <>
         {dataProvider && <PropertyGrid dataProvider={dataProvider} />}
         {!dataProvider && (
-          <div className="select-element-hint">
+          <div className="gmw-select-element-hint">
             <span>Select an element to see its properties.</span>
           </div>
         )}

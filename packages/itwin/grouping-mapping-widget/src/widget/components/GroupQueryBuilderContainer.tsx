@@ -54,14 +54,14 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
   };
 
   return (
-    <div className="find-similar-container">
+    <div className="gmw-find-similar-container">
       <PropertyGridWrapperApp keys={keysState} imodel={iModelConnection} />
       {selected && (
-        <div className="button-container">
+        <div className="gmw-button-container">
           <Button
             styleType="default"
             size="small"
-            className="reset-button"
+            className="gmw-reset-button"
             onClick={_onClickResetButton}
           >
             Reset

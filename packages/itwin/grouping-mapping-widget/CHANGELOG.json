@@ -2,6 +2,42 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.5.7",
+      "tag": "@itwin/grouping-mapping-widget_v0.5.7",
+      "date": "Mon, 22 Aug 2022 19:37:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated the classNames within the grouping and mapping components to use `gmw-` prefix, added quick update to property-grid to return code to working state"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.6",
+      "tag": "@itwin/grouping-mapping-widget_v0.5.6",
+      "date": "Mon, 22 Aug 2022 18:03:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improved button wrapping in Groups view toolbar"
+          },
+          {
+            "comment": "Changed search bar to match UX guidelines"
+          },
+          {
+            "comment": "Cancel button fix in group by"
+          },
+          {
+            "comment": "Replaced Mappings table with tile component"
+          },
+          {
+            "comment": "Updated css classnames to be scoped to this package only"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.5",
       "tag": "@itwin/grouping-mapping-widget_v0.5.5",
       "date": "Mon, 08 Aug 2022 11:57:54 GMT",

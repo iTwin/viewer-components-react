@@ -6,18 +6,18 @@
 @import "~@itwin/itwinui-css/scss/icon/index";
 @import "~@itwin/itwinui-css/scss/button/index";
 
-.widget-header-container {
+.gmw-widget-header-container {
   display: flex;
   margin-bottom: $iui-baseline * 3;
 
-  .chevron {
+  .gmw-chevron {
     @include iui-icons-large();
     cursor: pointer;
     align-self: center;
     margin-right: $iui-s;
   }
 
-  .chevron-disabled {
+  .gmw-chevron-disabled {
     @include iui-icons-large();
     @include themed {
       fill: t(iui-icons-color-actionable-disabled);
@@ -28,19 +28,19 @@
     margin-right: $iui-s;
   }
 
-  .title {
+  .gmw-title {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 }
 
-.gm-loading-spinner {
+.gmw-loading-spinner {
   display: flex;
   align-items: center;
 }
 
-.gm-center-overlay {
+.gmw-center-overlay {
   display: flex;
   justify-content: center;
   align-items: center;

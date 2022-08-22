@@ -83,18 +83,18 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
   }, [searchInput, setSearched, clearSearch]);
 
   return (
-    <div className="select-project-grid-container">
+    <div className="gmw-select-project-grid-container">
       <HorizontalTabs
         labels={tabsWithIcons}
         onTabSelected={setProjectType}
         activeIndex={projectType}
         type={"borderless"}
-        contentClassName="grid-holding-tab"
+        contentClassName="gmw-grid-holding-tab"
       >
         <LabeledInput
           displayStyle="inline"
           iconDisplayStyle="inline"
-          className="search-input"
+          className="gmw-search-input"
           label="Search"
           value={searchInput}
           placeholder="Search...."
@@ -122,7 +122,7 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
           }
         />
       </HorizontalTabs>
-      <div className="project-grid">
+      <div className="gmw-project-grid">
         <ProjectGrid
           onThumbnailClick={onSelect}
           accessToken={accessToken}
@@ -133,7 +133,7 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
           }
         />
       </div>
-      <div className="select-project-action-panel">
+      <div className="gmw-select-project-action-panel">
         <Button onClick={onCancel}>Cancel</Button>
       </div>
     </div>
