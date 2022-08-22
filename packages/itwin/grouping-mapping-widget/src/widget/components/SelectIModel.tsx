@@ -44,8 +44,8 @@ const SelectIModel = ({
   }, [getAccessToken]);
 
   return (
-    <div className='imodel-grid-container'>
-      <div className='imodel-grid'>
+    <div className='gmw-imodel-grid-container'>
+      <div className='gmw-imodel-grid'>
         <IModelGrid
           projectId={projectId}
           onThumbnailClick={onSelect}
@@ -53,7 +53,7 @@ const SelectIModel = ({
           apiOverrides={apiOverrides}
         />
       </div>
-      <div className='import-action-panel'>
+      <div className='gmw-import-action-panel'>
         <Button onClick={backFn}>Back</Button>
         <Button onClick={onCancel}>Cancel</Button>
       </div>

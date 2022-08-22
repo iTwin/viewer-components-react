@@ -232,9 +232,9 @@ const GroupAction = ({
           await goBack();
         }}
       />
-      <div className='group-add-modify-container'>
-        <Fieldset legend='Group Details' className='group-details'>
-          <Small className='field-legend'>
+      <div className='gmw-group-add-modify-container'>
+        <Fieldset legend='Group Details' className='gmw-group-details'>
+          <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
@@ -279,9 +279,9 @@ const GroupAction = ({
             }}
           />
         </Fieldset>
-        <Fieldset legend='Group By' className='query-builder-container'>
+        <Fieldset legend='Group By' className='gmw-query-builder-container'>
           <RadioTileGroup
-            className="radio-group-tile"
+            className="gmw-radio-group-tile"
             required>
             <RadioTile
               name={"groupby"}
@@ -317,7 +317,7 @@ const GroupAction = ({
             >
               <GroupQueryBuilderContainer />
             </GroupQueryBuilderContext.Provider> :
-            <div className="search-form">
+            <div className="gmw-search-form">
               <Text>Generate a query by keywords. Keywords wrapped in double quotes will be considered a required criteria.</Text>
               <LabeledTextarea
                 label="Query Keywords"
@@ -326,7 +326,7 @@ const GroupAction = ({
                 onChange={(event) => setSearchInput(event.target.value)}
                 disabled={isLoading || isRendering}
                 placeholder={`E.g. "red" chair`} />
-              <div className="search-actions">
+              <div className="gmw-search-actions">
                 {isRendering &&
                   <LoadingSpinner />
                 }

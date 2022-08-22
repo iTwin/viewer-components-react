@@ -4,14 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.groups-container {
+.gmw-groups-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   padding: $iui-baseline $iui-m;
   min-height: 0;
 
-  .toolbar {
+  .gmw-toolbar {
     display: flex;
     justify-content: space-between;
     gap: $iui-s;
@@ -19,36 +19,30 @@
     padding-bottom: $iui-baseline;
     flex-wrap: wrap;
 
-    .add-load-button {
-      width: 125px;
-      text-align: center;
-    }
-
-    .toolbar-buttons {
-      display:flex;
+    .gmw-toolbar-buttons {
       margin-right: $iui-sm;
       flex-wrap: wrap;
 
-      .toggle {
+      .gmw-toggle {
         margin-right: $iui-xs;
       }
     }
   }
 
-  .group-list {
+  .gmw-group-list {
     display: flex;
     flex-direction: column;
     overflow-y: overlay;
     gap: 7.5px;
     margin-top: 7.5px;
 
-    .actions {
+    .gmw-actions {
       display: flex;
       flex-direction: row;
     }
   }
 
-  .group-view-icon {
+  .gmw-group-view-icon {
     margin-left: 0;
     align-self: center;
     min-width: $iui-l;

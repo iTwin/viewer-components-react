@@ -117,9 +117,9 @@ const CustomCalculationAction = ({
         }
         returnFn={async () => returnFn(false)}
       />
-      <div className='custom-calculation-action-container'>
-        <Fieldset legend='Custom Calculation Details' className='details-form'>
-          <Small className='field-legend'>
+      <div className='gmw-custom-calculation-action-container'>
+        <Fieldset legend='Custom Calculation Details' className='gmw-details-form'>
+          <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput

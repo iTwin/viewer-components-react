@@ -509,9 +509,9 @@ const GroupPropertyAction = ({
         title={groupPropertyName ?? "Add Property"}
         returnFn={async () => returnFn(false)}
       />
-      <div className='group-property-action-container'>
-        <Fieldset className='property-options' legend='Property Details'>
-          <Small className='field-legend'>
+      <div className='gmw-group-property-action-container'>
+        <Fieldset className='gmw-property-options' legend='Property Details'>
+          <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
@@ -575,7 +575,7 @@ const GroupPropertyAction = ({
             onHide={() => { }}
           />
         </Fieldset>
-        <Fieldset className='property-selection-container' legend='Properties'>
+        <Fieldset className='gmw-property-selection-container' legend='Properties'>
           {propertyAlert && (
             <Alert type={"negative"}>
               Please select at least one property.
@@ -592,7 +592,7 @@ const GroupPropertyAction = ({
           {ecProperties?.map((ecProperty, index) => {
             return (
               <div
-                className='property-select-item'
+                className='gmw-property-select-item'
                 key={`${ecProperty.ecSchemaName}${ecProperty.ecClassName}`}
               >
                 <Text variant='leading'>{ecProperty.ecClassName}</Text>
@@ -600,7 +600,7 @@ const GroupPropertyAction = ({
                   {ecProperty.ecSchemaName}
                 </Text>
 
-                <div className='selection-and-reorder'>
+                <div className='gmw-selection-and-reorder'>
                   <Select<string>
                     options={propertyOptions[index]}
                     value={getValue(ecProperty, index)}

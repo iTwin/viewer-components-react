@@ -68,7 +68,7 @@ export const MappingImportWizardModal = ({
         await onClose();
       }}
     >
-      <div className='import-wizard-body-container'>
+      <div className='gmw-import-wizard-body-container'>
         <Wizard
           currentStep={currentStep}
           steps={steps.current}
@@ -108,7 +108,7 @@ export const MappingImportWizardModal = ({
                 <>
                   <div
                     style={{ display: currentStep === 2 ? "flex" : "none" }}
-                    className="mappings-container"
+                    className="gmw-mappings-container"
                   >
                     <SelectMappings
                       iModelId={selectedIModelId}

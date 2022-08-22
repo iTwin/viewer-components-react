@@ -23,8 +23,8 @@ const ActionPanel = ({
   isLoading = false,
 }: ActionPanelProps): JSX.Element => {
   return (
-    <div id='action' className='action-panel-container'>
-      <div className='action-panel'>
+    <div id='action' className='gmw-action-panel-container'>
+      <div className='gmw-action-panel'>
         {isLoading &&
           <LoadingSpinner />
         }

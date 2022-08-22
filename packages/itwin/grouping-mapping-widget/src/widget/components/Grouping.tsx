@@ -392,8 +392,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               await goBack();
             }}
           />
-          <Surface className="groups-container">
-            <div className="toolbar">
+          <Surface className="gmw-groups-container">
+            <div className="gmw-toolbar">
               <Button
                 className = "add-load-button"
                 startIcon={
@@ -409,11 +409,11 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               >
                 {isLoadingQuery ? "Loading" : "Add Group"}
               </Button>
-              <ButtonGroup className="toolbar-buttons">
+              <ButtonGroup className="gmw-toolbar-buttons">
                 <ToggleSwitch
                   label="Color by Group"
                   labelPosition="left"
-                  className="group-view-icon toggle"
+                  className="gmw-toggle"
                   disabled={isLoadingQuery}
                   checked={showGroupColor}
                   onChange={toggleGroupColor}
@@ -423,7 +423,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   onClick={showAll}
                   disabled={isLoadingQuery}
                   styleType="borderless"
-                  className="group-view-icon"
+                  className="gmw-group-view-icon"
                 >
                   <SvgVisibilityShow />
                 </IconButton>
@@ -432,7 +432,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   onClick={hideAll}
                   disabled={isLoadingQuery}
                   styleType="borderless"
-                  className="group-view-icon"
+                  className="gmw-group-view-icon"
                 >
                   <SvgVisibilityHide />
                 </IconButton>
@@ -443,7 +443,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             ) : groups.length === 0 ? (
               <EmptyMessage message="No Groups available." />
             ) : (
-              <div className="group-list">
+              <div className="gmw-group-list">
                 {
                   groups
                     .sort((a, b) => a.groupName?.localeCompare(b.groupName ?? "") ?? 1)
@@ -453,11 +453,11 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                         title={g.groupName ? g.groupName : "Untitled"}
                         subText={g.description}
                         actionGroup={
-                          <div className="actions">
+                          <div className="gmw-actions">
                             {showGroupColor && (
                               <IconButton
                                 styleType="borderless"
-                                className="group-view-icon"
+                                className="gmw-group-view-icon"
                               >
                                 <SvgRectangle
                                   stroke-width="100"
@@ -471,7 +471,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                               <IconButton
                                 disabled={isLoadingQuery}
                                 styleType="borderless"
-                                className="group-view-icon"
+                                className="gmw-group-view-icon"
                                 onClick={async () => {
                                   await showGroup(g);
                                   setHiddenGroupsIds(
@@ -485,7 +485,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                               <IconButton
                                 disabled={isLoadingQuery}
                                 styleType="borderless"
-                                className="group-view-icon"
+                                className="gmw-group-view-icon"
                                 onClick={async () => {
                                   await hideGroups([g]);
                                   setHiddenGroupsIds(
