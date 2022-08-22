@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "Updated property-grid with a few UX changes ",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}
