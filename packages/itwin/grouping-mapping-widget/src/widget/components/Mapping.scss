@@ -11,7 +11,7 @@
   padding: $iui-baseline $iui-m;
   min-height: 0;;
 
-  .table-toolbar {
+  .gmw-table-toolbar {
     display: flex;
     justify-content: space-between;
     gap: $iui-s;
@@ -29,7 +29,7 @@
     align-self: flex-start;
   }
 
-  .mappings-list {
+  .gmw-mappings-list {
     display: flex;
     flex-direction: column;
     overflow-y: overlay;
@@ -38,8 +38,3 @@
   }
 }
 
-.action-panel {
-  display: flex;
-  justify-content: right;
-  column-gap: $iui-s;
-}

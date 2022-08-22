@@ -4,18 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.imodel-grid-container {
+.gmw-imodel-grid-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   min-height: 0;
 
-  .imodel-grid {
+  .gmw-imodel-grid {
     overflow: auto;
     flex-grow: 1;
-
-    .search-input {
-      margin-left: auto;
-    }
   }
 }

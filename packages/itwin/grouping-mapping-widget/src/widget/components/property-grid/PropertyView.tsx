@@ -244,8 +244,8 @@ export const PropertyView = (props: PropertyViewProps) => {
   const getClassName = (viewProps: PropertyViewProps) => {
     let propertyRecordClassName =
       viewProps.orientation === Orientation.Horizontal
-        ? "components-property-record--horizontal"
-        : "components-property-record--vertical";
+        ? "gmw-components-property-record--horizontal"
+        : "gmw-components-property-record--vertical";
     if (viewProps.isSelected) {
       propertyRecordClassName += " components--selected";
     }
@@ -290,12 +290,12 @@ export const PropertyView = (props: PropertyViewProps) => {
       onMouseLeave={_onMouseLeave}
       role="presentation"
     >
-      <div className="components-property-record-label">
+      <div className="gmw-components-property-record-label">
         {props.propertyRecord.value.valueFormat ===
           PropertyValueFormat.Primitive && (
           <Checkbox
             style={{ marginLeft: offset }}
-            className="components-property-selection-checkbox"
+            className="gmw-components-property-selection-checkbox"
             checked={isPropertySelected}
             onChange={_onPropertySelectionChanged}
             disabled={
@@ -322,7 +322,7 @@ export const PropertyView = (props: PropertyViewProps) => {
       ) : undefined}
       {props.propertyRecord.value.valueFormat ===
         PropertyValueFormat.Primitive ? (
-          <div className="components-property-record-value">
+          <div className="gmw-components-property-record-value">
             <span>
               {props.valueElementRenderer
                 ? props.valueElementRenderer()

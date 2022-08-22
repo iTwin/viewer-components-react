@@ -6,11 +6,9 @@ import * as React from "react";
 import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
 import { NonPrimitivePropertyLabelRenderer } from "@itwin/components-react";
-
 import { PropertyRenderer } from "./PropertyRender";
 import { PropertyView } from "./PropertyView";
 import type { PrimitiveRendererProps } from "./PrimitivePropertyRenderer";
-import "./NonPrimitivePropertyRenderer.scss";
 
 /** Properties of [[NonPrimitivePropertyRenderer]] React component
  * @public

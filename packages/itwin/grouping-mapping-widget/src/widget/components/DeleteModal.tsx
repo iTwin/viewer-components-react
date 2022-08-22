@@ -54,7 +54,7 @@ export const DeleteModal = ({
           setShow(false);
         }}
       >
-        <div className="delete-modal-body-text">
+        <div className="gmw-delete-modal-body-text">
           <Leading>
             Are you sure you want to delete
           </Leading>
@@ -64,7 +64,7 @@ export const DeleteModal = ({
         </div>
         <ModalButtonBar>
           {isLoading &&
-            <div className="loading-delete">
+            <div className="gmw-loading-delete">
               <LoadingSpinner />
             </div>}
           <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>

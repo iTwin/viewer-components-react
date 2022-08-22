@@ -147,8 +147,8 @@ export const Mappings = () => {
           <BlockingOverlay isVisible={showBlockingOverlay} />
           <WidgetHeader title="Mappings" />
           <Surface className="gmw-mappings-container">
-            <div className="table-toolbar">
-              <div className = "gmw-button-spacing">
+            <div className="gmw-table-toolbar">
+              <div className="gmw-button-spacing">
                 <Button
                   startIcon={<SvgAdd />}
                   onClick={async () => addMapping()}
@@ -167,7 +167,7 @@ export const Mappings = () => {
             ) : mappings.length === 0 ? (
               <EmptyMessage message="No Mappings available." />
             ) : (
-              <div className = "mappings-list">
+              <div className="gmw-mappings-list">
                 {mappings
                   .sort((a, b) => a.mappingName?.localeCompare(b.mappingName ?? "") ?? 1)
                   .map((mapping) => (

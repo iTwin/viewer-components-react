@@ -247,14 +247,14 @@ PropertyGridState
   public override render() {
     if (this.state.loadStart) {
       return (
-        <div className="gm-components-property-grid-loader">
+        <div className="gmw-components-property-grid-loader">
           <ProgressRadial indeterminate />
         </div>
       );
     }
 
     return (
-      <div className="table-box-inner">
+      <div className="gmw-table-box-inner">
         <PropertyGridEventsRelatedPropsSupplier
           isPropertySelectionEnabled={
             this.props.isPropertySelectionEnabled ?? false
@@ -271,18 +271,18 @@ PropertyGridState
           {(selectionContext) => (
             <div
               className={classnames(
-                "components-property-grid-wrapper",
+                "gmw-components-property-grid-wrapper",
                 this.props.className
               )}
               style={this.props.style}
             >
               <div
                 className={classnames(
-                  "components-property-grid",
+                  "gmw-components-property-grid",
                   "components-smallEditor-host"
                 )}
               >
-                <div className="property-categories">
+                <div className= "gmw-property-categories">
                   {this.state.categories.map(
                     (categorizedRecords: CategorizedPropertyGridRecords) => (
                       <NestedCategoryBlock
@@ -382,7 +382,7 @@ const NestedCategoryBlock = (props: NestedCategoryBlockProps) => {
         </ColumnResizingPropertyListPropsSupplier>
       ) : undefined}
       {props.categorizedRecords.children.length ? (
-        <div className="property-categories">
+        <div className="gmw-property-categories">
           {props.categorizedRecords.children.map((categorizedChildRecords) => (
             <NestedCategoryBlock
               {...props}

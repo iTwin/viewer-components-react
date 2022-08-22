@@ -12,7 +12,7 @@ interface HorizontalTileProps {
   title: string;
   actionGroup: ReactNode;
   subText?: string;
-  onClick?: ()=>void;
+  onClick?: () => void;
   onClickTitle?: () => void;
   titleTooltip?: string;
   subtextToolTip?: string;
@@ -24,10 +24,10 @@ export const HorizontalTile = ({ title, subText, onClick, onClickTitle, titleToo
   return (
     <div className={classNames("gmw-horizontal-tile-container", {"gmw-horizontal-tile-selected":selected})} onClick={onClick} data-testid="gmw-horizontal-tile">
       <div className="body">
-        <Text className={classNames("body-text", {"iui-anchor": onClickTitle})} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
-        {subText && <Text className="body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
+        <Text className={classNames("gmw-body-text", {"iui-anchor": onClickTitle})} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
+        {subText && <Text className="gmw-body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
       </div>
-      <div className="action-button" data-testid="tile-action-button">
+      <div className="gmw-action-button" data-testid="tile-action-button">
         {actionGroup}
       </div>
     </div>

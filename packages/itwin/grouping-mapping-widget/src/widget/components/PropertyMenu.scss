@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.loading-overlay {
+.gmw-loading-overlay {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,33 +13,33 @@
   height: 100%;
 }
 
-.property-menu-wrapper {
+.gmw-property-menu-wrapper {
   display: flex;
   flex-direction: column;
   height: 100%;
 
-  .information-panel {
+  .gmw-information-panel {
     max-width: 100%;
     width: 100%;
 
-    .information-body {
+    .gmw-information-body {
       textarea {
         resize: vertical;
       }
     }
   }
 
-  .property-header {
+  .gmw-property-header {
     display: flex;
     justify-content: space-between;
   }
 
-  .property-menu-container {
+  .gmw-property-menu-container {
     display: flex;
     flex-direction: column;
     overflow: auto;
     gap: $iui-baseline * 3;
-    .property-table {
+    .gmw-property-table {
       display: flex;
       flex-direction: column;
       gap: $iui-baseline;
