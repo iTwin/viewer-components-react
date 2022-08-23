@@ -12,12 +12,11 @@ import {
   TablePaginator,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { Mapping } from "@itwin/insights-client";
+import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import type { MappingType } from "./Mapping";
 import "./SelectMapping.scss";
 import { handleError } from "./utils";
-import type { IMappingClient } from "../IMappingClient";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
@@ -26,12 +25,12 @@ const fetchMappings = async (
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   getAccessToken: GetAccessTokenFn,
-  mappingClient: IMappingClient
+  mappingsClient: IMappingsClient
 ) => {
   try {
     setIsLoading(true);
     const accessToken = await getAccessToken();
-    const mappings = await mappingClient.getMappings(accessToken, iModelId);
+    const mappings = await mappingsClient.getMappings(accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);

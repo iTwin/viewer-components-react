@@ -6,10 +6,10 @@ import React, { useEffect, useState } from "react";
 import { Mappings } from "./Mapping";
 import "./GroupingMapping.scss";
 import { IModelApp } from "@itwin/core-frontend";
-import type { IMappingClient } from "../IMappingClient";
 import type { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
 import { createMappingClient, MappingClientContext } from "./context/MappingClientContext";
+import { IMappingsClient } from "@itwin/insights-client";
 
 export interface GroupingMappingProps {
   /**
@@ -24,14 +24,14 @@ export interface GroupingMappingProps {
   /**
    * A custom implementation of MappingClient.
    */
-  client?: IMappingClient;
+  client?: IMappingsClient;
 }
 
 const authorizationClientGetAccessToken = (async () => (await IModelApp.authorizationClient?.getAccessToken() ?? ""));
 
 const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProps) => {
-  const clientProp: IMappingClient | ClientPrefix = client ?? prefix;
-  const [mappingClient, setMappingClient] = useState<IMappingClient>(createMappingClient(clientProp));
+  const clientProp: IMappingsClient | ClientPrefix = client ?? prefix;
+  const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
   const [apiConfig, setApiConfig] = useState<GroupingMappingApiConfig>({
     getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
     prefix,

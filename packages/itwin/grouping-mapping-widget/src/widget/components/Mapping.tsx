@@ -28,11 +28,10 @@ import { Groupings } from "./Grouping";
 import MappingAction from "./MappingAction";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
 import { useMappingClient } from "./context/MappingClientContext";
-import type { Mapping } from "@itwin/insights-client";
+import type { Mapping, IMappingsClient } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { HorizontalTile } from "./HorizontalTile";
 import { clearAll } from "./viewerUtils";
-import type { IMappingClient } from "../IMappingClient";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
@@ -51,12 +50,12 @@ const fetchMappings = async (
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   getAccessToken: GetAccessTokenFn,
-  mappingClient: IMappingClient,
+  mappingsClient: IMappingsClient,
 ) => {
   try {
     setIsLoading(true);
     const accessToken = await getAccessToken();
-    const mappings = await mappingClient.getMappings(accessToken, iModelId);
+    const mappings = await mappingsClient.getMappings(accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -67,14 +66,14 @@ const fetchMappings = async (
 
 const toggleExtraction = async (
   getAccessToken: GetAccessTokenFn,
-  mappingClient: IMappingClient,
+  mappingsClient: IMappingsClient,
   iModelId: string,
   mapping: Mapping
 ) => {
   try {
     const newState = !mapping?.extractionEnabled;
     const accessToken = await getAccessToken();
-    await mappingClient.updateMapping(
+    await mappingsClient.updateMapping(
       accessToken,
       iModelId,
       mapping?.id ?? "",
@@ -172,16 +171,16 @@ export const Mappings = () => {
                   .sort((a, b) => a.mappingName?.localeCompare(b.mappingName ?? "") ?? 1)
                   .map((mapping) => (
                     <HorizontalTile
-                      key = {mapping.id}
-                      title = {mapping.mappingName ? mapping.mappingName: "Untitled"}
-                      subText = {mapping.description ?? ""}
-                      subtextToolTip = {mapping.description ?? ""}
+                      key={mapping.id}
+                      title={mapping.mappingName ? mapping.mappingName : "Untitled"}
+                      subText={mapping.description ?? ""}
+                      subtextToolTip={mapping.description ?? ""}
                       titleTooltip={mapping.mappingName}
                       onClickTitle={() => {
                         setSelectedMapping(mapping);
                         setMappingView(MappingView.GROUPS);
                       }}
-                      actionGroup = {
+                      actionGroup={
                         <DropdownMenu
                           menuItems={(close: () => void) => [
                             <MenuItem

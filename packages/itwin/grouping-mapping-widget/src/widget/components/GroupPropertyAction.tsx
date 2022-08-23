@@ -43,7 +43,7 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
-import type { ECProperty, GroupPropertyCreate, GroupPropertySingle } from "@itwin/insights-client";
+import { DataType, ECProperty, GroupProperty, GroupPropertyCreate, GroupPropertySingle, QuantityType } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
@@ -57,15 +57,15 @@ interface GroupPropertyActionProps {
   returnFn: (modified: boolean) => Promise<void>;
 }
 
-export const quantityTypesSelectionOptions: SelectOption<string>[] = [
-  { value: "Area", label: "Area" },
-  { value: "Distance", label: "Distance" },
-  { value: "Force", label: "Force" },
-  { value: "Mass", label: "Mass" },
-  { value: "Monetary", label: "Monetary" },
-  { value: "Time", label: "Time" },
-  { value: "Volume", label: "Volume" },
-  { value: "Undefined", label: "No Quantity Type" },
+export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
+  { value: QuantityType.Area, label: "Area" },
+  { value: QuantityType.Distance, label: "Distance" },
+  { value: QuantityType.Force, label: "Force" },
+  { value: QuantityType.Mass, label: "Mass" },
+  { value: QuantityType.Monetary, label: "Monetary" },
+  { value: QuantityType.Time, label: "Time" },
+  { value: QuantityType.Volume, label: "Volume" },
+  { value: QuantityType.Undefined, label: "No Quantity Type" },
 ];
 interface Property {
   name: string;
@@ -267,8 +267,8 @@ const GroupPropertyAction = ({
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>("");
-  const [dataType, setDataType] = useState<string | undefined>();
-  const [quantityType, setQuantityType] = useState<string>("Undefined");
+  const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
+  const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
   const [classToPropertiesMapping, setClassToPropertiesMapping] =
     useState<Map<string, Property[]>>();
   const [ecProperties, setEcProperties] = useState<ECProperty[]>(
@@ -349,7 +349,7 @@ const GroupPropertyAction = ({
       // Fetch already existing ec properties then add all classes from presentation
       if (groupPropertyId) {
         const accessToken = await getAccessToken();
-        let response: GroupPropertySingle | undefined;
+        let response: GroupProperty | undefined;
         try {
           response = await mappingClient.getGroupProperty(
             accessToken,
@@ -365,7 +365,7 @@ const GroupPropertyAction = ({
         if (!response) {
           return;
         }
-        newEcProperties = response.property?.ecProperties ?? [];
+        newEcProperties = response?.ecProperties ?? [];
 
         let keys = Array.from(classToPropertiesMapping.keys()).reverse();
         for (const ecProperty of newEcProperties) {
@@ -381,13 +381,13 @@ const GroupPropertyAction = ({
             ecClassName: key.split(":")[1],
             // Placeholders for properties
             ecPropertyName: "",
-            ecPropertyType: "",
+            ecPropertyType: DataType.Undefined,
           }))
         );
 
-        setPropertyName(response.property?.propertyName ?? "");
-        setDataType(response.property?.dataType ?? "");
-        setQuantityType(response.property?.quantityType ?? "");
+        setPropertyName(response?.propertyName ?? "");
+        setDataType(response?.dataType ?? "");
+        setQuantityType(response?.quantityType ?? "");
       } else {
         newEcProperties = Array.from(classToPropertiesMapping)
           .map(([key]) => ({
@@ -395,7 +395,7 @@ const GroupPropertyAction = ({
             ecClassName: key.split(":")[1],
             // Placeholders for properties
             ecPropertyName: "",
-            ecPropertyType: "",
+            ecPropertyType: DataType.Undefined,
           }))
           .reverse();
       }
@@ -458,10 +458,10 @@ const GroupPropertyAction = ({
       updatedEcProperties[index].ecPropertyName = property.name;
 
       // Unique types
-      let type = "";
+      let type = DataType.Undefined;
       switch (property.type) {
         case "long":
-          type = "integer";
+          type = DataType.Integer;
           break;
         default:
           type = property.type;
@@ -538,14 +538,14 @@ const GroupPropertyAction = ({
               validator.showMessageFor("propertyName");
             }}
           />
-          <LabeledSelect<string>
+          <LabeledSelect<DataType>
             label={"Data Type"}
             id='dataType'
             disabled={isLoading}
             options={[
-              { value: "Boolean", label: "Boolean" },
-              { value: "Number", label: "Number" },
-              { value: "String", label: "String" },
+              { value: DataType.Boolean, label: "Boolean" },
+              { value: DataType.Number, label: "Number" },
+              { value: DataType.String, label: "String" },
             ]}
             required
             value={dataType}
@@ -565,7 +565,7 @@ const GroupPropertyAction = ({
             onShow={() => { }}
             onHide={() => { }}
           />
-          <LabeledSelect<string>
+          <LabeledSelect<QuantityType>
             label='Quantity Type'
             disabled={isLoading}
             options={quantityTypesSelectionOptions}
@@ -616,7 +616,7 @@ const GroupPropertyAction = ({
                       updatedEcPropertyList[index] = {
                         ...updatedEcPropertyList[index],
                         ecPropertyName: "",
-                        ecPropertyType: "",
+                        ecPropertyType: DataType.Undefined,
                       };
                       setEcProperties(updatedEcPropertyList);
                     }}

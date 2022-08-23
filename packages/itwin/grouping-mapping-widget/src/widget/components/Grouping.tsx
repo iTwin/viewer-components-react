@@ -49,11 +49,10 @@ import {
   WidgetHeader,
 } from "./utils";
 import GroupAction from "./GroupAction";
-import type { Group, Mapping } from "@itwin/insights-client";
+import type { Group, IMappingsClient, Mapping } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { FeatureOverrideType } from "@itwin/core-common";
 import { HorizontalTile } from "./HorizontalTile";
-import type { IMappingClient } from "../IMappingClient";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
@@ -79,12 +78,12 @@ const fetchGroups = async (
   mappingId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   getAccessToken: GetAccessTokenFn,
-  mappingClient: IMappingClient,
+  mappingsClient: IMappingsClient,
 ): Promise<Group[] | undefined> => {
   try {
     setIsLoading(true);
     const accessToken = await getAccessToken();
-    const groups = await mappingClient.getGroups(
+    const groups = await mappingsClient.getGroups(
       accessToken,
       iModelId,
       mappingId,
@@ -395,7 +394,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           <Surface className="gmw-groups-container">
             <div className="gmw-toolbar">
               <Button
-                className = "add-load-button"
+                className="add-load-button"
                 startIcon={
                   isLoadingQuery ? (
                     <ProgressRadial size="small" indeterminate />

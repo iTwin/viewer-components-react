@@ -26,6 +26,7 @@ import "./CalculatedPropertyAction.scss";
 import type { CalculatedPropertyType } from "./CalculatedPropertyTable";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { CalculatedPropertyType as CalcPropertyType } from "@itwin/insights-client";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
@@ -49,7 +50,7 @@ const CalculatedPropertyAction = ({
   const [propertyName, setPropertyName] = useState<string>(
     property?.propertyName ?? "",
   );
-  const [type, setType] = useState<string>(property?.type ?? "");
+  const [type, setType] = useState<CalcPropertyType>(property?.type ?? CalcPropertyType.Undefined);
   const [bboxDecorator, setBboxDecorator] = useState<BboxDimensionsDecorator | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [inferredSpatialData, setInferredSpatialData] = useState<Map<BboxDimension, number> | undefined>();
@@ -183,39 +184,39 @@ const CalculatedPropertyAction = ({
               validator.showMessageFor("name");
             }}
           />
-          <LabeledSelect<string>
+          <LabeledSelect<CalcPropertyType>
             label='Quantity Type'
             required
             options={[
-              { value: "Length", label: "Length" },
-              { value: "Area", label: "Area" },
-              { value: "Volume", label: "Volume" },
+              { value: CalcPropertyType.Length, label: "Length" },
+              { value: CalcPropertyType.Area, label: "Area" },
+              { value: CalcPropertyType.Volume, label: "Volume" },
               {
-                value: "BoundingBoxLongestEdgeLength",
+                value: CalcPropertyType.BoundingBoxLongestEdgeLength,
                 label: "Longest Edge Length",
               },
               {
-                value: "BoundingBoxIntermediateEdgeLength",
+                value: CalcPropertyType.BoundingBoxIntermediateEdgeLength,
                 label: "Intermediate Edge Length",
               },
               {
-                value: "BoundingBoxShortestEdgeLength",
+                value: CalcPropertyType.BoundingBoxShortestEdgeLength,
                 label: "Shortest Edge Length",
               },
               {
-                value: "BoundingBoxDiagonalLength",
+                value: CalcPropertyType.BoundingBoxDiagonalLength,
                 label: "Diagonal Length",
               },
               {
-                value: "BoundingBoxLongestFaceDiagonalLength",
+                value: CalcPropertyType.BoundingBoxLongestFaceDiagonalLength,
                 label: "Longest Face Diagonal Length",
               },
               {
-                value: "BoundingBoxIntermediateFaceDiagonalLength",
+                value: CalcPropertyType.BoundingBoxIntermediateFaceDiagonalLength,
                 label: "Intermediate Face Diagonal Length",
               },
               {
-                value: "BoundingBoxShortestFaceDiagonalLength",
+                value: CalcPropertyType.BoundingBoxShortestFaceDiagonalLength,
                 label: "Shortest Face Diagonal Length",
               },
             ]}

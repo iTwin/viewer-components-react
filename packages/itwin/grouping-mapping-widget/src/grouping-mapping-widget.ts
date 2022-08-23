@@ -9,7 +9,6 @@ export * from "./widget/GroupingMappingWidget";
 export { createDefaultMappingClient } from "./widget/components/context/MappingClientContext";
 export { ClientPrefix } from "./widget/components/context/GroupingApiConfigContext";
 export * from "@itwin/insights-client";
-export * from "./widget/IMappingClient";
 
 /** Internal components for custom UIs */
 export { Mappings } from "./widget/components/Mapping";
