@@ -2,10 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
-
-// Widgets by default don't get horizontal scrollbars...
-/* stylelint-disable-next-line selector-class-pattern */
+@import "~@itwin/itwinui-css/scss/variables";
 
 .gmw-group-mapping-container {
   display: flex;
