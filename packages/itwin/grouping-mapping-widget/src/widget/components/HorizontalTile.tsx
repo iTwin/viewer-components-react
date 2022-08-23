@@ -23,7 +23,7 @@ export const HorizontalTile = ({ title, subText, onClick, onClickTitle, titleToo
 
   return (
     <div className={classNames("gmw-horizontal-tile-container", {"gmw-horizontal-tile-selected":selected})} onClick={onClick} data-testid="gmw-horizontal-tile">
-      <div className="body">
+      <div className="gmw-body">
         <Text className={classNames("gmw-body-text", {"iui-anchor": onClickTitle})} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
         {subText && <Text className="gmw-body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
       </div>

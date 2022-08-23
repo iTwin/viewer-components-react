@@ -623,14 +623,6 @@ const GroupPropertyAction = ({
               />
             ))}
           </div>
-          {/* {isLoading &&
-            Array(3)
-              .fill(null)
-              .map((_, index) => (
-                <Text key={index} variant='headline' isSkeleton>
-                  LOADING SKELETON
-                </Text>
-              ))} */}
         </Fieldset>
       </div>
       <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} />
