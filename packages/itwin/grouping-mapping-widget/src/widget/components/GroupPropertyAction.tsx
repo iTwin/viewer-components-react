@@ -86,12 +86,11 @@ interface PropertyMetaData {
 const convertType = (type: string) => {
   switch (type) {
     case "int":
+    case "enum":
     case "long":
       return "Integer";
-    case "enum":
-      return "String";
     default:
-      // Capitilize first letter
+      // Capitilize first letter to match backend capitalization
       return `${type[0].toUpperCase()}${type.slice(1).toLowerCase()}`;
   }
 };
@@ -109,7 +108,17 @@ const extractPrimitive = (
 
   propertyTraversal.push(propertyName);
 
-  return { label, schema: "*", className: "*", propertyTraversal, type, primitiveNavigationClass, parentPropertyClassName, key: propertyField.name, categoryLabel: propertyField.category.label };
+  return {
+    label,
+    schema: "*",
+    className: "*",
+    propertyTraversal,
+    type,
+    primitiveNavigationClass,
+    parentPropertyClassName,
+    key: propertyField.name,
+    categoryLabel: propertyField.category.label,
+  };
 };
 
 const extractPrimitiveStructProperties = (
@@ -126,7 +135,18 @@ const extractPrimitiveStructProperties = (
       const label = member.label;
       const type = convertType(member.type.typeName);
 
-      ecPropertyMetaDetaList.push({ label, schema: "*", className: "*", propertyTraversal: [...propertyTraversal, propertyName], type, primitiveNavigationClass: "", parentPropertyClassName, key: member.name, categoryLabel});
+      ecPropertyMetaDetaList.push({
+        label,
+        schema: "*",
+        className: "*",
+        propertyTraversal: [...propertyTraversal, propertyName],
+        type,
+        primitiveNavigationClass: "",
+        parentPropertyClassName,
+        key: member.name,
+        categoryLabel,
+      });
+
     } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
       ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
         propertyTraversal,
@@ -135,6 +155,7 @@ const extractPrimitiveStructProperties = (
       ));
     }
   }
+
   return ecPropertyMetaDetaList;
 };
 
@@ -273,13 +294,14 @@ const convertPresentationFields = (propertyFields: Field[]) => {
   return ecPropertyMetaDetaList;
 };
 
-const convertECProperties = (property: PropertyMetaData): Array<ECProperty> => {
+const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> => {
   const ecProperty: ECProperty = {
     ecSchemaName: property.schema,
     ecClassName: property.className,
     ecPropertyType: property.type,
   };
   switch (property.primitiveNavigationClass) {
+    // Hardcode Models navigation path and label behavior
     case "BisCore:ModelContainsElements": {
       return [
         {
@@ -300,6 +322,7 @@ const convertECProperties = (property: PropertyMetaData): Array<ECProperty> => {
         },
       ];
     }
+    // Hardcode Category navigation path and label behavior
     case "BisCore:GeometricElement3dIsInCategory":
       return [
         {
@@ -311,6 +334,7 @@ const convertECProperties = (property: PropertyMetaData): Array<ECProperty> => {
           ecPropertyName: [...property.propertyTraversal, "CodeValue"].join("."),
         },
       ];
+    // Hardcode Material path and label behavior
     case "BisCore:PhysicalElementIsOfPhysicalMaterial": {
       return [
         {
@@ -334,14 +358,40 @@ const convertECProperties = (property: PropertyMetaData): Array<ECProperty> => {
   }
 };
 
-const findPropertyNaive = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[])=>{
+const findProperty = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[])=>{
   for(const property of propertiesMetaData ){
-    const convertedECProperty = convertECProperties(property);
+    const convertedECProperty = convertToECProperties(property);
     if(deepEqual(convertedECProperty, ecProperties)){
       return property;
     }
   }
   return undefined;
+};
+
+const fetchPresentationDescriptor = async (iModelConnection: IModelConnection, keySet: KeySet) => {
+  const ruleSet: Ruleset = {
+    id: "gmw-element-properties",
+    rules: [
+      {
+        ruleType: RuleTypes.Content,
+        specifications: [
+          {
+            specType: ContentSpecificationTypes.SelectedNodeInstances,
+          },
+        ],
+      }],
+  };
+  const requestOptions: ContentDescriptorRequestOptions<IModelConnection, KeySet, RulesetVariable> = {
+    imodel: iModelConnection,
+    keys: keySet,
+    rulesetOrId: ruleSet,
+    displayType: DefaultContentDisplayTypes.PropertyPane,
+  };
+  const descriptor = await Presentation.presentation.getContentDescriptor(
+    requestOptions
+  );
+
+  return descriptor;
 };
 
 const GroupPropertyAction = ({
@@ -353,7 +403,7 @@ const GroupPropertyAction = ({
   keySet,
   returnFn,
 }: GroupPropertyActionProps) => {
-  const iModelConnection = useActiveIModelConnection() as IModelConnection;
+  const iModelConnection = useActiveIModelConnection();
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>("");
@@ -383,29 +433,12 @@ const GroupPropertyAction = ({
   useEffect(() => {
     const generatedProperties = async () => {
       setIsLoading(true);
-      const ruleSet: Ruleset = {
-        id: "element-properties",
-        rules: [
-          {
-            ruleType: RuleTypes.Content,
-            specifications: [
-              {
-                specType: ContentSpecificationTypes.SelectedNodeInstances,
-              },
-            ],
-          }],
-      };
-      const requestOptions: ContentDescriptorRequestOptions<IModelConnection, KeySet, RulesetVariable> = {
-        imodel: iModelConnection,
-        keys: keySet,
-        rulesetOrId: ruleSet,
-        displayType: DefaultContentDisplayTypes.PropertyPane,
-      };
-      const descriptor = await Presentation.presentation.getContentDescriptor(
-        requestOptions
-      );
 
-      // Only primitives and structs for now
+      if(!iModelConnection) return;
+
+      const descriptor = await fetchPresentationDescriptor(iModelConnection, keySet);
+
+      // Only allow primitives and structs
       const propertyFields =
         descriptor?.fields.filter(
           (field) =>
@@ -432,7 +465,7 @@ const GroupPropertyAction = ({
           setPropertyName(response.property?.propertyName ?? "");
           setDataType(response.property?.dataType ?? "");
           setQuantityType(response.property?.quantityType ?? "");
-          const property = findPropertyNaive(response.property?.ecProperties??[], propertiesMetaData);
+          const property = findProperty(response.property?.ecProperties??[], propertiesMetaData);
           setSelectedProperty(property);
         } catch (error: any) {
           handleError(error.status);
@@ -445,9 +478,9 @@ const GroupPropertyAction = ({
   }, [getAccessToken, mappingClient, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
 
   const onSave = async () => {
-
     if (!validator.allValid()) {
       showValidationMessage(true);
+      return;
     }
     try {
       setIsLoading(true);
@@ -456,7 +489,7 @@ const GroupPropertyAction = ({
         propertyName,
         dataType,
         quantityType,
-        ecProperties: selectedProperty && convertECProperties(selectedProperty),
+        ecProperties: selectedProperty && convertToECProperties(selectedProperty),
       };
       groupPropertyId
         ? await mappingClient.updateGroupProperty(
@@ -482,6 +515,7 @@ const GroupPropertyAction = ({
   };
 
   const startSearch = useCallback(() => {
+    if(!searchInput) return;
     setActiveSearchInput(searchInput);
     setSearched(true);
   }, [searchInput]);
@@ -567,15 +601,15 @@ const GroupPropertyAction = ({
             onShow={() => { }}
             onHide={() => { }}
           />
-
         </Fieldset>
-        {groupPropertyId && !isLoading  && !selectedProperty && <Alert type="warning">Property could not be found. Warning: Overwriting will occur.</Alert>}
+        {groupPropertyId && !isLoading  && !selectedProperty && <Alert type="warning">Warning: Property could not be found. Overwriting will occur if a selection is made.</Alert>}
         <Fieldset className='gmw-property-selection-container' legend="Properties">
           <Label as="span">Selected Property</Label>
           <HorizontalTile
             title={selectedProperty?.label ?? "No Selection"}
-            subText={selectedProperty?.parentPropertyClassName ?? "No Type"}
-            actionGroup={"Category"}
+            titleTooltip={`Parent: ${selectedProperty?.parentPropertyClassName}`}
+            subText={selectedProperty?.type ?? "No Type"}
+            actionGroup={selectedProperty?.categoryLabel ?? "Category"}
           />
           <div className="gmw-available-properties">
             <Label as="span">Available Properties</Label>
@@ -625,7 +659,7 @@ const GroupPropertyAction = ({
           </div>
         </Fieldset>
       </div>
-      <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} />
+      <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} isSavingDisabled={!selectedProperty}/>
     </>
   );
 };
