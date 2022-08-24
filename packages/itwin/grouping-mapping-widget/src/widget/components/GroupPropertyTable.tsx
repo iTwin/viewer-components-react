@@ -5,7 +5,6 @@
 import {
   SvgAdd,
   SvgDelete,
-  SvgEdit,
   SvgMore,
 } from "@itwin/itwinui-icons-react";
 import {
@@ -82,13 +81,6 @@ const GroupPropertyTable = ({
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
-                    <MenuItem
-                      key={0}
-                      onClick={() => onGroupPropertyModify(value)}
-                      icon={<SvgEdit />}
-                    >
-                      Modify
-                    </MenuItem>,
                     <MenuItem
                       key={1}
                       onClick={() => {

@@ -25,17 +25,34 @@
     min-height: 0;
     padding: $iui-baseline $iui-m;
     min-width: 0;
-    .gmw-properties-list {
+
+    .gmw-selected-properties {
       display: flex;
       flex-direction: column;
-      gap: 7.5px;
-      overflow-y: overlay;
+      gap: $iui-baseline;
+      flex: 1 1;
+      min-height: 0;
     }
+
     .gmw-available-properties {
       display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: $iui-baseline;
+      flex: 1 1;
+      min-height: 0;
+      .gmw-available-properties-header {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
     }
   }
+}
+
+.gmw-properties-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7.5px;
+  flex: 1;
+  overflow-y: overlay;
 }

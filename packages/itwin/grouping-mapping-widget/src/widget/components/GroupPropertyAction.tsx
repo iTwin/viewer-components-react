@@ -23,11 +23,10 @@ import {
 import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { SelectOption } from "@itwin/itwinui-react";
-import { Alert } from "@itwin/itwinui-react";
 import { IconButton } from "@itwin/itwinui-react";
-import { Label } from "@itwin/itwinui-react";
 import {
   Fieldset,
+  Label,
   LabeledInput,
   LabeledSelect,
   Small,
@@ -40,9 +39,8 @@ import "./GroupPropertyAction.scss";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { HorizontalTile } from "./HorizontalTile";
-import type { ECProperty, GroupPropertyCreate, GroupPropertySingle } from "@itwin/insights-client";
+import type { ECProperty, GroupPropertyCreate } from "@itwin/insights-client";
 import { SvgClose, SvgSearch } from "@itwin/itwinui-icons-react";
-import { deepEqual } from "fast-equals";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -358,15 +356,15 @@ const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> =>
   }
 };
 
-const findProperty = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[])=>{
-  for(const property of propertiesMetaData ){
-    const convertedECProperty = convertToECProperties(property);
-    if(deepEqual(convertedECProperty, ecProperties)){
-      return property;
-    }
-  }
-  return undefined;
-};
+// const findProperty = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[])=>{
+//   for(const property of propertiesMetaData ){
+//     const convertedECProperty = convertToECProperties(property);
+//     if(deepEqual(convertedECProperty, ecProperties)){
+//       return property;
+//     }
+//   }
+//   return undefined;
+// };
 
 const fetchPresentationDescriptor = async (iModelConnection: IModelConnection, keySet: KeySet) => {
   const ruleSet: Ruleset = {
@@ -409,7 +407,7 @@ const GroupPropertyAction = ({
   const [propertyName, setPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<string | undefined>();
   const [quantityType, setQuantityType] = useState<string>("Undefined");
-  const [selectedProperty, setSelectedProperty] = useState<PropertyMetaData>();
+  const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
   const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>(
     []
   );
@@ -450,27 +448,27 @@ const GroupPropertyAction = ({
 
       setPropertiesMetaData(propertiesMetaData);
 
-      if (groupPropertyId) {
-        const accessToken = await getAccessToken();
-        let response: GroupPropertySingle | undefined;
-        try {
-          response = await mappingClient.getGroupProperty(
-            accessToken,
-            iModelId,
-            mappingId,
-            groupId,
-            groupPropertyId
-          );
+      // if (groupPropertyId) {
+      //   const accessToken = await getAccessToken();
+      //   let response: GroupPropertySingle | undefined;
+      //   try {
+      //     response = await mappingClient.getGroupProperty(
+      //       accessToken,
+      //       iModelId,
+      //       mappingId,
+      //       groupId,
+      //       groupPropertyId
+      //     );
 
-          setPropertyName(response.property?.propertyName ?? "");
-          setDataType(response.property?.dataType ?? "");
-          setQuantityType(response.property?.quantityType ?? "");
-          const property = findProperty(response.property?.ecProperties??[], propertiesMetaData);
-          setSelectedProperty(property);
-        } catch (error: any) {
-          handleError(error.status);
-        }
-      }
+      //     setPropertyName(response.property?.propertyName ?? "");
+      //     setDataType(response.property?.dataType ?? "");
+      //     setQuantityType(response.property?.quantityType ?? "");
+      //     const property = findProperty(response.property?.ecProperties??[], propertiesMetaData);
+      //     setSelectedProperties(property);
+      //   } catch (error: any) {
+      //     handleError(error.status);
+      //   }
+      // }
 
       setIsLoading(false);
     };
@@ -489,7 +487,7 @@ const GroupPropertyAction = ({
         propertyName,
         dataType,
         quantityType,
-        ecProperties: selectedProperty && convertToECProperties(selectedProperty),
+        ecProperties: selectedProperties.map((p)=>convertToECProperties(p)).flat(),
       };
       groupPropertyId
         ? await mappingClient.updateGroupProperty(
@@ -602,64 +600,82 @@ const GroupPropertyAction = ({
             onHide={() => { }}
           />
         </Fieldset>
-        {groupPropertyId && !isLoading  && !selectedProperty && <Alert type="warning">Warning: Property could not be found. Overwriting will occur if a selection is made.</Alert>}
         <Fieldset className='gmw-property-selection-container' legend="Properties">
-          <Label as="span">Selected Property</Label>
-          <HorizontalTile
-            title={selectedProperty?.label ?? "No Selection"}
-            titleTooltip={`Parent: ${selectedProperty?.parentPropertyClassName}`}
-            subText={selectedProperty?.type ?? "No Type"}
-            actionGroup={selectedProperty?.categoryLabel ?? "Category"}
-          />
-          <div className="gmw-available-properties">
-            <Label as="span">Available Properties</Label>
-            <LabeledInput
-              displayStyle="inline"
-              iconDisplayStyle="inline"
-              className="search-input"
-              value={searchInput}
-              size="small"
-              placeholder="Search...."
-              onChange={(event) => {
-                const {
-                  target: { value },
-                } = event;
-                setSearchInput(value);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  startSearch();
-                }
-              }}
-              svgIcon={
-                searched ? (
-                  <IconButton onClick={clearSearch} styleType="borderless">
-                    <SvgClose />
-                  </IconButton>
-                ) : (
-                  <IconButton onClick={startSearch} styleType="borderless">
-                    <SvgSearch />
-                  </IconButton>
+          <div className="gmw-selected-properties">
+            <Label as="span">Selected Properties</Label>
+            <div className="gmw-properties-list">
+              {
+                selectedProperties.map((selectedProperty)=>
+                  <HorizontalTile
+                    key={selectedProperty.key}
+                    title={selectedProperty.label}
+                    titleTooltip={`Parent: ${selectedProperty.parentPropertyClassName}`}
+                    subText={selectedProperty.type}
+                    actionGroup={selectedProperty.categoryLabel}
+                  />
                 )
               }
-            />
+            </div>
           </div>
-          <div className="gmw-properties-list">
-            {filteredProperties.map((property) => (
-              <HorizontalTile
-                key={property.key}
-                title={property.label}
-                titleTooltip={`Parent: ${property.parentPropertyClassName}`}
-                subText={`${property.type}`}
-                actionGroup={`${property.categoryLabel}`}
-                selected={selectedProperty?.key === property.key}
-                onClick={() => setSelectedProperty(property)}
+          <div className="gmw-available-properties">
+            <div className="gmw-available-properties-header">
+              <Label as="span">Available Properties</Label>
+              <LabeledInput
+                displayStyle="inline"
+                iconDisplayStyle="inline"
+                className="search-input"
+                value={searchInput}
+                size="small"
+                placeholder="Search...."
+                onChange={(event) => {
+                  const {
+                    target: { value },
+                  } = event;
+                  setSearchInput(value);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    startSearch();
+                  }
+                }}
+                svgIcon={
+                  searched ? (
+                    <IconButton onClick={clearSearch} styleType="borderless">
+                      <SvgClose />
+                    </IconButton>
+                  ) : (
+                    <IconButton onClick={startSearch} styleType="borderless">
+                      <SvgSearch />
+                    </IconButton>
+                  )
+                }
               />
-            ))}
+            </div>
+            <div className="gmw-properties-list">
+              {filteredProperties.map((property) => (
+                <HorizontalTile
+                  key={property.key}
+                  title={property.label}
+                  titleTooltip={`Parent: ${property.parentPropertyClassName}`}
+                  subText={`${property.type}`}
+                  actionGroup={`${property.categoryLabel}`}
+                  selected={selectedProperties.some((p)=> property.key===p.key)}
+                  onClick={() =>
+                    setSelectedProperties(
+                      selectedProperties.some((p) => property.key === p.key)
+                        ? selectedProperties.filter(
+                          (p) => property.key !== p.key
+                        )
+                        : [...selectedProperties, property]
+                    )
+                  }
+                />
+              ))}
+            </div>
           </div>
         </Fieldset>
       </div>
-      <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} isSavingDisabled={!selectedProperty}/>
+      <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} isSavingDisabled={!selectedProperties}/>
     </>
   );
 };
