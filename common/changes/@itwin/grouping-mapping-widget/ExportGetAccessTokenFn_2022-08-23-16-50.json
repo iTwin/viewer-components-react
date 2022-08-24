@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "Exporting GetAccessTokenFn type from GroupingApiConfigContext for consuming applications to use when setting up the GroupingMappingProvider",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}
