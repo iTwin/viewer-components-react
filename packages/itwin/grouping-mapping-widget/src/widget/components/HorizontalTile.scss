@@ -16,6 +16,7 @@
 
     .gmw-body-container {
       display: flex;
+      min-width: 0;
       .gmw-drag-icon {
         @include iui-icons-large();
         justify-content: center;
