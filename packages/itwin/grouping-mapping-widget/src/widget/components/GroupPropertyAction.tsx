@@ -40,7 +40,7 @@ import "./GroupPropertyAction.scss";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { HorizontalTile } from "./HorizontalTile";
-import type { ECProperty, GroupPropertyCreate } from "@itwin/insights-client";
+import type { ECProperty, GroupPropertyCreate, GroupPropertySingle } from "@itwin/insights-client";
 import { SvgClose, SvgDragHandleVertical, SvgRemove, SvgSearch } from "@itwin/itwinui-icons-react";
 import type {
   DragEndEvent,
@@ -62,6 +62,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import SortableHorizontalTile from "./SortableHorizontalTile";
+import { deepEqual } from "fast-equals";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -377,15 +378,29 @@ const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> =>
   }
 };
 
-// const findProperty = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[])=>{
-//   for(const property of propertiesMetaData ){
-//     const convertedECProperty = convertToECProperties(property);
-//     if(deepEqual(convertedECProperty, ecProperties)){
-//       return property;
-//     }
-//   }
-//   return undefined;
-// };
+const findProperties = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[])=>{
+  let ecPropertiesCopy = [...ecProperties];
+  const propertiesMetaDataResult: PropertyMetaData[] = new Array<PropertyMetaData>();
+  let notFound=false;
+  while(ecPropertiesCopy.length!==0){
+    for(let i = 0; i<propertiesMetaData.length; i++ ){
+      const generatedProperty = convertToECProperties(propertiesMetaData[i]);
+      const slicedEcProperties = ecPropertiesCopy.slice(0,generatedProperty.length);
+      if(deepEqual(generatedProperty, slicedEcProperties)){
+        propertiesMetaDataResult.push(propertiesMetaData[i]);
+        ecPropertiesCopy = ecPropertiesCopy.slice(generatedProperty.length);
+        break;
+      }
+      if(i===propertiesMetaData.length-1){
+        notFound = true;
+      }
+    }
+    if(notFound)
+      break;
+  }
+
+  return notFound ? []: propertiesMetaDataResult;
+};
 
 const fetchPresentationDescriptor = async (iModelConnection: IModelConnection, keySet: KeySet) => {
   const ruleSet: Ruleset = {
@@ -497,27 +512,27 @@ const GroupPropertyAction = ({
 
       setPropertiesMetaData(propertiesMetaData);
 
-      // if (groupPropertyId) {
-      //   const accessToken = await getAccessToken();
-      //   let response: GroupPropertySingle | undefined;
-      //   try {
-      //     response = await mappingClient.getGroupProperty(
-      //       accessToken,
-      //       iModelId,
-      //       mappingId,
-      //       groupId,
-      //       groupPropertyId
-      //     );
+      if (groupPropertyId) {
+        const accessToken = await getAccessToken();
+        let response: GroupPropertySingle | undefined;
+        try {
+          response = await mappingClient.getGroupProperty(
+            accessToken,
+            iModelId,
+            mappingId,
+            groupId,
+            groupPropertyId
+          );
 
-      //     setPropertyName(response.property?.propertyName ?? "");
-      //     setDataType(response.property?.dataType ?? "");
-      //     setQuantityType(response.property?.quantityType ?? "");
-      //     const property = findProperty(response.property?.ecProperties??[], propertiesMetaData);
-      //     setSelectedProperties(property);
-      //   } catch (error: any) {
-      //     handleError(error.status);
-      //   }
-      // }
+          setPropertyName(response.property?.propertyName ?? "");
+          setDataType(response.property?.dataType ?? "");
+          setQuantityType(response.property?.quantityType ?? "");
+          const properties = findProperties(response.property?.ecProperties??[], propertiesMetaData);
+          setSelectedProperties(properties);
+        } catch (error: any) {
+          handleError(error.status);
+        }
+      }
 
       setIsLoading(false);
     };

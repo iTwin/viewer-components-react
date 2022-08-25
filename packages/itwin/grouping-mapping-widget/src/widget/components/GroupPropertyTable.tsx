@@ -31,6 +31,7 @@ interface GroupPropertyTableProps {
   groupId: string;
   setSelectedGroupProperty: React.Dispatch<React.SetStateAction<CreateTypeFromInterface<GroupPropertyType> | undefined>>;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
+  onGroupPropertyModify: (value: CellProps<GroupPropertyType>) => void;
   isLoadingGroupProperties: boolean;
   groupProperties: GroupPropertyType[];
   refreshGroupProperties: () => Promise<void>;
@@ -42,6 +43,7 @@ const GroupPropertyTable = ({
   mappingId,
   groupId,
   selectedGroupProperty,
+  onGroupPropertyModify,
   setSelectedGroupProperty,
   isLoadingGroupProperties,
   groupProperties,
@@ -62,6 +64,14 @@ const GroupPropertyTable = ({
             id: "propertyName",
             Header: "Property",
             accessor: "propertyName",
+            Cell: (value: CellProps<GroupPropertyType>) => (
+              <div
+                className='iui-anchor'
+                onClick={() => onGroupPropertyModify(value)}
+              >
+                {value.row.original.propertyName}
+              </div>
+            ),
           },
           {
             id: "dropdown",
@@ -99,7 +109,7 @@ const GroupPropertyTable = ({
         ],
       },
     ],
-    [setSelectedGroupProperty],
+    [onGroupPropertyModify, setSelectedGroupProperty],
   );
 
   return (
