@@ -47,5 +47,9 @@
     align-self: center;
     min-width: $iui-l;
     cursor: pointer;
+
+    .gmw-color-box {
+      border: 2px solid black;
+    }
   }
 }
