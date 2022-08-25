@@ -3,13 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Guid } from "@itwin/core-bentley";
-import { Template, Label, Material } from "./Template"
+import { Configuration, Label, Material } from "./Template"
 
 // For now only one template for each report.
 
 export default class TemplateClient {
-  public getTemplates(): Template[] {
-    var templates: Template[] = [];
+  public getTemplates(): Configuration[] {
+    var templates: Configuration[] = [];
     for (var i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith("sel.")) {
@@ -23,7 +23,7 @@ export default class TemplateClient {
     return templates;
   }
 
-  public createUpdateTemplate(template: Template): string {
+  public createUpdateTemplate(template: Configuration): string {
     if (!template.id)
       template.id = Guid.createValue()
 

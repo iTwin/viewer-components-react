@@ -2,9 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-export interface Template {
-  templateName: string;
-  templateDescription: string;
+export interface Configuration {
+  displayName: string;
+  description: string;
   id?: string;
   reportId: string;
   labels: Label[];
@@ -12,12 +12,12 @@ export interface Template {
 
 export interface Label {
   reportTable: string;
-  customName: string;
-  itemName: string;
-  itemQuantity: string;
+  name: string;
+  elementNameColumn: string;
+  elementQuantityColumn: string;
   materials: Material[];
 }
 
 export interface Material {
-  name: string | undefined;
+  nameColumn: string | undefined;
 }

@@ -14,7 +14,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { Button, toaster, MenuItem, IconButton } from "@itwin/itwinui-react";
 import { WidgetHeader } from "./utils";
 import "./LabelAction.scss";
-import { Template, Label, Material } from "./Template"
+import { Configuration, Label, Material } from "./Template"
 import { ReportingClient } from "@itwin/insights-client";
 import { DropdownTile } from "./DropdrownTile";
 import DeleteModal from "./DeleteModal";
@@ -22,10 +22,10 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import React from "react";
 
 interface LabelActionProps {
-  template: Template;
+  template: Configuration;
   label: Label | undefined;
   goBack: () => Promise<void>;
-  setTemplate: (sel: Template) => void;
+  setTemplate: (sel: Configuration) => void;
 }
 
 async function fetchMetadata(token: string, reportingClientApi: ReportingClient, reportId: string) {
@@ -34,13 +34,13 @@ async function fetchMetadata(token: string, reportingClientApi: ReportingClient,
 
 const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps) => {
   const [reportTable, setReportTable] = useState<string>(label?.reportTable ?? "");
-  const [name, setName] = useState<string>(label?.customName ?? "");
-  const [itemName, setItemName] = useState<string>(label?.itemName ?? "UserLabel");
-  const [itemQuantity, setItemQuantity] = useState<string>(label?.itemQuantity ?? "");
+  const [name, setName] = useState<string>(label?.name ?? "");
+  const [itemName, setItemName] = useState<string>(label?.elementNameColumn ?? "UserLabel");
+  const [itemQuantity, setItemQuantity] = useState<string>(label?.elementQuantityColumn ?? "");
   const [selectedMaterial, setSelectedMaterial] = useState<Material>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   // creating a copy of an array, so original isn't modified
-  const [materials, setMaterials] = useState<Material[]>(label?.materials.map(x => { return { name: x.name } }) ?? []);
+  const [materials, setMaterials] = useState<Material[]>(label?.materials.map(x => { return { nameColumn: x.nameColumn } }) ?? []);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
   const [availableLabels, setLabels] = useState<string[]>();
@@ -51,9 +51,9 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   const onSave = async () => {
     const selectedLabel: Label = {
       reportTable: reportTable,
-      customName: name,
-      itemName: itemName,
-      itemQuantity: itemQuantity,
+      name: name,
+      elementNameColumn: itemName,
+      elementQuantityColumn: itemQuantity,
       materials: materials,
     }
 
@@ -141,7 +141,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
 
   const getStringColumnOptions = ((material: string | undefined) => {
     const options = StringColumnOptions
-      .filter(x => materials.filter(p => p.name === x.label).length === 0)
+      .filter(x => materials.filter(p => p.nameColumn === x.label).length === 0)
       .filter(x => x.label !== itemName);
 
 
@@ -200,13 +200,13 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   }, []);
 
   const addPair = (() => {
-    if (materials.filter(x => x.name === undefined).length === 0) {
+    if (materials.filter(x => x.nameColumn === undefined).length === 0) {
 
       const pair: Material = {
-        name: undefined,
+        nameColumn: undefined,
       };
 
-      const newMaterials = materials.map((x) => { return { name: x.name } });
+      const newMaterials = materials.map((x) => { return { nameColumn: x.nameColumn } });
 
       newMaterials.push(pair);
       setMaterials(newMaterials);
@@ -217,10 +217,10 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     setIsLoading(true);
     if (label) {
       setReportTable(label.reportTable);
-      setName(label.customName);
-      setItemName(label.itemName);
-      setItemQuantity(label.itemQuantity);
-      setMaterials(label.materials.map(x => { return { name: x.name } })); // creating a copy of array, so original (in the parent) isn't modified
+      setName(label.name);
+      setItemName(label.elementNameColumn);
+      setItemQuantity(label.elementQuantityColumn);
+      setMaterials(label.materials.map(x => { return { nameColumn: x.nameColumn } })); // creating a copy of array, so original (in the parent) isn't modified
       updateColumns(label.reportTable);
     }
     else {
@@ -277,7 +277,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   return (
     <>
       <WidgetHeader
-        title={label?.customName ?? "Label"}
+        title={label?.name ?? "Label"}
         returnFn={goBack}
         disabled={isLoading}
       />
@@ -394,14 +394,14 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
             {materials.map((material, index) => (
               <DropdownTile
                 key={index}
-                stringColumnOptions={getStringColumnOptions(material.name)}
-                materialValue={material.name ?? ""}
+                stringColumnOptions={getStringColumnOptions(material.nameColumn)}
+                materialValue={material.nameColumn ?? ""}
                 validator={validator}
                 onMaterialChange={async (value) => {
-                  const newPairs = materials.map(x => { return { name: x.name } });
+                  const newPairs = materials.map(x => { return { nameColumn: x.nameColumn } });
                   newPairs.forEach(p => {
-                    if (p.name === material.name)
-                      p.name = value;
+                    if (p.nameColumn === material.nameColumn)
+                      p.nameColumn = value;
                   });
                   setMaterials(newPairs);
                 }}
@@ -450,11 +450,11 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       </div>
 
       <DeleteModal
-        entityName={selectedMaterial?.name ?? ""}
+        entityName={selectedMaterial?.nameColumn ?? ""}
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
-          setMaterials(materials.filter(x => x.name !== selectedMaterial?.name));
+          setMaterials(materials.filter(x => x.nameColumn !== selectedMaterial?.nameColumn));
         }}
         refresh={refresh}
       />

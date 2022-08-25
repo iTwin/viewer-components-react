@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useMemo, useState } from "react";
 import DeleteModal from "./DeleteModal";
-import { Button, Table, DropdownMenu, MenuItem, IconButton, Surface } from "@itwin/itwinui-react";
+import { Button, Table, DropdownMenu, MenuItem, IconButton, Surface, toaster } from "@itwin/itwinui-react";
 import {
   SvgDelete,
   SvgMore,
@@ -13,11 +13,13 @@ import {
 import { WidgetHeader, LoadingOverlay, EmptyMessage } from "./utils";
 import "./Templates.scss";
 import TemplateClient from "./TemplateClient";
-import { Template } from "./Template"
+import { Configuration } from "./Template"
 import TemplateMenu from "./TemplateMenu";
 import { SearchBar } from "./SearchBar";
 import { HorizontalTile } from "./HorizontalTile";
 import React from "react";
+import { EC3ConfigurationClient } from "./api/EC3ConfigurationClient";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 
 
 enum TemplateView {
@@ -27,35 +29,40 @@ enum TemplateView {
 }
 
 const Templates = () => {
-
+  const iTwinId = useActiveIModelConnection()?.iTwinId;
   const templateClient = useMemo(() => { return new TemplateClient() }, []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [templates, setTemplates] = useState<Template[]>([]);
+  const [templates, setTemplates] = useState<Configuration[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template>();
+  const [selectedTemplate, setSelectedTemplate] = useState<Configuration>();
   const [searchValue, setSearchValue] = useState<string>("");
+  const configClient = new EC3ConfigurationClient();
   const [templateView, setTemplateView] = useState<TemplateView>(
     TemplateView.TEMPLATES
   );
 
-  const load = useCallback(() => {
+  const load = useCallback(async () => {
     setIsLoading(true);
-    const templates = templateClient.getTemplates();
-    setTemplates(templates);
+    if (iTwinId) {
+      const templates = await configClient.getConfigurations(iTwinId);
+      setTemplates(templates.configurations);
+    }
+    else {
+      toaster.negative("Invalid iTwinId");
+    }
+
     setIsLoading(false);
   }, [templateClient])
-
 
   const refresh = useCallback(async () => {
     setTemplateView(TemplateView.TEMPLATES);
     load();
   }, [load]);
 
-
   const filteredTemplates = useMemo(
     () =>
       templates.filter((x) =>
-        [x.templateName, x.templateDescription]
+        [x.displayName, x.description]
           .join(" ")
           .toLowerCase()
           .includes(searchValue.toLowerCase())
@@ -121,10 +128,10 @@ const Templates = () => {
                 {filteredTemplates.map((template) => (
                   <HorizontalTile
                     key={template.id}
-                    title={template.templateName}
-                    subText={template.templateDescription}
-                    subtextToolTip={template.templateDescription}
-                    titleTooltip={template.templateName}
+                    title={template.displayName}
+                    subText={template.description}
+                    subtextToolTip={template.description}
+                    titleTooltip={template.displayName}
                     onClickTitle={() => {
                       setSelectedTemplate(template);
                       setTemplateView(TemplateView.MENU);
@@ -161,14 +168,12 @@ const Templates = () => {
             )}
           </Surface>
           <DeleteModal
-            entityName={selectedTemplate?.templateName ?? ""}
+            entityName={selectedTemplate?.displayName ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
-            onDelete={() => {
+            onDelete={async () => {
               if (selectedTemplate && selectedTemplate.id) {
-                templateClient.deleteTemplate(
-                  selectedTemplate.id
-                );
+                await configClient.deleteConfiguration(selectedTemplate.id);
               }
             }}
             refresh={refresh}

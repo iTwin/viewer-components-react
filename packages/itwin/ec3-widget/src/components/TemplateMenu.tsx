@@ -12,12 +12,13 @@ import { WidgetHeader, handleSelectChange } from "./utils";
 import ExportModal from "./ExportModal";
 import TemplateClient from "./TemplateClient";
 import LabelAction from "./LabelAction";
-import { Template, Label } from "./Template"
+import { Configuration, Label } from "./Template"
 import { LabelTile } from "./LabelTile";
 import DeleteModal from "./DeleteModal";
 import { handleInputChange } from "./utils";
 import TemplateActionPanel from "./TemplateActionPanel";
 import ReportConfirmModal from "./ReportConfirmModal";
+import { EC3ConfigurationClient } from "./api/EC3ConfigurationClient";
 
 import {
   SvgDelete,
@@ -36,7 +37,7 @@ import "./TemplateMenu.scss";
 import React from "react";
 
 interface TemplateProps {
-  template?: Template;
+  template?: Configuration;
   goBack: () => Promise<void>;
 }
 
@@ -57,10 +58,11 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   const [selectedReport, setSelectedReport] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
   const [availableReports, setReports] = useState<Report[]>([]);
-  const [childTemplate, setChildTemplate] = useState<Template>(template ?? {
+  const configurationClient = new EC3ConfigurationClient();
+  const [childTemplate, setChildTemplate] = useState<Configuration>({
     reportId: "",
-    templateDescription: "",
-    templateName: "",
+    description: "",
+    displayName: "",
     labels: []
   });
 
@@ -69,13 +71,33 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   );
 
   const onSave = async () => {
-    templateClient.createUpdateTemplate(childTemplate);
-    goBack();
+    var response;
+    if (childTemplate.id)
+      response = await configurationClient.updateConfiguration(childTemplate);
+    else
+      response = await configurationClient.createConfiguration(childTemplate);
+
+    if (!response.ok) {
+      toaster.negative("Saving failed");
+      console.log(response.statusText);
+    }
+    else {
+      toaster.positive("Saved successfully!");
+      goBack();
+    }
   };
 
   useEffect(() => {
     setIsLoading(true);
+
     const fetchReports = async () => {
+      if (template) {
+        const config = await configurationClient.getConfiguration(template.id!);
+        const configuration = config.configuration;
+        const reportId = configuration._links.report.href.split("/reports/")[1];
+        configuration.reportId = reportId;
+        setChildTemplate(configuration);
+      }
 
       if (!IModelApp.authorizationClient)
         throw new Error(
@@ -145,7 +167,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
       return (
         <>
           <WidgetHeader
-            title={childTemplate.templateName === "" ? "Create template" : childTemplate.templateName}
+            title={childTemplate.displayName === "" ? "Create template" : childTemplate.displayName}
             disabled={isLoading}
             returnFn={async () => {
               await goBack();
@@ -158,9 +180,9 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
               </Small>
               <LabeledInput
                 id='templateName'
-                name='templateName'
+                name='displayName'
                 label='Template name'
-                value={childTemplate.templateName}
+                value={childTemplate.displayName}
                 required
                 onChange={(event) => {
                   handleInputChange(event, childTemplate, setChildTemplate);
@@ -169,9 +191,9 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
               />
               <LabeledInput
                 id='templateDescription'
-                name='templateDescription'
+                name='description'
                 label='Template description'
-                value={childTemplate.templateDescription}
+                value={childTemplate.description}
                 onChange={(event) => {
                   handleInputChange(event, childTemplate, setChildTemplate);
                 }}
@@ -202,7 +224,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                       .map((g) => (
                         <LabelTile
                           key={g.reportTable}
-                          title={g.customName === "" ? g.reportTable : g.customName}
+                          title={g.name === "" ? g.reportTable : g.name}
                           actionGroup={
                             <div className="actions">
                               <DropdownMenu
@@ -256,7 +278,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
             onExport={async () => {
               openModal(true);
             }}
-            isSavingDisabled={!childTemplate.templateName || !childTemplate.reportId}
+            isSavingDisabled={!childTemplate.displayName || !childTemplate.reportId}
             isLoading={isLoading}
           />
 
@@ -267,7 +289,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
           />
 
           <DeleteModal
-            entityName={selectedLabel?.customName === "" ? selectedLabel.reportTable : selectedLabel?.customName ?? ""}
+            entityName={selectedLabel?.name === "" ? selectedLabel.reportTable : selectedLabel?.name ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={() => {
