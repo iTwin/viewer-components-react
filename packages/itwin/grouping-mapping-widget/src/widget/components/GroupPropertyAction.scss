@@ -32,6 +32,14 @@
       gap: $iui-baseline;
       flex: 1 1;
       min-height: 0;
+      .gmw-no-selection {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: $iui-baseline;
+        height: 100%;
+      }
     }
 
     .gmw-available-properties {

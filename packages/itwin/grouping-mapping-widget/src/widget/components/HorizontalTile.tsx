@@ -8,7 +8,7 @@ import { Text } from "@itwin/itwinui-react";
 import "./HorizontalTile.scss";
 import classNames from "classnames";
 
-interface HorizontalTileProps {
+export interface HorizontalTileProps {
   title: string;
   actionGroup: ReactNode;
   subText?: string;
@@ -17,15 +17,19 @@ interface HorizontalTileProps {
   titleTooltip?: string;
   subtextToolTip?: string;
   selected?: boolean;
+  dragHandle?: ReactNode;
 }
 
-export const HorizontalTile = ({ title, subText, onClick, onClickTitle, titleTooltip, subtextToolTip, actionGroup, selected}: HorizontalTileProps) => {
+export const HorizontalTile = ({ title, subText, onClick, onClickTitle, titleTooltip, subtextToolTip, actionGroup, selected, dragHandle}: HorizontalTileProps) => {
 
   return (
     <div className={classNames("gmw-horizontal-tile-container", {"gmw-horizontal-tile-selected":selected})} onClick={onClick} data-testid="gmw-horizontal-tile">
-      <div className="gmw-body">
-        <Text className={classNames("gmw-body-text", {"iui-anchor": onClickTitle})} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
-        {subText && <Text className="gmw-body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
+      <div className="gmw-body-container">
+        {dragHandle}
+        <div className="gmw-body">
+          <Text className={classNames("gmw-body-text", {"iui-anchor": onClickTitle})} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
+          {subText && <Text className="gmw-body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
+        </div>
       </div>
       <div className="gmw-action-button" data-testid="tile-action-button">
         {actionGroup}

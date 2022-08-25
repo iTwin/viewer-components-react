@@ -62,7 +62,6 @@ interface PropertyModifyProps {
 export enum PropertyMenuView {
   DEFAULT = "default",
   ADD_GROUP_PROPERTY = "add_group_property",
-  MODIFY_GROUP_PROPERTY = "modify_group_property",
   ADD_CALCULATED_PROPERTY = "add_calculated_property",
   MODIFY_CALCULATED_PROPERTY = "modify_calculated_property",
   ADD_CUSTOM_CALCULATION = "add_custom_calculation",
@@ -197,14 +196,6 @@ export const PropertyMenu = ({
     void initialize();
   }, [iModelConnection, group.query, goBack, group.groupName]);
 
-  const onGroupPropertyModify = useCallback(
-    (value: CellProps<GroupPropertyType>) => {
-      setSelectedGroupProperty(value.row.original);
-      setPropertyMenuView(PropertyMenuView.MODIFY_GROUP_PROPERTY);
-    },
-    [],
-  );
-
   const onCalculatedPropertyModify = useCallback(
     (value: CellProps<CalculatedPropertyType>) => {
       setSelectedCalculatedProperty(value.row.original);
@@ -256,18 +247,6 @@ export const PropertyMenu = ({
           mappingId={mappingId}
           groupId={groupId}
           keySet={keySet ?? new KeySet()}
-          returnFn={groupPropertyReturn}
-        />
-      );
-    case PropertyMenuView.MODIFY_GROUP_PROPERTY:
-      return (
-        <GroupPropertyAction
-          iModelId={iModelId}
-          mappingId={mappingId}
-          groupId={groupId}
-          keySet={keySet ?? new KeySet()}
-          groupPropertyId={selectedGroupProperty?.id ?? ""}
-          groupPropertyName={selectedGroupProperty?.propertyName ?? ""}
           returnFn={groupPropertyReturn}
         />
       );
@@ -335,7 +314,6 @@ export const PropertyMenu = ({
                   iModelId={iModelId}
                   mappingId={mappingId}
                   groupId={groupId}
-                  onGroupPropertyModify={onGroupPropertyModify}
                   setSelectedGroupProperty={setSelectedGroupProperty}
                   setGroupModifyView={setPropertyMenuView}
                   isLoadingGroupProperties={isLoadingGroupProperties}
