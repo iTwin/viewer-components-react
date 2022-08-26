@@ -64,6 +64,7 @@
     "@dnd-kit/utilities": "3.2.0",
     "fast-equals": "^4.0.2",
     "immer": "^9.0.7",
+    "react-split": "2.0.14",
     "simple-react-validator": "^1.6.1"
   },
   "devDependencies": {

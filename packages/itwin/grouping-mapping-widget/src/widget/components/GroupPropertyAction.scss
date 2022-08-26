@@ -16,46 +16,6 @@
     flex-direction: inherit;
     gap: $iui-baseline;
   }
-
-  .gmw-property-selection-container {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    gap: $iui-baseline;
-    min-height: 0;
-    padding: $iui-baseline $iui-m;
-    min-width: 0;
-
-    .gmw-selected-properties {
-      display: flex;
-      flex-direction: column;
-      gap: $iui-baseline;
-      flex: 1 1;
-      min-height: 0;
-      .gmw-no-selection {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        gap: $iui-baseline;
-        padding: $iui-baseline $iui-m;
-        height: 100%;
-      }
-    }
-
-    .gmw-available-properties {
-      display: flex;
-      flex-direction: column;
-      gap: $iui-baseline;
-      flex: 1 1;
-      min-height: 0;
-      .gmw-available-properties-header {
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-      }
-    }
-  }
 }
 
 .gmw-properties-list {
@@ -64,4 +24,83 @@
   gap: 7.5px;
   flex: 1;
   overflow-y: overlay;
+}
+
+.gmw-properties-list-surface {
+  display: flex;
+  flex-direction: column;
+  gap: 7.5px;
+  flex: 1;
+  overflow-y: overlay;
+  padding: $iui-baseline $iui-m;
+}
+
+.gmw-property-view-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: $iui-baseline;
+  min-height: 0;
+  padding: $iui-baseline $iui-m;
+  min-width: 0;
+  .gmw-property-view-button {
+    display: flex;
+  }
+}
+
+.gmw-property-selection-container {
+  display: flex;
+  gap: $iui-s;
+  width: 45vw;
+  min-width: 100%;
+  height: 75vh;
+
+  .gutter {
+    background-repeat: no-repeat;
+    background-position: 50%;
+    &.gutter-horizontal {
+      background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==");
+      cursor: col-resize;
+    }
+  }
+
+  .gmw-selected-properties {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline;
+    padding: $iui-baseline $iui-m;
+    // flex: 1 1;
+    // min-height: 0;
+    // min-width: 0;
+  }
+
+  .gmw-available-properties {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline;
+    padding: $iui-baseline $iui-m;
+    // flex: 1 1;
+    // min-height: 0;
+    // min-width: 0;
+    .gmw-available-properties-header {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: $iui-s;
+      .gmw-available-prop-search {
+        flex: 1 1 80px;
+        min-width: 80px;
+        max-width: 300px;
+      }
+    }
+  }
+}
+.gmw-no-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: $iui-baseline;
+  padding: $iui-baseline $iui-m;
+  height: 100%;
 }

@@ -23,6 +23,10 @@ import {
 import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { SelectOption} from "@itwin/itwinui-react";
+import { Alert} from "@itwin/itwinui-react";
+import { ModalButtonBar} from "@itwin/itwinui-react";
+import { Button} from "@itwin/itwinui-react";
+import { Modal} from "@itwin/itwinui-react";
 import { Surface } from "@itwin/itwinui-react";
 import { IconButton } from "@itwin/itwinui-react";
 import {
@@ -63,6 +67,7 @@ import {
 } from "@dnd-kit/sortable";
 import SortableHorizontalTile from "./SortableHorizontalTile";
 import { deepEqual } from "fast-equals";
+import Split from "react-split";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -237,7 +242,7 @@ const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]
 
 };
 
-const convertPresentationFields = (propertyFields: Field[]) => {
+const convertPresentationFields = async (propertyFields: Field[]) => {
 
   const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
 
@@ -280,6 +285,7 @@ const convertPresentationFields = (propertyFields: Field[]) => {
               const aspectExtractedNested = extractedNested.map((ecProperty) => ({ ...ecProperty, schema, className }));
               ecPropertyMetaDetaList.push(...aspectExtractedNested);
 
+              // Check if it is an ElementRefersToElements
             }
             break;
           }
@@ -459,6 +465,7 @@ const GroupPropertyAction = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+  const [showModal, setShowModal]=useState<boolean>(false);
 
   const handleDragStart=(event: DragStartEvent)=> {
     const {active} = event;
@@ -493,7 +500,7 @@ const GroupPropertyAction = ({
   );
 
   useEffect(() => {
-    const generatedProperties = async () => {
+    const generateProperties = async () => {
       setIsLoading(true);
 
       if(!iModelConnection) return;
@@ -508,7 +515,7 @@ const GroupPropertyAction = ({
             field.type.valueFormat === PropertyValueFormat.Struct
         ) ?? [];
 
-      const propertiesMetaData = convertPresentationFields(propertyFields);
+      const propertiesMetaData = await convertPresentationFields(propertyFields);
 
       setPropertiesMetaData(propertiesMetaData);
 
@@ -536,7 +543,7 @@ const GroupPropertyAction = ({
 
       setIsLoading(false);
     };
-    void generatedProperties();
+    void generateProperties();
   }, [getAccessToken, mappingClient, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
 
   const onSave = async () => {
@@ -596,7 +603,12 @@ const GroupPropertyAction = ({
   }, [searchInput, setSearched, clearSearch]);
 
   return (
-    <>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       <WidgetHeader
         title={groupPropertyName ?? "Add Property"}
         returnFn={async () => returnFn(false)}
@@ -664,14 +676,52 @@ const GroupPropertyAction = ({
             onHide={() => { }}
           />
         </Fieldset>
-        <Fieldset className='gmw-property-selection-container' legend="Properties">
-          <div className="gmw-available-properties">
+        {groupPropertyId && !isLoading && selectedProperties.length===0 && <Alert type="warning">Warning: Properties could not be found. Overwriting will occur if a selection is made.</Alert>}
+        <Fieldset className='gmw-property-view-container' legend="Current Properties">
+          <div className="gmw-property-view-button">
+            <Button
+              onClick={async () => setShowModal(true)}
+              disabled={isLoading}
+            >
+            Select Properties
+            </Button>
+          </div>
+          <div className="gmw-properties-list">
+            {selectedProperties.length===0 && !isLoading?
+              <div className="gmw-no-selection">
+                No properties selected. Add some by opening the menu on the top.
+              </div>:
+              selectedProperties.map((property) => (
+                <HorizontalTile
+                  key={property.key}
+                  title={property.label}
+                  titleTooltip={`Parent: ${property.parentPropertyClassName}`}
+                  subText={`${property.type}`}
+                  actionGroup={`${property.categoryLabel}`}
+                />
+              ))}
+          </div>
+        </Fieldset>
+      </div>
+      <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} isSavingDisabled={selectedProperties.length===0}/>
+      <Modal
+        title="Properties Selection"
+        isOpen={showModal}
+        isDismissible={false}
+      >
+        <Split
+          expandToMin={false}
+          className="gmw-property-selection-container"
+          gutterAlign="center"
+          gutterSize={2}
+          direction="horizontal">
+          <Surface className="gmw-available-properties" elevation={1}>
             <div className="gmw-available-properties-header">
               <Label as="span">Available Properties</Label>
               <LabeledInput
                 displayStyle="inline"
                 iconDisplayStyle="inline"
-                className="search-input"
+                className="gmw-available-prop-search"
                 value={searchInput}
                 size="small"
                 placeholder="Search...."
@@ -700,87 +750,85 @@ const GroupPropertyAction = ({
               />
             </div>
             <div className="gmw-properties-list">
-              {filteredProperties.map((property) => (
-                <HorizontalTile
-                  key={property.key}
-                  title={property.label}
-                  titleTooltip={`Parent: ${property.parentPropertyClassName}`}
-                  subText={`${property.type}`}
-                  actionGroup={`${property.categoryLabel}`}
-                  selected={selectedProperties.some((p)=> property.key===p.key)}
-                  onClick={() =>
-                    setSelectedProperties((sp)=>
-                      sp.some((p) => property.key === p.key)
-                        ? sp.filter(
-                          (p) => property.key !== p.key
-                        )
-                        : [...sp, property]
-                    )
-                  }
-                />
-              ))}
+              {
+                filteredProperties.map((property) => (
+                  <HorizontalTile
+                    key={property.key}
+                    title={property.label}
+                    titleTooltip={`Parent: ${property.parentPropertyClassName}`}
+                    subText={`${property.type}`}
+                    actionGroup={`${property.categoryLabel}`}
+                    selected={selectedProperties.some((p)=> property.key===p.key)}
+                    onClick={() =>
+                      setSelectedProperties((sp)=>
+                        sp.some((p) => property.key === p.key)
+                          ? sp.filter(
+                            (p) => property.key !== p.key
+                          )
+                          : [...sp, property]
+                      )
+                    }
+                  />
+                ))}
             </div>
-          </div>
-          <div className="gmw-selected-properties">
+          </Surface>
+          <Surface className="gmw-selected-properties" elevation={1}>
             <Label as="span">Selected Properties</Label>
             {selectedProperties.length===0 ?
-              <Surface className="gmw-no-selection" elevation={1}>
-                No properties selected. Add some by clicking on the properties above.
+              <Surface className="gmw-no-selection" elevation={2}>
+                No properties selected. Add some by clicking on the properties shown left.
               </Surface>:
-              <div className="gmw-properties-list">
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
+              <div className="gmw-properties-list" >
+                <SortableContext
+                  items={selectedProperties.map((p)=>p.key)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  <SortableContext
-                    items={selectedProperties.map((p)=>p.key)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {selectedProperties.map((property) =>
-                      <SortableHorizontalTile
-                        key={property.key}
-                        id={property.key}
-                        title={property.label}
-                        titleTooltip={`Parent: ${property.parentPropertyClassName}`}
-                        subText={property.type}
-                        actionGroup={
-                          <div>
-                            {property.categoryLabel}
-                            <IconButton
-                              styleType="borderless"
-                              title="Remove"
-                              onClick={() =>{
-                                setSelectedProperties((sp)=>sp.filter(
-                                  (p) => property.key !== p.key
-                                ));
-                              }
-                              }>
-                              <SvgRemove/>
-                            </IconButton>
-                          </div>
-                        }
-                      />)}
-                  </SortableContext>
-                  <DragOverlay>
-                    {activeDragProperty ?
-                      <HorizontalTile
-                        title={activeDragProperty.label}
-                        titleTooltip={`Parent: ${activeDragProperty.parentPropertyClassName}`}
-                        subText={activeDragProperty.type}
-                        actionGroup={activeDragProperty.categoryLabel }
-                        dragHandle={<div className="gmw-drag-icon" ><SvgDragHandleVertical/></div>}
-                      /> : null}
-                  </DragOverlay>
-                </DndContext>
+                  {selectedProperties.map((property) =>
+                    <SortableHorizontalTile
+                      key={property.key}
+                      id={property.key}
+                      title={property.label}
+                      titleTooltip={`Parent: ${property.parentPropertyClassName}`}
+                      subText={property.type}
+                      actionGroup={
+                        <div>
+                          {property.categoryLabel}
+                          <IconButton
+                            styleType="borderless"
+                            title="Remove"
+                            onClick={() =>{
+                              setSelectedProperties((sp)=>sp.filter(
+                                (p) => property.key !== p.key
+                              ));
+                            }
+                            }>
+                            <SvgRemove/>
+                          </IconButton>
+                        </div>
+                      }
+                    />)}
+                </SortableContext>
               </div>
             }
-          </div>
-        </Fieldset>
-      </div>
-      <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} isSavingDisabled={selectedProperties.length===0}/>
-    </>
+          </Surface>
+        </Split>
+        <ModalButtonBar>
+          <Button onClick={()=>setShowModal(false)} styleType='high-visibility'>
+            Done
+          </Button>
+        </ModalButtonBar>
+      </Modal>
+      <DragOverlay zIndex={9999}>
+        {activeDragProperty ?
+          <HorizontalTile
+            title={activeDragProperty.label}
+            titleTooltip={`Parent: ${activeDragProperty.parentPropertyClassName}`}
+            subText={activeDragProperty.type}
+            actionGroup={activeDragProperty.categoryLabel }
+            dragHandle={<div className="gmw-drag-icon" ><SvgDragHandleVertical/></div>}
+          /> : null}
+      </DragOverlay>
+    </DndContext>
   );
 };
 
