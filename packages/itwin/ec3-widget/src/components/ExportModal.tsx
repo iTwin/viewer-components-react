@@ -10,6 +10,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { IModelApp } from "@itwin/core-frontend";
 import {
   Alert,
   Button,
@@ -17,18 +18,21 @@ import {
   Modal,
   ProgressLinear,
   ProgressRadial,
-  Text
+  Text,
+  toaster,
 } from "@itwin/itwinui-react";
 import {
   SvgVisibilityHide,
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
-import type { Link } from "@itwin/insights-client";
+import type { JobCreation, Link } from "@itwin/insights-client";
 import { JobStatus } from "@itwin/insights-client";
 import EC3Client from "./EC3/EC3Client";
+import { EC3JobClient } from "./api/EC3JobClient";
 import logo from '../../public/logo/EC3Logo.png';
 
 interface ExportProps {
+  projectName: string;
   isOpen: boolean;
   close: () => void;
   templateId: string | undefined;
@@ -40,8 +44,10 @@ interface ec3TokenCache {
 }
 
 const ExportModal = (props: ExportProps) => {
+  const MILI_SECONDS = 1000;
+  const PIN_INTERVAL = 1000;
   const EC3ClientApi = useMemo(() => new EC3Client(), []);
-
+  const ec3JobClient = useMemo(() => new EC3JobClient(), []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordIsVisible, showPassword] = useState(false);
@@ -79,11 +85,90 @@ const ExportModal = (props: ExportProps) => {
     showSigninError(false);
   }, [setEmail, setPassword, showPassword, showSigninError]);
 
+  const pinStatus = useCallback(
+    (job: JobCreation) => {
+      const intervalId = window.setInterval(async () => {
+        const token =
+          (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+        if (job.id && token) {
+          const currentJobStatus =
+            await ec3JobClient.getEC3JobStatus(token, job?.id);
+          if (currentJobStatus.job?.status) {
+            if (
+              currentJobStatus.job?.status === JobStatus.StatusEnum.Succeeded
+            ) {
+              setJobLink(currentJobStatus?.job._links?.ec3Project);
+            }
+            setJobStatus(currentJobStatus.job?.status);
+          } else {
+            setJobStatus(JobStatus.StatusEnum.Failed);
+            toaster.negative("Failed to get job status. 😔");
+          }
+        }
+      }, PIN_INTERVAL);
+      intervalRef.current = intervalId;
+    },
+    [setJobLink, setJobStatus, ec3JobClient]
+  );
+
+  const runJob = useCallback(
+    async (token: string) => {
+      const accessToken =
+        (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+      if (props.templateId && token) {
+        try {
+          const jobCreated = await ec3JobClient.createJob(
+            accessToken,
+            token,
+            props.templateId,
+            props.projectName
+          );
+          if (jobCreated?.job?.id) {
+            pinStatus(jobCreated?.job);
+          } else {
+            setJobStatus(JobStatus.StatusEnum.Failed);
+            toaster.negative("Failed to create EC3 job. 😔");
+          }
+        } catch (e) {
+          setJobStatus(JobStatus.StatusEnum.Failed);
+          toaster.negative("You do not have the required permissions. Please contact the project administrator.");
+          /* eslint-disable no-console */
+          console.error(e);
+        }
+      } else {
+        setJobStatus(JobStatus.StatusEnum.Failed);
+        toaster.negative("Invalid reportId.");
+      }
+    },
+    [props, pinStatus, ec3JobClient]
+  );
+
   const signin = useCallback(
-    async (e: any) => {
+    async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const result = await EC3ClientApi.getEC3AccessToken(email, password);
-      console.log(result);
+      startSigningIn(true);
+      try {
+        const result = await EC3ClientApi.getEC3AccessToken(
+          email,
+          password
+        );
+        if (result && result.key && result.last_login) {
+          cacheToken({
+            token: result.key,
+            exp: Date.now() + 10000 * MILI_SECONDS,
+          });
+          resetSignin();
+          setIsSignedIn(true);
+        } else {
+          showSigninError(true);
+        }
+
+      } catch (err) {
+        toaster.negative("Failed to sign in EC3.");
+        /* eslint-disable no-console */
+        console.error(err);
+      }
+      startSigningIn(false);
     },
     [
       email,
@@ -137,7 +222,7 @@ const ExportModal = (props: ExportProps) => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Button styleType="cta">Open in E C 3</Button>
+                  <Button styleType="cta">Open in EC3</Button>
                 </a>
               </div>
             )
@@ -163,6 +248,28 @@ const ExportModal = (props: ExportProps) => {
   );
 
   useEffect(() => {
+    if (props.isOpen && isSignedIn && cache?.token) {
+      runJob(cache.token).catch((err) => {
+        setJobStatus(JobStatus.StatusEnum.Failed);
+        toaster.negative("Error occurs while running the job. 😔");
+        /* eslint-disable no-console */
+        console.error(err);
+      });
+    }
+  }, [props.isOpen, isSignedIn, cache, runJob]);
+
+  useEffect(() => {
+    if (
+      jobStatus === JobStatus.StatusEnum.Succeeded ||
+      jobStatus === JobStatus.StatusEnum.Failed
+    ) {
+      if (intervalRef.current) {
+        window.clearInterval(intervalRef.current);
+      }
+    }
+  }, [jobStatus]);
+
+  useEffect(() => {
     if (email !== "") {
       const timeoutId = setTimeout(() => setEmailError(!isValidEmail()), 1000);
       return () => clearTimeout(timeoutId);
@@ -185,13 +292,13 @@ const ExportModal = (props: ExportProps) => {
           <img
             className="ec3-signin-icon"
             src={logo}
-            alt="E C 3® software"
+            alt="EC3® software"
             data-height-percentage="80"
             data-actual-width="1200"
             data-actual-height="600"
           />
           <form onSubmit={signin} className="ec3-signin-form">
-            <div className="ec3-signin-prompt">Sign in to E C 3.</div>
+            <div className="ec3-signin-prompt">Sign in to EC3.</div>
             {signinError && (
               <Alert type="negative" className="ec3-signin-error">
                 Incorrect email or password.

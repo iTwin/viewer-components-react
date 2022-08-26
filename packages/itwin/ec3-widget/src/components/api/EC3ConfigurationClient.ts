@@ -34,8 +34,6 @@ export const BASE_PATH = "https://dev-api.bentley.com/insights/carbon-calculatio
   ""
 );
 
-
-
 class EC3ConfigurationClient {
   public async getConfigurations(contextId: string) {
     if (!IModelApp.authorizationClient)
@@ -150,6 +148,5 @@ export interface FetchArgs {
   url: string;
   options: any;
 }
-
 
 export { EC3ConfigurationClient };
