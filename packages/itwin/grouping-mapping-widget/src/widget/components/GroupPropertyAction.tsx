@@ -677,7 +677,7 @@ const GroupPropertyAction = ({
           />
         </Fieldset>
         {groupPropertyId && !isLoading && selectedProperties.length===0 && <Alert type="warning">Warning: Properties could not be found. Overwriting will occur if a selection is made.</Alert>}
-        <Fieldset className='gmw-property-view-container' legend="Current Properties">
+        <Fieldset className='gmw-property-view-container' legend="Mapped Properties">
           <div className="gmw-property-view-button">
             <Button
               onClick={async () => setShowModal(true)}
@@ -688,7 +688,7 @@ const GroupPropertyAction = ({
           </div>
           <div className="gmw-properties-list">
             {selectedProperties.length===0 && !isLoading?
-              <div className="gmw-no-selection">
+              <div className="gmw-empty-selection">
                 No properties selected. Add some by opening the menu on the top.
               </div>:
               selectedProperties.map((property) => (
@@ -703,11 +703,22 @@ const GroupPropertyAction = ({
           </div>
         </Fieldset>
       </div>
-      <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} isSavingDisabled={selectedProperties.length===0}/>
+      <ActionPanel
+        onSave={onSave}
+        onCancel={async () => returnFn(false)}
+        isLoading={isLoading}
+        isSavingDisabled={
+          selectedProperties.length === 0 || !propertyName || !dataType
+        }
+      />
       <Modal
         title="Properties Selection"
         isOpen={showModal}
-        isDismissible={false}
+        onClose={() => {
+          setShowModal(false);
+          clearSearch();
+        }}
+        closeOnExternalClick={false}
       >
         <Split
           expandToMin={false}
@@ -749,33 +760,37 @@ const GroupPropertyAction = ({
                 }
               />
             </div>
-            <div className="gmw-properties-list">
-              {
-                filteredProperties.map((property) => (
-                  <HorizontalTile
-                    key={property.key}
-                    title={property.label}
-                    titleTooltip={`Parent: ${property.parentPropertyClassName}`}
-                    subText={`${property.type}`}
-                    actionGroup={`${property.categoryLabel}`}
-                    selected={selectedProperties.some((p)=> property.key===p.key)}
-                    onClick={() =>
-                      setSelectedProperties((sp)=>
-                        sp.some((p) => property.key === p.key)
-                          ? sp.filter(
-                            (p) => property.key !== p.key
-                          )
-                          : [...sp, property]
-                      )
-                    }
-                  />
-                ))}
-            </div>
+            {filteredProperties.length===0 ?
+              <Surface className="gmw-empty-selection" elevation={2}>
+                No properties available.
+              </Surface>:
+              <div className="gmw-properties-list">
+                {
+                  filteredProperties.map((property) => (
+                    <HorizontalTile
+                      key={property.key}
+                      title={property.label}
+                      titleTooltip={`Parent: ${property.parentPropertyClassName}`}
+                      subText={`${property.type}`}
+                      actionGroup={`${property.categoryLabel}`}
+                      selected={selectedProperties.some((p)=> property.key===p.key)}
+                      onClick={() =>
+                        setSelectedProperties((sp)=>
+                          sp.some((p) => property.key === p.key)
+                            ? sp.filter(
+                              (p) => property.key !== p.key
+                            )
+                            : [...sp, property]
+                        )
+                      }
+                    />
+                  ))}
+              </div>}
           </Surface>
           <Surface className="gmw-selected-properties" elevation={1}>
             <Label as="span">Selected Properties</Label>
             {selectedProperties.length===0 ?
-              <Surface className="gmw-no-selection" elevation={2}>
+              <Surface className="gmw-empty-selection" elevation={2}>
                 No properties selected. Add some by clicking on the properties shown left.
               </Surface>:
               <div className="gmw-properties-list" >
@@ -813,8 +828,14 @@ const GroupPropertyAction = ({
           </Surface>
         </Split>
         <ModalButtonBar>
-          <Button onClick={()=>setShowModal(false)} styleType='high-visibility'>
-            Done
+          <Button
+            onClick={() => {
+              setShowModal(false);
+              clearSearch();
+            }}
+            styleType="high-visibility"
+          >
+            Close
           </Button>
         </ModalButtonBar>
       </Modal>
