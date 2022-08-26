@@ -26,7 +26,8 @@ import {
 } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
-import { Report, ReportsClient } from "@itwin/insights-client";
+import type { Report } from "@itwin/insights-client";
+import { ReportsClient } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
@@ -173,7 +174,7 @@ export const Reports = () => {
                 {filteredReports.map((report) => (
                   <HorizontalTile
                     key={report.id}
-                    title={report.displayName ?? ""}
+                    title={report.displayName}
                     subText={report.description ?? ""}
                     subtextToolTip={report.description ?? ""}
                     titleTooltip={report.displayName}

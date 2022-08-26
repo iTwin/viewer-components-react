@@ -4,8 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 import { Modal, Table, tableFilters } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
-import { Mapping, ReportsClient } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH, MappingsClient } from "@itwin/insights-client";
+import type { Mapping } from "@itwin/insights-client";
+import { ReportsClient } from "@itwin/insights-client";
+import { MappingsClient, REPORTING_BASE_PATH } from "@itwin/insights-client";
 import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
@@ -111,7 +112,7 @@ const AddMappingsModal = ({
       for (const mapping of selectedMappings) {
         await reportsClientApi.createReportMapping(accessToken, reportId, {
           imodelId: selectedIModelId,
-          mappingId: mapping.id ?? "",
+          mappingId: mapping.id,
         });
       }
 

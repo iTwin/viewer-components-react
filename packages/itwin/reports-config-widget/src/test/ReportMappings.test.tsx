@@ -24,14 +24,16 @@ import userEvent from "@testing-library/user-event";
 import * as moq from "typemoq";
 import type { RequestHandler } from "msw";
 import { rest } from "msw";
-import {
-  ExtractionStatus,
-  ExtractorState,
+import type {
+  ExtractionStatusSingle,
   Mapping,
   MappingCollection,
   MappingSingle,
   Report,
   ReportMappingCollection,
+} from "@itwin/insights-client";
+import {
+  ExtractorState,
 } from "@itwin/insights-client";
 import { ReportMappings } from "../widget/components/ReportMappings";
 import { Constants, IModelState } from "@itwin/imodels-client-management";
@@ -180,7 +182,7 @@ const mockReportMappingsFactory = (): ReportMappingCollection => {
 const mockMappingsFactory = (
   mockReportMappings: ReportMappingCollection
 ): [MappingSingle[], RequestHandler[]] => {
-  const mockMappings: MappingSingle[] = mockReportMappings.mappings!.map(
+  const mockMappings: MappingSingle[] = mockReportMappings.mappings.map(
     (mapping, index) => ({
       mapping: {
         id: mapping.mappingId,
@@ -203,8 +205,8 @@ const mockMappingsFactory = (
 
   const iModelHandlers: RequestHandler[] = mockMappings.map((mapping) =>
     rest.get(
-      `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mapping.mapping?._links?.imodel?.href ?? ""
-      }/mappings/${mapping.mapping?.id}`,
+      `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mapping.mapping._links.imodel.href
+      }/mappings/${mapping.mapping.id}`,
       async (_req, res, ctx) => {
         return res(ctx.delay(), ctx.status(200), ctx.json(mapping));
       }
@@ -318,16 +320,16 @@ describe("Report Mappings View", () => {
       const reportMappingTile = within(horizontalTile);
       const mockiModel = mockIModelsResponse.find(
         (iModel) =>
-          iModel.iModel.id === mockMappings[index].mapping?._links?.imodel?.href
+          iModel.iModel.id === mockMappings[index].mapping._links.imodel.href
       );
       expect(
         reportMappingTile.getByText(
-          mockMappings[index].mapping?.mappingName ?? ""
+          mockMappings[index].mapping.mappingName
         )
       ).toBeInTheDocument();
       expect(
         reportMappingTile.getByTitle(
-          mockMappings[index].mapping?.description ?? ""
+          mockMappings[index].mapping.description ?? ""
         )
       ).toBeInTheDocument();
       expect(
@@ -390,24 +392,24 @@ describe("Report Mappings View", () => {
     });
 
     // Be an exact match on display name.
-    await user.type(searchInput, mockMappings[0].mapping?.mappingName ?? "");
+    await user.type(searchInput, mockMappings[0].mapping.mappingName);
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
     expect(
-      screen.getByText(mockMappings[0].mapping?.mappingName ?? "")
+      screen.getByText(mockMappings[0].mapping.mappingName)
     ).toBeInTheDocument();
 
     // Be an exact match on description.
     await user.clear(searchInput);
-    await user.type(searchInput, mockMappings[0].mapping?.description ?? "");
+    await user.type(searchInput, mockMappings[0].mapping.description ?? "");
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
     expect(
-      screen.getByTitle(mockMappings[0].mapping?.description ?? "")
+      screen.getByTitle(mockMappings[0].mapping.description ?? "")
     ).toBeInTheDocument();
 
     // Be an exact match on iModel Name.
     const iModel = mockIModelsResponse.find(
       (mockIModel) =>
-        mockIModel.iModel.id === mockMappings[0].mapping?._links?.imodel?.href
+        mockIModel.iModel.id === mockMappings[0].mapping._links.imodel.href
     );
     await user.clear(searchInput);
     await user.type(searchInput, iModel?.iModel.displayName ?? "");
@@ -421,7 +423,7 @@ describe("Report Mappings View", () => {
     const mockReportMappings = mockReportMappingsFactory();
     const [_, iModelHandlers] = mockMappingsFactory(mockReportMappings);
 
-    const mockReportMappingsOriginalSize = mockReportMappings.mappings!.length;
+    const mockReportMappingsOriginalSize = mockReportMappings.mappings.length;
 
     server.use(
       rest.get(
@@ -456,13 +458,12 @@ describe("Report Mappings View", () => {
       ),
       ...iModelHandlers,
       rest.delete(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings/${mockReportMappings.mappings![0].mappingId ?? ""
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings/${mockReportMappings.mappings[0].mappingId
         }`,
         async (_req, res, ctx) => {
-          mockReportMappings.mappings = mockReportMappings.mappings!.filter(
+          mockReportMappings.mappings = mockReportMappings.mappings.filter(
             (mapping) =>
-              mapping.mappingId !== mockReportMappings.mappings![0].mappingId ??
-              ""
+              mapping.mappingId !== mockReportMappings.mappings[0].mappingId
           );
           return res(ctx.delay(100), ctx.status(204));
         }
@@ -631,7 +632,7 @@ describe("Report Mappings View", () => {
     for (let i = 0; i < mockMappings.length - 1; i++) {
       const row = screen.getByRole("row", {
         name: new RegExp(
-          `${mockMappings[i].mapping?.mappingName} ${mockMappings[i].mapping?.description}`,
+          `${mockMappings[i].mapping.mappingName} ${mockMappings[i].mapping.description}`,
           "i"
         ),
       });
@@ -643,8 +644,8 @@ describe("Report Mappings View", () => {
     // Click on checkbox on new mapping
     const unmappedRow = screen.getByRole("row", {
       name: new RegExp(
-        `${mockMappings[mockMappings.length - 1].mapping?.mappingName
-        } ${mockMappings[mockMappings.length - 1].mapping?.description}`,
+        `${mockMappings[mockMappings.length - 1].mapping.mappingName
+        } ${mockMappings[mockMappings.length - 1].mapping.description}`,
         "i"
       ),
     });
@@ -751,14 +752,16 @@ describe("Report Mappings View", () => {
       },
     };
 
-    let mockStatusResponse: ExtractionStatus = {
-      state: ExtractorState.Queued,
-      reason: "",
-      containsIssues: false,
-      _links: {
-        logs: {
-          href: "",
-        }
+    let mockStatusResponse: ExtractionStatusSingle = {
+      status: {
+        state: ExtractorState.Queued,
+        reason: "",
+        containsIssues: false,
+        _links: {
+          logs: {
+            href: "",
+          },
+        },
       },
     };
 
@@ -856,13 +859,15 @@ describe("Report Mappings View", () => {
     expect(queuedStates).toHaveLength(2);
 
     mockStatusResponse = {
-      state: ExtractorState.Running,
-      reason: "",
-      containsIssues: false,
-      _links: {
-        logs: {
-          href: "",
-        }
+      status: {
+        state: ExtractorState.Running,
+        reason: "",
+        containsIssues: false,
+        _links: {
+          logs: {
+            href: "",
+          },
+        },
       },
     };
 
@@ -872,13 +877,15 @@ describe("Report Mappings View", () => {
     expect(runningStates).toHaveLength(2);
 
     mockStatusResponse = {
-      state: ExtractorState.Succeeded,
-      reason: "",
-      containsIssues: false,
-      _links: {
-        logs: {
-          href: "",
-        }
+      status: {
+        state: ExtractorState.Succeeded,
+        reason: "",
+        containsIssues: false,
+        _links: {
+          logs: {
+            href: "",
+          },
+        },
       },
     };
 

@@ -49,8 +49,8 @@ const reportsFactory = (): ReportCollection => ({
       deleted: false,
       _links: {
         project: {
-          href: ""
-        }
+          href: "",
+        },
       },
     })
   ),
@@ -182,18 +182,18 @@ describe("Reports View", () => {
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
     const horizontalTiles = screen.getAllByTestId("horizontal-tile");
     // TODO check for all descriptions and names and imodels
-    expect(horizontalTiles).toHaveLength(mockedReports?.reports!.length);
+    expect(horizontalTiles).toHaveLength(mockedReports?.reports.length);
 
     for (const [index, horizontalTile] of horizontalTiles.entries()) {
       const reportMappingTile = within(horizontalTile);
       expect(
         reportMappingTile.getByText(
-          mockedReports?.reports![index].displayName ?? ""
+          mockedReports?.reports[index].displayName ?? ""
         )
       ).toBeInTheDocument();
       expect(
         reportMappingTile.getByTitle(
-          mockedReports?.reports![index].description ?? ""
+          mockedReports?.reports[index].description ?? ""
         )
       ).toBeInTheDocument();
     }
@@ -226,7 +226,7 @@ describe("Reports View", () => {
 
   it("remove a report", async () => {
     const mockedReports: ReportCollection = reportsFactory();
-    const mockedReportsOriginalLength = mockedReports.reports!.length;
+    const mockedReportsOriginalLength = mockedReports.reports.length;
     server.use(
       rest.get(
         `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
@@ -235,11 +235,11 @@ describe("Reports View", () => {
         }
       ),
       rest.delete(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockedReports.reports![0].id
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockedReports.reports[0].id
         }`,
         async (_req, res, ctx) => {
-          mockedReports.reports = mockedReports.reports!.filter(
-            (report) => report.id !== mockedReports.reports![0].id
+          mockedReports.reports = mockedReports.reports.filter(
+            (report) => report.id !== mockedReports.reports[0].id
           );
           return res(ctx.delay(100), ctx.status(204));
         }
@@ -302,22 +302,22 @@ describe("Reports View", () => {
     // Be an exact match on display name.
     await userEvent.type(
       searchInput,
-      mockedReports.reports![0].displayName ?? ""
+      mockedReports.reports[0].displayName
     );
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
     expect(
-      screen.getByText(mockedReports.reports![0].displayName ?? "")
+      screen.getByText(mockedReports.reports[0].displayName)
     ).toBeInTheDocument();
 
     // Be an exact match on description.
     await userEvent.clear(searchInput);
     await userEvent.type(
       searchInput,
-      mockedReports.reports![0].description ?? ""
+      mockedReports.reports[0].description ?? ""
     );
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(1);
     expect(
-      screen.getByText(mockedReports.reports![0].displayName ?? "")
+      screen.getByText(mockedReports.reports[0].displayName)
     ).toBeInTheDocument();
   });
 
@@ -362,7 +362,7 @@ describe("Reports View", () => {
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
     const reportName = screen.getByText(
-      mockedReports.reports![0].displayName ?? ""
+      mockedReports.reports[0].displayName
     );
     await user.click(reportName);
     expect(screen.getByText(/MockReportMappings/i)).toBeInTheDocument();

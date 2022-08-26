@@ -11,7 +11,7 @@ import {
 } from "@itwin/itwinui-react";
 import * as React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { REPORTING_BASE_PATH, ExtractionClient } from "@itwin/insights-client";
+import { ExtractionClient, REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { generateUrl, handleError, SkeletonBlock } from "./utils";
 import "./Extraction.scss";
 import {

@@ -13,7 +13,8 @@ import {
   WidgetHeader,
 } from "./utils";
 import "./ReportAction.scss";
-import { Report, ReportsClient } from "@itwin/insights-client";
+import type { Report } from "@itwin/insights-client";
+import { ReportsClient } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";

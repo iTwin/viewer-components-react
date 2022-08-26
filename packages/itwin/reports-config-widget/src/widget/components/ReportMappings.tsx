@@ -29,7 +29,8 @@ import {
 } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
-import { MappingsClient, Report, ReportMapping, ReportsClient } from "@itwin/insights-client";
+import type { Report, ReportMapping } from "@itwin/insights-client";
+import { MappingsClient, ReportsClient } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import AddMappingsModal from "./AddMappingsModal";
 import type {
@@ -88,13 +89,13 @@ const fetchReportMappings = async (
       AccessTokenAdapter.toAuthorizationCallback(accessToken);
     const iModelNames = new Map<string, string>();
     const reportMappingsAndMapping = await Promise.all(
-      reportMappings?.map(async (reportMapping) => {
-        const iModelId = reportMapping.imodelId ?? "";
+      reportMappings.map(async (reportMapping) => {
+        const iModelId = reportMapping.imodelId;
         let iModelName = "";
         const mapping = await mappingsClientApi.getMapping(
           accessToken,
-          reportMapping.mappingId ?? "",
-          iModelId
+          iModelId,
+          reportMapping.mappingId
         );
         if (iModelNames.has(iModelId)) {
           iModelName = iModelNames.get(iModelId) ?? "";
@@ -152,7 +153,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   useEffect(() => {
     void fetchReportMappings(
       setReportMappings,
-      report.id ?? "",
+      report.id,
       setIsLoading,
       apiConfig
     );
@@ -162,7 +163,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
     await fetchReportMappings(
       setReportMappings,
-      report.id ?? "",
+      report.id,
       setIsLoading,
       apiConfig
     );
@@ -176,7 +177,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     () =>
       new Map(
         reportMappings.map((mapping) => [
-          mapping.imodelId ?? "",
+          mapping.imodelId,
           mapping.iModelName,
         ])
       ),
@@ -201,7 +202,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
 
   return (
     <>
-      <WidgetHeader title={report.displayName ?? ""} returnFn={goBack} />
+      <WidgetHeader title={report.displayName} returnFn={goBack} />
       <div className="report-mapping-misc">
         <LabeledInput
           label={ReportsConfigWidget.localization.getLocalizedString(
