@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import { Modal, Table, tableFilters } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
-import type { Mapping } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
+import { Mapping, ReportsClient } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH, MappingsClient } from "@itwin/insights-client";
 import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
@@ -27,11 +27,11 @@ const fetchMappings = async (
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(
+    const mappingsClientApi = new MappingsClient(
       generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl)
     );
     const accessToken = await apiContext.getAccessToken();
-    const mappings = await reportingClientApi.getMappings(
+    const mappings = await mappingsClientApi.getMappings(
       accessToken,
       iModelId
     );
@@ -104,12 +104,12 @@ const AddMappingsModal = ({
     try {
       if (!selectedIModelId) return;
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient(
+      const reportsClientApi = new ReportsClient(
         generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
       );
       const accessToken = await apiConfig.getAccessToken();
       for (const mapping of selectedMappings) {
-        await reportingClientApi.createReportMapping(accessToken, reportId, {
+        await reportsClientApi.createReportMapping(accessToken, reportId, {
           imodelId: selectedIModelId,
           mappingId: mapping.id ?? "",
         });

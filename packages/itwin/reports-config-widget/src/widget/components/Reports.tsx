@@ -26,8 +26,8 @@ import {
 } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
-import type { Report } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
+import { Report, ReportsClient } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
 import { HorizontalTile } from "./HorizontalTile";
@@ -55,11 +55,11 @@ const fetchReports = async (
   try {
     if (!iTwinId) return;
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(
+    const reportsClientApi = new ReportsClient(
       generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl)
     );
     const accessToken = await apiContext.getAccessToken();
-    const reports = await reportingClientApi.getReports(accessToken, iTwinId);
+    const reports = await reportsClientApi.getReports(accessToken, iTwinId);
     setReports(reports ?? []);
   } catch (error: any) {
     handleError(error.status);
@@ -231,11 +231,11 @@ export const Reports = () => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
-              const reportingClientApi = new ReportingClient(
+              const reportsClientApi = new ReportsClient(
                 generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
               );
               const accessToken = await apiConfig.getAccessToken();
-              await reportingClientApi.deleteReport(
+              await reportsClientApi.deleteReport(
                 accessToken,
                 selectedReport?.id ?? ""
               );

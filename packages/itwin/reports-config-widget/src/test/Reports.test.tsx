@@ -46,6 +46,12 @@ const reportsFactory = (): ReportCollection => ({
       id: `${faker.datatype.uuid()}`,
       displayName: `mOcKRePoRT${index}`,
       description: `mOcKRePoRTDeScRiPtIoN${index}`,
+      deleted: false,
+      _links: {
+        project: {
+          href: ""
+        }
+      },
     })
   ),
   _links: {
@@ -229,8 +235,7 @@ describe("Reports View", () => {
         }
       ),
       rest.delete(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${
-          mockedReports.reports![0].id
+        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockedReports.reports![0].id
         }`,
         async (_req, res, ctx) => {
           mockedReports.reports = mockedReports.reports!.filter(

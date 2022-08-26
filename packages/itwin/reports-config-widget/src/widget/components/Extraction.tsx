@@ -11,7 +11,7 @@ import {
 } from "@itwin/itwinui-react";
 import * as React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH, ExtractionClient } from "@itwin/insights-client";
 import { generateUrl, handleError, SkeletonBlock } from "./utils";
 import "./Extraction.scss";
 import {
@@ -185,15 +185,15 @@ export const Extraction = ({
     try {
       setExtractionState(ExtractionStates.Starting);
       setExtractingIModelId(iModelId);
-      const reportingClientApi = new ReportingClient(
+      const extractionClientApi = new ExtractionClient(
         generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
       );
       const accessToken = await apiConfig.getAccessToken();
-      const response = await reportingClientApi.runExtraction(
+      const response = await extractionClientApi.runExtraction(
         accessToken,
         iModelId
       );
-      jobId.current = response.run?.id ?? "";
+      jobId.current = response.id;
       setIsRunning(true);
       setExtractionState(ExtractionStates.FetchingUpdate);
     } catch (error: any) {
@@ -207,23 +207,23 @@ export const Extraction = ({
   useEffect(() => {
     if (!intervalId.current && isRunning) {
       const newIntervalId = window.setInterval(async () => {
-        const reportingClientApi = new ReportingClient(
+        const extractionClientApi = new ExtractionClient(
           generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
         );
         const accessToken = await apiConfig.getAccessToken();
-        const response = await reportingClientApi.getExtractionStatus(
+        const response = await extractionClientApi.getExtractionStatus(
           accessToken,
           jobId.current
         );
-        if (response.status?.state === "Queued") {
+        if (response.state === "Queued") {
           setExtractionState(ExtractionStates.Queued);
-        } else if (response.status?.state === "Running") {
+        } else if (response.state === "Running") {
           setExtractionState(ExtractionStates.Running);
-        } else if (response.status?.state === "Succeeded") {
+        } else if (response.state === "Succeeded") {
           setExtractionState(ExtractionStates.Succeeded);
           setIsRunning(false);
           setCurrentIModelId(undefined);
-        } else if (response.status?.state === "Failed") {
+        } else if (response.state === "Failed") {
           setExtractionState(ExtractionStates.Failed);
           setIsRunning(false);
           setCurrentIModelId(undefined);

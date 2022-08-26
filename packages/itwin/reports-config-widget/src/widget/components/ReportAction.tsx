@@ -13,8 +13,8 @@ import {
   WidgetHeader,
 } from "./utils";
 import "./ReportAction.scss";
-import type { Report } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
+import { Report, ReportsClient } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
@@ -40,16 +40,16 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
         return;
       }
       setIsLoading(true);
-      const reportingClientApi = new ReportingClient(
+      const reportsClientApi = new ReportsClient(
         generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
       );
       const accessToken = await apiConfig.getAccessToken();
       report
-        ? await reportingClientApi.updateReport(accessToken, report.id ?? "", {
+        ? await reportsClientApi.updateReport(accessToken, report.id ?? "", {
           displayName: values.name,
           description: values.description,
         })
-        : await reportingClientApi.createReport(accessToken, {
+        : await reportsClientApi.createReport(accessToken, {
           displayName: values.name,
           description: values.description,
           projectId: iTwinId,

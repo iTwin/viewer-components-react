@@ -24,8 +24,9 @@ import userEvent from "@testing-library/user-event";
 import * as moq from "typemoq";
 import type { RequestHandler } from "msw";
 import { rest } from "msw";
-import type {
+import {
   ExtractionStatus,
+  ExtractorState,
   Mapping,
   MappingCollection,
   MappingSingle,
@@ -751,9 +752,13 @@ describe("Report Mappings View", () => {
     };
 
     let mockStatusResponse: ExtractionStatus = {
-      status: {
-        state: "Queued",
-        reason: "",
+      state: ExtractorState.Queued,
+      reason: "",
+      containsIssues: false,
+      _links: {
+        logs: {
+          href: "",
+        }
       },
     };
 
@@ -851,9 +856,13 @@ describe("Report Mappings View", () => {
     expect(queuedStates).toHaveLength(2);
 
     mockStatusResponse = {
-      status: {
-        state: "Running",
-        reason: "",
+      state: ExtractorState.Running,
+      reason: "",
+      containsIssues: false,
+      _links: {
+        logs: {
+          href: "",
+        }
       },
     };
 
@@ -863,9 +872,13 @@ describe("Report Mappings View", () => {
     expect(runningStates).toHaveLength(2);
 
     mockStatusResponse = {
-      status: {
-        state: "Succeeded",
-        reason: "",
+      state: ExtractorState.Succeeded,
+      reason: "",
+      containsIssues: false,
+      _links: {
+        logs: {
+          href: "",
+        }
       },
     };
 
