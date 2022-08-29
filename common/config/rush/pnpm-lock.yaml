@@ -762,7 +762,7 @@ importers:
       '@itwin/imodel-components-react': ^3.0.0
       '@itwin/imodels-access-frontend': ^1.0.1
       '@itwin/imodels-client-management': ^1.0.1
-      '@itwin/insights-client': ^0.2.0
+      '@itwin/insights-client': ^0.3.0
       '@itwin/itwinui-icons-color-react': ^1.0.1
       '@itwin/itwinui-icons-react': ^1.7.0
       '@itwin/itwinui-react': ~1.42.0
@@ -804,7 +804,7 @@ importers:
     dependencies:
       '@itwin/imodels-access-frontend': 1.0.1_e42c8153c9c78e18694e22e7ad06c7e0
       '@itwin/imodels-client-management': 1.0.1
-      '@itwin/insights-client': 0.2.0
+      '@itwin/insights-client': 0.3.0
       '@itwin/itwinui-icons-color-react': 1.0.2_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-icons-react': 1.8.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.42.0_react-dom@17.0.2+react@17.0.2
@@ -2872,18 +2872,19 @@ packages:
       - encoding
     dev: false
 
-  /@itwin/insights-client/0.2.0:
-    resolution: {integrity: sha512-D8jeHbQVErug9cBNkmdTFd93Yavg/lfYQ0UYcJWA538qk4Fw32GkOxDaMIj584NzmXr26n4xW2HLB3mwk3ewig==}
+  /@itwin/insights-client/0.2.1:
+    resolution: {integrity: sha512-hghlgwRy/IGJd5zv0RGzCNUVYKyw2LGeyvZarCA3o7e41y8GzA00mvSwo8lHa35PmwPDjN2ArlfMzx85LLXuwQ==}
     dependencies:
       cross-fetch: 3.1.5
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@itwin/insights-client/0.2.1:
-    resolution: {integrity: sha512-hghlgwRy/IGJd5zv0RGzCNUVYKyw2LGeyvZarCA3o7e41y8GzA00mvSwo8lHa35PmwPDjN2ArlfMzx85LLXuwQ==}
+  /@itwin/insights-client/0.3.0:
+    resolution: {integrity: sha512-QiulW7EeOab9qy5jKGZDEmeN3VmEx5dZ1DYAJbgdQDit+4eSFW/1jpmD2X8ZGADoW//FdI5dY+wTPaqrQACb9Q==}
     dependencies:
       cross-fetch: 3.1.5
+      fast-xml-parser: 4.0.9
     transitivePeerDependencies:
       - encoding
     dev: false
@@ -8403,6 +8404,13 @@ packages:
   /fast-sort/3.1.3:
     resolution: {integrity: sha512-DFD9n2nZVfJljjRaEN94SnIvUoSW2wpCdS2LC95iMNnzz8sja4yAYUVOXsXqvTiKUGMXiuhGZkrmtzUx8vopTg==}
     dev: true
+
+  /fast-xml-parser/4.0.9:
+    resolution: {integrity: sha512-4G8EzDg2Nb1Qurs3f7BpFV4+jpMVsdgLVuG1Uv8O2OHJfVCg7gcA53obuKbmVqzd4Y7YXVBK05oJG7hzGIdyzg==}
+    hasBin: true
+    dependencies:
+      strnum: 1.0.5
+    dev: false
 
   /fastq/1.13.0:
     resolution: {integrity: sha512-YpkpUnK8od0o1hmeSc7UUs/eB/vIPWJYjKck2QKIzAf71Vm1AAQ3EbuZB3g2JIy+pg+ERD0vqI79KyZiB2e2Nw==}
@@ -14454,6 +14462,10 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
     dev: true
+
+  /strnum/1.0.5:
+    resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}
+    dev: false
 
   /stylus-lookup/3.0.2:
     resolution: {integrity: sha512-oEQGHSjg/AMaWlKe7gqsnYzan8DLcGIHe0dUaFkucZZ14z4zjENRlQMCHT4FNsiWnJf17YN9OvrCfCoi7VvOyg==}
