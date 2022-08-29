@@ -2,29 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-/*
-import { IModelApp } from "@bentley/imodeljs-frontend";
-import { AuthorizationClient } from "@bentley/itwin-client";
-import { getConfig } from "../../config";
-import { prefixUrl } from "../useApiPrefix";
-import {
-  BASE_PATH,
-  CalculatedPropertyCreateReportingAPI,
-  CalculatedPropertyUpdateReportingAPI,
-  GroupCreateReportingAPI,
-  GroupPropertyCreateReportingAPI,
-  GroupPropertyUpdateReportingAPI,
-  GroupUpdateReportingAPI,
-  MappingCreateReportingAPI,
-  MappingsApi,
-  MappingUpdateReportingAPI,
-  ReportsApi,
-} from "./generated";
-*/
+
 import { IModelApp } from "@itwin/core-frontend";
 import { Configuration } from "../Template";
-//import * as isomorphicFetch from "isomorphic-fetch";
-//import * as url from "url";
 import isomorphicFetch from 'cross-fetch';
 
 const ACCEPT = "application/vnd.bentley.itwin-platform.v1+json";
