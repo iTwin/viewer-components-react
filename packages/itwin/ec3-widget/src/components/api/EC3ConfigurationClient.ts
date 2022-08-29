@@ -53,7 +53,17 @@ class EC3ConfigurationClient {
     };
 
     const response = await isomorphicFetch(url, prop);
-    return await response.json();
+
+    if (response.ok) {
+      return await response.json();
+    }
+    else {
+      var empty: any = {
+        configurations: []
+      }
+
+      return empty;
+    }
   }
 
   public async getConfiguration(configurationId: string) {
