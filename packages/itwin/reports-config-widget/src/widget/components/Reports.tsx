@@ -27,8 +27,7 @@ import {
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
 import type { Report } from "@itwin/insights-client";
-import { ReportsClient } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
 import { HorizontalTile } from "./HorizontalTile";
