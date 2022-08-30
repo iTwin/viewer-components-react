@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Added border to the color boxes for group highlighting",
+      "comment": "Added border to the color legend for group hiliting",
       "type": "patch"
     }
   ],
