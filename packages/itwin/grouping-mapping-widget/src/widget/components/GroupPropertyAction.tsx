@@ -35,6 +35,7 @@ import {
   LabeledInput,
   LabeledSelect,
   Small,
+  Text,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ActionPanel from "./ActionPanel";
@@ -689,7 +690,8 @@ const GroupPropertyAction = ({
           <div className="gmw-properties-list">
             {selectedProperties.length===0 && !isLoading?
               <div className="gmw-empty-selection">
-                No properties selected. Add some by opening the menu on the top.
+                <Text>No properties selected.</Text>
+                <Text>Press the &quot;Select Properties&quot; button for options.</Text>
               </div>:
               selectedProperties.map((property) => (
                 <HorizontalTile
@@ -761,9 +763,9 @@ const GroupPropertyAction = ({
               />
             </div>
             {filteredProperties.length===0 ?
-              <Surface className="gmw-empty-selection" elevation={2}>
-                No properties available.
-              </Surface>:
+              <div className="gmw-empty-selection">
+                <Text>No properties available. </Text>
+              </div>:
               <div className="gmw-properties-list">
                 {
                   filteredProperties.map((property) => (
@@ -790,9 +792,10 @@ const GroupPropertyAction = ({
           <Surface className="gmw-selected-properties" elevation={1}>
             <Label as="span">Selected Properties</Label>
             {selectedProperties.length===0 ?
-              <Surface className="gmw-empty-selection" elevation={2}>
-                No properties selected. Add some by clicking on the properties shown left.
-              </Surface>:
+              <div className="gmw-empty-selection">
+                <Text>No properties selected.</Text>
+                <Text>Add some by clicking on the properties shown left.</Text>
+              </div>:
               <div className="gmw-properties-list" >
                 <SortableContext
                   items={selectedProperties.map((p)=>p.key)}
