@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/reports-config-widget-react",
-      "comment": "updated insights client to 3.0",
+      "comment": "updated insights client to 0.3.0",
       "type": "patch"
     }
   ],
