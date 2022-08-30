@@ -459,7 +459,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                 className="gmw-group-view-icon"
                               >
                                 <div
-                                  className="gmw-color-box"
+                                  className="gmw-color-legend"
                                   style={{
                                     backgroundColor: getGroupColor(groups.findIndex((group) => g.id === group.id)),
                                   }}
