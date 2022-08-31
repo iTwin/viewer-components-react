@@ -30,7 +30,7 @@ import {
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
 import type { Report, ReportMapping } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH, ReportingClient } from "@itwin/insights-client";
+import { MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import AddMappingsModal from "./AddMappingsModal";
 import type {
   GetSingleIModelParams,
@@ -68,11 +68,14 @@ const fetchReportMappings = async (
 ) => {
   try {
     setIsLoading(true);
-    const reportingClientApi = new ReportingClient(
+    const reportsClientApi = new ReportsClient(
+      generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl)
+    );
+    const mappingsClientApi = new MappingsClient(
       generateUrl(REPORTING_BASE_PATH, apiContext.baseUrl)
     );
     const accessToken = await apiContext.getAccessToken();
-    const reportMappings = await reportingClientApi.getReportMappings(
+    const reportMappings = await reportsClientApi.getReportMappings(
       accessToken,
       reportId
     );
@@ -85,13 +88,13 @@ const fetchReportMappings = async (
       AccessTokenAdapter.toAuthorizationCallback(accessToken);
     const iModelNames = new Map<string, string>();
     const reportMappingsAndMapping = await Promise.all(
-      reportMappings?.map(async (reportMapping) => {
-        const iModelId = reportMapping.imodelId ?? "";
+      reportMappings.map(async (reportMapping) => {
+        const iModelId = reportMapping.imodelId;
         let iModelName = "";
-        const mapping = await reportingClientApi.getMapping(
+        const mapping = await mappingsClientApi.getMapping(
           accessToken,
-          reportMapping.mappingId ?? "",
-          iModelId
+          iModelId,
+          reportMapping.mappingId
         );
         if (iModelNames.has(iModelId)) {
           iModelName = iModelNames.get(iModelId) ?? "";
@@ -107,8 +110,8 @@ const fetchReportMappings = async (
         const reportMappingAndMapping: ReportMappingAndMapping = {
           ...reportMapping,
           iModelName,
-          mappingName: mapping.mapping?.mappingName ?? "",
-          mappingDescription: mapping.mapping?.description ?? "",
+          mappingName: mapping.mappingName,
+          mappingDescription: mapping.description ?? "",
         };
         return reportMappingAndMapping;
       }) ?? []
@@ -149,7 +152,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   useEffect(() => {
     void fetchReportMappings(
       setReportMappings,
-      report.id ?? "",
+      report.id,
       setIsLoading,
       apiConfig
     );
@@ -159,7 +162,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
     await fetchReportMappings(
       setReportMappings,
-      report.id ?? "",
+      report.id,
       setIsLoading,
       apiConfig
     );
@@ -173,7 +176,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
     () =>
       new Map(
         reportMappings.map((mapping) => [
-          mapping.imodelId ?? "",
+          mapping.imodelId,
           mapping.iModelName,
         ])
       ),
@@ -198,7 +201,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
 
   return (
     <>
-      <WidgetHeader title={report.displayName ?? ""} returnFn={goBack} />
+      <WidgetHeader title={report.displayName} returnFn={goBack} />
       <div className="report-mapping-misc">
         <LabeledInput
           label={ReportsConfigWidget.localization.getLocalizedString(
@@ -324,7 +327,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
       </Surface>
       <AddMappingsModal
         show={reportMappingsView === ReportMappingsView.ADDING}
-        reportId={report.id ?? ""}
+        reportId={report.id}
         existingMappings={reportMappings}
         returnFn={refresh}
       />
@@ -333,13 +336,13 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
-          const reportingClientApi = new ReportingClient(
+          const reportsClientApi = new ReportsClient(
             generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl)
           );
           const accessToken = await apiConfig.getAccessToken();
-          await reportingClientApi.deleteReportMapping(
+          await reportsClientApi.deleteReportMapping(
             accessToken,
-            report.id ?? "",
+            report.id,
             selectedReportMapping?.mappingId ?? ""
           );
         }}
