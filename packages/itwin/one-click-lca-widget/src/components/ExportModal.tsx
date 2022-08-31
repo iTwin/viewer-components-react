@@ -94,7 +94,7 @@ const ExportModal = (props: ExportProps) => {
             if (
               currentJobStatus.job?.status === JobStatus.StatusEnum.Succeeded
             ) {
-              setJobLink(currentJobStatus?.job._links?.oneclicklca);
+              setJobLink({href: currentJobStatus?.job._links?.oneclicklca?.href ?? ""});
             }
             setJobStatus(currentJobStatus.job?.status);
           } else {

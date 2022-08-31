@@ -7,8 +7,7 @@ import { SearchBox } from "@itwin/core-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Table, toaster } from "@itwin/itwinui-react";
-import type { Report } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
+import { Report, ReportsClient } from "@itwin/insights-client";
 import { WidgetHeader } from "./utils";
 import ExportModal from "./ExportModal";
 import "./Reports.scss";
@@ -21,7 +20,7 @@ type Reporting = CreateTypeFromInterface<Report>;
 
 const Reports = () => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  const reportingClientApi = useMemo(() => new ReportingClient(), []);
+  const reportsClientApi = useMemo(() => new ReportsClient(), []);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reports, setReports] = useState<Report[]>([]);
@@ -57,7 +56,7 @@ const Reports = () => {
     const filterReports = reports.filter(
       (x) =>
         x.displayName &&
-        x.displayName.toLowerCase()?.indexOf(value.toLowerCase()) > -1
+        x.displayName.toLowerCase().indexOf(value.toLowerCase()) > -1
     );
     setFilteredReports(filterReports);
   };
@@ -95,11 +94,11 @@ const Reports = () => {
     IModelApp.authorizationClient
       .getAccessToken()
       .then((token: string) => {
-        reportingClientApi
+        reportsClientApi
           .getReports(token, projectId)
           .then((data) => {
             if (data) {
-              const fetchedReports = data.reports ?? [];
+              const fetchedReports = data ?? [];
               setReports(fetchedReports);
               setFilteredReports(fetchedReports);
               setIsLoading(false);
@@ -117,7 +116,7 @@ const Reports = () => {
         /* eslint-disable no-console */
         console.error(err);
       });
-  }, [projectId, reportingClientApi]);
+  }, [projectId, reportsClientApi]);
 
   return (
     <>
