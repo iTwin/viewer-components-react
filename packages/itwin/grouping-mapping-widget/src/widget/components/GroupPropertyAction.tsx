@@ -100,8 +100,10 @@ interface PropertyMetaData {
   categoryLabel: string;
   // Property Type
   type: string;
+  // The actual ECClass name of the property
+  actualECClassName: string;
   // The parent class of the property
-  parentPropertyClassName: string;
+  parentPropertyClassName: string | undefined;
   // ECProperty type traversal
   propertyTraversal: Array<string>;
   // The type of primitive navigation from Presentation
@@ -128,9 +130,10 @@ const extractPrimitive = (
   const propertyName = propertyField.properties[0].property.name;
   const label = propertyField.label;
   //  It belongs to this parent class
-  const parentPropertyClassName = propertyField.parent?.contentClassInfo.name ?? "No Parent";
+  const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
   const primitiveNavigationClass = propertyField.properties[0].property.navigationPropertyInfo?.classInfo.name ?? "";
   const type = primitiveNavigationClass ? "String" : convertType(propertyField.properties[0].property.type);
+  const actualECClassName = propertyField.properties[0].property.classInfo.name;
 
   propertyTraversal.push(propertyName);
 
@@ -141,6 +144,7 @@ const extractPrimitive = (
     propertyTraversal,
     type,
     primitiveNavigationClass,
+    actualECClassName,
     parentPropertyClassName,
     key: propertyField.name,
     categoryLabel: propertyField.category.label,
@@ -151,7 +155,8 @@ const extractPrimitiveStructProperties = (
   propertyTraversal: Array<string>,
   members: StructFieldMemberDescription[],
   categoryLabel: string,
-  parentPropertyClassName: string = "*",
+  actualECClassName: string,
+  parentPropertyClassName?: string,
 ) => {
   const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
   for (const member of members) {
@@ -168,6 +173,7 @@ const extractPrimitiveStructProperties = (
         propertyTraversal: [...propertyTraversal, propertyName],
         type,
         primitiveNavigationClass: "",
+        actualECClassName,
         parentPropertyClassName,
         key: member.name,
         categoryLabel,
@@ -177,12 +183,28 @@ const extractPrimitiveStructProperties = (
       ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
         propertyTraversal,
         member.type.members,
+        categoryLabel,
+        actualECClassName,
         parentPropertyClassName
       ));
     }
   }
 
   return ecPropertyMetaDetaList;
+};
+
+const extractStruct = (property: Field, ecPropertyMetaDetaList: PropertyMetaData[]) => {
+  if (property.type.valueFormat !== PropertyValueFormat.Struct) return;
+
+  const columnName = (property as PropertiesField).properties[0]
+    .property.name;
+  const actualECClassName = (property as PropertiesField).properties[0].property.classInfo.name;
+  ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
+    [columnName],
+    property.type.members,
+    property.category.label,
+    actualECClassName
+  ));
 };
 
 const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]) => {
@@ -223,15 +245,7 @@ const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]
             // Some elements don't have a path to primary class or relationship meaning..
             // Most likely a simple struct property
             if (!nestedContentField.pathToPrimaryClass) {
-              const columnName = (property as PropertiesField).properties[0]
-                .property.name;
-              ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
-                [...propertyTraversal, columnName],
-                property.type.members,
-                property.category.label,
-                // It belongs to this parent class
-                property.parent?.contentClassInfo.name
-              ));
+              extractStruct(property, ecPropertyMetaDetaList);
             }
           }
         }
@@ -249,7 +263,6 @@ const convertPresentationFields = async (propertyFields: Field[]) => {
     // Generate base ECProperty
     switch (property.type.valueFormat) {
       case PropertyValueFormat.Primitive: {
-
         const extractedPrimitive = extractPrimitive([], property as PropertiesField);
         extractedPrimitive.schema = "*";
         extractedPrimitive.className = "*";
@@ -299,13 +312,7 @@ const convertPresentationFields = async (propertyFields: Field[]) => {
             // Some elements don't have a path to primary class or relationship meaning..
             // Most likely a simple struct property
             if (!nestedContentField.pathToPrimaryClass) {
-              const columnName = (property as PropertiesField).properties[0]
-                .property.name;
-              ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
-                [columnName],
-                property.type.members,
-                property.category.label,
-              ));
+              extractStruct(property, ecPropertyMetaDetaList);
             }
           }
         }
@@ -484,7 +491,7 @@ const GroupPropertyAction = ({
   const filteredProperties = useMemo(
     () =>
       propertiesMetaData.filter((p) =>
-        [p.label, p.categoryLabel]
+        [p.label, p.categoryLabel, p.actualECClassName]
           .join(" ")
           .toLowerCase()
           .includes(activeSearchInput.toLowerCase())
@@ -669,7 +676,11 @@ const GroupPropertyAction = ({
             onHide={() => { }}
           />
         </Fieldset>
-        {groupPropertyId && !isLoading && selectedProperties.length === 0 && <Alert type="warning">Warning: Properties could not be found. Overwriting will occur if a selection is made.</Alert>}
+        {groupPropertyId && !isLoading && selectedProperties.length === 0 &&
+          <Alert type="warning">
+            Warning: Could not match saved properties from the current generated list. It does not confirm or deny validity. Overwriting will occur if a new selection is made and saved.
+          </Alert>
+        }
         <Fieldset className='gmw-property-view-container' legend="Mapped Properties">
           <div className="gmw-property-view-button">
             <Button
@@ -689,7 +700,7 @@ const GroupPropertyAction = ({
                 <HorizontalTile
                   key={property.key}
                   title={property.label}
-                  titleTooltip={`Parent: ${property.parentPropertyClassName}`}
+                  titleTooltip={`${property.actualECClassName}`}
                   subText={`${property.type}`}
                   actionGroup={`${property.categoryLabel}`}
                 />
@@ -764,7 +775,7 @@ const GroupPropertyAction = ({
                     <HorizontalTile
                       key={property.key}
                       title={property.label}
-                      titleTooltip={`Parent: ${property.parentPropertyClassName}`}
+                      titleTooltip={`${property.actualECClassName}`}
                       subText={`${property.type}`}
                       actionGroup={`${property.categoryLabel}`}
                       selected={selectedProperties.some((p) => property.key === p.key)}
@@ -798,7 +809,7 @@ const GroupPropertyAction = ({
                       key={property.key}
                       id={property.key}
                       title={property.label}
-                      titleTooltip={`Parent: ${property.parentPropertyClassName}`}
+                      titleTooltip={`${property.actualECClassName}`}
                       subText={property.type}
                       actionGroup={
                         <div>
@@ -818,8 +829,7 @@ const GroupPropertyAction = ({
                       }
                     />)}
                 </SortableContext>
-              </div>
-            }
+              </div>}
           </Surface>
         </Split>
         <ModalButtonBar>
@@ -838,7 +848,6 @@ const GroupPropertyAction = ({
         {activeDragProperty ?
           <HorizontalTile
             title={activeDragProperty.label}
-            titleTooltip={`Parent: ${activeDragProperty.parentPropertyClassName}`}
             subText={activeDragProperty.type}
             actionGroup={activeDragProperty.categoryLabel}
             dragHandle={<div className="gmw-drag-icon" ><SvgDragHandleVertical /></div>}
@@ -849,3 +858,4 @@ const GroupPropertyAction = ({
 };
 
 export default GroupPropertyAction;
+
