@@ -22,26 +22,25 @@ import {
 } from "@itwin/presentation-common";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import type { SelectOption} from "@itwin/itwinui-react";
-import { Alert} from "@itwin/itwinui-react";
-import { ModalButtonBar} from "@itwin/itwinui-react";
-import { Button} from "@itwin/itwinui-react";
-import { Modal} from "@itwin/itwinui-react";
-import { Surface } from "@itwin/itwinui-react";
-import { IconButton } from "@itwin/itwinui-react";
+import type { SelectOption } from "@itwin/itwinui-react";
 import {
+  Alert,
+  Button,
   Fieldset,
+  IconButton,
   Label,
   LabeledInput,
   LabeledSelect,
+  Modal,
+  ModalButtonBar,
   Small,
+  Surface,
   Text,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
-import "./GroupPropertyAction.scss";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { HorizontalTile } from "./HorizontalTile";
@@ -69,6 +68,7 @@ import {
 import SortableHorizontalTile from "./SortableHorizontalTile";
 import { deepEqual } from "fast-equals";
 import Split from "react-split";
+import "./GroupPropertyAction.scss";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -244,11 +244,8 @@ const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]
 };
 
 const convertPresentationFields = async (propertyFields: Field[]) => {
-
   const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
-
   for (const property of propertyFields) {
-
     // Generate base ECProperty
     switch (property.type.valueFormat) {
       case PropertyValueFormat.Primitive: {
@@ -269,7 +266,6 @@ const convertPresentationFields = async (propertyFields: Field[]) => {
         ) {
           break;
         }
-
         switch (nestedContentField.relationshipMeaning) {
           case RelationshipMeaning.SameInstance: {
             // Check for aspects.
@@ -285,8 +281,6 @@ const convertPresentationFields = async (propertyFields: Field[]) => {
               const extractedNested = extractNested([], nestedContentField.nestedFields);
               const aspectExtractedNested = extractedNested.map((ecProperty) => ({ ...ecProperty, schema, className }));
               ecPropertyMetaDetaList.push(...aspectExtractedNested);
-
-              // Check if it is an ElementRefersToElements
             }
             break;
           }
@@ -385,28 +379,27 @@ const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> =>
   }
 };
 
-const findProperties = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[])=>{
+const findProperties = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[]) => {
   let ecPropertiesCopy = [...ecProperties];
   const propertiesMetaDataResult: PropertyMetaData[] = new Array<PropertyMetaData>();
-  let notFound=false;
-  while(ecPropertiesCopy.length!==0){
-    for(let i = 0; i<propertiesMetaData.length; i++ ){
+  let notFound = false;
+  while (ecPropertiesCopy.length !== 0) {
+    for (let i = 0; i < propertiesMetaData.length; i++) {
       const generatedProperty = convertToECProperties(propertiesMetaData[i]);
-      const slicedEcProperties = ecPropertiesCopy.slice(0,generatedProperty.length);
-      if(deepEqual(generatedProperty, slicedEcProperties)){
+      const slicedEcProperties = ecPropertiesCopy.slice(0, generatedProperty.length);
+      if (deepEqual(generatedProperty, slicedEcProperties)) {
         propertiesMetaDataResult.push(propertiesMetaData[i]);
         ecPropertiesCopy = ecPropertiesCopy.slice(generatedProperty.length);
         break;
       }
-      if(i===propertiesMetaData.length-1){
+      if (i === propertiesMetaData.length - 1) {
         notFound = true;
       }
     }
-    if(notFound)
+    if (notFound)
       break;
   }
-
-  return notFound ? []: propertiesMetaDataResult;
+  return notFound ? [] : propertiesMetaDataResult;
 };
 
 const fetchPresentationDescriptor = async (iModelConnection: IModelConnection, keySet: KeySet) => {
@@ -431,7 +424,6 @@ const fetchPresentationDescriptor = async (iModelConnection: IModelConnection, k
   const descriptor = await Presentation.presentation.getContentDescriptor(
     requestOptions
   );
-
   return descriptor;
 };
 
@@ -466,21 +458,21 @@ const GroupPropertyAction = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  const [showModal, setShowModal]=useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
-  const handleDragStart=(event: DragStartEvent)=> {
-    const {active} = event;
-    const activeProperty= selectedProperties.find((p)=>active.id===p.key);
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const activeProperty = selectedProperties.find((p) => active.id === p.key);
     setActiveDragProperty(activeProperty);
   };
 
-  const handleDragEnd=(event: DragEndEvent) =>{
-    const {active, over} = event;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
     if (over && (active.id !== over.id)) {
       setSelectedProperties((items) => {
-        const oldIndex = selectedProperties.findIndex((p)=>active.id===p.key);
-        const newIndex = selectedProperties.findIndex((p)=>over.id===p.key);
+        const oldIndex = selectedProperties.findIndex((p) => active.id === p.key);
+        const newIndex = selectedProperties.findIndex((p) => over.id === p.key);
 
         return arrayMove(items, oldIndex, newIndex);
       });
@@ -504,7 +496,7 @@ const GroupPropertyAction = ({
     const generateProperties = async () => {
       setIsLoading(true);
 
-      if(!iModelConnection) return;
+      if (!iModelConnection) return;
 
       const descriptor = await fetchPresentationDescriptor(iModelConnection, keySet);
 
@@ -535,7 +527,7 @@ const GroupPropertyAction = ({
           setPropertyName(response.property?.propertyName ?? "");
           setDataType(response.property?.dataType ?? "");
           setQuantityType(response.property?.quantityType ?? "");
-          const properties = findProperties(response.property?.ecProperties??[], propertiesMetaData);
+          const properties = findProperties(response.property?.ecProperties ?? [], propertiesMetaData);
           setSelectedProperties(properties);
         } catch (error: any) {
           handleError(error.status);
@@ -559,7 +551,7 @@ const GroupPropertyAction = ({
         propertyName,
         dataType,
         quantityType,
-        ecProperties: selectedProperties.map((p)=>convertToECProperties(p)).flat(),
+        ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
       };
       groupPropertyId
         ? await mappingClient.updateGroupProperty(
@@ -585,7 +577,7 @@ const GroupPropertyAction = ({
   };
 
   const startSearch = useCallback(() => {
-    if(!searchInput) return;
+    if (!searchInput) return;
     setActiveSearchInput(searchInput);
     setSearched(true);
   }, [searchInput]);
@@ -677,22 +669,22 @@ const GroupPropertyAction = ({
             onHide={() => { }}
           />
         </Fieldset>
-        {groupPropertyId && !isLoading && selectedProperties.length===0 && <Alert type="warning">Warning: Properties could not be found. Overwriting will occur if a selection is made.</Alert>}
+        {groupPropertyId && !isLoading && selectedProperties.length === 0 && <Alert type="warning">Warning: Properties could not be found. Overwriting will occur if a selection is made.</Alert>}
         <Fieldset className='gmw-property-view-container' legend="Mapped Properties">
           <div className="gmw-property-view-button">
             <Button
               onClick={async () => setShowModal(true)}
               disabled={isLoading}
             >
-            Select Properties
+              Select Properties
             </Button>
           </div>
           <div className="gmw-properties-list">
-            {selectedProperties.length===0 && !isLoading?
+            {selectedProperties.length === 0 && !isLoading ?
               <div className="gmw-empty-selection">
                 <Text>No properties selected.</Text>
                 <Text>Press the &quot;Select Properties&quot; button for options.</Text>
-              </div>:
+              </div> :
               selectedProperties.map((property) => (
                 <HorizontalTile
                   key={property.key}
@@ -762,10 +754,10 @@ const GroupPropertyAction = ({
                 }
               />
             </div>
-            {filteredProperties.length===0 ?
+            {filteredProperties.length === 0 ?
               <div className="gmw-empty-selection">
                 <Text>No properties available. </Text>
-              </div>:
+              </div> :
               <div className="gmw-properties-list">
                 {
                   filteredProperties.map((property) => (
@@ -775,9 +767,9 @@ const GroupPropertyAction = ({
                       titleTooltip={`Parent: ${property.parentPropertyClassName}`}
                       subText={`${property.type}`}
                       actionGroup={`${property.categoryLabel}`}
-                      selected={selectedProperties.some((p)=> property.key===p.key)}
+                      selected={selectedProperties.some((p) => property.key === p.key)}
                       onClick={() =>
-                        setSelectedProperties((sp)=>
+                        setSelectedProperties((sp) =>
                           sp.some((p) => property.key === p.key)
                             ? sp.filter(
                               (p) => property.key !== p.key
@@ -791,14 +783,14 @@ const GroupPropertyAction = ({
           </Surface>
           <Surface className="gmw-selected-properties" elevation={1}>
             <Label as="span">Selected Properties</Label>
-            {selectedProperties.length===0 ?
+            {selectedProperties.length === 0 ?
               <div className="gmw-empty-selection">
                 <Text>No properties selected.</Text>
                 <Text>Add some by clicking on the properties shown left.</Text>
-              </div>:
+              </div> :
               <div className="gmw-properties-list" >
                 <SortableContext
-                  items={selectedProperties.map((p)=>p.key)}
+                  items={selectedProperties.map((p) => p.key)}
                   strategy={verticalListSortingStrategy}
                 >
                   {selectedProperties.map((property) =>
@@ -814,13 +806,13 @@ const GroupPropertyAction = ({
                           <IconButton
                             styleType="borderless"
                             title="Remove"
-                            onClick={() =>{
-                              setSelectedProperties((sp)=>sp.filter(
+                            onClick={() => {
+                              setSelectedProperties((sp) => sp.filter(
                                 (p) => property.key !== p.key
                               ));
                             }
                             }>
-                            <SvgRemove/>
+                            <SvgRemove />
                           </IconButton>
                         </div>
                       }
@@ -848,8 +840,8 @@ const GroupPropertyAction = ({
             title={activeDragProperty.label}
             titleTooltip={`Parent: ${activeDragProperty.parentPropertyClassName}`}
             subText={activeDragProperty.type}
-            actionGroup={activeDragProperty.categoryLabel }
-            dragHandle={<div className="gmw-drag-icon" ><SvgDragHandleVertical/></div>}
+            actionGroup={activeDragProperty.categoryLabel}
+            dragHandle={<div className="gmw-drag-icon" ><SvgDragHandleVertical /></div>}
           /> : null}
       </DragOverlay>
     </DndContext>
