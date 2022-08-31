@@ -5,8 +5,7 @@
 import { Modal, Table, tableFilters } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
 import type { Mapping } from "@itwin/insights-client";
-import { ReportsClient } from "@itwin/insights-client";
-import { MappingsClient, REPORTING_BASE_PATH } from "@itwin/insights-client";
+import { MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
