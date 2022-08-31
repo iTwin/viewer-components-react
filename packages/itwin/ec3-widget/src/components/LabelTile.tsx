@@ -4,19 +4,22 @@
 *--------------------------------------------------------------------------------------------*/
 import type { ReactNode } from "react";
 import React from "react";
-import { Text } from "@itwin/itwinui-react";
+import { Text, IconButton } from "@itwin/itwinui-react";
+import {
+  SvgDelete,
+} from "@itwin/itwinui-icons-react";
 import "./LabelTile.scss";
 
 interface LabelTileProps {
   title: string;
-  actionGroup: ReactNode;
+  onDelete: () => void;
   subText?: string;
   onClickTitle?: () => void;
   titleTooltip?: string;
   subtextToolTip?: string;
 }
 
-export const LabelTile = ({ title, subText, onClickTitle, titleTooltip, subtextToolTip, actionGroup }: LabelTileProps) => {
+export const LabelTile = ({ title, subText, onClickTitle, titleTooltip, subtextToolTip, onDelete }: LabelTileProps) => {
 
   return (
     <div className="ec3-label-tile-container" data-testid="label-tile">
@@ -24,9 +27,13 @@ export const LabelTile = ({ title, subText, onClickTitle, titleTooltip, subtextT
         <Text className={`body-text ${onClickTitle ? "iui-anchor" : ""}`} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
         {subText && <Text className="body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
       </div>
-      <div className="action-button" data-testid="tile-action-button">
-        {actionGroup}
-      </div>
+      <IconButton
+        styleType="borderless"
+        className="delete-icon"
+        onClick={onDelete}
+      >
+        <SvgDelete />
+      </IconButton>
     </div>
   );
 

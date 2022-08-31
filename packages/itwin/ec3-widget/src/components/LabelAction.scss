@@ -31,6 +31,13 @@
   .ec3-label-button {
     min-height: 38px;
   }
+
+  .delete-icon {
+    margin-left: 0;
+    align-self: center;
+    min-width: $iui-l;
+    cursor: pointer;
+  }
 }
 
 .ec3-label-combo-field {

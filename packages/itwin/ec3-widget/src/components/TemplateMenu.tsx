@@ -12,13 +12,17 @@ import { WidgetHeader, handleSelectChange } from "./utils";
 import ExportModal from "./ExportModal";
 import TemplateClient from "./TemplateClient";
 import LabelAction from "./LabelAction";
-import { Configuration, Label } from "./Template"
+import { Configuration, Label as EC3Label } from "./Template"
 import { LabelTile } from "./LabelTile";
 import DeleteModal from "./DeleteModal";
 import { handleInputChange } from "./utils";
 import TemplateActionPanel from "./TemplateActionPanel";
 import ReportConfirmModal from "./ReportConfirmModal";
 import { EC3ConfigurationClient } from "./api/EC3ConfigurationClient";
+import {
+  ComboBox,
+  Label
+} from "@itwin/itwinui-react";
 
 import {
   SvgDelete,
@@ -48,14 +52,12 @@ enum LabelView {
 }
 
 const TemplateMenu = ({ template, goBack }: TemplateProps) => {
-  const templateClient = new TemplateClient();
-  const [projectName, setProjectName] = useState<string>("");
   const projectId = useActiveIModelConnection()?.iTwinId as string;
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
-  const [selectedLabel, setSelectedLabel] = useState<Label>();
+  const [selectedLabel, setSelectedLabel] = useState<EC3Label>();
   const [selectedReport, setSelectedReport] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
   const [availableReports, setReports] = useState<Report[]>([]);
@@ -115,7 +117,6 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
 
     const fetchReports = async () => {
       const projName = await fetchProjectName(projectId);
-      setProjectName(projName);
       if (template) {
         const config = await configurationClient.getConfiguration(template.id!);
         const configuration = config.configuration;
@@ -133,7 +134,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
         const accessToken = await IModelApp.authorizationClient.getAccessToken();
         const data = await reportingClientApi.getReports(accessToken, projectId);
         if (data) {
-          const fetchedReports = data;
+          const fetchedReports = data.sort((a, b) => a.displayName?.localeCompare(b.displayName ?? "") ?? 0);
           setReports(fetchedReports);
           setIsLoading(false);
         }
@@ -224,23 +225,31 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                 }}
               />
 
-              <LabeledSelect
-                label="Report"
-                id='reportId'
-                required
-                options={ReportOptions}
-                value={childTemplate.reportId}
-                placeholder={isLoading ? "Loading" : "Select report"}
-                onChange={async (value) => {
+              <div className="report-select-container">
+                <div className="report-select-combo-box">
+                  <Label htmlFor="combo-input" required={true}>
+                    Report
+                  </Label>
 
-                  if (template && value !== template.reportId) {
-                    setSelectedReport(value);
-                    setShowReportConfirmModal(true);
-                  }
-                  else {
-                    handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
-                  }
-                }} onShow={() => { }} onHide={() => { }} />
+                  <ComboBox
+                    options={ReportOptions}
+                    value={childTemplate.reportId}
+                    onChange={async (value) => {
+                      if (template && value !== template.reportId) {
+                        setSelectedReport(value);
+                        setShowReportConfirmModal(true);
+                      }
+                      else {
+                        handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
+                      }
+                    }}
+                    inputProps={{
+                      id: "combo-input",
+                      placeholder: "Select report"
+                    }}
+                  />
+                </div>
+              </div>
 
               <Surface className="ec3-labels-container">
                 <div className="ec3-labels-list">
@@ -250,36 +259,11 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                         <LabelTile
                           key={g.reportTable}
                           title={g.name === "" ? g.reportTable : g.name}
-                          actionGroup={
-                            <div className="actions">
-                              <DropdownMenu
-                                menuItems={(close: () => void) => [
-                                  <MenuItem
-                                    key={2}
-                                    onClick={() => {
-                                      setSelectedLabel(g);
-                                      setShowDeleteModal(true);
-                                      close();
-                                    }}
-                                    icon={<SvgDelete />}
-                                  >
-                                    Remove
-                                  </MenuItem>,
-                                ]}
-                              >
-                                <IconButton
-                                  styleType="borderless"
-                                >
-                                  <SvgMore
-                                    style={{
-                                      width: "16px",
-                                      height: "16px",
-                                    }}
-                                  />
-                                </IconButton>
-                              </DropdownMenu>
-                            </div>
-                          }
+                          onDelete={() => {
+                            setSelectedLabel(g);
+                            setShowDeleteModal(true);
+                            close();
+                          }}
                           onClickTitle={() => {
                             setSelectedLabel(g);
                             setLabelsView(LabelView.MODIFY);
@@ -308,7 +292,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
           />
 
           <ExportModal
-            projectName={projectName}
+            projectName={childTemplate.displayName}
             isOpen={modalIsOpen}
             close={() => openModal(false)}
             templateId={childTemplate.id}

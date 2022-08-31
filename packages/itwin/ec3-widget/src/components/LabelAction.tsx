@@ -407,32 +407,17 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 }}
                 actionGroup={
                   <div className="actions">
-                    <DropdownMenu
-                      menuItems={(close: () => void) => [
-                        <MenuItem
-                          key={0}
-                          onClick={() => {
-                            setSelectedMaterial(material);
-                            setShowDeleteModal(true);
-                            close();
-                          }}
-                          icon={<SvgDelete />}
-                        >
-                          Remove
-                        </MenuItem>,
-                      ]}
+                    <IconButton
+                      styleType="borderless"
+                      className="delete-icon"
+                      onClick={() => {
+                        setSelectedMaterial(material);
+                        setShowDeleteModal(true);
+                        close();
+                      }}
                     >
-                      <IconButton
-                        styleType="borderless"
-                      >
-                        <SvgMore
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                          }}
-                        />
-                      </IconButton>
-                    </DropdownMenu>
+                      <SvgDelete />
+                    </IconButton>
                   </div>
                 }
               />

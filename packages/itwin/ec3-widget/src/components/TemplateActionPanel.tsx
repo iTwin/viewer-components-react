@@ -7,12 +7,6 @@ import * as React from "react";
 import "./TemplateActionPanel.scss";
 import { LoadingSpinner } from "./utils";
 
-import {
-  SvgSave,
-  SvgExport,
-  SvgExit
-} from "@itwin/itwinui-icons-react";
-
 export interface TemplateActionPanelProps {
   onSave: () => void;
   onCancel: () => void;
@@ -38,7 +32,6 @@ const TemplateActionPanel = ({
         }
         <Button
           disabled={isSavingDisabled || isLoading}
-          startIcon={<SvgSave />}
           styleType='high-visibility'
           id='save-app'
           onClick={onSave}
@@ -46,14 +39,12 @@ const TemplateActionPanel = ({
           Save
         </Button>
         <Button
-          startIcon={<SvgExport />}
           styleType="high-visibility"
           onClick={onExport}
         >
           Export
         </Button>
         <Button
-          startIcon={<SvgExit />}
           styleType='default'
           type='button'
           id='cancel'

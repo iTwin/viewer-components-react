@@ -19,6 +19,19 @@
   }
 }
 
+.report-select-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $iui-s;
+
+  .report-select-combo-box {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+}
+
 .ec3-labels-container {
   display: flex;
   flex-direction: column;
