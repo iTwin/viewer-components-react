@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/one-click-lca-react",
       "comment": "Updated oclca widget to insights-client 0.3.0",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/one-click-lca-react"
