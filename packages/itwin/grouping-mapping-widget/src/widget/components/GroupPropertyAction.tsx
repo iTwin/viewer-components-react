@@ -43,7 +43,8 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import "./GroupPropertyAction.scss";
-import { DataType, ECProperty, GroupProperty, GroupPropertyCreate, GroupPropertySingle, QuantityType } from "@itwin/insights-client";
+import type { ECProperty, GroupProperty, GroupPropertyCreate} from "@itwin/insights-client";
+import { DataType, QuantityType } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
@@ -365,7 +366,7 @@ const GroupPropertyAction = ({
         if (!response) {
           return;
         }
-        newEcProperties = response?.ecProperties ?? [];
+        newEcProperties = response.ecProperties;
 
         let keys = Array.from(classToPropertiesMapping.keys()).reverse();
         for (const ecProperty of newEcProperties) {
@@ -385,9 +386,9 @@ const GroupPropertyAction = ({
           }))
         );
 
-        setPropertyName(response?.propertyName ?? "");
-        setDataType(response?.dataType ?? "");
-        setQuantityType(response?.quantityType ?? "");
+        setPropertyName(response.propertyName);
+        setDataType(response.dataType);
+        setQuantityType(response.quantityType);
       } else {
         newEcProperties = Array.from(classToPropertiesMapping)
           .map(([key]) => ({
@@ -411,9 +412,9 @@ const GroupPropertyAction = ({
     const filteredEcProperties = ecProperties.filter(
       (ecProperty) => ecProperty.ecPropertyName && ecProperty.ecPropertyType
     );
-    if (!filteredEcProperties?.length || !validator.allValid()) {
+    if (!filteredEcProperties.length || !validator.allValid()) {
       showValidationMessage(true);
-      if (!filteredEcProperties?.length) {
+      if (!filteredEcProperties.length) {
         setPropertyAlert(true);
       }
       return;
@@ -589,7 +590,7 @@ const GroupPropertyAction = ({
                   LOADING SKELETON
                 </Text>
               ))}
-          {ecProperties?.map((ecProperty, index) => {
+          {ecProperties.map((ecProperty, index) => {
             return (
               <div
                 className='gmw-property-select-item'

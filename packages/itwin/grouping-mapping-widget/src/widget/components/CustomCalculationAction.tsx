@@ -71,7 +71,7 @@ const CustomCalculationAction = ({
           iModelId,
           mappingId,
           groupId,
-          customCalculation.id ?? "",
+          customCalculation.id,
           {
             propertyName,
             formula,
@@ -113,7 +113,7 @@ const CustomCalculationAction = ({
       <WidgetHeader
         title={
           customCalculation
-            ? `${customCalculation?.propertyName ?? ""}`
+            ? `${customCalculation.propertyName}`
             : "Create Custom Calculation"
         }
         returnFn={async () => returnFn(false)}

@@ -112,7 +112,7 @@ const CalculatedPropertyAction = ({
           iModelId,
           mappingId,
           groupId,
-          property.id ?? "",
+          property.id,
           {
             propertyName,
             type,

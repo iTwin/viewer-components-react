@@ -118,7 +118,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     void fetchGroups(
       setGroups,
       iModelId,
-      mapping.id ?? "",
+      mapping.id,
       setIsLoading,
       getAccessToken,
       mappingClient,
@@ -133,7 +133,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     async (groups: Group[]) => {
       let allIds: string[] = [];
       for (const group of groups) {
-        const query = group.query ?? "";
+        const query = group.query;
         let currentIds: string[] = [];
         if (hilitedElements.current.has(query)) {
           currentIds = hilitedElements.current.get(query) ?? [];
@@ -177,7 +177,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           FeatureOverrideType.ColorAndAlpha,
         );
         emphasizeElements(hilitedIds, undefined);
-        if (!hiddenGroupsIds.includes(group.id ?? "")) {
+        if (!hiddenGroupsIds.includes(group.id)) {
           allIds = allIds.concat(hilitedIds);
         }
       }
@@ -192,7 +192,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     async (viewGroups: Group[]) => {
       setLoadingQuery(true);
       for (const viewGroup of viewGroups) {
-        const query = viewGroup.query ?? "";
+        const query = viewGroup.query;
         if (hilitedElements.current.has(query)) {
           const hilitedIds = hilitedElements.current.get(query) ?? [];
           hideElements(hilitedIds);
@@ -250,7 +250,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const onModify = async (group: Group) => {
     setSelectedGroup(group);
     setGroupsView(GroupsView.MODIFYING);
-    if (group?.id && hiddenGroupsIds.includes(group.id)) {
+    if (group.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
     }
@@ -260,7 +260,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const openProperties = async (group: Group) => {
     setSelectedGroup(group);
     setGroupsView(GroupsView.PROPERTIES);
-    if (group?.id && hiddenGroupsIds.includes(group.id)) {
+    if (group.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
     }
@@ -273,7 +273,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     const groups = await fetchGroups(
       setGroups,
       iModelId,
-      mapping.id ?? "",
+      mapping.id,
       setIsLoading,
       getAccessToken,
       mappingClient,
@@ -349,7 +349,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return (
         <GroupAction
           iModelId={iModelId}
-          mappingId={mapping.id ?? ""}
+          mappingId={mapping.id}
           goBack={async () => {
             setGroupsView(GroupsView.GROUPS);
             await refresh();
@@ -361,7 +361,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return selectedGroup ? (
         <GroupAction
           iModelId={iModelId}
-          mappingId={mapping.id ?? ""}
+          mappingId={mapping.id}
           group={selectedGroup}
           goBack={async () => {
             setGroupsView(GroupsView.GROUPS);
@@ -374,7 +374,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return selectedGroup ? (
         <PropertyMenu
           iModelId={iModelId}
-          mappingId={mapping.id ?? ""}
+          mappingId={mapping.id}
           group={selectedGroup}
           goBack={propertyMenuGoBack}
         />
@@ -383,7 +383,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return (
         <>
           <WidgetHeader
-            title={mapping.mappingName ?? ""}
+            title={mapping.mappingName}
             disabled={isLoading || isLoadingQuery}
             returnFn={async () => {
               clearEmphasizedOverriddenElements();
@@ -444,7 +444,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               <div className="gmw-group-list">
                 {
                   groups
-                    .sort((a, b) => a.groupName?.localeCompare(b.groupName ?? "") ?? 1)
+                    .sort((a, b) => a.groupName.localeCompare(b.groupName) ?? 1)
                     .map((g) => (
                       <HorizontalTile
                         key={g.id}
@@ -555,7 +555,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               await mappingClient.deleteGroup(
                 accessToken,
                 iModelId,
-                mapping.id ?? "",
+                mapping.id,
                 selectedGroup?.id ?? "",
               );
             }}

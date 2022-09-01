@@ -28,7 +28,7 @@ import { Groupings } from "./Grouping";
 import MappingAction from "./MappingAction";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
 import { useMappingClient } from "./context/MappingClientContext";
-import type { Mapping, IMappingsClient } from "@itwin/insights-client";
+import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { HorizontalTile } from "./HorizontalTile";
 import { clearAll } from "./viewerUtils";
@@ -71,12 +71,12 @@ const toggleExtraction = async (
   mapping: Mapping
 ) => {
   try {
-    const newState = !mapping?.extractionEnabled;
+    const newState = mapping.extractionEnabled;
     const accessToken = await getAccessToken();
     await mappingsClient.updateMapping(
       accessToken,
       iModelId,
-      mapping?.id ?? "",
+      mapping.id,
       { extractionEnabled: newState }
     );
   } catch (error: any) {
@@ -168,7 +168,7 @@ export const Mappings = () => {
             ) : (
               <div className="gmw-mappings-list">
                 {mappings
-                  .sort((a, b) => a.mappingName?.localeCompare(b.mappingName ?? "") ?? 1)
+                  .sort((a, b) => a.mappingName.localeCompare(b.mappingName) ?? 1)
                   .map((mapping) => (
                     <HorizontalTile
                       key={mapping.id}

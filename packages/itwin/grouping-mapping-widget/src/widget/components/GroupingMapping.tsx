@@ -9,7 +9,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import type { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
 import { createMappingClient, MappingClientContext } from "./context/MappingClientContext";
-import { IMappingsClient } from "@itwin/insights-client";
+import type { IMappingsClient } from "@itwin/insights-client";
 
 export interface GroupingMappingProps {
   /**

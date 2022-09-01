@@ -121,7 +121,7 @@ export const PropertyMenu = ({
   hideCalculatedProps = false,
   hideCustomCalculationProps = false,
 }: PropertyModifyProps) => {
-  const groupId = group.id ?? "";
+  const groupId = group.id;
 
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -172,7 +172,7 @@ export const PropertyMenu = ({
   useEffect(() => {
     const initialize = async () => {
       try {
-        const query = group.query ?? "";
+        const query = group.query;
         const queryRowCount = await iModelConnection.queryRowCount(query);
         if (queryRowCount === 0) {
           toaster.warning("The query is valid but produced no results.");
@@ -318,7 +318,7 @@ export const PropertyMenu = ({
         <InformationPanelWrapper className='gmw-property-menu-wrapper'>
           <div className='gmw-property-header'>
             <WidgetHeader
-              title={`${group.groupName ?? ""}`}
+              title={`${group.groupName}`}
               returnFn={goBack}
             />
             <IconButton
@@ -386,7 +386,7 @@ export const PropertyMenu = ({
             <InformationPanelHeader
               onClose={() => setIsInformationPanelOpen(false)}
             >
-              <Text variant='subheading'>{`${group.groupName ?? ""} Information`}</Text>
+              <Text variant='subheading'>{`${group.groupName} Information`}</Text>
             </InformationPanelHeader>
             <InformationPanelBody>
               <div className='gmw-information-body'>
@@ -394,7 +394,7 @@ export const PropertyMenu = ({
                   label='Query'
                   rows={15}
                   readOnly
-                  defaultValue={group.query ?? ""}
+                  defaultValue={group.query}
                 />
               </div>
             </InformationPanelBody>
