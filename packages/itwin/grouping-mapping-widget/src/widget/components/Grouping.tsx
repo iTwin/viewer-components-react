@@ -22,7 +22,6 @@ import {
   SvgEdit,
   SvgList,
   SvgMore,
-  SvgRectangle,
   SvgVisibilityHide,
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
@@ -458,11 +457,11 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                 styleType="borderless"
                                 className="gmw-group-view-icon"
                               >
-                                <SvgRectangle
-                                  stroke-width="100"
-                                  stroke={getGroupColor(
-                                    groups.findIndex((group) => g.id === group.id),
-                                  )}
+                                <div
+                                  className="gmw-color-legend"
+                                  style={{
+                                    backgroundColor: getGroupColor(groups.findIndex((group) => g.id === group.id)),
+                                  }}
                                 />
                               </IconButton>
                             )}

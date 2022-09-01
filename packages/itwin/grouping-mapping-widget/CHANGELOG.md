@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 22 Aug 2022 19:37:22 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Aug 2022 14:01:03 GMT and should not be manually modified.
+
+## 0.5.8
+Wed, 24 Aug 2022 14:01:03 GMT
+
+### Patches
+
+- Exporting GetAccessTokenFn type from GroupingApiConfigContext for consuming applications to use when setting up the GroupingMappingProvider
 
 ## 0.5.7
 Mon, 22 Aug 2022 19:37:22 GMT
