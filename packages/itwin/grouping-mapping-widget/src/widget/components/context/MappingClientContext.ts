@@ -2,7 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { REPORTING_BASE_PATH, IMappingsClient, MappingsClient } from "@itwin/insights-client";
+import type { IMappingsClient} from "@itwin/insights-client";
+import { MappingsClient, REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 import type { ClientPrefix } from "./GroupingApiConfigContext";
 
