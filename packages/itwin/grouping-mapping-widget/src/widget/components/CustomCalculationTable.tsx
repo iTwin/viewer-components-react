@@ -31,7 +31,7 @@ interface CustomCalculationTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  setSelectedCustomCalculation: React.Dispatch<React.SetStateAction<CreateTypeFromInterface<CustomCalculationType> | undefined>>;
+  setSelectedCustomCalculation: React.Dispatch<React.SetStateAction<CustomCalculationType | undefined>>;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
   onCustomCalculationModify: (value: CellProps<CustomCalculationType>) => void;
   isLoadingCustomCalculations: boolean;

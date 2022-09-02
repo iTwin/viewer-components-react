@@ -22,7 +22,7 @@ import CalculatedPropertyAction from "./CalculatedPropertyAction";
 import type { GroupPropertyType } from "./GroupPropertyTable";
 import GroupPropertyTable from "./GroupPropertyTable";
 import type {
-  CalculatedPropertyType,
+  ICalculatedPropertyType,
 } from "./CalculatedPropertyTable";
 import CalculatedPropertyTable from "./CalculatedPropertyTable";
 import {
@@ -84,7 +84,7 @@ const stringToPossibleDataType = (str?: string): PossibleDataType => {
 
 const convertToPropertyMap = (
   groupProperties: GroupPropertyType[],
-  calculatedProperties: CalculatedPropertyType[],
+  calculatedProperties: ICalculatedPropertyType[],
   customCalculations: CustomCalculationType[],
   selectedPropertyName?: string
 ): PropertyMap => {
@@ -133,7 +133,7 @@ export const PropertyMenu = ({
   const [selectedGroupProperty, setSelectedGroupProperty] =
     useState<GroupPropertyType | undefined>(undefined);
   const [selectedCalculatedProperty, setSelectedCalculatedProperty] =
-    useState<CalculatedPropertyType | undefined>(undefined);
+    useState<ICalculatedPropertyType | undefined>(undefined);
   const [selectedCustomCalculation, setSelectedCustomCalculation] =
     useState<CustomCalculationType | undefined>(undefined);
   const [isInformationPanelOpen, setIsInformationPanelOpen] =
@@ -158,7 +158,7 @@ export const PropertyMenu = ({
     [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingCalculatedProperties, data: calculatedProperties, refreshData: refreshCalculatedProperties } =
-    useCombinedFetchRefresh<CalculatedPropertyType>(fetchCalculatedProperties);
+    useCombinedFetchRefresh<ICalculatedPropertyType>(fetchCalculatedProperties);
 
   const fetchCustomCalculations = useMemo(
     () => {
@@ -206,7 +206,7 @@ export const PropertyMenu = ({
   );
 
   const onCalculatedPropertyModify = useCallback(
-    (value: CellProps<CalculatedPropertyType>) => {
+    (value: CellProps<ICalculatedPropertyType>) => {
       setSelectedCalculatedProperty(value.row.original);
       setPropertyMenuView(PropertyMenuView.MODIFY_CALCULATED_PROPERTY);
     },

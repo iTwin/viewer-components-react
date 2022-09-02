@@ -23,16 +23,16 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
-import type { CalculatedPropertyType } from "./CalculatedPropertyTable";
+import type { ICalculatedPropertyType } from "./CalculatedPropertyTable";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import { CalculatedPropertyType as CalcPropertyType } from "@itwin/insights-client";
+import { CalculatedPropertyType } from "@itwin/insights-client";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  property?: CalculatedPropertyType;
+  property?: ICalculatedPropertyType;
   ids: string[];
   returnFn: (modified: boolean) => Promise<void>;
 }
@@ -50,7 +50,7 @@ const CalculatedPropertyAction = ({
   const [propertyName, setPropertyName] = useState<string>(
     property?.propertyName ?? "",
   );
-  const [type, setType] = useState<CalcPropertyType>(property?.type ?? CalcPropertyType.Undefined);
+  const [type, setType] = useState<CalculatedPropertyType>(property?.type ?? CalculatedPropertyType.Undefined);
   const [bboxDecorator, setBboxDecorator] = useState<BboxDimensionsDecorator | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [inferredSpatialData, setInferredSpatialData] = useState<Map<BboxDimension, number> | undefined>();
@@ -184,39 +184,39 @@ const CalculatedPropertyAction = ({
               validator.showMessageFor("name");
             }}
           />
-          <LabeledSelect<CalcPropertyType>
+          <LabeledSelect<CalculatedPropertyType>
             label='Quantity Type'
             required
             options={[
-              { value: CalcPropertyType.Length, label: "Length" },
-              { value: CalcPropertyType.Area, label: "Area" },
-              { value: CalcPropertyType.Volume, label: "Volume" },
+              { value: CalculatedPropertyType.Length, label: "Length" },
+              { value: CalculatedPropertyType.Area, label: "Area" },
+              { value: CalculatedPropertyType.Volume, label: "Volume" },
               {
-                value: CalcPropertyType.BoundingBoxLongestEdgeLength,
+                value: CalculatedPropertyType.BoundingBoxLongestEdgeLength,
                 label: "Longest Edge Length",
               },
               {
-                value: CalcPropertyType.BoundingBoxIntermediateEdgeLength,
+                value: CalculatedPropertyType.BoundingBoxIntermediateEdgeLength,
                 label: "Intermediate Edge Length",
               },
               {
-                value: CalcPropertyType.BoundingBoxShortestEdgeLength,
+                value: CalculatedPropertyType.BoundingBoxShortestEdgeLength,
                 label: "Shortest Edge Length",
               },
               {
-                value: CalcPropertyType.BoundingBoxDiagonalLength,
+                value: CalculatedPropertyType.BoundingBoxDiagonalLength,
                 label: "Diagonal Length",
               },
               {
-                value: CalcPropertyType.BoundingBoxLongestFaceDiagonalLength,
+                value: CalculatedPropertyType.BoundingBoxLongestFaceDiagonalLength,
                 label: "Longest Face Diagonal Length",
               },
               {
-                value: CalcPropertyType.BoundingBoxIntermediateFaceDiagonalLength,
+                value: CalculatedPropertyType.BoundingBoxIntermediateFaceDiagonalLength,
                 label: "Intermediate Face Diagonal Length",
               },
               {
-                value: CalcPropertyType.BoundingBoxShortestFaceDiagonalLength,
+                value: CalculatedPropertyType.BoundingBoxShortestFaceDiagonalLength,
                 label: "Shortest Face Diagonal Length",
               },
             ]}
