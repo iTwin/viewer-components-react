@@ -14,7 +14,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
-import type { MappingType } from "./Mapping";
+import type { IMappingTyped } from "./Mapping";
 import "./SelectMapping.scss";
 import { handleError } from "./utils";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
@@ -41,7 +41,7 @@ const fetchMappings = async (
 
 interface SelectMappingsProps {
   iModelId: string;
-  onSelect: (selectedMappings: MappingType[]) => void;
+  onSelect: (selectedMappings: IMappingTyped[]) => void;
   onCancel: () => void;
   backFn: () => void;
 }
@@ -55,7 +55,7 @@ const SelectMappings = ({
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [selectedMappings, setSelectedMappings] = useState<MappingType[]>([]);
+  const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
   useEffect(() => {
@@ -95,7 +95,7 @@ const SelectMappings = ({
 
   return (
     <div className='gmw-select-mapping-container'>
-      <Table<MappingType>
+      <Table<IMappingTyped>
         data={mappings}
         columns={mappingsColumns}
         className='gmw-select-mapping-table'
@@ -103,7 +103,7 @@ const SelectMappings = ({
         isSortable
         isSelectable
         isLoading={isLoading}
-        onSelect={(selectData: MappingType[] | undefined) => {
+        onSelect={(selectData: IMappingTyped[] | undefined) => {
           selectData && setSelectedMappings(selectData);
         }}
         paginatorRenderer={paginator}

@@ -24,20 +24,20 @@ import type { CalculatedProperty } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
-export type ICalculatedPropertyType =
+export type ICalculatedPropertyTyped =
   CreateTypeFromInterface<CalculatedProperty>;
 
 interface CalculatedPropertyTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  setSelectedCalculatedProperty: React.Dispatch<React.SetStateAction<ICalculatedPropertyType | undefined>>;
+  setSelectedCalculatedProperty: React.Dispatch<React.SetStateAction<ICalculatedPropertyTyped | undefined>>;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
-  onCalculatedPropertyModify: (value: CellProps<ICalculatedPropertyType>) => void;
+  onCalculatedPropertyModify: (value: CellProps<ICalculatedPropertyTyped>) => void;
   isLoadingCalculatedProperties: boolean;
-  calculatedProperties: ICalculatedPropertyType[];
+  calculatedProperties: ICalculatedPropertyTyped[];
   refreshCalculatedProperties: () => Promise<void>;
-  selectedCalculatedProperty?: ICalculatedPropertyType;
+  selectedCalculatedProperty?: ICalculatedPropertyTyped;
 }
 
 const CalculatedPropertyTable = ({
@@ -68,7 +68,7 @@ const CalculatedPropertyTable = ({
             id: "propertyName",
             Header: "Calculated Property",
             accessor: "propertyName",
-            Cell: (value: CellProps<ICalculatedPropertyType>) => (
+            Cell: (value: CellProps<ICalculatedPropertyTyped>) => (
               <div
                 className='iui-anchor'
                 onClick={() => onCalculatedPropertyModify(value)}
@@ -81,7 +81,7 @@ const CalculatedPropertyTable = ({
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<ICalculatedPropertyType>) => {
+            Cell: (value: CellProps<ICalculatedPropertyTyped>) => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
@@ -134,7 +134,7 @@ const CalculatedPropertyTable = ({
       >
         Add Calculated Property
       </Button>
-      <Table<ICalculatedPropertyType>
+      <Table<ICalculatedPropertyTyped>
         data={calculatedProperties}
         density='extra-condensed'
         columns={calculatedPropertiesColumns}

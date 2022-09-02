@@ -35,7 +35,7 @@ import { clearAll } from "./viewerUtils";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
-export type MappingType = CreateTypeFromInterface<Mapping>;
+export type IMappingTyped = CreateTypeFromInterface<Mapping>;
 
 enum MappingView {
   MAPPINGS = "mappings",

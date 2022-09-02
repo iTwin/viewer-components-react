@@ -55,7 +55,7 @@ import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
-export type GroupType = CreateTypeFromInterface<Group>;
+export type IGroupTyped = CreateTypeFromInterface<Group>;
 
 enum GroupsView {
   GROUPS = "groups",
@@ -72,7 +72,7 @@ interface GroupsTreeProps {
 const goldenAngle = 180 * (3 - Math.sqrt(5));
 
 const fetchGroups = async (
-  setGroups: React.Dispatch<React.SetStateAction<GroupType[]>>,
+  setGroups: React.Dispatch<React.SetStateAction<IGroupTyped[]>>,
   iModelId: string,
   mappingId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
@@ -105,7 +105,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [groupsView, setGroupsView] = useState<GroupsView>(GroupsView.GROUPS);
-  const [selectedGroup, setSelectedGroup] = useState<GroupType | undefined>(
+  const [selectedGroup, setSelectedGroup] = useState<IGroupTyped | undefined>(
     undefined,
   );
   const hilitedElements = useRef<Map<string, string[]>>(new Map());

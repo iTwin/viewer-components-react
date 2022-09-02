@@ -24,20 +24,20 @@ import type { CustomCalculation } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
-export type CustomCalculationType =
+export type ICustomCalculationTyped =
   CreateTypeFromInterface<CustomCalculation>;
 
 interface CustomCalculationTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  setSelectedCustomCalculation: React.Dispatch<React.SetStateAction<CustomCalculationType | undefined>>;
+  setSelectedCustomCalculation: React.Dispatch<React.SetStateAction<ICustomCalculationTyped | undefined>>;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
-  onCustomCalculationModify: (value: CellProps<CustomCalculationType>) => void;
+  onCustomCalculationModify: (value: CellProps<ICustomCalculationTyped>) => void;
   isLoadingCustomCalculations: boolean;
-  customCalculations: CustomCalculationType[];
+  customCalculations: ICustomCalculationTyped[];
   refreshCustomCalculations: () => Promise<void>;
-  selectedCustomCalculation?: CustomCalculationType;
+  selectedCustomCalculation?: ICustomCalculationTyped;
 }
 
 const CustomCalculationTable = ({
@@ -68,7 +68,7 @@ const CustomCalculationTable = ({
             id: "propertyName",
             Header: "Custom Calculation",
             accessor: "propertyName",
-            Cell: (value: CellProps<CustomCalculationType>) => (
+            Cell: (value: CellProps<ICustomCalculationTyped>) => (
               <div
                 className='iui-anchor'
                 onClick={() => onCustomCalculationModify(value)}
@@ -86,7 +86,7 @@ const CustomCalculationTable = ({
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<CustomCalculationType>) => {
+            Cell: (value: CellProps<ICustomCalculationTyped>) => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
@@ -139,7 +139,7 @@ const CustomCalculationTable = ({
       >
         Add Custom Calculation
       </Button>
-      <Table<CustomCalculationType>
+      <Table<ICustomCalculationTyped>
         data={customCalculations}
         density='extra-condensed'
         columns={CustomCalculationsColumns}

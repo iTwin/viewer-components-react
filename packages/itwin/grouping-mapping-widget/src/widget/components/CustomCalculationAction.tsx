@@ -14,7 +14,7 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import "./CalculatedPropertyAction.scss";
-import type { CustomCalculationType } from "./CustomCalculationTable";
+import type { ICustomCalculationTyped } from "./CustomCalculationTable";
 import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
@@ -28,7 +28,7 @@ interface CalculatedPropertyActionProps {
   mappingId: string;
   groupId: string;
   properties: PropertyMap;
-  customCalculation?: CustomCalculationType;
+  customCalculation?: ICustomCalculationTyped;
   returnFn: (modified: boolean) => Promise<void>;
 }
 

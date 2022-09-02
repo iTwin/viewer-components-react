@@ -15,14 +15,14 @@ import {
   visualizeElementsByKeys,
   zoomToElements,
 } from "./viewerUtils";
-import type { GroupType } from "./Grouping";
+import type { IGroupTyped } from "./Grouping";
 import "./PropertyMenu.scss";
 import GroupPropertyAction from "./GroupPropertyAction";
 import CalculatedPropertyAction from "./CalculatedPropertyAction";
-import type { GroupPropertyType } from "./GroupPropertyTable";
+import type { IGroupPropertyTyped } from "./GroupPropertyTable";
 import GroupPropertyTable from "./GroupPropertyTable";
 import type {
-  ICalculatedPropertyType,
+  ICalculatedPropertyTyped,
 } from "./CalculatedPropertyTable";
 import CalculatedPropertyTable from "./CalculatedPropertyTable";
 import {
@@ -38,7 +38,7 @@ import {
 } from "@itwin/itwinui-react";
 import type { CellProps } from "react-table";
 import type {
-  CustomCalculationType,
+  ICustomCalculationTyped,
 } from "./CustomCalculationTable";
 import CustomCalculationTable from "./CustomCalculationTable";
 import CustomCalculationAction from "./CustomCalculationAction";
@@ -52,7 +52,7 @@ import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext"
 interface PropertyModifyProps {
   iModelId: string;
   mappingId: string;
-  group: GroupType;
+  group: IGroupTyped;
   goBack: () => Promise<void>;
   hideGroupProps?: boolean;
   hideCalculatedProps?: boolean;
@@ -83,9 +83,9 @@ const stringToPossibleDataType = (str?: string): PossibleDataType => {
 };
 
 const convertToPropertyMap = (
-  groupProperties: GroupPropertyType[],
-  calculatedProperties: ICalculatedPropertyType[],
-  customCalculations: CustomCalculationType[],
+  groupProperties: IGroupPropertyTyped[],
+  calculatedProperties: ICalculatedPropertyTyped[],
+  customCalculations: ICustomCalculationTyped[],
   selectedPropertyName?: string
 ): PropertyMap => {
   const map: PropertyMap = {};
@@ -131,11 +131,11 @@ export const PropertyMenu = ({
     PropertyMenuView.DEFAULT,
   );
   const [selectedGroupProperty, setSelectedGroupProperty] =
-    useState<GroupPropertyType | undefined>(undefined);
+    useState<IGroupPropertyTyped | undefined>(undefined);
   const [selectedCalculatedProperty, setSelectedCalculatedProperty] =
-    useState<ICalculatedPropertyType | undefined>(undefined);
+    useState<ICalculatedPropertyTyped | undefined>(undefined);
   const [selectedCustomCalculation, setSelectedCustomCalculation] =
-    useState<CustomCalculationType | undefined>(undefined);
+    useState<ICustomCalculationTyped | undefined>(undefined);
   const [isInformationPanelOpen, setIsInformationPanelOpen] =
     useState<boolean>(false);
   const [resolvedHiliteIds, setResolvedHiliteIds] = useState<string[]>([]);
@@ -149,7 +149,7 @@ export const PropertyMenu = ({
     [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingGroupProperties, data: groupProperties, refreshData: refreshGroupProperties } =
-    useCombinedFetchRefresh<GroupPropertyType>(fetchGroupProperties);
+    useCombinedFetchRefresh<IGroupPropertyTyped>(fetchGroupProperties);
 
   const fetchCalculatedProperties = useMemo(
     () => {
@@ -158,7 +158,7 @@ export const PropertyMenu = ({
     [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingCalculatedProperties, data: calculatedProperties, refreshData: refreshCalculatedProperties } =
-    useCombinedFetchRefresh<ICalculatedPropertyType>(fetchCalculatedProperties);
+    useCombinedFetchRefresh<ICalculatedPropertyTyped>(fetchCalculatedProperties);
 
   const fetchCustomCalculations = useMemo(
     () => {
@@ -167,7 +167,7 @@ export const PropertyMenu = ({
     [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
   const { isLoading: isLoadingCustomCalculations, data: customCalculations, refreshData: refreshCustomCalculations } =
-    useCombinedFetchRefresh<CustomCalculationType>(fetchCustomCalculations);
+    useCombinedFetchRefresh<ICustomCalculationTyped>(fetchCustomCalculations);
 
   useEffect(() => {
     const initialize = async () => {
@@ -198,7 +198,7 @@ export const PropertyMenu = ({
   }, [iModelConnection, group.query, goBack, group.groupName]);
 
   const onGroupPropertyModify = useCallback(
-    (value: CellProps<GroupPropertyType>) => {
+    (value: CellProps<IGroupPropertyTyped>) => {
       setSelectedGroupProperty(value.row.original);
       setPropertyMenuView(PropertyMenuView.MODIFY_GROUP_PROPERTY);
     },
@@ -206,7 +206,7 @@ export const PropertyMenu = ({
   );
 
   const onCalculatedPropertyModify = useCallback(
-    (value: CellProps<ICalculatedPropertyType>) => {
+    (value: CellProps<ICalculatedPropertyTyped>) => {
       setSelectedCalculatedProperty(value.row.original);
       setPropertyMenuView(PropertyMenuView.MODIFY_CALCULATED_PROPERTY);
     },
@@ -214,7 +214,7 @@ export const PropertyMenu = ({
   );
 
   const onCustomCalculationModify = useCallback(
-    (value: CellProps<CustomCalculationType>) => {
+    (value: CellProps<ICustomCalculationTyped>) => {
       setSelectedCustomCalculation(value.row.original);
       setPropertyMenuView(PropertyMenuView.MODIFY_CUSTOM_CALCULATION);
     },

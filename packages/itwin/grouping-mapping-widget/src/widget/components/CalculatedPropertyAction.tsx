@@ -23,7 +23,7 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
-import type { ICalculatedPropertyType } from "./CalculatedPropertyTable";
+import type { ICalculatedPropertyTyped } from "./CalculatedPropertyTable";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { CalculatedPropertyType } from "@itwin/insights-client";
@@ -32,7 +32,7 @@ interface CalculatedPropertyActionProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  property?: ICalculatedPropertyType;
+  property?: ICalculatedPropertyTyped;
   ids: string[];
   returnFn: (modified: boolean) => Promise<void>;
 }
