@@ -10,7 +10,7 @@ import {
   Text,
 } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
-import type { MappingType } from "./Mapping";
+import type { IMappingTyped } from "./Mapping";
 import "./ConfirmMappingsImport.scss";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { SvgStatusSuccessHollow } from "@itwin/itwinui-icons-react";
@@ -21,10 +21,10 @@ import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext"
 
 interface ConfirmMappingImportProps {
   sourceiModelId: string;
-  selectedMappings: MappingType[];
+  selectedMappings: IMappingTyped[];
   importing: boolean;
   setImporting: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedMappings: React.Dispatch<React.SetStateAction<MappingType[]>>;
+  setSelectedMappings: React.Dispatch<React.SetStateAction<IMappingTyped[]>>;
   backFn: () => void;
   onCancel: () => void;
   onFinish: () => void;
