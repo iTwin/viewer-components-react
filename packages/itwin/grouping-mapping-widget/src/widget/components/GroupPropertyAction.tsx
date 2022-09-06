@@ -44,7 +44,8 @@ import { handleError, WidgetHeader } from "./utils";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { HorizontalTile } from "./HorizontalTile";
-import type { ECProperty, GroupPropertyCreate, GroupPropertySingle } from "@itwin/insights-client";
+import { DataType, QuantityType } from "@itwin/insights-client";
+import type { ECProperty, GroupProperty, GroupPropertyCreate } from "@itwin/insights-client";
 import { SvgClose, SvgDragHandleVertical, SvgRemove, SvgSearch } from "@itwin/itwinui-icons-react";
 import type {
   DragEndEvent,
@@ -80,15 +81,15 @@ interface GroupPropertyActionProps {
   returnFn: (modified: boolean) => Promise<void>;
 }
 
-export const quantityTypesSelectionOptions: SelectOption<string>[] = [
-  { value: "Area", label: "Area" },
-  { value: "Distance", label: "Distance" },
-  { value: "Force", label: "Force" },
-  { value: "Mass", label: "Mass" },
-  { value: "Monetary", label: "Monetary" },
-  { value: "Time", label: "Time" },
-  { value: "Volume", label: "Volume" },
-  { value: "Undefined", label: "No Quantity Type" },
+export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
+  { value: QuantityType.Area, label: "Area" },
+  { value: QuantityType.Distance, label: "Distance" },
+  { value: QuantityType.Force, label: "Force" },
+  { value: QuantityType.Mass, label: "Mass" },
+  { value: QuantityType.Monetary, label: "Monetary" },
+  { value: QuantityType.Time, label: "Time" },
+  { value: QuantityType.Volume, label: "Volume" },
+  { value: QuantityType.Undefined, label: "No Quantity Type" },
 ];
 
 interface PropertyMetaData {
@@ -99,7 +100,7 @@ interface PropertyMetaData {
   className: string;
   categoryLabel: string;
   // Property Type
-  type: string;
+  type: DataType;
   // The actual ECClass name of the property
   actualECClassName: string;
   // The parent class of the property
@@ -111,15 +112,22 @@ interface PropertyMetaData {
   key: string;
 }
 
-const convertType = (type: string) => {
+const convertType = (type: string): DataType => {
   switch (type) {
     case "int":
     case "enum":
     case "long":
-      return "Integer";
+      return DataType.Integer;
+    case "boolean":
+      return DataType.Boolean;
+    case "double":
+      return DataType.Double;
+    case "string":
+      return DataType.String;
+    case "number":
+      return DataType.Number;
     default:
-      // Capitilize first letter to match backend capitalization
-      return `${type[0].toUpperCase()}${type.slice(1).toLowerCase()}`;
+      return DataType.Undefined;
   }
 };
 
@@ -132,7 +140,8 @@ const extractPrimitive = (
   //  It belongs to this parent class
   const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
   const primitiveNavigationClass = propertyField.properties[0].property.navigationPropertyInfo?.classInfo.name ?? "";
-  const type = primitiveNavigationClass ? "String" : convertType(propertyField.properties[0].property.type);
+  // Presentation treats primitive navigation classes as longs. Handling this special case.
+  const type = primitiveNavigationClass ? DataType.String : convertType(propertyField.properties[0].property.type);
   const actualECClassName = propertyField.properties[0].property.classInfo.name;
 
   propertyTraversal.push(propertyName);
@@ -327,6 +336,7 @@ const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> =>
     ecSchemaName: property.schema,
     ecClassName: property.className,
     ecPropertyType: property.type,
+    ecPropertyName: "",
   };
   switch (property.primitiveNavigationClass) {
     // Hardcode Models navigation path and label behavior
@@ -447,8 +457,8 @@ const GroupPropertyAction = ({
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>("");
-  const [dataType, setDataType] = useState<string | undefined>();
-  const [quantityType, setQuantityType] = useState<string>("Undefined");
+  const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
+  const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
   const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
   const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>(
     []
@@ -521,7 +531,7 @@ const GroupPropertyAction = ({
 
       if (groupPropertyId) {
         const accessToken = await getAccessToken();
-        let response: GroupPropertySingle | undefined;
+        let response: GroupProperty | undefined;
         try {
           response = await mappingClient.getGroupProperty(
             accessToken,
@@ -531,10 +541,10 @@ const GroupPropertyAction = ({
             groupPropertyId
           );
 
-          setPropertyName(response.property?.propertyName ?? "");
-          setDataType(response.property?.dataType ?? "");
-          setQuantityType(response.property?.quantityType ?? "");
-          const properties = findProperties(response.property?.ecProperties ?? [], propertiesMetaData);
+          setPropertyName(response.propertyName);
+          setDataType(response.dataType);
+          setQuantityType(response.quantityType);
+          const properties = findProperties(response.ecProperties, propertiesMetaData);
           setSelectedProperties(properties);
         } catch (error: any) {
           handleError(error.status);
@@ -641,13 +651,13 @@ const GroupPropertyAction = ({
               validator.showMessageFor("propertyName");
             }}
           />
-          <LabeledSelect<string>
+          <LabeledSelect<DataType>
             label={"Data Type"}
             id='dataType'
             options={[
-              { value: "Boolean", label: "Boolean" },
-              { value: "Number", label: "Number" },
-              { value: "String", label: "String" },
+              { value: DataType.Boolean, label: "Boolean" },
+              { value: DataType.Number, label: "Number" },
+              { value: DataType.String, label: "String" },
             ]}
             required
             value={dataType}
@@ -667,7 +677,7 @@ const GroupPropertyAction = ({
             onShow={() => { }}
             onHide={() => { }}
           />
-          <LabeledSelect<string>
+          <LabeledSelect<QuantityType>
             label='Quantity Type'
             options={quantityTypesSelectionOptions}
             value={quantityType}
