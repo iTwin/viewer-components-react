@@ -198,7 +198,6 @@ const extractPrimitiveStructProperties = (
       ));
     }
   }
-
   return ecPropertyMetaDetaList;
 };
 
@@ -261,9 +260,7 @@ const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]
       }
     }
   }
-
   return ecPropertyMetaDetaList;
-
 };
 
 const convertPresentationFields = async (propertyFields: Field[]) => {
