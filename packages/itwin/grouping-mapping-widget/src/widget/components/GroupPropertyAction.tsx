@@ -130,33 +130,38 @@ const convertType = (type: string): DataType => {
   }
 };
 
-const extractPrimitive = (
+const extractPrimitives = (
   propertyTraversal: Array<string>,
   propertyField: PropertiesField
-): PropertyMetaData => {
-  const propertyName = propertyField.properties[0].property.name;
-  const label = propertyField.label;
-  //  It belongs to this parent class
-  const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
-  const primitiveNavigationClass = propertyField.properties[0].property.navigationPropertyInfo?.classInfo.name ?? "";
-  // Presentation treats primitive navigation classes as longs. Handling this special case.
-  const type = primitiveNavigationClass ? DataType.String : convertType(propertyField.properties[0].property.type);
-  const actualECClassName = propertyField.properties[0].property.classInfo.name;
+): PropertyMetaData[] => {
+  const properties = new Array<PropertyMetaData>();
+  for(const property of propertyField.properties){
+    const propertyName = property.property.name;
+    const label = propertyField.label;
+    // It belongs to this parent class
+    const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
+    const primitiveNavigationClass = property.property.navigationPropertyInfo?.classInfo.name ?? "";
+    // Presentation treats primitive navigation classes as longs. Handling this special case.
+    const type = primitiveNavigationClass ? DataType.String : convertType(property.property.type);
+    const actualECClassName = property.property.classInfo.name;
 
-  propertyTraversal.push(propertyName);
+    properties.push(
+      {
+        label,
+        schema: "*",
+        className: "*",
+        propertyTraversal: [...propertyTraversal, propertyName],
+        type,
+        primitiveNavigationClass,
+        actualECClassName,
+        parentPropertyClassName,
+        key: propertyField.name,
+        categoryLabel: propertyField.category.label,
+      }
+    );
+  }
 
-  return {
-    label,
-    schema: "*",
-    className: "*",
-    propertyTraversal,
-    type,
-    primitiveNavigationClass,
-    actualECClassName,
-    parentPropertyClassName,
-    key: propertyField.name,
-    categoryLabel: propertyField.category.label,
-  };
+  return properties;
 };
 
 const extractPrimitiveStructProperties = (
@@ -221,7 +226,7 @@ const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]
     // Generate base ECProperty
     switch (property.type.valueFormat) {
       case PropertyValueFormat.Primitive: {
-        ecPropertyMetaDetaList.push(extractPrimitive([...propertyTraversal], property as PropertiesField));
+        ecPropertyMetaDetaList.push(...extractPrimitives([...propertyTraversal], property as PropertiesField));
         break;
       }
       // Get structs
@@ -268,10 +273,12 @@ const convertPresentationFields = async (propertyFields: Field[]) => {
     // Generate base ECProperty
     switch (property.type.valueFormat) {
       case PropertyValueFormat.Primitive: {
-        const extractedPrimitive = extractPrimitive([], property as PropertiesField);
-        extractedPrimitive.schema = "*";
-        extractedPrimitive.className = "*";
-        ecPropertyMetaDetaList.push(extractedPrimitive);
+        const extractedPrimitives = extractPrimitives([], property as PropertiesField);
+        for(const extractedPrimitive of extractedPrimitives){
+          extractedPrimitive.schema = "*";
+          extractedPrimitive.className = "*";
+          ecPropertyMetaDetaList.push(extractedPrimitive);
+        }
         break;
       }
       // Get structs
@@ -361,11 +368,17 @@ const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> =>
       return [
         {
           ...ecProperty,
-          ecPropertyName: [...property.propertyTraversal, "UserLabel"].join("."),
+          ecPropertyName: [
+            ...property.propertyTraversal,
+            "UserLabel",
+          ].join("."),
         },
         {
           ...ecProperty,
-          ecPropertyName: [...property.propertyTraversal, "CodeValue"].join("."),
+          ecPropertyName: [
+            ...property.propertyTraversal,
+            "CodeValue",
+          ].join("."),
         },
       ];
     // Hardcode Material path and label behavior
@@ -373,11 +386,19 @@ const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> =>
       return [
         {
           ...ecProperty,
-          ecPropertyName: [...property.propertyTraversal.slice(0, -1), "Material", "UserLabel"].join("."),
+          ecPropertyName: [
+            ...property.propertyTraversal.slice(0, -1),
+            "Material",
+            "UserLabel",
+          ].join("."),
         },
         {
           ...ecProperty,
-          ecPropertyName: [...property.propertyTraversal.slice(0, -1), "Material", "CodeValue"].join("."),
+          ecPropertyName: [
+            ...property.propertyTraversal.slice(0, -1),
+            "Material",
+            "CodeValue",
+          ].join("."),
         },
       ];
     }
