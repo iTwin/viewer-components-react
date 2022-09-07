@@ -24,19 +24,19 @@ import type { GroupProperty } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
 
-export type GroupPropertyType = CreateTypeFromInterface<GroupProperty>;
+export type IGroupPropertyTyped = CreateTypeFromInterface<GroupProperty>;
 
 interface GroupPropertyTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  setSelectedGroupProperty: React.Dispatch<React.SetStateAction<CreateTypeFromInterface<GroupPropertyType> | undefined>>;
+  setSelectedGroupProperty: React.Dispatch<React.SetStateAction<IGroupPropertyTyped | undefined>>;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
-  onGroupPropertyModify: (value: CellProps<GroupPropertyType>) => void;
+  onGroupPropertyModify: (value: CellProps<IGroupPropertyTyped>) => void;
   isLoadingGroupProperties: boolean;
-  groupProperties: GroupPropertyType[];
+  groupProperties: IGroupPropertyTyped[];
   refreshGroupProperties: () => Promise<void>;
-  selectedGroupProperty?: GroupPropertyType;
+  selectedGroupProperty?: IGroupPropertyTyped;
 }
 
 const GroupPropertyTable = ({
@@ -65,7 +65,7 @@ const GroupPropertyTable = ({
             id: "propertyName",
             Header: "Property",
             accessor: "propertyName",
-            Cell: (value: CellProps<GroupPropertyType>) => (
+            Cell: (value: CellProps<IGroupPropertyTyped>) => (
               <div
                 className='iui-anchor'
                 onClick={() => onGroupPropertyModify(value)}
@@ -78,7 +78,7 @@ const GroupPropertyTable = ({
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<GroupPropertyType>) => {
+            Cell: (value: CellProps<IGroupPropertyTyped>) => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
@@ -131,7 +131,7 @@ const GroupPropertyTable = ({
       >
         Add Property
       </Button>
-      <Table<GroupPropertyType>
+      <Table<IGroupPropertyTyped>
         data={groupProperties}
         density='extra-condensed'
         columns={groupPropertiesColumns}

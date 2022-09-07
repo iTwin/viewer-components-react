@@ -9,7 +9,7 @@ import SelectProject from "./SelectProject";
 import "./MappingImportWizardModal.scss";
 import SelectIModel from "./SelectIModel";
 import SelectMappings from "./SelectMappings";
-import type { MappingType } from "./Mapping";
+import type { IMappingTyped } from "./Mapping";
 import ConfirmMappingImport from "./ConfirmMappingsImport";
 
 interface MappingImportWizardModalProps {
@@ -26,7 +26,7 @@ export const MappingImportWizardModal = ({
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [selectedIModelId, setSelectedIModelId] = useState<string>("");
-  const [selectedMappings, setSelectedMappings] = useState<MappingType[]>([]);
+  const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
   const [importing, setImporting] = useState<boolean>(false);
 
   const steps = useRef<StepProperties[]>([
@@ -68,7 +68,7 @@ export const MappingImportWizardModal = ({
         await onClose();
       }}
     >
-      <div className='import-wizard-body-container'>
+      <div className='gmw-import-wizard-body-container'>
         <Wizard
           currentStep={currentStep}
           steps={steps.current}
@@ -108,7 +108,7 @@ export const MappingImportWizardModal = ({
                 <>
                   <div
                     style={{ display: currentStep === 2 ? "flex" : "none" }}
-                    className="mappings-container"
+                    className="gmw-mappings-container"
                   >
                     <SelectMappings
                       iModelId={selectedIModelId}

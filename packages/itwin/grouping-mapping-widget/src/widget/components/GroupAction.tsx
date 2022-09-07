@@ -13,8 +13,8 @@ import {
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
-import { fetchIdsFromQuery, handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
-import type { GroupType } from "./Grouping";
+import { handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
+import type { IGroupTyped } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -23,7 +23,7 @@ import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
 import { QueryBuilder } from "./QueryBuilder";
 import {
   transparentOverriddenElements,
-  visualizeElementsById,
+  visualizeElementsByQuery,
   zoomToElements,
 } from "./viewerUtils";
 import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
@@ -34,7 +34,7 @@ import { useMappingClient } from "./context/MappingClientContext";
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
-  group?: GroupType;
+  group?: IGroupTyped;
   goBack: () => Promise<void>;
   resetView: () => Promise<void>;
 }
@@ -110,9 +110,8 @@ const GroupAction = ({
 
         setIsRendering(true);
         transparentOverriddenElements();
-        const ids = await fetchIdsFromQuery(query ?? "", iModelConnection);
-        const resolvedHiliteIds = await visualizeElementsById(
-          ids,
+        const resolvedHiliteIds = await visualizeElementsByQuery(
+          query,
           "red",
           iModelConnection,
         );
@@ -233,9 +232,9 @@ const GroupAction = ({
           await goBack();
         }}
       />
-      <div className='group-add-modify-container'>
-        <Fieldset legend='Group Details' className='group-details'>
-          <Small className='field-legend'>
+      <div className='gmw-group-add-modify-container'>
+        <Fieldset legend='Group Details' className='gmw-group-details'>
+          <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
@@ -280,9 +279,9 @@ const GroupAction = ({
             }}
           />
         </Fieldset>
-        <Fieldset legend='Group By' className='query-builder-container'>
+        <Fieldset legend='Group By' className='gmw-query-builder-container'>
           <RadioTileGroup
-            className="radio-group-tile"
+            className="gmw-radio-group-tile"
             required>
             <RadioTile
               name={"groupby"}
@@ -318,7 +317,7 @@ const GroupAction = ({
             >
               <GroupQueryBuilderContainer />
             </GroupQueryBuilderContext.Provider> :
-            <div className="search-form">
+            <div className="gmw-search-form">
               <Text>Generate a query by keywords. Keywords wrapped in double quotes will be considered a required criteria.</Text>
               <LabeledTextarea
                 label="Query Keywords"
@@ -327,7 +326,7 @@ const GroupAction = ({
                 onChange={(event) => setSearchInput(event.target.value)}
                 disabled={isLoading || isRendering}
                 placeholder={`E.g. "red" chair`} />
-              <div className="search-actions">
+              <div className="gmw-search-actions">
                 {isRendering &&
                   <LoadingSpinner />
                 }
@@ -356,7 +355,6 @@ const GroupAction = ({
         isSavingDisabled={
           isBlockingActions
         }
-        isCancelDisabled={isBlockingActions}
         isLoading={isLoading}
       />
     </>

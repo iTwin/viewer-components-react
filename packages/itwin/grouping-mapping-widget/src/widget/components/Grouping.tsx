@@ -3,12 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import {
   Button,
@@ -42,27 +37,25 @@ import {
   emphasizeElements,
   getHiliteIds,
   hideElements,
-  hideElementsById,
+  hideElementsByQuery,
   overrideElements,
   zoomToElements,
 } from "./viewerUtils";
 import {
   EmptyMessage,
-  fetchIdsFromQuery,
   handleError,
   LoadingOverlay,
   WidgetHeader,
 } from "./utils";
 import GroupAction from "./GroupAction";
-import type { Group, Mapping } from "@itwin/insights-client";
+import type { Group, IMappingsClient, Mapping } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { FeatureOverrideType } from "@itwin/core-common";
-import { GroupTile } from "./GroupTile";
-import type { IMappingClient } from "../IMappingClient";
+import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
-export type GroupType = CreateTypeFromInterface<Group>;
+export type IGroupTyped = CreateTypeFromInterface<Group>;
 
 enum GroupsView {
   GROUPS = "groups",
@@ -79,17 +72,17 @@ interface GroupsTreeProps {
 const goldenAngle = 180 * (3 - Math.sqrt(5));
 
 const fetchGroups = async (
-  setGroups: React.Dispatch<React.SetStateAction<GroupType[]>>,
+  setGroups: React.Dispatch<React.SetStateAction<IGroupTyped[]>>,
   iModelId: string,
   mappingId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   getAccessToken: GetAccessTokenFn,
-  mappingClient: IMappingClient,
+  mappingsClient: IMappingsClient,
 ): Promise<Group[] | undefined> => {
   try {
     setIsLoading(true);
     const accessToken = await getAccessToken();
-    const groups = await mappingClient.getGroups(
+    const groups = await mappingsClient.getGroups(
       accessToken,
       iModelId,
       mappingId,
@@ -112,7 +105,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [groupsView, setGroupsView] = useState<GroupsView>(GroupsView.GROUPS);
-  const [selectedGroup, setSelectedGroup] = useState<GroupType | undefined>(
+  const [selectedGroup, setSelectedGroup] = useState<IGroupTyped | undefined>(
     undefined,
   );
   const hilitedElements = useRef<Map<string, string[]>>(new Map());
@@ -125,7 +118,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     void fetchGroups(
       setGroups,
       iModelId,
-      mapping.id ?? "",
+      mapping.id,
       setIsLoading,
       getAccessToken,
       mappingClient,
@@ -136,36 +129,36 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
   };
 
-  const getHiliteIdsFromGroups = useCallback(async (groups: Group[]) => {
-    let allIds: string[] = [];
-    for (const group of groups) {
-      const query = group.query ?? "";
-      let currentIds: string[] = [];
-      if (hilitedElements.current.has(query)) {
-        currentIds = hilitedElements.current.get(query) ?? [];
-      } else {
-        try {
-          const ids: string[] = await fetchIdsFromQuery(
-            query,
-            iModelConnection,
-          );
-          if (ids.length === 0) {
-            toaster.warning(
-              `${group.groupName}'s query is valid but produced no results.`,
+  const getHiliteIdsFromGroups = useCallback(
+    async (groups: Group[]) => {
+      let allIds: string[] = [];
+      for (const group of groups) {
+        const query = group.query;
+        let currentIds: string[] = [];
+        if (hilitedElements.current.has(query)) {
+          currentIds = hilitedElements.current.get(query) ?? [];
+        } else {
+          try {
+            const queryRowCount = await iModelConnection.queryRowCount(query);
+            if (queryRowCount === 0) {
+              toaster.warning(
+                `${group.groupName}'s query is valid but produced no results.`,
+              );
+            }
+            currentIds = await getHiliteIds(query, iModelConnection);
+            hilitedElements.current.set(query, currentIds);
+          } catch {
+            toaster.negative(
+              `Could not hide/show ${group.groupName}. Query could not be resolved.`,
             );
           }
-          currentIds = await getHiliteIds(ids, iModelConnection);
-          hilitedElements.current.set(query, currentIds);
-        } catch {
-          toaster.negative(
-            `Could not hide/show ${group.groupName}. Query could not be resolved.`,
-          );
         }
+        allIds = allIds.concat(currentIds);
       }
-      allIds = allIds.concat(currentIds);
-    }
-    return allIds;
-  }, [iModelConnection, hilitedElements]);
+      return allIds;
+    },
+    [iModelConnection, hilitedElements],
+  );
 
   const visualizeGroupColors = useCallback(
     async (viewGroups: Group[]) => {
@@ -184,7 +177,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           FeatureOverrideType.ColorAndAlpha,
         );
         emphasizeElements(hilitedIds, undefined);
-        if (!hiddenGroupsIds.includes(group.id ?? "")) {
+        if (!hiddenGroupsIds.includes(group.id)) {
           allIds = allIds.concat(hilitedIds);
         }
       }
@@ -196,42 +189,33 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   );
 
   const hideGroups = useCallback(
-    async (viewGroups: Group[], zoomTo: boolean = true) => {
+    async (viewGroups: Group[]) => {
       setLoadingQuery(true);
-      let allIds: string[] = [];
       for (const viewGroup of viewGroups) {
-        const query = viewGroup.query ?? "";
+        const query = viewGroup.query;
         if (hilitedElements.current.has(query)) {
           const hilitedIds = hilitedElements.current.get(query) ?? [];
           hideElements(hilitedIds);
-          allIds = allIds.concat(hilitedIds);
         } else {
           try {
-            const ids: string[] = await fetchIdsFromQuery(
-              query,
-              iModelConnection,
-            );
-            if (ids.length === 0) {
+            const queryRowCount = await iModelConnection.queryRowCount(query);
+            if (queryRowCount === 0) {
               toaster.warning(
                 `${viewGroup.groupName}'s query is valid but produced no results.`,
               );
             }
-            const hiliteIds = await hideElementsById(
-              ids,
+            const hiliteIds = await hideElementsByQuery(
+              query,
               iModelConnection,
               false,
             );
             hilitedElements.current.set(query, hiliteIds);
-            allIds = allIds.concat(hiliteIds);
           } catch {
             toaster.negative(
               `Could not hide/show ${viewGroup.groupName}. Query could not be resolved.`,
             );
           }
         }
-      }
-      if (zoomTo) {
-        await zoomToElements(allIds);
       }
       setLoadingQuery(false);
     },
@@ -254,7 +238,6 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       let hiddenIds = await getHiliteIdsFromGroups(newHiddenGroups);
       hiddenIds = hiddenIds.filter((id) => !viewIds.includes(id));
       hideElements(hiddenIds);
-      await zoomToElements(viewIds);
     },
     [groups, hiddenGroupsIds, getHiliteIdsFromGroups],
   );
@@ -267,7 +250,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const onModify = async (group: Group) => {
     setSelectedGroup(group);
     setGroupsView(GroupsView.MODIFYING);
-    if (group?.id && hiddenGroupsIds.includes(group.id)) {
+    if (group.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
     }
@@ -277,7 +260,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const openProperties = async (group: Group) => {
     setSelectedGroup(group);
     setGroupsView(GroupsView.PROPERTIES);
-    if (group?.id && hiddenGroupsIds.includes(group.id)) {
+    if (group.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
     }
@@ -290,7 +273,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     const groups = await fetchGroups(
       setGroups,
       iModelId,
-      mapping.id ?? "",
+      mapping.id,
       setIsLoading,
       getAccessToken,
       mappingClient,
@@ -339,7 +322,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     setHiddenGroupsIds(
       groups.map((g) => g.id).filter((id): id is string => !!id),
     );
-  }, [setHiddenGroupsIds, groups, hideGroups]);
+    const allIds = await getHiliteIdsFromGroups(groups);
+    await zoomToElements(allIds);
+  }, [setHiddenGroupsIds, groups, hideGroups, getHiliteIdsFromGroups]);
 
   const toggleGroupColor = useCallback(
     async (e: any) => {
@@ -364,7 +349,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return (
         <GroupAction
           iModelId={iModelId}
-          mappingId={mapping.id ?? ""}
+          mappingId={mapping.id}
           goBack={async () => {
             setGroupsView(GroupsView.GROUPS);
             await refresh();
@@ -376,7 +361,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return selectedGroup ? (
         <GroupAction
           iModelId={iModelId}
-          mappingId={mapping.id ?? ""}
+          mappingId={mapping.id}
           group={selectedGroup}
           goBack={async () => {
             setGroupsView(GroupsView.GROUPS);
@@ -389,7 +374,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return selectedGroup ? (
         <PropertyMenu
           iModelId={iModelId}
-          mappingId={mapping.id ?? ""}
+          mappingId={mapping.id}
           group={selectedGroup}
           goBack={propertyMenuGoBack}
         />
@@ -398,16 +383,17 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return (
         <>
           <WidgetHeader
-            title={mapping.mappingName ?? ""}
+            title={mapping.mappingName}
             disabled={isLoading || isLoadingQuery}
             returnFn={async () => {
               clearEmphasizedOverriddenElements();
               await goBack();
             }}
           />
-          <Surface className="groups-container">
-            <div className="toolbar">
+          <Surface className="gmw-groups-container">
+            <div className="gmw-toolbar">
               <Button
+                className="add-load-button"
                 startIcon={
                   isLoadingQuery ? (
                     <ProgressRadial size="small" indeterminate />
@@ -419,13 +405,13 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 disabled={isLoadingQuery}
                 onClick={addGroup}
               >
-                {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
+                {isLoadingQuery ? "Loading" : "Add Group"}
               </Button>
-              <ButtonGroup className="toolbar-buttons">
+              <ButtonGroup className="gmw-toolbar-buttons">
                 <ToggleSwitch
                   label="Color by Group"
                   labelPosition="left"
-                  className="group-view-icon toggle"
+                  className="gmw-toggle"
                   disabled={isLoadingQuery}
                   checked={showGroupColor}
                   onChange={toggleGroupColor}
@@ -435,7 +421,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   onClick={showAll}
                   disabled={isLoadingQuery}
                   styleType="borderless"
-                  className="group-view-icon"
+                  className="gmw-group-view-icon"
                 >
                   <SvgVisibilityShow />
                 </IconButton>
@@ -444,7 +430,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   onClick={hideAll}
                   disabled={isLoadingQuery}
                   styleType="borderless"
-                  className="group-view-icon"
+                  className="gmw-group-view-icon"
                 >
                   <SvgVisibilityHide />
                 </IconButton>
@@ -455,22 +441,35 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             ) : groups.length === 0 ? (
               <EmptyMessage message="No Groups available." />
             ) : (
-              <div className="group-list">
+              <div className="gmw-group-list">
                 {
                   groups
-                    .sort((a, b) => a.groupName?.localeCompare(b.groupName ?? "") ?? 1)
+                    .sort((a, b) => a.groupName.localeCompare(b.groupName) ?? 1)
                     .map((g) => (
-                      <GroupTile
+                      <HorizontalTile
                         key={g.id}
                         title={g.groupName ? g.groupName : "Untitled"}
                         subText={g.description}
                         actionGroup={
-                          <div className="actions">
+                          <div className="gmw-actions">
+                            {showGroupColor && (
+                              <IconButton
+                                styleType="borderless"
+                                className="gmw-group-view-icon"
+                              >
+                                <div
+                                  className="gmw-color-legend"
+                                  style={{
+                                    backgroundColor: getGroupColor(groups.findIndex((group) => g.id === group.id)),
+                                  }}
+                                />
+                              </IconButton>
+                            )}
                             {g.id && hiddenGroupsIds.includes(g.id) ? (
                               <IconButton
                                 disabled={isLoadingQuery}
                                 styleType="borderless"
-                                className="group-view-icon"
+                                className="gmw-group-view-icon"
                                 onClick={async () => {
                                   await showGroup(g);
                                   setHiddenGroupsIds(
@@ -484,7 +483,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                               <IconButton
                                 disabled={isLoadingQuery}
                                 styleType="borderless"
-                                className="group-view-icon"
+                                className="gmw-group-view-icon"
                                 onClick={async () => {
                                   await hideGroups([g]);
                                   setHiddenGroupsIds(
@@ -556,7 +555,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               await mappingClient.deleteGroup(
                 accessToken,
                 iModelId,
-                mapping.id ?? "",
+                mapping.id,
                 selectedGroup?.id ?? "",
               );
             }}

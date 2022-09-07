@@ -4,14 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.select-mapping-container {
+.gmw-select-mapping-container {
   display: flex;
   flex-direction: column;
   gap: $iui-baseline * 2;
   flex-grow: 1;
   min-height: 0;
 
-  .select-mapping-table {
+  .gmw-select-mapping-table {
     flex-grow: 1;
     overflow: auto;
   }

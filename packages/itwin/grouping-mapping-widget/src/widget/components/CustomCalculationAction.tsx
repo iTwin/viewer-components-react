@@ -14,20 +14,21 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import "./CalculatedPropertyAction.scss";
-import type { CustomCalculationType } from "./CustomCalculationTable";
+import type { ICustomCalculationTyped } from "./CustomCalculationTable";
 import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
 import type { PropertyMap } from "../../formula/Types";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { QuantityType } from "@itwin/insights-client";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
   properties: PropertyMap;
-  customCalculation?: CustomCalculationType;
+  customCalculation?: ICustomCalculationTyped;
   returnFn: (modified: boolean) => Promise<void>;
 }
 
@@ -47,7 +48,7 @@ const CustomCalculationAction = ({
   const [formula, setFormula] = useState<string>(
     customCalculation?.formula ?? "",
   );
-  const [quantityType, setQuantityType] = useState<string>(customCalculation?.quantityType ?? "Undefined");
+  const [quantityType, setQuantityType] = useState<QuantityType>(customCalculation?.quantityType ?? QuantityType.Undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
@@ -70,7 +71,7 @@ const CustomCalculationAction = ({
           iModelId,
           mappingId,
           groupId,
-          customCalculation.id ?? "",
+          customCalculation.id,
           {
             propertyName,
             formula,
@@ -112,14 +113,14 @@ const CustomCalculationAction = ({
       <WidgetHeader
         title={
           customCalculation
-            ? `${customCalculation?.propertyName ?? ""}`
+            ? `${customCalculation.propertyName}`
             : "Create Custom Calculation"
         }
         returnFn={async () => returnFn(false)}
       />
-      <div className='custom-calculation-action-container'>
-        <Fieldset legend='Custom Calculation Details' className='details-form'>
-          <Small className='field-legend'>
+      <div className='gmw-custom-calculation-action-container'>
+        <Fieldset legend='Custom Calculation Details' className='gmw-details-form'>
+          <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
@@ -158,7 +159,7 @@ const CustomCalculationAction = ({
             message={formulaErrorMessage}
             status={formulaErrorMessage ? "negative" : undefined}
           />
-          <LabeledSelect<string>
+          <LabeledSelect<QuantityType>
             label='Quantity Type'
             disabled={isLoading}
             options={quantityTypesSelectionOptions}

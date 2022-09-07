@@ -12,12 +12,11 @@ import {
   TablePaginator,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { Mapping } from "@itwin/insights-client";
+import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
-import type { MappingType } from "./Mapping";
+import type { IMappingTyped } from "./Mapping";
 import "./SelectMapping.scss";
 import { handleError } from "./utils";
-import type { IMappingClient } from "../IMappingClient";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
@@ -26,12 +25,12 @@ const fetchMappings = async (
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   getAccessToken: GetAccessTokenFn,
-  mappingClient: IMappingClient
+  mappingsClient: IMappingsClient
 ) => {
   try {
     setIsLoading(true);
     const accessToken = await getAccessToken();
-    const mappings = await mappingClient.getMappings(accessToken, iModelId);
+    const mappings = await mappingsClient.getMappings(accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -42,7 +41,7 @@ const fetchMappings = async (
 
 interface SelectMappingsProps {
   iModelId: string;
-  onSelect: (selectedMappings: MappingType[]) => void;
+  onSelect: (selectedMappings: IMappingTyped[]) => void;
   onCancel: () => void;
   backFn: () => void;
 }
@@ -56,7 +55,7 @@ const SelectMappings = ({
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [selectedMappings, setSelectedMappings] = useState<MappingType[]>([]);
+  const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
   useEffect(() => {
@@ -95,21 +94,21 @@ const SelectMappings = ({
   );
 
   return (
-    <div className='select-mapping-container'>
-      <Table<MappingType>
+    <div className='gmw-select-mapping-container'>
+      <Table<IMappingTyped>
         data={mappings}
         columns={mappingsColumns}
-        className='select-mapping-table'
+        className='gmw-select-mapping-table'
         emptyTableContent='No Mappings available.'
         isSortable
         isSelectable
         isLoading={isLoading}
-        onSelect={(selectData: MappingType[] | undefined) => {
+        onSelect={(selectData: IMappingTyped[] | undefined) => {
           selectData && setSelectedMappings(selectData);
         }}
         paginatorRenderer={paginator}
       />
-      <div className='import-action-panel'>
+      <div className='gmw-import-action-panel'>
         <Button onClick={backFn}>Back</Button>
         <Button
           styleType='high-visibility'

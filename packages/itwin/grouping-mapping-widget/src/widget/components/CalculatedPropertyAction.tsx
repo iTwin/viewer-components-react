@@ -23,15 +23,16 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
 import { visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
-import type { CalculatedPropertyType } from "./CalculatedPropertyTable";
+import type { ICalculatedPropertyTyped } from "./CalculatedPropertyTable";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { CalculatedPropertyType } from "@itwin/insights-client";
 
 interface CalculatedPropertyActionProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  property?: CalculatedPropertyType;
+  property?: ICalculatedPropertyTyped;
   ids: string[];
   returnFn: (modified: boolean) => Promise<void>;
 }
@@ -49,7 +50,7 @@ const CalculatedPropertyAction = ({
   const [propertyName, setPropertyName] = useState<string>(
     property?.propertyName ?? "",
   );
-  const [type, setType] = useState<string>(property?.type ?? "");
+  const [type, setType] = useState<CalculatedPropertyType>(property?.type ?? CalculatedPropertyType.Undefined);
   const [bboxDecorator, setBboxDecorator] = useState<BboxDimensionsDecorator | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [inferredSpatialData, setInferredSpatialData] = useState<Map<BboxDimension, number> | undefined>();
@@ -111,7 +112,7 @@ const CalculatedPropertyAction = ({
           iModelId,
           mappingId,
           groupId,
-          property.id ?? "",
+          property.id,
           {
             propertyName,
             type,
@@ -155,9 +156,9 @@ const CalculatedPropertyAction = ({
         }
         returnFn={async () => returnFn(false)}
       />
-      <div className='calculated-properties-action-container'>
-        <Fieldset legend='Calculated Property Details' className='details-form'>
-          <Small className='field-legend'>
+      <div className='gmw-calculated-properties-action-container'>
+        <Fieldset legend='Calculated Property Details' className='gmw-details-form'>
+          <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
@@ -183,39 +184,39 @@ const CalculatedPropertyAction = ({
               validator.showMessageFor("name");
             }}
           />
-          <LabeledSelect<string>
+          <LabeledSelect<CalculatedPropertyType>
             label='Quantity Type'
             required
             options={[
-              { value: "Length", label: "Length" },
-              { value: "Area", label: "Area" },
-              { value: "Volume", label: "Volume" },
+              { value: CalculatedPropertyType.Length, label: "Length" },
+              { value: CalculatedPropertyType.Area, label: "Area" },
+              { value: CalculatedPropertyType.Volume, label: "Volume" },
               {
-                value: "BoundingBoxLongestEdgeLength",
+                value: CalculatedPropertyType.BoundingBoxLongestEdgeLength,
                 label: "Longest Edge Length",
               },
               {
-                value: "BoundingBoxIntermediateEdgeLength",
+                value: CalculatedPropertyType.BoundingBoxIntermediateEdgeLength,
                 label: "Intermediate Edge Length",
               },
               {
-                value: "BoundingBoxShortestEdgeLength",
+                value: CalculatedPropertyType.BoundingBoxShortestEdgeLength,
                 label: "Shortest Edge Length",
               },
               {
-                value: "BoundingBoxDiagonalLength",
+                value: CalculatedPropertyType.BoundingBoxDiagonalLength,
                 label: "Diagonal Length",
               },
               {
-                value: "BoundingBoxLongestFaceDiagonalLength",
+                value: CalculatedPropertyType.BoundingBoxLongestFaceDiagonalLength,
                 label: "Longest Face Diagonal Length",
               },
               {
-                value: "BoundingBoxIntermediateFaceDiagonalLength",
+                value: CalculatedPropertyType.BoundingBoxIntermediateFaceDiagonalLength,
                 label: "Intermediate Face Diagonal Length",
               },
               {
-                value: "BoundingBoxShortestFaceDiagonalLength",
+                value: CalculatedPropertyType.BoundingBoxShortestFaceDiagonalLength,
                 label: "Shortest Face Diagonal Length",
               },
             ]}
@@ -223,14 +224,14 @@ const CalculatedPropertyAction = ({
             onChange={setType}
             itemRenderer={(option: SelectOption<string>) => (
               <MenuItem>
-                <div className='gr-cp-menu-item'>
+                <div className='gmw-gr-cp-menu-item'>
                   <div>{option.label}</div>
                   {getSpatialData(option.value)}
                 </div>
               </MenuItem>
             )}
             selectedItemRenderer={(option: SelectOption<string>) => (
-              <div className='select-item'>
+              <div className='gmw-select-item'>
                 <div>{option.label}</div>
                 {getSpatialData(option.value)}
               </div>

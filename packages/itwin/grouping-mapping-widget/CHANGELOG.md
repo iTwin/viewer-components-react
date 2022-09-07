@@ -1,6 +1,47 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 22 Jul 2022 18:27:54 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Aug 2022 14:01:03 GMT and should not be manually modified.
+
+## 0.5.8
+Wed, 24 Aug 2022 14:01:03 GMT
+
+### Patches
+
+- Exporting GetAccessTokenFn type from GroupingApiConfigContext for consuming applications to use when setting up the GroupingMappingProvider
+
+## 0.5.7
+Mon, 22 Aug 2022 19:37:22 GMT
+
+### Patches
+
+- Updated the classNames within the grouping and mapping components to use `gmw-` prefix, added quick update to property-grid to return code to working state
+
+## 0.5.6
+Mon, 22 Aug 2022 18:03:47 GMT
+
+### Patches
+
+- Improved button wrapping in Groups view toolbar
+- Changed search bar to match UX guidelines
+- Cancel button fix in group by
+- Replaced Mappings table with tile component
+- Updated css classnames to be scoped to this package only
+
+## 0.5.5
+Mon, 08 Aug 2022 11:57:54 GMT
+
+### Patches
+
+- remove zoom on individual visibility change
+- Optimized group hiliting
+
+## 0.5.4
+Thu, 28 Jul 2022 13:50:39 GMT
+
+### Patches
+
+- Fixed select in group properties
+- add color legends for groups
 
 ## 0.5.3
 Fri, 22 Jul 2022 18:27:54 GMT

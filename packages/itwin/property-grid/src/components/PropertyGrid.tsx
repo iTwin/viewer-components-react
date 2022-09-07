@@ -15,7 +15,6 @@ import type {
 } from "@itwin/components-react";
 import {
   PropertyValueRendererManager,
-  VirtualizedPropertyGridWithDataProvider,
 } from "@itwin/components-react";
 import {
   ContextMenuItem,
@@ -42,6 +41,7 @@ import type {
 } from "../types";
 import { PropertyGridDefaultContextMenuKey } from "../types";
 import {
+  FilteringPropertyGrid,
   FilteringPropertyGridWithUnifiedSelection,
   NonEmptyValuesPropertyDataFilterer,
   PlaceholderPropertyDataFilterer,
@@ -434,16 +434,18 @@ export const PropertyGrid = ({
     return (
       <div ref={ref} style={{ width: "100%", height: "100%" }}>
         {disableUnifiedSelection ? (
-          <VirtualizedPropertyGridWithDataProvider
+          <FilteringPropertyGrid
             orientation={orientation ?? Orientation.Horizontal}
             isOrientationFixed={isOrientationFixed ?? true}
             dataProvider={dataProvider}
+            filterer={filterer}
             isPropertyHoverEnabled={true}
             isPropertySelectionEnabled={true}
             onPropertyContextMenu={onPropertyContextMenu}
             actionButtonRenderers={actionButtonRenderers}
             width={width}
             height={height}
+            autoExpandChildCategories={autoExpandChildCategories}
           />
         ) : (
           <FilteringPropertyGridWithUnifiedSelection

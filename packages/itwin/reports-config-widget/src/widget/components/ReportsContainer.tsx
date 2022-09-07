@@ -4,8 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { Reports } from "../components/Reports";
+import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsApiConfigContext } from "../context/ReportsApiConfigContext";
 import "./ReportsContainer.scss";
 
@@ -14,23 +15,32 @@ interface ReportsContainerProps {
   baseUrl: string;
 }
 
+const authorizationClientGetAccessToken = async () =>
+  (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+
 const ReportsContainer = ({
   getAccessToken,
   baseUrl,
-}: ReportsContainerProps) => (
-  <ReportsApiConfigContext.Provider
-    value={{
-      getAccessToken:
-        getAccessToken ??
-        (async () =>
-          (await IModelApp.authorizationClient?.getAccessToken()) ?? ""),
+}: ReportsContainerProps) => {
+  const [apiConfig, setApiConfig] = useState<ReportsApiConfig>({
+    getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
+    baseUrl,
+  });
+
+  useEffect(() => {
+    setApiConfig(() => ({
       baseUrl,
-    }}
-  >
-    <div className="reports-container">
-      <Reports />
-    </div>
-  </ReportsApiConfigContext.Provider>
-);
+      getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
+    }));
+  }, [getAccessToken, baseUrl]);
+
+  return (
+    <ReportsApiConfigContext.Provider value={apiConfig}>
+      <div className="reports-container">
+        <Reports />
+      </div>
+    </ReportsApiConfigContext.Provider>
+  );
+};
 
 export default ReportsContainer;

@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.border-div {
+.gmw-border-div {
   border-bottom: 1px solid var(--iui-color-background-4);
 }
 
-.mapping-row {
+.gmw-mapping-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-column-gap: $iui-xl;
@@ -17,14 +17,14 @@
   padding: $iui-baseline $iui-m $iui-baseline $iui-m;
 }
 
-.import-progress-container {
+.gmw-import-progress-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   min-height: 0;
   justify-content: center;
 
-  .import-progress-bar {
+  .gmw-import-progress-bar {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -32,7 +32,7 @@
     align-items: center;
     gap: $iui-baseline * 2;
 
-    .import-progress-bar-description {
+    .gmw-import-progress-bar-description {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -50,28 +50,28 @@
   }
 }
 
-.rename-confirm-container {
+.gmw-rename-confirm-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   min-height: 0;
 
-  .mapping-rename-container {
+  .gmw-mapping-rename-container {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     overflow: auto;
 
-    .mapping-row-header-container {
+    .gmw-mapping-row-header-container {
       position: sticky;
       top: 0;
       background-color: var(--iui-color-background-3);
     }
 
-    .mapping-row-body {
+    .gmw-mapping-row-body {
       overflow-y: auto;
 
-      .mapping-row-container {
+      .gmw-mapping-row-container {
         background-color: var(--iui-color-background-2);
       }
     }

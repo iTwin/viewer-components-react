@@ -8,11 +8,10 @@ import type {
   IModelFull,
   ProjectFull,
 } from "@itwin/imodel-browser-react";
-import {
-  ProjectGrid,
-} from "@itwin/imodel-browser-react";
+import { ProjectGrid } from "@itwin/imodel-browser-react";
 import {
   SvgCalendar,
+  SvgClose,
   SvgList,
   SvgSearch,
   SvgStarHollow,
@@ -30,12 +29,12 @@ import "./SelectProject.scss";
 
 const tabsWithIcons = [
   <Tab
-    key='favorite'
-    label='Favorite projects'
+    key="favorite"
+    label="Favorite projects"
     startIcon={<SvgStarHollow />}
   />,
-  <Tab key='recents' label='Recent projects' startIcon={<SvgCalendar />} />,
-  <Tab key='all' label='My projects' startIcon={<SvgList />} />,
+  <Tab key="recents" label="Recent projects" startIcon={<SvgCalendar />} />,
+  <Tab key="all" label="My projects" startIcon={<SvgList />} />,
 ];
 interface SelectProjectProps {
   onSelect: (project: ProjectFull) => void;
@@ -47,9 +46,15 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
   const [searchInput, setSearchInput] = useState<string>("");
   const [activeSearchInput, setActiveSearchInput] = useState<string>("");
   const [accessToken, setAccessToken] = useState<AccessToken>();
-  const [apiOverrides, setApiOverrides] = useState<ApiOverrides<IModelFull[]>>({ serverEnvironmentPrefix: prefix });
+  const [apiOverrides, setApiOverrides] = useState<ApiOverrides<IModelFull[]>>({
+    serverEnvironmentPrefix: prefix,
+  });
+  const [searched, setSearched] = useState<boolean>(false);
 
-  useEffect(() => setApiOverrides({ serverEnvironmentPrefix: prefix }), [prefix]);
+  useEffect(
+    () => setApiOverrides({ serverEnvironmentPrefix: prefix }),
+    [prefix]
+  );
 
   useEffect(() => {
     const fetchAccessToken = async () => {
@@ -61,23 +66,38 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
 
   const startSearch = useCallback(() => {
     setActiveSearchInput(searchInput);
+    setSearched(true);
   }, [searchInput]);
 
+  const clearSearch = useCallback(() => {
+    setSearchInput("");
+    setActiveSearchInput("");
+    setSearched(false);
+  }, []);
+
+  useEffect(() => {
+    if (searchInput.length === 0) {
+      setSearched(false);
+      clearSearch();
+    }
+  }, [searchInput, setSearched, clearSearch]);
+
   return (
-    <div className='select-project-grid-container'>
+    <div className="gmw-select-project-grid-container">
       <HorizontalTabs
         labels={tabsWithIcons}
         onTabSelected={setProjectType}
         activeIndex={projectType}
         type={"borderless"}
-        contentClassName='grid-holding-tab'
+        contentClassName="gmw-grid-holding-tab"
       >
         <LabeledInput
-          displayStyle='inline'
-          iconDisplayStyle='inline'
-          className='search-input'
-          label='Search'
+          displayStyle="inline"
+          iconDisplayStyle="inline"
+          className="gmw-search-input"
+          label="Search"
           value={searchInput}
+          placeholder="Search...."
           onChange={(event) => {
             const {
               target: { value },
@@ -88,34 +108,32 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
             if (event.key === "Enter") {
               startSearch();
             }
-            if (event.key === "Escape") {
-              setSearchInput("");
-              setActiveSearchInput("");
-            }
           }}
           svgIcon={
-            <IconButton onClick={() => startSearch()} styleType='borderless'>
-              <SvgSearch />
-            </IconButton>
+            searched ? (
+              <IconButton onClick={clearSearch} styleType="borderless">
+                <SvgClose />
+              </IconButton>
+            ) : (
+              <IconButton onClick={startSearch} styleType="borderless">
+                <SvgSearch />
+              </IconButton>
+            )
           }
         />
       </HorizontalTabs>
-      <div className='project-grid'>
+      <div className="gmw-project-grid">
         <ProjectGrid
           onThumbnailClick={onSelect}
           accessToken={accessToken}
           apiOverrides={apiOverrides}
           filterOptions={activeSearchInput}
           requestType={
-            projectType === 0
-              ? "favorites"
-              : projectType === 1
-                ? "recents"
-                : ""
+            projectType === 0 ? "favorites" : projectType === 1 ? "recents" : ""
           }
         />
       </div>
-      <div className='select-project-action-panel'>
+      <div className="gmw-select-project-action-panel">
         <Button onClick={onCancel}>Cancel</Button>
       </div>
     </div>

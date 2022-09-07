@@ -39,7 +39,7 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
       setIsLoading(true);
       const accessToken = await getAccessToken();
       mapping
-        ? await mappingClient.updateMapping(accessToken, iModelId, mapping.id ?? "", {
+        ? await mappingClient.updateMapping(accessToken, iModelId, mapping.id, {
           mappingName: values.name,
           description: values.description,
           extractionEnabled: values.extractionEnabled,
@@ -62,9 +62,9 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
         title={mapping ? "Modify Mapping" : "Add Mapping"}
         returnFn={returnFn}
       />
-      <div className='details-form-container'>
-        <Fieldset legend='Mapping Details' className='details-form'>
-          <Small className='field-legend'>
+      <div className='gmw-details-form-container'>
+        <Fieldset legend='Mapping Details' className='gmw-details-form'>
+          <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput

@@ -52,16 +52,16 @@ export const WidgetHeader = ({
   returnFn,
 }: WidgetHeaderProps) => {
   return (
-    <div className='widget-header-container'>
+    <div className='gmw-widget-header-container'>
       {returnFn && (
         <div
-          className={disabled ? "chevron-disabled" : "chevron"}
+          className={disabled ? "gmw-chevron-disabled" : "gmw-chevron"}
           onClick={disabled ? undefined : returnFn}
         >
           <SvgChevronLeft />
         </div>
       )}
-      <Text className='title' variant='title'>
+      <Text className='gmw-title' variant='title'>
         {title}
       </Text>
     </div>
@@ -146,7 +146,7 @@ export const handleError = (errorStatus: number) => {
 };
 
 export const LoadingOverlay = () => (
-  <div className='gm-center-overlay'>
+  <div className='gmw-center-overlay'>
     <Text>Loading</Text>
     <ProgressRadial indeterminate />
     <Text>Please wait...</Text>
@@ -158,14 +158,14 @@ interface EmptyMessageProps {
 }
 
 export const EmptyMessage = ({ message }: EmptyMessageProps) => (
-  <div className='gm-center-overlay'>
+  <div className='gmw-center-overlay'>
     <Text>{message}</Text>
   </div>
 );
 
 export const LoadingSpinner = () => {
   return (
-    <div className="gm-loading-spinner">
+    <div className="gmw-loading-spinner">
       <ProgressRadial size="small" indeterminate />
     </div>
   );
