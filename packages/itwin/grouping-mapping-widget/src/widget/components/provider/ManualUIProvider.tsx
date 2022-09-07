@@ -18,7 +18,7 @@ const ManualUIProvider = ({
   return (
     <div className='gmw-manual-form'>
       <Text>
-        Generate group by user defined ECSQL query. Please select ECInstanceId
+        Generate group using an ECSQL query. Please select ECInstanceId
         column in the query.
       </Text>
       <LabeledTextarea
