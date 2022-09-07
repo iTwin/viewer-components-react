@@ -107,6 +107,7 @@
     "react-table": "^7.7.0",
     "redux": "^4.1.0",
     "rimraf": "^3.0.2",
+    "split.js": "^1.6.0",
     "typescript": "~4.3.0"
   },
   "peerDependencies": {

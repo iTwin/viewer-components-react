@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
+@import "~@itwin/itwinui-css/scss/icon/index";
 
 .gmw-group-property-action-container {
   display: flex;
@@ -55,13 +56,11 @@
   min-width: 100%;
   height: 75vh;
 
-  .gutter {
-    background-repeat: no-repeat;
-    background-position: 50%;
-    &.gutter-horizontal {
-      background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==");
-      cursor: col-resize;
-    }
+  .gmw-gutter {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
   .gmw-selected-properties {
@@ -89,6 +88,13 @@
     }
   }
 }
+
+.gmw-gutter-drag-icon {
+  @include iui-icons-large();
+  justify-content: center;
+  cursor: col-resize;
+}
+
 .gmw-empty-selection {
   display: flex;
   justify-content: center;

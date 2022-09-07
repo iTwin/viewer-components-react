@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { IModelConnection } from "@itwin/core-frontend";
+import { renderToStaticMarkup } from "react-dom/server";
 import type {
   ContentDescriptorRequestOptions,
   Field,
@@ -46,7 +47,7 @@ import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext"
 import { HorizontalTile } from "./HorizontalTile";
 import { DataType, QuantityType } from "@itwin/insights-client";
 import type { ECProperty, GroupProperty, GroupPropertyCreate } from "@itwin/insights-client";
-import { SvgClose, SvgDragHandleVertical, SvgRemove, SvgSearch } from "@itwin/itwinui-icons-react";
+import { SvgClose, SvgDragHandleVertical, SvgMoreVerticalSmall, SvgRemove, SvgSearch } from "@itwin/itwinui-icons-react";
 import type {
   DragEndEvent,
   DragStartEvent,
@@ -122,12 +123,10 @@ const convertType = (type: string): DataType => {
       return DataType.Boolean;
     case "double":
       return DataType.Double;
-    case "string":
-      return DataType.String;
     case "number":
       return DataType.Number;
     default:
-      return DataType.Undefined;
+      return DataType.String;
   }
 };
 
@@ -737,6 +736,14 @@ const GroupPropertyAction = ({
           className="gmw-property-selection-container"
           gutterAlign="center"
           gutterSize={2}
+          gutter={() => {
+            // Expects HTMLElement
+            const dragHangle = renderToStaticMarkup(<div className="gmw-gutter-drag-icon"><SvgMoreVerticalSmall /></div>);
+            const gutter = document.createElement("div");
+            gutter.className = `gmw-gutter`;
+            gutter.innerHTML = dragHangle;
+            return gutter;
+          }}
           direction="horizontal">
           <Surface className="gmw-available-properties" elevation={1}>
             <div className="gmw-available-properties-header">
