@@ -58,7 +58,7 @@ import { HorizontalTile } from "./HorizontalTile";
 import type { IMappingClient } from "../IMappingClient";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import { useGroupExtension } from "./context/GroupExtensionContext";
+import { useCustomUIProvider } from "./context/CustomUIProviderContext";
 
 export type GroupType = CreateTypeFromInterface<Group>;
 
@@ -107,7 +107,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
-  const groupExtension = useGroupExtension();
+  const uiProviders = useCustomUIProvider();
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -408,55 +408,50 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           <Surface className='gmw-groups-container'>
             <div className='gmw-toolbar'>
               <DropdownMenu
-                className='gmw-extension-dropdown'
+                className='gmw-ui-provider-dropdown'
                 disabled={isLoadingQuery}
                 menuItems={() =>
-                  (groupExtension?.extensions
-                    ? groupExtension.extensions.map((ext) => (
+                  uiProviders.length > 0
+                    ? uiProviders.map((p) => (
                       <MenuItem
-                        key={ext.name}
-                        onClick={() => addGroup(ext.name)}
-                        icon={ext.icon}
+                        key={p.name}
+                        onClick={() => addGroup(p.name)}
+                        icon={p.icon}
                         className='gmw-menu-item'
                       >
-                        {ext.displayLabel}
+                        {p.displayLabel}
                       </MenuItem>
                     ))
-                    : []
-                  ).concat(
-                    groupExtension.extendsDefault
-                      ? [
-                        <MenuItem
-                          key={0}
-                          onClick={() => addGroup("Selection")}
-                          icon={<SvgAdd />}
-                          className='gmw-menu-item'
-                        >
-                          Selection
-                        </MenuItem>,
-                        <MenuItem
-                          key={1}
-                          onClick={() => addGroup("Search")}
-                          icon={<SvgSearch />}
-                          className='gmw-menu-item'
-                        >
-                          Search
-                        </MenuItem>,
-                        <MenuItem
-                          key={2}
-                          onClick={() => addGroup("Manual")}
-                          icon={<SvgDraw />}
-                          className='gmw-menu-item'
-                        >
-                          Manual
-                        </MenuItem>,
-                      ]
-                      : [],
-                  )
+                    : [
+                      <MenuItem
+                        key={0}
+                        onClick={() => addGroup("Selection")}
+                        icon={<SvgAdd />}
+                        className='gmw-menu-item'
+                      >
+                        Selection
+                      </MenuItem>,
+                      <MenuItem
+                        key={1}
+                        onClick={() => addGroup("Search")}
+                        icon={<SvgSearch />}
+                        className='gmw-menu-item'
+                      >
+                        Search
+                      </MenuItem>,
+                      <MenuItem
+                        key={2}
+                        onClick={() => addGroup("Manual")}
+                        icon={<SvgDraw />}
+                        className='gmw-menu-item'
+                      >
+                        Manual
+                      </MenuItem>,
+                    ]
                 }
               >
                 <Button
-                  className="add-load-button"
+                  className='add-load-button'
                   startIcon={
                     isLoadingQuery ? (
                       <ProgressRadial size='small' indeterminate />
@@ -472,9 +467,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               </DropdownMenu>
               <ButtonGroup className='gmw-toolbar-buttons'>
                 <ToggleSwitch
-                  label="Color by Group"
-                  labelPosition="left"
-                  className="gmw-toggle"
+                  label='Color by Group'
+                  labelPosition='left'
+                  className='gmw-toggle'
                   disabled={isLoadingQuery}
                   checked={showGroupColor}
                   onChange={toggleGroupColor}
@@ -483,8 +478,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   title='Show All'
                   onClick={showAll}
                   disabled={isLoadingQuery}
-                  styleType="borderless"
-                  className="gmw-group-view-icon"
+                  styleType='borderless'
+                  className='gmw-group-view-icon'
                 >
                   <SvgVisibilityShow />
                 </IconButton>
@@ -492,8 +487,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   title='Hide All'
                   onClick={hideAll}
                   disabled={isLoadingQuery}
-                  styleType="borderless"
-                  className="gmw-group-view-icon"
+                  styleType='borderless'
+                  className='gmw-group-view-icon'
                 >
                   <SvgVisibilityHide />
                 </IconButton>
@@ -562,27 +557,25 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                             </IconButton>
                           )}
                           <DropdownMenu
-                            className='gmw-extension-dropdown'
+                            className='gmw-ui-provider-dropdown'
                             disabled={isLoadingQuery}
                             menuItems={(close: () => void) => [
                               <MenuItem
                                 key={0}
                                 disabled={isLoadingQuery}
-                                subMenuItems={(groupExtension.extensions
-                                  ? groupExtension.extensions.map((ext) => (
-                                    <MenuItem
-                                      className='gmw-menu-item'
-                                      key={ext.name}
-                                      onClick={() => addGroup(ext.name)}
-                                      icon={ext.icon}
-                                    >
-                                      {ext.displayLabel}
-                                    </MenuItem>
-                                  ))
-                                  : []
-                                ).concat(
-                                  groupExtension.extendsDefault
-                                    ? [
+                                subMenuItems={
+                                  uiProviders.length > 0
+                                    ? uiProviders.map((p) => (
+                                      <MenuItem
+                                        className='gmw-menu-item'
+                                        key={p.name}
+                                        onClick={() => addGroup(p.name)}
+                                        icon={p.icon}
+                                      >
+                                        {p.displayLabel}
+                                      </MenuItem>
+                                    ))
+                                    : [
                                       <MenuItem
                                         key={0}
                                         onClick={async () =>
@@ -614,8 +607,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                         Manual
                                       </MenuItem>,
                                     ]
-                                    : [],
-                                )}
+                                }
                               >
                                 <SvgEdit
                                   style={{

@@ -20,11 +20,11 @@ export function debounce<F extends (...args: any[]) => void>(
 }
 
 /**
- * Group Extension type definition
+ * Custom UI provider type definition
  */
-export interface GroupExtension {
+export interface CustomUIProvider {
   /**
-   * unique identifier of the extension
+   * unique identifier of the ui provider
    */
   name: string;
   /**
@@ -35,7 +35,7 @@ export interface GroupExtension {
    * UI Component interface
    * User defined UI component MUST BE CAPITALIZED
    */
-  uiComponent: (props: GroupExtensionProps) => JSX.Element;
+  uiComponent: (props: CustomUIProviderProps) => JSX.Element;
   /**
    * Optional icon, will be shown before display label in widget
    */
@@ -43,9 +43,9 @@ export interface GroupExtension {
 }
 
 /**
- * Group extension component props
+ * Custom UI Provider props
  */
-export interface GroupExtensionProps {
+export interface CustomUIProviderProps {
   /**
    * to validate and update current query
    */

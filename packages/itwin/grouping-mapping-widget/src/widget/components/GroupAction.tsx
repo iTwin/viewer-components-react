@@ -39,9 +39,9 @@ import {
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
-import { useGroupExtension } from "./context/GroupExtensionContext";
-import ManualExtension from "./extension/ManualExtension";
-import SearchExtension from "./extension/SearchExtension";
+import { useCustomUIProvider } from "./context/CustomUIProviderContext";
+import ManualUIProvider from "./provider/ManualUIProvider";
+import SearchUIProvider from "./provider/SearchUIProvider";
 import { SvgCursor, SvgDraw, SvgSearch } from "@itwin/itwinui-icons-react";
 
 interface GroupActionProps {
@@ -64,7 +64,7 @@ const GroupAction = ({
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const groupExtension = useGroupExtension();
+  const uiProviders = useCustomUIProvider();
 
   const [details, setDetails] = useState({
     groupName: group?.groupName ?? "",
@@ -243,7 +243,7 @@ const GroupAction = ({
       }
       case "Search": {
         return (
-          <SearchExtension
+          <SearchUIProvider
             updateQuery={updateQuery}
             isUpdating={isUpdating}
             resetView={resetView}
@@ -252,7 +252,7 @@ const GroupAction = ({
       }
       case "Manual": {
         return (
-          <ManualExtension
+          <ManualUIProvider
             updateQuery={updateQuery}
             isUpdating={isUpdating}
             resetView={resetView}
@@ -261,11 +261,11 @@ const GroupAction = ({
       }
       default: {
         if (localQueryGenerationType && localQueryGenerationType.length > 0) {
-          const selectedExtension = groupExtension.extensions?.find(
+          const selectedUIProvider = uiProviders.find(
             (e) => e.name === localQueryGenerationType,
           );
-          if (selectedExtension) {
-            return React.createElement(selectedExtension.uiComponent, {
+          if (selectedUIProvider) {
+            return React.createElement(selectedUIProvider.uiComponent, {
               updateQuery,
               isUpdating: isLoading || isRendering,
               resetView,
@@ -345,7 +345,7 @@ const GroupAction = ({
         </Fieldset>
         <Fieldset legend='Group By' className='gmw-query-builder-container'>
           <RadioTileGroup className='gmw-radio-group-tile' required>
-            {groupExtension.extendsDefault && (
+            {(uiProviders === undefined || uiProviders.length === 0) && (
               <>
                 <RadioTile
                   name={"groupby"}
@@ -376,7 +376,7 @@ const GroupAction = ({
                 />
               </>
             )}
-            {groupExtension.extensions?.map((ext) => (
+            {uiProviders?.map((ext) => (
               <RadioTile
                 key={ext.name}
                 icon={ext.icon}

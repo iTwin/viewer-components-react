@@ -4,11 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
-import type { GroupExtensionProps } from "../../utils";
+import type { CustomUIProviderProps } from "../../utils";
 import { LoadingSpinner } from "../utils";
-import "./SearchExtension.scss";
+import "./SearchUIProvider.scss";
 
-const SearchExtension = ({ updateQuery, isUpdating, resetView }: GroupExtensionProps) => {
+const SearchUIProvider = ({
+  updateQuery,
+  isUpdating,
+  resetView,
+}: CustomUIProviderProps) => {
   const [searchInput, setSearchInput] = React.useState("");
   const isWrappedInQuotes = (text: string) => {
     return text.startsWith(`"`) && text.endsWith(`"`);
@@ -117,20 +121,20 @@ const SearchExtension = ({ updateQuery, isUpdating, resetView }: GroupExtensionP
   };
 
   return (
-    <div className="gmw-search-form">
+    <div className='gmw-search-form'>
       <Text>
-        Generate a query by keywords. Keywords wrapped in double quotes
-        will be considered a required criteria.
+        Generate a query by keywords. Keywords wrapped in double quotes will be
+        considered a required criteria.
       </Text>
       <LabeledTextarea
-        label="Query Keywords"
+        label='Query Keywords'
         required
         value={searchInput}
         onChange={(event) => setSearchInput(event.target.value)}
         disabled={isUpdating}
         placeholder={`E.g. "red" chair`}
       />
-      <div className="gmw-search-actions">
+      <div className='gmw-search-actions'>
         {isUpdating && <LoadingSpinner />}
         <Button
           disabled={isUpdating}
@@ -164,4 +168,4 @@ const SearchExtension = ({ updateQuery, isUpdating, resetView }: GroupExtensionP
   );
 };
 
-export default SearchExtension;
+export default SearchUIProvider;

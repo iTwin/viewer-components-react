@@ -34,14 +34,14 @@ import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 
 We provide interface to define your own group creation method. You can use your own UI component to create/update query and visualize in the viewer accordingly.
 
-Here is an example of custom extension component:
+Here is an example of group custom UI provider:
 
 ```tsx
-const ProcessFuncExtension = ({
+const ProcessFuncUIProvider = ({
     updateQuery,
     isUpdating,
     resetView,
-}: GroupExtensionProps) => {
+}: CustomUIProviderProps) => {
   return ();
 };
 ```
@@ -50,29 +50,24 @@ const ProcessFuncExtension = ({
 `isUpdating` keeps track of the status of query execution. \
 `resetView` enables you to reset the viewer state.
 
-To configure your own extension, you need to give it:
+To configure your own UI provider, you need to give it:
 
 - a `name` as identifier
 - a `displayLabel` which will show in the 'Add Group' dropdown list
 - a `uiComponent` like above
 - an optional `icon`
 
-You can define your extension as following in the GroupingMappingProvider:
+You can define your UI provider as following in the GroupingMappingProvider:
 
 ```tsx
 new GroupingMappingProvider({
-  extension: {
-    extendsDefault: true,
-    extensions: [
-      {
-        name: "ProcessFunc",
-        displayLabel: "Process Functional",
-        uiComponent: ProcessFuncExtension,
-        icon: <SvgProcess />,
-      },
-    ],
-  },
+  customUIProviders: [
+    {
+      name: "ProcessFunc",
+      displayLabel: "Process Functional",
+      uiComponent: ProcessFuncUIProvider,
+      icon: <SvgProcess />,
+    },
+  ],
 });
 ```
-
-`extendsDefault` is used to configure if default extensions (Selection, Search and Manual) will be showed in widget.
