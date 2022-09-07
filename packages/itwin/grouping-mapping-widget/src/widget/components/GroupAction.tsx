@@ -47,7 +47,7 @@ import { SvgCursor, SvgDraw, SvgSearch } from "@itwin/itwinui-icons-react";
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
-  group?: GroupType;
+  group?: IGroupTyped;
   queryGenerationType?: string;
   goBack: () => Promise<void>;
   resetView: () => Promise<void>;

@@ -6,7 +6,6 @@ import React, { useEffect, useState } from "react";
 import { Mappings } from "./Mapping";
 import "./GroupingMapping.scss";
 import { IModelApp } from "@itwin/core-frontend";
-import type { IMappingClient } from "../IMappingClient";
 import type {
   ClientPrefix,
   GetAccessTokenFn,
