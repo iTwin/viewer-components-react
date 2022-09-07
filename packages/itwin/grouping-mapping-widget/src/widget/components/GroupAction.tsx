@@ -24,7 +24,7 @@ import {
   handleInputChange,
   WidgetHeader,
 } from "./utils";
-import type { GroupType } from "./Grouping";
+import type { IGroupTyped } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -344,7 +344,9 @@ const GroupAction = ({
           />
         </Fieldset>
         <Fieldset legend='Group By' className='gmw-query-builder-container'>
-          <RadioTileGroup className='gmw-radio-group-tile' required>
+          <RadioTileGroup
+            className='gmw-radio-group-tile'
+            required>
             {(uiProviders === undefined || uiProviders.length === 0) && (
               <>
                 <RadioTile

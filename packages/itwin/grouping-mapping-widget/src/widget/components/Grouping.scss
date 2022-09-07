@@ -47,6 +47,10 @@
     align-self: center;
     min-width: $iui-l;
     cursor: pointer;
+
+    .gmw-color-legend {
+      border: 2px solid black;
+    }
   }
 
   .gmw-menu-item {

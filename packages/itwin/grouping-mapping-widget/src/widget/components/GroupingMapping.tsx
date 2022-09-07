@@ -17,6 +17,7 @@ import {
   createMappingClient,
   MappingClientContext,
 } from "./context/MappingClientContext";
+import type { IMappingsClient } from "@itwin/insights-client";
 import { createCustomUIProvider } from "./context/CustomUIProviderContext";
 import { CustomUIProviderContext } from "./context/CustomUIProviderContext";
 import type { CustomUIProvider } from "../utils";
@@ -34,7 +35,7 @@ export interface GroupingMappingProps {
   /**
    * A custom implementation of MappingClient.
    */
-  client?: IMappingClient;
+  client?: IMappingsClient;
   /**
    * Custom UI providers to add and update groups
    */
@@ -50,10 +51,8 @@ const GroupingMapping = ({
   client,
   uiProviders,
 }: GroupingMappingProps) => {
-  const clientProp: IMappingClient | ClientPrefix = client ?? prefix;
-  const [mappingClient, setMappingClient] = useState<IMappingClient>(
-    createMappingClient(clientProp),
-  );
+  const clientProp: IMappingsClient | ClientPrefix = client ?? prefix;
+  const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
   const [groupUIProviders, setGroupUIProviders] = useState<CustomUIProvider[]>(
     createCustomUIProvider(uiProviders),
   );

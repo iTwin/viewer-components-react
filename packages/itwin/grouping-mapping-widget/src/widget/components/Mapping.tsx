@@ -28,15 +28,14 @@ import { Groupings } from "./Grouping";
 import MappingAction from "./MappingAction";
 import { MappingImportWizardModal } from "./MappingImportWizardModal";
 import { useMappingClient } from "./context/MappingClientContext";
-import type { Mapping } from "@itwin/insights-client";
+import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { HorizontalTile } from "./HorizontalTile";
 import { clearAll } from "./viewerUtils";
-import type { IMappingClient } from "../IMappingClient";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
-export type MappingType = CreateTypeFromInterface<Mapping>;
+export type IMappingTyped = CreateTypeFromInterface<Mapping>;
 
 enum MappingView {
   MAPPINGS = "mappings",
@@ -51,12 +50,12 @@ const fetchMappings = async (
   iModelId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   getAccessToken: GetAccessTokenFn,
-  mappingClient: IMappingClient,
+  mappingsClient: IMappingsClient,
 ) => {
   try {
     setIsLoading(true);
     const accessToken = await getAccessToken();
-    const mappings = await mappingClient.getMappings(accessToken, iModelId);
+    const mappings = await mappingsClient.getMappings(accessToken, iModelId);
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);
@@ -67,17 +66,17 @@ const fetchMappings = async (
 
 const toggleExtraction = async (
   getAccessToken: GetAccessTokenFn,
-  mappingClient: IMappingClient,
+  mappingsClient: IMappingsClient,
   iModelId: string,
   mapping: Mapping
 ) => {
   try {
-    const newState = !mapping?.extractionEnabled;
+    const newState = mapping.extractionEnabled;
     const accessToken = await getAccessToken();
-    await mappingClient.updateMapping(
+    await mappingsClient.updateMapping(
       accessToken,
       iModelId,
-      mapping?.id ?? "",
+      mapping.id,
       { extractionEnabled: newState }
     );
   } catch (error: any) {
@@ -169,7 +168,7 @@ export const Mappings = () => {
             ) : (
               <div className="gmw-mappings-list">
                 {mappings
-                  .sort((a, b) => a.mappingName?.localeCompare(b.mappingName ?? "") ?? 1)
+                  .sort((a, b) => a.mappingName.localeCompare(b.mappingName) ?? 1)
                   .map((mapping) => (
                     <HorizontalTile
                       key={mapping.id}
