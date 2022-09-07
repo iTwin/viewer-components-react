@@ -307,6 +307,7 @@ importers:
       redux: ^4.1.0
       rimraf: ^3.0.2
       simple-react-validator: ^1.6.1
+      split.js: ^1.6.0
       typescript: ~4.3.0
     dependencies:
       '@dnd-kit/core': 6.0.5_react-dom@17.0.2+react@17.0.2
@@ -362,6 +363,7 @@ importers:
       react-table: 7.7.0_react@17.0.2
       redux: 4.1.2
       rimraf: 3.0.2
+      split.js: 1.6.5
       typescript: 4.3.5
 
   ../../packages/itwin/imodel-react-hooks:
@@ -14278,7 +14280,6 @@ packages:
 
   /split.js/1.6.5:
     resolution: {integrity: sha512-mPTnGCiS/RiuTNsVhCm9De9cCAUsrNFFviRbADdKiiV+Kk8HKp/0fWu7Kr8pi3/yBmsqLFHuXGT9UUZ+CNLwFw==}
-    dev: false
 
   /sprintf-js/1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
