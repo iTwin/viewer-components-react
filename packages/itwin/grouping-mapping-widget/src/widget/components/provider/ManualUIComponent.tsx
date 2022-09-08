@@ -6,13 +6,13 @@ import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
 import { LoadingSpinner } from "../utils";
 import "./ManualUIProvider.scss";
-import type { CustomUIProviderProps } from "./CustomUIProvider";
+import type { CustomUIComponentProps } from "./CustomUIProvider";
 
-const ManualUIProvider = ({
+const ManualUIComponent = ({
   updateQuery,
   isUpdating,
   resetView,
-}: CustomUIProviderProps) => {
+}: CustomUIComponentProps) => {
   const [manualInput, setManualInput] = React.useState("");
 
   return (
@@ -50,4 +50,4 @@ const ManualUIProvider = ({
   );
 };
 
-export default ManualUIProvider;
+export default ManualUIComponent;

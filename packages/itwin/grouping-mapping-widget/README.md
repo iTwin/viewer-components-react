@@ -32,16 +32,16 @@ import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 
 ## UI Configuration
 
-We provide interface to define your own group creation method. You can use your own UI component to create/update query and visualize in the viewer accordingly.
+This package provides an interface to define your own group creation method. You can use your own UI component to create or update the query.
 
 Here is an example of group custom UI provider:
 
 ```tsx
-const ProcessFuncUIProvider = ({
+const ManualUIComponent = ({
     updateQuery,
     isUpdating,
     resetView,
-}: CustomUIProviderProps) => {
+}: CustomUIComponentProps) => {
   return ();
 };
 ```
@@ -63,10 +63,10 @@ You can define your UI provider as follows in the GroupingMappingProvider:
 new GroupingMappingProvider({
   customUIProviders: [
     {
-      name: "ProcessFunc",
-      displayLabel: "Process Functional",
-      uiComponent: ProcessFuncUIProvider,
-      icon: <SvgProcess />,
+      name: "Manual",
+      displayLabel: "Manual Query",
+      uiComponent: [ManualUIComponent](./src/widget/components/provider/ManualUIComponent.tsx) ,
+      icon: <SvgDraw />,
     },
   ],
 });

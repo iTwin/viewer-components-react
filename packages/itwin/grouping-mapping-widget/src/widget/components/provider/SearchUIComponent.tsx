@@ -4,15 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
-import type { CustomUIProviderProps } from "./CustomUIProvider";
+import type { CustomUIComponentProps } from "./CustomUIProvider";
 import { LoadingSpinner } from "../utils";
 import "./SearchUIProvider.scss";
 
-const SearchUIProvider = ({
+const SearchUIComponent = ({
   updateQuery,
   isUpdating,
   resetView,
-}: CustomUIProviderProps) => {
+}: CustomUIComponentProps) => {
   const [searchInput, setSearchInput] = React.useState("");
   const isWrappedInQuotes = (text: string) => {
     return text.startsWith(`"`) && text.endsWith(`"`);
@@ -26,7 +26,6 @@ const SearchUIProvider = ({
     isWrappedInQuotes(token) ||
     (index === 1 && isWrappedInQuotes(searchQuery[0]));
 
-  // Temporary until ECViews become available for use.
   const generateSearchQuery = (searchQuery: string[]) => {
     if (searchQuery.length === 0) {
       updateQuery("");
@@ -169,4 +168,4 @@ const SearchUIProvider = ({
   );
 };
 
-export default SearchUIProvider;
+export default SearchUIComponent;

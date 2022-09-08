@@ -41,8 +41,8 @@ import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useCustomUIProvider } from "./context/CustomUIProviderContext";
-import ManualUIProvider from "./provider/ManualUIProvider";
-import SearchUIProvider from "./provider/SearchUIProvider";
+import ManualUIProvider from "./provider/ManualUIComponent";
+import SearchUIProvider from "./provider/SearchUIComponent";
 import { SvgAdd, SvgCursor, SvgDraw, SvgSearch } from "@itwin/itwinui-icons-react";
 
 interface GroupActionProps {
@@ -69,9 +69,7 @@ const GroupAction = (props: GroupActionProps) => {
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const [currentPropertyList, setCurrentPropertyList] = useState<
-  PropertyRecord[]
-  >([]);
+  const [currentPropertyList, setCurrentPropertyList] = useState<PropertyRecord[]>([]);
   const [queryBuilder, setQueryBuilder] = useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
@@ -217,7 +215,7 @@ const GroupAction = (props: GroupActionProps) => {
     iModelConnection,
   ]);
 
-  const queryGenerationComponent = () => {
+  const createQueryBuilderComponent  = () => {
     switch (queryGenerationType) {
       case "Selection": {
         return (
@@ -375,7 +373,7 @@ const GroupAction = (props: GroupActionProps) => {
                 )
               )}
           </RadioTileGroup>
-          {queryGenerationType && queryGenerationComponent()}
+          {queryGenerationType && createQueryBuilderComponent()}
         </Fieldset>
       </div>
       <ActionPanel

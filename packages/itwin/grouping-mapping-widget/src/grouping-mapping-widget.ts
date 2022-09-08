@@ -24,5 +24,5 @@ export { DataType, PropertyMap } from "./formula/Types";
 export { IResult } from "./formula/IResult";
 export {
   CustomUIProvider,
-  CustomUIProviderProps,
+  CustomUIComponentProps,
 } from "./widget/components/provider/CustomUIProvider";

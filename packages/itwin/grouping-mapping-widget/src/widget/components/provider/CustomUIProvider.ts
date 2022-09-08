@@ -19,7 +19,7 @@ export interface CustomUIProvider {
   /**
    * Custom UI Component to build query interactively. Refer to SearchUIProvider/ManualUIProvider.
    */
-  uiComponent: (props: CustomUIProviderProps) => JSX.Element;
+  uiComponent: (props: CustomUIComponentProps) => JSX.Element;
   /**
    * Optional icon, will be shown before display label in widget
    */
@@ -29,7 +29,7 @@ export interface CustomUIProvider {
 /**
  * Custom UI Provider props
  */
-export interface CustomUIProviderProps {
+export interface CustomUIComponentProps {
   /**
    * To validate and update current query
    */
