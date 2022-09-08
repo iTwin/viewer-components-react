@@ -26,6 +26,7 @@ import {
   WidgetHeader,
 } from "./utils";
 import type { IGroupTyped } from "./Grouping";
+import { defaultUIProvidersMetadata } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -43,7 +44,7 @@ import { useMappingClient } from "./context/MappingClientContext";
 import { useCustomUIProvider } from "./context/CustomUIProviderContext";
 import ManualUIProvider from "./provider/ManualUIComponent";
 import SearchUIProvider from "./provider/SearchUIComponent";
-import { SvgAdd, SvgCursor, SvgDraw, SvgSearch } from "@itwin/itwinui-icons-react";
+import { SvgAdd } from "@itwin/itwinui-icons-react";
 
 interface GroupActionProps {
   iModelId: string;
@@ -352,11 +353,9 @@ const GroupAction = (props: GroupActionProps) => {
           <RadioTileGroup className="gmw-radio-group-tile" required>
             {uiProviders.length === 0
               ? (
-                <>
-                  {getRadioTileComponent(<SvgCursor />, "Selection", "Selection")}
-                  {getRadioTileComponent(<SvgSearch />, "Search", "Query Keywords")}
-                  {getRadioTileComponent(<SvgDraw />, "Manual", "Manual Query")}
-                </>
+                defaultUIProvidersMetadata.map((p) =>
+                  getRadioTileComponent(p.icon, p.name, p.displayLabel)
+                )
               )
               : (
                 uiProviders.map((ext) =>

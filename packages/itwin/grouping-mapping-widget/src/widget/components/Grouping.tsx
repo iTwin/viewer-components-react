@@ -61,6 +61,24 @@ import { useCustomUIProvider } from "./context/CustomUIProviderContext";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
+export const defaultUIProvidersMetadata = [
+  {
+    name: "Selection",
+    displayLabel: "Selection",
+    icon: <SvgCursor />,
+  },
+  {
+    name: "Search",
+    displayLabel: "Query Keywords",
+    icon: <SvgSearch />,
+  },
+  {
+    name: "Manual",
+    displayLabel: "Manual Query",
+    icon: <SvgDraw />,
+  },
+];
+
 enum GroupsView {
   GROUPS = "groups",
   MODIFYING = "modifying",
@@ -122,21 +140,6 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
 
   const [queryGenerationType, setQueryGenerationType] =
     useState<string>("Selection");
-
-  const defaultUIProvidersMetadata = [
-    {
-      name: "Selection",
-      icon: <SvgCursor />,
-    },
-    {
-      name: "Search",
-      icon: <SvgSearch />,
-    },
-    {
-      name: "Manual",
-      icon: <SvgDraw />,
-    },
-  ];
 
   useEffect(() => {
     void fetchGroups(
@@ -442,7 +445,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                         onClick={() => addGroup(p.name)}
                         icon={p.icon}
                         className='gmw-menu-item'
-                      ></MenuItem>
+                      >
+                        {p.displayLabel}
+                      </MenuItem>
                     ))
                 }
               >
@@ -575,7 +580,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                         key={p.name}
                                         onClick={async () => onModify(g, p.name)}
                                         icon={p.icon}
-                                      ></MenuItem>
+                                      >
+                                        {p.displayLabel}
+                                      </MenuItem>
                                     ))
                                 }
                               >
