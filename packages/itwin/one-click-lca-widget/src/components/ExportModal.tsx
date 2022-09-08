@@ -53,7 +53,7 @@ const ExportModal = (props: ExportProps) => {
   const [cache, cacheToken] = useState<OclcaTokenCache>();
 
   const [jobStatus, setJobStatus] = useState<JobStatus.StatusEnum>();
-  const [jobLink, setJobLink] = useState<Link|undefined>();
+  const [jobLink, setJobLink] = useState<Link | undefined>();
 
   const isValidEmail = useCallback(() => {
     return /\S+@\S+\.\S+/.test(email);
@@ -94,7 +94,7 @@ const ExportModal = (props: ExportProps) => {
             if (
               currentJobStatus.job?.status === JobStatus.StatusEnum.Succeeded
             ) {
-              setJobLink(undefined !== currentJobStatus?.job._links?.oneclicklca?.href ? {href: currentJobStatus.job._links.oneclicklca.href} : undefined);
+              setJobLink(!currentJobStatus?.job._links?.oneclicklca?.href ? {href: currentJobStatus.job._links!.oneclicklca!.href!} : undefined);
             }
             setJobStatus(currentJobStatus.job?.status);
           } else {
