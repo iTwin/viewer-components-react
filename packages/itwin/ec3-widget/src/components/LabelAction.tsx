@@ -14,16 +14,21 @@ import { IModelApp } from "@itwin/core-frontend";
 import { Button, toaster, MenuItem, IconButton } from "@itwin/itwinui-react";
 import { WidgetHeader } from "./utils";
 import "./LabelAction.scss";
-import { Configuration, Label, Material } from "./Template"
+import { Configuration, Label as EC3Label, Material } from "./Template"
 import { ReportingClient } from "@itwin/insights-client";
 import { DropdownTile } from "./DropdrownTile";
 import DeleteModal from "./DeleteModal";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import React from "react";
+import {
+  ComboBox,
+  Label,
+  Select
+} from "@itwin/itwinui-react";
 
 interface LabelActionProps {
   template: Configuration;
-  label: Label | undefined;
+  label: EC3Label | undefined;
   goBack: () => Promise<void>;
   setTemplate: (sel: Configuration) => void;
 }
@@ -40,7 +45,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   const [selectedMaterial, setSelectedMaterial] = useState<Material>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   // creating a copy of an array, so original isn't modified
-  const [materials, setMaterials] = useState<Material[]>(label?.materials.map(x => { return { nameColumn: x.nameColumn } }) ?? []);
+  const [materials, setMaterials] = useState<Material[]>(label?.materials.map(x => { return { nameColumn: x.nameColumn } }) ?? [{ nameColumn: undefined }]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
   const [availableLabels, setLabels] = useState<string[]>();
@@ -49,7 +54,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
 
   const onSave = async () => {
-    const selectedLabel: Label = {
+    const selectedLabel: EC3Label = {
       reportTable: reportTable,
       name: name,
       elementNameColumn: itemName,
@@ -150,7 +155,6 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     return options;
   })
 
-
   const NumericalColumnOptions = useMemo(() => {
     const options = availableNumericalColumns?.map((col) => ({
       label: col,
@@ -162,8 +166,6 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     }
     return options;
   }, [availableNumericalColumns]);
-
-
 
   const load = (async () => {
     if (!IModelApp.authorizationClient)
@@ -200,17 +202,12 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   }, []);
 
   const addPair = (() => {
-    if (materials.filter(x => x.nameColumn === undefined).length === 0) {
-
-      const pair: Material = {
-        nameColumn: undefined,
-      };
-
-      const newMaterials = materials.map((x) => { return { nameColumn: x.nameColumn } });
-
-      newMaterials.push(pair);
-      setMaterials(newMaterials);
-    }
+    const pair: Material = {
+      nameColumn: undefined,
+    };
+    const newMaterials = materials.map((x) => { return { nameColumn: x.nameColumn } });
+    newMaterials.push(pair);
+    setMaterials(newMaterials);
   })
 
   useEffect(() => {
@@ -287,39 +284,46 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
             Asterisk * indicates mandatory fields.
           </Small>
 
-          <LabeledSelect
-            label="Report table"
-            id='reportTable'
-            placeholder={isLoading ? "Loading report tables" : "Select report table"}
-            required
-            options={labelOptions}
-            value={reportTable}
-            onChange={async (value) => {
-              if (value !== reportTable) {
-                setMaterials([]);
-                setName(value);
-              }
+          <div className="dropdown-select-container">
+            <div className="dropdown-select-combo-box">
+              <Label htmlFor="combo-input" required>
+                Report table
+              </Label>
+              <ComboBox
+                options={labelOptions}
+                value={reportTable}
+                onChange={async (value) => {
+                  if (value !== reportTable) {
+                    setMaterials([{ nameColumn: undefined }]);
+                    setName(value);
+                  }
 
-              setReportTable(value);
-              updateColumns(value);
-            }}
-            message={validator.message(
-              "reportTable",
-              reportTable,
-              NAME_REQUIREMENTS,
-            )}
-            status={
-              validator.message(
-                "reportTable",
-                reportTable,
-                NAME_REQUIREMENTS,
-              )
-                ? "negative"
-                : undefined
-            }
-            onBlur={() => {
-              validator.showMessageFor("reportTable");
-            }} onShow={() => { }} onHide={() => { }} />
+                  setReportTable(value);
+                  updateColumns(value);
+                }}
+                message={
+                  validator.message(
+                    "reportTable",
+                    reportTable,
+                    NAME_REQUIREMENTS,
+                  )}
+                status={
+                  validator.message(
+                    "reportTable",
+                    reportTable,
+                    NAME_REQUIREMENTS,
+                  )
+                    ? "negative"
+                    : undefined
+                }
+                inputProps={{
+                  id: "combo-input",
+                  placeholder: isLoading ? "Loading report tables" : "Select report table"
+                }}
+              />
+            </div>
+          </div>
+
           <LabeledInput
             id='name'
             name='name'
@@ -331,62 +335,43 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
           />
           <div className="body">
             <div className="ec3-label-combo-field">
-              <LabeledSelect
-                label="Element"
-                id='element'
-                required
-                options={getStringColumnOptions(itemName)}
-                value={itemName}
-                onChange={async (value) => {
-                  setItemName(value);
-                }}
-                message={validator.message(
-                  "element",
-                  itemName,
-                  NAME_REQUIREMENTS,
-                )}
-                status={
-                  validator.message(
-                    "element",
-                    itemName,
-                    NAME_REQUIREMENTS,
-                  )
-                    ? "negative"
-                    : undefined
-                }
-                onBlur={() => {
-                  validator.showMessageFor("element");
-                }} onShow={() => { }} onHide={() => { }} />
+              <div className="dropdown-select-container">
+                <div className="dropdown-select-combo-box">
+                  <Label htmlFor="combo-input" required>
+                    Element
+                  </Label>
+                  <Select
+                    options={getStringColumnOptions(itemName)}
+                    value={itemName}
+                    //placeholder={isLoading ? "Loading elements" : "Select element quantity"}
+                    onChange={async (value) => {
+                      setItemName(value);
+                    }}
+                    disabled={isLoading || reportTable === ""}
+                    placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element")}
+                  />
+                </div>
+              </div>
             </div>
+
             <div className="ec3-label-combo-field">
-              <LabeledSelect
-                label="Element quantity"
-                id='elementQuantity'
-                placeholder={isLoading ? "Loading elements" : "Select element quantity"}
-                required
-                options={NumericalColumnOptions}
-                value={itemQuantity}
-                onChange={async (value) => {
-                  setItemQuantity(value);
-                  console.log(value);
-                }}
-                message={validator.message(
-                  "elementQuantity",
-                  itemQuantity,
-                  NAME_REQUIREMENTS,
-                )}
-                status={
-                  validator.message(
-                    "elementQuantity",
-                    itemQuantity,
-                    NAME_REQUIREMENTS,
-                  )
-                    ? "negative"
-                    : undefined
-                }
-                onBlur={() => {
-                  validator.showMessageFor("elementQuantity");
-                }} onShow={() => { }} onHide={() => { }} />
+              <div className="dropdown-select-container">
+                <div className="dropdown-select-combo-box">
+                  <Label htmlFor="combo-input" required>
+                    Element quantity
+                  </Label>
+                  <Select
+                    options={NumericalColumnOptions}
+                    value={itemQuantity}
+                    //placeholder={isLoading ? "Loading elements" : "Select element quantity"}
+                    onChange={async (value) => {
+                      setItemQuantity(value);
+                    }}
+                    disabled={isLoading || reportTable === ""}
+                    placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element quantity")}
+                  />
+                </div>
+              </div>
             </div>
 
           </div>
@@ -394,9 +379,10 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
             {materials.map((material, index) => (
               <DropdownTile
                 key={index}
+                deletionDisabled={index === 0}
+                disabled={reportTable === ""}
                 stringColumnOptions={getStringColumnOptions(material.nameColumn)}
                 materialValue={material.nameColumn ?? ""}
-                validator={validator}
                 onMaterialChange={async (value) => {
                   const newPairs = materials.map(x => { return { nameColumn: x.nameColumn } });
                   newPairs.forEach(p => {
@@ -427,6 +413,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
               startIcon={<SvgAdd />}
               onClick={addPair}
               styleType="high-visibility"
+              disabled={isLoading || reportTable === "" || materials.filter(x => x.nameColumn === undefined).length > 0}
             >
               {"Add material"}
             </Button>
@@ -445,12 +432,13 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       />
 
       <LabelActionPanel
+        isSavingDisabled={
+          !validator.allValid() ||
+          materials.filter(x => x.nameColumn === undefined).length > 0 ||
+          itemQuantity === "" ||
+          itemName === ""
+        }
         onSave={async () => {
-          if (!validator.allValid()) {
-            showValidationMessage(true);
-            return;
-          }
-
           onSave();
           await goBack();
         }

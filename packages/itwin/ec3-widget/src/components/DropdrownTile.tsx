@@ -8,21 +8,27 @@ import "./DropdownTile.scss";
 import { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import SimpleReactValidator from "simple-react-validator";
 import React from "react";
+import {
+  Select,
+  Label
+} from "@itwin/itwinui-react";
 
 interface DropdownTileProps {
   stringColumnOptions: SelectOption<string>[];
   materialValue: string;
   onMaterialChange: (value: string) => void;
   actionGroup: ReactNode;
-  validator: SimpleReactValidator;
+  disabled: boolean;
+  deletionDisabled: boolean;
 }
 
 export const DropdownTile = ({
   stringColumnOptions,
   materialValue,
   onMaterialChange,
-  validator,
   actionGroup,
+  disabled,
+  deletionDisabled
 }: DropdownTileProps) => {
   return (
     <div
@@ -32,30 +38,21 @@ export const DropdownTile = ({
       <div className="body">
         <div className="material-combo">
 
-          <LabeledSelect
-            label="Material"
-            id='material'
-            required
-            options={stringColumnOptions}
-            value={materialValue}
-            onChange={(value) => { onMaterialChange(value); }}
-            message={validator.message(
-              "materialValue",
-              materialValue,
-              NAME_REQUIREMENTS
-            )}
-            status={validator.message(
-              "materialValue",
-              materialValue,
-              NAME_REQUIREMENTS
-            )
-              ? "negative"
-              : undefined}
-            onBlur={() => {
-              validator.showMessageFor("materialValue");
-            }} onShow={() => { }} onHide={() => { }} />
+          <div className="dropdown-select-container">
+            <div className="dropdown-select-combo-box">
+              <Label htmlFor="combo-input" required>
+                Material
+              </Label>
+              <Select
+                disabled={disabled}
+                options={stringColumnOptions}
+                value={materialValue}
+                onChange={(value) => { onMaterialChange(value); }}
+              />
+            </div>
+          </div>
         </div>
-        <div className="action-button" data-testid="tile-action-button">
+        <div className="action-button" data-testid="tile-action-button" hidden={deletionDisabled} >
           {actionGroup}
         </div>
 

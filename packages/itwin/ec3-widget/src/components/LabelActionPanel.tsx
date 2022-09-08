@@ -23,7 +23,7 @@ const ActionPanel = ({
   onSave,
   onCancel,
   isCancelDisabled = false,
-  isSavingDisabled = false,
+  isSavingDisabled,
   isLoading = false,
 }: ActionPanelProps): JSX.Element => {
   return (

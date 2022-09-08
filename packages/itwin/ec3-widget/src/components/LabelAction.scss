@@ -40,6 +40,19 @@
   }
 }
 
+.dropdown-select-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $iui-s;
+
+  .dropdown-select-combo-box {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+}
+
 .ec3-label-combo-field {
   margin-left: 0;
   align-self: center;
