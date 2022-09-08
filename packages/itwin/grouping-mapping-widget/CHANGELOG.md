@@ -1,6 +1,21 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 24 Jun 2022 21:18:52 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Jul 2022 18:27:54 GMT and should not be manually modified.
+
+## 0.5.3
+Fri, 22 Jul 2022 18:27:54 GMT
+
+### Patches
+
+- group ordering by name
+
+## 0.5.2
+Mon, 18 Jul 2022 13:24:31 GMT
+
+### Patches
+
+- Query Keywords by default no longer takes selection when no keywords are applied
+- Fixed incorrect prefix being applied on first render
 
 ## 0.5.1
 Fri, 24 Jun 2022 21:18:52 GMT

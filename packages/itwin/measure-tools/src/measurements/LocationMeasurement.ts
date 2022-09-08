@@ -157,6 +157,15 @@ export class LocationMeasurement extends Measurement {
     }
   }
 
+  /** Changes the location. Only possible if the measurement is dynamic. */
+  public changeLocation(props: LocationMeasurementProps): boolean {
+    if (!this.isDynamic)
+      return false;
+
+    this.readFromJSON(props);
+    return true;
+  }
+
   public override testDecorationHit(
     pickContext: MeasurementPickContext
   ): boolean {
@@ -189,6 +198,9 @@ export class LocationMeasurement extends Measurement {
     if (!this.transientId)
       this.transientId = MeasurementSelectionSet.nextTransientId;
 
+    if (this.isDynamic)
+      return undefined;
+
     return this.transientId;
   }
 
@@ -204,6 +216,12 @@ export class LocationMeasurement extends Measurement {
       WellKnownGraphicStyleType.LocationMeasurement
     )!;
 
+    if (this._textMarker && this.displayLabels)
+      this._textMarker.addDecoration(context);
+
+    if (this.isDynamic)
+      return;
+
     const xBuilder = context.createGraphicBuilder(
       GraphicType.WorldDecoration,
       undefined,
@@ -211,9 +229,6 @@ export class LocationMeasurement extends Measurement {
     );
     style.addStyledPointString(xBuilder, [this._location], false);
     context.addDecorationFromBuilder(xBuilder);
-
-    if (this._textMarker && this.displayLabels)
-      this._textMarker.addDecoration(context);
   }
 
   private async createTextMarker(): Promise<void> {
@@ -237,6 +252,17 @@ export class LocationMeasurement extends Measurement {
         value: await FormatterUtils.formatLength(this._location.z),
       },
     ];
+
+    if (this._isDynamic) {
+      entries.push(
+        {
+          label: MeasureTools.localization.getLocalizedString(
+            "MeasureTools:tools.MeasureLocation.slope"
+          ),
+          value: this._slope === undefined ? "" : FormatterUtils.formatSlope(100 * this._slope, false),
+        }
+      );
+    }
 
     if (!this._textMarker) {
       const styleTheme = StyleSet.getOrDefault(this.activeStyle);
