@@ -76,7 +76,8 @@ const GroupAction = (props: GroupActionProps) => {
   const [queryGenerationType, setQueryGenerationType] = useState(
     props.queryGenerationType,
   );
-  const resetView = props.resetView;
+
+  const isUpdating = isLoading || isRendering;
 
   const changeGroupByType = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -105,10 +106,9 @@ const GroupAction = (props: GroupActionProps) => {
             evt.imodel,
             evt.level,
           );
-          const query =
-            selection.instanceKeys.size > 0
-              ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}`
-              : "";
+          const query = selection.instanceKeys.size > 0
+            ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}`
+            : "";
           setSimpleSelectionQuery(query);
         }
       },
@@ -156,15 +156,6 @@ const GroupAction = (props: GroupActionProps) => {
       iModelConnection,
     );
   }, [iModelConnection]);
-
-  const updateQuery = useCallback(
-    (newQuery: string) => {
-      setQuery(newQuery);
-    },
-    [setQuery],
-  );
-
-  const isUpdating = isLoading || isRendering;
 
   const save = useCallback(async () => {
     if (!validator.allValid()) {
@@ -229,7 +220,7 @@ const GroupAction = (props: GroupActionProps) => {
               setQueryBuilder,
               isLoading,
               isRendering,
-              resetView,
+              resetView: props.resetView,
             }}
           >
             <GroupQueryBuilderContainer />
@@ -239,7 +230,7 @@ const GroupAction = (props: GroupActionProps) => {
       case "Search": {
         return (
           <SearchUIProvider
-            updateQuery={updateQuery}
+            updateQuery={setQuery}
             isUpdating={isUpdating}
             resetView={props.resetView}
           />
@@ -248,7 +239,7 @@ const GroupAction = (props: GroupActionProps) => {
       case "Manual": {
         return (
           <ManualUIProvider
-            updateQuery={updateQuery}
+            updateQuery={setQuery}
             isUpdating={isUpdating}
             resetView={props.resetView}
           />
@@ -261,9 +252,9 @@ const GroupAction = (props: GroupActionProps) => {
           );
           if (selectedUIProvider) {
             return React.createElement(selectedUIProvider.uiComponent, {
-              updateQuery,
+              updateQuery: setQuery,
               isUpdating,
-              resetView,
+              resetView: props.resetView,
             });
           }
         }
@@ -358,7 +349,7 @@ const GroupAction = (props: GroupActionProps) => {
           />
         </Fieldset>
         <Fieldset legend='Group By' className='gmw-query-builder-container'>
-          <RadioTileGroup className='gmw-radio-group-tile' required>
+          <RadioTileGroup className="gmw-radio-group-tile" required>
             {uiProviders.length === 0
               ? (
                 <>

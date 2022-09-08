@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "add group extension function and refactor",
+      "comment": "Add custom UI provider extensibility and refactor default providers accordingly",
       "type": "patch"
     }
   ],

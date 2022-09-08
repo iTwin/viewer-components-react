@@ -18,6 +18,7 @@ import {
 } from "@itwin/itwinui-react";
 import {
   SvgAdd,
+  SvgCursor,
   SvgDelete,
   SvgDraw,
   SvgEdit,
@@ -121,6 +122,21 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
 
   const [queryGenerationType, setQueryGenerationType] =
     useState<string>("Selection");
+
+  const defaultUIProvidersMetadata = [
+    {
+      name: "Selection",
+      icon: <SvgCursor />,
+    },
+    {
+      name: "Search",
+      icon: <SvgSearch />,
+    },
+    {
+      name: "Manual",
+      icon: <SvgDraw />,
+    },
+  ];
 
   useEffect(() => {
     void fetchGroups(
@@ -420,32 +436,14 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                         {p.displayLabel}
                       </MenuItem>
                     ))
-                    : [
+                    : defaultUIProvidersMetadata.map((p) => (
                       <MenuItem
-                        key={0}
-                        onClick={() => addGroup("Selection")}
-                        icon={<SvgAdd />}
+                        key={p.name}
+                        onClick={() => addGroup(p.name)}
+                        icon={p.icon}
                         className='gmw-menu-item'
-                      >
-                        Selection
-                      </MenuItem>,
-                      <MenuItem
-                        key={1}
-                        onClick={() => addGroup("Search")}
-                        icon={<SvgSearch />}
-                        className='gmw-menu-item'
-                      >
-                        Search
-                      </MenuItem>,
-                      <MenuItem
-                        key={2}
-                        onClick={() => addGroup("Manual")}
-                        icon={<SvgDraw />}
-                        className='gmw-menu-item'
-                      >
-                        Manual
-                      </MenuItem>,
-                    ]
+                      ></MenuItem>
+                    ))
                 }
               >
                 <Button
@@ -565,44 +563,20 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                       <MenuItem
                                         className='gmw-menu-item'
                                         key={p.name}
-                                        onClick={() => addGroup(p.name)}
+                                        onClick={async () => onModify(g, p.name)}
                                         icon={p.icon}
                                       >
                                         {p.displayLabel}
                                       </MenuItem>
                                     ))
-                                    : [
+                                    : defaultUIProvidersMetadata.map((p) => (
                                       <MenuItem
-                                        key={0}
-                                        onClick={async () =>
-                                          onModify(g, "Selection")
-                                        }
-                                        icon={<SvgAdd />}
                                         className='gmw-menu-item'
-                                      >
-                                        Selection
-                                      </MenuItem>,
-                                      <MenuItem
-                                        key={1}
-                                        onClick={async () =>
-                                          onModify(g, "Search")
-                                        }
-                                        icon={<SvgSearch />}
-                                        className='gmw-menu-item'
-                                      >
-                                        Search
-                                      </MenuItem>,
-                                      <MenuItem
-                                        key={2}
-                                        onClick={async () =>
-                                          onModify(g, "Manual")
-                                        }
-                                        icon={<SvgDraw />}
-                                        className='gmw-menu-item'
-                                      >
-                                        Manual
-                                      </MenuItem>,
-                                    ]
+                                        key={p.name}
+                                        onClick={async () => onModify(g, p.name)}
+                                        icon={p.icon}
+                                      ></MenuItem>
+                                    ))
                                 }
                               >
                                 <SvgEdit

@@ -5,15 +5,15 @@
 import type { ReactElement } from "react";
 
 /**
- * Custom UI provider type definition
+ * Custom UI provider type definition.
  */
 export interface CustomUIProvider {
   /**
-   * Unique identifier of the UI provider
+   * Unique identifier of the UI provider.
    */
   name: string;
   /**
-   * Display label in the widget
+   * Display label in the widget.
    */
   displayLabel: string;
   /**
@@ -21,25 +21,25 @@ export interface CustomUIProvider {
    */
   uiComponent: (props: CustomUIComponentProps) => JSX.Element;
   /**
-   * Optional icon, will be shown before display label in widget
+   * Optional icon, will be shown before display label in widget.
    */
   icon?: ReactElement;
 }
 
 /**
- * Custom UI Provider props
+ * Custom UI component props definition.
  */
 export interface CustomUIComponentProps {
   /**
-   * To validate and update current query
+   * To validate and update current query.
    */
   updateQuery: (query: string) => void;
   /**
-   * To get the query loading status
+   * To get the query loading status.
    */
   isUpdating?: boolean;
   /**
-   * To reset the viewer
+   * To reset the viewer.
    */
   resetView?: () => Promise<void>;
 }
