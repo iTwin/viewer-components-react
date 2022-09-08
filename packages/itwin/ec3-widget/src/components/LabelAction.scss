@@ -1,0 +1,63 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import '~@itwin/itwinui-css/scss/variables';
+
+.ec3-label-details-container {
+  overflow-x: auto;
+  height: 100%;
+
+  .ec3-label-details {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline;
+  }
+
+  .ec3-label-field-legend {
+    color: $iui-color-system-gray;
+  }
+}
+
+.ec3-pair-list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: overlay;
+  gap: 7.5px;
+  margin-top: 7.5px;
+  gap: $iui-baseline;
+  height: auto;
+
+  .ec3-label-button {
+    min-height: 38px;
+  }
+
+  .delete-icon {
+    margin-left: 0;
+    align-self: center;
+    min-width: $iui-l;
+    cursor: pointer;
+  }
+}
+
+.dropdown-select-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $iui-s;
+
+  .dropdown-select-combo-box {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+}
+
+.ec3-label-combo-field {
+  margin-left: 0;
+  align-self: center;
+  min-width: 36px;
+  margin-right: $iui-xs;
+  width: 49%;
+  display: inline-block;
+}

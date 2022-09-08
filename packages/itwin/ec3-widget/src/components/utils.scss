@@ -1,0 +1,39 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "~@itwin/itwinui-css/scss/variables";
+@import "~@itwin/itwinui-css/scss/icon/index";
+@import "~@itwin/itwinui-css/scss/button/index";
+
+.ec3-widget-header-container {
+  display: flex;
+  margin-bottom: $iui-baseline * 3;
+
+  //margin-bottom: $iui-baseline * 3;
+  .ec3-chevron {
+    @include iui-icons-large();
+    cursor: pointer;
+    align-self: center;
+    margin-right: $iui-s;
+  }
+
+  .ec3-chevron-disabled {
+    @include iui-icons-large();
+
+    @include themed {
+      fill: t(iui-icons-color-actionable-disabled);
+    }
+
+    cursor: not-allowed;
+
+    align-self: center;
+    margin-right: $iui-s;
+  }
+
+  .ec3-title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}

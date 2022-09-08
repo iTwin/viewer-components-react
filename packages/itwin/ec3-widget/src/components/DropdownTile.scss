@@ -1,0 +1,60 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "~@itwin/itwinui-css/scss/variables";
+
+.ec3-dropdown-tile-container {
+  display: flex;
+  justify-content: space-between;
+  border-radius: 5px;
+  background-color: var(--iui-color-background-2);
+  height: $iui-baseline * 6;
+  padding: 5.5px $iui-s;
+
+  .body {
+    display: flex;
+    flex-direction: row;
+    min-width: 0;
+    justify-content: left;
+    width: 100%;
+
+    &-text {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .action-button {
+    margin-left: 0;
+    align-self: center;
+    min-width: 36px;
+    margin-right: $iui-xs;
+    flex-shrink: 0;
+  }
+
+  .combo-field {
+    margin-left: 0;
+    align-self: center;
+    min-width: 36px;
+    margin-right: $iui-xs;
+  }
+
+  .material-combo {
+    width: 100%;
+  }
+}
+
+.dropdown-select-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $iui-s;
+
+  .dropdown-select-combo-box {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+}

@@ -1,0 +1,76 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "~@itwin/itwinui-css/scss/variables";
+
+.ec3 {
+  &-scrollable-table {
+    overflow-y: scroll;
+    max-height: 90%;
+  }
+
+  &-reports-table {
+    :hover {
+      cursor: pointer;
+    }
+  }
+
+  &-searchbox-container {
+    display: inline-flex;
+    justify-content: right;
+  }
+
+  &-template-container {
+    display: flex;
+    flex-direction: column;
+    gap: $iui-baseline;
+    margin-bottom: $iui-line-height;
+    max-height: 80%;
+  }
+
+  &-button-center {
+    align-self: center;
+  }
+
+  &-container {
+    display: flex;
+    flex-direction: column;
+    padding: $iui-baseline $iui-m;
+    box-sizing: border-box;
+    height: 100%;
+    overflow: auto;
+  }
+}
+
+
+.ec3-templates-list-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: $iui-baseline $iui-m;
+  min-height: 0;
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: $iui-s;
+    border-bottom: 1px solid var(--iui-color-background-4);
+    padding-bottom: $iui-baseline;
+    flex-wrap: wrap;
+  }
+
+  .search-bar-container {
+    flex-basis: $iui-3xl;
+    flex-shrink: 1;
+    flex-grow: 1;
+  }
+
+  .templates-list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: overlay;
+    gap: 7.5px;
+    margin-top: 7.5px;
+  }
+}
