@@ -57,7 +57,7 @@ To configure your own UI provider, you need to give it:
 - a `uiComponent` like above
 - an optional `icon`
 
-You can define your UI provider as following in the GroupingMappingProvider:
+You can define your UI provider as follows in the GroupingMappingProvider:
 
 ```tsx
 new GroupingMappingProvider({

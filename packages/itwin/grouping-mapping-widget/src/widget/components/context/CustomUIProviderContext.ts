@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { createContext, useContext } from "react";
-import type { CustomUIProvider } from "../../utils";
+import type { CustomUIProvider } from "../provider/CustomUIProvider";
 
 export const createDefaultCustomUIProvider = (): CustomUIProvider[] => {
   return [];

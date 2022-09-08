@@ -22,4 +22,7 @@ export { PropertyMenu } from "./widget/components/PropertyMenu";
 export { resolveFormulaDataType } from "./formula/FormulaDataTypeResolver";
 export { DataType, PropertyMap } from "./formula/Types";
 export { IResult } from "./formula/IResult";
-export { CustomUIProvider, CustomUIProviderProps } from "./widget/utils";
+export {
+  CustomUIProvider,
+  CustomUIProviderProps,
+} from "./widget/components/provider/CustomUIProvider";

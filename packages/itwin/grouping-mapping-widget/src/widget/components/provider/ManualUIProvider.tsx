@@ -4,9 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
-import type { CustomUIProviderProps } from "../../utils";
 import { LoadingSpinner } from "../utils";
 import "./ManualUIProvider.scss";
+import type { CustomUIProviderProps } from "./CustomUIProvider";
 
 const ManualUIProvider = ({
   updateQuery,
@@ -18,8 +18,7 @@ const ManualUIProvider = ({
   return (
     <div className='gmw-manual-form'>
       <Text>
-        Generate group using an ECSQL query. Please select ECInstanceId
-        column in the query.
+        Generate group using an ECSQL query. Please select ECInstanceId and ECClassId columns in the query.
       </Text>
       <LabeledTextarea
         label='Query'
@@ -27,7 +26,7 @@ const ManualUIProvider = ({
         value={manualInput}
         onChange={(event) => setManualInput(event.target.value)}
         disabled={isUpdating}
-        placeholder={`E.g. "Select ECInstanceId From Biscore.Element`}
+        placeholder={`E.g. "SELECT ECInstanceId, ECClassId FROM BisCore:PhysicalElement"`}
       />
       <div className='gmw-manual-actions'>
         {isUpdating && <LoadingSpinner />}

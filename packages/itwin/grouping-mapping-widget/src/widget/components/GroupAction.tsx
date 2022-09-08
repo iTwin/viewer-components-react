@@ -17,6 +17,7 @@ import {
   Small,
   toaster,
 } from "@itwin/itwinui-react";
+import type { ReactElement } from "react";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   EmptyMessage,
@@ -42,7 +43,7 @@ import { useMappingClient } from "./context/MappingClientContext";
 import { useCustomUIProvider } from "./context/CustomUIProviderContext";
 import ManualUIProvider from "./provider/ManualUIProvider";
 import SearchUIProvider from "./provider/SearchUIProvider";
-import { SvgCursor, SvgDraw, SvgSearch } from "@itwin/itwinui-icons-react";
+import { SvgAdd, SvgCursor, SvgDraw, SvgSearch } from "@itwin/itwinui-icons-react";
 
 interface GroupActionProps {
   iModelId: string;
@@ -53,36 +54,31 @@ interface GroupActionProps {
   resetView: () => Promise<void>;
 }
 
-const GroupAction = ({
-  iModelId,
-  mappingId,
-  group,
-  queryGenerationType,
-  goBack,
-  resetView,
-}: GroupActionProps) => {
+const GroupAction = (props: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const uiProviders = useCustomUIProvider();
 
   const [details, setDetails] = useState({
-    groupName: group?.groupName ?? "",
-    description: group?.description ?? "",
+    groupName: props.group?.groupName ?? "",
+    description: props.group?.description ?? "",
   });
   const [query, setQuery] = useState<string>("");
   const [simpleSelectionQuery, setSimpleSelectionQuery] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const [currentPropertyList, setCurrentPropertyList] = React.useState<
-    PropertyRecord[]
+  const [currentPropertyList, setCurrentPropertyList] = useState<
+  PropertyRecord[]
   >([]);
-  const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
+  const [queryBuilder, setQueryBuilder] = useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
-  const [localQueryGenerationType, setQueryGenerationType] =
-    React.useState(queryGenerationType);
+  const [queryGenerationType, setQueryGenerationType] = useState(
+    props.queryGenerationType,
+  );
+  const resetView = props.resetView;
 
   const changeGroupByType = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -97,7 +93,7 @@ const GroupAction = ({
     );
     setQuery("");
     setSimpleSelectionQuery("");
-    await resetView();
+    await props.resetView();
   };
 
   useEffect(() => {
@@ -106,15 +102,14 @@ const GroupAction = ({
         evt: SelectionChangeEventArgs,
         selectionProvider: ISelectionProvider,
       ) => {
-        if (localQueryGenerationType === "Selection") {
+        if (queryGenerationType === "Selection") {
           const selection = selectionProvider.getSelection(
             evt.imodel,
             evt.level,
           );
           const query =
             selection.instanceKeys.size > 0
-              ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value
-              }`
+              ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}`
               : "";
           setSimpleSelectionQuery(query);
         }
@@ -123,7 +118,7 @@ const GroupAction = ({
     return () => {
       removeListener();
     };
-  }, [iModelConnection, localQueryGenerationType]);
+  }, [iModelConnection, queryGenerationType]);
 
   useEffect(() => {
     const reemphasize = async () => {
@@ -133,7 +128,7 @@ const GroupAction = ({
         }
 
         if (
-          localQueryGenerationType === "Selection" &&
+          queryGenerationType === "Selection" &&
           currentPropertyList.length === 0
         ) {
           return;
@@ -155,7 +150,7 @@ const GroupAction = ({
     };
 
     void reemphasize();
-  }, [iModelConnection, query, currentPropertyList, localQueryGenerationType]);
+  }, [iModelConnection, query, currentPropertyList, queryGenerationType]);
 
   useEffect(() => {
     Presentation.selection.clearSelection(
@@ -184,44 +179,46 @@ const GroupAction = ({
 
       const accessToken = await getAccessToken();
 
-      group
+      props.group
         ? await mappingClient.updateGroup(
           accessToken,
-          iModelId,
-          mappingId,
-          group.id ?? "",
+          props.iModelId,
+          props.mappingId,
+          props.group.id ?? "",
           { ...details, query: currentQuery },
         )
-        : await mappingClient.createGroup(accessToken, iModelId, mappingId, {
-          ...details,
-          query: currentQuery,
-        });
+        : await mappingClient.createGroup(
+          accessToken,
+          props.iModelId,
+          props.mappingId,
+          {
+            ...details,
+            query: currentQuery,
+          },
+        );
       Presentation.selection.clearSelection(
         "GroupingMappingWidget",
         iModelConnection,
       );
-      await goBack();
+      await props.goBack();
     } catch (error: any) {
       handleError(error.status);
       setIsLoading(false);
     }
   }, [
-    details,
-    goBack,
-    group,
-    iModelConnection,
-    iModelId,
-    mappingId,
-    query,
-    showValidationMessage,
-    simpleSelectionQuery,
     validator,
+    showValidationMessage,
+    query,
+    simpleSelectionQuery,
     getAccessToken,
+    props,
     mappingClient,
+    details,
+    iModelConnection,
   ]);
 
   const queryGenerationComponent = () => {
-    switch (localQueryGenerationType) {
+    switch (queryGenerationType) {
       case "Selection": {
         return (
           <GroupQueryBuilderContext.Provider
@@ -246,7 +243,7 @@ const GroupAction = ({
           <SearchUIProvider
             updateQuery={updateQuery}
             isUpdating={isUpdating}
-            resetView={resetView}
+            resetView={props.resetView}
           />
         );
       }
@@ -255,19 +252,19 @@ const GroupAction = ({
           <ManualUIProvider
             updateQuery={updateQuery}
             isUpdating={isUpdating}
-            resetView={resetView}
+            resetView={props.resetView}
           />
         );
       }
       default: {
-        if (localQueryGenerationType && localQueryGenerationType.length > 0) {
+        if (queryGenerationType && queryGenerationType.length > 0) {
           const selectedUIProvider = uiProviders.find(
-            (e) => e.name === localQueryGenerationType,
+            (e) => e.name === queryGenerationType,
           );
           if (selectedUIProvider) {
             return React.createElement(selectedUIProvider.uiComponent, {
               updateQuery,
-              isUpdating: isLoading || isRendering,
+              isUpdating,
               resetView,
             });
           }
@@ -284,16 +281,35 @@ const GroupAction = ({
     !isLoading
   );
 
+  const getRadioTileComponent = (
+    icon: ReactElement,
+    value: string,
+    label: string,
+  ) => {
+    return (
+      <RadioTile
+        name={"groupby"}
+        icon={icon}
+        key={value}
+        onChange={changeGroupByType}
+        value={value}
+        label={label}
+        disabled={isLoading || isRendering}
+        checked={queryGenerationType === value}
+      />
+    );
+  };
+
   return (
     <>
       <WidgetHeader
-        title={group ? group.groupName ?? "" : "Add Group"}
+        title={props.group ? props.group.groupName ?? "" : "Add Group"}
         returnFn={async () => {
           Presentation.selection.clearSelection(
             "GroupingMappingWidget",
             iModelConnection,
           );
-          await goBack();
+          await props.goBack();
         }}
       />
       <div className='gmw-group-add-modify-container'>
@@ -344,54 +360,22 @@ const GroupAction = ({
           />
         </Fieldset>
         <Fieldset legend='Group By' className='gmw-query-builder-container'>
-          <RadioTileGroup
-            className='gmw-radio-group-tile'
-            required>
-            {(uiProviders === undefined || uiProviders.length === 0) && (
-              <>
-                <RadioTile
-                  name={"groupby"}
-                  icon={<SvgCursor />}
-                  onChange={changeGroupByType}
-                  value={"Selection"}
-                  label={"Selection"}
-                  disabled={isLoading || isRendering}
-                  checked={localQueryGenerationType === "Selection"}
-                />
-                <RadioTile
-                  icon={<SvgSearch />}
-                  name={"groupby"}
-                  onChange={changeGroupByType}
-                  value={"Search"}
-                  label={"Query Keywords"}
-                  disabled={isLoading || isRendering}
-                  checked={localQueryGenerationType === "Search"}
-                />
-                <RadioTile
-                  icon={<SvgDraw />}
-                  name={"groupby"}
-                  onChange={changeGroupByType}
-                  value={"Manual"}
-                  label={"Manual Query"}
-                  disabled={isLoading || isRendering}
-                  checked={localQueryGenerationType === "Manual"}
-                />
-              </>
-            )}
-            {uiProviders?.map((ext) => (
-              <RadioTile
-                key={ext.name}
-                icon={ext.icon}
-                name={"groupby"}
-                onChange={changeGroupByType}
-                value={ext.name}
-                label={ext.displayLabel}
-                disabled={isLoading || isRendering}
-                checked={localQueryGenerationType === ext.name}
-              />
-            ))}
+          <RadioTileGroup className='gmw-radio-group-tile' required>
+            {uiProviders.length === 0
+              ? (
+                <>
+                  {getRadioTileComponent(<SvgCursor />, "Selection", "Selection")}
+                  {getRadioTileComponent(<SvgSearch />, "Search", "Query Keywords")}
+                  {getRadioTileComponent(<SvgDraw />, "Manual", "Manual Query")}
+                </>
+              )
+              : (
+                uiProviders.map((ext) =>
+                  getRadioTileComponent(ext.icon ?? <SvgAdd />, ext.name, ext.displayLabel),
+                )
+              )}
           </RadioTileGroup>
-          {localQueryGenerationType && queryGenerationComponent()}
+          {queryGenerationType && queryGenerationComponent()}
         </Fieldset>
       </div>
       <ActionPanel
@@ -403,7 +387,7 @@ const GroupAction = ({
             "GroupingMappingWidget",
             iModelConnection,
           );
-          await goBack();
+          await props.goBack();
         }}
         isSavingDisabled={isBlockingActions}
         isLoading={isLoading}

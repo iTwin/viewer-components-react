@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
-import type { CustomUIProviderProps } from "../../utils";
+import type { CustomUIProviderProps } from "./CustomUIProvider";
 import { LoadingSpinner } from "../utils";
 import "./SearchUIProvider.scss";
 
@@ -25,6 +25,7 @@ const SearchUIProvider = ({
   ) =>
     isWrappedInQuotes(token) ||
     (index === 1 && isWrappedInQuotes(searchQuery[0]));
+
   // Temporary until ECViews become available for use.
   const generateSearchQuery = (searchQuery: string[]) => {
     if (searchQuery.length === 0) {
@@ -48,50 +49,50 @@ const SearchUIProvider = ({
           }%'`,
       )
       .join(" ")}) OR (${searchQuery
-        .map(
-          (token, index) =>
-            `${index === 0
-              ? ""
-              : needsAndOperator(token, index, searchQuery)
-                ? "AND"
-                : "OR"
-            } be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-            }%'`,
-        )
-        .join(" ")})) OR ((${searchQuery
-          .map(
-            (token, index) =>
-              `${index === 0
-                ? ""
-                : needsAndOperator(token, index, searchQuery)
-                  ? "AND"
-                  : "OR"
-              } cat.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-              }%'`,
-          )
-          .join(" ")}) OR (${searchQuery
-            .map(
-              (token, index) =>
-                `${index === 0
-                  ? ""
-                  : needsAndOperator(token, index, searchQuery)
-                    ? "AND"
-                    : "OR"
-                } cat.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-                }%'`,
-            )
-            .join(" ")})) OR (${searchQuery
-              .map(
-                (token, index) =>
-                  `${index === 0
-                    ? ""
-                    : needsAndOperator(token, index, searchQuery)
-                      ? "AND"
-                      : "OR"
-                  } ecc.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-                  }%'`,
-              )
-              .join(" ")})`;
+      .map(
+        (token, index) =>
+          `${index === 0
+            ? ""
+            : needsAndOperator(token, index, searchQuery)
+              ? "AND"
+              : "OR"
+          } be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+          }%'`,
+      )
+      .join(" ")})) OR ((${searchQuery
+      .map(
+        (token, index) =>
+          `${index === 0
+            ? ""
+            : needsAndOperator(token, index, searchQuery)
+              ? "AND"
+              : "OR"
+          } cat.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+          }%'`,
+      )
+      .join(" ")}) OR (${searchQuery
+      .map(
+        (token, index) =>
+          `${index === 0
+            ? ""
+            : needsAndOperator(token, index, searchQuery)
+              ? "AND"
+              : "OR"
+          } cat.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+          }%'`,
+      )
+      .join(" ")})) OR (${searchQuery
+      .map(
+        (token, index) =>
+          `${index === 0
+            ? ""
+            : needsAndOperator(token, index, searchQuery)
+              ? "AND"
+              : "OR"
+          } ecc.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+          }%'`,
+      )
+      .join(" ")})`;
     // Physical Types
     generatedSearchQuery += ` OR ((${searchQuery
       .map(
@@ -105,17 +106,17 @@ const SearchUIProvider = ({
           }%'`,
       )
       .join(" ")}) OR (${searchQuery
-        .map(
-          (token, index) =>
-            `${index === 0
-              ? ""
-              : needsAndOperator(token, index, searchQuery)
-                ? "AND"
-                : "OR"
-            } pt.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
-            }%'`,
-        )
-        .join(" ")})) `;
+      .map(
+        (token, index) =>
+          `${index === 0
+            ? ""
+            : needsAndOperator(token, index, searchQuery)
+              ? "AND"
+              : "OR"
+          } pt.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token
+          }%'`,
+      )
+      .join(" ")})) `;
 
     updateQuery(generatedSearchQuery);
   };

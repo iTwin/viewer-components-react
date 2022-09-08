@@ -19,7 +19,7 @@ import {
 import type { IMappingsClient } from "@itwin/insights-client";
 import { createCustomUIProvider } from "./context/CustomUIProviderContext";
 import { CustomUIProviderContext } from "./context/CustomUIProviderContext";
-import type { CustomUIProvider } from "../utils";
+import type { CustomUIProvider } from "./provider/CustomUIProvider";
 
 export interface GroupingMappingProps {
   /**
@@ -36,7 +36,7 @@ export interface GroupingMappingProps {
    */
   client?: IMappingsClient;
   /**
-   * Custom UI providers to add and update groups
+   * Custom UI providers to add and update groups.
    */
   uiProviders?: CustomUIProvider[];
 }
