@@ -14,7 +14,7 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
-import type { GroupType } from "./Grouping";
+import type { IGroupTyped } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -34,7 +34,7 @@ import { useMappingClient } from "./context/MappingClientContext";
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
-  group?: GroupType;
+  group?: IGroupTyped;
   goBack: () => Promise<void>;
   resetView: () => Promise<void>;
 }

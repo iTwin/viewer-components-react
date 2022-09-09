@@ -39,7 +39,7 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
       setIsLoading(true);
       const accessToken = await getAccessToken();
       mapping
-        ? await mappingClient.updateMapping(accessToken, iModelId, mapping.id ?? "", {
+        ? await mappingClient.updateMapping(accessToken, iModelId, mapping.id, {
           mappingName: values.name,
           description: values.description,
           extractionEnabled: values.extractionEnabled,
