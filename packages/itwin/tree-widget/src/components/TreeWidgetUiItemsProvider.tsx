@@ -51,9 +51,9 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       const trees: SelectableContentDefinition[] = [];
 
       if (!this._treeWidgetOptions?.hideTrees?.modelsTree) {
-        trees.push({
-          label: TreeWidget.translate("modeltree"),
-          id: "model-tree",
+        const modelTree = {
+          label: TreeWidget.translate("modelstree"),
+          id: "models-tree",
           render: () => (
             <ModelsTreeComponent
               enableElementsClassGrouping={
@@ -64,21 +64,23 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
               {...this._treeWidgetOptions?.modelsTreeProps}
             />
           ),
-        });
+        }
+        this._treeWidgetOptions?.defaultTree === modelTree.id ? trees.unshift(modelTree) : trees.push(modelTree);
       }
 
       if (!this._treeWidgetOptions?.hideTrees?.categoriesTree) {
-        trees.push({
+        const categoriesTree = {
           label: TreeWidget.translate("categories"),
           id: "categories-tree",
           render: () => (
             <CategoriesTreeComponent {...this._treeWidgetOptions?.categoriesTreeProps} />
           ),
-        });
+        }
+        this._treeWidgetOptions?.defaultTree === categoriesTree.id  ? trees.unshift(categoriesTree) : trees.push(categoriesTree);
       }
 
       if (!this._treeWidgetOptions?.hideTrees?.spatialTree) {
-        trees.push({
+        const spatialContainmentTree = {
           label: TreeWidget.translate("containment"),
           id: "spatial-containment-tree",
           render: () => (
@@ -91,11 +93,20 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
               {...this._treeWidgetOptions?.spatialTreeProps}
             />
           ),
-        });
+        }
+        this._treeWidgetOptions?.defaultTree === spatialContainmentTree.id ? trees.unshift(spatialContainmentTree) : trees.push(spatialContainmentTree);
       }
 
       if (this._treeWidgetOptions?.additionalTrees) {
-        trees.push(...this._treeWidgetOptions.additionalTrees);
+        const defaultTreeId = this._treeWidgetOptions.defaultTree
+        if(!( defaultTreeId === "models-tree" || defaultTreeId === "categories-tree" || defaultTreeId === "spatial-containment-tree")){
+          const additionalTrees = this._treeWidgetOptions.additionalTrees
+          for (const tree of additionalTrees){
+            tree.id === defaultTreeId ? trees.unshift(tree) : trees.push(tree);
+          }
+        }else{
+          trees.push(...this._treeWidgetOptions.additionalTrees)
+        }
       }
 
       widgets.push({
