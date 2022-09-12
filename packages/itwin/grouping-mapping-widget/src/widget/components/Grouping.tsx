@@ -344,6 +344,15 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     await refresh();
   }, [refresh]);
 
+  const removeGroup = (g: Group) => {
+    const index: number = groups.findIndex((group) => {
+      return g === group;
+    });
+    if(index !== -1) {
+      groups.splice(index, 1);
+    }
+  };
+
   switch (groupsView) {
     case GroupsView.ADD:
       return (
@@ -513,8 +522,12 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                 </MenuItem>,
                                 <MenuItem
                                   key={2}
-                                  onClick={() => {
+                                  onClick={async () => {
                                     setSelectedGroup(g);
+                                    hilitedElements.current.delete(g.query);
+                                    removeGroup(g);
+                                    setGroups(groups);
+                                    await resetView();
                                     setShowDeleteModal(true);
                                     close();
                                   }}
