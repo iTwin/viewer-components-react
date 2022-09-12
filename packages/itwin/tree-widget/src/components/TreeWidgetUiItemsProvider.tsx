@@ -100,7 +100,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
 
       if(this._treeWidgetOptions?.defaultTreeId && trees.length !== 0){
         //Adding the defaultTree to first index
-        const defaultTreeId = this._treeWidgetOptions.defaultTreeId;
+        const { defaultTreeId } = this._treeWidgetOptions;
         const extractedDefaultTree = trees.filter(tree => tree.id===defaultTreeId)[0];
         const index = trees.indexOf(extractedDefaultTree);
         trees.unshift(trees.splice(index, 1)[0]);
