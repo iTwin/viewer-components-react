@@ -1,6 +1,13 @@
 # Change Log - @itwin/reports-config-widget-react
 
-This log was last generated on Mon, 08 Aug 2022 11:57:54 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Sep 2022 19:50:36 GMT and should not be manually modified.
+
+## 0.0.7
+Mon, 12 Sep 2022 19:50:36 GMT
+
+### Patches
+
+- updated insights client to 0.3.0
 
 ## 0.0.6
 Mon, 08 Aug 2022 11:57:54 GMT
