@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Added the code change for the setting up defaultTree from the viewer component. ",
-      "type": "patch"
+      "comment": "Add new `defaultTreeId` prop to specify default tree for TreeWidgetUiItemsProvider",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

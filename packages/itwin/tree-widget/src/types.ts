@@ -56,7 +56,7 @@ export interface TreeWidgetOptions {
   modelsTreeProps?: ModelTreeProps;
   categoriesTreeProps?: CategoriesTreeProps;
   spatialTreeProps?: SpatialTreeProps;
-  defaultTree?: string;
+  defaultTreeId?: string;
   hideTrees?: {
     modelsTree?: boolean;
     categoriesTree?: boolean;
