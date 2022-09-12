@@ -41,6 +41,12 @@ SpatialContainmentTreeProps,
 "iModel" | "width" | "height"
 >;
 
+export const ModelsTreeId = "models-tree"
+
+export const CategoriesTreeId = "categories-tree"
+
+export const SpatialContainmentTreeId = "spatial-containment-tree"
+
 export interface TreeWidgetOptions {
   defaultPanelLocation?: StagePanelLocation;
   defaultPanelSection?: StagePanelSection;

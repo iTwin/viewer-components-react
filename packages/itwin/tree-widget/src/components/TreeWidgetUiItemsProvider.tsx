@@ -23,7 +23,7 @@ import { ModelsTreeComponent } from "./trees/ModelsTree";
 import { SpatialTreeComponent } from "./trees/SpatialTree";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
-import type { TreeWidgetOptions } from "../types";
+import { CategoriesTreeId, ModelsTreeId, SpatialContainmentTreeId, TreeWidgetOptions } from "../types";
 
 export const TreeWidgetId = "tree-widget-react:trees";
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
@@ -51,9 +51,9 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       const trees: SelectableContentDefinition[] = [];
 
       if (!this._treeWidgetOptions?.hideTrees?.modelsTree) {
-        const modelTree = {
-          label: TreeWidget.translate("modelstree"),
-          id: "models-tree",
+        trees.push({
+          label: TreeWidget.translate("models"),
+          id: ModelsTreeId,
           render: () => (
             <ModelsTreeComponent
               enableElementsClassGrouping={
@@ -64,25 +64,23 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
               {...this._treeWidgetOptions?.modelsTreeProps}
             />
           ),
-        }
-        this._treeWidgetOptions?.defaultTree === modelTree.id ? trees.unshift(modelTree) : trees.push(modelTree);
+        });
       }
 
-      if (!this._treeWidgetOptions?.hideTrees?.categoriesTree) {
-        const categoriesTree = {
+      if (!this._treeWidgetOptions?.hideTrees?.categoriesTree) { 
+        trees.push({
           label: TreeWidget.translate("categories"),
-          id: "categories-tree",
+          id: CategoriesTreeId,
           render: () => (
             <CategoriesTreeComponent {...this._treeWidgetOptions?.categoriesTreeProps} />
           ),
-        }
-        this._treeWidgetOptions?.defaultTree === categoriesTree.id  ? trees.unshift(categoriesTree) : trees.push(categoriesTree);
+        });
       }
 
       if (!this._treeWidgetOptions?.hideTrees?.spatialTree) {
-        const spatialContainmentTree = {
+        trees.push({
           label: TreeWidget.translate("containment"),
-          id: "spatial-containment-tree",
+          id: SpatialContainmentTreeId,
           render: () => (
             <SpatialTreeComponent
               enableElementsClassGrouping={
@@ -93,20 +91,17 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
               {...this._treeWidgetOptions?.spatialTreeProps}
             />
           ),
-        }
-        this._treeWidgetOptions?.defaultTree === spatialContainmentTree.id ? trees.unshift(spatialContainmentTree) : trees.push(spatialContainmentTree);
+        });
       }
 
       if (this._treeWidgetOptions?.additionalTrees) {
-        const defaultTreeId = this._treeWidgetOptions.defaultTree
-        if(!( defaultTreeId === "models-tree" || defaultTreeId === "categories-tree" || defaultTreeId === "spatial-containment-tree")){
-          const additionalTrees = this._treeWidgetOptions.additionalTrees
-          for (const tree of additionalTrees){
-            tree.id === defaultTreeId ? trees.unshift(tree) : trees.push(tree);
-          }
-        }else{
           trees.push(...this._treeWidgetOptions.additionalTrees)
-        }
+      }
+
+      if(this._treeWidgetOptions?.defaultTree && trees.length !== 0){
+        //Adding the defaultTree to first index
+        const defaultTreeId = this._treeWidgetOptions.defaultTree
+        trees.unshift(trees.splice(trees.indexOf(trees.filter(tree => tree.id===defaultTreeId)[0]), 1)[0])
       }
 
       widgets.push({
