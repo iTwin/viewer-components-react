@@ -67,7 +67,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
         });
       }
 
-      if (!this._treeWidgetOptions?.hideTrees?.categoriesTree) { 
+      if (!this._treeWidgetOptions?.hideTrees?.categoriesTree) {
         trees.push({
           label: TreeWidget.translate("categories"),
           id: CategoriesTreeId,
@@ -95,7 +95,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       }
 
       if (this._treeWidgetOptions?.additionalTrees) {
-          trees.push(...this._treeWidgetOptions.additionalTrees)
+        trees.push(...this._treeWidgetOptions.additionalTrees);
       }
 
       if(this._treeWidgetOptions?.defaultTree && trees.length !== 0){
