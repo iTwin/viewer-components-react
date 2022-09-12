@@ -23,7 +23,8 @@ import { ModelsTreeComponent } from "./trees/ModelsTree";
 import { SpatialTreeComponent } from "./trees/SpatialTree";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
-import { CategoriesTreeId, ModelsTreeId, SpatialContainmentTreeId, TreeWidgetOptions } from "../types";
+import type { TreeWidgetOptions } from "../types";
+import { CategoriesTreeId, ModelsTreeId, SpatialContainmentTreeId } from "../types";
 
 export const TreeWidgetId = "tree-widget-react:trees";
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
@@ -99,9 +100,9 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       }
 
       if(this._treeWidgetOptions?.defaultTreeId && trees.length !== 0){
-        //Adding the defaultTree to first index
+        // Adding the defaultTree to first index
         const { defaultTreeId } = this._treeWidgetOptions;
-        const extractedDefaultTree = trees.filter(tree => tree.id===defaultTreeId)[0];
+        const extractedDefaultTree = trees.filter((tree) => tree.id===defaultTreeId)[0];
         const index = trees.indexOf(extractedDefaultTree);
         trees.unshift(trees.splice(index, 1)[0]);
       }
