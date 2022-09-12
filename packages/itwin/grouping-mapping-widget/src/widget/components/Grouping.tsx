@@ -195,7 +195,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
         const query = viewGroup.query;
         if (hilitedElements.current.has(query)) {
           const hilitedIds = hilitedElements.current.get(query) ?? [];
-          hideElements(hilitedIds);
+          hideElements(hilitedIds, true);
         } else {
           try {
             const queryRowCount = await iModelConnection.queryRowCount(query);
