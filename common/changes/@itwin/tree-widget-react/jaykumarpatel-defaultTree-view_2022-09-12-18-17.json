@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Add new `defaultTreeId` prop to specify default tree for TreeWidgetUiItemsProvider",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/tree-widget-react"
