@@ -20,19 +20,19 @@ export interface HorizontalTileProps {
   dragHandle?: ReactNode;
 }
 
-export const HorizontalTile = ({ title, subText, onClick, onClickTitle, titleTooltip, subtextToolTip, actionGroup, selected, dragHandle}: HorizontalTileProps) => {
+export const HorizontalTile = (props: HorizontalTileProps) => {
 
   return (
-    <div className={classNames("gmw-horizontal-tile-container", {"gmw-horizontal-tile-selected":selected})} onClick={onClick} data-testid="gmw-horizontal-tile">
+    <div className={classNames("gmw-horizontal-tile-container", {"gmw-horizontal-tile-selected":props.selected})} onClick={props.onClick} data-testid="gmw-horizontal-tile">
       <div className="gmw-body-container">
-        {dragHandle}
+        {props.dragHandle}
         <div className="gmw-body">
-          <Text className={classNames("gmw-body-text", {"iui-anchor": onClickTitle})} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
-          {subText && <Text className="gmw-body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
+          <Text className={classNames("gmw-body-text", {"iui-anchor": props.onClickTitle})} onClick={props.onClickTitle} variant="body" title={props.titleTooltip}>{props.title}</Text>
+          {props.subText && <Text className="gmw-body-text" isMuted={true} title={props.subtextToolTip} variant="small">{props.subText}</Text>}
         </div>
       </div>
       <div className="gmw-action-button" data-testid="tile-action-button">
-        {actionGroup}
+        {props.actionGroup}
       </div>
     </div>
   );

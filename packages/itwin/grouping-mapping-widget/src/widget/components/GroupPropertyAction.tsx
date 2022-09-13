@@ -363,8 +363,9 @@ const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> =>
         },
       ];
     }
-    // Hardcode Category navigation path and label behavior
+    // Hardcode Category and Physical Material navigation path and label behavior
     case "BisCore:GeometricElement3dIsInCategory":
+    case "BisCore:PhysicalElementIsOfPhysicalMaterial":
       return [
         {
           ...ecProperty,
@@ -381,27 +382,6 @@ const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> =>
           ].join("."),
         },
       ];
-    // Hardcode Material path and label behavior
-    case "BisCore:PhysicalElementIsOfPhysicalMaterial": {
-      return [
-        {
-          ...ecProperty,
-          ecPropertyName: [
-            ...property.propertyTraversal.slice(0, -1),
-            "Material",
-            "UserLabel",
-          ].join("."),
-        },
-        {
-          ...ecProperty,
-          ecPropertyName: [
-            ...property.propertyTraversal.slice(0, -1),
-            "Material",
-            "CodeValue",
-          ].join("."),
-        },
-      ];
-    }
     default: {
       return [
         {
