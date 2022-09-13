@@ -7,10 +7,7 @@ export * from "./widget/GroupingMappingWidget";
 
 /** Interfaces for providing custom MappingClient and API configuration */
 export { createDefaultMappingClient } from "./widget/components/context/MappingClientContext";
-export {
-  ClientPrefix,
-  GetAccessTokenFn,
-} from "./widget/components/context/GroupingApiConfigContext";
+export { ClientPrefix, GetAccessTokenFn } from "./widget/components/context/GroupingApiConfigContext";
 export * from "@itwin/insights-client";
 
 /** Internal components for custom UIs */
@@ -22,7 +19,4 @@ export { PropertyMenu } from "./widget/components/PropertyMenu";
 export { resolveFormulaDataType } from "./formula/FormulaDataTypeResolver";
 export { DataType, PropertyMap } from "./formula/Types";
 export { IResult } from "./formula/IResult";
-export {
-  CustomUIProvider,
-  CustomUIComponentProps,
-} from "./widget/components/provider/CustomUIProvider";
+export { CustomUIProvider, CustomUIComponentProps } from "./widget/components/provider/CustomUIProvider";
