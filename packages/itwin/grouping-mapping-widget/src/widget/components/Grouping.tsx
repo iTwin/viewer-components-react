@@ -410,7 +410,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           goBack={propertyMenuGoBack}
         />
       ) : null;
-    default:
+    case GroupsView.GROUPS:
       return (
         <>
           <WidgetHeader
@@ -428,18 +428,10 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 className='gmw-ui-provider-dropdown'
                 disabled={isLoadingQuery}
                 menuItems={() =>
-                  uiProviders.length > 0
-                    ? uiProviders.map((p) => (
-                      <MenuItem
-                        key={p.name}
-                        onClick={() => addGroup(p.name)}
-                        icon={p.icon}
-                        className='gmw-menu-item'
-                      >
-                        {p.displayLabel}
-                      </MenuItem>
-                    ))
-                    : defaultUIProvidersMetadata.map((p) => (
+                  (uiProviders.length > 0
+                    ? uiProviders
+                    : defaultUIProvidersMetadata)
+                    .map((p) => (
                       <MenuItem
                         key={p.name}
                         onClick={() => addGroup(p.name)}
@@ -563,18 +555,10 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                 key={0}
                                 disabled={isLoadingQuery}
                                 subMenuItems={
-                                  uiProviders.length > 0
-                                    ? uiProviders.map((p) => (
-                                      <MenuItem
-                                        className='gmw-menu-item'
-                                        key={p.name}
-                                        onClick={async () => onModify(g, p.name)}
-                                        icon={p.icon}
-                                      >
-                                        {p.displayLabel}
-                                      </MenuItem>
-                                    ))
-                                    : defaultUIProvidersMetadata.map((p) => (
+                                  (uiProviders.length > 0
+                                    ? uiProviders
+                                    : defaultUIProvidersMetadata)
+                                    .map((p) => (
                                       <MenuItem
                                         className='gmw-menu-item'
                                         key={p.name}
@@ -655,6 +639,10 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             refresh={refresh}
           />
         </>
+      );
+    default:
+      return (
+        <EmptyMessage message="No given group view"/>
       );
   }
 };

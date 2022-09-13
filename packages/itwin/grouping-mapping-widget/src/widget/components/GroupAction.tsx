@@ -284,7 +284,7 @@ const GroupAction = (props: GroupActionProps) => {
         onChange={changeGroupByType}
         value={value}
         label={label}
-        disabled={isLoading || isRendering}
+        disabled={isUpdating}
         checked={queryGenerationType === value}
       />
     );
@@ -350,7 +350,7 @@ const GroupAction = (props: GroupActionProps) => {
           />
         </Fieldset>
         <Fieldset legend='Group By' className='gmw-query-builder-container'>
-          <RadioTileGroup className="gmw-radio-group-tile" required>
+          <RadioTileGroup className='gmw-radio-group-tile' required>
             {uiProviders.length === 0
               ? (
                 defaultUIProvidersMetadata.map((p) =>
