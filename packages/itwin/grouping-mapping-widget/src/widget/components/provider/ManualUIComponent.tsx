@@ -6,13 +6,13 @@ import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
 import { LoadingSpinner } from "../utils";
 import "./ManualUIProvider.scss";
-import type { CustomUIComponentProps } from "./CustomUIProvider";
+import type { GroupUIComponentProps } from "./CustomUIProvider";
 
 const ManualUIComponent = ({
   updateQuery,
   isUpdating,
   resetView,
-}: CustomUIComponentProps) => {
+}: GroupUIComponentProps) => {
   const [manualInput, setManualInput] = React.useState("");
 
   return (

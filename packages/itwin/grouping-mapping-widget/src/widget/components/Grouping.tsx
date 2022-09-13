@@ -58,6 +58,9 @@ import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useCustomUIProvider } from "./context/CustomUIProviderContext";
+import type { ContextUIProvider, GroupUIProvider } from "./provider/CustomUIProvider";
+import { CustomUIProviderTypes } from "./provider/CustomUIProvider";
+import { Presentation } from "@itwin/presentation-frontend";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
@@ -84,6 +87,7 @@ enum GroupsView {
   MODIFYING = "modifying",
   ADD = "ADD",
   PROPERTIES = "properties",
+  CUSTOM = "custom",
 }
 
 interface GroupsTreeProps {
@@ -124,7 +128,10 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
-  const uiProviders = useCustomUIProvider();
+  const groupUIProviders: GroupUIProvider[] = useCustomUIProvider()
+    .filter((p) => p.type === CustomUIProviderTypes.GROUP) as GroupUIProvider[];
+  const contextUIProviders: ContextUIProvider[] = useCustomUIProvider()
+    .filter((p) => p.type === CustomUIProviderTypes.CONTEXT) as ContextUIProvider[];
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -140,6 +147,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
 
   const [queryGenerationType, setQueryGenerationType] =
     useState<string>("Selection");
+  const [selectedContextUIProvider, setSelectedContextUIProvider] = useState<ContextUIProvider>();
 
   useEffect(() => {
     void fetchGroups(
@@ -428,8 +436,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 className='gmw-ui-provider-dropdown'
                 disabled={isLoadingQuery}
                 menuItems={() =>
-                  (uiProviders.length > 0
-                    ? uiProviders
+                  (groupUIProviders.length > 0
+                    ? groupUIProviders
                     : defaultUIProvidersMetadata)
                     .map((p) => (
                       <MenuItem
@@ -550,54 +558,85 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                           <DropdownMenu
                             className='gmw-ui-provider-dropdown'
                             disabled={isLoadingQuery}
-                            menuItems={(close: () => void) => [
-                              <MenuItem
-                                key={0}
-                                disabled={isLoadingQuery}
-                                subMenuItems={
-                                  (uiProviders.length > 0
-                                    ? uiProviders
-                                    : defaultUIProvidersMetadata)
-                                    .map((p) => (
-                                      <MenuItem
-                                        className='gmw-menu-item'
-                                        key={p.name}
-                                        onClick={async () => onModify(g, p.name)}
-                                        icon={p.icon}
-                                      >
-                                        {p.displayLabel}
-                                      </MenuItem>
-                                    ))
-                                }
-                              >
-                                <SvgEdit
-                                  style={{
-                                    width: "16px",
-                                    height: "16px",
-                                    margin: "0 8px 0 0",
+                            menuItems={(close: () => void) =>
+                              [
+                                <MenuItem
+                                  key={0}
+                                  disabled={isLoadingQuery}
+                                  subMenuItems={
+                                    (groupUIProviders.length > 0
+                                      ? groupUIProviders
+                                      : defaultUIProvidersMetadata)
+                                      .map((p) => (
+                                        <MenuItem
+                                          className='gmw-menu-item'
+                                          key={p.name}
+                                          onClick={async () => onModify(g, p.name)}
+                                          icon={p.icon}
+                                        >
+                                          {p.displayLabel}
+                                        </MenuItem>
+                                      ))
+                                  }
+                                >
+                                  <SvgEdit
+                                    style={{
+                                      width: "16px",
+                                      height: "16px",
+                                      margin: "0 8px 0 0",
+                                    }}
+                                  />
+                                  Edit
+                                </MenuItem>,
+                                <MenuItem
+                                  key={1}
+                                  onClick={async () => openProperties(g)}
+                                  icon={<SvgList />}
+                                >
+                                  Properties
+                                </MenuItem>,
+                                <MenuItem
+                                  key={2}
+                                  onClick={() => {
+                                    setSelectedGroup(g);
+                                    setShowDeleteModal(true);
+                                    close();
                                   }}
-                                />
-                                Edit
-                              </MenuItem>,
-                              <MenuItem
-                                key={1}
-                                onClick={async () => openProperties(g)}
-                                icon={<SvgList />}
-                              >
-                                Properties
-                              </MenuItem>,
-                              <MenuItem
-                                key={2}
-                                onClick={() => {
-                                  setSelectedGroup(g);
-                                  setShowDeleteModal(true);
-                                  close();
-                                }}
-                                icon={<SvgDelete />}
-                              >
-                                Remove
-                              </MenuItem>,
-                            ]}
+                                  icon={<SvgDelete />}
+                                >
+                                  Remove
+                                </MenuItem>,
+                              ].concat(
+                                contextUIProviders.map((p) => {
+                                  if(p.uiComponent) {
+                                    return <MenuItem
+                                      key={p.name}
+                                      onClick={() => {
+                                        setSelectedGroup(g);
+                                        setSelectedContextUIProvider(p);
+                                        setGroupsView(GroupsView.CUSTOM);
+                                      }}
+                                      icon={p.icon}
+                                    >
+                                      {p.displayLabel}
+                                    </MenuItem>;
+                                  } else{
+                                    return <MenuItem
+                                      key={p.name}
+                                      onClick={() => {
+                                        p.callback !== undefined
+                                          ? p.callback(g.id, mapping.id, iModelId)
+                                          : toaster.warning("This context UI provider was not linked to a callback function.");
+                                        close();
+                                      }}
+                                      icon={p.icon}
+                                    >
+                                      {p.displayLabel}
+                                    </MenuItem>;
+                                  }
+                                })
+                              )
+                            }
                           >
                             <IconButton
                               disabled={isLoadingQuery}
@@ -640,6 +679,24 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           />
         </>
       );
+    case GroupsView.CUSTOM:
+      return selectedContextUIProvider && selectedContextUIProvider.uiComponent
+        ? (
+          <>
+            <WidgetHeader
+              title={selectedContextUIProvider.displayLabel}
+              returnFn={async () => {
+                Presentation.selection.clearSelection(
+                  "GroupingMappingWidget",
+                  iModelConnection,
+                );
+                await refresh();
+              }}
+            />
+            {React.createElement(selectedContextUIProvider.uiComponent)}
+          </>
+        )
+        : null;
     default:
       return (
         <EmptyMessage message="No given group view"/>

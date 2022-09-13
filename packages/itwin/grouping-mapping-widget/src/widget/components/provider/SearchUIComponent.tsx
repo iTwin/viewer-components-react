@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
-import type { CustomUIComponentProps } from "./CustomUIProvider";
+import type { GroupUIComponentProps } from "./CustomUIProvider";
 import { LoadingSpinner } from "../utils";
 import "./SearchUIProvider.scss";
 
@@ -12,7 +12,7 @@ const SearchUIComponent = ({
   updateQuery,
   isUpdating,
   resetView,
-}: CustomUIComponentProps) => {
+}: GroupUIComponentProps) => {
   const [searchInput, setSearchInput] = React.useState("");
   const isWrappedInQuotes = (text: string) => {
     return text.startsWith(`"`) && text.endsWith(`"`);

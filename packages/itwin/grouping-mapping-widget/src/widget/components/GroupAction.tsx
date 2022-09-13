@@ -45,6 +45,8 @@ import { useCustomUIProvider } from "./context/CustomUIProviderContext";
 import ManualUIProvider from "./provider/ManualUIComponent";
 import SearchUIProvider from "./provider/SearchUIComponent";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
+import type { GroupUIProvider } from "./provider/CustomUIProvider";
+import { CustomUIProviderTypes } from "./provider/CustomUIProvider";
 
 interface GroupActionProps {
   iModelId: string;
@@ -59,7 +61,8 @@ const GroupAction = (props: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const uiProviders = useCustomUIProvider();
+  const groupUIProviders: GroupUIProvider[] = useCustomUIProvider()
+    .filter((p) => p.type === CustomUIProviderTypes.GROUP) as GroupUIProvider[];
 
   const [details, setDetails] = useState({
     groupName: props.group?.groupName ?? "",
@@ -248,7 +251,7 @@ const GroupAction = (props: GroupActionProps) => {
       }
       default: {
         if (queryGenerationType && queryGenerationType.length > 0) {
-          const selectedUIProvider = uiProviders.find(
+          const selectedUIProvider = groupUIProviders.find(
             (e) => e.name === queryGenerationType,
           );
           if (selectedUIProvider) {
@@ -351,14 +354,14 @@ const GroupAction = (props: GroupActionProps) => {
         </Fieldset>
         <Fieldset legend='Group By' className='gmw-query-builder-container'>
           <RadioTileGroup className='gmw-radio-group-tile' required>
-            {uiProviders.length === 0
+            {groupUIProviders.length === 0
               ? (
                 defaultUIProvidersMetadata.map((p) =>
                   getRadioTileComponent(p.icon, p.name, p.displayLabel)
                 )
               )
               : (
-                uiProviders.map((ext) =>
+                groupUIProviders.map((ext) =>
                   getRadioTileComponent(ext.icon ?? <SvgAdd />, ext.name, ext.displayLabel),
                 )
               )}
