@@ -155,7 +155,7 @@ const extractPrimitives = (
         primitiveNavigationClass,
         actualECClassName,
         parentPropertyClassName,
-        key: propertyField.name,
+        key: `${actualECClassName}_${propertyField.name}`,
         categoryLabel: propertyField.category.label,
       }
     );
@@ -188,7 +188,7 @@ const extractPrimitiveStructProperties = (
         primitiveNavigationClass: "",
         actualECClassName,
         parentPropertyClassName,
-        key: member.name,
+        key: `${actualECClassName}_${member.name}`,
         categoryLabel,
       });
 
