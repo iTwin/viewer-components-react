@@ -6,13 +6,13 @@ import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
 import { LoadingSpinner } from "../utils";
 import "./ManualGroupingUI.scss";
-import type { GroupingMappingUIProps } from "./GroupingMappingUIProvider";
+import type { GroupingUIProps } from "./GroupingMappingUIProvider";
 
 const ManualGroupingUI = ({
   updateQuery,
   isUpdating,
   resetView,
-}: GroupingMappingUIProps) => {
+}: GroupingUIProps) => {
   const [manualInput, setManualInput] = React.useState("");
 
   return (

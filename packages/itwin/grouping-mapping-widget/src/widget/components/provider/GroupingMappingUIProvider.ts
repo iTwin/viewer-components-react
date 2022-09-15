@@ -4,20 +4,20 @@
 *--------------------------------------------------------------------------------------------*/
 import type { ReactElement } from "react";
 
-export enum CustomUIProviderTypes{
+export enum GroupingMappingUIProviderType {
   GROUP = "group",
   CONTEXT = "context"
 }
 
-export type CustomUIProvider = GroupUIProvider | ContextUIProvider;
+export type GroupingMappingUIProvider = GroupingUIProvider | ContextUIProvider;
 
 /** Custom UI Provider Definitions  */
 
-export interface ICustomUIProvider {
+export interface IGroupingMappingUIProvider {
   /**
    * UI Provider type
    */
-  type: CustomUIProviderTypes;
+  type: GroupingMappingUIProviderType;
   /**
    * Unique identifier of the UI provider.
    */
@@ -35,11 +35,11 @@ export interface ICustomUIProvider {
 /**
  * Context UI provider type definition.
  */
-export interface ContextUIProvider extends ICustomUIProvider {
+export interface ContextUIProvider extends IGroupingMappingUIProvider {
   /**
    * UI Provider type.
    */
-  type: CustomUIProviderTypes.CONTEXT;
+  type: GroupingMappingUIProviderType.CONTEXT;
   /**
    * User defined component for UI interaction with grouping mapping widget.
    */
@@ -53,15 +53,15 @@ export interface ContextUIProvider extends ICustomUIProvider {
 /**
  * Custom UI provider type definition.
  */
-export interface GroupUIProvider extends ICustomUIProvider {
+export interface GroupingUIProvider extends IGroupingMappingUIProvider {
   /**
    * UI Provider type.
    */
-  type: CustomUIProviderTypes.GROUP;
+  type: GroupingMappingUIProviderType.GROUP;
   /**
    * Custom UI Component to build query interactively. Refer to SearchUIProvider/ManualUIProvider.
    */
-  uiComponent: (props: GroupUIComponentProps) => JSX.Element;
+  uiComponent: (props: GroupingUIProps ) => JSX.Element;
 }
 
 /** Custom UI Component props definitions  */
@@ -69,7 +69,7 @@ export interface GroupUIProvider extends ICustomUIProvider {
 /**
  * Group providerized UI component arguments definition.
  */
-export interface GroupUIComponentProps {
+export interface GroupingUIProps {
   /**
    * To validate and update current query.
    */

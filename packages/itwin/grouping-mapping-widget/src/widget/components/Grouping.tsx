@@ -58,8 +58,8 @@ import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingUIProvider } from "./context/GroupingMappingUIProviderContext";
-import type { ContextUIProvider, GroupUIProvider } from "./provider/CustomUIProvider";
-import { CustomUIProviderTypes } from "./provider/CustomUIProvider";
+import { GroupingMappingUIProviderType} from "./provider/GroupingMappingUIProvider";
+import type { ContextUIProvider, GroupingUIProvider } from "./provider/GroupingMappingUIProvider";
 import { Presentation } from "@itwin/presentation-frontend";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
@@ -128,10 +128,10 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
-  const groupUIProviders: GroupUIProvider[] = useCustomUIProvider()
-    .filter((p) => p.type === CustomUIProviderTypes.GROUP) as GroupUIProvider[];
-  const contextUIProviders: ContextUIProvider[] = useCustomUIProvider()
-    .filter((p) => p.type === CustomUIProviderTypes.CONTEXT) as ContextUIProvider[];
+  const groupUIProviders: GroupingUIProvider[] = useGroupingMappingUIProvider()
+    .filter((p) => p.type === GroupingMappingUIProviderType.GROUP) as GroupingUIProvider[];
+  const contextUIProviders: ContextUIProvider[] = useGroupingMappingUIProvider()
+    .filter((p) => p.type === GroupingMappingUIProviderType.CONTEXT) as ContextUIProvider[];
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
