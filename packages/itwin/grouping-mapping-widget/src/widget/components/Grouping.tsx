@@ -57,7 +57,7 @@ import { FeatureOverrideType } from "@itwin/core-common";
 import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import { useCustomUIProvider } from "./context/CustomUIProviderContext";
+import { useGroupingMappingUIProvider } from "./context/GroupingMappingUIProviderContext";
 import type { ContextUIProvider, GroupUIProvider } from "./provider/CustomUIProvider";
 import { CustomUIProviderTypes } from "./provider/CustomUIProvider";
 import { Presentation } from "@itwin/presentation-frontend";

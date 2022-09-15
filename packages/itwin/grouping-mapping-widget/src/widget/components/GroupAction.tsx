@@ -41,12 +41,12 @@ import {
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
-import { useCustomUIProvider } from "./context/CustomUIProviderContext";
-import ManualUIProvider from "./provider/ManualUIComponent";
-import SearchUIProvider from "./provider/SearchUIComponent";
+import { useGroupingMappingUIProvider } from "./context/GroupingMappingUIProviderContext";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
-import type { GroupUIProvider } from "./provider/CustomUIProvider";
-import { CustomUIProviderTypes } from "./provider/CustomUIProvider";
+import SearchGroupingUI from "./provider/SearchGroupingUI";
+import ManualGroupingUI from "./provider/ManualGroupingUI";
+import { GroupingMappingUIProviderType} from "./provider/GroupingMappingUIProvider";
+import type { GroupingUIProvider } from "./provider/GroupingMappingUIProvider";
 
 interface GroupActionProps {
   iModelId: string;
@@ -61,8 +61,8 @@ const GroupAction = (props: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const groupUIProviders: GroupUIProvider[] = useCustomUIProvider()
-    .filter((p) => p.type === CustomUIProviderTypes.GROUP) as GroupUIProvider[];
+  const groupUIProviders: GroupingUIProvider[] = useGroupingMappingUIProvider()
+    .filter((p) => p.type === GroupingMappingUIProviderType.GROUP) as GroupingUIProvider[];
 
   const [details, setDetails] = useState({
     groupName: props.group?.groupName ?? "",
@@ -233,7 +233,7 @@ const GroupAction = (props: GroupActionProps) => {
       }
       case "Search": {
         return (
-          <SearchUIProvider
+          <SearchGroupingUI
             updateQuery={setQuery}
             isUpdating={isUpdating}
             resetView={props.resetView}
@@ -242,7 +242,7 @@ const GroupAction = (props: GroupActionProps) => {
       }
       case "Manual": {
         return (
-          <ManualUIProvider
+          <ManualGroupingUI
             updateQuery={setQuery}
             isUpdating={isUpdating}
             resetView={props.resetView}

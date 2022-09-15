@@ -2,6 +2,23 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.6.0",
+      "date": "Mon, 12 Sep 2022 19:50:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added border to the color legend for group hiliting"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Updated to insights client version 0.3.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.8",
       "tag": "@itwin/grouping-mapping-widget_v0.5.8",
       "date": "Wed, 24 Aug 2022 14:01:03 GMT",

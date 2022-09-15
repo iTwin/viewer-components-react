@@ -17,9 +17,8 @@ import {
   MappingClientContext,
 } from "./context/MappingClientContext";
 import type { IMappingsClient } from "@itwin/insights-client";
-import { createCustomUIProvider } from "./context/CustomUIProviderContext";
-import { CustomUIProviderContext } from "./context/CustomUIProviderContext";
-import type { CustomUIProvider } from "./provider/CustomUIProvider";
+import { createGroupingMappingProvider, GroupingMappingUIProviderContext } from "./context/GroupingMappingUIProviderContext";
+import type { GroupingMappingUIProvider } from "./provider/GroupingMappingUIProvider";
 
 export interface GroupingMappingProps {
   /**
@@ -38,51 +37,46 @@ export interface GroupingMappingProps {
   /**
    * Custom UI providers to add and update groups.
    */
-  uiProviders?: CustomUIProvider[];
+  uiProviders?: GroupingMappingUIProvider[];
 }
 
 const authorizationClientGetAccessToken = async () =>
   (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
 
-const GroupingMapping = ({
-  getAccessToken,
-  prefix,
-  client,
-  uiProviders,
-}: GroupingMappingProps) => {
-  const clientProp: IMappingsClient | ClientPrefix = client ?? prefix;
+const GroupingMapping = (props: GroupingMappingProps) => {
+  const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
   const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
-  const [groupUIProviders, setGroupUIProviders] = useState<CustomUIProvider[]>(
-    createCustomUIProvider(uiProviders),
+  const [uiProviders, setUIProviders] = useState<GroupingMappingUIProvider[]>(
+    createGroupingMappingProvider(props.uiProviders),
   );
   const [apiConfig, setApiConfig] = useState<GroupingMappingApiConfig>({
-    getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
-    prefix,
+    getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
+    prefix: props.prefix,
   });
 
   useEffect(() => {
     setApiConfig(() => ({
-      prefix,
-      getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
+      prefix: props.prefix,
+      getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
     }));
-  }, [getAccessToken, prefix]);
+  }, [props.getAccessToken, props.prefix]);
 
   useEffect(() => {
     setMappingClient(createMappingClient(clientProp));
   }, [clientProp]);
 
   useEffect(() => {
-    setGroupUIProviders(createCustomUIProvider(uiProviders));
+    setUIProviders(createGroupingMappingProvider(uiProviders));
   }, [uiProviders]);
 
   return (
     <GroupingMappingApiConfigContext.Provider value={apiConfig}>
       <MappingClientContext.Provider value={mappingClient}>
-        <CustomUIProviderContext.Provider value={groupUIProviders}>
+        <GroupingMappingUIProviderContext.Provider value={uiProviders}>
           <div className='gmw-group-mapping-container'>
             <Mappings />
           </div>
-        </CustomUIProviderContext.Provider>
+        </GroupingMappingUIProviderContext.Provider>
       </MappingClientContext.Provider>
     </GroupingMappingApiConfigContext.Provider>
   );

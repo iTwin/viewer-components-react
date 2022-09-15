@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/grouping-mapping-widget",
       "comment": "Add custom UI provider extensibility and refactor default providers accordingly",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/grouping-mapping-widget"
