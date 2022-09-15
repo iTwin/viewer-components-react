@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 30 May 2022 12:44:10 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Sep 2022 19:50:36 GMT and should not be manually modified.
+
+## 0.5.0
+Mon, 12 Sep 2022 19:50:36 GMT
+
+### Minor changes
+
+- Add new `defaultTreeId` prop to specify default tree for TreeWidgetUiItemsProvider
 
 ## 0.4.7
 Mon, 30 May 2022 12:44:10 GMT
