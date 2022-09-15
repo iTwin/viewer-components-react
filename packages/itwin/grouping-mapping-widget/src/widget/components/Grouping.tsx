@@ -109,6 +109,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
     undefined,
   );
   const hilitedElements = useRef<Map<string, string[]>>(new Map());
+  const activeHilitedElements = useRef<Map<string, string[]>>(new Map());
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const [hiddenGroupsIds, setHiddenGroupsIds] = useState<string[]>([]);
@@ -147,6 +148,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             }
             currentIds = await getHiliteIds(query, iModelConnection);
             hilitedElements.current.set(query, currentIds);
+            activeHilitedElements.current.set(query, currentIds);
           } catch {
             toaster.negative(
               `Could not hide/show ${group.groupName}. Query could not be resolved.`,
@@ -525,6 +527,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                   onClick={async () => {
                                     setSelectedGroup(g);
                                     hilitedElements.current.delete(g.query);
+                                    activeHilitedElements.current.delete(g.query);
                                     removeGroup(g);
                                     setGroups(groups);
                                     await resetView();
