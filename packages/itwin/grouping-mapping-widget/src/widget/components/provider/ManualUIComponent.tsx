@@ -5,7 +5,7 @@
 import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
 import { LoadingSpinner } from "../utils";
-import "./ManualUIProvider.scss";
+import "./ManualUIComponent.scss";
 import type { GroupUIComponentProps } from "./CustomUIProvider";
 
 const ManualUIComponent = ({
