@@ -67,7 +67,7 @@ export interface GroupUIProvider extends ICustomUIProvider {
 /** Custom UI Component props definitions  */
 
 /**
- * Custom UI component props definition.
+ * Group provider UI component props definition.
  */
 export interface GroupUIComponentProps {
   /**

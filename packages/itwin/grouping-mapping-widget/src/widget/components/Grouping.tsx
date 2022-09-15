@@ -608,32 +608,23 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                 </MenuItem>,
                               ].concat(
                                 contextUIProviders.map((p) => {
-                                  if(p.uiComponent) {
-                                    return <MenuItem
-                                      key={p.name}
-                                      onClick={() => {
+                                  return <MenuItem
+                                    key={p.name}
+                                    onClick={() => {
+                                      if(p.uiComponent) {
                                         setSelectedGroup(g);
                                         setSelectedContextUIProvider(p);
                                         setGroupsView(GroupsView.CUSTOM);
-                                      }}
-                                      icon={p.icon}
-                                    >
-                                      {p.displayLabel}
-                                    </MenuItem>;
-                                  } else{
-                                    return <MenuItem
-                                      key={p.name}
-                                      onClick={() => {
-                                        p.callback !== undefined
-                                          ? p.callback(g.id, mapping.id, iModelId)
-                                          : toaster.warning("This context UI provider was not linked to a callback function.");
-                                        close();
-                                      }}
-                                      icon={p.icon}
-                                    >
-                                      {p.displayLabel}
-                                    </MenuItem>;
-                                  }
+                                      }
+                                      if(p.callback) {
+                                        p.callback(g.id, mapping.id, iModelId);
+                                      }
+                                      close();
+                                    }}
+                                    icon={p.icon}
+                                  >
+                                    {p.displayLabel}
+                                  </MenuItem>;
                                 })
                               )
                             }
