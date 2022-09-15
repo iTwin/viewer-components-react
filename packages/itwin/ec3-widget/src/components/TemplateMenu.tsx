@@ -69,28 +69,6 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
     labels: []
   });
 
-
-  const fetchProjectName = (async (iTwinId: string) => {
-    if (!IModelApp.authorizationClient)
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
-    const _accessToken = await IModelApp.authorizationClient.getAccessToken();
-    const url = "https://dev-api.bentley.com/projects/" + iTwinId;
-    const prop = {
-      method: "GET",
-      Request: "no-cors",
-      headers: {
-        "Accept": "application/vnd.bentley.itwin-platform.v1+json",
-        "Authorization": _accessToken,
-      },
-    };
-    const response = await fetch(url, prop);
-    //const json = await response.json()
-    return (await response.json()).project.displayName;
-  })
-
-
   const [labelsView, setLabelsView] = useState<LabelView>(
     LabelView.LABELS
   );
@@ -116,7 +94,6 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
     setIsLoading(true);
 
     const fetchReports = async () => {
-      const projName = await fetchProjectName(projectId);
       if (template) {
         const config = await configurationClient.getConfiguration(template.id!);
         const configuration = config.configuration;
