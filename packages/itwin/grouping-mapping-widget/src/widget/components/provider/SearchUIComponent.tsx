@@ -6,7 +6,7 @@ import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
 import type { CustomUIComponentProps } from "./CustomUIProvider";
 import { LoadingSpinner } from "../utils";
-import "./SearchUIProvider.scss";
+import "./SearchUIComponent.scss";
 
 const SearchUIComponent = ({
   updateQuery,
