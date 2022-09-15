@@ -1,6 +1,17 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 24 Aug 2022 14:01:03 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Sep 2022 19:50:36 GMT and should not be manually modified.
+
+## 0.6.0
+Mon, 12 Sep 2022 19:50:36 GMT
+
+### Minor changes
+
+- Updated to insights client version 0.3.0
+
+### Patches
+
+- Added border to the color legend for group hiliting
 
 ## 0.5.8
 Wed, 24 Aug 2022 14:01:03 GMT
