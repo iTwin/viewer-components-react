@@ -57,7 +57,7 @@ import { FeatureOverrideType } from "@itwin/core-common";
 import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import { useCustomUIProvider } from "./context/CustomUIProviderContext";
+import { useGroupingMappingUIProvider } from "./context/GroupingMappingUIProviderContext";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
@@ -124,7 +124,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
-  const uiProviders = useCustomUIProvider();
+  const uiProviders = useGroupingMappingUIProvider();
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);

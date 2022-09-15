@@ -5,9 +5,9 @@
 import type { ReactElement } from "react";
 
 /**
- * Custom UI provider type definition.
+ * Customized UI provider type definition for grouping mapping widget.
  */
-export interface CustomUIProvider {
+export interface GroupingMappingUIProvider {
   /**
    * Unique identifier of the UI provider.
    */
@@ -17,9 +17,9 @@ export interface CustomUIProvider {
    */
   displayLabel: string;
   /**
-   * Custom UI Component to build query interactively. Refer to SearchUIProvider/ManualUIProvider.
+   * Custom UI Component to build query interactively. Refer to SearchGroupingUIProvider/ManualGroupingUI.
    */
-  uiComponent: (props: CustomUIComponentProps) => JSX.Element;
+  uiComponent: (props: GroupingMappingUIProps) => JSX.Element;
   /**
    * Optional icon, will be shown before display label in widget.
    */
@@ -27,9 +27,9 @@ export interface CustomUIProvider {
 }
 
 /**
- * Custom UI component props definition.
+ * Customized UI component arguments definition.
  */
-export interface CustomUIComponentProps {
+export interface GroupingMappingUIProps {
   /**
    * To validate and update current query.
    */

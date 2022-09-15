@@ -41,10 +41,10 @@ import {
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
-import { useCustomUIProvider } from "./context/CustomUIProviderContext";
-import ManualUIProvider from "./provider/ManualUIComponent";
-import SearchUIProvider from "./provider/SearchUIComponent";
+import { useGroupingMappingUIProvider } from "./context/GroupingMappingUIProviderContext";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
+import SearchGroupingUI from "./provider/SearchGroupingUI";
+import ManualGroupingUI from "./provider/ManualGroupingUI";
 
 interface GroupActionProps {
   iModelId: string;
@@ -59,7 +59,7 @@ const GroupAction = (props: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const uiProviders = useCustomUIProvider();
+  const uiProviders = useGroupingMappingUIProvider();
 
   const [details, setDetails] = useState({
     groupName: props.group?.groupName ?? "",
@@ -230,7 +230,7 @@ const GroupAction = (props: GroupActionProps) => {
       }
       case "Search": {
         return (
-          <SearchUIProvider
+          <SearchGroupingUI
             updateQuery={setQuery}
             isUpdating={isUpdating}
             resetView={props.resetView}
@@ -239,7 +239,7 @@ const GroupAction = (props: GroupActionProps) => {
       }
       case "Manual": {
         return (
-          <ManualUIProvider
+          <ManualGroupingUI
             updateQuery={setQuery}
             isUpdating={isUpdating}
             resetView={props.resetView}

@@ -4,15 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
-import type { CustomUIComponentProps } from "./CustomUIProvider";
+import type { GroupingMappingUIProps } from "./GroupingMappingUIProvider";
 import { LoadingSpinner } from "../utils";
-import "./SearchUIComponent.scss";
+import "./SearchGroupingUI.scss";
 
-const SearchUIComponent = ({
+const SearchGroupingUI = ({
   updateQuery,
   isUpdating,
   resetView,
-}: CustomUIComponentProps) => {
+}: GroupingMappingUIProps) => {
   const [searchInput, setSearchInput] = React.useState("");
   const isWrappedInQuotes = (text: string) => {
     return text.startsWith(`"`) && text.endsWith(`"`);
@@ -168,4 +168,4 @@ const SearchUIComponent = ({
   );
 };
 
-export default SearchUIComponent;
+export default SearchGroupingUI;

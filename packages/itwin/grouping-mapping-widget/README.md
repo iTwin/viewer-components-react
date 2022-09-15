@@ -34,7 +34,7 @@ import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
 
 This package provides an interface to define your own group creation method. You can use your own UI component to create or update the query.
 
-An example of group custom UI provider, [ManualUIComponent](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/grouping-mapping-widget/src/widget/components/provider/ManualUIComponent.tsx) helps user to manually define ECSQL query for groups.
+An example of group custom UI provider, [ManualGroupingUI](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/grouping-mapping-widget/src/widget/components/provider/ManualGroupingUI.tsx) helps user to manually define ECSQL query for groups.
 
 In CustomUIComponentProps:
 
@@ -57,7 +57,7 @@ new GroupingMappingProvider({
     {
       name: "Manual",
       displayLabel: "Manual Query",
-      uiComponent: ManualUIComponent,
+      uiComponent: ManualGroupingUI,
       icon: <SvgDraw />,
     },
   ],
