@@ -13,14 +13,12 @@ export const createCustomUIProvider = (
   providers: CustomUIProvider[] | undefined,
 ): CustomUIProvider[] => {
   if (undefined === providers) {
-    return createDefaultCustomUIProvider();
+    return [];
   }
   return providers;
 };
 
-export const CustomUIProviderContext = createContext<CustomUIProvider[]>(
-  createDefaultCustomUIProvider(),
-);
+export const CustomUIProviderContext = createContext<CustomUIProvider[]>([]);
 
 export const useCustomUIProvider = () => {
   const context = useContext(CustomUIProviderContext);
