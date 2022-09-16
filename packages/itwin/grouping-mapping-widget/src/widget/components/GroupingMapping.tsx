@@ -17,8 +17,8 @@ import {
   MappingClientContext,
 } from "./context/MappingClientContext";
 import type { IMappingsClient } from "@itwin/insights-client";
-import { createGroupingMappingProvider, GroupingMappingUIProviderContext } from "./context/GroupingMappingUIProviderContext";
-import type { GroupingMappingUIProvider } from "./provider/GroupingMappingUIProvider";
+import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
+import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
 
 export interface GroupingMappingProps {
   /**
@@ -37,7 +37,7 @@ export interface GroupingMappingProps {
   /**
    * Custom UI providers to add and update groups.
    */
-  uiProviders?: GroupingMappingUIProvider[];
+  customUIs?: GroupingMappingCustomUI[];
 }
 
 const authorizationClientGetAccessToken = async () =>
@@ -46,8 +46,8 @@ const authorizationClientGetAccessToken = async () =>
 const GroupingMapping = (props: GroupingMappingProps) => {
   const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
   const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
-  const [uiProviders, setUIProviders] = useState<GroupingMappingUIProvider[]>(
-    createGroupingMappingProvider(props.uiProviders),
+  const [customUIs, setCustomUIs] = useState<GroupingMappingCustomUI[]>(
+    createGroupingMappingCustomUI(props.customUIs),
   );
   const [apiConfig, setApiConfig] = useState<GroupingMappingApiConfig>({
     getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
@@ -66,17 +66,17 @@ const GroupingMapping = (props: GroupingMappingProps) => {
   }, [clientProp]);
 
   useEffect(() => {
-    setUIProviders(createGroupingMappingProvider(uiProviders));
-  }, [uiProviders]);
+    setCustomUIs(createGroupingMappingCustomUI(props.customUIs));
+  }, [props.customUIs]);
 
   return (
     <GroupingMappingApiConfigContext.Provider value={apiConfig}>
       <MappingClientContext.Provider value={mappingClient}>
-        <GroupingMappingUIProviderContext.Provider value={uiProviders}>
+        <GroupingMappingCustomUIContext.Provider value={customUIs}>
           <div className='gmw-group-mapping-container'>
             <Mappings />
           </div>
-        </GroupingMappingUIProviderContext.Provider>
+        </GroupingMappingCustomUIContext.Provider>
       </MappingClientContext.Provider>
     </GroupingMappingApiConfigContext.Provider>
   );

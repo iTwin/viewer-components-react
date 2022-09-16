@@ -3,24 +3,24 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { createContext, useContext } from "react";
-import type { GroupingMappingUIProvider } from "../provider/GroupingMappingUIProvider";
+import type { GroupingMappingCustomUI } from "../customUI/GroupingMappingCustomUI";
 
-export const createGroupingMappingProvider = (
-  providers: GroupingMappingUIProvider[] | undefined,
-): GroupingMappingUIProvider[] => {
+export const createGroupingMappingCustomUI = (
+  providers: GroupingMappingCustomUI[] | undefined,
+): GroupingMappingCustomUI[] => {
   if (undefined === providers) {
     return [];
   }
   return providers;
 };
 
-export const GroupingMappingUIProviderContext = createContext<GroupingMappingUIProvider[]>([]);
+export const GroupingMappingCustomUIContext = createContext<GroupingMappingCustomUI[]>([]);
 
-export const useGroupingMappingUIProvider = () => {
-  const context = useContext(GroupingMappingUIProviderContext);
+export const useGroupingMappingCustomUI = () => {
+  const context = useContext(GroupingMappingCustomUIContext);
   if (!context) {
     throw new Error(
-      "useGroupingMappingUIProvider should be used within a GroupingMappingUIProviderContext provider",
+      "useGroupingMappingCustomUI should be used within a GroupingMappingCustomUIContext provider",
     );
   }
   return context;

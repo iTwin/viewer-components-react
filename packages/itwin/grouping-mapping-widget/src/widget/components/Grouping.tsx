@@ -57,11 +57,11 @@ import { FeatureOverrideType } from "@itwin/core-common";
 import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import { useGroupingMappingUIProvider } from "./context/GroupingMappingUIProviderContext";
+import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
-export const defaultUIProvidersMetadata = [
+export const defaultUIMetadata = [
   {
     name: "Selection",
     displayLabel: "Selection",
@@ -124,7 +124,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
-  const uiProviders = useGroupingMappingUIProvider();
+  const customUIs = useGroupingMappingCustomUI();
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -428,9 +428,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 className='gmw-ui-provider-dropdown'
                 disabled={isLoadingQuery}
                 menuItems={() =>
-                  (uiProviders.length > 0
-                    ? uiProviders
-                    : defaultUIProvidersMetadata)
+                  (customUIs.length > 0
+                    ? customUIs
+                    : defaultUIMetadata)
                     .map((p) => (
                       <MenuItem
                         key={p.name}
@@ -555,9 +555,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                 key={0}
                                 disabled={isLoadingQuery}
                                 subMenuItems={
-                                  (uiProviders.length > 0
-                                    ? uiProviders
-                                    : defaultUIProvidersMetadata)
+                                  (customUIs.length > 0
+                                    ? customUIs
+                                    : defaultUIMetadata)
                                     .map((p) => (
                                       <MenuItem
                                         className='gmw-menu-item'
