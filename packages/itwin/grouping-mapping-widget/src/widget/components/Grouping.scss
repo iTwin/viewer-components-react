@@ -33,8 +33,8 @@
     display: flex;
     flex-direction: column;
     overflow-y: overlay;
-    gap: 7.5px;
-    margin-top: 7.5px;
+    gap: $iui-s;
+    margin-top: $iui-s;
 
     .gmw-actions {
       display: flex;
@@ -49,7 +49,22 @@
     cursor: pointer;
 
     .gmw-color-legend {
-      border: 2px solid black;
+      border: $iui-xxs solid black;
     }
   }
+
+  .gmw-menu-item {
+    padding-left: $iui-component-padding-horizontal;
+  }
+}
+
+.gmw-nest-menu-item {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0 $iui-component-padding-horizontal;
+  gap: $iui-s;
+}
+
+.gmw-ui-provider-dropdown {
+  width: $iui-3xl + $iui-l;
 }

@@ -7,14 +7,26 @@ import type {
   ISelectionProvider,
   SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";
-import {
-  Presentation,
-} from "@itwin/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { Button, Fieldset, LabeledInput, LabeledTextarea, RadioTile, RadioTileGroup, Small, Text, toaster } from "@itwin/itwinui-react";
+import {
+  Fieldset,
+  LabeledInput,
+  RadioTile,
+  RadioTileGroup,
+  Small,
+  toaster,
+} from "@itwin/itwinui-react";
+import type { ReactElement } from "react";
 import React, { useCallback, useEffect, useState } from "react";
-import { handleError, handleInputChange, LoadingSpinner, WidgetHeader } from "./utils";
+import {
+  EmptyMessage,
+  handleError,
+  handleInputChange,
+  WidgetHeader,
+} from "./utils";
 import type { IGroupTyped } from "./Grouping";
+import { defaultUIMetadata } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -26,46 +38,51 @@ import {
   visualizeElementsByQuery,
   zoomToElements,
 } from "./viewerUtils";
-import { SvgCursor, SvgSearch } from "@itwin/itwinui-icons-react";
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
+import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
+import { SvgAdd } from "@itwin/itwinui-icons-react";
+import SearchGroupingUI from "./customUI/SearchGroupingUI";
+import ManualGroupingUI from "./customUI/ManualGroupingUI";
 
 interface GroupActionProps {
   iModelId: string;
   mappingId: string;
   group?: IGroupTyped;
+  queryGenerationType?: string;
   goBack: () => Promise<void>;
   resetView: () => Promise<void>;
 }
 
-const GroupAction = ({
-  iModelId,
-  mappingId,
-  group,
-  goBack,
-  resetView,
-}: GroupActionProps) => {
+const GroupAction = (props: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
+  const customUIs = useGroupingMappingCustomUI();
+
   const [details, setDetails] = useState({
-    groupName: group?.groupName ?? "",
-    description: group?.description ?? "",
+    groupName: props.group?.groupName ?? "",
+    description: props.group?.description ?? "",
   });
   const [query, setQuery] = useState<string>("");
   const [simpleSelectionQuery, setSimpleSelectionQuery] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const [currentPropertyList, setCurrentPropertyList] = React.useState<PropertyRecord[]>([]);
-  const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>(
+  const [currentPropertyList, setCurrentPropertyList] = useState<PropertyRecord[]>([]);
+  const [queryBuilder, setQueryBuilder] = useState<QueryBuilder>(
     new QueryBuilder(undefined),
   );
-  const [queryGenerationType, setQueryGenerationType] = React.useState("Selection");
-  const [searchInput, setSearchInput] = React.useState("");
+  const [queryGenerationType, setQueryGenerationType] = useState(
+    props.queryGenerationType,
+  );
 
-  const changeGroupByType = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const isUpdating = isLoading || isRendering;
+
+  const changeGroupByType = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const {
       target: { value },
     } = event;
@@ -76,7 +93,7 @@ const GroupAction = ({
     );
     setQuery("");
     setSimpleSelectionQuery("");
-    await resetView();
+    await props.resetView();
   };
 
   useEffect(() => {
@@ -86,8 +103,13 @@ const GroupAction = ({
         selectionProvider: ISelectionProvider,
       ) => {
         if (queryGenerationType === "Selection") {
-          const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-          const query = selection.instanceKeys.size > 0 ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}` : "";
+          const selection = selectionProvider.getSelection(
+            evt.imodel,
+            evt.level,
+          );
+          const query = selection.instanceKeys.size > 0
+            ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}`
+            : "";
           setSimpleSelectionQuery(query);
         }
       },
@@ -104,7 +126,10 @@ const GroupAction = ({
           return;
         }
 
-        if (queryGenerationType === "Selection" && currentPropertyList.length === 0) {
+        if (
+          queryGenerationType === "Selection" &&
+          currentPropertyList.length === 0
+        ) {
           return;
         }
 
@@ -133,44 +158,6 @@ const GroupAction = ({
     );
   }, [iModelConnection]);
 
-  const isWrappedInQuotes = (text: string) => {
-    return text.startsWith(`"`) && text.endsWith(`"`);
-  };
-
-  const needsAndOperator = (token: string, index: number, searchQuery: string[]) => isWrappedInQuotes(token) || (index === 1 && isWrappedInQuotes(searchQuery[0]));
-  // Temporary until ECViews become available for use.
-  const generateSearchQuery = (searchQuery: string[]) => {
-    if (searchQuery.length === 0) {
-      setQuery("");
-      return;
-    }
-
-    let generatedSearchQuery =
-      `SELECT be.ECInstanceId, be.ECClassId FROM bis.geometricelement3d be `;
-    generatedSearchQuery += `LEFT JOIN bis.SpatialCategory cat ON be.Category.Id = cat.ECInstanceID LEFT JOIN ecdbmeta.ECClassDef ecc ON be.ECClassId = ecc.ECInstanceId `;
-    generatedSearchQuery += `LEFT JOIN bis.PhysicalType pt ON be.TypeDefinition.Id = pt.ECInstanceID`;
-    generatedSearchQuery += ` WHERE `;
-    generatedSearchQuery += `((${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} be.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")}) OR (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} be.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")})) OR ((${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} cat.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")}) OR (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} cat.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")})) OR (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} ecc.name LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")})`;
-    // Physical Types
-    generatedSearchQuery += ` OR ((${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} pt.codevalue LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")}) OR (${searchQuery.map((token, index) =>
-      `${index === 0 ? "" : needsAndOperator(token, index, searchQuery) ? "AND" : "OR"} pt.userlabel LIKE '%${isWrappedInQuotes(token) ? token.slice(1, -1) : token}%'`
-    ).join(" ")})) `;
-
-    setQuery(generatedSearchQuery);
-  };
-
   const save = useCallback(async () => {
     if (!validator.allValid()) {
       showValidationMessage(true);
@@ -182,54 +169,137 @@ const GroupAction = ({
 
       const accessToken = await getAccessToken();
 
-      group
+      props.group
         ? await mappingClient.updateGroup(
           accessToken,
-          iModelId,
-          mappingId,
-          group.id ?? "",
+          props.iModelId,
+          props.mappingId,
+          props.group.id ?? "",
           { ...details, query: currentQuery },
         )
-        : await mappingClient.createGroup(accessToken, iModelId, mappingId, {
-          ...details,
-          query: currentQuery,
-        });
+        : await mappingClient.createGroup(
+          accessToken,
+          props.iModelId,
+          props.mappingId,
+          {
+            ...details,
+            query: currentQuery,
+          },
+        );
       Presentation.selection.clearSelection(
         "GroupingMappingWidget",
         iModelConnection,
       );
-      await goBack();
+      await props.goBack();
     } catch (error: any) {
       handleError(error.status);
       setIsLoading(false);
     }
   }, [
-    details,
-    goBack,
-    group,
-    iModelConnection,
-    iModelId,
-    mappingId,
-    query,
-    showValidationMessage,
-    simpleSelectionQuery,
     validator,
+    showValidationMessage,
+    query,
+    simpleSelectionQuery,
     getAccessToken,
+    props,
     mappingClient,
+    details,
+    iModelConnection,
   ]);
 
-  const isBlockingActions = !(details.groupName && (query || simpleSelectionQuery) && !isRendering && !isLoading);
+  const createQueryBuilderComponent  = () => {
+    switch (queryGenerationType) {
+      case "Selection": {
+        return (
+          <GroupQueryBuilderContext.Provider
+            value={{
+              currentPropertyList,
+              setCurrentPropertyList,
+              query,
+              setQuery,
+              queryBuilder,
+              setQueryBuilder,
+              isLoading,
+              isRendering,
+              resetView: props.resetView,
+            }}
+          >
+            <GroupQueryBuilderContainer />
+          </GroupQueryBuilderContext.Provider>
+        );
+      }
+      case "Search": {
+        return (
+          <SearchGroupingUI
+            updateQuery={setQuery}
+            isUpdating={isUpdating}
+            resetView={props.resetView}
+          />
+        );
+      }
+      case "Manual": {
+        return (
+          <ManualGroupingUI
+            updateQuery={setQuery}
+            isUpdating={isUpdating}
+            resetView={props.resetView}
+          />
+        );
+      }
+      default: {
+        if (queryGenerationType && queryGenerationType.length > 0) {
+          const selectedCustomUI = customUIs.find(
+            (e) => e.name === queryGenerationType,
+          );
+          if (selectedCustomUI) {
+            return React.createElement(selectedCustomUI.uiComponent, {
+              updateQuery: setQuery,
+              isUpdating,
+              resetView: props.resetView,
+            });
+          }
+        }
+        return <EmptyMessage message='No query generation method selected. ' />;
+      }
+    }
+  };
+
+  const isBlockingActions = !(
+    details.groupName &&
+    (query || simpleSelectionQuery) &&
+    !isRendering &&
+    !isLoading
+  );
+
+  const getRadioTileComponent = (
+    icon: ReactElement,
+    value: string,
+    label: string,
+  ) => {
+    return (
+      <RadioTile
+        name={"groupby"}
+        icon={icon}
+        key={value}
+        onChange={changeGroupByType}
+        value={value}
+        label={label}
+        disabled={isUpdating}
+        checked={queryGenerationType === value}
+      />
+    );
+  };
 
   return (
     <>
       <WidgetHeader
-        title={group ? group.groupName ?? "" : "Add Group"}
+        title={props.group ? props.group.groupName ?? "" : "Add Group"}
         returnFn={async () => {
           Presentation.selection.clearSelection(
             "GroupingMappingWidget",
             iModelConnection,
           );
-          await goBack();
+          await props.goBack();
         }}
       />
       <div className='gmw-group-add-modify-container'>
@@ -280,65 +350,20 @@ const GroupAction = ({
           />
         </Fieldset>
         <Fieldset legend='Group By' className='gmw-query-builder-container'>
-          <RadioTileGroup
-            className="gmw-radio-group-tile"
-            required>
-            <RadioTile
-              name={"groupby"}
-              icon={<SvgCursor />}
-              onChange={changeGroupByType}
-              defaultChecked
-              value={"Selection"}
-              label={"Selection"}
-              disabled={isLoading || isRendering}
-            />
-            <RadioTile
-              icon={<SvgSearch />}
-              name={"groupby"}
-              onChange={changeGroupByType}
-              value={"Query Keywords"}
-              label={"Query Keywords"}
-              disabled={isLoading || isRendering}
-            />
+          <RadioTileGroup className='gmw-radio-group-tile' required>
+            {customUIs.length === 0
+              ? (
+                defaultUIMetadata.map((p) =>
+                  getRadioTileComponent(p.icon, p.name, p.displayLabel)
+                )
+              )
+              : (
+                customUIs.map((ext) =>
+                  getRadioTileComponent(ext.icon ?? <SvgAdd />, ext.name, ext.displayLabel),
+                )
+              )}
           </RadioTileGroup>
-          {queryGenerationType === "Selection" ?
-            <GroupQueryBuilderContext.Provider
-              value={{
-                currentPropertyList,
-                setCurrentPropertyList,
-                query,
-                setQuery,
-                queryBuilder,
-                setQueryBuilder,
-                isLoading,
-                isRendering,
-                resetView,
-              }}
-            >
-              <GroupQueryBuilderContainer />
-            </GroupQueryBuilderContext.Provider> :
-            <div className="gmw-search-form">
-              <Text>Generate a query by keywords. Keywords wrapped in double quotes will be considered a required criteria.</Text>
-              <LabeledTextarea
-                label="Query Keywords"
-                required
-                value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
-                disabled={isLoading || isRendering}
-                placeholder={`E.g. "red" chair`} />
-              <div className="gmw-search-actions">
-                {isRendering &&
-                  <LoadingSpinner />
-                }
-                <Button disabled={isLoading || isRendering} onClick={() => generateSearchQuery(searchInput ? searchInput.replace(/(\r\n|\n|\r)/gm, "").trim().split(" ") : [])}>Generate Query</Button>
-                <Button disabled={isLoading || isRendering} onClick={async () => {
-                  setQuery("");
-                  setSearchInput("");
-                  await resetView();
-                }}>Clear</Button>
-              </div>
-            </div>
-          }
+          {queryGenerationType && createQueryBuilderComponent()}
         </Fieldset>
       </div>
       <ActionPanel
@@ -350,11 +375,9 @@ const GroupAction = ({
             "GroupingMappingWidget",
             iModelConnection,
           );
-          await goBack();
+          await props.goBack();
         }}
-        isSavingDisabled={
-          isBlockingActions
-        }
+        isSavingDisabled={isBlockingActions}
         isLoading={isLoading}
       />
     </>

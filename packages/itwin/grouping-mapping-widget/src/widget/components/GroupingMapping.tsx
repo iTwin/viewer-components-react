@@ -6,10 +6,19 @@ import React, { useEffect, useState } from "react";
 import { Mappings } from "./Mapping";
 import "./GroupingMapping.scss";
 import { IModelApp } from "@itwin/core-frontend";
-import type { ClientPrefix, GetAccessTokenFn, GroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type {
+  ClientPrefix,
+  GetAccessTokenFn,
+  GroupingMappingApiConfig,
+} from "./context/GroupingApiConfigContext";
 import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
-import { createMappingClient, MappingClientContext } from "./context/MappingClientContext";
+import {
+  createMappingClient,
+  MappingClientContext,
+} from "./context/MappingClientContext";
 import type { IMappingsClient } from "@itwin/insights-client";
+import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
+import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
 
 export interface GroupingMappingProps {
   /**
@@ -25,34 +34,49 @@ export interface GroupingMappingProps {
    * A custom implementation of MappingClient.
    */
   client?: IMappingsClient;
+  /**
+   * Custom UI to add and update groups.
+   */
+  customUIs?: GroupingMappingCustomUI[];
 }
 
-const authorizationClientGetAccessToken = (async () => (await IModelApp.authorizationClient?.getAccessToken() ?? ""));
+const authorizationClientGetAccessToken = async () =>
+  (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
 
-const GroupingMapping = ({ getAccessToken, prefix, client }: GroupingMappingProps) => {
-  const clientProp: IMappingsClient | ClientPrefix = client ?? prefix;
+const GroupingMapping = (props: GroupingMappingProps) => {
+  const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
   const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
+  const [customUIs, setCustomUIs] = useState<GroupingMappingCustomUI[]>(
+    createGroupingMappingCustomUI(props.customUIs),
+  );
   const [apiConfig, setApiConfig] = useState<GroupingMappingApiConfig>({
-    getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
-    prefix,
+    getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
+    prefix: props.prefix,
   });
 
   useEffect(() => {
-    setApiConfig(() => ({ prefix, getAccessToken: getAccessToken ?? authorizationClientGetAccessToken }));
-  }, [getAccessToken, prefix]);
+    setApiConfig(() => ({
+      prefix: props.prefix,
+      getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
+    }));
+  }, [props.getAccessToken, props.prefix]);
 
   useEffect(() => {
     setMappingClient(createMappingClient(clientProp));
   }, [clientProp]);
 
+  useEffect(() => {
+    setCustomUIs(createGroupingMappingCustomUI(props.customUIs));
+  }, [props.customUIs]);
+
   return (
-    <GroupingMappingApiConfigContext.Provider
-      value={apiConfig}
-    >
+    <GroupingMappingApiConfigContext.Provider value={apiConfig}>
       <MappingClientContext.Provider value={mappingClient}>
-        <div className='gmw-group-mapping-container'>
-          <Mappings />
-        </div>
+        <GroupingMappingCustomUIContext.Provider value={customUIs}>
+          <div className='gmw-group-mapping-container'>
+            <Mappings />
+          </div>
+        </GroupingMappingCustomUIContext.Provider>
       </MappingClientContext.Provider>
     </GroupingMappingApiConfigContext.Provider>
   );
