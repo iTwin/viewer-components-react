@@ -5,11 +5,11 @@
 import type { ReactElement } from "react";
 
 /**
- * Customized UI provider type definition for grouping mapping widget.
+ * Customized UI type definition for grouping mapping widget.
  */
 export interface GroupingMappingCustomUI {
   /**
-   * Unique identifier of the UI provider.
+   * Unique identifier of the custom UI.
    */
   name: string;
   /**

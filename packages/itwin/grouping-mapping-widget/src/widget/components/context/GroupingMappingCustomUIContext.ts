@@ -6,12 +6,12 @@ import { createContext, useContext } from "react";
 import type { GroupingMappingCustomUI } from "../customUI/GroupingMappingCustomUI";
 
 export const createGroupingMappingCustomUI = (
-  providers: GroupingMappingCustomUI[] | undefined,
+  customUIs: GroupingMappingCustomUI[] | undefined,
 ): GroupingMappingCustomUI[] => {
-  if (undefined === providers) {
+  if (undefined === customUIs) {
     return [];
   }
-  return providers;
+  return customUIs;
 };
 
 export const GroupingMappingCustomUIContext = createContext<GroupingMappingCustomUI[]>([]);
