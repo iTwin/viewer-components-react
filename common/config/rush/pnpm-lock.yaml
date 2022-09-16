@@ -596,7 +596,7 @@ importers:
       '@itwin/core-frontend': ^3.0.0
       '@itwin/core-react': ^3.0.0
       '@itwin/eslint-plugin': ^3.0.0
-      '@itwin/insights-client': 0.1.0
+      '@itwin/insights-client': ^0.3.0
       '@itwin/itwinui-icons-react': ^1.5.1
       '@itwin/itwinui-react': ^1.29.2
       '@testing-library/dom': ^8.12.0
@@ -625,7 +625,7 @@ importers:
       ts-jest: ^27.1.3
       typescript: ~4.3.0
     dependencies:
-      '@itwin/insights-client': 0.1.0
+      '@itwin/insights-client': 0.3.0
       '@itwin/itwinui-icons-react': 1.8.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.35.0_react-dom@17.0.2+react@17.0.2
     devDependencies:
@@ -2862,14 +2862,6 @@ packages:
       axios: 0.21.4
     transitivePeerDependencies:
       - debug
-    dev: false
-
-  /@itwin/insights-client/0.1.0:
-    resolution: {integrity: sha512-CpK9EhEKF+yXdwUpf/J7HyYs453twEM49qQchZ4lL2x54sSNQ8P4KXZhEdMxz9BMpob/7f/xImolTLd3HnY/Bg==}
-    dependencies:
-      cross-fetch: 3.1.5
-    transitivePeerDependencies:
-      - encoding
     dev: false
 
   /@itwin/insights-client/0.3.0:

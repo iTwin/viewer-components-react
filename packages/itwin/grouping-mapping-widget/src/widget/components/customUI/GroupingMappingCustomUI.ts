@@ -4,20 +4,20 @@
 *--------------------------------------------------------------------------------------------*/
 import type { ReactElement } from "react";
 
-export enum GroupingMappingUIProviderType {
+export enum GroupingMappingCustomUIType {
   GROUP = "group",
   CONTEXT = "context"
 }
 
-export type GroupingMappingUIProvider = GroupingUIProvider | ContextUIProvider;
+export type GroupingMappingCustomUI = GroupingUI | ContextUI;
 
-/** Custom UI Provider Definitions  */
+/** Custom UI Definitions */
 
-export interface IGroupingMappingUIProvider {
+export interface IGroupingMappingCustomUI {
   /**
    * UI Provider type
    */
-  type: GroupingMappingUIProviderType;
+  type: GroupingMappingCustomUIType;
   /**
    * Unique identifier of the UI provider.
    */
@@ -33,13 +33,13 @@ export interface IGroupingMappingUIProvider {
 }
 
 /**
- * Context UI provider type definition.
+ * Context custom UI type definition.
  */
-export interface ContextUIProvider extends IGroupingMappingUIProvider {
+export interface ContextUI extends IGroupingMappingCustomUI {
   /**
-   * UI Provider type.
+   * UI type.
    */
-  type: GroupingMappingUIProviderType.CONTEXT;
+  type: GroupingMappingCustomUIType.CONTEXT;
   /**
    * User defined component for UI interaction with grouping mapping widget.
    */
@@ -51,15 +51,15 @@ export interface ContextUIProvider extends IGroupingMappingUIProvider {
 }
 
 /**
- * Custom UI provider type definition.
+ * Group custom UI type definition.
  */
-export interface GroupingUIProvider extends IGroupingMappingUIProvider {
+export interface GroupingUI extends IGroupingMappingCustomUI {
   /**
-   * UI Provider type.
+   * UI type.
    */
-  type: GroupingMappingUIProviderType.GROUP;
+  type: GroupingMappingCustomUIType.GROUP;
   /**
-   * Custom UI Component to build query interactively. Refer to SearchUIProvider/ManualUIProvider.
+   * Custom UI Component to build query interactively. Refer to SearchGroupingUI/ManualGroupingUI.
    */
   uiComponent: (props: GroupingUIProps ) => JSX.Element;
 }
@@ -67,7 +67,7 @@ export interface GroupingUIProvider extends IGroupingMappingUIProvider {
 /** Custom UI Component props definitions  */
 
 /**
- * Group providerized UI component arguments definition.
+ * Group custom UI component arguments definition.
  */
 export interface GroupingUIProps {
   /**

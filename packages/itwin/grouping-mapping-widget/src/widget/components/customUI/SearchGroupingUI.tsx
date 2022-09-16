@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
-import type { GroupingUIProps } from "./GroupingMappingUIProvider";
+import type { GroupingUIProps } from "./GroupingMappingCustomUI";
 import { LoadingSpinner } from "../utils";
 import "./SearchGroupingUI.scss";
 

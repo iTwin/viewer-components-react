@@ -57,14 +57,14 @@ import { FeatureOverrideType } from "@itwin/core-common";
 import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import { useGroupingMappingUIProvider } from "./context/GroupingMappingUIProviderContext";
-import { GroupingMappingUIProviderType} from "./provider/GroupingMappingUIProvider";
-import type { ContextUIProvider, GroupingUIProvider } from "./provider/GroupingMappingUIProvider";
+import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
+import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
+import type { ContextUI, GroupingUI } from "./customUI/GroupingMappingCustomUI";
 import { Presentation } from "@itwin/presentation-frontend";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
-export const defaultUIProvidersMetadata = [
+export const defaultUIMetadata = [
   {
     name: "Selection",
     displayLabel: "Selection",
@@ -128,10 +128,10 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
-  const groupUIProviders: GroupingUIProvider[] = useGroupingMappingUIProvider()
-    .filter((p) => p.type === GroupingMappingUIProviderType.GROUP) as GroupingUIProvider[];
-  const contextUIProviders: ContextUIProvider[] = useGroupingMappingUIProvider()
-    .filter((p) => p.type === GroupingMappingUIProviderType.CONTEXT) as ContextUIProvider[];
+  const groupUIs: GroupingUI[] = useGroupingMappingCustomUI()
+    .filter((p) => p.type === GroupingMappingCustomUIType.GROUP) as GroupingUI[];
+  const contextUIs: ContextUI[] = useGroupingMappingCustomUI()
+    .filter((p) => p.type === GroupingMappingCustomUIType.CONTEXT) as ContextUI[];
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -147,7 +147,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
 
   const [queryGenerationType, setQueryGenerationType] =
     useState<string>("Selection");
-  const [selectedContextUIProvider, setSelectedContextUIProvider] = useState<ContextUIProvider>();
+  const [selectedContextUI, setSelectedContextUI] = useState<ContextUI>();
 
   useEffect(() => {
     void fetchGroups(
@@ -436,9 +436,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 className='gmw-ui-provider-dropdown'
                 disabled={isLoadingQuery}
                 menuItems={() =>
-                  (groupUIProviders.length > 0
-                    ? groupUIProviders
-                    : defaultUIProvidersMetadata)
+                  (groupUIs.length > 0
+                    ? groupUIs
+                    : defaultUIMetadata)
                     .map((p) => (
                       <MenuItem
                         key={p.name}
@@ -565,9 +565,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                   key={0}
                                   disabled={isLoadingQuery}
                                   subMenuItems={
-                                    (groupUIProviders.length > 0
-                                      ? groupUIProviders
-                                      : defaultUIProvidersMetadata)
+                                    (groupUIs.length > 0
+                                      ? groupUIs
+                                      : defaultUIMetadata)
                                       .map((p) => (
                                         <MenuItem
                                           className='gmw-menu-item'
@@ -608,13 +608,13 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                   Remove
                                 </MenuItem>,
                               ].concat(
-                                contextUIProviders.map((p) => {
+                                contextUIs.map((p) => {
                                   return <MenuItem
                                     key={p.name}
                                     onClick={() => {
                                       if(p.uiComponent) {
                                         setSelectedGroup(g);
-                                        setSelectedContextUIProvider(p);
+                                        setSelectedContextUI(p);
                                         setGroupsView(GroupsView.CUSTOM);
                                       }
                                       if(p.callback) {
@@ -672,11 +672,11 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
         </>
       );
     case GroupsView.CUSTOM:
-      return selectedContextUIProvider && selectedContextUIProvider.uiComponent
+      return selectedContextUI && selectedContextUI.uiComponent
         ? (
           <>
             <WidgetHeader
-              title={selectedContextUIProvider.displayLabel}
+              title={selectedContextUI.displayLabel}
               returnFn={async () => {
                 Presentation.selection.clearSelection(
                   "GroupingMappingWidget",
@@ -685,7 +685,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 await refresh();
               }}
             />
-            {React.createElement(selectedContextUIProvider.uiComponent)}
+            {React.createElement(selectedContextUI.uiComponent)}
           </>
         )
         : null;

@@ -26,7 +26,7 @@ import {
   WidgetHeader,
 } from "./utils";
 import type { IGroupTyped } from "./Grouping";
-import { defaultUIProvidersMetadata } from "./Grouping";
+import { defaultUIMetadata } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -41,12 +41,12 @@ import {
 import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
-import { useGroupingMappingUIProvider } from "./context/GroupingMappingUIProviderContext";
+import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
-import SearchGroupingUI from "./provider/SearchGroupingUI";
-import ManualGroupingUI from "./provider/ManualGroupingUI";
-import { GroupingMappingUIProviderType} from "./provider/GroupingMappingUIProvider";
-import type { GroupingUIProvider } from "./provider/GroupingMappingUIProvider";
+import SearchGroupingUI from "./customUI/SearchGroupingUI";
+import ManualGroupingUI from "./customUI/ManualGroupingUI";
+import type { GroupingUI } from "./customUI/GroupingMappingCustomUI";
+import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
 
 interface GroupActionProps {
   iModelId: string;
@@ -61,8 +61,8 @@ const GroupAction = (props: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const groupUIProviders: GroupingUIProvider[] = useGroupingMappingUIProvider()
-    .filter((p) => p.type === GroupingMappingUIProviderType.GROUP) as GroupingUIProvider[];
+  const groupUIs: GroupingUI[] = useGroupingMappingCustomUI()
+    .filter((p) => p.type === GroupingMappingCustomUIType.GROUP) as GroupingUI[];
 
   const [details, setDetails] = useState({
     groupName: props.group?.groupName ?? "",
@@ -251,11 +251,11 @@ const GroupAction = (props: GroupActionProps) => {
       }
       default: {
         if (queryGenerationType && queryGenerationType.length > 0) {
-          const selectedUIProvider = groupUIProviders.find(
+          const selectedCustomUI = groupUIs.find(
             (e) => e.name === queryGenerationType,
           );
-          if (selectedUIProvider) {
-            return React.createElement(selectedUIProvider.uiComponent, {
+          if (selectedCustomUI) {
+            return React.createElement(selectedCustomUI.uiComponent, {
               updateQuery: setQuery,
               isUpdating,
               resetView: props.resetView,
@@ -354,14 +354,14 @@ const GroupAction = (props: GroupActionProps) => {
         </Fieldset>
         <Fieldset legend='Group By' className='gmw-query-builder-container'>
           <RadioTileGroup className='gmw-radio-group-tile' required>
-            {groupUIProviders.length === 0
+            {groupUIs.length === 0
               ? (
-                defaultUIProvidersMetadata.map((p) =>
+                defaultUIMetadata.map((p) =>
                   getRadioTileComponent(p.icon, p.name, p.displayLabel)
                 )
               )
               : (
-                groupUIProviders.map((ext) =>
+                groupUIs.map((ext) =>
                   getRadioTileComponent(ext.icon ?? <SvgAdd />, ext.name, ext.displayLabel),
                 )
               )}

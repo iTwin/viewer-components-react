@@ -53,7 +53,7 @@ You can define your UI provider as follows in the GroupingMappingProvider:
 
 ```tsx
 new GroupingMappingProvider({
-  customUIProviders: [
+  customUIs: [
     {
       name: "Manual",
       displayLabel: "Manual Query",
