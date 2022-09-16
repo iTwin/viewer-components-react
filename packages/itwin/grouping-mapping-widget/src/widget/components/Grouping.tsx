@@ -441,6 +441,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                     : defaultUIMetadata)
                     .map((p) => (
                       <MenuItem
+                        data-testid="menu-item"
                         key={p.name}
                         onClick={() => addGroup(p.name)}
                         icon={p.icon}
@@ -452,6 +453,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 }
               >
                 <Button
+                  data-testid="add-group-button"
                   className='add-load-button'
                   startIcon={
                     isLoadingQuery ? (
@@ -500,7 +502,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             ) : groups.length === 0 ? (
               <EmptyMessage message='No Groups available.' />
             ) : (
-              <div className='gmw-group-list'>
+              <div className='gmw-group-list' data-testid="horizontal-tile">
                 {groups
                   .sort(
                     (a, b) =>
@@ -510,7 +512,6 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                     <HorizontalTile
                       key={g.id}
                       title={g.groupName ? g.groupName : "Untitled"}
-                      data-testid="horizontal-tile"
                       subText={g.description}
                       actionGroup={
                         <div className='gmw-actions'>

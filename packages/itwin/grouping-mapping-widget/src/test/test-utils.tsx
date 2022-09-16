@@ -16,25 +16,24 @@ import userEvent from "@testing-library/user-event";
 import { GroupingMappingApiConfigContext } from "../widget/components/context/GroupingApiConfigContext";
 import type { IMappingsClient } from "@itwin/insights-client";
 import { MappingsClient } from "@itwin/insights-client";
-import type { GroupingMappingUIProvider } from "../grouping-mapping-widget";
 import { MappingClientContext } from "../widget/components/context/MappingClientContext";
-import { GroupingMappingUIProviderContext } from "../widget/components/context/GroupingMappingUIProviderContext";
+import { GroupingMappingCustomUIContext } from "../widget/components/context/GroupingMappingCustomUIContext";
+import type { GroupingMappingCustomUI } from "../grouping-mapping-widget";
 
 export const mockAccessToken = async () => "Bearer eyJhbGci";
 export const mockMappingClient = jest.mocked<IMappingsClient>(new MappingsClient());
-export const mockGroupUIProviders = jest.mocked<GroupingMappingUIProvider[]>([]);
 
 interface WrapperProps {
   children?: React.ReactNode;
 }
 
-function render(ui: React.ReactElement, { ...options } = {}) {
+function render(ui: React.ReactElement, mockUIs: GroupingMappingCustomUI[] = [], { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (
     <GroupingMappingApiConfigContext.Provider value={{ getAccessToken: mockAccessToken }}>
       <MappingClientContext.Provider value={mockMappingClient}>
-        <GroupingMappingUIProviderContext.Provider value={mockGroupUIProviders}>
+        <GroupingMappingCustomUIContext.Provider value={mockUIs}>
           {children}
-        </GroupingMappingUIProviderContext.Provider>
+        </GroupingMappingCustomUIContext.Provider>
       </MappingClientContext.Provider>
     </GroupingMappingApiConfigContext.Provider>
   );

@@ -4,8 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, TestUtils, waitForElementToBeRemoved, within } from "../test/test-utils";
+import { render, screen, TestUtils, waitForElementToBeRemoved } from "./test-utils";
 import { faker } from "@faker-js/faker";
+import type { GroupingMappingCustomUI} from "../grouping-mapping-widget";
 import { Groupings } from "../grouping-mapping-widget";
 import type { Group, Mapping } from "@itwin/insights-client";
 import * as moq from "typemoq";
@@ -16,38 +17,12 @@ import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend
 import type { BeEvent } from "@itwin/core-bentley";
 import { setupServer } from "msw/node";
 import { rest } from "msw";
-import { Constants, IModelState } from "@itwin/imodels-client-management";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
 const mockMappingId = faker.datatype.uuid();
 const mockGroupId1 = faker.datatype.uuid();
 const mockGroupId2 = faker.datatype.uuid();
-const mockIModelsResponse = [
-  {
-    iModel: {
-      id: mockIModelId,
-      displayName: "rAnDoMdIsPlAynAmE1",
-      name: "rAnDomName1",
-      description: "rAnDoMDeScRiPtIoN1",
-      createdDateTime: "2021-10-04T22:13:50.397Z",
-      state: IModelState.Initialized,
-      projectId: mockITwinId,
-      extent: null,
-      _links: {
-        creator: {
-          href: "",
-        },
-        namedVersions: {
-          href: "",
-        },
-        changesets: {
-          href: "",
-        },
-      },
-    },
-  },
-];
 
 const connectionMock = moq.Mock.ofType<IModelConnection>();
 const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
@@ -88,7 +63,10 @@ beforeAll(async () => {
 
   Presentation.setSelectionManager(selectionManagerMock.object);
   await TestUtils.initializeUiFramework(connectionMock.object);
-  server.listen();
+  server.listen({
+    onUnhandledRequest: "warn",
+  });
+  server.printHandlers();
 });
 
 afterAll(() => {
@@ -148,38 +126,43 @@ describe("Groupings View", () => {
             ctx.json(mockGroups)
           );
         }
-      ),rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[0])
-          );
-        }
       ),
     );
+    const mockUIs = jest.mocked<GroupingMappingCustomUI[]>([]);
 
     // Act
-    render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
+    const { user } = render(<Groupings mapping={mockMapping} goBack={jest.fn()} />, mockUIs);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
-    // Assert
-    const horizontalTiles = screen.getAllByTestId("horizontal-tile");
-    expect(horizontalTiles).toHaveLength(mockGroups.length);
 
-    for (const [index, horizontalTile] of horizontalTiles.entries()) {
-      const groupTile = within(horizontalTile);
-      expect(
-        groupTile.getByText(
-          mockGroups[index].groupName
-        )
-      ).toBeInTheDocument();
-      expect(
-        groupTile.getByTitle(
-          mockGroups[index].description ?? ""
-        )
-      ).toBeInTheDocument();
-    }
+    // Assert
+    const addButton = screen.getAllByTestId("add-group-button");
+    expect(addButton).toHaveLength(1);
+
+    await user.click(addButton[0]);
+
+    const AddMenuItems = screen.getAllByTestId("menu-item");
+    expect(AddMenuItems).toHaveLength(3);
+    expect(AddMenuItems[0]).toHaveTextContent("Selection");
+    expect(AddMenuItems[1]).toHaveTextContent("Query");
+    expect(AddMenuItems[2]).toHaveTextContent("Manual");
+
+    // Assert
+    // const horizontalTiles = screen.getAllByTestId("horizontal-tile");
+    // expect(horizontalTiles).toHaveLength(mockGroups.length);
+
+    // horizontalTiles.forEach((horizontalTile, index) => {
+    //   const groupTile = within(horizontalTile);
+    //   expect(
+    //     groupTile.getByText(
+    //       mockGroups[index].groupName
+    //     )
+    //   ).toBeInTheDocument();
+    //   expect(
+    //     groupTile.getByTitle(
+    //       mockGroups[index].description ?? ""
+    //     )
+    //   ).toBeInTheDocument();
+    // });
   });
 });
