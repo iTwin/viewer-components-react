@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/one-click-lca-react",
+      "comment": "Updated One Click LCA widget to use @itwin/insights-client version 0.3.0",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/one-click-lca-react"
+}
