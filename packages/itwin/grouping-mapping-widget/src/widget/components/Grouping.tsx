@@ -510,6 +510,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                     <HorizontalTile
                       key={g.id}
                       title={g.groupName ? g.groupName : "Untitled"}
+                      data-testid="horizontal-tile"
                       subText={g.description}
                       actionGroup={
                         <div className='gmw-actions'>
