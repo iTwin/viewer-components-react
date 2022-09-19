@@ -61,36 +61,31 @@ const convertType = (type: string): DataType => {
 const extractPrimitives = (
   propertyTraversal: Array<string>,
   propertyField: PropertiesField
-): PropertyMetaData[] => {
-  const properties = new Array<PropertyMetaData>();
-  for (const property of propertyField.properties) {
-    const propertyName = property.property.name;
-    const label = propertyField.label;
-    // It belongs to this parent class
-    const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
-    const primitiveNavigationClass = property.property.navigationPropertyInfo?.classInfo.name ?? "";
-    // Presentation treats primitive navigation classes as longs. Handling this special case.
-    const type = primitiveNavigationClass ? DataType.String : convertType(property.property.type);
-    const actualECClassName = property.property.classInfo.name;
+): PropertyMetaData[] => propertyField.properties.map((property) => {
+  const propertyName = property.property.name;
+  const label = propertyField.label;
+  // It belongs to this parent class
+  const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
+  const primitiveNavigationClass = property.property.navigationPropertyInfo?.classInfo.name ?? "";
+  // Presentation treats primitive navigation classes as longs. Handling this special case.
+  const type = primitiveNavigationClass ? DataType.String : convertType(property.property.type);
+  const actualECClassName = property.property.classInfo.name;
 
-    properties.push(
-      {
-        label,
-        schema: "*",
-        className: "*",
-        propertyTraversal: [...propertyTraversal, propertyName],
-        type,
-        primitiveNavigationClass,
-        actualECClassName,
-        parentPropertyClassName,
-        key: `${actualECClassName}_${propertyField.name}`,
-        categoryLabel: propertyField.category.label,
-      }
-    );
-  }
-
-  return properties;
-};
+  return (
+    {
+      label,
+      schema: "*",
+      className: "*",
+      propertyTraversal: [...propertyTraversal, propertyName],
+      type,
+      primitiveNavigationClass,
+      actualECClassName,
+      parentPropertyClassName,
+      key: `${actualECClassName}_${propertyField.name}`,
+      categoryLabel: propertyField.category.label,
+    }
+  );
+});
 
 const extractPrimitiveStructProperties = (
   propertyTraversal: Array<string>,
