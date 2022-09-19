@@ -9,7 +9,7 @@ export enum GroupingMappingCustomUIType {
   CONTEXT = "context"
 }
 
-export type GroupingMappingCustomUI = GroupingUI | ContextUI;
+export type GroupingMappingCustomUI = GroupingCustomUI | ContextCustomUI;
 
 /** Custom UI Definitions */
 
@@ -35,7 +35,7 @@ export interface IGroupingMappingCustomUI {
 /**
  * Context custom UI type definition.
  */
-export interface ContextUI extends IGroupingMappingCustomUI {
+export interface ContextCustomUI extends IGroupingMappingCustomUI {
   /**
    * UI type.
    */
@@ -53,15 +53,15 @@ export interface ContextUI extends IGroupingMappingCustomUI {
 /**
  * Group custom UI type definition.
  */
-export interface GroupingUI extends IGroupingMappingCustomUI {
+export interface GroupingCustomUI extends IGroupingMappingCustomUI {
   /**
    * UI type.
    */
   type: GroupingMappingCustomUIType.GROUP;
   /**
-   * Custom UI Component to build query interactively. Refer to SearchGroupingUI/ManualGroupingUI.
+   * Custom UI Component to build query interactively. Refer to SearchGroupingCustomUI/ManualGroupingCustomUI.
    */
-  uiComponent: (props: GroupingUIProps ) => JSX.Element;
+  uiComponent: (props: GroupingCustomUIProps ) => JSX.Element;
 }
 
 /** Custom UI Component props definitions  */
@@ -69,7 +69,7 @@ export interface GroupingUI extends IGroupingMappingCustomUI {
 /**
  * Group custom UI component arguments definition.
  */
-export interface GroupingUIProps {
+export interface GroupingCustomUIProps {
   /**
    * To validate and update current query.
    */

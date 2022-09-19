@@ -43,9 +43,9 @@ import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext"
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
-import SearchGroupingUI from "./customUI/SearchGroupingUI";
-import ManualGroupingUI from "./customUI/ManualGroupingUI";
-import type { GroupingUI } from "./customUI/GroupingMappingCustomUI";
+import SearchGroupingCustomUI from "./customUI/SearchGroupingCustomUI";
+import ManualGroupingCustomUI from "./customUI/ManualGroupingCustomUI";
+import type { GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
 
 interface GroupActionProps {
@@ -61,8 +61,8 @@ const GroupAction = (props: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const groupUIs: GroupingUI[] = useGroupingMappingCustomUI()
-    .filter((p) => p.type === GroupingMappingCustomUIType.GROUP) as GroupingUI[];
+  const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI()
+    .filter((p) => p.type === GroupingMappingCustomUIType.GROUP) as GroupingCustomUI[];
 
   const [details, setDetails] = useState({
     groupName: props.group?.groupName ?? "",
@@ -233,7 +233,7 @@ const GroupAction = (props: GroupActionProps) => {
       }
       case "Search": {
         return (
-          <SearchGroupingUI
+          <SearchGroupingCustomUI
             updateQuery={setQuery}
             isUpdating={isUpdating}
             resetView={props.resetView}
@@ -242,7 +242,7 @@ const GroupAction = (props: GroupActionProps) => {
       }
       case "Manual": {
         return (
-          <ManualGroupingUI
+          <ManualGroupingCustomUI
             updateQuery={setQuery}
             isUpdating={isUpdating}
             resetView={props.resetView}

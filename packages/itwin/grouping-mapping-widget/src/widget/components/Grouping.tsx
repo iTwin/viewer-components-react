@@ -59,7 +59,7 @@ import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
 import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
-import type { ContextUI, GroupingUI } from "./customUI/GroupingMappingCustomUI";
+import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { Presentation } from "@itwin/presentation-frontend";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
@@ -128,10 +128,10 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
-  const groupUIs: GroupingUI[] = useGroupingMappingCustomUI()
-    .filter((p) => p.type === GroupingMappingCustomUIType.GROUP) as GroupingUI[];
-  const contextUIs: ContextUI[] = useGroupingMappingCustomUI()
-    .filter((p) => p.type === GroupingMappingCustomUIType.CONTEXT) as ContextUI[];
+  const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI()
+    .filter((p) => p.type === GroupingMappingCustomUIType.GROUP) as GroupingCustomUI[];
+  const contextUIs: ContextCustomUI[] = useGroupingMappingCustomUI()
+    .filter((p) => p.type === GroupingMappingCustomUIType.CONTEXT) as ContextCustomUI[];
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -147,7 +147,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
 
   const [queryGenerationType, setQueryGenerationType] =
     useState<string>("Selection");
-  const [selectedContextUI, setSelectedContextUI] = useState<ContextUI>();
+  const [selectedContextCustomUI, setSelectedContextCustomUI] = useState<ContextCustomUI>();
 
   useEffect(() => {
     void fetchGroups(
@@ -615,7 +615,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                     onClick={() => {
                                       if(p.uiComponent) {
                                         setSelectedGroup(g);
-                                        setSelectedContextUI(p);
+                                        setSelectedContextCustomUI(p);
                                         setGroupsView(GroupsView.CUSTOM);
                                       }
                                       if(p.callback) {
@@ -673,11 +673,11 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
         </>
       );
     case GroupsView.CUSTOM:
-      return selectedContextUI && selectedContextUI.uiComponent
+      return selectedContextCustomUI && selectedContextCustomUI.uiComponent
         ? (
           <>
             <WidgetHeader
-              title={selectedContextUI.displayLabel}
+              title={selectedContextCustomUI.displayLabel}
               returnFn={async () => {
                 Presentation.selection.clearSelection(
                   "GroupingMappingWidget",
@@ -686,7 +686,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 await refresh();
               }}
             />
-            {React.createElement(selectedContextUI.uiComponent)}
+            {React.createElement(selectedContextCustomUI.uiComponent)}
           </>
         )
         : null;
