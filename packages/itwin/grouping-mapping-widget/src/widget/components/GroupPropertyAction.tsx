@@ -2,26 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { IModelConnection } from "@itwin/core-frontend";
 import { renderToStaticMarkup } from "react-dom/server";
-import type {
-  ContentDescriptorRequestOptions,
-  Field,
-  KeySet,
-  NestedContentField,
-  PropertiesField,
-  Ruleset,
-  RulesetVariable,
-  StructFieldMemberDescription,
-} from "@itwin/presentation-common";
-import {
-  ContentSpecificationTypes,
-  DefaultContentDisplayTypes,
-  PropertyValueFormat,
-  RelationshipMeaning,
-  RuleTypes,
-} from "@itwin/presentation-common";
-import { Presentation } from "@itwin/presentation-frontend";
+import type { KeySet } from "@itwin/presentation-common";
+import { PropertyValueFormat } from "@itwin/presentation-common";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import {
@@ -46,12 +29,18 @@ import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { HorizontalTile } from "./HorizontalTile";
 import { DataType, QuantityType } from "@itwin/insights-client";
-import type { ECProperty, GroupProperty, GroupPropertyCreate } from "@itwin/insights-client";
-import { SvgClose, SvgDragHandleVertical, SvgMoreVerticalSmall, SvgRemove, SvgSearch } from "@itwin/itwinui-icons-react";
 import type {
-  DragEndEvent,
-  DragStartEvent,
-} from "@dnd-kit/core";
+  GroupProperty,
+  GroupPropertyCreate,
+} from "@itwin/insights-client";
+import {
+  SvgClose,
+  SvgDragHandleVertical,
+  SvgMoreVerticalSmall,
+  SvgRemove,
+  SvgSearch,
+} from "@itwin/itwinui-icons-react";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import {
   closestCenter,
   DndContext,
@@ -68,9 +57,15 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import SortableHorizontalTile from "./SortableHorizontalTile";
-import { deepEqual } from "fast-equals";
 import Split from "react-split";
 import "./GroupPropertyAction.scss";
+import type { PropertyMetaData } from "./GroupPropertyUtils";
+import {
+  convertPresentationFields,
+  convertToECProperties,
+  fetchPresentationDescriptor,
+  findProperties,
+} from "./GroupPropertyUtils";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -92,354 +87,6 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
   { value: QuantityType.Volume, label: "Volume" },
   { value: QuantityType.Undefined, label: "No Quantity Type" },
 ];
-
-interface PropertyMetaData {
-  // Display label
-  label: string;
-  // ECProperty source schema:class
-  schema: string;
-  className: string;
-  categoryLabel: string;
-  // Property Type
-  type: DataType;
-  // The actual ECClass name of the property
-  actualECClassName: string;
-  // The parent class of the property
-  parentPropertyClassName: string | undefined;
-  // ECProperty type traversal
-  propertyTraversal: Array<string>;
-  // The type of primitive navigation from Presentation
-  primitiveNavigationClass: string;
-  key: string;
-}
-
-const convertType = (type: string): DataType => {
-  switch (type) {
-    case "int":
-    case "enum":
-    case "long":
-      return DataType.Integer;
-    case "boolean":
-      return DataType.Boolean;
-    case "double":
-      return DataType.Double;
-    case "number":
-      return DataType.Number;
-    default:
-      return DataType.String;
-  }
-};
-
-const extractPrimitives = (
-  propertyTraversal: Array<string>,
-  propertyField: PropertiesField
-): PropertyMetaData[] => {
-  const properties = new Array<PropertyMetaData>();
-  for(const property of propertyField.properties){
-    const propertyName = property.property.name;
-    const label = propertyField.label;
-    // It belongs to this parent class
-    const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
-    const primitiveNavigationClass = property.property.navigationPropertyInfo?.classInfo.name ?? "";
-    // Presentation treats primitive navigation classes as longs. Handling this special case.
-    const type = primitiveNavigationClass ? DataType.String : convertType(property.property.type);
-    const actualECClassName = property.property.classInfo.name;
-
-    properties.push(
-      {
-        label,
-        schema: "*",
-        className: "*",
-        propertyTraversal: [...propertyTraversal, propertyName],
-        type,
-        primitiveNavigationClass,
-        actualECClassName,
-        parentPropertyClassName,
-        key: `${actualECClassName}_${propertyField.name}`,
-        categoryLabel: propertyField.category.label,
-      }
-    );
-  }
-
-  return properties;
-};
-
-const extractPrimitiveStructProperties = (
-  propertyTraversal: Array<string>,
-  members: StructFieldMemberDescription[],
-  categoryLabel: string,
-  actualECClassName: string,
-  parentPropertyClassName?: string,
-) => {
-  const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
-  for (const member of members) {
-    if (member.type.valueFormat === PropertyValueFormat.Primitive) {
-
-      const propertyName = member.name;
-      const label = member.label;
-      const type = convertType(member.type.typeName);
-
-      ecPropertyMetaDetaList.push({
-        label,
-        schema: "*",
-        className: "*",
-        propertyTraversal: [...propertyTraversal, propertyName],
-        type,
-        primitiveNavigationClass: "",
-        actualECClassName,
-        parentPropertyClassName,
-        key: `${actualECClassName}_${member.name}`,
-        categoryLabel,
-      });
-
-    } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
-      ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
-        propertyTraversal,
-        member.type.members,
-        categoryLabel,
-        actualECClassName,
-        parentPropertyClassName
-      ));
-    }
-  }
-  return ecPropertyMetaDetaList;
-};
-
-const extractStruct = (property: Field, ecPropertyMetaDetaList: PropertyMetaData[]) => {
-  if (property.type.valueFormat !== PropertyValueFormat.Struct) return;
-
-  const columnName = (property as PropertiesField).properties[0]
-    .property.name;
-  const actualECClassName = (property as PropertiesField).properties[0].property.classInfo.name;
-  ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
-    [columnName],
-    property.type.members,
-    property.category.label,
-    actualECClassName
-  ));
-};
-
-const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]) => {
-  const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
-  for (const property of propertyFields) {
-
-    // Generate base ECProperty
-    switch (property.type.valueFormat) {
-      case PropertyValueFormat.Primitive: {
-        ecPropertyMetaDetaList.push(...extractPrimitives([...propertyTraversal], property as PropertiesField));
-        break;
-      }
-      // Get structs
-      case PropertyValueFormat.Struct: {
-        const nestedContentField = property as NestedContentField;
-        // Only handling single path and not handling nested content fields within navigations
-        if (
-          nestedContentField.pathToPrimaryClass &&
-          nestedContentField.pathToPrimaryClass.length > 1
-        ) {
-          break;
-        }
-
-        switch (nestedContentField.relationshipMeaning) {
-          // Aspects are not looked at again. Extraction does not support aspects within navigations.
-          // Navigation properties
-          case RelationshipMeaning.RelatedInstance: {
-            if (
-              // Deal with a TypeDefinition
-              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
-              "BisCore:GeometricElement3dHasTypeDefinition"
-            ) {
-              ecPropertyMetaDetaList.push(...extractNested([...propertyTraversal, "TypeDefinition"], nestedContentField.nestedFields));
-            }
-            break;
-          }
-          default: {
-            // Some elements don't have a path to primary class or relationship meaning..
-            // Most likely a simple struct property
-            if (!nestedContentField.pathToPrimaryClass) {
-              extractStruct(property, ecPropertyMetaDetaList);
-            }
-          }
-        }
-      }
-    }
-  }
-  return ecPropertyMetaDetaList;
-};
-
-const convertPresentationFields = async (propertyFields: Field[]) => {
-  const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
-  for (const property of propertyFields) {
-    // Generate base ECProperty
-    switch (property.type.valueFormat) {
-      case PropertyValueFormat.Primitive: {
-        const extractedPrimitives = extractPrimitives([], property as PropertiesField);
-        for(const extractedPrimitive of extractedPrimitives){
-          extractedPrimitive.schema = "*";
-          extractedPrimitive.className = "*";
-          ecPropertyMetaDetaList.push(extractedPrimitive);
-        }
-        break;
-      }
-      // Get structs
-      case PropertyValueFormat.Struct: {
-        const nestedContentField = property as NestedContentField;
-        // Only handling single path and not handling nested content fields within navigations
-        if (
-          nestedContentField.pathToPrimaryClass &&
-          nestedContentField.pathToPrimaryClass.length > 1
-        ) {
-          break;
-        }
-        switch (nestedContentField.relationshipMeaning) {
-          case RelationshipMeaning.SameInstance: {
-            // Check for aspects.
-            if (
-              (nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                .name === "BisCore:ElementOwnsUniqueAspect" ||
-                nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                  .name === "BisCore:ElementOwnsMultiAspects")
-            ) {
-              const fullClassName = nestedContentField.contentClassInfo.name;
-              const schema = fullClassName.split(":")[0];
-              const className = fullClassName.split(":")[1];
-              const extractedNested = extractNested([], nestedContentField.nestedFields);
-              const aspectExtractedNested = extractedNested.map((ecProperty) => ({ ...ecProperty, schema, className }));
-              ecPropertyMetaDetaList.push(...aspectExtractedNested);
-            }
-            break;
-          }
-          // Navigation properties
-          case RelationshipMeaning.RelatedInstance: {
-            if (
-              // Deal with a TypeDefinition
-              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
-              "BisCore:GeometricElement3dHasTypeDefinition"
-            ) {
-              ecPropertyMetaDetaList.push(...extractNested(["TypeDefinition"], nestedContentField.nestedFields));
-            }
-            break;
-          }
-          default: {
-            // Some elements don't have a path to primary class or relationship meaning..
-            // Most likely a simple struct property
-            if (!nestedContentField.pathToPrimaryClass) {
-              extractStruct(property, ecPropertyMetaDetaList);
-            }
-          }
-        }
-      }
-    }
-  }
-  return ecPropertyMetaDetaList;
-};
-
-const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> => {
-  const ecProperty: ECProperty = {
-    ecSchemaName: property.schema,
-    ecClassName: property.className,
-    ecPropertyType: property.type,
-    ecPropertyName: "",
-  };
-  switch (property.primitiveNavigationClass) {
-    // Hardcode Models navigation path and label behavior
-    case "BisCore:ModelContainsElements": {
-      return [
-        {
-          ...ecProperty,
-          ecPropertyName: [
-            ...property.propertyTraversal,
-            "ModeledElement",
-            "UserLabel",
-          ].join("."),
-        },
-        {
-          ...ecProperty,
-          ecPropertyName: [
-            ...property.propertyTraversal,
-            "ModeledElement",
-            "CodeValue",
-          ].join("."),
-        },
-      ];
-    }
-    // Hardcode Category and Physical Material navigation path and label behavior
-    case "BisCore:GeometricElement3dIsInCategory":
-    case "BisCore:PhysicalElementIsOfPhysicalMaterial":
-      return [
-        {
-          ...ecProperty,
-          ecPropertyName: [
-            ...property.propertyTraversal,
-            "UserLabel",
-          ].join("."),
-        },
-        {
-          ...ecProperty,
-          ecPropertyName: [
-            ...property.propertyTraversal,
-            "CodeValue",
-          ].join("."),
-        },
-      ];
-    default: {
-      return [
-        {
-          ...ecProperty,
-          ecPropertyName: property.propertyTraversal.join("."),
-        },
-      ];
-    }
-  }
-};
-
-const findProperties = (ecProperties: ECProperty[], propertiesMetaData: PropertyMetaData[]) => {
-  let ecPropertiesCopy = [...ecProperties];
-  const propertiesMetaDataResult: PropertyMetaData[] = new Array<PropertyMetaData>();
-  let notFound = false;
-  while (ecPropertiesCopy.length !== 0) {
-    for (let i = 0; i < propertiesMetaData.length; i++) {
-      const generatedProperty = convertToECProperties(propertiesMetaData[i]);
-      const slicedEcProperties = ecPropertiesCopy.slice(0, generatedProperty.length);
-      if (deepEqual(generatedProperty, slicedEcProperties)) {
-        propertiesMetaDataResult.push(propertiesMetaData[i]);
-        ecPropertiesCopy = ecPropertiesCopy.slice(generatedProperty.length);
-        break;
-      }
-      if (i === propertiesMetaData.length - 1) {
-        notFound = true;
-      }
-    }
-    if (notFound)
-      break;
-  }
-  return notFound ? [] : propertiesMetaDataResult;
-};
-
-const fetchPresentationDescriptor = async (iModelConnection: IModelConnection, keySet: KeySet) => {
-  const ruleSet: Ruleset = {
-    id: "gmw-element-properties",
-    rules: [
-      {
-        ruleType: RuleTypes.Content,
-        specifications: [
-          {
-            specType: ContentSpecificationTypes.SelectedNodeInstances,
-          },
-        ],
-      }],
-  };
-  const requestOptions: ContentDescriptorRequestOptions<IModelConnection, KeySet, RulesetVariable> = {
-    imodel: iModelConnection,
-    keys: keySet,
-    rulesetOrId: ruleSet,
-    displayType: DefaultContentDisplayTypes.PropertyPane,
-  };
-  const descriptor = await Presentation.presentation.getContentDescriptor(
-    requestOptions
-  );
-  return descriptor;
-};
 
 const GroupPropertyAction = ({
   iModelId,
