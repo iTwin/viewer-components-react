@@ -43,7 +43,7 @@ export interface ContextCustomUI extends IGroupingMappingCustomUI {
   /**
    * User defined component for UI interaction with grouping mapping widget.
    */
-  uiComponent?: () => JSX.Element;
+  uiComponent?: (props: ContextCustomUIProps) => JSX.Element;
   /**
    * Callback function for non UI interaction with grouping mapping widget.
    */
@@ -65,6 +65,24 @@ export interface GroupingCustomUI extends IGroupingMappingCustomUI {
 }
 
 /** Custom UI Component props definitions  */
+
+/**
+ * Context custom UI component arguments definition.
+ */
+export interface ContextCustomUIProps {
+  /**
+   * IModel Id.
+   */
+  iModelId: string;
+  /**
+   * Mapping Id.
+   */
+  mappingId: string;
+  /**
+   * Group Id.
+   */
+  groupId: string;
+}
 
 /**
  * Group custom UI component arguments definition.

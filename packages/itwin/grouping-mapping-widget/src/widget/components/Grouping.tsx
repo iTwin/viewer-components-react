@@ -667,7 +667,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
         </>
       );
     case GroupsView.CUSTOM:
-      return selectedContextCustomUI && selectedContextCustomUI.uiComponent
+      return selectedContextCustomUI && selectedContextCustomUI.uiComponent && selectedGroup
         ? (
           <>
             <WidgetHeader
@@ -680,7 +680,11 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 await refresh();
               }}
             />
-            {React.createElement(selectedContextCustomUI.uiComponent)}
+            {React.createElement(selectedContextCustomUI.uiComponent, {
+              iModelId,
+              mappingId: mapping.id,
+              groupId: selectedGroup.id,
+            })}
           </>
         )
         : null;
