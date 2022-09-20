@@ -107,6 +107,7 @@ const GroupPropertyAction = ({
   const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>(
     []
   );
+  const [propertiesNotFoundAlert, setPropertiesNotFoundAlert] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>("");
@@ -169,7 +170,7 @@ const GroupPropertyAction = ({
             field.type.valueFormat === PropertyValueFormat.Struct
         ) ?? [];
 
-      const propertiesMetaData = await convertPresentationFields(propertyFields);
+      const propertiesMetaData = convertPresentationFields(propertyFields);
 
       setPropertiesMetaData(propertiesMetaData);
 
@@ -189,6 +190,10 @@ const GroupPropertyAction = ({
           setDataType(response.dataType);
           setQuantityType(response.quantityType);
           const properties = findProperties(response.ecProperties, propertiesMetaData);
+          if(properties.length===0){
+            setPropertiesNotFoundAlert(true);
+          }
+
           setSelectedProperties(properties);
         } catch (error: any) {
           handleError(error.status);
@@ -330,7 +335,7 @@ const GroupPropertyAction = ({
             onHide={() => { }}
           />
         </Fieldset>
-        {groupPropertyId && !isLoading && selectedProperties.length === 0 &&
+        {propertiesNotFoundAlert &&
           <Alert type="warning">
             Warning: Could not match saved properties from the current generated list. It does not confirm or deny validity. Overwriting will occur if a new selection is made and saved.
           </Alert>

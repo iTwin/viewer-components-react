@@ -35,7 +35,7 @@ export interface PropertyMetaData {
   // The parent class of the property
   parentPropertyClassName: string | undefined;
   // ECProperty type traversal
-  propertyTraversal: Array<string>;
+  propertyTraversal: string[];
   // The type of primitive navigation from Presentation
   primitiveNavigationClass: string;
   key: string;
@@ -59,7 +59,7 @@ const convertType = (type: string): DataType => {
 };
 
 const extractPrimitives = (
-  propertyTraversal: Array<string>,
+  propertyTraversal: string[],
   propertyField: PropertiesField
 ): PropertyMetaData[] => propertyField.properties.map((property) => {
   const propertyName = property.property.name;
@@ -70,87 +70,85 @@ const extractPrimitives = (
   // Presentation treats primitive navigation classes as longs. Handling this special case.
   const type = primitiveNavigationClass ? DataType.String : convertType(property.property.type);
   const actualECClassName = property.property.classInfo.name;
+  const newPropertyTraversal = [...propertyTraversal, propertyName];
 
   return (
     {
       label,
       schema: "*",
       className: "*",
-      propertyTraversal: [...propertyTraversal, propertyName],
+      propertyTraversal: newPropertyTraversal,
       type,
       primitiveNavigationClass,
       actualECClassName,
       parentPropertyClassName,
-      key: `${actualECClassName}_${propertyField.name}`,
+      key: `${actualECClassName}__${newPropertyTraversal.join("_")}`,
       categoryLabel: propertyField.category.label,
     }
   );
 });
 
 const extractPrimitiveStructProperties = (
-  propertyTraversal: Array<string>,
+  propertyTraversal: string[],
   members: StructFieldMemberDescription[],
   categoryLabel: string,
   actualECClassName: string,
   parentPropertyClassName?: string,
-) => {
-  const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
-  for (const member of members) {
-    if (member.type.valueFormat === PropertyValueFormat.Primitive) {
+): PropertyMetaData[] => members.flatMap((member) => {
+  if (member.type.valueFormat === PropertyValueFormat.Primitive) {
+    const propertyName = member.name;
+    const label = member.label;
+    const type = convertType(member.type.typeName);
+    const newPropertyTraversal = [...propertyTraversal, propertyName];
 
-      const propertyName = member.name;
-      const label = member.label;
-      const type = convertType(member.type.typeName);
+    return ({
+      label,
+      schema: "*",
+      className: "*",
+      propertyTraversal: newPropertyTraversal,
+      type,
+      primitiveNavigationClass: "",
+      actualECClassName,
+      parentPropertyClassName,
+      key: `${actualECClassName}__${newPropertyTraversal.join("_")}`,
+      categoryLabel,
+    });
 
-      ecPropertyMetaDetaList.push({
-        label,
-        schema: "*",
-        className: "*",
-        propertyTraversal: [...propertyTraversal, propertyName],
-        type,
-        primitiveNavigationClass: "",
-        actualECClassName,
-        parentPropertyClassName,
-        key: `${actualECClassName}_${member.name}`,
-        categoryLabel,
-      });
-
-    } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
-      ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
-        propertyTraversal,
-        member.type.members,
-        categoryLabel,
-        actualECClassName,
-        parentPropertyClassName
-      ));
-    }
+  } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
+    return extractPrimitiveStructProperties(
+      propertyTraversal,
+      member.type.members,
+      categoryLabel,
+      actualECClassName,
+      parentPropertyClassName
+    );
   }
-  return ecPropertyMetaDetaList;
-};
 
-const extractStruct = (property: Field, ecPropertyMetaDetaList: PropertyMetaData[]) => {
-  if (property.type.valueFormat !== PropertyValueFormat.Struct) return;
+  return [];
+});
+
+const extractStruct = (property: Field) => {
+  if (property.type.valueFormat !== PropertyValueFormat.Struct) {
+    return [];
+  }
 
   const columnName = (property as PropertiesField).properties[0]
     .property.name;
   const actualECClassName = (property as PropertiesField).properties[0].property.classInfo.name;
-  ecPropertyMetaDetaList.push(...extractPrimitiveStructProperties(
+  return extractPrimitiveStructProperties(
     [columnName],
     property.type.members,
     property.category.label,
     actualECClassName
-  ));
+  );
 };
 
-const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]) => {
-  const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
-  for (const property of propertyFields) {
-
+const extractNested = (propertyTraversal: string[], propertyFields: Field[]): PropertyMetaData[] =>
+  propertyFields.flatMap((property) => {
     // Generate base ECProperty
     switch (property.type.valueFormat) {
       case PropertyValueFormat.Primitive: {
-        ecPropertyMetaDetaList.push(...extractPrimitives([...propertyTraversal], property as PropertiesField));
-        break;
+        return extractPrimitives([...propertyTraversal], property as PropertiesField);
       }
       // Get structs
       case PropertyValueFormat.Struct: {
@@ -172,7 +170,7 @@ const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]
               nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
               "BisCore:GeometricElement3dHasTypeDefinition"
             ) {
-              ecPropertyMetaDetaList.push(...extractNested([...propertyTraversal, "TypeDefinition"], nestedContentField.nestedFields));
+              return extractNested([...propertyTraversal, "TypeDefinition"], nestedContentField.nestedFields);
             }
             break;
           }
@@ -180,19 +178,17 @@ const extractNested = (propertyTraversal: Array<string>, propertyFields: Field[]
             // Some elements don't have a path to primary class or relationship meaning..
             // Most likely a simple struct property
             if (!nestedContentField.pathToPrimaryClass) {
-              extractStruct(property, ecPropertyMetaDetaList);
+              return extractStruct(property);
             }
           }
         }
       }
     }
-  }
-  return ecPropertyMetaDetaList;
-};
+    return [];
+  });
 
-export const convertPresentationFields = async (propertyFields: Field[]) => {
-  const ecPropertyMetaDetaList = new Array<PropertyMetaData>();
-  for (const property of propertyFields) {
+export const convertPresentationFields = (propertyFields: Field[]): PropertyMetaData[] =>
+  propertyFields.flatMap((property) => {
     // Generate base ECProperty
     switch (property.type.valueFormat) {
       case PropertyValueFormat.Primitive: {
@@ -200,7 +196,7 @@ export const convertPresentationFields = async (propertyFields: Field[]) => {
         for (const extractedPrimitive of extractedPrimitives) {
           extractedPrimitive.schema = "*";
           extractedPrimitive.className = "*";
-          ecPropertyMetaDetaList.push(extractedPrimitive);
+          return extractedPrimitive;
         }
         break;
       }
@@ -228,7 +224,7 @@ export const convertPresentationFields = async (propertyFields: Field[]) => {
               const className = fullClassName.split(":")[1];
               const extractedNested = extractNested([], nestedContentField.nestedFields);
               const aspectExtractedNested = extractedNested.map((ecProperty) => ({ ...ecProperty, schema, className }));
-              ecPropertyMetaDetaList.push(...aspectExtractedNested);
+              return aspectExtractedNested;
             }
             break;
           }
@@ -239,7 +235,7 @@ export const convertPresentationFields = async (propertyFields: Field[]) => {
               nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
               "BisCore:GeometricElement3dHasTypeDefinition"
             ) {
-              ecPropertyMetaDetaList.push(...extractNested(["TypeDefinition"], nestedContentField.nestedFields));
+              return extractNested(["TypeDefinition"], nestedContentField.nestedFields);
             }
             break;
           }
@@ -247,17 +243,16 @@ export const convertPresentationFields = async (propertyFields: Field[]) => {
             // Some elements don't have a path to primary class or relationship meaning..
             // Most likely a simple struct property
             if (!nestedContentField.pathToPrimaryClass) {
-              extractStruct(property, ecPropertyMetaDetaList);
+              return extractStruct(property);
             }
           }
         }
       }
     }
-  }
-  return ecPropertyMetaDetaList;
-};
+    return [];
+  });
 
-export const convertToECProperties = (property: PropertyMetaData): Array<ECProperty> => {
+export const convertToECProperties = (property: PropertyMetaData): ECProperty[] => {
   const ecProperty: ECProperty = {
     ecSchemaName: property.schema,
     ecClassName: property.className,
