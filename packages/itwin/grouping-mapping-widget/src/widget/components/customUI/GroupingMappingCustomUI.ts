@@ -15,11 +15,11 @@ export type GroupingMappingCustomUI = GroupingCustomUI | ContextCustomUI;
 
 export interface IGroupingMappingCustomUI {
   /**
-   * UI Provider type
+   * Custom UI type: grouping or context
    */
   type: GroupingMappingCustomUIType;
   /**
-   * Unique identifier of the UI provider.
+   * Unique identifier of the custom UI.
    */
   name: string;
   /**

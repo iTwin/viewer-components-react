@@ -35,7 +35,7 @@ export interface GroupingMappingProps {
    */
   client?: IMappingsClient;
   /**
-   * Custom UI providers to add and update groups.
+   * Custom UI to add and update groups or provide additional group context capabilities.
    */
   customUIs?: GroupingMappingCustomUI[];
 }
