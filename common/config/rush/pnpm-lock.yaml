@@ -276,7 +276,7 @@ importers:
       '@itwin/imodel-browser-react': ^0.12.3
       '@itwin/imodel-components-react': ^3.2.0
       '@itwin/insights-client': ^0.3.0
-      '@itwin/itwinui-icons-react': ^1.7.0
+      '@itwin/itwinui-icons-react': ^1.15.1
       '@itwin/itwinui-react': ~1.42.0
       '@itwin/presentation-common': ^3.2.0
       '@itwin/presentation-components': ^3.2.0
@@ -314,7 +314,7 @@ importers:
       '@dnd-kit/utilities': 3.2.0_react@17.0.2
       '@itwin/imodel-browser-react': 0.12.3_react-dom@17.0.2+react@17.0.2
       '@itwin/insights-client': 0.3.0
-      '@itwin/itwinui-icons-react': 1.8.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.42.0_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
       cross-fetch: 3.1.5
@@ -1868,7 +1868,7 @@ packages:
       '@itwin/core-telemetry': 3.2.2_@itwin+core-geometry@3.2.2
       '@itwin/imodel-components-react': 3.2.2_fd0453885139ba43494b554614c626b0
       '@itwin/itwinui-css': 0.50.1
-      '@itwin/itwinui-icons-react': 1.8.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.42.0_react-dom@17.0.2+react@17.0.2
       '@itwin/presentation-common': 3.2.2_aa7c17727124c31a56baeab89140d952
       '@itwin/presentation-components': 3.2.2_0c8e54e1d46986e00a4f386734b921be
@@ -2781,7 +2781,7 @@ packages:
       react: ^16.13.0 || ^17.0.2
       react-dom: ^16.13.0 || ^17.0.2
     dependencies:
-      '@itwin/itwinui-icons-react': 1.10.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.42.0_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
       react: 17.0.2
@@ -2977,6 +2977,16 @@ packages:
     dependencies:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
+    dev: true
+
+  /@itwin/itwinui-icons-react/1.15.1_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-ShlJU2LjwhTHz2SuVkN82eRbfAse1A5+OZMlg3aM8WAv7wGxSTusTnn/f63Z7JVLwupRMRcAGSmdciSSM1mmfg==}
+    peerDependencies:
+      react: '>=16.8.6'
+      react-dom: '>=16.8.6'
+    dependencies:
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
 
   /@itwin/itwinui-icons-react/1.8.0_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-/16NPEPGvqOAwcJ/uBCvmIyl0c0vaprfsjl/mdecYLf301dKvlKmIH+Eq6a2YUXZHO/B6KaZtM78UCuxXGMQBA==}
@@ -3082,7 +3092,7 @@ packages:
       react-dom: '>=16.8.6 < 19.0.0'
     dependencies:
       '@itwin/itwinui-css': 0.61.0
-      '@itwin/itwinui-icons-react': 1.10.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-illustrations-react': 1.3.1_react-dom@17.0.2+react@17.0.2
       '@tippyjs/react': 4.2.6_react-dom@17.0.2+react@17.0.2
       '@types/react-table': 7.7.10
