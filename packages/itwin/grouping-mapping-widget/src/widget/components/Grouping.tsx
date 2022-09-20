@@ -564,6 +564,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                               [
                                 <MenuItem
                                   key={0}
+                                  icon={<SvgEdit />}
                                   disabled={isLoadingQuery}
                                   data-testid="gmw-context-menu-item"
                                   subMenuItems={
@@ -583,13 +584,6 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                       ))
                                   }
                                 >
-                                  <SvgEdit
-                                    style={{
-                                      width: "16px",
-                                      height: "16px",
-                                      margin: "0 8px 0 0",
-                                    }}
-                                  />
                                   Edit
                                 </MenuItem>,
                                 <MenuItem
@@ -640,12 +634,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                               styleType='borderless'
                               data-testid="gmw-more-button"
                             >
-                              <SvgMore
-                                style={{
-                                  width: "16px",
-                                  height: "16px",
-                                }}
-                              />
+                              <SvgMore />
                             </IconButton>
                           </DropdownMenu>
                         </div>
