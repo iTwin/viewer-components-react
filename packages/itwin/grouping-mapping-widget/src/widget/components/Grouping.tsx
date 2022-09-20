@@ -441,11 +441,11 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                     : defaultUIMetadata)
                     .map((p) => (
                       <MenuItem
-                        data-testid="menu-item"
                         key={p.name}
                         onClick={() => addGroup(p.name)}
                         icon={p.icon}
                         className='gmw-menu-item'
+                        data-testid="gmw-add-group-menu-item"
                       >
                         {p.displayLabel}
                       </MenuItem>
@@ -453,7 +453,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 }
               >
                 <Button
-                  data-testid="add-group-button"
+                  data-testid="gmw-add-group-button"
                   className='add-load-button'
                   startIcon={
                     isLoadingQuery ? (
@@ -502,7 +502,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
             ) : groups.length === 0 ? (
               <EmptyMessage message='No Groups available.' />
             ) : (
-              <div className='gmw-group-list' data-testid="horizontal-tile">
+              <div className='gmw-group-list'>
                 {groups
                   .sort(
                     (a, b) =>
@@ -565,6 +565,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                 <MenuItem
                                   key={0}
                                   disabled={isLoadingQuery}
+                                  data-testid="gmw-context-menu-item"
                                   subMenuItems={
                                     (groupUIs.length > 0
                                       ? groupUIs
@@ -572,6 +573,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                       .map((p) => (
                                         <MenuItem
                                           className='gmw-menu-item'
+                                          data-testid="gmw-edit-menu-item"
                                           key={p.name}
                                           onClick={async () => onModify(g, p.name)}
                                           icon={p.icon}
@@ -594,6 +596,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                   key={1}
                                   onClick={async () => openProperties(g)}
                                   icon={<SvgList />}
+                                  data-testid="gmw-context-menu-item"
                                 >
                                   Properties
                                 </MenuItem>,
@@ -605,6 +608,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                     close();
                                   }}
                                   icon={<SvgDelete />}
+                                  data-testid="gmw-context-menu-item"
                                 >
                                   Remove
                                 </MenuItem>,
@@ -634,6 +638,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                             <IconButton
                               disabled={isLoadingQuery}
                               styleType='borderless'
+                              data-testid="gmw-more-button"
                             >
                               <SvgMore
                                 style={{

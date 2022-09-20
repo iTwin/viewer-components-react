@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, TestUtils, waitForElementToBeRemoved } from "./test-utils";
+import { render, screen, TestUtils, waitForElementToBeRemoved, within } from "./test-utils";
 import { faker } from "@faker-js/faker";
 import type { GroupingMappingCustomUI} from "../grouping-mapping-widget";
 import { Groupings } from "../grouping-mapping-widget";
-import type { Group, Mapping } from "@itwin/insights-client";
+import type { GroupCollection, Mapping } from "@itwin/insights-client";
 import * as moq from "typemoq";
 import type { IModelConnection, SelectionSet, SelectionSetEvent} from "@itwin/core-frontend";
 import { NoRenderApp } from "@itwin/core-frontend";
@@ -21,12 +21,37 @@ import { rest } from "msw";
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
 const mockMappingId = faker.datatype.uuid();
-const mockGroupId1 = faker.datatype.uuid();
-const mockGroupId2 = faker.datatype.uuid();
 
 const connectionMock = moq.Mock.ofType<IModelConnection>();
 const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
 const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
+
+const groupsFactory = (): GroupCollection => ({
+  groups: Array.from(
+    { length: faker.datatype.number({ min: 3, max: 5 }) },
+    (_, index) => ({
+      id: `${faker.datatype.uuid()}`,
+      groupName: `mOcKgRoUp${index}`,
+      description: `mOcKgRoUpDeScRiPtIoN${index}`,
+      query: `mOcKgRoUpQuErY${index}`,
+      deleted: false,
+      _links: {
+        imodel: {
+          href: "",
+        },
+        mapping: {
+          href: "",
+        },
+      },
+    })
+  ),
+  _links: {
+    next: undefined,
+    self: {
+      href: "",
+    },
+  },
+});
 
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
@@ -93,35 +118,21 @@ const mockMapping: Mapping = {
   },
 };
 
-const mockGroups: Group[] = [
-  {
-    id: mockGroupId1,
-    groupName: "mOcKgRoUp1",
-    description: "mOcKgRoUpDeScRiPtIoN1",
-    query: faker.datatype.string(),
-  },
-  {
-    id: mockGroupId2,
-    groupName: "mOcKgRoUp2",
-    description: "mOcKgRoUpDeScRiPtIoN2",
-    query: faker.datatype.string(),
-  },
-];
-
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
   useActiveIModelConnection: () => connectionMock.object,
 }));
 
-describe("Groupings View", () => {
-  it("List all groups", async () => {
+describe("Groupings View with default UIs", () => {
+  it("List all groups and click on add group and edit group buttons", async () => {
     // Arange
+    const mockGroups = groupsFactory();
     server.use(
       rest.get(
         `https://api.bentley.com/insights/reporting/datasources/imodels/${mockIModelId}/mappings/${mockMappingId}/groups`,
         async (_req, res, ctx) => {
           return res(
-            ctx.delay(),
+            ctx.delay(500),
             ctx.status(200),
             ctx.json(mockGroups)
           );
@@ -136,33 +147,54 @@ describe("Groupings View", () => {
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
     // Assert
-    const addButton = screen.getAllByTestId("add-group-button");
+    const addButton = screen.getAllByTestId("gmw-add-group-button");
     expect(addButton).toHaveLength(1);
 
+    // click 'Add Group'
     await user.click(addButton[0]);
 
-    const AddMenuItems = screen.getAllByTestId("menu-item");
+    const AddMenuItems = screen.getAllByTestId("gmw-add-group-menu-item");
     expect(AddMenuItems).toHaveLength(3);
     expect(AddMenuItems[0]).toHaveTextContent("Selection");
     expect(AddMenuItems[1]).toHaveTextContent("Query");
     expect(AddMenuItems[2]).toHaveTextContent("Manual");
 
-    // Assert
-    // const horizontalTiles = screen.getAllByTestId("horizontal-tile");
-    // expect(horizontalTiles).toHaveLength(mockGroups.length);
+    const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
+    expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
 
-    // horizontalTiles.forEach((horizontalTile, index) => {
-    //   const groupTile = within(horizontalTile);
-    //   expect(
-    //     groupTile.getByText(
-    //       mockGroups[index].groupName
-    //     )
-    //   ).toBeInTheDocument();
-    //   expect(
-    //     groupTile.getByTitle(
-    //       mockGroups[index].description ?? ""
-    //     )
-    //   ).toBeInTheDocument();
-    // });
+    horizontalTiles.forEach((horizontalTile, index) => {
+      const groupTile = within(horizontalTile);
+      expect(
+        groupTile.getByText(
+          mockGroups.groups[index].groupName
+        )
+      ).toBeInTheDocument();
+      expect(
+        groupTile.getByText(
+          mockGroups.groups[index].description ?? ""
+        )
+      ).toBeInTheDocument();
+    });
+
+    const moreButton = screen.getAllByTestId("gmw-more-button");
+    expect(moreButton).toHaveLength(mockGroups.groups.length);
+
+    // click on first group more icon
+    await user.click(moreButton[0]);
+
+    const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
+    expect(contextMenuItems).toHaveLength(3);
+    expect(contextMenuItems[0]).toHaveTextContent("Edit");
+    expect(contextMenuItems[1]).toHaveTextContent("Properties");
+    expect(contextMenuItems[2]).toHaveTextContent("Remove");
+
+    // hover 'Edit'
+    await user.hover(contextMenuItems[0]);
+
+    const editMenuItems = screen.getAllByTestId("gmw-edit-menu-item");
+    expect(editMenuItems).toHaveLength(3);
+    expect(editMenuItems[0]).toHaveTextContent("Selection");
+    expect(editMenuItems[1]).toHaveTextContent("Query");
+    expect(editMenuItems[2]).toHaveTextContent("Manual");
   });
 });
