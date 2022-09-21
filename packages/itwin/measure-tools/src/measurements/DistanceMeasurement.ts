@@ -482,16 +482,8 @@ export class DistanceMeasurement extends Measurement {
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
 
-    let adjustedStart = this._startPoint;
-    let adjustedEnd = this._endPoint;
-    const isSpatial = this.viewTarget.isOfViewType(WellKnownViewType.AnySpatial);
-    if (isSpatial) {
-      const globalOrigin = MeasurementSelectionSet.global.imodel?.globalOrigin;
-      if (globalOrigin) {
-        adjustedStart = adjustedStart.minus(globalOrigin);
-        adjustedEnd = adjustedEnd.minus(globalOrigin);
-      }
-    }
+    const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
+    const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
 
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
       distance,

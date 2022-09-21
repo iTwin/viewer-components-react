@@ -232,15 +232,7 @@ export class LocationMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
-    let adjustedLocation = this._location;
-    const isSpatial = this.viewTarget.isOfViewType(WellKnownViewType.AnySpatial);
-    if (isSpatial) {
-      const globalOrigin = MeasurementSelectionSet.global.imodel?.globalOrigin;
-      if (globalOrigin) {
-        adjustedLocation = adjustedLocation.minus(globalOrigin);
-      }
-    }
-
+    const adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
     const entries = [
       {
         label: MeasureTools.localization.getLocalizedString(
@@ -295,15 +287,7 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<
   MeasurementWidgetData | undefined
   > {
-    let adjustedLocation = this._location;
-    const isSpatial = this.viewTarget.isOfViewType(WellKnownViewType.AnySpatial);
-    if (isSpatial) {
-      const globalOrigin = MeasurementSelectionSet.global.imodel?.globalOrigin;
-      if (globalOrigin) {
-        adjustedLocation = adjustedLocation.minus(globalOrigin);
-      }
-    }
-
+    const adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
     const fCoordinates = await FormatterUtils.formatCoordinates(adjustedLocation);
 
     let title = MeasureTools.localization.getLocalizedString(
