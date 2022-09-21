@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/measure-tools-react",
-      "comment": "Fix linter issue",
+      "comment": "",
       "type": "patch"
     }
   ],
