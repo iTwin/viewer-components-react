@@ -43,7 +43,6 @@ import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
 import { MeasureTools } from "../MeasureTools";
-import { WellKnownViewType } from "../api/MeasurementEnums";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
