@@ -299,7 +299,7 @@ export class DistanceMeasurement extends Measurement {
    * @remarks Returns undefined if the segment is entirely 'behind' the camera eye
    */
   private calculateWorldTextLocation(context: DecorateContext): Point3d | undefined {
-    const clipFront = context.viewport.view.is3d();
+    const clipFront = context.viewport.view.is3d() && context.viewport.view.isCameraOn;
     const clipPlanes = context.viewport.getWorldFrustum().getRangePlanes(clipFront, false, 0.0);
     const startIn = clipPlanes.isPointOnOrInside(this._startPoint, Geometry.smallMetricDistance);
     const endIn = clipPlanes.isPointOnOrInside(this._endPoint, Geometry.smallMetricDistance);
@@ -317,15 +317,19 @@ export class DistanceMeasurement extends Measurement {
     let clampedStartPoint = this._startPoint;
     let clampedEndPoint = this._endPoint;
 
-    if (!startIn) {
-      // Computed from the test above
-      clampedStartPoint = ray.fractionToPoint(range.high);
+    if (!endIn) {
+      if (range.high < 0)
+        return undefined;
+
+      clampedEndPoint = ray.fractionToPoint(range.high);
     }
 
-    if (!endIn) {
+    if (!startIn) {
       ray = Ray3d.createStartEnd(this._endPoint.clone(), this._startPoint);
-      if (clipPlanes.hasIntersectionWithRay(ray, range))
-        clampedEndPoint = ray.fractionToPoint(range.high);
+      if (!clipPlanes.hasIntersectionWithRay(ray, range) || range.high < 0)
+        return undefined;
+
+      clampedStartPoint = ray.fractionToPoint(range.high);
     }
 
     return Point3d.createAdd2Scaled(clampedStartPoint, 0.5, clampedEndPoint, 0.5);
