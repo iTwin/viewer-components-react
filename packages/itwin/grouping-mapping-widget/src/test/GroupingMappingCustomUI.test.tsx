@@ -4,10 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, TestUtils, waitForElementToBeRemoved, within } from "./test-utils";
+import { mockMappingClient, render, screen, TestUtils, waitForElementToBeRemoved, within } from "./test-utils";
 import { faker } from "@faker-js/faker";
 import { Groupings } from "../grouping-mapping-widget";
-import type { GroupCollection, Mapping } from "@itwin/insights-client";
+import type { GroupCollection, Mapping} from "@itwin/insights-client";
 import * as moq from "typemoq";
 import type { IModelConnection, SelectionSet, SelectionSetEvent} from "@itwin/core-frontend";
 import { NoRenderApp } from "@itwin/core-frontend";
@@ -15,7 +15,7 @@ import type { SelectionManager, SelectionScopesManager } from "@itwin/presentati
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
 import { setupServer } from "msw/node";
-import { rest } from "msw";
+import { EmptyLocalization } from "@itwin/core-common";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
@@ -44,7 +44,6 @@ const groupsFactory = (): GroupCollection => ({
       groupName: `mOcKgRoUp${index}`,
       description: `mOcKgRoUpDeScRiPtIoN${index}`,
       query: `mOcKgRoUpQuErY${index}`,
-      deleted: false,
       _links: {
         imodel: {
           href: "",
@@ -75,9 +74,7 @@ jest.mock("@itwin/appui-react", () => ({
 const server = setupServer();
 
 beforeAll(async () => {
-  // This is required by the i18n module within iTwin.js
-  (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
-  await NoRenderApp.startup();
+  await NoRenderApp.startup({localization: new EmptyLocalization()});
   await Presentation.initialize();
   const selectionSet = moq.Mock.ofType<SelectionSet>();
   const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
@@ -120,18 +117,9 @@ describe("Groupings View with default UIs", () => {
   it("List all groups and click on add group and edit group buttons", async () => {
     // Arange
     const mockGroups = groupsFactory();
-    server.use(
-      rest.get(
-        `https://api.bentley.com/insights/reporting/datasources/imodels/${mockIModelId}/mappings/${mockMappingId}/groups`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(200),
-            ctx.status(200),
-            ctx.json(mockGroups)
-          );
-        }
-      ),
-    );
+    mockMappingClient
+      .setup(async (x) => x.getGroups(moq.It.isAnyString(), moq.It.isAnyString(), moq.It.isAnyString()))
+      .returns(async () => mockGroups.groups);
 
     // Act
     const { user } = render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
@@ -145,11 +133,12 @@ describe("Groupings View with default UIs", () => {
     await user.click(addButton[0]);
 
     // Should have three menu items
-    const AddMenuItems = screen.getAllByTestId("gmw-add-group-menu-item");
-    expect(AddMenuItems).toHaveLength(3);
-    expect(AddMenuItems[0]).toHaveTextContent("Selection");
-    expect(AddMenuItems[1]).toHaveTextContent("Query");
-    expect(AddMenuItems[2]).toHaveTextContent("Manual");
+    const addSelection = screen.getAllByTestId("gmw-add-Selection");
+    expect(addSelection).toHaveLength(1);
+    const addSearch = screen.getAllByTestId("gmw-add-Search");
+    expect(addSearch).toHaveLength(1);
+    const addManual = screen.getAllByTestId("gmw-add-Manual");
+    expect(addManual).toHaveLength(1);
 
     // Should have the right group number
     const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
@@ -186,10 +175,11 @@ describe("Groupings View with default UIs", () => {
     await user.hover(contextMenuItems[0]);
 
     // Should have 3 sub menu items
-    const editMenuItems = screen.getAllByTestId("gmw-edit-menu-item");
-    expect(editMenuItems).toHaveLength(3);
-    expect(editMenuItems[0]).toHaveTextContent("Selection");
-    expect(editMenuItems[1]).toHaveTextContent("Query");
-    expect(editMenuItems[2]).toHaveTextContent("Manual");
+    const editSelection = screen.getAllByTestId(`gmw-edit-Selection`);
+    expect(editSelection).toHaveLength(1);
+    const editSearch = screen.getAllByTestId(`gmw-edit-Search`);
+    expect(editSearch).toHaveLength(1);
+    const editManual = screen.getAllByTestId(`gmw-edit-Manual`);
+    expect(editManual).toHaveLength(1);
   });
 });

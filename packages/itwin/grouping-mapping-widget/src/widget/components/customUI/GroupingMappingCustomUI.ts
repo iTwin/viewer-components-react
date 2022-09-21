@@ -5,8 +5,8 @@
 import type { ReactElement } from "react";
 
 export enum GroupingMappingCustomUIType {
-  GROUP = "group",
-  CONTEXT = "context"
+  GROUPING = "Grouping",
+  CONTEXT = "Context"
 }
 
 export type GroupingMappingCustomUI = GroupingCustomUI | ContextCustomUI;
@@ -45,9 +45,9 @@ export interface ContextCustomUI extends IGroupingMappingCustomUI {
    */
   uiComponent?: (props: ContextCustomUIProps) => JSX.Element;
   /**
-   * Callback function for non UI interaction with grouping mapping widget.
+   * Callback function for context custom UI menu item click event.
    */
-  callback?: (groupId: string, mappingId: string, iModelId: string) => void;
+  onClick?: (groupId: string, mappingId: string, iModelId: string) => void;
 }
 
 /**
@@ -57,14 +57,14 @@ export interface GroupingCustomUI extends IGroupingMappingCustomUI {
   /**
    * UI type.
    */
-  type: GroupingMappingCustomUIType.GROUP;
+  type: GroupingMappingCustomUIType.GROUPING;
   /**
    * Custom UI Component to build query interactively. Refer to SearchGroupingCustomUI/ManualGroupingCustomUI.
    */
-  uiComponent: (props: GroupingCustomUIProps ) => JSX.Element;
+  uiComponent: (props: GroupingCustomUIProps) => JSX.Element;
 }
 
-/** Custom UI Component props definitions  */
+/** Custom UI Component props definitions. */
 
 /**
  * Context custom UI component arguments definition.

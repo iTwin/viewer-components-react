@@ -129,7 +129,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI()
-    .filter((p) => p.type === GroupingMappingCustomUIType.GROUP) as GroupingCustomUI[];
+    .filter((p) => p.type === GroupingMappingCustomUIType.GROUPING) as GroupingCustomUI[];
   const contextUIs: ContextCustomUI[] = useGroupingMappingCustomUI()
     .filter((p) => p.type === GroupingMappingCustomUIType.CONTEXT) as ContextCustomUI[];
 
@@ -433,7 +433,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           <Surface className='gmw-groups-container'>
             <div className='gmw-toolbar'>
               <DropdownMenu
-                className='gmw-ui-provider-dropdown'
+                className='gmw-custom-ui-dropdown'
                 disabled={isLoadingQuery}
                 menuItems={() =>
                   (groupUIs.length > 0
@@ -445,7 +445,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                         onClick={() => addGroup(p.name)}
                         icon={p.icon}
                         className='gmw-menu-item'
-                        data-testid="gmw-add-group-menu-item"
+                        data-testid={`gmw-add-${p.name}`}
                       >
                         {p.displayLabel}
                       </MenuItem>
@@ -558,7 +558,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                             </IconButton>
                           )}
                           <DropdownMenu
-                            className='gmw-ui-provider-dropdown'
+                            className='gmw-custom-ui-dropdown'
                             disabled={isLoadingQuery}
                             menuItems={(close: () => void) =>
                               [
@@ -574,7 +574,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                       .map((p) => (
                                         <MenuItem
                                           className='gmw-menu-item'
-                                          data-testid="gmw-edit-menu-item"
+                                          data-testid={`gmw-edit-${p.name}`}
                                           key={p.name}
                                           onClick={async () => onModify(g, p.name)}
                                           icon={p.icon}
@@ -616,8 +616,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                         setSelectedContextCustomUI(p);
                                         setGroupsView(GroupsView.CUSTOM);
                                       }
-                                      if(p.callback) {
-                                        p.callback(g.id, mapping.id, iModelId);
+                                      if(p.onClick) {
+                                        p.onClick(g.id, mapping.id, iModelId);
                                       }
                                       close();
                                     }}
