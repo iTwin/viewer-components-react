@@ -43,6 +43,7 @@ import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
 import { MeasureTools } from "../MeasureTools";
+import { WellKnownViewType } from "../api/MeasurementEnums";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
@@ -477,15 +478,26 @@ export class DistanceMeasurement extends Measurement {
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
 
+    let adjustedStart = this._startPoint;
+    let adjustedEnd = this._endPoint;
+    const isSpatial = this.viewTarget.isOfViewType(WellKnownViewType.AnySpatial);
+    if (isSpatial) {
+      const globalOrigin = MeasurementSelectionSet.global.imodel?.globalOrigin;
+      if (globalOrigin) {
+        adjustedStart = adjustedStart.minus(globalOrigin);
+        adjustedEnd = adjustedEnd.minus(globalOrigin);
+      }
+    }
+
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
       distance,
       lengthSpec
     );
     const fStartCoords = FormatterUtils.formatCoordinatesImmediate(
-      this._startPoint
+      adjustedStart
     );
     const fEndCoords = FormatterUtils.formatCoordinatesImmediate(
-      this._endPoint
+      adjustedEnd
     );
     const fSlope = FormatterUtils.formatSlope(slope, true);
     const fRun = IModelApp.quantityFormatter.formatQuantity(run, lengthSpec);
