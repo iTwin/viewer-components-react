@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/measure-tools-react",
+      "comment": "Make sure we also refresh displayed measurements if the global origin changes. Fix an issue where the text marker would go past the DistanceMeasurement line.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/measure-tools-react"
+}
