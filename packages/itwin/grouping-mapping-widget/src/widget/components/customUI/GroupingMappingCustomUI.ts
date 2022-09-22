@@ -5,17 +5,17 @@
 import type { ReactElement } from "react";
 
 export enum GroupingMappingCustomUIType {
-  GROUPING = "Grouping",
-  CONTEXT = "Context"
+  Grouping,
+  Context,
 }
 
 export type GroupingMappingCustomUI = GroupingCustomUI | ContextCustomUI;
 
-/** Custom UI Definitions */
+/** Custom UI Definitions. */
 
 export interface IGroupingMappingCustomUI {
   /**
-   * Custom UI type: grouping or context
+   * See GroupingMappingCustomUIType.
    */
   type: GroupingMappingCustomUIType;
   /**
@@ -37,9 +37,9 @@ export interface IGroupingMappingCustomUI {
  */
 export interface ContextCustomUI extends IGroupingMappingCustomUI {
   /**
-   * UI type.
+   * See GroupingMappingCustomUIType.
    */
-  type: GroupingMappingCustomUIType.CONTEXT;
+  type: GroupingMappingCustomUIType.Context;
   /**
    * User defined component for UI interaction with grouping mapping widget.
    */
@@ -55,9 +55,9 @@ export interface ContextCustomUI extends IGroupingMappingCustomUI {
  */
 export interface GroupingCustomUI extends IGroupingMappingCustomUI {
   /**
-   * UI type.
+   * See GroupingMappingCustomUIType.
    */
-  type: GroupingMappingCustomUIType.GROUPING;
+  type: GroupingMappingCustomUIType.Grouping;
   /**
    * Custom UI Component to build query interactively. Refer to SearchGroupingCustomUI/ManualGroupingCustomUI.
    */

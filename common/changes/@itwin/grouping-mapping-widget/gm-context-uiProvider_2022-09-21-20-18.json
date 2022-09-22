@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "add context custom UI support ",
+      "comment": "Add context custom UI support",
       "type": "minor"
     }
   ],

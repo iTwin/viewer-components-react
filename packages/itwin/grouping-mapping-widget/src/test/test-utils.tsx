@@ -63,15 +63,7 @@ export class TestUtils {
 
   public static async initializeUiFramework(_?: IModelConnection) {
     const store = this.createAppStore();
-
     await UiFramework.initialize(store);
-
-    // Set the iModelConnection in the Redux store
-    // Can not get it to function as intended. Store does not update with the iModel connection
-    // if (imodel)
-    //   UiFramework.setIModelConnection(imodel);
-
     SyncUiEventDispatcher.setTimeoutPeriod(0); // disables non-immediate event processing.
   }
-
 }

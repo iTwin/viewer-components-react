@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { mockMappingClient, render, screen, TestUtils, waitForElementToBeRemoved, within } from "./test-utils";
+import { mockAccessToken, mockMappingClient, render, screen, TestUtils, waitForElementToBeRemoved, within } from "./test-utils";
 import { faker } from "@faker-js/faker";
 import { Groupings } from "../grouping-mapping-widget";
 import type { GroupCollection, Mapping} from "@itwin/insights-client";
@@ -14,7 +14,6 @@ import { NoRenderApp } from "@itwin/core-frontend";
 import type { SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
-import { setupServer } from "msw/node";
 import { EmptyLocalization } from "@itwin/core-common";
 
 const mockITwinId = faker.datatype.uuid();
@@ -71,8 +70,6 @@ jest.mock("@itwin/appui-react", () => ({
   useActiveIModelConnection: () => connectionMock.object,
 }));
 
-const server = setupServer();
-
 beforeAll(async () => {
   await NoRenderApp.startup({localization: new EmptyLocalization()});
   await Presentation.initialize();
@@ -99,26 +96,15 @@ beforeAll(async () => {
 
   Presentation.setSelectionManager(selectionManagerMock.object);
   await TestUtils.initializeUiFramework(connectionMock.object);
-  server.listen({
-    onUnhandledRequest: "warn",
-  });
-  server.printHandlers();
-});
-
-afterAll(() => {
-  server.close();
-});
-
-afterEach(() => {
-  server.resetHandlers();
 });
 
 describe("Groupings View with default UIs", () => {
   it("List all groups and click on add group and edit group buttons", async () => {
     // Arange
     const mockGroups = groupsFactory();
+    const mockedAccessToken = await mockAccessToken();
     mockMappingClient
-      .setup(async (x) => x.getGroups(moq.It.isAnyString(), moq.It.isAnyString(), moq.It.isAnyString()))
+      .setup(async (x) => x.getGroups(mockedAccessToken, mockIModelId, mockMappingId))
       .returns(async () => mockGroups.groups);
 
     // Act
@@ -133,11 +119,11 @@ describe("Groupings View with default UIs", () => {
     await user.click(addButton[0]);
 
     // Should have three menu items
-    const addSelection = screen.getAllByTestId("gmw-add-Selection");
+    const addSelection = screen.getAllByTestId("gmw-add-0");
     expect(addSelection).toHaveLength(1);
-    const addSearch = screen.getAllByTestId("gmw-add-Search");
+    const addSearch = screen.getAllByTestId("gmw-add-1");
     expect(addSearch).toHaveLength(1);
-    const addManual = screen.getAllByTestId("gmw-add-Manual");
+    const addManual = screen.getAllByTestId("gmw-add-2");
     expect(addManual).toHaveLength(1);
 
     // Should have the right group number
@@ -175,11 +161,11 @@ describe("Groupings View with default UIs", () => {
     await user.hover(contextMenuItems[0]);
 
     // Should have 3 sub menu items
-    const editSelection = screen.getAllByTestId(`gmw-edit-Selection`);
+    const editSelection = screen.getAllByTestId(`gmw-edit-0`);
     expect(editSelection).toHaveLength(1);
-    const editSearch = screen.getAllByTestId(`gmw-edit-Search`);
+    const editSearch = screen.getAllByTestId(`gmw-edit-1`);
     expect(editSearch).toHaveLength(1);
-    const editManual = screen.getAllByTestId(`gmw-edit-Manual`);
+    const editManual = screen.getAllByTestId(`gmw-edit-2`);
     expect(editManual).toHaveLength(1);
   });
 });

@@ -83,11 +83,11 @@ export const defaultUIMetadata = [
 ];
 
 enum GroupsView {
-  GROUPS = "groups",
-  MODIFYING = "modifying",
-  ADD = "ADD",
-  PROPERTIES = "properties",
-  CUSTOM = "custom",
+  Add,          // Add group view
+  Groups,       // Group list page
+  CustomUI,     // Context custom UI view
+  Modifying,    // Modify group view
+  Properties,   // Group properties view
 }
 
 interface GroupsTreeProps {
@@ -129,13 +129,13 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI()
-    .filter((p) => p.type === GroupingMappingCustomUIType.GROUPING) as GroupingCustomUI[];
+    .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];
   const contextUIs: ContextCustomUI[] = useGroupingMappingCustomUI()
-    .filter((p) => p.type === GroupingMappingCustomUIType.CONTEXT) as ContextCustomUI[];
+    .filter((p) => p.type === GroupingMappingCustomUIType.Context) as ContextCustomUI[];
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [groupsView, setGroupsView] = useState<GroupsView>(GroupsView.GROUPS);
+  const [groupsView, setGroupsView] = useState<GroupsView>(GroupsView.Groups);
   const [selectedGroup, setSelectedGroup] = useState<IGroupTyped | undefined>(
     undefined,
   );
@@ -147,7 +147,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
 
   const [queryGenerationType, setQueryGenerationType] =
     useState<string>("Selection");
-  const [selectedContextCustomUI, setSelectedContextCustomUI] = useState<ContextCustomUI>();
+  const [selectedContextCustomUI, setSelectedContextCustomUI] = useState<ContextCustomUI | undefined>(undefined);
 
   useEffect(() => {
     void fetchGroups(
@@ -280,13 +280,13 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const addGroup = (type: string) => {
     setQueryGenerationType(type);
     clearEmphasizedElements();
-    setGroupsView(GroupsView.ADD);
+    setGroupsView(GroupsView.Add);
   };
 
   const onModify = async (group: Group, type: string) => {
     setQueryGenerationType(type);
     setSelectedGroup(group);
-    setGroupsView(GroupsView.MODIFYING);
+    setGroupsView(GroupsView.Modifying);
     if (group.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
@@ -296,7 +296,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
 
   const openProperties = async (group: Group) => {
     setSelectedGroup(group);
-    setGroupsView(GroupsView.PROPERTIES);
+    setGroupsView(GroupsView.Properties);
     if (group.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
@@ -304,8 +304,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   };
 
   const refresh = useCallback(async () => {
-    setGroupsView(GroupsView.GROUPS);
+    setGroupsView(GroupsView.Groups);
     setSelectedGroup(undefined);
+    setSelectedContextCustomUI(undefined);
     setGroups([]);
     const groups = await fetchGroups(
       setGroups,
@@ -377,25 +378,25 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   );
 
   const propertyMenuGoBack = useCallback(async () => {
-    setGroupsView(GroupsView.GROUPS);
+    setGroupsView(GroupsView.Groups);
     await refresh();
   }, [refresh]);
 
   switch (groupsView) {
-    case GroupsView.ADD:
+    case GroupsView.Add:
       return (
         <GroupAction
           iModelId={iModelId}
           mappingId={mapping.id}
           queryGenerationType={queryGenerationType}
           goBack={async () => {
-            setGroupsView(GroupsView.GROUPS);
+            setGroupsView(GroupsView.Groups);
             await refresh();
           }}
           resetView={resetView}
         />
       );
-    case GroupsView.MODIFYING:
+    case GroupsView.Modifying:
       return selectedGroup ? (
         <GroupAction
           iModelId={iModelId}
@@ -403,13 +404,13 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           group={selectedGroup}
           queryGenerationType={queryGenerationType}
           goBack={async () => {
-            setGroupsView(GroupsView.GROUPS);
+            setGroupsView(GroupsView.Groups);
             await refresh();
           }}
           resetView={resetView}
         />
       ) : null;
-    case GroupsView.PROPERTIES:
+    case GroupsView.Properties:
       return selectedGroup ? (
         <PropertyMenu
           iModelId={iModelId}
@@ -418,7 +419,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           goBack={propertyMenuGoBack}
         />
       ) : null;
-    case GroupsView.GROUPS:
+    case GroupsView.Groups:
       return (
         <>
           <WidgetHeader
@@ -439,13 +440,13 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                   (groupUIs.length > 0
                     ? groupUIs
                     : defaultUIMetadata)
-                    .map((p) => (
+                    .map((p, index) => (
                       <MenuItem
-                        key={p.name}
+                        key={index}
                         onClick={() => addGroup(p.name)}
                         icon={p.icon}
                         className='gmw-menu-item'
-                        data-testid={`gmw-add-${p.name}`}
+                        data-testid={`gmw-add-${index}`}
                       >
                         {p.displayLabel}
                       </MenuItem>
@@ -571,11 +572,11 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                     (groupUIs.length > 0
                                       ? groupUIs
                                       : defaultUIMetadata)
-                                      .map((p) => (
+                                      .map((p, index) => (
                                         <MenuItem
+                                          key={index}
                                           className='gmw-menu-item'
-                                          data-testid={`gmw-edit-${p.name}`}
-                                          key={p.name}
+                                          data-testid={`gmw-edit-${index}`}
                                           onClick={async () => onModify(g, p.name)}
                                           icon={p.icon}
                                         >
@@ -614,7 +615,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                       if(p.uiComponent) {
                                         setSelectedGroup(g);
                                         setSelectedContextCustomUI(p);
-                                        setGroupsView(GroupsView.CUSTOM);
+                                        setGroupsView(GroupsView.CustomUI);
                                       }
                                       if(p.onClick) {
                                         p.onClick(g.id, mapping.id, iModelId);
@@ -622,6 +623,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                       close();
                                     }}
                                     icon={p.icon}
+                                    data-testid="gmw-context-menu-item"
                                   >
                                     {p.displayLabel}
                                   </MenuItem>;
@@ -666,7 +668,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           />
         </>
       );
-    case GroupsView.CUSTOM:
+    case GroupsView.CustomUI:
       return selectedContextCustomUI && selectedContextCustomUI.uiComponent && selectedGroup
         ? (
           <>

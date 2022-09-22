@@ -62,7 +62,7 @@ const GroupAction = (props: GroupActionProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI()
-    .filter((p) => p.type === GroupingMappingCustomUIType.GROUPING) as GroupingCustomUI[];
+    .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];
 
   const [details, setDetails] = useState({
     groupName: props.group?.groupName ?? "",

@@ -38,7 +38,7 @@ This package provides an interface to define your own custom UI or callback func
 
 You can use your own UI component to define group creation method.
 
-An example of grouping custom UI, [ManualGroupingCustomUI](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/grouping-mapping-widget/src/widget/components/provider/ManualGroupingCustomUI.tsx) helps user to manually define ECSQL query for groups.
+An example of grouping custom UI, [ManualGroupingCustomUI](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/grouping-mapping-widget/src/widget/components/customUI/ManualGroupingCustomUI.tsx) helps user to manually define ECSQL query for groups.
 
 In `GroupingCustomUIProps`:
 
@@ -70,11 +70,15 @@ new GroupingMappingProvider({
 });
 ```
 
+After adding the grouping custom UI, it will be presented in the 'Add Group' drop down list.
+
+![Process Functional Grouping Menu Item](./assets/ProcessGroupingMenuItem.jpg)
+
 ### Context Custom UI
 
 You can also add custom UI in context menu for each group. This could be UI driven interaction or simply a callback function to execute your own code.
 
-You can pass in `iModelId`, `mappingId` and `groupId` in `ContextCustomUIProps` to assist customized user experience.
+You can use the `iModelId`, `mappingId` and `groupId` in `ContextCustomUIProps` provided by Grouping Mapping Widget in your UI component or callback.
 
 To configure your own context custom UI, you need to give it:
 
@@ -85,7 +89,7 @@ To configure your own context custom UI, you need to give it:
 - an optional `onClick` callback function where you could make your own API calls
 - an optional `icon`
 
-You can define your context custom UI as following example in the GroupingMappingProvider:
+You can define your context custom UI as following example in the GroupingMappingProvider with an example is to use [clash detection](https://www.itwinjs.org/sandboxes/iTwinPlatform/Clash%20Review) in the widget:
 
 ```tsx
 const customCB = (groupId: string, mappingId: string, iModelId: string) => {
@@ -105,3 +109,7 @@ new GroupingMappingProvider({
   ],
 });
 ```
+
+After adding the context custom UI, the context menu item will look like this with additional `Clash Detection` menu item.
+
+![Clash Detection Context Menu Item](./assets/ClashDetectionContextMenuItem.jpg)
