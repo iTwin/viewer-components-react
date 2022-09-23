@@ -104,9 +104,7 @@ const GroupPropertyAction = ({
   const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
   const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
   const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
-  const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>(
-    []
-  );
+  const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>([]);
   const [propertiesNotFoundAlert, setPropertiesNotFoundAlert] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -147,9 +145,8 @@ const GroupPropertyAction = ({
     () =>
       propertiesMetaData.filter((p) =>
         [p.label, p.categoryLabel, p.actualECClassName]
-          .join(" ")
-          .toLowerCase()
-          .includes(activeSearchInput.toLowerCase())
+          .map((l) => l.toLowerCase())
+          .some((l) => l.includes(activeSearchInput.toLowerCase()))
       ),
     [activeSearchInput, propertiesMetaData]
   );
