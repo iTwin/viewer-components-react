@@ -23,7 +23,7 @@ export const SearchBar = ({
   const [searchBarClosing, setSearchBarClosing] = useState<boolean>(false);
 
   return searchBarOpen || searchValue ? (
-    <div
+    <div className="search-button"
       style={{
         animation: searchBarClosing ? "rcw-shrink .5s" : "rcw-expand .5s",
       }}

@@ -6,51 +6,31 @@ import type { ReactNode } from "react";
 import React from "react";
 import { Text } from "@itwin/itwinui-react";
 import "./HorizontalTile.scss";
+import classNames from "classnames";
 
-interface HorizontalTileProps {
+export interface HorizontalTileProps {
   title: string;
-  button: ReactNode;
+  actionGroup: ReactNode;
   subText?: string;
-  onClickTitle?: () => void;
+  onClick?: (e: any) => void;
+  onClickTitle?: (e: any) => void;
   titleTooltip?: string;
   subtextToolTip?: string;
+  selected?: boolean;
 }
 
-export const HorizontalTile = ({
-  title,
-  subText,
-  onClickTitle,
-  titleTooltip,
-  subtextToolTip,
-  button,
-}: HorizontalTileProps) => {
+export const HorizontalTile = (props: HorizontalTileProps) => {
+
   return (
-    <div
-      className="rcw-horizontal-tile-container"
-      data-testid="horizontal-tile"
-    >
-      <div className="body">
-        <Text
-          className={`body-text ${onClickTitle ? "iui-anchor" : ""}`}
-          onClick={onClickTitle}
-          variant="body"
-          title={titleTooltip}
-        >
-          {title}
-        </Text>
-        {subText && (
-          <Text
-            className="body-text"
-            isMuted={true}
-            title={subtextToolTip}
-            variant="small"
-          >
-            {subText}
-          </Text>
-        )}
+    <div className={classNames("rcw-horizontal-tile-container", { "rcw-horizontal-tile-selected": props.selected })} onClick={props.onClick} data-testid="rcw-horizontal-tile">
+      <div className="rcw-body-container">
+        <div className="rcw-body">
+          <Text className={classNames("rcw-body-text", { "iui-anchor": props.onClickTitle })} onClick={props.onClickTitle} variant="body" title={props.titleTooltip}>{props.title}</Text>
+          {props.subText && <Text className="rcw-body-text" isMuted={true} title={props.subtextToolTip} variant="small">{props.subText}</Text>}
+        </div>
       </div>
-      <div className="action-button" data-testid="tile-action-button">
-        {button}
+      <div className="rcw-action-button" data-testid="tile-action-button">
+        {props.actionGroup}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import {
   SvgDelete,
   SvgEdit,
   SvgMore,
+  SvgRefresh
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
@@ -36,6 +37,8 @@ import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { useActiveIModelConnection } from "@itwin/appui-react";
+import BulkExtractor from "./BulkExtractor";
+import { ExtractionStatus, ExtractionStates } from "./ExtractionStatus";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -71,7 +74,10 @@ const fetchReports = async (
 export const Reports = () => {
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const apiConfig = useReportsApiConfig();
+  const [selectedReports, setSelectedReports] = useState<Report[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [extractionStates, setExtractionStates] = useState<Map<string, ExtractionStates>>(new Map<string, ExtractionStates>());
+  const [jobStarted, setJobStarted] = useState<boolean>(false);
   const [reportsView, setReportsView] = useState<ReportsView>(
     ReportsView.REPORTS
   );
@@ -81,6 +87,7 @@ export const Reports = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
+  const bulkExtractor = useMemo(() => new BulkExtractor(), []);
 
   useEffect(() => {
     void fetchReports(setReports, iTwinId, setIsLoading, apiConfig);
@@ -106,6 +113,28 @@ export const Reports = () => {
       ),
     [reports, searchValue]
   );
+
+  useEffect(() => {
+    if (jobStarted) {
+      const interval = setInterval(async () => {
+        const states = await bulkExtractor.getStates(reports.map(r => r.id));
+        if (Array.from(states.values())
+          .filter(x => x === ExtractionStates.Succeeded ||
+            x === ExtractionStates.Failed ||
+            x === ExtractionStates.None)
+          .length === states.size) {
+          setJobStarted(false);
+          bulkExtractor.clearJobs();
+        }
+        setExtractionStates(states);
+      }, 5000)
+      return () => clearInterval(interval);
+    }
+    setTimeout(() => {
+      setExtractionStates(new Map<string, ExtractionStates>());
+    }, 5000);
+    return;
+  }, [jobStarted]);
 
   switch (reportsView) {
     case ReportsView.ADDING:
@@ -143,12 +172,34 @@ export const Reports = () => {
                   "ReportsConfigWidget:New"
                 )}
               </Button>
+              <IconButton
+                title={ReportsConfigWidget.localization.getLocalizedString(
+                  "ReportsConfigWidget:UpdateDatasets"
+                )}
+                onClick={async () => {
+                  setJobStarted(true);
+                  const states = extractionStates;
+                  selectedReports.map(report => states.set(report.id, ExtractionStates.Starting));
+                  bulkExtractor.startJobs(selectedReports.map(report => report.id));
+                  setExtractionStates(states);
+                  setSelectedReports([]);
+                }}
+                disabled={selectedReports.length === 0 ||
+                  selectedReports.filter(sr => (
+                    (extractionStates.get(sr.id) ?? ExtractionStates.None >= 1) &&
+                    (extractionStates.get(sr.id) ?? ExtractionStates.None <= 4)
+                  )).length > 0}
+              >
+                <SvgRefresh />
+              </IconButton>
               <div className="search-bar-container" data-testid="search-bar">
-                <SearchBar
-                  searchValue={searchValue}
-                  setSearchValue={setSearchValue}
-                  disabled={isLoading}
-                />
+                <div className="search-button">
+                  <SearchBar
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
             </div>
             {isLoading ? (
@@ -181,45 +232,66 @@ export const Reports = () => {
                       setSelectedReport(report);
                       setReportsView(ReportsView.REPORTSMAPPING);
                     }}
-                    button={
-                      <DropdownMenu
-                        menuItems={(close: () => void) => [
-                          <MenuItem
-                            key={0}
-                            onClick={() => {
-                              setSelectedReport(report);
-                              setReportsView(ReportsView.MODIFYING);
-                            }}
-                            icon={<SvgEdit />}
-                          >
-                            {ReportsConfigWidget.localization.getLocalizedString(
-                              "ReportsConfigWidget:Modify"
-                            )}
-                          </MenuItem>,
-                          <MenuItem
-                            key={1}
-                            onClick={() => {
-                              setSelectedReport(report);
-                              setShowDeleteModal(true);
-                              close();
-                            }}
-                            icon={<SvgDelete />}
-                          >
-                            {ReportsConfigWidget.localization.getLocalizedString(
-                              "ReportsConfigWidget:Remove"
-                            )}
-                          </MenuItem>,
-                        ]}
-                      >
-                        <IconButton styleType="borderless">
-                          <SvgMore
-                            style={{
-                              width: "16px",
-                              height: "16px",
-                            }}
-                          />
-                        </IconButton>
-                      </DropdownMenu>
+                    selected={selectedReports.some((r) => report.id === r.id)}
+                    onClick={(e) => {
+                      if (e?.target?.className?.toString().startsWith("rcw-horizontal-tile-container")) {
+                        if (!e.ctrlKey)
+                          setSelectedReports([]);
+
+                        setSelectedReports((sr) =>
+                          sr.some((r) => report.id === r.id)
+                            ? sr.filter(
+                              (r) => report.id !== r.id
+                            )
+                            : [...sr, report]
+                        )
+                      }
+                    }
+                    }
+                    actionGroup={
+                      <div className="button-container">
+                        <ExtractionStatus
+                          state={extractionStates.get(report.id) ?? ExtractionStates.None}>
+                        </ExtractionStatus>
+                        <DropdownMenu
+                          menuItems={(close: () => void) => [
+                            <MenuItem
+                              key={0}
+                              onClick={() => {
+                                setSelectedReport(report);
+                                setReportsView(ReportsView.MODIFYING);
+                              }}
+                              icon={<SvgEdit />}
+                            >
+                              {ReportsConfigWidget.localization.getLocalizedString(
+                                "ReportsConfigWidget:Modify"
+                              )}
+                            </MenuItem>,
+                            <MenuItem
+                              key={1}
+                              onClick={() => {
+                                setSelectedReport(report);
+                                setShowDeleteModal(true);
+                                close();
+                              }}
+                              icon={<SvgDelete />}
+                            >
+                              {ReportsConfigWidget.localization.getLocalizedString(
+                                "ReportsConfigWidget:Remove"
+                              )}
+                            </MenuItem>,
+                          ]}
+                        >
+                          <IconButton styleType="borderless">
+                            <SvgMore
+                              style={{
+                                width: "16px",
+                                height: "16px",
+                              }}
+                            />
+                          </IconButton>
+                        </DropdownMenu>
+                      </div>
                     }
                   />
                 ))}

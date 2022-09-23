@@ -4,30 +4,26 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-@keyframes rcw-expand {
-  0% {
-    opacity: 0;
-    width: 20%;
-  }
+.iui-message {
+  margin: auto;
+}
 
-  100% {
-    opacity: 1;
-    width: 100%;
+.extraction-status {
+  align-items: center;
+  margin: 0 $iui-s;
+
+  .status-icon {
+    width: $iui-icons-default;
+    height: $iui-icons-default;
   }
 }
 
-@keyframes rcw-shrink {
-  100% {
-    opacity: 0;
-    width: 20%;
-  }
-
+@keyframes rcw-fade-out {
   0% {
     opacity: 1;
-    width: 100%;
   }
-}
 
-.search-button {
-  float: right;
+  100% {
+    opacity: 0;
+  }
 }
