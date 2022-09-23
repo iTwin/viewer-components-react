@@ -255,6 +255,7 @@ importers:
 
   ../../packages/itwin/grouping-mapping-widget:
     specifiers:
+      '@faker-js/faker': ^7.5.0
       '@itwin/appui-abstract': ^3.2.0
       '@itwin/appui-layout-react': ^3.2.0
       '@itwin/appui-react': ^3.2.0
@@ -279,12 +280,18 @@ importers:
       '@itwin/presentation-components': ^3.2.0
       '@itwin/presentation-frontend': ^3.2.0
       '@itwin/webgl-compatibility': ^3.2.0
+      '@testing-library/dom': ^8.12.0
+      '@testing-library/jest-dom': ^5.16.3
+      '@testing-library/react': ^12.1.4
+      '@testing-library/user-event': ^14.1.1
       '@types/i18next': ^8.4.2
+      '@types/jest': ^27.4.1
       '@types/node': ^14.14.20
       '@types/react': ^17.0.19
       '@types/react-dom': ^17.0.9
       '@types/react-redux': ^7.0.1
       '@types/react-table': ^7.7.0
+      '@types/testing-library__jest-dom': ^5.14.3
       '@typescript-eslint/eslint-plugin': ^5.3.1
       '@typescript-eslint/parser': ^5.10.1
       classnames: ^2.3.1
@@ -295,6 +302,10 @@ importers:
       eslint-plugin-react: ^7.25.1
       eslint-plugin-react-hooks: ^4.2.0
       immer: ^9.0.7
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      jest-transform-stub: ^2.0.0
+      msw: ^0.39.2
       react: ^17.0.2
       react-dom: ^17.0.2
       react-redux: ^7.2.0
@@ -302,6 +313,8 @@ importers:
       redux: ^4.1.0
       rimraf: ^3.0.2
       simple-react-validator: ^1.6.1
+      ts-jest: ^27.1.3
+      typemoq: ^2.1.0
       typescript: ~4.3.0
     dependencies:
       '@itwin/imodel-browser-react': 0.12.2_react-dom@17.0.2+react@17.0.2
@@ -313,6 +326,7 @@ importers:
       immer: 9.0.12
       simple-react-validator: 1.6.1
     devDependencies:
+      '@faker-js/faker': 7.5.0
       '@itwin/appui-abstract': 3.2.2_@itwin+core-bentley@3.2.2
       '@itwin/appui-layout-react': 3.2.2_0099bfc9ea57e7c3c0d0f85e9959e8d2
       '@itwin/appui-react': 3.2.2_4789d025ca1425755dd1e71786f2c62d
@@ -333,12 +347,18 @@ importers:
       '@itwin/presentation-components': 3.2.2_0c8e54e1d46986e00a4f386734b921be
       '@itwin/presentation-frontend': 3.2.2_7d67946d87cba22f9e077d73ef83df22
       '@itwin/webgl-compatibility': 3.2.2
+      '@testing-library/dom': 8.13.0
+      '@testing-library/jest-dom': 5.16.4
+      '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
+      '@testing-library/user-event': 14.1.1_@testing-library+dom@8.13.0
       '@types/i18next': 8.4.6
+      '@types/jest': 27.4.1
       '@types/node': 14.18.12
       '@types/react': 17.0.44
       '@types/react-dom': 17.0.15
       '@types/react-redux': 7.1.23
       '@types/react-table': 7.7.10
+      '@types/testing-library__jest-dom': 5.14.3
       '@typescript-eslint/eslint-plugin': 5.19.0_725bf6bcf2ceaaf4f4f9385fbbfa4252
       '@typescript-eslint/parser': 5.19.0_eslint@7.32.0+typescript@4.3.5
       cpx2: 3.0.2
@@ -346,12 +366,18 @@ importers:
       eslint-plugin-node: 11.1.0_eslint@7.32.0
       eslint-plugin-react: 7.29.4_eslint@7.32.0
       eslint-plugin-react-hooks: 4.4.0_eslint@7.32.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      jest-transform-stub: 2.0.0
+      msw: 0.39.2
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
       react-table: 7.7.0_react@17.0.2
       redux: 4.1.2
       rimraf: 3.0.2
+      ts-jest: 27.1.4_d66bf574fe8cd4e531c57da2e08c8633
+      typemoq: 2.1.0
       typescript: 4.3.5
 
   ../../packages/itwin/imodel-react-hooks:
@@ -1427,6 +1453,11 @@ packages:
 
   /@faker-js/faker/6.2.0:
     resolution: {integrity: sha512-3kIcQ+aTr3I+LqDbJwbINFk5oA+a63LH57GPJt9PM8AWqN7nCwnubuSiWosHYQlyf2NicrvpzXQxllyLeEdpyQ==}
+    engines: {node: '>=14.0.0', npm: '>=6.0.0'}
+    dev: true
+
+  /@faker-js/faker/7.5.0:
+    resolution: {integrity: sha512-8wNUCCUHvfvI0gQpDUho/3gPzABffnCn5um65F8dzQ86zz6dlt4+nmAA7PQUc8L+eH+9RgR/qzy5N/8kN0Ozdw==}
     engines: {node: '>=14.0.0', npm: '>=6.0.0'}
     dev: true
 
@@ -6510,7 +6541,7 @@ packages:
     dev: true
 
   /clone/1.0.4:
-    resolution: {integrity: sha1-2jCcwmPfFZlMaIypAheco8fNfH4=}
+    resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
     dev: true
 
@@ -6815,7 +6846,7 @@ packages:
     dev: true
 
   /css.escape/1.5.1:
-    resolution: {integrity: sha1-QuJ9T6BK4y+TGktNQZH6nN3ul8s=}
+    resolution: {integrity: sha512-YUifsXXuknHlUsmlgyY0PKzgPOr7/FjCePfHNt0jxm83wHZi44VDMQ7/fGNkjY3/jV1MC+1CmZbaHzugyeRtpg==}
     dev: true
 
   /css/3.0.0:
@@ -6942,12 +6973,12 @@ packages:
     dev: true
 
   /decode-uri-component/0.2.0:
-    resolution: {integrity: sha1-6zkTMzRYd1y4TNGh+uBiEGu4dUU=}
+    resolution: {integrity: sha512-hjf+xovcEn31w/EUYdTXQh/8smFL/dzYjohQGEIgjyNavaJfBY2p5F527Bo1VPATxv0VYTUC2bOcXvqFwk78Og==}
     engines: {node: '>=0.10'}
     dev: true
 
   /dedent/0.7.0:
-    resolution: {integrity: sha1-JJXduvbrh0q7Dhvp3yLS5aVEMmw=}
+    resolution: {integrity: sha512-Q6fKUPqnAHAyhiUgFU7BUzLiv0kd8saH9al7tnu5Q/okj6dnupxyTgFIBjVzJATdfIAm9NAsvXNzjaKa+bxVyA==}
     dev: true
 
   /deep-assign/2.0.0:
@@ -6993,7 +7024,7 @@ packages:
     dev: true
 
   /defaults/1.0.3:
-    resolution: {integrity: sha1-xlYFHpgX2f8I7YgUd/P+QBnz730=}
+    resolution: {integrity: sha512-s82itHOnYrN0Ib8r+z7laQz3sdE+4FP3d9Q7VLO7U+KRT+CR0GsWuyHxzdAY82I7cXv0G/twrqomTJLOssO5HA==}
     dependencies:
       clone: 1.0.4
     dev: true
@@ -9589,7 +9620,7 @@ packages:
     dev: true
 
   /is-typedarray/1.0.0:
-    resolution: {integrity: sha1-5HnICFjfDBsR3dppQPlgEfzaSpo=}
+    resolution: {integrity: sha512-cyA56iCMHAh5CdzjJIa4aohJyeO1YbwLi3Jc35MmRU6poroFjIGZzUzupGiRPOjgHg9TLu43xbpwXk523fMxKA==}
     dev: true
 
   /is-unicode-supported/0.1.0:
@@ -11115,7 +11146,7 @@ packages:
     dev: true
 
   /levn/0.3.0:
-    resolution: {integrity: sha1-OwmSTt+fCDwEkP3UwLxEIeBHZO4=}
+    resolution: {integrity: sha512-0OO4y2iOHix2W6ujICbKIaEQXvFQHue65vUG3pb5EUomzPI90z9hsA1VsO/dbIIpC53J8gxM9Q4Oho0jrCM/yA==}
     engines: {node: '>= 0.8.0'}
     dependencies:
       prelude-ls: 1.1.2
@@ -11220,7 +11251,7 @@ packages:
     dev: true
 
   /lodash.memoize/4.1.2:
-    resolution: {integrity: sha1-vMbEmkKihA7Zl/Mj6tpezRguC/4=}
+    resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
     dev: true
 
   /lodash.merge/4.6.2:
@@ -11304,7 +11335,7 @@ packages:
     dev: true
 
   /lz-string/1.4.4:
-    resolution: {integrity: sha1-wNjq82BZ9wV5bh40SBHPTEmNOiY=}
+    resolution: {integrity: sha512-0ckx7ZHRPqb0oUm8zNr+90mtf9DQB60H1wMCjBtfi62Kl3a7JbHob6gA2bC+xRvZoOL+1hzUK8jeuEIQE8svEQ==}
     hasBin: true
     dev: true
 
@@ -11839,7 +11870,7 @@ packages:
       whatwg-url: 5.0.0
 
   /node-int64/0.4.0:
-    resolution: {integrity: sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=}
+    resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
     dev: true
 
   /node-libs-browser/2.2.1:
@@ -12201,7 +12232,7 @@ packages:
     dev: true
 
   /os-tmpdir/1.0.2:
-    resolution: {integrity: sha1-u+Z0BseaqFxc/sdm/lc0VV36EnQ=}
+    resolution: {integrity: sha512-D2FR03Vir7FIu45XBY20mTb+/ZSWB00sjU9jdQXt83gDrI4Ztz5Fs7/yy74g2N5SVQY4xY1qDr4rNddwYRVX0g==}
     engines: {node: '>=0.10.0'}
     dev: true
 
@@ -12605,7 +12636,7 @@ packages:
     dev: true
 
   /prelude-ls/1.1.2:
-    resolution: {integrity: sha1-IZMqVJ9eUv/ZqCf1cOBL5iqX2lQ=}
+    resolution: {integrity: sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==}
     engines: {node: '>= 0.8.0'}
     dev: true
 
@@ -14779,7 +14810,7 @@ packages:
     dev: true
 
   /type-check/0.3.2:
-    resolution: {integrity: sha1-WITKtRLPHTVeP7eE8wgEsrUg23I=}
+    resolution: {integrity: sha512-ZCmOJdvOWDBYJlzAoFkC+Q0+bUyEOS1ltgp1MGU03fqHG+dbi9tBFU2Rd9QKiDZFAYrhPh2JUf7rZRIuHRKtOg==}
     engines: {node: '>= 0.8.0'}
     dependencies:
       prelude-ls: 1.1.2
@@ -15180,7 +15211,7 @@ packages:
     dev: true
 
   /wcwidth/1.0.1:
-    resolution: {integrity: sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g=}
+    resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
     dependencies:
       defaults: 1.0.3
     dev: true

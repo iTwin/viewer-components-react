@@ -58,6 +58,9 @@ import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
+import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
+import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
+import { Presentation } from "@itwin/presentation-frontend";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
@@ -80,10 +83,11 @@ export const defaultUIMetadata = [
 ];
 
 enum GroupsView {
-  GROUPS = "groups",
-  MODIFYING = "modifying",
-  ADD = "ADD",
-  PROPERTIES = "properties",
+  Add,          // Add group view
+  Groups,       // Group list page
+  CustomUI,     // Context custom UI view
+  Modifying,    // Modify group view
+  Properties,   // Group properties view
 }
 
 interface GroupsTreeProps {
@@ -124,11 +128,14 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const iModelId = useActiveIModelConnection()?.iModelId as string;
-  const customUIs = useGroupingMappingCustomUI();
+  const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI()
+    .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];
+  const contextUIs: ContextCustomUI[] = useGroupingMappingCustomUI()
+    .filter((p) => p.type === GroupingMappingCustomUIType.Context) as ContextCustomUI[];
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [groupsView, setGroupsView] = useState<GroupsView>(GroupsView.GROUPS);
+  const [groupsView, setGroupsView] = useState<GroupsView>(GroupsView.Groups);
   const [selectedGroup, setSelectedGroup] = useState<IGroupTyped | undefined>(
     undefined,
   );
@@ -140,6 +147,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
 
   const [queryGenerationType, setQueryGenerationType] =
     useState<string>("Selection");
+  const [selectedContextCustomUI, setSelectedContextCustomUI] = useState<ContextCustomUI | undefined>(undefined);
 
   useEffect(() => {
     void fetchGroups(
@@ -272,13 +280,13 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const addGroup = (type: string) => {
     setQueryGenerationType(type);
     clearEmphasizedElements();
-    setGroupsView(GroupsView.ADD);
+    setGroupsView(GroupsView.Add);
   };
 
   const onModify = async (group: Group, type: string) => {
     setQueryGenerationType(type);
     setSelectedGroup(group);
-    setGroupsView(GroupsView.MODIFYING);
+    setGroupsView(GroupsView.Modifying);
     if (group.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
@@ -288,7 +296,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
 
   const openProperties = async (group: Group) => {
     setSelectedGroup(group);
-    setGroupsView(GroupsView.PROPERTIES);
+    setGroupsView(GroupsView.Properties);
     if (group.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
@@ -296,8 +304,9 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   };
 
   const refresh = useCallback(async () => {
-    setGroupsView(GroupsView.GROUPS);
+    setGroupsView(GroupsView.Groups);
     setSelectedGroup(undefined);
+    setSelectedContextCustomUI(undefined);
     setGroups([]);
     const groups = await fetchGroups(
       setGroups,
@@ -369,25 +378,25 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   );
 
   const propertyMenuGoBack = useCallback(async () => {
-    setGroupsView(GroupsView.GROUPS);
+    setGroupsView(GroupsView.Groups);
     await refresh();
   }, [refresh]);
 
   switch (groupsView) {
-    case GroupsView.ADD:
+    case GroupsView.Add:
       return (
         <GroupAction
           iModelId={iModelId}
           mappingId={mapping.id}
           queryGenerationType={queryGenerationType}
           goBack={async () => {
-            setGroupsView(GroupsView.GROUPS);
+            setGroupsView(GroupsView.Groups);
             await refresh();
           }}
           resetView={resetView}
         />
       );
-    case GroupsView.MODIFYING:
+    case GroupsView.Modifying:
       return selectedGroup ? (
         <GroupAction
           iModelId={iModelId}
@@ -395,13 +404,13 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           group={selectedGroup}
           queryGenerationType={queryGenerationType}
           goBack={async () => {
-            setGroupsView(GroupsView.GROUPS);
+            setGroupsView(GroupsView.Groups);
             await refresh();
           }}
           resetView={resetView}
         />
       ) : null;
-    case GroupsView.PROPERTIES:
+    case GroupsView.Properties:
       return selectedGroup ? (
         <PropertyMenu
           iModelId={iModelId}
@@ -410,7 +419,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           goBack={propertyMenuGoBack}
         />
       ) : null;
-    case GroupsView.GROUPS:
+    case GroupsView.Groups:
       return (
         <>
           <WidgetHeader
@@ -425,18 +434,19 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           <Surface className='gmw-groups-container'>
             <div className='gmw-toolbar'>
               <DropdownMenu
-                className='gmw-ui-provider-dropdown'
+                className='gmw-custom-ui-dropdown'
                 disabled={isLoadingQuery}
                 menuItems={() =>
-                  (customUIs.length > 0
-                    ? customUIs
+                  (groupUIs.length > 0
+                    ? groupUIs
                     : defaultUIMetadata)
-                    .map((p) => (
+                    .map((p, index) => (
                       <MenuItem
-                        key={p.name}
+                        key={index}
                         onClick={() => addGroup(p.name)}
                         icon={p.icon}
                         className='gmw-menu-item'
+                        data-testid={`gmw-add-${index}`}
                       >
                         {p.displayLabel}
                       </MenuItem>
@@ -444,6 +454,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                 }
               >
                 <Button
+                  data-testid="gmw-add-group-button"
                   className='add-load-button'
                   startIcon={
                     isLoadingQuery ? (
@@ -548,67 +559,84 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                             </IconButton>
                           )}
                           <DropdownMenu
-                            className='gmw-ui-provider-dropdown'
+                            className='gmw-custom-ui-dropdown'
                             disabled={isLoadingQuery}
-                            menuItems={(close: () => void) => [
-                              <MenuItem
-                                key={0}
-                                disabled={isLoadingQuery}
-                                subMenuItems={
-                                  (customUIs.length > 0
-                                    ? customUIs
-                                    : defaultUIMetadata)
-                                    .map((p) => (
-                                      <MenuItem
-                                        className='gmw-menu-item'
-                                        key={p.name}
-                                        onClick={async () => onModify(g, p.name)}
-                                        icon={p.icon}
-                                      >
-                                        {p.displayLabel}
-                                      </MenuItem>
-                                    ))
-                                }
-                              >
-                                <SvgEdit
-                                  style={{
-                                    width: "16px",
-                                    height: "16px",
-                                    margin: "0 8px 0 0",
+                            menuItems={(close: () => void) =>
+                              [
+                                <MenuItem
+                                  key={0}
+                                  icon={<SvgEdit />}
+                                  disabled={isLoadingQuery}
+                                  data-testid="gmw-context-menu-item"
+                                  subMenuItems={
+                                    (groupUIs.length > 0
+                                      ? groupUIs
+                                      : defaultUIMetadata)
+                                      .map((p, index) => (
+                                        <MenuItem
+                                          key={index}
+                                          className='gmw-menu-item'
+                                          data-testid={`gmw-edit-${index}`}
+                                          onClick={async () => onModify(g, p.name)}
+                                          icon={p.icon}
+                                        >
+                                          {p.displayLabel}
+                                        </MenuItem>
+                                      ))
+                                  }
+                                >
+                                  Edit
+                                </MenuItem>,
+                                <MenuItem
+                                  key={1}
+                                  onClick={async () => openProperties(g)}
+                                  icon={<SvgList />}
+                                  data-testid="gmw-context-menu-item"
+                                >
+                                  Properties
+                                </MenuItem>,
+                                <MenuItem
+                                  key={2}
+                                  onClick={() => {
+                                    setSelectedGroup(g);
+                                    setShowDeleteModal(true);
+                                    close();
                                   }}
-                                />
-                                Edit
-                              </MenuItem>,
-                              <MenuItem
-                                key={1}
-                                onClick={async () => openProperties(g)}
-                                icon={<SvgList />}
-                              >
-                                Properties
-                              </MenuItem>,
-                              <MenuItem
-                                key={2}
-                                onClick={() => {
-                                  setSelectedGroup(g);
-                                  setShowDeleteModal(true);
-                                  close();
-                                }}
-                                icon={<SvgDelete />}
-                              >
-                                Remove
-                              </MenuItem>,
-                            ]}
+                                  icon={<SvgDelete />}
+                                  data-testid="gmw-context-menu-item"
+                                >
+                                  Remove
+                                </MenuItem>,
+                              ].concat(
+                                contextUIs.map((p) => {
+                                  return <MenuItem
+                                    key={p.name}
+                                    onClick={() => {
+                                      if(p.uiComponent) {
+                                        setSelectedGroup(g);
+                                        setSelectedContextCustomUI(p);
+                                        setGroupsView(GroupsView.CustomUI);
+                                      }
+                                      if(p.onClick) {
+                                        p.onClick(g.id, mapping.id, iModelId);
+                                      }
+                                      close();
+                                    }}
+                                    icon={p.icon}
+                                    data-testid="gmw-context-menu-item"
+                                  >
+                                    {p.displayLabel}
+                                  </MenuItem>;
+                                })
+                              )
+                            }
                           >
                             <IconButton
                               disabled={isLoadingQuery}
                               styleType='borderless'
+                              data-testid="gmw-more-button"
                             >
-                              <SvgMore
-                                style={{
-                                  width: "16px",
-                                  height: "16px",
-                                }}
-                              />
+                              <SvgMore />
                             </IconButton>
                           </DropdownMenu>
                         </div>
@@ -640,6 +668,28 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
           />
         </>
       );
+    case GroupsView.CustomUI:
+      return selectedContextCustomUI && selectedContextCustomUI.uiComponent && selectedGroup
+        ? (
+          <>
+            <WidgetHeader
+              title={selectedContextCustomUI.displayLabel}
+              returnFn={async () => {
+                Presentation.selection.clearSelection(
+                  "GroupingMappingWidget",
+                  iModelConnection,
+                );
+                await refresh();
+              }}
+            />
+            {React.createElement(selectedContextCustomUI.uiComponent, {
+              iModelId,
+              mappingId: mapping.id,
+              groupId: selectedGroup.id,
+            })}
+          </>
+        )
+        : null;
     default:
       return (
         <EmptyMessage message="No given group view"/>
