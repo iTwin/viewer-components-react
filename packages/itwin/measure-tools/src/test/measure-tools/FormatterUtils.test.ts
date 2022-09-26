@@ -14,7 +14,7 @@ const deg = "\xB0";
 const min = "\u0027";
 const sec = "\u0022";
 
-describe.only("FormatterUtils", () => {
+describe("FormatterUtils", () => {
   it("test formatCoordinates", async () => {
 
     await IModelApp.quantityFormatter.setActiveUnitSystem("metric");
