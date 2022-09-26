@@ -359,8 +359,7 @@ export class AngleMeasurement extends Measurement {
         QuantityType.Angle
       );
 
-    const angle = this.angle ? this.angle : 0;
-
+    const angle = this.angle ?? 0;
     const fAngle = IModelApp.quantityFormatter.formatQuantity(angle, angleSpec);
 
     let title = MeasureTools.localization.getLocalizedString(
