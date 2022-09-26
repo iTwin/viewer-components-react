@@ -355,10 +355,10 @@ const GroupPropertyAction = ({
               selectedProperties.map((property) => (
                 <HorizontalTile
                   key={property.key}
-                  title={property.label}
+                  title={`${property.label} (${property.type})`}
                   titleTooltip={`${property.actualECClassName}`}
-                  subText={`${property.type}`}
-                  actionGroup={`${property.categoryLabel}`}
+                  subText={property.categoryLabel}
+                  actionGroup={null}
                 />
               ))}
           </div>
@@ -438,10 +438,10 @@ const GroupPropertyAction = ({
                   filteredProperties.map((property) => (
                     <HorizontalTile
                       key={property.key}
-                      title={property.label}
+                      title={`${property.label} (${property.type})`}
                       titleTooltip={`${property.actualECClassName}`}
-                      subText={`${property.type}`}
-                      actionGroup={`${property.categoryLabel}`}
+                      subText={property.categoryLabel}
+                      actionGroup={null}
                       selected={selectedProperties.some((p) => property.key === p.key)}
                       onClick={() =>
                         setSelectedProperties((sp) =>
@@ -472,12 +472,11 @@ const GroupPropertyAction = ({
                     <SortableHorizontalTile
                       key={property.key}
                       id={property.key}
-                      title={property.label}
+                      title={`${property.label} (${property.type})`}
                       titleTooltip={`${property.actualECClassName}`}
-                      subText={property.type}
+                      subText={property.categoryLabel}
                       actionGroup={
                         <div>
-                          {property.categoryLabel}
                           <IconButton
                             styleType="borderless"
                             title="Remove"
@@ -511,9 +510,14 @@ const GroupPropertyAction = ({
       <DragOverlay zIndex={9999}>
         {activeDragProperty ?
           <HorizontalTile
-            title={activeDragProperty.label}
-            subText={activeDragProperty.type}
-            actionGroup={activeDragProperty.categoryLabel}
+            title={`${activeDragProperty.label} (${activeDragProperty.type})`}
+            titleTooltip={`${activeDragProperty.actualECClassName}`}
+            subText={activeDragProperty.categoryLabel}
+            actionGroup={
+              <IconButton
+                styleType="borderless">
+                <SvgRemove />
+              </IconButton>}
             dragHandle={<div className="gmw-drag-icon" ><SvgDragHandleVertical /></div>}
           /> : null}
       </DragOverlay>
