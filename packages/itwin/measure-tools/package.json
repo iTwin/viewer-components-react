@@ -23,7 +23,8 @@
     "rebuild": "npm run clean && npm run build",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
-    "test": "npm run webpack:tests && certa -c certa.json -r chrome",
+    "test": "npm run webpack:tests && npm run test:certa",
+    "test:certa": "certa -r chrome",
     "cover": "nyc npm test",
     "madge": "madge --circular --extensions ts,tsx src",
     "webpack:tests": "webpack --config webpack.config.js 1>&2"
