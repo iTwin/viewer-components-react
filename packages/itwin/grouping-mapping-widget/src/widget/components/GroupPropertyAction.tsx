@@ -111,7 +111,7 @@ const GroupPropertyAction = ({
   const [searchInput, setSearchInput] = useState<string>("");
   const [activeSearchInput, setActiveSearchInput] = useState<string>("");
   const [searched, setSearched] = useState<boolean>(false);
-  const [activeDragProperty, setActiveDragProperty] = useState<PropertyMetaData>();
+  const [activeDragProperty, setActiveDragProperty] = useState<PropertyMetaData | undefined>();
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -120,13 +120,13 @@ const GroupPropertyAction = ({
   );
   const [showModal, setShowModal] = useState<boolean>(false);
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
     const activeProperty = selectedProperties.find((p) => active.id === p.key);
     setActiveDragProperty(activeProperty);
-  };
+  }, [selectedProperties]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && (active.id !== over.id)) {
@@ -139,12 +139,12 @@ const GroupPropertyAction = ({
     }
 
     setActiveDragProperty(undefined);
-  };
+  }, [selectedProperties]);
 
   const filteredProperties = useMemo(
     () =>
       propertiesMetaData.filter((p) =>
-        [p.label, p.categoryLabel, p.actualECClassName]
+        [p.displayLabel, p.categoryLabel, p.actualECClassName]
           .map((l) => l.toLowerCase())
           .some((l) => l.includes(activeSearchInput.toLowerCase()))
       ),
@@ -187,7 +187,7 @@ const GroupPropertyAction = ({
           setDataType(response.dataType);
           setQuantityType(response.quantityType);
           const properties = findProperties(response.ecProperties, propertiesMetaData);
-          if(properties.length===0){
+          if (properties.length === 0) {
             setPropertiesNotFoundAlert(true);
           }
 
@@ -355,7 +355,7 @@ const GroupPropertyAction = ({
               selectedProperties.map((property) => (
                 <HorizontalTile
                   key={property.key}
-                  title={`${property.label} (${property.type})`}
+                  title={`${property.displayLabel} (${property.propertyType})`}
                   titleTooltip={`${property.actualECClassName}`}
                   subText={property.categoryLabel}
                   actionGroup={null}
@@ -438,7 +438,7 @@ const GroupPropertyAction = ({
                   filteredProperties.map((property) => (
                     <HorizontalTile
                       key={property.key}
-                      title={`${property.label} (${property.type})`}
+                      title={`${property.displayLabel} (${property.propertyType})`}
                       titleTooltip={`${property.actualECClassName}`}
                       subText={property.categoryLabel}
                       actionGroup={null}
@@ -472,7 +472,7 @@ const GroupPropertyAction = ({
                     <SortableHorizontalTile
                       key={property.key}
                       id={property.key}
-                      title={`${property.label} (${property.type})`}
+                      title={`${property.displayLabel} (${property.propertyType})`}
                       titleTooltip={`${property.actualECClassName}`}
                       subText={property.categoryLabel}
                       actionGroup={
@@ -510,7 +510,7 @@ const GroupPropertyAction = ({
       <DragOverlay zIndex={9999}>
         {activeDragProperty ?
           <HorizontalTile
-            title={`${activeDragProperty.label} (${activeDragProperty.type})`}
+            title={`${activeDragProperty.displayLabel} (${activeDragProperty.propertyType})`}
             titleTooltip={`${activeDragProperty.actualECClassName}`}
             subText={activeDragProperty.categoryLabel}
             actionGroup={

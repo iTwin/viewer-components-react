@@ -26,21 +26,14 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { deepEqual } from "fast-equals";
 
 export interface PropertyMetaData {
-  // Display label
-  label: string;
-  // ECProperty source schema:class
-  schema: string;
-  className: string;
+  displayLabel: string;
+  sourceSchema: string;
+  sourceClassName: string;
   categoryLabel: string;
-  // Property Type
-  type: DataType;
-  // The actual ECClass name of the property
+  propertyType: DataType;
   actualECClassName: string;
-  // The parent class of the property
   parentPropertyClassName: string | undefined;
-  // ECProperty type traversal
-  propertyTraversal: string[];
-  // The type of primitive navigation from Presentation
+  ecPropertyTraversal: string[];
   primitiveNavigationClass: string;
   key: string;
 }
@@ -67,22 +60,22 @@ const extractPrimitives = (
   propertyField: PropertiesField
 ): PropertyMetaData[] => propertyField.properties.map((property) => {
   const propertyName = property.property.name;
-  const label = propertyField.label;
+  const displayLabel = propertyField.label;
   // It belongs to this parent class
   const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
   const primitiveNavigationClass = property.property.navigationPropertyInfo?.classInfo.name ?? "";
   // Presentation treats primitive navigation classes as longs. Handling this special case.
-  const type = primitiveNavigationClass ? DataType.String : convertType(property.property.type);
+  const propertyType = primitiveNavigationClass ? DataType.String : convertType(property.property.type);
   const actualECClassName = property.property.classInfo.name;
   const newPropertyTraversal = [...propertyTraversal, propertyName];
 
   return (
     {
-      label,
-      schema: "*",
-      className: "*",
-      propertyTraversal: newPropertyTraversal,
-      type,
+      displayLabel,
+      sourceSchema: "*",
+      sourceClassName: "*",
+      ecPropertyTraversal: newPropertyTraversal,
+      propertyType,
       primitiveNavigationClass,
       actualECClassName,
       parentPropertyClassName,
@@ -101,16 +94,16 @@ const extractPrimitiveStructProperties = (
 ): PropertyMetaData[] => members.flatMap((member) => {
   if (member.type.valueFormat === PropertyValueFormat.Primitive) {
     const propertyName = member.name;
-    const label = member.label;
-    const type = convertType(member.type.typeName);
+    const displayLabel = member.label;
+    const propertyType = convertType(member.type.typeName);
     const newPropertyTraversal = [...propertyTraversal, propertyName];
 
     return ({
-      label,
-      schema: "*",
-      className: "*",
-      propertyTraversal: newPropertyTraversal,
-      type,
+      displayLabel,
+      sourceSchema: "*",
+      sourceClassName: "*",
+      ecPropertyTraversal: newPropertyTraversal,
+      propertyType,
       primitiveNavigationClass: "",
       actualECClassName,
       parentPropertyClassName,
@@ -198,8 +191,8 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
       case PropertyValueFormat.Primitive: {
         const extractedPrimitives = extractPrimitives([], property as PropertiesField);
         for (const extractedPrimitive of extractedPrimitives) {
-          extractedPrimitive.schema = "*";
-          extractedPrimitive.className = "*";
+          extractedPrimitive.sourceSchema = "*";
+          extractedPrimitive.sourceClassName = "*";
           return extractedPrimitive;
         }
         break;
@@ -258,9 +251,9 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
 
 export const convertToECProperties = (property: PropertyMetaData): ECProperty[] => {
   const ecProperty: ECProperty = {
-    ecSchemaName: property.schema,
-    ecClassName: property.className,
-    ecPropertyType: property.type,
+    ecSchemaName: property.sourceSchema,
+    ecClassName: property.sourceClassName,
+    ecPropertyType: property.propertyType,
     ecPropertyName: "",
   };
   switch (property.primitiveNavigationClass) {
@@ -270,7 +263,7 @@ export const convertToECProperties = (property: PropertyMetaData): ECProperty[] 
         {
           ...ecProperty,
           ecPropertyName: [
-            ...property.propertyTraversal,
+            ...property.ecPropertyTraversal,
             "ModeledElement",
             "UserLabel",
           ].join("."),
@@ -278,7 +271,7 @@ export const convertToECProperties = (property: PropertyMetaData): ECProperty[] 
         {
           ...ecProperty,
           ecPropertyName: [
-            ...property.propertyTraversal,
+            ...property.ecPropertyTraversal,
             "ModeledElement",
             "CodeValue",
           ].join("."),
@@ -292,14 +285,14 @@ export const convertToECProperties = (property: PropertyMetaData): ECProperty[] 
         {
           ...ecProperty,
           ecPropertyName: [
-            ...property.propertyTraversal,
+            ...property.ecPropertyTraversal,
             "UserLabel",
           ].join("."),
         },
         {
           ...ecProperty,
           ecPropertyName: [
-            ...property.propertyTraversal,
+            ...property.ecPropertyTraversal,
             "CodeValue",
           ].join("."),
         },
@@ -308,7 +301,7 @@ export const convertToECProperties = (property: PropertyMetaData): ECProperty[] 
       return [
         {
           ...ecProperty,
-          ecPropertyName: property.propertyTraversal.join("."),
+          ecPropertyName: property.ecPropertyTraversal.join("."),
         },
       ];
     }

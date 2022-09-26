@@ -13,7 +13,7 @@ interface SortableHorizontalTileProps extends HorizontalTileProps {
   id: string;
 }
 
-const SortableHorizontalTile = ({id, ...props}: SortableHorizontalTileProps) => {
+const SortableHorizontalTile = ({ id, ...props }: SortableHorizontalTileProps) => {
   const {
     attributes,
     listeners,
@@ -21,7 +21,7 @@ const SortableHorizontalTile = ({id, ...props}: SortableHorizontalTileProps) => 
     setNodeRef,
     transform,
     transition,
-  } = useSortable({id});
+  } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -46,7 +46,7 @@ const SortableHorizontalTile = ({id, ...props}: SortableHorizontalTileProps) => 
     >
       <HorizontalTile
         dragHandle={
-          <div className="gmw-drag-icon" style={{cursor:"grab"}} title="Drag & Drop" {...listeners}>
+          <div className="gmw-drag-icon" style={{ cursor: "grab" }} title="Drag & Drop" {...listeners}>
             <SvgDragHandleVertical />
           </div>
         }

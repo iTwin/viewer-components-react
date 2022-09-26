@@ -23,11 +23,11 @@ export interface HorizontalTileProps {
 export const HorizontalTile = (props: HorizontalTileProps) => {
 
   return (
-    <div className={classNames("gmw-horizontal-tile-container", {"gmw-horizontal-tile-selected":props.selected})} onClick={props.onClick} data-testid="gmw-horizontal-tile">
+    <div className={classNames("gmw-horizontal-tile-container", { "gmw-horizontal-tile-selected": props.selected })} onClick={props.onClick} data-testid="gmw-horizontal-tile">
       <div className="gmw-body-container">
         {props.dragHandle}
         <div className="gmw-body">
-          <Text className={classNames("gmw-body-text", {"iui-anchor": props.onClickTitle})} onClick={props.onClickTitle} variant="body" title={props.titleTooltip}>{props.title}</Text>
+          <Text className={classNames("gmw-body-text", { "iui-anchor": !!props.onClickTitle })} onClick={props.onClickTitle} variant="body" title={props.titleTooltip}>{props.title}</Text>
           {props.subText && <Text className="gmw-body-text" isMuted={true} title={props.subtextToolTip} variant="small">{props.subText}</Text>}
         </div>
       </div>
