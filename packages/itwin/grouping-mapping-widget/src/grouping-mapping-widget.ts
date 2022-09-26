@@ -19,3 +19,4 @@ export { PropertyMenu } from "./widget/components/PropertyMenu";
 export { resolveFormulaDataType } from "./formula/FormulaDataTypeResolver";
 export { DataType, PropertyMap } from "./formula/Types";
 export { IResult } from "./formula/IResult";
+export { GroupingMappingCustomUI, GroupingMappingCustomUIType, ContextCustomUI, GroupingCustomUI, GroupingCustomUIProps, ContextCustomUIProps } from "./widget/components/customUI/GroupingMappingCustomUI";

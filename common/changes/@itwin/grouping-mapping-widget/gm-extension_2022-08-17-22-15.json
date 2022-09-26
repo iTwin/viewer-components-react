@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Updated to insights client version 0.3.0",
+      "comment": "Add custom UI extensibility for grouping and mapping and refactor default UI accordingly",
       "type": "minor"
     }
   ],
