@@ -5,14 +5,14 @@
 import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
 import { LoadingSpinner } from "../utils";
-import "./ManualGroupingUI.scss";
-import type { GroupingMappingCustomUIProps } from "./GroupingMappingCustomUI";
+import "./ManualGroupingCustomUI.scss";
+import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
 
-const ManualGroupingUI = ({
+const ManualGroupingCustomUI = ({
   updateQuery,
   isUpdating,
   resetView,
-}: GroupingMappingCustomUIProps) => {
+}: GroupingCustomUIProps) => {
   const [manualInput, setManualInput] = React.useState("");
 
   return (
@@ -50,4 +50,4 @@ const ManualGroupingUI = ({
   );
 };
 
-export default ManualGroupingUI;
+export default ManualGroupingCustomUI;

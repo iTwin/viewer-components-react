@@ -4,10 +4,20 @@
 *--------------------------------------------------------------------------------------------*/
 import type { ReactElement } from "react";
 
-/**
- * Customized UI type definition for grouping mapping widget.
- */
-export interface GroupingMappingCustomUI {
+export enum GroupingMappingCustomUIType {
+  Grouping,
+  Context,
+}
+
+export type GroupingMappingCustomUI = GroupingCustomUI | ContextCustomUI;
+
+/** Custom UI Definitions. */
+
+export interface IGroupingMappingCustomUI {
+  /**
+   * See GroupingMappingCustomUIType.
+   */
+  type: GroupingMappingCustomUIType;
   /**
    * Unique identifier of the custom UI.
    */
@@ -17,19 +27,67 @@ export interface GroupingMappingCustomUI {
    */
   displayLabel: string;
   /**
-   * Custom UI Component to build query interactively. Refer to searchGroupingUI/manualGroupingUI.
-   */
-  uiComponent: (props: GroupingMappingCustomUIProps) => JSX.Element;
-  /**
    * Optional icon, will be shown before display label in widget.
    */
   icon?: ReactElement;
 }
 
 /**
- * Customized UI component arguments definition.
+ * Context custom UI type definition.
  */
-export interface GroupingMappingCustomUIProps {
+export interface ContextCustomUI extends IGroupingMappingCustomUI {
+  /**
+   * See GroupingMappingCustomUIType.
+   */
+  type: GroupingMappingCustomUIType.Context;
+  /**
+   * User defined component for UI interaction with grouping mapping widget.
+   */
+  uiComponent?: (props: ContextCustomUIProps) => JSX.Element;
+  /**
+   * Callback function for context custom UI menu item click event.
+   */
+  onClick?: (groupId: string, mappingId: string, iModelId: string) => void;
+}
+
+/**
+ * Group custom UI type definition.
+ */
+export interface GroupingCustomUI extends IGroupingMappingCustomUI {
+  /**
+   * See GroupingMappingCustomUIType.
+   */
+  type: GroupingMappingCustomUIType.Grouping;
+  /**
+   * Custom UI Component to build query interactively. Refer to SearchGroupingCustomUI/ManualGroupingCustomUI.
+   */
+  uiComponent: (props: GroupingCustomUIProps) => JSX.Element;
+}
+
+/** Custom UI Component props definitions. */
+
+/**
+ * Context custom UI component arguments definition.
+ */
+export interface ContextCustomUIProps {
+  /**
+   * IModel Id.
+   */
+  iModelId: string;
+  /**
+   * Mapping Id.
+   */
+  mappingId: string;
+  /**
+   * Group Id.
+   */
+  groupId: string;
+}
+
+/**
+ * Group custom UI component arguments definition.
+ */
+export interface GroupingCustomUIProps {
   /**
    * To validate and update current query.
    */
