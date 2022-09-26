@@ -271,7 +271,7 @@ const GroupPropertyAction = ({
       />
       <div className='gmw-group-property-action-container'>
         <Fieldset disabled={isLoading} className='gmw-property-options' legend='Property Details'>
-          <Small className='field-legend'>
+          <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
           <LabeledInput
