@@ -337,26 +337,26 @@ importers:
       simple-react-validator: 1.6.1
     devDependencies:
       '@faker-js/faker': 7.5.0
-      '@itwin/appui-abstract': 3.2.2_@itwin+core-bentley@3.2.2
-      '@itwin/appui-layout-react': 3.2.2_0099bfc9ea57e7c3c0d0f85e9959e8d2
-      '@itwin/appui-react': 3.2.2_4789d025ca1425755dd1e71786f2c62d
-      '@itwin/build-tools': 3.2.2
-      '@itwin/components-react': 3.2.2_0099bfc9ea57e7c3c0d0f85e9959e8d2
-      '@itwin/core-bentley': 3.2.2
-      '@itwin/core-common': 3.2.2_e6d66caefee1fbf2ea2f1b02ed39e7bc
-      '@itwin/core-frontend': 3.2.2_8ccda288ed47acb9d98e6367860e03c6
-      '@itwin/core-geometry': 3.2.2
-      '@itwin/core-i18n': 3.2.2_@itwin+core-bentley@3.2.2
-      '@itwin/core-markup': 3.2.2_23a531a032d1b3bc40495f7ef7a79662
-      '@itwin/core-orbitgt': 3.2.2
-      '@itwin/core-quantity': 3.2.2_@itwin+core-bentley@3.2.2
-      '@itwin/core-react': 3.2.2_635ad49d75618b72dca44ab860e4509b
-      '@itwin/eslint-plugin': 3.2.2_eslint@7.32.0+typescript@4.3.5
-      '@itwin/imodel-components-react': 3.2.2_fd0453885139ba43494b554614c626b0
-      '@itwin/presentation-common': 3.2.2_aa7c17727124c31a56baeab89140d952
-      '@itwin/presentation-components': 3.2.2_0c8e54e1d46986e00a4f386734b921be
-      '@itwin/presentation-frontend': 3.2.2_7d67946d87cba22f9e077d73ef83df22
-      '@itwin/webgl-compatibility': 3.2.2
+      '@itwin/appui-abstract': 3.2.4_@itwin+core-bentley@3.2.4
+      '@itwin/appui-layout-react': 3.2.4_d8b925a165b91dccf2814af5fd373d12
+      '@itwin/appui-react': 3.2.4_a110f0083bcb27abd0b8fad45f1a2e82
+      '@itwin/build-tools': 3.2.4
+      '@itwin/components-react': 3.2.4_d8b925a165b91dccf2814af5fd373d12
+      '@itwin/core-bentley': 3.2.4
+      '@itwin/core-common': 3.2.4_bc4de992b38f6fd5a188089037e9aa1e
+      '@itwin/core-frontend': 3.2.4_6096a54f708536f6149ef8f7a5469759
+      '@itwin/core-geometry': 3.2.4
+      '@itwin/core-i18n': 3.2.4_@itwin+core-bentley@3.2.4
+      '@itwin/core-markup': 3.2.4_fd777e50b8139eb2cae6c607e6fa68c3
+      '@itwin/core-orbitgt': 3.2.4
+      '@itwin/core-quantity': 3.2.4_@itwin+core-bentley@3.2.4
+      '@itwin/core-react': 3.2.4_607d1d071412a3176e71fca695eb18e0
+      '@itwin/eslint-plugin': 3.2.4_eslint@7.32.0+typescript@4.3.5
+      '@itwin/imodel-components-react': 3.2.4_284f744975b7010765e33cd82cf5abd5
+      '@itwin/presentation-common': 3.2.4_292635cddc94cb9e89eee37a7ec1b018
+      '@itwin/presentation-components': 3.2.4_1be7ba0741b63e1c5884e1b90e326ba9
+      '@itwin/presentation-frontend': 3.2.4_17579ccf48e56cfd5df4551deb49a966
+      '@itwin/webgl-compatibility': 3.2.4
       '@testing-library/dom': 8.13.0
       '@testing-library/jest-dom': 5.16.4
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
@@ -2011,9 +2011,9 @@ packages:
       '@itwin/core-react': 3.2.4_607d1d071412a3176e71fca695eb18e0
       '@itwin/core-telemetry': 3.2.4_@itwin+core-geometry@3.2.4
       '@itwin/imodel-components-react': 3.2.4_284f744975b7010765e33cd82cf5abd5
-      '@itwin/itwinui-css': 0.50.1
-      '@itwin/itwinui-icons-react': 1.10.1_react-dom@17.0.2+react@17.0.2
-      '@itwin/itwinui-react': 1.40.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-css': 0.61.0
+      '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 1.42.0_react-dom@17.0.2+react@17.0.2
       '@itwin/presentation-common': 3.2.4_292635cddc94cb9e89eee37a7ec1b018
       '@itwin/presentation-components': 3.2.4_1be7ba0741b63e1c5884e1b90e326ba9
       '@itwin/presentation-frontend': 3.2.4_17579ccf48e56cfd5df4551deb49a966
@@ -2750,8 +2750,8 @@ packages:
       '@bentley/icons-generic-webfont': 1.0.34
       '@itwin/appui-abstract': 3.2.4_@itwin+core-bentley@3.2.4
       '@itwin/core-bentley': 3.2.4
-      '@itwin/itwinui-css': 0.50.1
-      '@itwin/itwinui-react': 1.40.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-css': 0.61.0
+      '@itwin/itwinui-react': 1.42.0_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
       dompurify: 2.3.6
       lodash: 4.17.21
@@ -6761,7 +6761,7 @@ packages:
     dev: true
 
   /charenc/0.0.2:
-    resolution: {integrity: sha512-yrLQ/yVUFXkzg7EDQsPieE/53+0RlaWTs+wBrvW36cyilJ2SaDWfl4Yj7MtLTXleV9uEKefbAGUPv2/iWSooRA==}
+    resolution: {integrity: sha1-wKHS86cJLgN3S/qD8UwPxXkKhmc=}
     dev: true
 
   /check-error/1.0.2:
@@ -7213,7 +7213,7 @@ packages:
     dev: true
 
   /crypt/0.0.2:
-    resolution: {integrity: sha512-mCxBlsHFYh9C+HVpiEacem8FEBnMXgU9gy4zmNC+SXAZNB/1idgp/aulFJ4FgCi7GPEVbfyng092GqL2k2rmow==}
+    resolution: {integrity: sha1-iNf/fsDfuG9xPch7u0LQRNPmxBs=}
     dev: true
 
   /crypto-browserify/3.12.0:
@@ -7612,7 +7612,7 @@ packages:
     dev: true
 
   /dezalgo/1.0.3:
-    resolution: {integrity: sha512-K7i4zNfT2kgQz3GylDw40ot9GAE47sFZ9EXHFSPP6zONLgH6kWXE0KWJchkbQJLBkRazq4APwZ4OwiFFlT95OQ==}
+    resolution: {integrity: sha1-f3Qt4Gb8dIvI24IFad3c5Jvw1FY=}
     dependencies:
       asap: 2.0.6
       wrappy: 1.0.2
