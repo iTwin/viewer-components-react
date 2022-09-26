@@ -72,7 +72,7 @@ new GroupingMappingProvider({
 
 After adding the grouping custom UI, it will be presented in the 'Add Group' drop down list.
 
-![Process Functional Grouping Menu Item](./assets/ProcessGroupingMenuItem.jpg)
+![Process Functional Grouping Menu Item](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/grouping-mapping-widget/assets/ProcessGroupingMenuItem.jpg)
 
 ### Context Custom UI
 
@@ -112,4 +112,4 @@ new GroupingMappingProvider({
 
 After adding the context custom UI, the context menu item will look like this with additional `Clash Detection` menu item.
 
-![Clash Detection Context Menu Item](./assets/ClashDetectionContextMenuItem.jpg)
+![Clash Detection Context Menu Item](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/grouping-mapping-widget/assets/ClashDetectionContextMenuItem.jpg)
