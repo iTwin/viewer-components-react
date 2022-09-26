@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECProperty } from "@itwin/insights-client";
 import { DataType } from "@itwin/insights-client";
