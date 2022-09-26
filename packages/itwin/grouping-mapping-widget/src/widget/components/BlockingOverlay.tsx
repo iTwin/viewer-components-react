@@ -14,7 +14,9 @@ export interface BlockingOverlayProps {
 export const BlockingOverlay = ({ isVisible }: BlockingOverlayProps) => {
   return (
     <div className={classnames("gmw-group-mapping-blocking-overlay", isVisible && "gmw-visible")}>
-      <LoadingSpinner />
+      <div className="gmw-group-mapping-blocking-overlay-spinner">
+        <LoadingSpinner />
+      </div>
     </div>
   );
 };
