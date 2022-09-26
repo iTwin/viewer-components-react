@@ -4,15 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.iui-message {
-  margin: auto;
-}
-
-.extraction-status {
+.rcw-extraction-status {
   align-items: center;
-  margin: 0 $iui-s;
+  margin: auto $iui-s;
 
-  .status-icon {
+  .rcw-status-icon {
     width: $iui-icons-default;
     height: $iui-icons-default;
   }

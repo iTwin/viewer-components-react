@@ -116,7 +116,7 @@ export const Reports = () => {
 
   useEffect(() => {
     if (jobStarted) {
-      const interval = setInterval(async () => {
+      const interval = window.setInterval(async () => {
         const states = await bulkExtractor.getStates(reports.map(r => r.id));
         if (Array.from(states.values())
           .filter(x => x === ExtractionStates.Succeeded ||
@@ -128,11 +128,19 @@ export const Reports = () => {
         }
         setExtractionStates(states);
       }, 5000)
-      return () => clearInterval(interval);
+      return () => window.clearInterval(interval);
     }
-    setTimeout(() => {
-      setExtractionStates(new Map<string, ExtractionStates>());
-    }, 5000);
+    return;
+  }, [jobStarted]);
+
+
+  useEffect(() => {
+    if (!jobStarted) {
+      const timeout = window.setTimeout(() => {
+        setExtractionStates(new Map<string, ExtractionStates>());
+      }, 5000);
+      return () => window.clearTimeout(timeout);
+    }
     return;
   }, [jobStarted]);
 
@@ -162,7 +170,7 @@ export const Reports = () => {
             )}
           />
           <Surface className="reports-list-container">
-            <div className="toolbar">
+            <div className="rcw-toolbar">
               <Button
                 startIcon={<SvgAdd />}
                 onClick={() => addReport()}
@@ -192,8 +200,8 @@ export const Reports = () => {
               >
                 <SvgRefresh />
               </IconButton>
-              <div className="search-bar-container" data-testid="search-bar">
-                <div className="search-button">
+              <div className="rcw-search-bar-container" data-testid="search-bar">
+                <div className="rcw-search-button">
                   <SearchBar
                     searchValue={searchValue}
                     setSearchValue={setSearchValue}
@@ -249,7 +257,7 @@ export const Reports = () => {
                     }
                     }
                     actionGroup={
-                      <div className="button-container">
+                      <div className="rcw-button-container">
                         <ExtractionStatus
                           state={extractionStates.get(report.id) ?? ExtractionStates.None}>
                         </ExtractionStatus>
@@ -284,10 +292,6 @@ export const Reports = () => {
                         >
                           <IconButton styleType="borderless">
                             <SvgMore
-                              style={{
-                                width: "16px",
-                                height: "16px",
-                              }}
                             />
                           </IconButton>
                         </DropdownMenu>

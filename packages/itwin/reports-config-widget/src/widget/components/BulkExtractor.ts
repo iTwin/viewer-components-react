@@ -50,9 +50,9 @@ export default class BulkExtractor {
         if (state) {
           states.push(state);
         } else {
-          const state = await this.getSingleState(runId, extractionClientApi, accessToken);
-          states.push(state);
-          stateByRunId.set(runId, state);
+          const runState = await this.getSingleState(runId, extractionClientApi, accessToken);
+          states.push(runState);
+          stateByRunId.set(runId, runState);
         }
       }
       const finalState = this.getFinalState(states);

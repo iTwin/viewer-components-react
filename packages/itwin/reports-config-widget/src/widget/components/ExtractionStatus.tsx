@@ -60,9 +60,9 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Starting"
           )}
-          className="extraction-status"
+          className="rcw-extraction-status"
         >
-          <div className="status-icon">
+          <div className="rcw-status-icon">
             <SvgStatusPendingHollow />
           </div>
         </div>
@@ -73,7 +73,7 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Loading"
           )}
-          className="extraction-status"
+          className="rcw-extraction-status"
         >
           <ProgressRadial size="x-small" indeterminate />
         </div>
@@ -84,9 +84,9 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Queued"
           )}
-          className="extraction-status"
+          className="rcw-extraction-status"
         >
-          <div className="status-icon">
+          <div className="rcw-status-icon">
             <SvgStatusPending />
           </div>
         </div>
@@ -97,7 +97,7 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Running"
           )}
-          className="extraction-status"
+          className="rcw-extraction-status"
         >
           <ProgressRadial size="x-small" indeterminate />
         </div>
@@ -108,10 +108,10 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Success"
           )}
-          className="extraction-status"
+          className="rcw-extraction-status"
         >
           <div
-            className={`status-icon`}
+            className={`rcw-status-icon`}
             style={{
               animationName: fadeOut ? "rcw-fade-out" : "",
               animationDelay: "5s",
@@ -129,10 +129,10 @@ export const ExtractionStatus = ({
           title={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:Failed"
           )}
-          className="extraction-status"
+          className="rcw-extraction-status"
         >
           <div
-            className={`status-icon`}
+            className={`rcw-status-icon`}
             style={{
               animationName: fadeOut ? "rcw-fade-out" : "",
               animationDelay: "5s",
