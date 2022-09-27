@@ -39,6 +39,8 @@ import {
 } from "@itwin/itwinui-react";
 import "./TemplateMenu.scss";
 import React from "react";
+import { EC3TokenCache } from "./EC3/EC3TokenCache";
+import { EC3Config } from "./EC3/EC3Config";
 
 interface TemplateProps {
   template?: Configuration;
@@ -54,6 +56,7 @@ enum LabelView {
 const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
+  const [token, setToken] = useState<EC3TokenCache>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
@@ -89,6 +92,10 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
       goBack();
     }
   };
+
+  const validateSignin = useCallback(() => {
+    return token?.token && token?.exp > Date.now();
+  }, [token]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -262,7 +269,20 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
             onSave={onSave}
             onCancel={goBack}
             onExport={async () => {
-              openModal(true);
+              if (validateSignin()) {
+                const url = `${EC3Config.EC3_URI}oauth2/authorize?client_id=${EC3Config.CLIENT_ID}&redirect_uri=${EC3Config.REDIRECT_URI}&response_type=code&scope=${EC3Config.SCOPE}`;
+                const authWindow = window.open(url, '_blank', 'toolbar=0,location=0,menubar=0,width=800,height=700');
+
+                const receiveMessage = (event: MessageEvent<EC3TokenCache>) => {
+                  authWindow?.close();
+                  setToken(event.data);
+                  openModal(true);
+                };
+
+                window.addEventListener('message', receiveMessage, false);
+              } else {
+                openModal(true);
+              }
             }}
             isSavingDisabled={!childTemplate.displayName || !childTemplate.reportId}
             isLoading={isLoading}
@@ -273,6 +293,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
             isOpen={modalIsOpen}
             close={() => openModal(false)}
             templateId={childTemplate.id}
+            token={token?.token}
           />
 
           <DeleteModal
