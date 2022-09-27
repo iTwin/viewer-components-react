@@ -64,7 +64,10 @@ const extractPrimitives = (
   // It belongs to this parent class
   const parentPropertyClassName = propertyField.parent?.contentClassInfo.name;
   const primitiveNavigationClass = property.property.navigationPropertyInfo?.classInfo.name ?? "";
-  // Presentation treats primitive navigation classes as longs. Handling this special case.
+  /* Presentation assigns primitive navigations properties as a long type due to how it stores the
+     ECInstanceId of the class in the meta.ECClassDef table on the C++ layer.
+     We are handling this special case.
+  */
   const propertyType = primitiveNavigationClass ? DataType.String : convertType(property.property.type);
   const actualECClassName = property.property.classInfo.name;
   const newPropertyTraversal = [...propertyTraversal, propertyName];
