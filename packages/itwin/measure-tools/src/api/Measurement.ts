@@ -3,10 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import { UiFramework } from "@itwin/appui-react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { DecorateContext, HitDetail} from "@itwin/core-frontend";
 import { BeButton, BeButtonEvent, IModelApp } from "@itwin/core-frontend";
+import type { Point3d } from "@itwin/core-geometry";
 import type { FormatterSpec } from "@itwin/core-quantity";
 import { MeasurementButtonHandledEvent, WellKnownMeasurementStyle, WellKnownViewType } from "./MeasurementEnums";
 import { MeasurementPreferences } from "./MeasurementPreferences";
@@ -577,6 +579,20 @@ export abstract class Measurement {
 
   /** Cleans up any resources (e.g. IDisposable objects) */
   public onCleanup() { }
+
+  /** Adjusts a point to account for Global Origin. This is required in order to display coordinates as text.
+   * May return a reference to the original point, or a new point if the global origin is applied
+   */
+  protected adjustPointForGlobalOrigin(point: Point3d): Readonly<Point3d> {
+    if (this.viewTarget.isOfViewType(WellKnownViewType.AnySpatial)) {
+      const iModel = UiFramework.getIModelConnection();
+      if (iModel) {
+        const globalOrigin = iModel.globalOrigin;
+        return point.minus(globalOrigin);
+      }
+    }
+    return point;
+  }
 
   /**
    * Creates a new instance of the measurement subclass. This works well for most subclasses that have a parameterless constructor (or one that takes in an optional props object).

@@ -2,6 +2,21 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.7.0",
+      "date": "Mon, 26 Sep 2022 17:13:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add context custom UI support"
+          },
+          {
+            "comment": "Add custom UI extensibility for grouping and mapping and refactor default UI accordingly"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@itwin/grouping-mapping-widget_v0.6.0",
       "date": "Mon, 12 Sep 2022 19:50:36 GMT",
