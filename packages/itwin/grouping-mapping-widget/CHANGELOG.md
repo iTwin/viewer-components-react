@@ -1,6 +1,14 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 12 Sep 2022 19:50:36 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Sep 2022 17:13:11 GMT and should not be manually modified.
+
+## 0.7.0
+Mon, 26 Sep 2022 17:13:11 GMT
+
+### Minor changes
+
+- Add context custom UI support
+- Add custom UI extensibility for grouping and mapping and refactor default UI accordingly
 
 ## 0.6.0
 Mon, 12 Sep 2022 19:50:36 GMT
