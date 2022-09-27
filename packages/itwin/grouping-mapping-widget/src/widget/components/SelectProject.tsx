@@ -65,6 +65,7 @@ const SelectProject = ({ onSelect, onCancel }: SelectProjectProps) => {
   }, [getAccessToken]);
 
   const startSearch = useCallback(() => {
+    if (!searchInput) return;
     setActiveSearchInput(searchInput);
     setSearched(true);
   }, [searchInput]);
