@@ -7,7 +7,7 @@ import "@testing-library/jest-dom";
 import { mockAccessToken, mockMappingClient, render, screen, TestUtils, waitForElementToBeRemoved, within } from "./test-utils";
 import { faker } from "@faker-js/faker";
 import { Groupings } from "../grouping-mapping-widget";
-import type { GroupCollection, Mapping} from "@itwin/insights-client";
+import type { GroupCollection, Mapping } from "@itwin/insights-client";
 import * as moq from "typemoq";
 import type { IModelConnection, SelectionSet, SelectionSetEvent} from "@itwin/core-frontend";
 import { NoRenderApp } from "@itwin/core-frontend";
@@ -15,6 +15,8 @@ import type { SelectionManager, SelectionScopesManager } from "@itwin/presentati
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
+import type { GroupingCustomUIProps, GroupingMappingCustomUI} from "../grouping-mapping-widget";
+import { GroupingMappingCustomUIType } from "../grouping-mapping-widget";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
@@ -167,5 +169,61 @@ describe("Groupings View with default UIs", () => {
     expect(editSearch).toHaveLength(1);
     const editManual = screen.getAllByTestId(`gmw-edit-2`);
     expect(editManual).toHaveLength(1);
+  });
+
+  it("Set up grouping custom UI - should replace default grouping methods", async () => {
+    // Arange
+    const mockGroups = groupsFactory();
+    const mockedAccessToken = await mockAccessToken();
+    mockMappingClient
+      .setup(async (x) => x.getGroups(mockedAccessToken, mockIModelId, mockMappingId))
+      .returns(async () => mockGroups.groups);
+    const mockedUIComponent = (_props: GroupingCustomUIProps) => React.createElement("div");
+    const mockGroupingUI: GroupingMappingCustomUI = {
+      type: GroupingMappingCustomUIType.Grouping,
+      name: "mOcKgRoUpInGuI",
+      displayLabel: "Mock Grouping UI",
+      uiComponent: mockedUIComponent,
+    };
+
+    // Act
+    const { user } = render(<Groupings mapping={mockMapping} goBack={jest.fn()} />, [mockGroupingUI]);
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
+
+    // Assert
+    const addButton = screen.getAllByTestId("gmw-add-group-button");
+    expect(addButton).toHaveLength(1);
+
+    // Click on 'Add Group' button
+    await user.click(addButton[0]);
+
+    // Should have one add method
+    const addCustom = screen.getAllByTestId("gmw-add-0");
+    expect(addCustom).toHaveLength(1);
+    expect(addCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
+
+    // Each group should have a more icon button
+    const moreButton = screen.getAllByTestId("gmw-more-button");
+    expect(moreButton).toHaveLength(mockGroups.groups.length);
+    expect(moreButton.length).toBeGreaterThan(0);
+
+    // Click on first more icon
+    await user.click(moreButton[0]);
+
+    // Should have 3 context menu items
+    const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
+    expect(contextMenuItems).toHaveLength(3);
+    expect(contextMenuItems[0]).toHaveTextContent("Edit");
+
+    // Hover on 'Edit'
+    await user.hover(contextMenuItems[0]);
+
+    // Should have 3 sub menu items
+    const editCustom = screen.getAllByTestId(`gmw-edit-0`);
+    expect(editCustom).toHaveLength(1);
+    expect(editCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
+
+    // Click on the edit custom UI
+    await user.click(editCustom[0]);
   });
 });
