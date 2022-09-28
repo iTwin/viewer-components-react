@@ -2,9 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { ExtractionClient, REPORTING_BASE_PATH, ReportMapping, ReportsClient, MappingsClient, ExtractorState } from "@itwin/insights-client";
+import { ExtractionClient, ExtractorState, MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
+import type { ReportMapping } from "@itwin/insights-client";
 import { generateUrl, handleError } from "./utils";
-import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import type { CreateTypeFromInterface } from "./utils";
 import type {
   GetSingleIModelParams,
@@ -24,21 +24,24 @@ export type ReportMappingAndMapping = ReportMappingType & {
 };
 
 export default class BulkExtractor {
-  reportStates = new Map<string, ExtractionStates>();
-  reportRunIds = new Map<string, string[]>();
-  apiConfig = useReportsApiConfig();
+  private _reportRunIds = new Map<string, string[]>();
+  private _apiConfig: ReportsApiConfig;
+
+  constructor(apiConfig: ReportsApiConfig) {
+    this._apiConfig = apiConfig;
+  }
 
   public async getStates(reportIds: string[]): Promise<Map<string, ExtractionStates>> {
     const extractionClientApi = new ExtractionClient(
-      generateUrl(REPORTING_BASE_PATH, this.apiConfig.baseUrl)
+      generateUrl(REPORTING_BASE_PATH, this._apiConfig.baseUrl)
     );
-    const accessToken = await this.apiConfig.getAccessToken();
+    const accessToken = await this._apiConfig.getAccessToken();
 
     const stateByReportId = new Map<string, ExtractionStates>();
     const stateByRunId = new Map<string, ExtractorState>();
 
     for (const reportId of reportIds) {
-      const runs = this.reportRunIds.get(reportId);
+      const runs = this._reportRunIds.get(reportId);
       if (!runs) {
         stateByReportId.set(reportId, ExtractionStates.None);
         continue;
@@ -62,7 +65,7 @@ export default class BulkExtractor {
   }
 
   public clearJobs() {
-    this.reportRunIds = new Map<string, string[]>();
+    this._reportRunIds = new Map<string, string[]>();
   }
 
   private getFinalState(states: ExtractorState[]) {
@@ -85,13 +88,13 @@ export default class BulkExtractor {
 
   public async startJobs(reportIds: string[]) {
     const extractionClientApi = new ExtractionClient(
-      generateUrl(REPORTING_BASE_PATH, this.apiConfig.baseUrl)
+      generateUrl(REPORTING_BASE_PATH, this._apiConfig.baseUrl)
     );
-    const accessToken = await this.apiConfig.getAccessToken();
+    const accessToken = await this._apiConfig.getAccessToken();
 
     const extractionByIModel = new Map<string, string>();
     for (const reportId of reportIds) {
-      const IModels = (await this.fetchReportMappings(reportId, this.apiConfig)).map(m => m.imodelId);
+      const IModels = (await this.fetchReportMappings(reportId, this._apiConfig)).map((m) => m.imodelId);
       const uniqueIModels = Array.from(new Set(IModels));
 
       const runs: string[] = [];
@@ -99,8 +102,7 @@ export default class BulkExtractor {
         const extraction = extractionByIModel.get(iModelId);
         if (extraction) {
           runs.push(extraction);
-        }
-        else {
+        } else {
           const run = await this.runExtraction(iModelId, extractionClientApi, accessToken);
           if (run) {
             runs.push(run.id);
@@ -108,7 +110,7 @@ export default class BulkExtractor {
           }
         }
       }
-      this.reportRunIds.set(reportId, runs);
+      this._reportRunIds.set(reportId, runs);
     }
   }
 
@@ -123,7 +125,7 @@ export default class BulkExtractor {
       handleError(error.status);
     }
     return undefined;
-  };
+  }
 
   private async fetchReportMappings(
     reportId: string,
@@ -184,5 +186,5 @@ export default class BulkExtractor {
       handleError(error.status);
     }
     return [];
-  };
+  }
 }

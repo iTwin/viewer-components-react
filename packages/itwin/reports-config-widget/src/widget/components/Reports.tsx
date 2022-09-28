@@ -7,7 +7,7 @@ import {
   SvgDelete,
   SvgEdit,
   SvgMore,
-  SvgRefresh
+  SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
@@ -38,7 +38,7 @@ import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import BulkExtractor from "./BulkExtractor";
-import { ExtractionStatus, ExtractionStates } from "./ExtractionStatus";
+import { ExtractionStates, ExtractionStatus } from "./ExtractionStatus";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -87,7 +87,7 @@ export const Reports = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
-  const bulkExtractor = useMemo(() => new BulkExtractor(), []);
+  const bulkExtractor = useMemo(() => new BulkExtractor(apiConfig), [apiConfig]);
 
   useEffect(() => {
     void fetchReports(setReports, iTwinId, setIsLoading, apiConfig);
@@ -117,9 +117,9 @@ export const Reports = () => {
   useEffect(() => {
     if (jobStarted) {
       const interval = window.setInterval(async () => {
-        const states = await bulkExtractor.getStates(reports.map(r => r.id));
+        const states = await bulkExtractor.getStates(reports.map((r) => r.id));
         if (Array.from(states.values())
-          .filter(x => x === ExtractionStates.Succeeded ||
+          .filter((x) => x === ExtractionStates.Succeeded ||
             x === ExtractionStates.Failed ||
             x === ExtractionStates.None)
           .length === states.size) {
@@ -127,12 +127,11 @@ export const Reports = () => {
           bulkExtractor.clearJobs();
         }
         setExtractionStates(states);
-      }, 5000)
+      }, 5000);
       return () => window.clearInterval(interval);
     }
     return;
-  }, [jobStarted]);
-
+  }, [bulkExtractor, reports, jobStarted]);
 
   useEffect(() => {
     if (!jobStarted) {
@@ -187,13 +186,13 @@ export const Reports = () => {
                 onClick={async () => {
                   setJobStarted(true);
                   const states = extractionStates;
-                  selectedReports.map(report => states.set(report.id, ExtractionStates.Starting));
-                  bulkExtractor.startJobs(selectedReports.map(report => report.id));
+                  selectedReports.map((report) => states.set(report.id, ExtractionStates.Starting));
+                  await bulkExtractor.startJobs(selectedReports.map((report) => report.id));
                   setExtractionStates(states);
                   setSelectedReports([]);
                 }}
                 disabled={selectedReports.length === 0 ||
-                  selectedReports.filter(sr => (
+                  selectedReports.filter((sr) => (
                     (extractionStates.get(sr.id) ?? ExtractionStates.None >= 1) &&
                     (extractionStates.get(sr.id) ?? ExtractionStates.None <= 4)
                   )).length > 0}
@@ -252,7 +251,7 @@ export const Reports = () => {
                               (r) => report.id !== r.id
                             )
                             : [...sr, report]
-                        )
+                        );
                       }
                     }
                     }
@@ -291,8 +290,7 @@ export const Reports = () => {
                           ]}
                         >
                           <IconButton styleType="borderless">
-                            <SvgMore
-                            />
+                            <SvgMore />
                           </IconButton>
                         </DropdownMenu>
                       </div>
