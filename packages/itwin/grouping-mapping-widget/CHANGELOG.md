@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 28 Sep 2022 20:44:12 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Sep 2022 19:04:42 GMT and should not be manually modified.
+
+## 0.8.1
+Thu, 29 Sep 2022 19:04:42 GMT
+
+### Patches
+
+- Fixed text overflow issue.
 
 ## 0.8.0
 Wed, 28 Sep 2022 20:44:12 GMT
