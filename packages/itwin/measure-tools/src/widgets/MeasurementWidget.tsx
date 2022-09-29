@@ -39,11 +39,11 @@ export class MeasurementWidget extends WidgetControl {
     this._showPropertyAggregates = true;
     this._dataProvider = new SimplePropertyDataProvider();
     this._lastSelectedCount = MeasurementSelectionSet.global.measurements.length;
-    this._onSelectionChanged = this._onSelectionChanged.bind(this);
 
     if (options.iModelConnection) {
-      MeasurementSelectionSet.global.onChanged.addListener(this._onSelectionChanged);
-      MeasurementUIEvents.onMeasurementPropertiesChanged.addListener(this._onSelectionChanged);
+      MeasurementSelectionSet.global.onChanged.addListener(this._onSelectionChanged, this);
+      MeasurementUIEvents.onMeasurementPropertiesChanged.addListener(this._onSelectionChanged, this);
+      options.iModelConnection.onGlobalOriginChanged.addListener(this._onSelectionChanged, this);
       this.reactNode = <PropertyGrid dataProvider={this._dataProvider} orientation={Orientation.Vertical} className={"measurement-widget"} />; // eslint-disable-line react/react-in-jsx-scope
       this._getData(this._lastSelectedCount >= 2).catch(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }

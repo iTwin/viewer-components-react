@@ -2,17 +2,4 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
-
-.reports-container {
-  position: absolute;
-  right: 0;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  padding: $iui-baseline $iui-m;
-  box-sizing: border-box;
-  height: 100%;
-  overflow: auto;
-  gap: $iui-baseline;
-}
+module.exports = {};

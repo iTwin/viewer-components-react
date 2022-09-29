@@ -4,21 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.gmw-group-mapping-blocking-overlay {
-  background-color: black;
-  position: absolute;
+.gmw-search-form {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  top: $iui-baseline;
-  bottom: $iui-baseline;
-  right: $iui-s;
-  left: $iui-s;
-  opacity: 60%;
-  z-index: 9999;
-  visibility: hidden;
-
-  &.gmw-visible {
-    visibility: visible;
+  flex-direction: column;
+  gap: $iui-baseline;
+  margin-top: $iui-baseline;
+  > .gmw-search-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $iui-s;
   }
 }
