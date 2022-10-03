@@ -10,7 +10,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/itwin/grouping-mapping-widget"
+    "url": "https://github.com/iTwin/viewer-components-react",
+    "directory": "packages/itwin/grouping-mapping-widget"
   },
   "license": "MIT",
   "author": {

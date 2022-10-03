@@ -38,7 +38,7 @@ This package provides an interface to define your own custom UI or callback func
 
 You can use your own UI component to define group creation method.
 
-An example of grouping custom UI, [ManualGroupingCustomUI](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/grouping-mapping-widget/src/widget/components/customUI/ManualGroupingCustomUI.tsx) helps user to manually define ECSQL query for groups.
+An example of grouping custom UI, [ManualGroupingCustomUI](./src/widget/components/customUI/ManualGroupingCustomUI.tsx) helps user to manually define ECSQL query for groups.
 
 In `GroupingCustomUIProps`:
 
@@ -72,7 +72,7 @@ new GroupingMappingProvider({
 
 After adding the grouping custom UI, it will be presented in the 'Add Group' drop down list.
 
-![Process Functional Grouping Menu Item](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/grouping-mapping-widget/assets/ProcessGroupingMenuItem.jpg)
+![Process Functional Grouping Menu Item](./assets/ProcessGroupingMenuItem.jpg)
 
 ### Context Custom UI
 
@@ -112,4 +112,4 @@ new GroupingMappingProvider({
 
 After adding the context custom UI, the context menu item will look like this with additional `Clash Detection` menu item.
 
-![Clash Detection Context Menu Item](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/grouping-mapping-widget/assets/ClashDetectionContextMenuItem.jpg)
+![Clash Detection Context Menu Item](./assets/ClashDetectionContextMenuItem.jpg)

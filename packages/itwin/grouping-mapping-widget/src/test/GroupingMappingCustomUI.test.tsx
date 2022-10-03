@@ -197,7 +197,7 @@ describe("Groupings View with default UIs", () => {
     // Click on 'Add Group' button
     await user.click(addButton[0]);
 
-    // Should have one add method
+    // Should have exact 1 add method with given configuration
     const addCustom = screen.getAllByTestId("gmw-add-0");
     expect(addCustom).toHaveLength(1);
     expect(addCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
@@ -210,7 +210,7 @@ describe("Groupings View with default UIs", () => {
     // Click on first more icon
     await user.click(moreButton[0]);
 
-    // Should have 3 context menu items
+    // Should have 3 context menu items without context configuration
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
     expect(contextMenuItems).toHaveLength(3);
     expect(contextMenuItems[0]).toHaveTextContent("Edit");
@@ -218,7 +218,7 @@ describe("Groupings View with default UIs", () => {
     // Hover on 'Edit'
     await user.hover(contextMenuItems[0]);
 
-    // Should have 3 sub menu items
+    // Should have exact 1 sub menu item
     const editCustom = screen.getAllByTestId(`gmw-edit-0`);
     expect(editCustom).toHaveLength(1);
     expect(editCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
@@ -274,7 +274,67 @@ describe("Groupings View with default UIs", () => {
 
     await user.click(moreButton[0]);
 
-    // Should have 3 context menu items
+    // Should have 4 context menu items
+    const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
+    expect(contextMenuItems).toHaveLength(4);
+    expect(contextMenuItems[0]).toHaveTextContent("Edit");
+    expect(contextMenuItems[1]).toHaveTextContent("Properties");
+    expect(contextMenuItems[2]).toHaveTextContent("Remove");
+    expect(contextMenuItems[3]).toHaveTextContent(mockContextUI.displayLabel);
+
+    // Click on the context ui
+    await user.click(contextMenuItems[3]);
+  });
+
+  it("Set up both grouping and context custom UI", async () => {
+    // Arange
+    const mockGroups = groupsFactory();
+    const mockedAccessToken = await mockAccessToken();
+    mockMappingClient
+      .setup(async (x) => x.getGroups(mockedAccessToken, mockIModelId, mockMappingId))
+      .returns(async () => mockGroups.groups);
+    const mockedGroupingUIComponent = (_props: GroupingCustomUIProps) => React.createElement("div");
+    const mockedContextUIComponent = (_props: ContextCustomUIProps) => React.createElement("div");
+    const mockGroupingUI: GroupingMappingCustomUI = {
+      type: GroupingMappingCustomUIType.Grouping,
+      name: "mOcKgRoUpInGuI",
+      displayLabel: "Mock Grouping UI",
+      uiComponent: mockedGroupingUIComponent,
+    };
+    const mockContextUI: GroupingMappingCustomUI = {
+      type: GroupingMappingCustomUIType.Context,
+      name: "mOcKgRoUpInGuI",
+      displayLabel: "Mock Grouping UI",
+      uiComponent: mockedContextUIComponent,
+    };
+
+    // Act
+    const { user } = render(<Groupings mapping={mockMapping} goBack={jest.fn()} />, [mockContextUI, mockGroupingUI]);
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
+
+    // Assert
+    const addButton = screen.getAllByTestId("gmw-add-group-button");
+    expect(addButton).toHaveLength(1);
+
+    // Click on 'Add Group' button
+    await user.click(addButton[0]);
+
+    // Should have exact 1 add method with given configuration
+    const addCustom = screen.getAllByTestId("gmw-add-0");
+    expect(addCustom).toHaveLength(1);
+    expect(addCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
+
+    // Check the group tile number
+    const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
+    expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
+
+    // Click on first group more icon
+    const moreButton = screen.getAllByTestId("gmw-more-button");
+    expect(moreButton).toHaveLength(mockGroups.groups.length);
+
+    await user.click(moreButton[0]);
+
+    // Should have 4 context menu items
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
     expect(contextMenuItems).toHaveLength(4);
     expect(contextMenuItems[0]).toHaveTextContent("Edit");
