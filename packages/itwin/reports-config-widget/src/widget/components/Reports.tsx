@@ -255,8 +255,7 @@ export const Reports = () => {
                       setReportsView(ReportsView.REPORTSMAPPING);
                     }}
                     selected={selectedReports.some((r) => report.id === r.id)}
-                    onClick={(e) => onClickTile(e, report)
-                    }
+                    onClick={(e) => onClickTile(e, report)}
                     actionGroup={
                       <div className="rcw-button-container">
                         <ExtractionStatus
