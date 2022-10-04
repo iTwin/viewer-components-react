@@ -25,7 +25,7 @@ export const HorizontalTile = (props: HorizontalTileProps) => {
     <div
       className={classNames("rcw-horizontal-tile-container", { "rcw-horizontal-tile-selected": props.selected })}
       onClick={props.onClick}
-      data-testid="rcw-horizontal-tile"
+      data-testid="horizontal-tile"
     >
       <div className="rcw-body-container">
         <div className="rcw-body">
