@@ -2,17 +2,16 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { ProgressRadial } from "@itwin/itwinui-react";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import "./ExtractionStatus.scss";
-import {
-  SvgStatusError,
-  SvgStatusPending,
-  SvgStatusPendingHollow,
-  SvgStatusSuccess,
-} from "@itwin/itwinui-icons-color-react";
-import { ReportsConfigWidget } from "../../ReportsConfigWidget";
+import { STATUS_CHECK_INTERVAL } from "./Constants";
+import { StartingExtractionState } from "./ExtractionStates/StartingExtractionState";
+import { FetchingUpdateExtractionState } from "./ExtractionStates/FetchingUpdateExtractionState";
+import { RunningExtractionState } from "./ExtractionStates/RunningExtractionState";
+import { FailedExtractionState } from "./ExtractionStates/FailedExtractionState";
+import { QueuedExtractionState } from "./ExtractionStates/QueuedExtractionState";
+import { SucceededExtractionState } from "./ExtractionStates/SucceededExtractionState";
 
 export enum ExtractionStates {
   None,
@@ -23,24 +22,23 @@ export enum ExtractionStates {
   Succeeded,
   Failed,
 }
+
 interface ExtractionStatusProps {
   state: ExtractionStates;
-  setExtractionState?: React.Dispatch<React.SetStateAction<ExtractionStates>>;
+  clearExtractionState: () => void;
   children?: React.ReactNode;
 }
 
 export const ExtractionStatus = ({
   state,
   children,
-  setExtractionState,
+  clearExtractionState,
 }: ExtractionStatusProps) => {
   const [fadeOut, setFadeOut] = useState<boolean>(false);
 
   const onAnimationEnd = () => {
-    if (setExtractionState) {
-      setExtractionState(ExtractionStates.None);
-      setFadeOut(false);
-    }
+    clearExtractionState();
+    setFadeOut(false);
   };
 
   useEffect(() => {
@@ -48,102 +46,24 @@ export const ExtractionStatus = ({
     switch (state) {
       case ExtractionStates.Succeeded:
       case ExtractionStates.Failed:
-        timer = window.setTimeout(() => setFadeOut(true), 5000);
+        timer = window.setTimeout(() => setFadeOut(true), STATUS_CHECK_INTERVAL);
     }
-    return () => clearTimeout(timer);
-  }, [state, setExtractionState]);
+    return () => window.clearTimeout(timer);
+  }, [state]);
 
   switch (state) {
     case ExtractionStates.Starting:
-      return (
-        <div
-          title={ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:Starting"
-          )}
-          className="rcw-extraction-status"
-        >
-          <div className="rcw-status-icon">
-            <SvgStatusPendingHollow />
-          </div>
-        </div>
-      );
+      return StartingExtractionState();
     case ExtractionStates.FetchingUpdate:
-      return (
-        <div
-          title={ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:Loading"
-          )}
-          className="rcw-extraction-status"
-        >
-          <ProgressRadial size="x-small" indeterminate />
-        </div>
-      );
+      return FetchingUpdateExtractionState();
     case ExtractionStates.Queued:
-      return (
-        <div
-          title={ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:Queued"
-          )}
-          className="rcw-extraction-status"
-        >
-          <div className="rcw-status-icon">
-            <SvgStatusPending />
-          </div>
-        </div>
-      );
+      return QueuedExtractionState();
     case ExtractionStates.Running:
-      return (
-        <div
-          title={ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:Running"
-          )}
-          className="rcw-extraction-status"
-        >
-          <ProgressRadial size="x-small" indeterminate />
-        </div>
-      );
+      return RunningExtractionState();
     case ExtractionStates.Succeeded:
-      return (
-        <div
-          title={ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:Success"
-          )}
-          className="rcw-extraction-status"
-        >
-          <div
-            className={`rcw-status-icon`}
-            style={{
-              animationName: fadeOut ? "rcw-fade-out" : "",
-              animationDelay: "5s",
-              animationDuration: "1s",
-            }}
-            onAnimationEnd={onAnimationEnd}
-          >
-            <SvgStatusSuccess />
-          </div>
-        </div>
-      );
+      return SucceededExtractionState(fadeOut ? "rcw-fade-out" : "", onAnimationEnd);
     case ExtractionStates.Failed:
-      return (
-        <div
-          title={ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:Failed"
-          )}
-          className="rcw-extraction-status"
-        >
-          <div
-            className={`rcw-status-icon`}
-            style={{
-              animationName: fadeOut ? "rcw-fade-out" : "",
-              animationDelay: "5s",
-              animationDuration: "1s",
-            }}
-            onAnimationEnd={onAnimationEnd}
-          >
-            <SvgStatusError />
-          </div>
-        </div>
-      );
+      return FailedExtractionState(fadeOut ? "rcw-fade-out" : "", onAnimationEnd);
     default:
       return <>{children}</>;
   }

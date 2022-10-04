@@ -39,6 +39,7 @@ import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import BulkExtractor from "./BulkExtractor";
 import { ExtractionStates, ExtractionStatus } from "./ExtractionStatus";
+import { STATUS_CHECK_INTERVAL } from "./Constants";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -124,10 +125,9 @@ export const Reports = () => {
             x === ExtractionStates.None)
           .length === states.size) {
           setJobStarted(false);
-          bulkExtractor.clearJobs();
         }
         setExtractionStates(states);
-      }, 5000);
+      }, STATUS_CHECK_INTERVAL);
       return () => window.clearInterval(interval);
     }
     return;
@@ -137,11 +137,26 @@ export const Reports = () => {
     if (!jobStarted) {
       const timeout = window.setTimeout(() => {
         setExtractionStates(new Map<string, ExtractionStates>());
-      }, 5000);
+      }, STATUS_CHECK_INTERVAL);
       return () => window.clearTimeout(timeout);
     }
     return;
   }, [jobStarted]);
+
+  function onClickTile(e: any, report: Report) {
+    if (e?.target?.className?.toString().split(" ").includes("rcw-horizontal-tile-container")) {
+      if (!e.ctrlKey)
+        setSelectedReports([]);
+
+      setSelectedReports((sr) =>
+        sr.some((r) => report.id === r.id)
+          ? sr.filter(
+            (r) => report.id !== r.id
+          )
+          : [...sr, report]
+      );
+    }
+  }
 
   switch (reportsView) {
     case ReportsView.ADDING:
@@ -240,59 +255,51 @@ export const Reports = () => {
                       setReportsView(ReportsView.REPORTSMAPPING);
                     }}
                     selected={selectedReports.some((r) => report.id === r.id)}
-                    onClick={(e) => {
-                      if (e?.target?.className?.toString().startsWith("rcw-horizontal-tile-container")) {
-                        if (!e.ctrlKey)
-                          setSelectedReports([]);
-
-                        setSelectedReports((sr) =>
-                          sr.some((r) => report.id === r.id)
-                            ? sr.filter(
-                              (r) => report.id !== r.id
-                            )
-                            : [...sr, report]
-                        );
-                      }
-                    }
+                    onClick={(e) => onClickTile(e, report)
                     }
                     actionGroup={
                       <div className="rcw-button-container">
                         <ExtractionStatus
-                          state={extractionStates.get(report.id) ?? ExtractionStates.None}>
-                        </ExtractionStatus>
-                        <DropdownMenu
-                          menuItems={(close: () => void) => [
-                            <MenuItem
-                              key={0}
-                              onClick={() => {
-                                setSelectedReport(report);
-                                setReportsView(ReportsView.MODIFYING);
-                              }}
-                              icon={<SvgEdit />}
-                            >
-                              {ReportsConfigWidget.localization.getLocalizedString(
-                                "ReportsConfigWidget:Modify"
-                              )}
-                            </MenuItem>,
-                            <MenuItem
-                              key={1}
-                              onClick={() => {
-                                setSelectedReport(report);
-                                setShowDeleteModal(true);
-                                close();
-                              }}
-                              icon={<SvgDelete />}
-                            >
-                              {ReportsConfigWidget.localization.getLocalizedString(
-                                "ReportsConfigWidget:Remove"
-                              )}
-                            </MenuItem>,
-                          ]}
+                          state={extractionStates.get(report.id) ?? ExtractionStates.None}
+                          clearExtractionState={() => {
+                            extractionStates.delete(report.id);
+                            bulkExtractor.clearJob(report.id);
+                          }}
                         >
-                          <IconButton styleType="borderless">
-                            <SvgMore />
-                          </IconButton>
-                        </DropdownMenu>
+                          <DropdownMenu
+                            menuItems={(close: () => void) => [
+                              <MenuItem
+                                key={0}
+                                onClick={() => {
+                                  setSelectedReport(report);
+                                  setReportsView(ReportsView.MODIFYING);
+                                }}
+                                icon={<SvgEdit />}
+                              >
+                                {ReportsConfigWidget.localization.getLocalizedString(
+                                  "ReportsConfigWidget:Modify"
+                                )}
+                              </MenuItem>,
+                              <MenuItem
+                                key={1}
+                                onClick={() => {
+                                  setSelectedReport(report);
+                                  setShowDeleteModal(true);
+                                  close();
+                                }}
+                                icon={<SvgDelete />}
+                              >
+                                {ReportsConfigWidget.localization.getLocalizedString(
+                                  "ReportsConfigWidget:Remove"
+                                )}
+                              </MenuItem>,
+                            ]}
+                          >
+                            <IconButton styleType="borderless">
+                              <SvgMore />
+                            </IconButton>
+                          </DropdownMenu>
+                        </ExtractionStatus>
                       </div>
                     }
                   />

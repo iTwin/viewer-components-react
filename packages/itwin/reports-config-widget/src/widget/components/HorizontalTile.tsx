@@ -22,14 +22,31 @@ export interface HorizontalTileProps {
 export const HorizontalTile = (props: HorizontalTileProps) => {
 
   return (
-    <div className={classNames("rcw-horizontal-tile-container", { "rcw-horizontal-tile-selected": props.selected })} onClick={props.onClick} data-testid="rcw-horizontal-tile">
+    <div
+      className={classNames("rcw-horizontal-tile-container", { "rcw-horizontal-tile-selected": props.selected })}
+      onClick={props.onClick}
+      data-testid="rcw-horizontal-tile"
+    >
       <div className="rcw-body-container">
         <div className="rcw-body">
-          <Text className={classNames("rcw-body-text", { "iui-anchor": props.onClickTitle })} onClick={props.onClickTitle} variant="body" title={props.titleTooltip}>{props.title}</Text>
-          {props.subText && <Text className="rcw-body-text" isMuted={true} title={props.subtextToolTip} variant="small">{props.subText}</Text>}
+          <Text className={classNames("rcw-body-text", { "iui-anchor": props.onClickTitle })}
+            onClick={props.onClickTitle}
+            variant="body"
+            title={props.titleTooltip}>{props.title}
+          </Text>
+          {
+            props.subText &&
+            <Text className="rcw-body-text"
+              isMuted={true}
+              title={props.subtextToolTip}
+              variant="small">{props.subText}
+            </Text>
+          }
         </div>
       </div>
-      <div className="rcw-action-button" data-testid="tile-action-button">
+      <div
+        className="rcw-action-button"
+        data-testid="tile-action-button">
         {props.actionGroup}
       </div>
     </div>
