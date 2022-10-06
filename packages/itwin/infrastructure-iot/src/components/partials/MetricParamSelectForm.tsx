@@ -40,7 +40,7 @@ export function MetricParamSelectForm(props: {
     }
   }, [props.observationQueryIndex]);
 
-  // We work with a local copy of the passed in observation query so we don"t modify parent props
+  // We work with a local copy of the passed in observation query so we don't modify parent props
   const [observationQuery, setObservationQuery] = useState<ObservationQuery>(props.observationQuery);
   useEffect(() => {
     setObservationQuery(props.observationQuery);
