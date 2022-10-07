@@ -186,7 +186,7 @@ const addOperator: TokenInterpreter = (ctx: IConverterContext) => {
       break;
     }
 
-    const o2Unary = o2.argCount === 0;
+    const o2Unary = (o2.argCount === 0) || (o2.argCount === 1 && o2.argCountIncremented === true);;
     const op2 = o2Unary ? getUnaryOperator(o2.value) : getBinaryOperator(o2.value);
     const o2Precedence = getOperatorPrecedence(op2);
     if (!(o2Precedence > o1Precedence || (o2Precedence === o1Precedence && o1Associativity === OperatorAssociativity.Left))) {
