@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/infrastructure-iot-react",
+      "comment": "Improved the view zoom behavior when clicking on sensor markers",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/infrastructure-iot-react"
+}
