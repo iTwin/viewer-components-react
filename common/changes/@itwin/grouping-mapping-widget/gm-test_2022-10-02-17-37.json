@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fix readme image render error; Add tests",
+      "comment": "Fixed readme image render error and added tests for Custom UI providers",
       "type": "patch"
     }
   ],

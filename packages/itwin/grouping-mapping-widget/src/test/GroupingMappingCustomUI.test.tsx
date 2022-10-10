@@ -197,7 +197,7 @@ describe("Groupings View with default UIs", () => {
     // Click on 'Add Group' button
     await user.click(addButton[0]);
 
-    // Should have exact 1 add method with given configuration
+    // Should have exactly 1 add method with given configuration
     const addCustom = screen.getAllByTestId("gmw-add-0");
     expect(addCustom).toHaveLength(1);
     expect(addCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
@@ -218,7 +218,7 @@ describe("Groupings View with default UIs", () => {
     // Hover on 'Edit'
     await user.hover(contextMenuItems[0]);
 
-    // Should have exact 1 sub menu item
+    // Should have exactly 1 sub menu item
     const editCustom = screen.getAllByTestId(`gmw-edit-0`);
     expect(editCustom).toHaveLength(1);
     expect(editCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
@@ -319,7 +319,7 @@ describe("Groupings View with default UIs", () => {
     // Click on 'Add Group' button
     await user.click(addButton[0]);
 
-    // Should have exact 1 add method with given configuration
+    // Should have exactly 1 add method with given configuration
     const addCustom = screen.getAllByTestId("gmw-add-0");
     expect(addCustom).toHaveLength(1);
     expect(addCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
