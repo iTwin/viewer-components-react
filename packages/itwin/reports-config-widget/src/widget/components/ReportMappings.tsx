@@ -59,7 +59,7 @@ enum ReportMappingsView {
 }
 
 const fetchReportMappings = async (
-  setReportMappings: React.Dispatch<React.SetStateAction<ReportMappingAndMapping[]>>,
+  setReportMappings: (mappings: ReportMappingAndMapping[]) => void,
   reportId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   apiContext: ReportsApiConfig

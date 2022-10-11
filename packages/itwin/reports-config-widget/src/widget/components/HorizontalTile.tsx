@@ -11,16 +11,15 @@ import classNames from "classnames";
 export interface HorizontalTileProps {
   title: string;
   actionGroup: ReactNode;
-  subText?: string;
+  subText: string;
   onClick?: (e: any) => void;
   onClickTitle?: (e: any) => void;
-  titleTooltip?: string;
+  titleTooltip: string;
   subtextToolTip?: string;
   selected?: boolean;
 }
 
 export const HorizontalTile = (props: HorizontalTileProps) => {
-
   return (
     <div
       className={classNames("rcw-horizontal-tile-container", { "rcw-horizontal-tile-selected": props.selected })}
@@ -29,7 +28,7 @@ export const HorizontalTile = (props: HorizontalTileProps) => {
     >
       <div className="rcw-body-container">
         <div className="rcw-body">
-          <Text className={classNames("rcw-body-text", { "iui-anchor": props.onClickTitle })}
+          <Text className={classNames("rcw-body-text", { "iui-anchor": !!props.onClickTitle })}
             onClick={props.onClickTitle}
             variant="body"
             title={props.titleTooltip}>{props.title}

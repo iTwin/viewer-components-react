@@ -2,21 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { ExtractionClient, ExtractorState, MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
+import { ExtractionClient, ExtractorState, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import type { ReportMapping } from "@itwin/insights-client";
 import { generateUrl, handleError } from "./utils";
-import type { CreateTypeFromInterface } from "./utils";
-import type {
-  GetSingleIModelParams,
-} from "@itwin/imodels-client-management";
-import { Constants, IModelsClient } from "@itwin/imodels-client-management";
-import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ExtractionStates } from "./ExtractionStatus";
+import { STATUS_CHECK_INTERVAL } from "./Constants";
 
-export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
-
-export type ReportMappingAndMapping = ReportMappingType & {
+export type ReportMappingAndMapping = ReportMapping & {
   mappingName: string;
   mappingDescription: string;
   iModelName: string;
@@ -25,24 +18,21 @@ export type ReportMappingAndMapping = ReportMappingType & {
 export default class BulkExtractor {
   private _reportRunIds = new Map<string, string[]>();
   private _reportsClientApi: ReportsClient;
-  private _mappingsClientApi: MappingsClient;
-  private _iModelsClient: IModelsClient;
   private _extractionClientApi: ExtractionClient;
-  private _accessToken: Promise<string>;
-  private _iModelNames = new Map<string, string>();
+  private _accessToken: () => Promise<string>;
+  private _reportStates = new Map<string, ExtractionStates>();
+  private _timeFetched = new Date();
+  private _reportIds: string[];
 
-  constructor(apiConfig: ReportsApiConfig) {
+  constructor(apiConfig: ReportsApiConfig, reportIds: string[]) {
     const url = generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl);
     this._reportsClientApi = new ReportsClient(url);
-    this._mappingsClientApi = new MappingsClient(url);
     this._extractionClientApi = new ExtractionClient(url);
-    this._iModelsClient = new IModelsClient({
-      api: { baseUrl: generateUrl(Constants.api.baseUrl, apiConfig.baseUrl) },
-    });
-    this._accessToken = apiConfig.getAccessToken();
+    this._accessToken = apiConfig.getAccessToken;
+    this._reportIds = reportIds;
   }
 
-  public async getStates(reportIds: string[]): Promise<Map<string, ExtractionStates>> {
+  private async getStates(reportIds: string[]): Promise<Map<string, ExtractionStates>> {
     const stateByReportId = new Map<string, ExtractionStates>();
     const stateByRunId = new Map<string, ExtractorState>();
 
@@ -59,22 +49,37 @@ export default class BulkExtractor {
         if (state) {
           states.push(state);
         } else {
-          const runState = await this.getSingleState(runId, await this._accessToken);
+          const runState = await this.getSingleState(runId, await this._accessToken());
           states.push(runState);
           stateByRunId.set(runId, runState);
         }
       }
-      const finalState = this.getFinalState(states);
+      const finalState = BulkExtractor.getFinalState(states);
       stateByReportId.set(reportId, finalState);
     }
     return stateByReportId;
+  }
+
+  private async fetchStates() {
+    this._reportStates = await this.getStates(this._reportIds);
+    this._timeFetched = new Date();
+  }
+
+  public getState(reportId: string) {
+    if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
+      this.fetchStates().catch((e) =>
+        /* eslint-disable no-console */
+        console.error(e)
+      );
+    }
+    return this._reportStates.get(reportId) ?? ExtractionStates.None;
   }
 
   public clearJob(reportId: string) {
     this._reportRunIds.delete(reportId);
   }
 
-  private getFinalState(states: ExtractorState[]) {
+  private static getFinalState(states: ExtractorState[]) {
     if (states.includes(ExtractorState.Failed))
       return ExtractionStates.Failed;
 
@@ -101,32 +106,36 @@ export default class BulkExtractor {
   }
 
   public async startJobs(reportIds: string[]) {
-    const extractionByIModel = new Map<string, string>();
+    const reportIModelIds = new Map<string, string[]>();
     for (const reportId of reportIds) {
-      const iModels = (await this.fetchReportMappings(reportId)).map((m) => m.imodelId);
-      const uniqueIModels = new Set(iModels);
-
-      const runs: string[] = [];
-      for (const iModelId of uniqueIModels) {
-        const extraction = extractionByIModel.get(iModelId);
-        if (extraction) {
-          runs.push(extraction);
-        } else {
-          const run = await this.runExtraction(iModelId, await this._accessToken);
-          if (run) {
-            runs.push(run.id);
-            extractionByIModel.set(iModelId, run.id);
-          }
-        }
-      }
-      this._reportRunIds.set(reportId, runs);
+      const reportIModels = await this.fetchReportIModels(reportId);
+      reportIModelIds.set(reportId, reportIModels);
+      this._reportStates.set(reportId, ExtractionStates.Starting);
     }
+    const iModels = new Set(Array.from(reportIModelIds.values()).flat());
+    const extractionMap =
+      Array.from(iModels).map(async (iModel): Promise<[string, string | undefined]> => {
+        const run = await this.runExtraction(iModel);
+        return [iModel, run?.id];
+      });
+
+    const extractionByIModel = new Map<string, string | undefined>(await Promise.all(extractionMap));
+    reportIds.forEach((reportId) => {
+      const reportIModels = reportIModelIds.get(reportId)!;
+      const runs: string[] = [];
+      reportIModels.forEach((iModelId) => {
+        const runId = extractionByIModel.get(iModelId);
+        if (runId)
+          runs.push(runId);
+      });
+      this._reportRunIds.set(reportId, runs);
+    });
   }
 
-  private async runExtraction(iModelId: string, accessToken: string) {
+  private async runExtraction(iModelId: string) {
     try {
       const response = await this._extractionClientApi.runExtraction(
-        accessToken,
+        await this._accessToken(),
         iModelId
       );
       return response;
@@ -136,51 +145,11 @@ export default class BulkExtractor {
     return undefined;
   }
 
-  private async fetchReportMappings(
-    reportId: string
-  ): Promise<ReportMappingAndMapping[]> {
-    try {
-      const reportMappings = await this._reportsClientApi.getReportMappings(
-        await this._accessToken,
-        reportId
-      );
-      const authorization =
-        AccessTokenAdapter.toAuthorizationCallback(await this._accessToken);
-
-      const reportMappingsAndMapping = await Promise.all(
-        reportMappings.map(async (reportMapping) => {
-          const iModelId = reportMapping.imodelId;
-          let iModelName = "";
-          const mapping = await this._mappingsClientApi.getMapping(
-            await this._accessToken,
-            iModelId,
-            reportMapping.mappingId
-          );
-          if (this._iModelNames.has(iModelId)) {
-            iModelName = this._iModelNames.get(iModelId) ?? "";
-          } else {
-            const getSingleParams: GetSingleIModelParams = {
-              authorization,
-              iModelId,
-            };
-            const iModel = await this._iModelsClient.iModels.getSingle(getSingleParams);
-            iModelName = iModel.displayName;
-            this._iModelNames.set(iModelId, iModelName);
-          }
-          const reportMappingAndMapping: ReportMappingAndMapping = {
-            ...reportMapping,
-            iModelName,
-            mappingName: mapping.mappingName,
-            mappingDescription: mapping.description ?? "",
-          };
-          return reportMappingAndMapping;
-        }) ?? []
-      );
-
-      return reportMappingsAndMapping;
-    } catch (error: any) {
-      handleError(error.status);
-    }
-    return [];
+  private async fetchReportIModels(reportId: string) {
+    const reportMappings = await this._reportsClientApi.getReportMappings(
+      await this._accessToken(),
+      reportId
+    );
+    return reportMappings.map((x) => x.imodelId);
   }
 }

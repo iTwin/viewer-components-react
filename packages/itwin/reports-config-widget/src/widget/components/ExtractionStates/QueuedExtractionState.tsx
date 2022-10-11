@@ -6,17 +6,15 @@ import React from "react";
 import { SvgStatusPending } from "@itwin/itwinui-icons-color-react";
 import { ReportsConfigWidget } from "../../../ReportsConfigWidget";
 
-export const QueuedExtractionState = () => {
-  return (
-    <div
-      title={ReportsConfigWidget.localization.getLocalizedString(
-        "ReportsConfigWidget:Queued"
-      )}
-      className="rcw-extraction-status"
-    >
-      <div className="rcw-status-icon">
-        <SvgStatusPending />
-      </div>
+export const QueuedExtractionState = () => (
+  <div
+    title={ReportsConfigWidget.localization.getLocalizedString(
+      "ReportsConfigWidget:Queued"
+    )}
+    className="rcw-extraction-status"
+  >
+    <div className="rcw-status-icon">
+      <SvgStatusPending />
     </div>
-  );
-};
+  </div>
+);

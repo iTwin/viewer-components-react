@@ -7,26 +7,28 @@ import { SvgStatusError } from "@itwin/itwinui-icons-color-react";
 import { ReportsConfigWidget } from "../../../ReportsConfigWidget";
 import { ANIMATION_DELAY, ANIMATION_DURATION } from "../Constants";
 
-export const FailedExtractionState = (animation: string, onAnimationEnd: () => void) => {
+interface ExtractionStateProps {
+  animation: boolean;
+  onAnimationEnd: () => void;
+}
 
-  return (
+export const FailedExtractionState = ({ animation, onAnimationEnd }: ExtractionStateProps) => (
+  <div
+    title={ReportsConfigWidget.localization.getLocalizedString(
+      "ReportsConfigWidget:Failed"
+    )}
+    className="rcw-extraction-status"
+  >
     <div
-      title={ReportsConfigWidget.localization.getLocalizedString(
-        "ReportsConfigWidget:Failed"
-      )}
-      className="rcw-extraction-status"
+      className={`rcw-status-icon`}
+      style={{
+        animationName: animation ? "rcw-fade-out" : "",
+        animationDelay: ANIMATION_DELAY,
+        animationDuration: ANIMATION_DURATION,
+      }}
+      onAnimationEnd={onAnimationEnd}
     >
-      <div
-        className={`rcw-status-icon`}
-        style={{
-          animationName: animation,
-          animationDelay: ANIMATION_DELAY,
-          animationDuration: ANIMATION_DURATION,
-        }}
-        onAnimationEnd={onAnimationEnd}
-      >
-        <SvgStatusError />
-      </div>
+      <SvgStatusError />
     </div>
-  );
-};
+  </div>
+);

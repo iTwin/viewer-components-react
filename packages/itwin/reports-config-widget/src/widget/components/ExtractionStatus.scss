@@ -6,7 +6,9 @@
 
 .rcw-extraction-status {
   align-items: center;
-  margin: auto $iui-s;
+  margin: auto $iui-s * 2;
+  height: 38px;
+  display: flex;
 
   .rcw-status-icon {
     width: $iui-icons-default;

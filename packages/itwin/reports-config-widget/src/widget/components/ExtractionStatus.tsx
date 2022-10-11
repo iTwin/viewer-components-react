@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import "./ExtractionStatus.scss";
 import { STATUS_CHECK_INTERVAL } from "./Constants";
 import { StartingExtractionState } from "./ExtractionStates/StartingExtractionState";
-import { FetchingUpdateExtractionState } from "./ExtractionStates/FetchingUpdateExtractionState";
 import { RunningExtractionState } from "./ExtractionStates/RunningExtractionState";
 import { FailedExtractionState } from "./ExtractionStates/FailedExtractionState";
 import { QueuedExtractionState } from "./ExtractionStates/QueuedExtractionState";
@@ -16,7 +15,6 @@ import { SucceededExtractionState } from "./ExtractionStates/SucceededExtraction
 export enum ExtractionStates {
   None,
   Starting,
-  FetchingUpdate,
   Queued,
   Running,
   Succeeded,
@@ -26,12 +24,10 @@ export enum ExtractionStates {
 interface ExtractionStatusProps {
   state: ExtractionStates;
   clearExtractionState: () => void;
-  children?: React.ReactNode;
 }
 
 export const ExtractionStatus = ({
   state,
-  children,
   clearExtractionState,
 }: ExtractionStatusProps) => {
   const [fadeOut, setFadeOut] = useState<boolean>(false);
@@ -53,18 +49,22 @@ export const ExtractionStatus = ({
 
   switch (state) {
     case ExtractionStates.Starting:
-      return StartingExtractionState();
-    case ExtractionStates.FetchingUpdate:
-      return FetchingUpdateExtractionState();
+      return (<StartingExtractionState />);
     case ExtractionStates.Queued:
-      return QueuedExtractionState();
+      return (<QueuedExtractionState />);
     case ExtractionStates.Running:
-      return RunningExtractionState();
+      return (<RunningExtractionState />);
     case ExtractionStates.Succeeded:
-      return SucceededExtractionState(fadeOut ? "rcw-fade-out" : "", onAnimationEnd);
+      return (<SucceededExtractionState
+        animation={fadeOut}
+        onAnimationEnd={onAnimationEnd}
+      />);
     case ExtractionStates.Failed:
-      return FailedExtractionState(fadeOut ? "rcw-fade-out" : "", onAnimationEnd);
+      return (<FailedExtractionState
+        animation={fadeOut}
+        onAnimationEnd={onAnimationEnd}
+      />);
     default:
-      return <>{children}</>;
+      return <></>;
   }
 };
