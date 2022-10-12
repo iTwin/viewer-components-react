@@ -82,7 +82,7 @@ const extractPrimitives = (
       primitiveNavigationClass,
       actualECClassName,
       parentPropertyClassName,
-      key: `${actualECClassName}__${newPropertyTraversal.join("_")}`,
+      key: `${propertyField.category.label}_${actualECClassName}_${newPropertyTraversal.join("_")}`,
       categoryLabel: propertyField.category.label,
     }
   );
