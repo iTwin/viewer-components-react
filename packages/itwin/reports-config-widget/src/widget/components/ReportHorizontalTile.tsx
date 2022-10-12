@@ -90,7 +90,7 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
           className="rcw-action-button"
           data-testid="tile-action-button">
           <DropdownMenu
-            menuItems={() => [
+            menuItems={(close: () => void) => [
               <MenuItem
                 key={0}
                 onClick={props.onClickModify}
@@ -102,7 +102,10 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
               </MenuItem>,
               <MenuItem
                 key={1}
-                onClick={props.onClickDelete}
+                onClick={() => {
+                  props.onClickDelete();
+                  close();
+                }}
                 icon={<SvgDelete />}
               >
                 {ReportsConfigWidget.localization.getLocalizedString(

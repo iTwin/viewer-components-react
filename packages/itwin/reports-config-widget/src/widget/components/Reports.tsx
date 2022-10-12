@@ -200,7 +200,6 @@ export const Reports = () => {
                     onClickDelete={() => {
                       setSelectedReport(report);
                       setShowDeleteModal(true);
-                      close();
                     }}
                     onClickModify={() => {
                       setSelectedReport(report);
