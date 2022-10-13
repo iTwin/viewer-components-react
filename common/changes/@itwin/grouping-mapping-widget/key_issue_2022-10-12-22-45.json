@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed key issue in group properties.",
+      "comment": "Fixed key uniqueness issue in group properties.",
       "type": "patch"
     }
   ],
