@@ -1,6 +1,13 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Mon, 26 Sep 2022 17:13:11 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Oct 2022 17:36:46 GMT and should not be manually modified.
+
+## 0.10.2
+Mon, 17 Oct 2022 17:36:46 GMT
+
+### Patches
+
+- Added launch configs to debug tests properly. Change the minute/second symbols to match what is being used in IModelApp.quantityFormatter. Fix inconsistencies with the slope formatting.
 
 ## 0.10.1
 Mon, 26 Sep 2022 17:13:11 GMT
