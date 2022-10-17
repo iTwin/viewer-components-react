@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Redesigned group properties UI.",
-      "type": "minor"
+      "comment": "Fixed readme image render error and added tests for Custom UI providers",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/grouping-mapping-widget"

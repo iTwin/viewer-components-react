@@ -38,7 +38,7 @@ This package provides an interface to define your own custom UI or callback func
 
 You can use your own UI component to define group creation method.
 
-An example of grouping custom UI, [ManualGroupingCustomUI](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/grouping-mapping-widget/src/widget/components/customUI/ManualGroupingCustomUI.tsx) helps user to manually define ECSQL query for groups.
+An example of grouping custom UI, [ManualGroupingCustomUI](./src/widget/components/customUI/ManualGroupingCustomUI.tsx) helps user to manually define ECSQL query for groups.
 
 In `GroupingCustomUIProps`:
 
