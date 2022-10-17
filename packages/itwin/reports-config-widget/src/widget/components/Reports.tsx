@@ -80,11 +80,13 @@ export const Reports = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
-  const bulkExtractor = useMemo(() =>
-    new BulkExtractor(apiConfig, reports.map((r) => r.id)), [apiConfig, reports]
+  const bulkExtractor = useMemo(
+    () => new BulkExtractor(apiConfig, reports.map((r) => r.id)),
+    [apiConfig, reports]
   );
-  const jobStartEvent = useMemo(() =>
-    new BeEvent<(reportId: string) => void>(), []
+  const jobStartEvent = useMemo(
+    () => new BeEvent<(reportId: string) => void>(),
+    []
   );
 
   useEffect(() => {

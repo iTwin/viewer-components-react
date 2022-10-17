@@ -21,9 +21,9 @@ import {
   SvgMore,
 } from "@itwin/itwinui-icons-react";
 import { HorizontalTile } from "./HorizontalTile";
+import type { HorizontalTileProps } from "./HorizontalTile";
 
-export interface ReportHorizontalTileProps {
-  onClickTitle: (e: any) => void;
+export interface ReportHorizontalTileProps extends Pick<HorizontalTileProps, "onClickTitle"> {
   selected: boolean;
   onSelectionChange: (reportId: string, controlPressed: boolean) => void;
   bulkExtractor: BulkExtractor;
@@ -69,8 +69,8 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
     }
   }, [props.report.id, props.bulkExtractor, jobStarted]);
 
-  const onClickTile = (e: any) => {
-    if (e?.target?.className?.toString().split(" ").includes("rcw-horizontal-tile-container")) {
+  const onClickTile = (e: React.MouseEvent) => {
+    if (e?.currentTarget.className?.toString().split(" ").includes("rcw-horizontal-tile-container")) {
       props.onSelectionChange(props.report.id, e.ctrlKey);
     }
   };
