@@ -93,19 +93,26 @@ export class FormatterUtils {
     return FormatterUtils.formatCoordinatesXYWithSpec(point, coordSpec);
   }
 
-  /** Formats the input angle into DD°MM′SS.SS″ format */
+  /** Formats the input angle into DD°MM'SS.SS" format.
+   * NOTE: uses the same symbols as the IModelApp's quantityFormatter for minute and second.
+   * The minute symbol is an apostrophe ' while it should be a prime (\u2032)
+   * The second symbol is a quotation mark " while it should be a double prime (\u2033)
+   */
   public static formatAngleToDMS(angleInDegrees: number): string {
-    const d = Math.trunc(angleInDegrees);
-    const m = Math.trunc((angleInDegrees - d) * 60);
-    const s = ((angleInDegrees - d) * 60 - m) * 60;
+    const isNegative = angleInDegrees < 0;
+    angleInDegrees = Math.abs(angleInDegrees);
 
-    let str = "";
+    const d = Math.trunc(angleInDegrees);
+    const m = Math.abs(Math.trunc((angleInDegrees - d) * 60));
+    const s = Math.abs(((angleInDegrees - d) * 60 - m) * 60);
+
+    let str = isNegative ? "-" : "";
     str += d;
     str += "\xB0";
     str += `00${m}`.slice(-2);
-    str += "\u2032";
+    str += "\u0027";
     str += `00000${s.toFixed(2)}`.slice(-5);
-    str += "\u2033";
+    str += "\u0022";
     return str;
   }
 
@@ -119,10 +126,10 @@ export class FormatterUtils {
         ? "MeasureTools:Generic.longitudeEastSuffix"
         : "MeasureTools:Generic.longitudeWestSuffix";
 
-    let str = FormatterUtils.formatAngleToDMS(Math.abs(c.latitude));
+    let str = FormatterUtils.formatAngleToDMS(Math.abs(c.latitudeDegrees));
     str += MeasureTools.localization.getLocalizedString(latSuffixKey);
     str += ", ";
-    str += FormatterUtils.formatAngleToDMS(Math.abs(c.longitude));
+    str += FormatterUtils.formatAngleToDMS(Math.abs(c.longitudeDegrees));
     str += MeasureTools.localization.getLocalizedString(longSuffixKey);
     return str;
   }
@@ -161,14 +168,17 @@ export class FormatterUtils {
     slopeInPercent: number,
     withSlopeRatio: boolean
   ): string {
-    if (!withSlopeRatio || 0.0 === slopeInPercent)
-      return `${slopeInPercent.toFixed(2)} %`;
 
-    const oneOnSlope = 100.0 / Math.abs(slopeInPercent);
+    const fSlope = `${slopeInPercent.toFixed(2)}%`;
+
+    if (!withSlopeRatio || 0.0 === slopeInPercent)
+      return fSlope;
+
+    const oneOverSlope = 100.0 / Math.abs(slopeInPercent);
     const sign = slopeInPercent < 0.0 ? "-" : "";
-    return `${slopeInPercent.toFixed(2)}%  (${sign}1 : ${oneOnSlope.toFixed(
-      3
-    )})`;
+    const fSlopeRatio = `${sign}1 : ${oneOverSlope.toFixed(3)}`;
+
+    return `${fSlope} (${fSlopeRatio})`;
   }
 
   public static async formatStation(station: number): Promise<string> {

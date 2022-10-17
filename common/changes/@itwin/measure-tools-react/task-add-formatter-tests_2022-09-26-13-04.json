@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/measure-tools-react",
+      "comment": "Added launch configs to debug tests properly. Change the minute/second symbols to match what is being used in IModelApp.quantityFormatter. Fix inconsistencies with the slope formatting.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/measure-tools-react"
+}
