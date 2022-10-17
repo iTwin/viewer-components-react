@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import React from "react";
 import type BulkExtractor from "./BulkExtractor";
 import { ExtractionStates, ExtractionStatus } from "./ExtractionStatus";
@@ -25,7 +25,7 @@ import { HorizontalTile } from "./HorizontalTile";
 export interface ReportHorizontalTileProps {
   onClickTitle: (e: any) => void;
   selected: boolean;
-  setSelectedReports: (value: React.SetStateAction<Report[]>) => void;
+  onSelectionChange: (reportId: string, controlPressed: boolean) => void;
   bulkExtractor: BulkExtractor;
   jobStartEvent: BeEvent<(reportId: string) => void>;
   report: Report;
@@ -36,8 +36,9 @@ export interface ReportHorizontalTileProps {
 export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
   const [jobStarted, setJobStarted] = useState<boolean>(false);
   const [extractionState, setExtractionState] = useState<ExtractionStates>(ExtractionStates.None);
+  const interval = useRef<number>();
 
-  if (props.jobStartEvent)
+  useEffect(() => {
     props.jobStartEvent.addListener((startedReportId: string) => {
       if (startedReportId === props.report.id) {
         setExtractionState(ExtractionStates.Starting);
@@ -45,9 +46,15 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
       }
     });
 
+    return function cleanup() {
+      props.jobStartEvent.clear();
+    };
+  }, [props.jobStartEvent, props.report.id]);
+
   useEffect(() => {
     if (jobStarted) {
-      const interval = window.setInterval(async () => {
+      window.clearInterval(interval.current);
+      interval.current = window.setInterval(async () => {
         const state = props.bulkExtractor.getState(props.report.id);
         if (state) {
           setExtractionState(state);
@@ -56,23 +63,15 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
           }
         }
       }, STATUS_CHECK_INTERVAL);
-      return () => window.clearInterval(interval);
+      return () => window.clearInterval(interval.current);
+    } else {
+      return () => window.clearInterval(interval.current);
     }
-    return;
   }, [props.report.id, props.bulkExtractor, jobStarted]);
 
   const onClickTile = (e: any) => {
     if (e?.target?.className?.toString().split(" ").includes("rcw-horizontal-tile-container")) {
-      if (!e.ctrlKey)
-        props.setSelectedReports([]);
-
-      props.setSelectedReports((sr) =>
-        sr.some((r) => props.report.id === r.id)
-          ? sr.filter(
-            (r) => props.report.id !== r.id
-          )
-          : [...sr, props.report]
-      );
+      props.onSelectionChange(props.report.id, e.ctrlKey);
     }
   };
 

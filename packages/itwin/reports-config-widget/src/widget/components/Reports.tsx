@@ -69,7 +69,7 @@ const fetchReports = async (
 export const Reports = () => {
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const apiConfig = useReportsApiConfig();
-  const [selectedReports, setSelectedReports] = useState<Report[]>([]);
+  const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [reportsView, setReportsView] = useState<ReportsView>(
     ReportsView.REPORTS
@@ -81,8 +81,11 @@ export const Reports = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
   const bulkExtractor = useMemo(() =>
-    new BulkExtractor(apiConfig, reports.map((r) => r.id)), [apiConfig, reports]);
-  const jobStartEvent = new BeEvent<(reportId: string) => void>();
+    new BulkExtractor(apiConfig, reports.map((r) => r.id)), [apiConfig, reports]
+  );
+  const jobStartEvent = useMemo(() =>
+    new BeEvent<(reportId: string) => void>(), []
+  );
 
   useEffect(() => {
     void fetchReports(setReports, iTwinId, setIsLoading, apiConfig);
@@ -108,6 +111,25 @@ export const Reports = () => {
       ),
     [reports, searchValue]
   );
+
+  const onSelectionChange = (reportId: string, control: boolean) => {
+    if (!control)
+      setSelectedReportIds([]);
+
+    setSelectedReportIds((sr) =>
+      sr.some((r) => reportId === r)
+        ? sr.filter(
+          (r) => reportId !== r
+        )
+        : [...sr, reportId]
+    );
+  };
+
+  const updateDatasets = useCallback(async () => {
+    selectedReportIds.map((reportId) => jobStartEvent.raiseEvent(reportId));
+    setSelectedReportIds([]);
+    await bulkExtractor.startJobs(selectedReportIds);
+  }, [selectedReportIds, jobStartEvent, bulkExtractor]);
 
   switch (reportsView) {
     case ReportsView.ADDING:
@@ -149,12 +171,8 @@ export const Reports = () => {
                 title={ReportsConfigWidget.localization.getLocalizedString(
                   "ReportsConfigWidget:UpdateDatasets"
                 )}
-                onClick={async () => {
-                  selectedReports.map((report) => jobStartEvent.raiseEvent(report.id));
-                  setSelectedReports([]);
-                  await bulkExtractor.startJobs(selectedReports.map((report) => report.id));
-                }}
-                disabled={selectedReports.length === 0}
+                onClick={updateDatasets}
+                disabled={selectedReportIds.length === 0}
               >
                 <SvgRefresh />
               </IconButton>
@@ -205,8 +223,8 @@ export const Reports = () => {
                       setSelectedReport(report);
                       setReportsView(ReportsView.MODIFYING);
                     }}
-                    setSelectedReports={setSelectedReports}
-                    selected={selectedReports.some((r) => report.id === r.id)}
+                    onSelectionChange={onSelectionChange}
+                    selected={selectedReportIds.some((reportId) => report.id === reportId)}
                   />
                 ))}
               </div>

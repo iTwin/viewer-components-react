@@ -65,7 +65,7 @@ export default class BulkExtractor {
     this._timeFetched = new Date();
   }
 
-  public getState(reportId: string) {
+  public getState(reportId: string): ExtractionStates {
     if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
       this.fetchStates().catch((e) =>
         /* eslint-disable no-console */
@@ -79,7 +79,7 @@ export default class BulkExtractor {
     this._reportRunIds.delete(reportId);
   }
 
-  private static getFinalState(states: ExtractorState[]) {
+  private static getFinalState(states: ExtractorState[]): ExtractionStates {
     if (states.includes(ExtractorState.Failed))
       return ExtractionStates.Failed;
 
@@ -116,7 +116,7 @@ export default class BulkExtractor {
     const extractionMap =
       Array.from(iModels).map(async (iModel): Promise<[string, string | undefined]> => {
         const run = await this.runExtraction(iModel);
-        return [iModel, run?.id];
+        return [iModel, run];
       });
 
     const extractionByIModel = new Map<string, string | undefined>(await Promise.all(extractionMap));
@@ -132,13 +132,13 @@ export default class BulkExtractor {
     });
   }
 
-  private async runExtraction(iModelId: string) {
+  private async runExtraction(iModelId: string): Promise<string | undefined> {
     try {
       const response = await this._extractionClientApi.runExtraction(
         await this._accessToken(),
         iModelId
       );
-      return response;
+      return response.id;
     } catch (error: any) {
       handleError(error.status);
     }
