@@ -60,7 +60,7 @@ export default class BulkExtractor {
     return stateByReportId;
   }
 
-  private async fetchStates() {
+  private async fetchStates(): Promise<void> {
     this._reportStates = await this.getStates(this._reportIds);
     this._timeFetched = new Date();
   }
@@ -75,7 +75,7 @@ export default class BulkExtractor {
     return this._reportStates.get(reportId) ?? ExtractionStates.None;
   }
 
-  public clearJob(reportId: string) {
+  public clearJob(reportId: string): void {
     this._reportRunIds.delete(reportId);
   }
 
@@ -105,7 +105,7 @@ export default class BulkExtractor {
     return ExtractorState.Failed;
   }
 
-  public async startJobs(reportIds: string[]) {
+  public async startJobs(reportIds: string[]): Promise<void> {
     const reportIModelIds = new Map<string, string[]>();
     for (const reportId of reportIds) {
       const reportIModels = await this.fetchReportIModels(reportId);
@@ -145,7 +145,7 @@ export default class BulkExtractor {
     return undefined;
   }
 
-  private async fetchReportIModels(reportId: string) {
+  private async fetchReportIModels(reportId: string): Promise<string[]> {
     const reportMappings = await this._reportsClientApi.getReportMappings(
       await this._accessToken(),
       reportId
