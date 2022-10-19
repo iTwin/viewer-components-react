@@ -2,6 +2,18 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.10.3",
+      "tag": "@itwin/measure-tools-react_v0.10.3",
+      "date": "Wed, 19 Oct 2022 14:17:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "customize widget placement in ui items provider"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.2",
       "tag": "@itwin/measure-tools-react_v0.10.2",
       "date": "Mon, 17 Oct 2022 17:36:46 GMT",
