@@ -2,6 +2,24 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.8.2",
+      "tag": "@itwin/grouping-mapping-widget_v0.8.2",
+      "date": "Mon, 17 Oct 2022 17:36:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed readme image render error and added tests for Custom UI providers"
+          },
+          {
+            "comment": "Fixed key uniqueness issue in group properties."
+          },
+          {
+            "comment": "Fixed formula interpreter sometimes not recognising unary operators leading to errors in formula order."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.1",
       "tag": "@itwin/grouping-mapping-widget_v0.8.1",
       "date": "Thu, 29 Sep 2022 19:04:42 GMT",
