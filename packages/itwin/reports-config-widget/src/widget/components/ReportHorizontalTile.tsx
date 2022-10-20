@@ -46,7 +46,7 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
       }
     });
 
-    return function cleanup() {
+    return () => {
       props.jobStartEvent.clear();
     };
   }, [props.jobStartEvent, props.report.id]);
@@ -63,10 +63,8 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
           }
         }
       }, STATUS_CHECK_INTERVAL);
-      return () => window.clearInterval(interval.current);
-    } else {
-      return () => window.clearInterval(interval.current);
     }
+    return () => window.clearInterval(interval.current);
   }, [props.report.id, props.bulkExtractor, jobStarted]);
 
   const onClickTile = (e: React.MouseEvent) => {

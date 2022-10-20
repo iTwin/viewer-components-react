@@ -113,13 +113,14 @@ export default class BulkExtractor {
       this._reportStates.set(reportId, ExtractionStates.Starting);
     }
     const iModels = new Set(Array.from(reportIModelIds.values()).flat());
-    const extractionMap =
+    const extractionMapPromise =
       Array.from(iModels).map(async (iModel): Promise<[string, string | undefined]> => {
         const run = await this.runExtraction(iModel);
         return [iModel, run];
       });
 
-    const extractionByIModel = new Map<string, string | undefined>(await Promise.all(extractionMap));
+    const extractionMap = await Promise.all(extractionMapPromise);
+    const extractionByIModel = new Map<string, string | undefined>(extractionMap);
     reportIds.forEach((reportId) => {
       const reportIModels = reportIModelIds.get(reportId)!;
       const runs: string[] = [];
