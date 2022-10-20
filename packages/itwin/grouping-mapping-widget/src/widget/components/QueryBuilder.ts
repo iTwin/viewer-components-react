@@ -512,7 +512,7 @@ export class QueryBuilder {
       return "";
     }
 
-    let querySegments: string[] = [];
+    const querySegments: string[] = [];
     for (const union of this.query.unions) {
       const baseClass = union.classes[0];
       const baseClassName = baseClass.className;
@@ -520,8 +520,8 @@ export class QueryBuilder {
         ? `${baseClassName}.Element.id`
         : `${baseClassName}.ECInstanceId`;
 
-        var selectSegment = `SELECT ${baseIdName}${baseClass.isAspect ? " ECInstanceId" : ""} FROM ${baseClassName}`;
-        querySegments.push(selectSegment);
+      const selectSegment = `SELECT ${baseIdName}${baseClass.isAspect ? " ECInstanceId" : ""} FROM ${baseClassName}`;
+      querySegments.push(selectSegment);
 
       if (union.classes.length > 1) {
         for (let i = 1; i < union.classes.length; i++) {
@@ -531,14 +531,14 @@ export class QueryBuilder {
             ? `${joinClassName}.Element.id`
             : `${joinClassName}.ECInstanceId`;
 
-          var joinSegment = joinClass.isRelational
-          ? ` JOIN ${joinClassName}`
-          : ` JOIN ${joinClassName} ON ${joinIdName} = ${baseIdName}`;
+          const joinSegment = joinClass.isRelational
+            ? ` JOIN ${joinClassName}`
+            : ` JOIN ${joinClassName} ON ${joinIdName} = ${baseIdName}`;
           querySegments.push(joinSegment);
 
           for (let j = 0; j < joinClass.properties.length; j++) {
-            let prefix = j === 0 && joinClass.isRelational ? "ON" : "AND";
-            var propertySegment = this._propertySegment(joinClassName, joinClass.properties[j], prefix);
+            const prefix = j === 0 && joinClass.isRelational ? "ON" : "AND";
+            const propertySegment = this._propertySegment(joinClassName, joinClass.properties[j], prefix);
             querySegments.push(propertySegment);
           }
           // when base is regular property, link base to first joined relational property
@@ -548,10 +548,10 @@ export class QueryBuilder {
         }
       }
 
-      var whereSegment = this._whereSegment(baseClass, baseClassName);
+      const whereSegment = this._whereSegment(baseClass, baseClassName);
       querySegments.push(whereSegment);
 
-      var unionSegment = " UNION ";
+      const unionSegment = " UNION ";
       querySegments.push(unionSegment);
     }
 
@@ -563,10 +563,10 @@ export class QueryBuilder {
     baseClass: QueryClass,
     baseClassName: string
   ): string => {
-    var queryString = ""
+    let queryString = "";
     const properties = baseClass.properties;
     for (let i = 0; i < properties.length; i++) {
-      let prefix = i === 0 ? "WHERE" : "AND";
+      const prefix = i === 0 ? "WHERE" : "AND";
       queryString += this._propertySegment(baseClassName, properties[i], prefix);
     }
 
