@@ -12,7 +12,7 @@ import {
   ConditionalBooleanValue, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
   ToolbarOrientation, ToolbarUsage,
 } from "@itwin/appui-abstract";
-import type { ToolItemDef } from "@itwin/appui-react";
+import { ToolItemDef, SyncUiEventId } from "@itwin/appui-react";
 import { ToolbarHelper } from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
@@ -21,6 +21,9 @@ import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions";
 import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget";
 import { AbstractZoneLocation } from "@itwin/appui-abstract";
 import { UiFramework } from "@itwin/appui-react";
+
+import { ViewHelper } from "../api/ViewHelper";
+import { IModelApp } from "@itwin/core-frontend";
 
 export interface MeasureToolsUiProviderOptions {
   itemPriority?: number;
@@ -64,6 +67,10 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       }
 
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
+        // don't display measurement tools on a sheet view
+        const vp = IModelApp.viewManager.selectedView;
+        if (vp && ViewHelper.isSheetView(vp))
+          return [];
         return [
           ToolbarItemUtilities.createGroupButton(
             "measure-tools-toolbar",
@@ -80,10 +87,14 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
 
       if (tools.length > 0 && toolbarOrientation === ToolbarOrientation.Horizontal) {
         const isHidden = new ConditionalBooleanValue(
-          () => !MeasurementUIEvents.isClearMeasurementButtonVisible,
+          () => {
+            const vp = IModelApp.viewManager.selectedView;
+            return (vp ? !MeasurementUIEvents.isClearMeasurementButtonVisible || ViewHelper.isSheetView(vp) : !MeasurementUIEvents.isClearMeasurementButtonVisible);
+          },
           [
             MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
             MeasurementSyncUiEventId.DynamicMeasurementChanged,
+            SyncUiEventId.ViewStateChanged
           ],
         );
         return [
