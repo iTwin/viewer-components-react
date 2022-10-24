@@ -34,6 +34,18 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public readonly id = "MeasureToolsUiItemsProvider";
   private _props?: MeasureToolsUiProviderOptions;
 
+  private isHidden = new ConditionalBooleanValue(
+    () => {
+      const vp = IModelApp.viewManager.selectedView;
+      return vp ? (ViewHelper.isSheetView(vp) && !MeasurementUIEvents.isClearMeasurementButtonVisible) : !MeasurementUIEvents.isClearMeasurementButtonVisible;
+    },
+    [
+      MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
+      MeasurementSyncUiEventId.DynamicMeasurementChanged,
+      SyncUiEventId.ViewStateChanged,
+    ],
+  )
+
   constructor(props?: MeasureToolsUiProviderOptions) {
     this._props = props;
   }
@@ -67,10 +79,6 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       }
 
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
-        // don't display measurement tools on a sheet view
-        const vp = IModelApp.viewManager.selectedView;
-        if (vp && ViewHelper.isSheetView(vp))
-          return [];
         return [
           ToolbarItemUtilities.createGroupButton(
             "measure-tools-toolbar",
@@ -80,29 +88,18 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
               "MeasureTools:MeasurementGroupButton.tooltip",
             ),
             ToolbarHelper.constructChildToolbarItems(tools),
-            { groupPriority: this._props?.groupPriority ?? 10 },
+            { groupPriority: this._props?.groupPriority ?? 10, isHidden: this.isHidden },
           ),
         ];
       }
 
       if (tools.length > 0 && toolbarOrientation === ToolbarOrientation.Horizontal) {
-        const isHidden = new ConditionalBooleanValue(
-          () => {
-            const vp = IModelApp.viewManager.selectedView;
-            return (vp ? !MeasurementUIEvents.isClearMeasurementButtonVisible || ViewHelper.isSheetView(vp) : !MeasurementUIEvents.isClearMeasurementButtonVisible);
-          },
-          [
-            MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
-            MeasurementSyncUiEventId.DynamicMeasurementChanged,
-            SyncUiEventId.ViewStateChanged
-          ],
-        );
         return [
           ToolbarHelper.createToolbarItemFromItemDef(
             100,
             MeasureToolDefinitions.clearMeasurementsToolCommand,
             {
-              isHidden,
+              isHidden: this.isHidden,
             },
           ),
         ];
