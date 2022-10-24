@@ -7,11 +7,13 @@
 const path = require("path");
 const glob = require("glob");
 
+const libFolder = path.resolve(__dirname, "lib/cjs");
+
 module.exports = {
   mode: "development",
-  entry: glob.sync(path.resolve(__dirname, "lib/cjs/**/*.test.js")),
+  entry: glob.sync(path.resolve(libFolder, "test/**/*.test.js")),
   output: {
-    path: path.resolve(__dirname, "lib/test/webpack"),
+    path: path.resolve(libFolder, "test/webpack"),
     filename: "bundled-tests.js",
     devtoolModuleFilenameTemplate: "file:///[absolute-resource-path]"
   },

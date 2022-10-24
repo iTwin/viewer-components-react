@@ -2,6 +2,18 @@
   "name": "@itwin/reports-config-widget-react",
   "entries": [
     {
+      "version": "0.0.8",
+      "tag": "@itwin/reports-config-widget-react_v0.0.8",
+      "date": "Thu, 29 Sep 2022 19:04:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed text overflow issue."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.0.7",
       "tag": "@itwin/reports-config-widget-react_v0.0.7",
       "date": "Mon, 12 Sep 2022 19:50:36 GMT",

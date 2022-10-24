@@ -29,3 +29,87 @@ import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
   uiProviders={[new GroupingMappingProvider()]}
 />
 ```
+
+## Custom UI
+
+This package provides an interface to define your own custom UI or callback functions in grouping mapping widget. There are different types of custom UIs provided.
+
+### Grouping Custom UI
+
+You can use your own UI component to define group creation method.
+
+An example of grouping custom UI, [ManualGroupingCustomUI](./src/widget/components/customUI/ManualGroupingCustomUI.tsx) helps user to manually define ECSQL query for groups.
+
+In `GroupingCustomUIProps`:
+
+- `updateQuery` is used to run the query and visualize results in the viewer.
+- `isUpdating` keeps track of the status of query execution.
+- `resetView` enables you to reset the viewer state.
+
+To configure your own grouping custom UI, you need to give it:
+
+- a `type` as `GroupingMappingCustomUIType.Grouping`
+- a `name` as identifier
+- a `displayLabel` which will be shown in the 'Add Group' dropdown list
+- a `uiComponent` like above
+- an optional `icon`
+
+You can define your UI provider as follows in the GroupingMappingProvider:
+
+```tsx
+new GroupingMappingProvider({
+  customUIs: [
+    {
+      type: GroupingMappingCustomUIType.Grouping,
+      name: "Manual",
+      displayLabel: "Manual Query",
+      uiComponent: ManualGroupingCustomUI,
+      icon: <SvgDraw />,
+    },
+  ],
+});
+```
+
+After adding the grouping custom UI, it will be presented in the 'Add Group' drop down list.
+
+![Process Functional Grouping Menu Item](./assets/ProcessGroupingMenuItem.jpg)
+
+### Context Custom UI
+
+You can also add custom UI in context menu for each group. This could be UI driven interaction or simply a callback function to execute your own code.
+
+You can use the `iModelId`, `mappingId` and `groupId` in `ContextCustomUIProps` provided by Grouping Mapping Widget in your UI component or callback.
+
+To configure your own context custom UI, you need to give it:
+
+- a `type` as `GroupingMappingCustomUIType.Context`
+- a `name` as identifier
+- a `displayLabel` which will be shown in the context dropdown list in each group tile
+- an optional `uiComponent` which will be presented in the widget as a UI component
+- an optional `onClick` callback function where you could make your own API calls
+- an optional `icon`
+
+You can define your context custom UI as following example in the GroupingMappingProvider with an example is to use [clash detection](https://www.itwinjs.org/sandboxes/iTwinPlatform/Clash%20Review) in the widget:
+
+```tsx
+const customCB = (groupId: string, mappingId: string, iModelId: string) => {
+  toaster.informational(`Called callback for group ${groupId}`)
+}
+
+new GroupingMappingProvider({
+  customUIs: [
+    {
+      type: GroupingMappingCustomUIType.Context,
+      name: "ClashDetection",
+      displayLabel: "Clash Detection",
+      uiComponent: ClashDetectionCustomUI,
+      onClick: customCB,
+      icon: <SvgClash />,
+    },
+  ],
+});
+```
+
+After adding the context custom UI, the context menu item will look like this with additional `Clash Detection` menu item.
+
+![Clash Detection Context Menu Item](./assets/ClashDetectionContextMenuItem.jpg)

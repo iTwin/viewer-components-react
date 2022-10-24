@@ -7,7 +7,7 @@ import type { Id64String } from "@itwin/core-bentley";
 import { IModelApp, SelectionSetEventType } from "@itwin/core-frontend";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import { PropertyRecord, PropertyValueFormat, WidgetState } from "@itwin/appui-abstract";
-import { useActiveFrontstageDef } from "@itwin/appui-react";
+import { useActiveFrontstageDef, useActiveIModelConnection } from "@itwin/appui-react";
 import { PropertyGrid, SimplePropertyDataProvider } from "@itwin/components-react";
 import { Orientation } from "@itwin/core-react";
 import type { AggregatableValue, Measurement, MeasurementWidgetData } from "../api/Measurement";
@@ -25,6 +25,7 @@ export const MeasurementPropertyWidgetId = "measure-tools-property-widget";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const MeasurementPropertyWidget = () => {
+  const activeIModelConnection = useActiveIModelConnection();
   const [dataProvider] = React.useState(new SimplePropertyDataProvider());
   const [lastSelectedCount, setLastSelectedCount] = React.useState(MeasurementSelectionSet.global.measurements.length);
 
@@ -148,12 +149,27 @@ export const MeasurementPropertyWidget = () => {
   };
 
   React.useEffect(() => {
-    MeasurementSelectionSet.global.onChanged.addListener(onSelectionChanged);
-    MeasurementUIEvents.onMeasurementPropertiesChanged.addListener(onSelectionChanged);
+    const remover1 = MeasurementSelectionSet.global.onChanged.addListener(onSelectionChanged);
+    const remover2 = MeasurementUIEvents.onMeasurementPropertiesChanged.addListener(onSelectionChanged);
+
     getData(lastSelectedCount >= 2).catch(() => {
       /* no op */
     });
+
+    return () => {
+      remover1();
+      remover2();
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  React.useEffect(() => {
+    if (!activeIModelConnection)
+      return;
+
+    return activeIModelConnection.onGlobalOriginChanged.addListener(async () => {
+      await getData(false);
+    });
+  }, [activeIModelConnection]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const widgetDef = useSpecificWidgetDef(MeasurementPropertyWidgetId);
 
