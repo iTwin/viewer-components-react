@@ -237,7 +237,6 @@ describe("Reports Action", () => {
   });
 
   it("check for character limits of name", async () => {
-    jest.setTimeout(15000);
     const mockReturnFn = jest.fn();
 
     const { user } = render(
