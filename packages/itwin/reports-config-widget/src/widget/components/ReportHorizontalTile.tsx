@@ -39,15 +39,16 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
   const interval = useRef<number>();
 
   useEffect(() => {
-    props.jobStartEvent.addListener((startedReportId: string) => {
+    const listener = (startedReportId: string) => {
       if (startedReportId === props.report.id) {
         setExtractionState(ExtractionStates.Starting);
         setJobStarted(true);
       }
-    });
+    };
+    props.jobStartEvent.addListener(listener);
 
     return () => {
-      props.jobStartEvent.clear();
+      props.jobStartEvent.removeListener(listener);
     };
   }, [props.jobStartEvent, props.report.id]);
 

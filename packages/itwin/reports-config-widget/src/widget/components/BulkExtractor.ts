@@ -62,11 +62,11 @@ export default class BulkExtractor {
 
   private async fetchStates(): Promise<void> {
     this._reportStates = await this.getStates(this._reportIds);
-    this._timeFetched = new Date();
   }
 
   public getState(reportId: string): ExtractionStates {
     if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
+      this._timeFetched = new Date();
       this.fetchStates().catch((e) =>
         /* eslint-disable no-console */
         console.error(e)
