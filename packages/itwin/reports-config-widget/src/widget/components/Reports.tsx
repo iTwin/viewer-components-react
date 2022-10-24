@@ -4,15 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 import {
   SvgAdd,
-  SvgDelete,
-  SvgEdit,
-  SvgMore,
+  SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
-  DropdownMenu,
   IconButton,
-  MenuItem,
   Surface,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -30,12 +26,14 @@ import type { Report } from "@itwin/insights-client";
 import { REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import ReportAction from "./ReportAction";
 import { ReportMappings } from "./ReportMappings";
-import { HorizontalTile } from "./HorizontalTile";
+import { ReportHorizontalTile } from "./ReportHorizontalTile";
 import { SearchBar } from "./SearchBar";
 import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { useActiveIModelConnection } from "@itwin/appui-react";
+import BulkExtractor from "./BulkExtractor";
+import { BeEvent } from "@itwin/core-bentley";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -71,6 +69,7 @@ const fetchReports = async (
 export const Reports = () => {
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const apiConfig = useReportsApiConfig();
+  const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [reportsView, setReportsView] = useState<ReportsView>(
     ReportsView.REPORTS
@@ -81,6 +80,14 @@ export const Reports = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
+  const bulkExtractor = useMemo(
+    () => new BulkExtractor(apiConfig, reports.map((r) => r.id)),
+    [apiConfig, reports]
+  );
+  const jobStartEvent = useMemo(
+    () => new BeEvent<(reportId: string) => void>(),
+    []
+  );
 
   useEffect(() => {
     void fetchReports(setReports, iTwinId, setIsLoading, apiConfig);
@@ -106,6 +113,25 @@ export const Reports = () => {
       ),
     [reports, searchValue]
   );
+
+  const onSelectionChange = (reportId: string, control: boolean) => {
+    if (!control)
+      setSelectedReportIds([]);
+
+    setSelectedReportIds((sr) =>
+      sr.some((r) => reportId === r)
+        ? sr.filter(
+          (r) => reportId !== r
+        )
+        : [...sr, reportId]
+    );
+  };
+
+  const updateDatasets = useCallback(async () => {
+    selectedReportIds.map((reportId) => jobStartEvent.raiseEvent(reportId));
+    setSelectedReportIds([]);
+    await bulkExtractor.startJobs(selectedReportIds);
+  }, [selectedReportIds, jobStartEvent, bulkExtractor]);
 
   switch (reportsView) {
     case ReportsView.ADDING:
@@ -133,7 +159,7 @@ export const Reports = () => {
             )}
           />
           <Surface className="reports-list-container">
-            <div className="toolbar">
+            <div className="rcw-toolbar">
               <Button
                 startIcon={<SvgAdd />}
                 onClick={() => addReport()}
@@ -143,12 +169,23 @@ export const Reports = () => {
                   "ReportsConfigWidget:New"
                 )}
               </Button>
-              <div className="search-bar-container" data-testid="search-bar">
-                <SearchBar
-                  searchValue={searchValue}
-                  setSearchValue={setSearchValue}
-                  disabled={isLoading}
-                />
+              <IconButton
+                title={ReportsConfigWidget.localization.getLocalizedString(
+                  "ReportsConfigWidget:UpdateDatasets"
+                )}
+                onClick={updateDatasets}
+                disabled={selectedReportIds.length === 0}
+              >
+                <SvgRefresh />
+              </IconButton>
+              <div className="rcw-search-bar-container" data-testid="search-bar">
+                <div className="rcw-search-button">
+                  <SearchBar
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
             </div>
             {isLoading ? (
@@ -160,7 +197,7 @@ export const Reports = () => {
                     "ReportsConfigWidget:NoReports"
                   )}
                   <div>
-                    <Button onClick={() => addReport()} styleType="cta">
+                    <Button onClick={addReport} styleType="cta">
                       {ReportsConfigWidget.localization.getLocalizedString(
                         "ReportsConfigWidget:CreateOneReportCTA"
                       )}
@@ -169,58 +206,27 @@ export const Reports = () => {
                 </>
               </EmptyMessage>
             ) : (
-              <div className="reports-list">
+              <div className="rcw-reports-list">
                 {filteredReports.map((report) => (
-                  <HorizontalTile
+                  <ReportHorizontalTile
                     key={report.id}
-                    title={report.displayName}
-                    subText={report.description ?? ""}
-                    subtextToolTip={report.description ?? ""}
-                    titleTooltip={report.displayName}
+                    report={report}
                     onClickTitle={() => {
                       setSelectedReport(report);
                       setReportsView(ReportsView.REPORTSMAPPING);
                     }}
-                    button={
-                      <DropdownMenu
-                        menuItems={(close: () => void) => [
-                          <MenuItem
-                            key={0}
-                            onClick={() => {
-                              setSelectedReport(report);
-                              setReportsView(ReportsView.MODIFYING);
-                            }}
-                            icon={<SvgEdit />}
-                          >
-                            {ReportsConfigWidget.localization.getLocalizedString(
-                              "ReportsConfigWidget:Modify"
-                            )}
-                          </MenuItem>,
-                          <MenuItem
-                            key={1}
-                            onClick={() => {
-                              setSelectedReport(report);
-                              setShowDeleteModal(true);
-                              close();
-                            }}
-                            icon={<SvgDelete />}
-                          >
-                            {ReportsConfigWidget.localization.getLocalizedString(
-                              "ReportsConfigWidget:Remove"
-                            )}
-                          </MenuItem>,
-                        ]}
-                      >
-                        <IconButton styleType="borderless">
-                          <SvgMore
-                            style={{
-                              width: "16px",
-                              height: "16px",
-                            }}
-                          />
-                        </IconButton>
-                      </DropdownMenu>
-                    }
+                    jobStartEvent={jobStartEvent}
+                    bulkExtractor={bulkExtractor}
+                    onClickDelete={() => {
+                      setSelectedReport(report);
+                      setShowDeleteModal(true);
+                    }}
+                    onClickModify={() => {
+                      setSelectedReport(report);
+                      setReportsView(ReportsView.MODIFYING);
+                    }}
+                    onSelectionChange={onSelectionChange}
+                    selected={selectedReportIds.some((reportId) => report.id === reportId)}
                   />
                 ))}
               </div>

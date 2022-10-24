@@ -11,7 +11,7 @@
   padding: $iui-baseline $iui-m;
   min-height: 0;
 
-  .toolbar {
+  .rcw-toolbar {
     display: flex;
     justify-content: space-between;
     gap: $iui-s;
@@ -20,17 +20,21 @@
     flex-wrap: wrap;
   }
 
-  .search-bar-container {
+  .rcw-search-bar-container {
     flex-basis: $iui-3xl;
     flex-shrink: 1;
     flex-grow: 1;
   }
 
-  .reports-list {
+  .rcw-reports-list {
     display: flex;
     flex-direction: column;
     overflow-y: overlay;
     gap: 7.5px;
     margin-top: 7.5px;
   }
+}
+
+.rcw-button-container {
+  display: flex;
 }
