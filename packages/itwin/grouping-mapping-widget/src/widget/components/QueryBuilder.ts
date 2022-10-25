@@ -101,7 +101,7 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
 
@@ -378,7 +378,7 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
     const isNavigation: boolean =
@@ -503,10 +503,6 @@ export class QueryBuilder {
     }
   }
 
-  public categoryQuery(codeValue: string): string {
-    return ` JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id AND ((bis.Category.CodeValue='${codeValue}') OR (bis.Category.UserLabel='${codeValue}'))`;
-  }
-
   public buildQueryString() {
     if (
       this.query === undefined ||
@@ -516,17 +512,18 @@ export class QueryBuilder {
       return "";
     }
 
-    let unionQuery = "";
+    const unionSegments: string[] = [];
     for (const union of this.query.unions) {
+      const querySegments: string[] = [];
+
       const baseClass = union.classes[0];
       const baseClassName = baseClass.className;
       const baseIdName = baseClass.isAspect
         ? `${baseClassName}.Element.id`
         : `${baseClassName}.ECInstanceId`;
 
-      let queryString = `SELECT ${baseIdName}${
-        baseClass.isAspect ? " ECInstanceId" : ""
-      } FROM ${baseClassName}`;
+      const selectSegment = `SELECT ${baseIdName}${baseClass.isAspect ? " ECInstanceId" : ""} FROM ${baseClassName}`;
+      querySegments.push(selectSegment);
 
       if (union.classes.length > 1) {
         for (let i = 1; i < union.classes.length; i++) {
@@ -536,122 +533,77 @@ export class QueryBuilder {
             ? `${joinClassName}.Element.id`
             : `${joinClassName}.ECInstanceId`;
 
-          if (joinClass.isRelational) {
-            queryString += ` JOIN ${joinClassName}`;
-            if (joinClass.properties.length > 0) {
-              if (joinClass.properties[0].isCategory) {
-                queryString += this.categoryQuery(
-                  joinClass.properties[0].value.toString(),
-                );
-              } else {
-                if (joinClass.properties[0].needsQuote) {
-                  queryString += ` ON ${joinClassName}.${joinClass.properties[0].name}='${joinClass.properties[0].value}'`;
-                } else {
-                  if (this._isFloat(joinClass.properties[0].value)) {
-                    queryString += ` ON ROUND(${joinClassName}.${joinClass.properties[0].name}, `;
-                    queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-                    queryString += `${Number(
-                      joinClass.properties[0].value,
-                    ).toFixed(QueryBuilder.DEFAULT_DOUBLE_PRECISION)}`;
-                  } else {
-                    queryString += ` ON ${joinClassName}.${joinClass.properties[0].name}=${joinClass.properties[0].value}`;
-                  }
-                }
-              }
-            }
-            // when base is regular property, link base to first joined relational property
-            if (!baseClass.isRelational && i === 1) {
-              queryString += ` AND ${joinIdName} = ${baseIdName}`;
-            }
-            for (const property of joinClass.properties) {
-              if (property.isCategory) {
-                queryString += this.categoryQuery(property.value.toString());
-              } else {
-                if (property.needsQuote) {
-                  queryString += ` AND ${joinClassName}.${property.name}='${property.value}'`;
-                } else {
-                  if (this._isFloat(property.value)) {
-                    queryString += ` AND ROUND(${joinClassName}.${property.name}, `;
-                    queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-                    queryString += `${Number(property.value).toFixed(
-                      QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-                    )}`;
-                  } else {
-                    queryString += ` AND ${joinClassName}.${property.name}=${property.value}`;
-                  }
-                }
-              }
-            }
-          } else {
-            queryString += ` JOIN ${joinClassName} ON ${joinIdName} = ${baseIdName}`;
-            for (const property of joinClass.properties) {
-              if (property.isCategory) {
-                queryString += this.categoryQuery(property.value.toString());
-              } else {
-                if (property.needsQuote) {
-                  queryString += ` AND ${joinClassName}.${property.name}='${property.value}'`;
-                } else {
-                  if (this._isFloat(property.value)) {
-                    queryString += ` AND ROUND(${joinClassName}.${property.name}, `;
-                    queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-                    queryString += `${Number(property.value).toFixed(
-                      QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-                    )}`;
-                  } else {
-                    queryString += ` AND ${joinClassName}.${property.name}=${property.value}`;
-                  }
-                }
-              }
-            }
+          const joinSegment = joinClass.isRelational
+            ? ` JOIN ${joinClassName}`
+            : ` JOIN ${joinClassName} ON ${joinIdName} = ${baseIdName}`;
+          querySegments.push(joinSegment);
+
+          for (let j = 0; j < joinClass.properties.length; j++) {
+            const prefix = j === 0 && joinClass.isRelational ? "ON" : "AND";
+            const propertySegment = this._propertySegment(joinClassName, joinClass.properties[j], prefix);
+            querySegments.push(propertySegment);
+          }
+          // when base is regular property, link base to first joined relational property
+          if (joinClass.isRelational && !baseClass.isRelational && i === 1) {
+            querySegments.push(` AND ${joinIdName} = ${baseIdName}`);
           }
         }
       }
 
-      const properties = baseClass.properties;
-      if (properties.length > 0) {
-        if (properties[0].isCategory) {
-          queryString += this.categoryQuery(properties[0].value.toString());
+      const whereSegment = this._whereSegment(baseClass, baseClassName);
+      querySegments.push(whereSegment);
+
+      unionSegments.push(querySegments.join(""));
+    }
+
+    return unionSegments.join(" UNION ");
+  }
+
+  private _whereSegment = (
+    baseClass: QueryClass,
+    baseClassName: string
+  ): string => {
+    const segments: string[] = [];
+
+    const properties = baseClass.properties;
+    for (let i = 0; i < properties.length; i++) {
+      const prefix = i === 0 ? "WHERE" : "AND";
+      segments.push(this._propertySegment(baseClassName, properties[i], prefix));
+    }
+
+    return segments.join("");
+  }
+
+  private _propertySegment(
+    className: string,
+    property: QueryProperty,
+    prefix: string
+  ): string {
+    const segments: string[] = [];
+
+    if (property.isCategory) {
+      segments.push(this._categoryQuery(property.value.toString()));
+    } else {
+      if (property.needsQuote) {
+        segments.push(` ${prefix} ${className}.${property.name}='${property.value}'`);
+      } else {
+        if (this._isFloat(property.value)) {
+          segments.push(` ${prefix} ROUND(${className}.${property.name}, `);
+          segments.push(`${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`);
+          segments.push(`${Number(property.value).toFixed(
+            QueryBuilder.DEFAULT_DOUBLE_PRECISION
+          )}`);
         } else {
-          if (properties[0].needsQuote) {
-            queryString += ` WHERE ${baseClassName}.${properties[0].name}='${properties[0].value}'`;
-          } else {
-            if (this._isFloat(properties[0].value)) {
-              queryString += ` WHERE ROUND(${baseClassName}.${properties[0].name}, `;
-              queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-              queryString += `${Number(properties[0].value).toFixed(
-                QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-              )}`;
-            } else {
-              queryString += ` WHERE ${baseClassName}.${properties[0].name}=${properties[0].value}`;
-            }
-          }
-        }
-        if (properties.length > 1) {
-          for (let i = 1; i < properties.length; i++) {
-            if (properties[i].isCategory) {
-              queryString += this.categoryQuery(properties[i].value.toString());
-            } else {
-              if (properties[i].needsQuote) {
-                queryString += ` AND ${baseClassName}.${properties[i].name}='${properties[i].value}'`;
-              } else {
-                if (this._isFloat(properties[i].value)) {
-                  queryString += ` AND ROUND(${baseClassName}.${properties[i].name}, `;
-                  queryString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-                  queryString += `${Number(properties[i].value).toFixed(
-                    QueryBuilder.DEFAULT_DOUBLE_PRECISION,
-                  )}`;
-                } else {
-                  queryString += ` AND ${baseClassName}.${properties[i].name}=${properties[i].value}`;
-                }
-              }
-            }
-          }
+          segments.push(` ${prefix} ${className}.${property.name}=${property.value}`);
         }
       }
-      unionQuery += `${queryString} UNION `;
     }
-    unionQuery = unionQuery.slice(0, unionQuery.length - 7);
-    return unionQuery;
+
+    return segments.join("");
+  }
+
+  private _categoryQuery(codeValue: string): string {
+    return ` JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id AND ((bis.Category.CodeValue='${codeValue}') OR (bis.Category.UserLabel='${codeValue}'))`;
   }
 
   private _isFloat(n: unknown): boolean {
