@@ -102,7 +102,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
             100,
             MeasureToolDefinitions.clearMeasurementsToolCommand,
             {
-              isHidden
+              isHidden,
             },
           ),
         ];
