@@ -65,6 +65,7 @@
     "RowsPerPage": "Rows per page"
   },
   "UpdateDataset": "Update your dataset",
+  "UpdateDatasets": "Update your datasets for selected reports",
   "UpdateInProgress": "Update in progress...",
   "Validators": {
     "NoDuplicateUnderscore": "Remove duplicate \"_\"",

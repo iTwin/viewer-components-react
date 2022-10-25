@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/reports-config-widget-react",
+      "comment": "Datasets can be updated in the Reports page. Reports tiles are now selectable",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/reports-config-widget-react"
+}

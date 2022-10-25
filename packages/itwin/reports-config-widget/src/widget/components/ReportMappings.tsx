@@ -59,9 +59,7 @@ enum ReportMappingsView {
 }
 
 const fetchReportMappings = async (
-  setReportMappings: React.Dispatch<
-  React.SetStateAction<ReportMappingAndMapping[]>
-  >,
+  setReportMappings: (mappings: ReportMappingAndMapping[]) => void,
   reportId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   apiContext: ReportsApiConfig
@@ -134,9 +132,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   const apiConfig = useReportsApiConfig();
   const [reportMappingsView, setReportMappingsView] =
     useState<ReportMappingsView>(ReportMappingsView.REPORTMAPPINGS);
-  const [selectedReportMapping, setSelectedReportMapping] = useState<
-  ReportMappingAndMapping | undefined
-  >(undefined);
+  const [selectedReportMapping, setSelectedReportMapping] = useState<ReportMappingAndMapping | undefined>(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -145,9 +141,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   );
   const [runningIModelId, setRunningIModelId] = useState<string>("");
   const [searchValue, setSearchValue] = useState<string>("");
-  const [reportMappings, setReportMappings] = useState<
-  ReportMappingAndMapping[]
-  >([]);
+  const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
 
   useEffect(() => {
     void fetchReportMappings(
@@ -284,7 +278,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
                 title={mapping.mappingName}
                 subText={mapping.iModelName}
                 titleTooltip={mapping.mappingDescription}
-                button={
+                actionGroup={
                   <ExtractionStatus
                     state={
                       mapping.imodelId === runningIModelId
