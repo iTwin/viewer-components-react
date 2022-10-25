@@ -37,13 +37,9 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   private isHidden = new ConditionalBooleanValue(
     () => {
       const vp = IModelApp.viewManager.selectedView;
-      return vp ? (ViewHelper.isSheetView(vp) && !MeasurementUIEvents.isClearMeasurementButtonVisible) : !MeasurementUIEvents.isClearMeasurementButtonVisible;
+      return vp ? ViewHelper.isSheetView(vp) : false;
     },
-    [
-      MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
-      MeasurementSyncUiEventId.DynamicMeasurementChanged,
-      SyncUiEventId.ViewStateChanged,
-    ],
+    [SyncUiEventId.ViewStateChanged],
   )
 
   constructor(props?: MeasureToolsUiProviderOptions) {
@@ -94,12 +90,19 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       }
 
       if (tools.length > 0 && toolbarOrientation === ToolbarOrientation.Horizontal) {
+        const isHidden = new ConditionalBooleanValue(
+          () => !MeasurementUIEvents.isClearMeasurementButtonVisible,
+          [
+            MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
+            MeasurementSyncUiEventId.DynamicMeasurementChanged,
+          ],
+        );
         return [
           ToolbarHelper.createToolbarItemFromItemDef(
             100,
             MeasureToolDefinitions.clearMeasurementsToolCommand,
             {
-              isHidden: this.isHidden,
+              isHidden
             },
           ),
         ];
