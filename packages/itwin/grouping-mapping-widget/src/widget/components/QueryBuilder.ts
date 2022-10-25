@@ -101,7 +101,7 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
 
@@ -378,7 +378,7 @@ export class QueryBuilder {
       propertyField.parent?.pathToPrimaryClass.find(
         (a) =>
           a.relationshipInfo?.name ===
-            QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
+          QueryBuilder.UNIQUE_ASPECT_PRIMARY_CLASS ||
           a.relationshipInfo?.name === QueryBuilder.MULTI_ASPECT_PRIMARY_CLASS,
       ) !== undefined;
     const isNavigation: boolean =
@@ -512,8 +512,10 @@ export class QueryBuilder {
       return "";
     }
 
-    const querySegments: string[] = [];
+    const unionSegments: string[] = [];
     for (const union of this.query.unions) {
+      const querySegments: string[] = [];
+
       const baseClass = union.classes[0];
       const baseClassName = baseClass.className;
       const baseIdName = baseClass.isAspect
@@ -551,26 +553,25 @@ export class QueryBuilder {
       const whereSegment = this._whereSegment(baseClass, baseClassName);
       querySegments.push(whereSegment);
 
-      const unionSegment = " UNION ";
-      querySegments.push(unionSegment);
+      unionSegments.push(querySegments.join(""));
     }
 
-    querySegments.pop();
-    return querySegments.join("");
+    return unionSegments.join(" UNION ");
   }
 
   private _whereSegment = (
     baseClass: QueryClass,
     baseClassName: string
   ): string => {
-    let queryString = "";
+    const segments: string[] = [];
+
     const properties = baseClass.properties;
     for (let i = 0; i < properties.length; i++) {
       const prefix = i === 0 ? "WHERE" : "AND";
-      queryString += this._propertySegment(baseClassName, properties[i], prefix);
+      segments.push(this._propertySegment(baseClassName, properties[i], prefix));
     }
 
-    return queryString;
+    return segments.join("");
   }
 
   private _propertySegment(
@@ -578,27 +579,27 @@ export class QueryBuilder {
     property: QueryProperty,
     prefix: string
   ): string {
-    let segmentString = "";
+    const segments: string[] = [];
 
     if (property.isCategory) {
-      segmentString += this._categoryQuery(property.value.toString());
+      segments.push(this._categoryQuery(property.value.toString()));
     } else {
       if (property.needsQuote) {
-        segmentString += ` ${prefix} ${className}.${property.name}='${property.value}'`;
+        segments.push(` ${prefix} ${className}.${property.name}='${property.value}'`);
       } else {
         if (this._isFloat(property.value)) {
-          segmentString += ` ${prefix} ROUND(${className}.${property.name}, `;
-          segmentString += `${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`;
-          segmentString += `${Number(property.value).toFixed(
+          segments.push(` ${prefix} ROUND(${className}.${property.name}, `);
+          segments.push(`${QueryBuilder.DEFAULT_DOUBLE_PRECISION})=`);
+          segments.push(`${Number(property.value).toFixed(
             QueryBuilder.DEFAULT_DOUBLE_PRECISION
-          )}`;
+          )}`);
         } else {
-          segmentString += ` ${prefix} ${className}.${property.name}=${property.value}`;
+          segments.push(` ${prefix} ${className}.${property.name}=${property.value}`);
         }
       }
     }
 
-    return segmentString;
+    return segments.join("");
   }
 
   private _categoryQuery(codeValue: string): string {
