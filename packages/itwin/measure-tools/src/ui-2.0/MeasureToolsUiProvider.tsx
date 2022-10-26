@@ -91,8 +91,12 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
 
       if (tools.length > 0 && toolbarOrientation === ToolbarOrientation.Horizontal) {
         const isHidden = new ConditionalBooleanValue(
-          () => !MeasurementUIEvents.isClearMeasurementButtonVisible,
+          () => {
+            const vp = IModelApp.viewManager.selectedView;
+            return vp ? ViewHelper.isSheetView(vp) && !MeasurementUIEvents.isClearMeasurementButtonVisible : !MeasurementUIEvents.isClearMeasurementButtonVisible;
+          },
           [
+            SyncUiEventId.ViewStateChanged,
             MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
             MeasurementSyncUiEventId.DynamicMeasurementChanged,
           ],
