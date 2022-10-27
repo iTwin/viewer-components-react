@@ -2,6 +2,80 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.8.2",
+      "tag": "@itwin/grouping-mapping-widget_v0.8.2",
+      "date": "Mon, 17 Oct 2022 17:36:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed readme image render error and added tests for Custom UI providers"
+          },
+          {
+            "comment": "Fixed key uniqueness issue in group properties."
+          },
+          {
+            "comment": "Fixed formula interpreter sometimes not recognising unary operators leading to errors in formula order."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.8.1",
+      "date": "Thu, 29 Sep 2022 19:04:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed text overflow issue."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.8.0",
+      "date": "Wed, 28 Sep 2022 20:44:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Redesigned group properties UI."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.7.0",
+      "date": "Mon, 26 Sep 2022 17:13:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add context custom UI support"
+          },
+          {
+            "comment": "Add custom UI extensibility for grouping and mapping and refactor default UI accordingly"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.6.0",
+      "date": "Mon, 12 Sep 2022 19:50:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added border to the color legend for group hiliting"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Updated to insights client version 0.3.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.8",
       "tag": "@itwin/grouping-mapping-widget_v0.5.8",
       "date": "Wed, 24 Aug 2022 14:01:03 GMT",

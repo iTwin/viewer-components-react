@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 module.exports = {
   preset: 'ts-jest',
+  testTimeout: 10000,
   testEnvironment: 'jsdom',
   transform: {
     "\\.(ts)$": ['ts-jest'],

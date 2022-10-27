@@ -298,7 +298,7 @@ export class DistanceMeasurement extends Measurement {
    * @remarks Returns undefined if the segment is entirely 'behind' the camera eye
    */
   private calculateWorldTextLocation(context: DecorateContext): Point3d | undefined {
-    const clipFront = context.viewport.view.is3d();
+    const clipFront = context.viewport.view.is3d() && context.viewport.view.isCameraOn;
     const clipPlanes = context.viewport.getWorldFrustum().getRangePlanes(clipFront, false, 0.0);
     const startIn = clipPlanes.isPointOnOrInside(this._startPoint, Geometry.smallMetricDistance);
     const endIn = clipPlanes.isPointOnOrInside(this._endPoint, Geometry.smallMetricDistance);
@@ -316,15 +316,19 @@ export class DistanceMeasurement extends Measurement {
     let clampedStartPoint = this._startPoint;
     let clampedEndPoint = this._endPoint;
 
-    if (!startIn) {
-      // Computed from the test above
-      clampedStartPoint = ray.fractionToPoint(range.high);
+    if (!endIn) {
+      if (range.high < 0)
+        return undefined;
+
+      clampedEndPoint = ray.fractionToPoint(range.high);
     }
 
-    if (!endIn) {
+    if (!startIn) {
       ray = Ray3d.createStartEnd(this._endPoint.clone(), this._startPoint);
-      if (clipPlanes.hasIntersectionWithRay(ray, range))
-        clampedEndPoint = ray.fractionToPoint(range.high);
+      if (!clipPlanes.hasIntersectionWithRay(ray, range) || range.high < 0)
+        return undefined;
+
+      clampedStartPoint = ray.fractionToPoint(range.high);
     }
 
     return Point3d.createAdd2Scaled(clampedStartPoint, 0.5, clampedEndPoint, 0.5);
@@ -477,15 +481,18 @@ export class DistanceMeasurement extends Measurement {
     const dx = Math.abs(this._endPoint.x - this._startPoint.x);
     const dy = Math.abs(this._endPoint.y - this._startPoint.y);
 
+    const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
+    const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
+
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
       distance,
       lengthSpec
     );
     const fStartCoords = FormatterUtils.formatCoordinatesImmediate(
-      this._startPoint
+      adjustedStart
     );
     const fEndCoords = FormatterUtils.formatCoordinatesImmediate(
-      this._endPoint
+      adjustedEnd
     );
     const fSlope = FormatterUtils.formatSlope(slope, true);
     const fRun = IModelApp.quantityFormatter.formatQuantity(run, lengthSpec);

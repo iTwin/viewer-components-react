@@ -66,7 +66,7 @@ class IModelSettingsServiceSingleton {
     const iModelSettings = instanceToInstance(this.iModelSettings.getValue());
     if (iModelSettings) {
 
-      // Disable entity association mode, if it"s active (shouldn"t be)
+      // Disable entity association mode, if it's active (shouldn't be)
       this.disableEntityAssociationMode();
 
       // Check if we"re setting or removing an association

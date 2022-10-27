@@ -232,24 +232,25 @@ export class LocationMeasurement extends Measurement {
   }
 
   private async createTextMarker(): Promise<void> {
+    const adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
     const entries = [
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_x"
         ),
-        value: await FormatterUtils.formatLength(this._location.x),
+        value: await FormatterUtils.formatLength(adjustedLocation.x),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_y"
         ),
-        value: await FormatterUtils.formatLength(this._location.y),
+        value: await FormatterUtils.formatLength(adjustedLocation.y),
       },
       {
         label: MeasureTools.localization.getLocalizedString(
           "MeasureTools:tools.MeasureLocation.coordinate_z"
         ),
-        value: await FormatterUtils.formatLength(this._location.z),
+        value: await FormatterUtils.formatLength(adjustedLocation.z),
       },
     ];
 
@@ -286,7 +287,8 @@ export class LocationMeasurement extends Measurement {
   protected override async getDataForMeasurementWidgetInternal(): Promise<
   MeasurementWidgetData | undefined
   > {
-    const fCoordinates = await FormatterUtils.formatCoordinates(this._location);
+    const adjustedLocation = this.adjustPointForGlobalOrigin(this._location);
+    const fCoordinates = await FormatterUtils.formatCoordinates(adjustedLocation);
 
     let title = MeasureTools.localization.getLocalizedString(
       "MeasureTools:Measurements.locationMeasurement"
@@ -321,7 +323,7 @@ export class LocationMeasurement extends Measurement {
           "MeasureTools:tools.MeasureLocation.altitude"
         ),
         name: "LocationMeasurement_Altitude",
-        value: await FormatterUtils.formatLength(this._location.z),
+        value: await FormatterUtils.formatLength(adjustedLocation.z),
       });
     }
 

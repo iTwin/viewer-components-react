@@ -6,26 +6,33 @@ import type { ReactNode } from "react";
 import React from "react";
 import { Text } from "@itwin/itwinui-react";
 import "./HorizontalTile.scss";
+import classNames from "classnames";
 
-interface HorizontalTileProps {
+export interface HorizontalTileProps {
   title: string;
   actionGroup: ReactNode;
   subText?: string;
+  onClick?: () => void;
   onClickTitle?: () => void;
   titleTooltip?: string;
   subtextToolTip?: string;
+  selected?: boolean;
+  dragHandle?: ReactNode;
 }
 
-export const HorizontalTile = ({ title, subText, onClickTitle, titleTooltip, subtextToolTip, actionGroup}: HorizontalTileProps) => {
+export const HorizontalTile = (props: HorizontalTileProps) => {
 
   return (
-    <div className="gmw-horizontal-tile-container" data-testid="gmw-horizontal-tile">
-      <div className="gmw-body">
-        <Text className={`gmw-body-text ${onClickTitle ? "iui-anchor" : ""}`} onClick={onClickTitle} variant="body" title={titleTooltip}>{title}</Text>
-        {subText && <Text className="gmw-body-text" isMuted={true} title={subtextToolTip} variant="small">{subText}</Text>}
+    <div className={classNames("gmw-horizontal-tile-container", { "gmw-horizontal-tile-selected": props.selected })} onClick={props.onClick} data-testid="gmw-horizontal-tile">
+      <div className="gmw-body-container">
+        {props.dragHandle}
+        <div className="gmw-body">
+          <Text className={classNames("gmw-body-text", { "iui-anchor": !!props.onClickTitle })} onClick={props.onClickTitle} variant="body" title={props.titleTooltip}>{props.title}</Text>
+          {props.subText && <Text className="gmw-body-text" isMuted={true} title={props.subtextToolTip} variant="small">{props.subText}</Text>}
+        </div>
       </div>
       <div className="gmw-action-button" data-testid="tile-action-button">
-        {actionGroup}
+        {props.actionGroup}
       </div>
     </div>
   );

@@ -1,0 +1,27 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "~@itwin/itwinui-css/scss/variables";
+
+.rcw-extraction-status {
+  align-items: center;
+  margin: auto $iui-s * 2;
+  height: 38px;
+  display: flex;
+
+  .rcw-status-icon {
+    width: $iui-icons-default;
+    height: $iui-icons-default;
+  }
+}
+
+@keyframes rcw-fade-out {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}

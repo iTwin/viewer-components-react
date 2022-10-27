@@ -72,7 +72,7 @@ class MetricServiceSingleton {
             });
           }
 
-          // Save metrics in cache so we don"t have to make this request again
+          // Save metrics in cache so we don't have to make this request again
           this.metricCache.sensors[cacheKey] = firstSensorMetrics;
 
           return firstSensorMetrics;

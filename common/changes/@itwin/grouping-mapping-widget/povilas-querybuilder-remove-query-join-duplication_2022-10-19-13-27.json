@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Added border to the color legend for group hiliting",
+      "comment": "Fixed duplication of JOIN statements in query builder",
       "type": "patch"
     }
   ],

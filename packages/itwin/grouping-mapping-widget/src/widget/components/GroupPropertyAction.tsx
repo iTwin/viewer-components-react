@@ -2,51 +2,70 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { IModelConnection } from "@itwin/core-frontend";
-import type {
-  ContentDescriptorRequestOptions,
-  Field,
-  KeySet,
-  NestedContentField,
-  PropertiesField,
-  Ruleset,
-  RulesetVariable,
-  StructFieldMemberDescription,
-} from "@itwin/presentation-common";
-import {
-  ContentSpecificationTypes,
-  DefaultContentDisplayTypes,
-  PropertyValueFormat,
-  RelationshipMeaning,
-  RuleTypes,
-} from "@itwin/presentation-common";
-import { Presentation } from "@itwin/presentation-frontend";
+import { renderToStaticMarkup } from "react-dom/server";
+import type { KeySet } from "@itwin/presentation-common";
+import { PropertyValueFormat } from "@itwin/presentation-common";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import {
-  SvgChevronDown,
-  SvgChevronUp,
-  SvgRemove,
-} from "@itwin/itwinui-icons-react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import {
   Alert,
+  Button,
   Fieldset,
   IconButton,
+  Label,
   LabeledInput,
   LabeledSelect,
-  Select,
+  Modal,
+  ModalButtonBar,
   Small,
+  Surface,
   Text,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import { handleError, WidgetHeader } from "./utils";
-import "./GroupPropertyAction.scss";
-import type { ECProperty, GroupProperty, GroupPropertyCreate} from "@itwin/insights-client";
-import { DataType, QuantityType } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { HorizontalTile } from "./HorizontalTile";
+import { DataType, QuantityType } from "@itwin/insights-client";
+import type {
+  GroupProperty,
+  GroupPropertyCreate,
+} from "@itwin/insights-client";
+import {
+  SvgClose,
+  SvgDragHandleVertical,
+  SvgMoreVerticalSmall,
+  SvgRemove,
+  SvgSearch,
+} from "@itwin/itwinui-icons-react";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import {
+  closestCenter,
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import SortableHorizontalTile from "./SortableHorizontalTile";
+import Split from "react-split";
+import "./GroupPropertyAction.scss";
+import type { PropertyMetaData } from "./GroupPropertyUtils";
+import {
+  convertPresentationFields,
+  convertToECProperties,
+  fetchPresentationDescriptor,
+  findProperties,
+} from "./GroupPropertyUtils";
 
 interface GroupPropertyActionProps {
   iModelId: string;
@@ -68,192 +87,6 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
   { value: QuantityType.Volume, label: "Volume" },
   { value: QuantityType.Undefined, label: "No Quantity Type" },
 ];
-interface Property {
-  name: string;
-  label: string;
-  type: string;
-}
-
-interface NavigationProperty {
-  navigationName: string;
-  rootClassName: string;
-}
-
-const extractPrimitive = (
-  propertiesField: PropertiesField,
-  classToPropertiesMapping: Map<string, Property[]>,
-  navigation?: NavigationProperty
-) => {
-  // There are rare cases which only happens in multiple selections where it returns more than one.
-  // This also checks if this property comes from a navigation property
-  const className =
-    navigation?.rootClassName ??
-    propertiesField.properties[0].property.classInfo.name;
-  // Sometimes class names are not defined. Type error. Not guaranteed.
-  if (!className) {
-    return;
-  }
-
-  if (!classToPropertiesMapping.has(className)) {
-    classToPropertiesMapping.set(className, []);
-  }
-
-  // Gets property name. Appends path if from navigation.
-  const propertyName = navigation
-    ? `${navigation.navigationName}.${propertiesField.properties[0].property.name}`
-    : propertiesField.properties[0].property.name;
-
-  const label = navigation
-    ? `${propertiesField.label} (${navigation?.navigationName})`
-    : propertiesField.label;
-
-  // Ignore hardcoded BisCore navigation properties
-  if (propertiesField.type.typeName === "navigation") {
-    return;
-  } else {
-    classToPropertiesMapping.get(className)?.push({
-      name: propertyName,
-      label,
-      type: propertiesField.properties[0].property.type,
-    });
-  }
-};
-
-const extractStructProperties = (
-  name: string,
-  className: string,
-  classToPropertiesMapping: Map<string, Property[]>,
-  members: StructFieldMemberDescription[]
-) => {
-  for (const member of members) {
-    if (member.type.valueFormat === PropertyValueFormat.Primitive) {
-      if (!classToPropertiesMapping.has(className)) {
-        classToPropertiesMapping.set(className, []);
-      }
-
-      classToPropertiesMapping.get(className)?.push({
-        name: `${name}.${member.name}`,
-        label: member.label,
-        type: member.type.typeName,
-      });
-    } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
-      extractStructProperties(
-        `${name}.${member.name}`,
-        className,
-        classToPropertiesMapping,
-        member.type.members
-      );
-    }
-  }
-};
-
-const extractProperties = (
-  properties: Field[],
-  classToPropertiesMapping: Map<string, Property[]>,
-  navigation?: NavigationProperty
-) => {
-  for (const property of properties) {
-    switch (property.type.valueFormat) {
-      case PropertyValueFormat.Primitive: {
-        extractPrimitive(
-          property as PropertiesField,
-          classToPropertiesMapping,
-          navigation
-        );
-        break;
-      }
-      // Get structs
-      case PropertyValueFormat.Struct: {
-        const nestedContentField = property as NestedContentField;
-        // Only handling single path and not handling nested content fields within navigations
-        if (
-          nestedContentField.pathToPrimaryClass &&
-          nestedContentField.pathToPrimaryClass.length > 1
-        ) {
-          break;
-        }
-
-        switch (nestedContentField.relationshipMeaning) {
-          case RelationshipMeaning.SameInstance: {
-            // Check for aspects. Ignore them if coming from navigation.
-            if (
-              !navigation &&
-              (nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                .name === "BisCore:ElementOwnsUniqueAspect" ||
-                nestedContentField.pathToPrimaryClass[0].relationshipInfo
-                  .name === "BisCore:ElementOwnsMultiAspects")
-            ) {
-              const className = nestedContentField.contentClassInfo.name;
-              if (!classToPropertiesMapping.has(className)) {
-                classToPropertiesMapping.set(className, []);
-              }
-
-              extractProperties(
-                nestedContentField.nestedFields,
-                classToPropertiesMapping,
-                navigation
-              );
-            }
-
-            break;
-          }
-          // Navigation properties
-          case RelationshipMeaning.RelatedInstance: {
-            if (
-              // Deal with a TypeDefinition
-              nestedContentField.pathToPrimaryClass[0].relationshipInfo.name ===
-              "BisCore:GeometricElement3dHasTypeDefinition"
-            ) {
-              const className =
-                nestedContentField.pathToPrimaryClass[0].targetClassInfo.name;
-              extractProperties(
-                nestedContentField.nestedFields,
-                classToPropertiesMapping,
-                {
-                  navigationName: "TypeDefinition",
-                  rootClassName: className,
-                }
-              );
-              // Hardcoded BisCore navigation properties for the type definition.
-              classToPropertiesMapping.get(className)?.push({
-                name: "TypeDefinition.Model.ModeledElement.UserLabel",
-                label: "Model UserLabel (TypeDefinition)",
-                type: "string",
-              });
-
-              classToPropertiesMapping.get(className)?.push({
-                name: "TypeDefinition.Model.ModeledElement.CodeValue",
-                label: "Model CodeValue (TypeDefinition)",
-                type: "string",
-              });
-
-            }
-            break;
-          }
-          default: {
-            // Some elements don't have a path to primary class or relationship meaning..
-            // Most likely a simple struct property
-            if (!nestedContentField.pathToPrimaryClass) {
-              const columnName = (property as PropertiesField).properties[0]
-                .property.name;
-              const className = (property as PropertiesField).properties[0]
-                .property.classInfo.name;
-              extractStructProperties(
-                navigation
-                  ? `${navigation.navigationName}.${columnName}`
-                  : columnName,
-                navigation ? navigation.rootClassName : className,
-                classToPropertiesMapping,
-                property.type.members
-              );
-
-            }
-          }
-        }
-      }
-    }
-  }
-};
 
 const GroupPropertyAction = ({
   iModelId,
@@ -264,90 +97,80 @@ const GroupPropertyAction = ({
   keySet,
   returnFn,
 }: GroupPropertyActionProps) => {
-  const iModelConnection = useActiveIModelConnection() as IModelConnection;
+  const iModelConnection = useActiveIModelConnection();
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
   const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
-  const [classToPropertiesMapping, setClassToPropertiesMapping] =
-    useState<Map<string, Property[]>>();
-  const [ecProperties, setEcProperties] = useState<ECProperty[]>(
-    []
-  );
+  const [selectedProperties, setSelectedProperties] = useState<PropertyMetaData[]>([]);
+  const [propertiesMetaData, setPropertiesMetaData] = useState<PropertyMetaData[]>([]);
+  const [propertiesNotFoundAlert, setPropertiesNotFoundAlert] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
-  const [propertyAlert, setPropertyAlert] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchInput, setSearchInput] = useState<string>("");
+  const [activeSearchInput, setActiveSearchInput] = useState<string>("");
+  const [searched, setSearched] = useState<boolean>(false);
+  const [activeDragProperty, setActiveDragProperty] = useState<PropertyMetaData | undefined>();
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+  const [showModal, setShowModal] = useState<boolean>(false);
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const { active } = event;
+    const activeProperty = selectedProperties.find((p) => active.id === p.key);
+    setActiveDragProperty(activeProperty);
+  }, [selectedProperties]);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && (active.id !== over.id)) {
+      setSelectedProperties((items) => {
+        const oldIndex = selectedProperties.findIndex((p) => active.id === p.key);
+        const newIndex = selectedProperties.findIndex((p) => over.id === p.key);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+
+    setActiveDragProperty(undefined);
+  }, [selectedProperties]);
+
+  const filteredProperties = useMemo(
+    () =>
+      propertiesMetaData.filter((p) =>
+        [p.displayLabel, p.categoryLabel, p.actualECClassName]
+          .map((l) => l.toLowerCase())
+          .some((l) => l.includes(activeSearchInput.toLowerCase()))
+      ),
+    [activeSearchInput, propertiesMetaData]
+  );
 
   useEffect(() => {
-    const getContent = async () => {
+    const generateProperties = async () => {
       setIsLoading(true);
-      const ruleSet: Ruleset = {
-        id: "element-properties",
-        rules: [
-          {
-            ruleType: RuleTypes.Content,
-            specifications: [
-              {
-                specType: ContentSpecificationTypes.SelectedNodeInstances,
-              },
-            ],
-          }],
-      };
-      const requestOptions: ContentDescriptorRequestOptions<IModelConnection, KeySet, RulesetVariable> = {
-        imodel: iModelConnection,
-        keys: keySet,
-        rulesetOrId: ruleSet,
-        displayType: DefaultContentDisplayTypes.PropertyPane,
-      };
-      const content = await Presentation.presentation.getContentDescriptor(
-        requestOptions
-      );
 
-      // Only primitives and structs for now
-      const properties =
-        content?.fields.filter(
+      if (!iModelConnection) return;
+
+      const descriptor = await fetchPresentationDescriptor(iModelConnection, keySet);
+
+      // Only allow primitives and structs
+      const propertyFields =
+        descriptor?.fields.filter(
           (field) =>
             field.type.valueFormat === PropertyValueFormat.Primitive ||
             field.type.valueFormat === PropertyValueFormat.Struct
         ) ?? [];
 
-      // Map properties to their classes
-      const classToPropertiesMapping = new Map<string, Property[]>();
+      const propertiesMetaData = convertPresentationFields(propertyFields);
 
-      extractProperties(properties, classToPropertiesMapping);
+      setPropertiesMetaData(propertiesMetaData);
 
-      const rootClassName = keySet.instanceKeys.keys().next().value;
-
-      // Hardcoded BisCore navigation properties.
-      classToPropertiesMapping.get(rootClassName)?.push({
-        name: "Model.ModeledElement.UserLabel",
-        label: "Model UserLabel",
-        type: "string",
-      });
-
-      classToPropertiesMapping.get(rootClassName)?.push({
-        name: "Model.ModeledElement.CodeValue",
-        label: "Model CodeValue",
-        type: "string",
-      });
-
-      classToPropertiesMapping.get(rootClassName)?.push({
-        name: "Category.CodeValue",
-        label: "Category CodeValue",
-        type: "string",
-      });
-
-      classToPropertiesMapping.get(rootClassName)?.push({
-        name: "Category.UserLabel",
-        label: "Category UserLabel",
-        type: "string",
-      });
-
-      setClassToPropertiesMapping(classToPropertiesMapping);
-
-      let newEcProperties: ECProperty[];
-      // Fetch already existing ec properties then add all classes from presentation
       if (groupPropertyId) {
         const accessToken = await getAccessToken();
         let response: GroupProperty | undefined;
@@ -359,64 +182,29 @@ const GroupPropertyAction = ({
             groupId,
             groupPropertyId
           );
+
+          setPropertyName(response.propertyName);
+          setDataType(response.dataType);
+          setQuantityType(response.quantityType);
+          const properties = findProperties(response.ecProperties, propertiesMetaData);
+          if (properties.length === 0) {
+            setPropertiesNotFoundAlert(true);
+          }
+
+          setSelectedProperties(properties);
         } catch (error: any) {
           handleError(error.status);
         }
-
-        if (!response) {
-          return;
-        }
-        newEcProperties = response.ecProperties;
-
-        let keys = Array.from(classToPropertiesMapping.keys()).reverse();
-        for (const ecProperty of newEcProperties) {
-          keys = keys.filter(
-            (key) =>
-              `${ecProperty.ecSchemaName}:${ecProperty.ecClassName}` !== key
-          );
-        }
-
-        newEcProperties.push(
-          ...keys.map((key) => ({
-            ecSchemaName: key.split(":")[0],
-            ecClassName: key.split(":")[1],
-            // Placeholders for properties
-            ecPropertyName: "",
-            ecPropertyType: DataType.Undefined,
-          }))
-        );
-
-        setPropertyName(response.propertyName);
-        setDataType(response.dataType);
-        setQuantityType(response.quantityType);
-      } else {
-        newEcProperties = Array.from(classToPropertiesMapping)
-          .map(([key]) => ({
-            ecSchemaName: key.split(":")[0],
-            ecClassName: key.split(":")[1],
-            // Placeholders for properties
-            ecPropertyName: "",
-            ecPropertyType: DataType.Undefined,
-          }))
-          .reverse();
       }
-
-      setEcProperties(newEcProperties);
 
       setIsLoading(false);
     };
-    void getContent();
+    void generateProperties();
   }, [getAccessToken, mappingClient, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
 
   const onSave = async () => {
-    const filteredEcProperties = ecProperties.filter(
-      (ecProperty) => ecProperty.ecPropertyName && ecProperty.ecPropertyType
-    );
-    if (!filteredEcProperties.length || !validator.allValid()) {
+    if (!validator.allValid()) {
       showValidationMessage(true);
-      if (!filteredEcProperties.length) {
-        setPropertyAlert(true);
-      }
       return;
     }
     try {
@@ -426,7 +214,7 @@ const GroupPropertyAction = ({
         propertyName,
         dataType,
         quantityType,
-        ecProperties: filteredEcProperties,
+        ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
       };
       groupPropertyId
         ? await mappingClient.updateGroupProperty(
@@ -451,67 +239,38 @@ const GroupPropertyAction = ({
     }
   };
 
-  const onChange = useCallback((value: string, index: number) => {
-    setPropertyAlert(false);
-    const property = JSON.parse(value);
-    setEcProperties((ecProperties) => {
-      const updatedEcProperties = [...ecProperties];
-      updatedEcProperties[index].ecPropertyName = property.name;
+  const startSearch = useCallback(() => {
+    if (!searchInput) return;
+    setActiveSearchInput(searchInput);
+    setSearched(true);
+  }, [searchInput]);
 
-      // Unique types
-      let type = DataType.Undefined;
-      switch (property.type) {
-        case "long":
-          type = DataType.Integer;
-          break;
-        default:
-          type = property.type;
-      }
-
-      updatedEcProperties[index].ecPropertyType = type;
-      return updatedEcProperties;
-    });
+  const clearSearch = useCallback(() => {
+    setSearchInput("");
+    setActiveSearchInput("");
+    setSearched(false);
   }, []);
 
-  const propertyOptions = useMemo(() => {
-    return ecProperties.map(
-      (ecProperty: ECProperty) =>
-        classToPropertiesMapping
-          ?.get(`${ecProperty.ecSchemaName}:${ecProperty.ecClassName}`)
-          ?.map((property) => ({
-            value: JSON.stringify({
-              name: property.name,
-              type: property.type,
-            }),
-            label: property.label,
-          })) ?? []
-    );
-  }, [classToPropertiesMapping, ecProperties]);
-
-  const getValue = useCallback(
-    (ecProperty: ECProperty, index: number) => {
-      const property = classToPropertiesMapping
-        ?.get(`${ecProperty.ecSchemaName}:${ecProperty.ecClassName}`)
-        ?.find(
-          (property) => property.name === ecProperties[index].ecPropertyName
-        );
-      const result = JSON.stringify({
-        name: property?.name,
-        type: property?.type,
-      });
-      return result;
-    },
-    [classToPropertiesMapping, ecProperties]
-  );
+  useEffect(() => {
+    if (searchInput.length === 0) {
+      setSearched(false);
+      clearSearch();
+    }
+  }, [searchInput, setSearched, clearSearch]);
 
   return (
-    <>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       <WidgetHeader
         title={groupPropertyName ?? "Add Property"}
         returnFn={async () => returnFn(false)}
       />
       <div className='gmw-group-property-action-container'>
-        <Fieldset className='gmw-property-options' legend='Property Details'>
+        <Fieldset disabled={isLoading} className='gmw-property-options' legend='Property Details'>
           <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
@@ -520,7 +279,6 @@ const GroupPropertyAction = ({
             label='Property Name'
             value={propertyName}
             required
-            disabled={isLoading}
             onChange={(event) => {
               setPropertyName(event.target.value);
               validator.showMessageFor("propertyName");
@@ -542,7 +300,6 @@ const GroupPropertyAction = ({
           <LabeledSelect<DataType>
             label={"Data Type"}
             id='dataType'
-            disabled={isLoading}
             options={[
               { value: DataType.Boolean, label: "Boolean" },
               { value: DataType.Number, label: "Number" },
@@ -568,7 +325,6 @@ const GroupPropertyAction = ({
           />
           <LabeledSelect<QuantityType>
             label='Quantity Type'
-            disabled={isLoading}
             options={quantityTypesSelectionOptions}
             value={quantityType}
             onChange={setQuantityType}
@@ -576,89 +332,198 @@ const GroupPropertyAction = ({
             onHide={() => { }}
           />
         </Fieldset>
-        <Fieldset className='gmw-property-selection-container' legend='Properties'>
-          {propertyAlert && (
-            <Alert type={"negative"}>
-              Please select at least one property.
-            </Alert>
-          )}
-          {isLoading &&
-            Array(3)
-              .fill(null)
-              .map((_, index) => (
-                <Text key={index} variant='headline' isSkeleton>
-                  LOADING SKELETON
-                </Text>
+        {propertiesNotFoundAlert &&
+          <Alert type="warning">
+            Warning: Could not match saved properties from the current generated list. It does not confirm or deny validity. Overwriting will occur if a new selection is made and saved.
+          </Alert>
+        }
+        <Fieldset className='gmw-property-view-container' legend="Mapped Properties">
+          <div className="gmw-property-view-button">
+            <Button
+              onClick={async () => setShowModal(true)}
+              disabled={isLoading}
+            >
+              Select Properties
+            </Button>
+          </div>
+          <div className="gmw-properties-list">
+            {selectedProperties.length === 0 && !isLoading ?
+              <div className="gmw-empty-selection">
+                <Text>No properties selected.</Text>
+                <Text>Press the &quot;Select Properties&quot; button for options.</Text>
+              </div> :
+              selectedProperties.map((property) => (
+                <HorizontalTile
+                  key={property.key}
+                  title={`${property.displayLabel} (${property.propertyType})`}
+                  titleTooltip={`${property.actualECClassName}`}
+                  subText={property.categoryLabel}
+                  actionGroup={null}
+                />
               ))}
-          {ecProperties.map((ecProperty, index) => {
-            return (
-              <div
-                className='gmw-property-select-item'
-                key={`${ecProperty.ecSchemaName}${ecProperty.ecClassName}`}
-              >
-                <Text variant='leading'>{ecProperty.ecClassName}</Text>
-                <Text isMuted variant='small'>
-                  {ecProperty.ecSchemaName}
-                </Text>
-
-                <div className='gmw-selection-and-reorder'>
-                  <Select<string>
-                    options={propertyOptions[index]}
-                    value={getValue(ecProperty, index)}
-                    onChange={(value) => { value && onChange(value, index); }}
-                    placeholder="<No Property Mapped>"
-                    style={{ width: "100%" }}
-                    onShow={() => { }}
-                    onHide={() => { }}
-                  />
-                  <IconButton
-                    onClick={() => {
-                      const updatedEcPropertyList = [...ecProperties];
-                      updatedEcPropertyList[index] = {
-                        ...updatedEcPropertyList[index],
-                        ecPropertyName: "",
-                        ecPropertyType: DataType.Undefined,
-                      };
-                      setEcProperties(updatedEcPropertyList);
-                    }}
-                    disabled={
-                      !ecProperty.ecPropertyName && !ecProperty.ecPropertyType
-                    }
-                  >
-                    <SvgRemove />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => {
-                      const tab = [...ecProperties];
-                      const item = tab.splice(index, 1);
-                      tab.splice(index - 1, 0, item[0]);
-                      setEcProperties(tab);
-                    }}
-                    disabled={index === 0}
-                  >
-                    <SvgChevronUp />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => {
-                      const tab = [...ecProperties];
-                      const item = tab.splice(index, 1);
-                      tab.splice(index + 1, 0, item[0]);
-                      setEcProperties(tab);
-                    }}
-                    disabled={index === ecProperties.length - 1}
-                  >
-                    <SvgChevronDown />
-                  </IconButton>
-                </div>
-              </div>
-            );
-          })}
+          </div>
         </Fieldset>
       </div>
-      {/* TODO: Disable when no properties are selected. Will do when I rework property selection. */}
-      <ActionPanel onSave={onSave} onCancel={async () => returnFn(false)} isLoading={isLoading} />
-    </>
+      <ActionPanel
+        onSave={onSave}
+        onCancel={async () => returnFn(false)}
+        isLoading={isLoading}
+        isSavingDisabled={
+          selectedProperties.length === 0 || !propertyName || !dataType
+        }
+      />
+      <Modal
+        title="Properties Selection"
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          clearSearch();
+        }}
+        closeOnExternalClick={false}
+      >
+        <Split
+          expandToMin={false}
+          className="gmw-property-selection-container"
+          gutterAlign="center"
+          gutterSize={2}
+          gutter={() => {
+            // Expects HTMLElement
+            const dragHangle = renderToStaticMarkup(<div className="gmw-gutter-drag-icon"><SvgMoreVerticalSmall /></div>);
+            const gutter = document.createElement("div");
+            gutter.className = `gmw-gutter`;
+            gutter.innerHTML = dragHangle;
+            return gutter;
+          }}
+          direction="horizontal">
+          <Surface className="gmw-available-properties" elevation={1}>
+            <div className="gmw-available-properties-header">
+              <Label as="span">Available Properties</Label>
+              <LabeledInput
+                displayStyle="inline"
+                iconDisplayStyle="inline"
+                className="gmw-available-prop-search"
+                value={searchInput}
+                size="small"
+                placeholder="Search...."
+                onChange={(event) => {
+                  const {
+                    target: { value },
+                  } = event;
+                  setSearchInput(value);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    startSearch();
+                  }
+                }}
+                svgIcon={
+                  searched ? (
+                    <IconButton onClick={clearSearch} styleType="borderless">
+                      <SvgClose />
+                    </IconButton>
+                  ) : (
+                    <IconButton onClick={startSearch} styleType="borderless">
+                      <SvgSearch />
+                    </IconButton>
+                  )
+                }
+              />
+            </div>
+            {filteredProperties.length === 0 ?
+              <div className="gmw-empty-selection">
+                <Text>No properties available. </Text>
+              </div> :
+              <div className="gmw-properties-list">
+                {
+                  filteredProperties.map((property) => (
+                    <HorizontalTile
+                      key={property.key}
+                      title={`${property.displayLabel} (${property.propertyType})`}
+                      titleTooltip={`${property.actualECClassName}`}
+                      subText={property.categoryLabel}
+                      actionGroup={null}
+                      selected={selectedProperties.some((p) => property.key === p.key)}
+                      onClick={() =>
+                        setSelectedProperties((sp) =>
+                          sp.some((p) => property.key === p.key)
+                            ? sp.filter(
+                              (p) => property.key !== p.key
+                            )
+                            : [...sp, property]
+                        )
+                      }
+                    />
+                  ))}
+              </div>}
+          </Surface>
+          <Surface className="gmw-selected-properties" elevation={1}>
+            <Label as="span">Selected Properties</Label>
+            {selectedProperties.length === 0 ?
+              <div className="gmw-empty-selection">
+                <Text>No properties selected.</Text>
+                <Text>Add some by clicking on the properties shown left.</Text>
+              </div> :
+              <div className="gmw-properties-list" >
+                <SortableContext
+                  items={selectedProperties.map((p) => p.key)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {selectedProperties.map((property) =>
+                    <SortableHorizontalTile
+                      key={property.key}
+                      id={property.key}
+                      title={`${property.displayLabel} (${property.propertyType})`}
+                      titleTooltip={`${property.actualECClassName}`}
+                      subText={property.categoryLabel}
+                      actionGroup={
+                        <div>
+                          <IconButton
+                            styleType="borderless"
+                            title="Remove"
+                            onClick={() => {
+                              setSelectedProperties((sp) => sp.filter(
+                                (p) => property.key !== p.key
+                              ));
+                            }
+                            }>
+                            <SvgRemove />
+                          </IconButton>
+                        </div>
+                      }
+                    />)}
+                </SortableContext>
+              </div>}
+          </Surface>
+        </Split>
+        <ModalButtonBar>
+          <Button
+            onClick={() => {
+              setShowModal(false);
+              clearSearch();
+            }}
+            styleType="high-visibility"
+          >
+            Close
+          </Button>
+        </ModalButtonBar>
+      </Modal>
+      <DragOverlay zIndex={9999}>
+        {activeDragProperty ?
+          <HorizontalTile
+            title={`${activeDragProperty.displayLabel} (${activeDragProperty.propertyType})`}
+            titleTooltip={`${activeDragProperty.actualECClassName}`}
+            subText={activeDragProperty.categoryLabel}
+            actionGroup={
+              <IconButton
+                styleType="borderless">
+                <SvgRemove />
+              </IconButton>}
+            dragHandle={<div className="gmw-drag-icon" ><SvgDragHandleVertical /></div>}
+          /> : null}
+      </DragOverlay>
+    </DndContext>
   );
 };
 
 export default GroupPropertyAction;
+

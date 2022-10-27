@@ -6,6 +6,7 @@
 import { BeUiEvent } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext, Decorator, HitDetail, ScreenViewport, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { EventHandled, IModelApp } from "@itwin/core-frontend";
 import type { Measurement} from "./Measurement";
 import { MeasurementPickContext } from "./Measurement";
@@ -40,6 +41,8 @@ export class MeasurementManager implements Decorator {
   private _measurements: Measurement[] = new Array<Measurement>();
   private _dropCallback?: () => void;
   private _dropUnitCallback?: () => void;
+  private _dropGlobalOriginChangedCallback?: () => void;
+  private _iModelIdForGlobalOrigin?: string;
   private _overrideToolTipHandler?: MeasurementToolTipHandler;
   private _overrideGeometryHandler?: MeasurementGeometryHandler;
   private _overrideHitHandler?: MeasurementHitHandler;
@@ -393,6 +396,7 @@ export class MeasurementManager implements Decorator {
    * @param context Decorate context for drawing to a viewport.
    */
   public decorate(context: DecorateContext): void {
+    this.tryAddGlobalOriginChangedListener(context.viewport.iModel);
     for (const measurement of this._measurements) {
       if (measurement.isVisible && measurement.viewTarget.isViewportCompatible(context.viewport))
         measurement.decorate(context);
@@ -403,9 +407,20 @@ export class MeasurementManager implements Decorator {
    * @param context Decorate context for drawing to a viewport.
    */
   public decorateCached(context: DecorateContext): void {
+    this.tryAddGlobalOriginChangedListener(context.viewport.iModel);
     for (const measurement of this._measurements) {
       if (measurement.isVisible && measurement.viewTarget.isViewportCompatible(context.viewport))
         measurement.decorateCached(context);
+    }
+  }
+
+  private tryAddGlobalOriginChangedListener(iModel: IModelConnection): void {
+    if (this._iModelIdForGlobalOrigin !== iModel.iModelId) {
+      if (this._dropGlobalOriginChangedCallback)
+        this._dropGlobalOriginChangedCallback();
+
+      this._dropGlobalOriginChangedCallback = iModel.onGlobalOriginChanged.addListener(this.onActiveUnitSystemChanged, this);
+      this._iModelIdForGlobalOrigin = iModel.iModelId;
     }
   }
 
