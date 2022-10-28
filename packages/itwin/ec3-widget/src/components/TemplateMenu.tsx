@@ -45,6 +45,7 @@ import { EC3Config } from "./EC3/EC3Config";
 interface TemplateProps {
   template?: Configuration;
   goBack: () => Promise<void>;
+  config: EC3Config;
 }
 
 enum LabelView {
@@ -53,7 +54,7 @@ enum LabelView {
   MODIFY = "modify"
 }
 
-const TemplateMenu = ({ template, goBack }: TemplateProps) => {
+const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
   const [token, setToken] = useState<EC3TokenCache>();
@@ -269,8 +270,8 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
             onSave={onSave}
             onCancel={goBack}
             onExport={async () => {
-              if (validateSignin()) {
-                const url = `${EC3Config.EC3_URI}oauth2/authorize?client_id=${EC3Config.CLIENT_ID}&redirect_uri=${EC3Config.REDIRECT_URI}&response_type=code&scope=${EC3Config.SCOPE}`;
+              if (!validateSignin()) {
+                const url = `${config.EC3_URI}oauth2/authorize?client_id=${config.CLIENT_ID}&redirect_uri=${config.REDIRECT_URI}&response_type=code&scope=${config.SCOPE}`;
                 const authWindow = window.open(url, '_blank', 'toolbar=0,location=0,menubar=0,width=800,height=700');
 
                 const receiveMessage = (event: MessageEvent<EC3TokenCache>) => {

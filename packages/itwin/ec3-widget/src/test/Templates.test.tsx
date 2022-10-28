@@ -15,6 +15,7 @@ import faker from "@faker-js/faker";
 import { setupServer } from "msw/node";
 import userEvent from "@testing-library/user-event";
 import sampleMetadata from "./metadataSample";
+import { EC3Config } from "../components/EC3/EC3Config";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const reportingClient = moq.Mock.ofType<ReportingClient>();
@@ -63,6 +64,7 @@ describe("Templates view", () => {
   const accessToken = faker.datatype.uuid();
   const authClient = moq.Mock.ofType<AuthorizationClient>();
   const server = setupServer();
+  const config = new EC3Config({ clientId: "", redirectUri: "" })
 
   beforeAll(async () => {
     const metadata: Response = {
@@ -83,18 +85,18 @@ describe("Templates view", () => {
   });
 
   it("Templates view should render successfully", function () {
-    render(<Templates />);
+    render(<Templates config={config} />);
     expect(screen.getByText("Templates")).toBeDefined();
   });
 
   it("Template Menu should render successfully", async () => {
     const returnfn = async () => { };
-    render(<TemplateMenu goBack={returnfn} />);
+    render(<TemplateMenu goBack={returnfn} config={config} />);
     expect(screen.getByText("Create template")).toBeInTheDocument();
   });
 
   it("Clicking create button should open creating template menu", async () => {
-    const user = render(<Templates />);
+    const user = render(<Templates config={config} />);
     const button = screen.getByText("Create Template");
     button.click();
     expect(screen.getByText("Create template")).toBeInTheDocument();
@@ -102,7 +104,7 @@ describe("Templates view", () => {
 
   it("Reports dropdown should be populated with data", async () => {
     const returnfn = async () => { };
-    render(<TemplateMenu goBack={returnfn} />);
+    render(<TemplateMenu goBack={returnfn} config={config} />);
     await waitForElementToBeRemoved(() => screen.getByText("Loading"));
     const dropdown = screen.getByText("Select report");
     dropdown.click();
@@ -112,7 +114,7 @@ describe("Templates view", () => {
   });
 
   it("Created template should appear in the list", async () => {
-    const user = render(<Templates />);
+    const user = render(<Templates config={config} />);
     const button = screen.getByText("Create Template");
     button.click();
     await waitForElementToBeRemoved(() => screen.getByText("Loading"));
@@ -144,7 +146,7 @@ describe("Templates view", () => {
   });
 
   it("Added label should appear in the list", async () => {
-    const user = render(<Templates />);
+    const user = render(<Templates config={config} />);
     const button = screen.getByText("Create Template");
     button.click();
     await waitForElementToBeRemoved(() => screen.getByText("Loading"));

@@ -20,6 +20,7 @@ import { HorizontalTile } from "./HorizontalTile";
 import React from "react";
 import { EC3ConfigurationClient } from "./api/EC3ConfigurationClient";
 import { useActiveIModelConnection } from "@itwin/appui-react";
+import { EC3Props } from "./EC3";
 
 
 enum TemplateView {
@@ -28,7 +29,7 @@ enum TemplateView {
   MENU = "menu",
 }
 
-const Templates = () => {
+const Templates = ({ config }: EC3Props) => {
   const iTwinId = useActiveIModelConnection()?.iTwinId;
   const templateClient = useMemo(() => { return new TemplateClient() }, []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -79,6 +80,7 @@ const Templates = () => {
     case TemplateView.CREATE:
       return (
         <TemplateMenu
+          config={config}
           goBack={async () => {
             setTemplateView(TemplateView.TEMPLATES);
             await refresh();
@@ -88,6 +90,7 @@ const Templates = () => {
     case TemplateView.MENU:
       return (
         <TemplateMenu
+          config={config}
           template={selectedTemplate!}
           //templateId={selectedTemplate!.id!}
           goBack={async () => {

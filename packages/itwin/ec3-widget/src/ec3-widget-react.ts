@@ -4,3 +4,4 @@
 *--------------------------------------------------------------------------------------------*/
 /** UI Provider for iTwin Viewer Applications */
 export * from "./widget/EC3Widget";
+export { EC3AuthCallback } from "./components/EC3/EC3AuthCallback"

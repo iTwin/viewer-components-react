@@ -13,9 +13,15 @@ import {
 } from "@itwin/appui-abstract";
 import EC3 from "../components/EC3";
 import React from "react";
+import { EC3Config, EC3ConfigProps } from "../components/EC3/EC3Config";
 
 export class EC3Provider implements UiItemsProvider {
   public readonly id = "EC3Provider";
+  public config: EC3Config;
+
+  constructor(props: EC3ConfigProps) {
+    this.config = new EC3Config(props);
+  }
 
   public provideWidgets(
     _stageId: string,
@@ -32,8 +38,9 @@ export class EC3Provider implements UiItemsProvider {
       const EC3Widget: AbstractWidgetProps = {
         id: "EC3Widget",
         label: "EC3",
-        getWidgetContent() {
-          return <EC3 />;
+        getWidgetContent: () => {
+          return <EC3
+            config={this.config} />;
         },
       };
 
