@@ -2,6 +2,18 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.10.4",
+      "tag": "@itwin/measure-tools-react_v0.10.4",
+      "date": "Mon, 31 Oct 2022 19:03:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Hide measurement tools button on sheet view."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.3",
       "tag": "@itwin/measure-tools-react_v0.10.3",
       "date": "Wed, 19 Oct 2022 14:17:36 GMT",

@@ -2,6 +2,18 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.8.3",
+      "tag": "@itwin/grouping-mapping-widget_v0.8.3",
+      "date": "Mon, 31 Oct 2022 19:03:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed duplication of JOIN statements in query builder"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.2",
       "tag": "@itwin/grouping-mapping-widget_v0.8.2",
       "date": "Mon, 17 Oct 2022 17:36:46 GMT",
