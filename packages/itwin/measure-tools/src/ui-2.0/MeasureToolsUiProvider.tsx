@@ -28,6 +28,12 @@ import { IModelApp } from "@itwin/core-frontend";
 export interface MeasureToolsUiProviderOptions {
   itemPriority?: number;
   groupPriority?: number;
+  widgetPlacement?: {
+    location: StagePanelLocation;
+    section?: StagePanelSection;
+    // eslint-disable-next-line deprecation/deprecation
+    zoneLocation?: AbstractZoneLocation;
+  };
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
@@ -125,18 +131,23 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     zoneLocation?: AbstractZoneLocation
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
+
+    const preferredLocation = this._props?.widgetPlacement?.location ?? StagePanelLocation.Right;
+    const preferredSection = this._props?.widgetPlacement?.section ?? StagePanelSection.Start;
+    // eslint-disable-next-line deprecation/deprecation
+    const preferredZoneLocation = this._props?.widgetPlacement?.zoneLocation ?? AbstractZoneLocation.CenterRight;
+
     if (
       (
         stageUsage === StageUsage.General &&
-        location === StagePanelLocation.Right &&
-        section === StagePanelSection.Start &&
+        location === preferredLocation &&
+        section === preferredSection &&
         UiFramework.uiVersion !== "1"
       ) ||
       (
         !section &&
         stageUsage === StageUsage.General &&
-        // eslint-disable-next-line deprecation/deprecation
-        zoneLocation === AbstractZoneLocation.CenterRight
+        zoneLocation === preferredZoneLocation
       )
     ) {
       widgets.push({
