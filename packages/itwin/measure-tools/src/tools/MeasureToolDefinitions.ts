@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { IModelApp } from "@itwin/core-frontend";
-import { ToolItemDef } from "@itwin/appui-react";
+import { SyncUiEventId, ToolItemDef } from "@itwin/appui-react";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { ClearMeasurementsTool } from "./ClearMeasurementsTool";
@@ -16,6 +16,7 @@ import { MeasurePerpendicularTool } from "./MeasurePerpendicularTool";
 import { MeasureRadiusTool } from "./MeasureRadiusTool";
 import { ToggleDisplayMeasurementAxesTool } from "./ToggleDisplayMeasurementAxesTool";
 import { MeasureTools } from "../MeasureTools";
+import { ConditionalBooleanValue } from "@itwin/appui-abstract";
 
 export class MeasureToolDefinitions {
   public static get measureDistanceToolCommand() {
@@ -75,19 +76,19 @@ export class MeasureToolDefinitions {
       label: () =>
         MeasurementPreferences.current.displayMeasurementAxes
           ? MeasureTools.localization.getLocalizedString(
-            "MeasureTools:Generic.hideMeasurementAxes"
-          )
+              "MeasureTools:Generic.hideMeasurementAxes"
+            )
           : MeasureTools.localization.getLocalizedString(
-            "MeasureTools:Generic.displayMeasurementAxes"
-          ),
+              "MeasureTools:Generic.displayMeasurementAxes"
+            ),
       tooltip: () =>
         MeasurementPreferences.current.displayMeasurementAxes
           ? MeasureTools.localization.getLocalizedString(
-            "MeasureTools:Generic.hideMeasurementAxes"
-          )
+              "MeasureTools:Generic.hideMeasurementAxes"
+            )
           : MeasureTools.localization.getLocalizedString(
-            "MeasureTools:Generic.displayMeasurementAxes"
-          ),
+              "MeasureTools:Generic.displayMeasurementAxes"
+            ),
       execute: () => {
         void IModelApp.tools.run(ToggleDisplayMeasurementAxesTool.toolId);
       },
@@ -124,6 +125,10 @@ export class MeasureToolDefinitions {
       iconSpec: MeasurePerpendicularTool.iconSpec,
       label: () => MeasurePerpendicularTool.flyover,
       tooltip: () => MeasurePerpendicularTool.description,
+      isHidden: new ConditionalBooleanValue(
+        () => !!IModelApp.viewManager.selectedView?.view?.isDrawingView(),
+        [SyncUiEventId.ViewStateChanged]
+      ),
       execute: () => {
         void IModelApp.tools.run(MeasurePerpendicularTool.toolId);
       },
