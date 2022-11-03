@@ -26,6 +26,7 @@ import { IModelApp } from "@itwin/core-frontend";
 // Note: measure tools cannot pick geometry when a sheet view is active to snap to and therefore must be hidden
 //  to avoid giving the user the impression they should work
 const isSheetViewActive = () => !!IModelApp.viewManager.selectedView?.view?.isSheetView();
+const isDrawingViewActive = () => !!IModelApp.viewManager.selectedView?.view?.isDrawingView();
 
 export interface MeasureToolsUiProviderOptions {
   itemPriority?: number;
@@ -70,7 +71,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       if (!featureFlags?.hideAngleTool) {
         tools.push(MeasureToolDefinitions.measureAngleToolCommand);
       }
-      if (!featureFlags?.hidePerpendicularTool) {
+      if (!featureFlags?.hidePerpendicularTool && !isDrawingViewActive()) {
         tools.push(MeasureToolDefinitions.measurePerpendicularToolCommand);
       }
 
