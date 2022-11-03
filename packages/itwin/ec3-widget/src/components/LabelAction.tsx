@@ -333,49 +333,55 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
               setName(event.target.value);
             }}
           />
-          <div className="body">
-            <div className="ec3-label-combo-field">
-              <div className="dropdown-select-container">
-                <div className="dropdown-select-combo-box">
-                  <Label htmlFor="combo-input" required>
-                    Element
-                  </Label>
-                  <Select
-                    options={getStringColumnOptions(itemName)}
-                    value={itemName}
-                    //placeholder={isLoading ? "Loading elements" : "Select element quantity"}
-                    onChange={async (value) => {
-                      setItemName(value);
-                    }}
-                    disabled={isLoading || reportTable === ""}
-                    placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element")}
-                  />
-                </div>
-              </div>
-            </div>
 
-            <div className="ec3-label-combo-field">
-              <div className="dropdown-select-container">
-                <div className="dropdown-select-combo-box">
-                  <Label htmlFor="combo-input" required>
-                    Element quantity
-                  </Label>
-                  <Select
-                    options={NumericalColumnOptions}
-                    value={itemQuantity}
-                    //placeholder={isLoading ? "Loading elements" : "Select element quantity"}
-                    onChange={async (value) => {
-                      setItemQuantity(value);
-                    }}
-                    disabled={isLoading || reportTable === ""}
-                    placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element quantity")}
-                  />
-                </div>
-              </div>
+          <div className="dropdown-select-container">
+            <div className="dropdown-select-combo-box">
+              <Label htmlFor="combo-input" required>
+                Element
+              </Label>
+              <Select
+                options={getStringColumnOptions(itemName)}
+                value={itemName}
+                //placeholder={isLoading ? "Loading elements" : "Select element quantity"}
+                onChange={async (value) => {
+                  setItemName(value);
+                }}
+                disabled={isLoading || reportTable === ""}
+                placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element")}
+              />
             </div>
-
           </div>
+
+          <div className="dropdown-select-container">
+            <div className="dropdown-select-combo-box">
+              <Label htmlFor="combo-input" required>
+                Element quantity
+              </Label>
+              <Select
+                options={NumericalColumnOptions}
+                value={itemQuantity}
+                //placeholder={isLoading ? "Loading elements" : "Select element quantity"}
+                onChange={async (value) => {
+                  setItemQuantity(value);
+                }}
+                disabled={isLoading || reportTable === ""}
+                placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element quantity")}
+              />
+            </div>
+          </div>
+        </Fieldset>
+
+        <Fieldset legend='Materials' className='ec3-label-details'>
           <div className="ec3-pair-list">
+            <Button
+              className="ec3-label-button"
+              startIcon={<SvgAdd />}
+              onClick={addPair}
+              styleType="default"
+              disabled={isLoading || reportTable === "" || materials.filter(x => x.nameColumn === undefined).length > 0}
+            >
+              Add material
+            </Button>
             {materials.map((material, index) => (
               <DropdownTile
                 key={index}
@@ -408,15 +414,6 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 }
               />
             ))}
-            <Button
-              className="ec3-label-button"
-              startIcon={<SvgAdd />}
-              onClick={addPair}
-              styleType="high-visibility"
-              disabled={isLoading || reportTable === "" || materials.filter(x => x.nameColumn === undefined).length > 0}
-            >
-              {"Add material"}
-            </Button>
           </div>
         </Fieldset>
       </div>
