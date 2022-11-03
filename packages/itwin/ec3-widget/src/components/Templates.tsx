@@ -104,7 +104,7 @@ const Templates = ({ config }: EC3Props) => {
         <>
           <WidgetHeader title="Templates" />
           <Surface className="ec3-templates-list-container">
-            <div className="toolbar">
+            <div className="toolbar" data-testId="ec3-templates">
               <Button
                 startIcon={<SvgAdd />}
                 onClick={() => setTemplateView(TemplateView.CREATE)}

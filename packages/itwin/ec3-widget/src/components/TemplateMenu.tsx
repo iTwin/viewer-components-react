@@ -184,7 +184,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
               await goBack();
             }}
           />
-          <div className='ec3-template-details-container'>
+          <div className='ec3-template-details-container' data-testId="ec3-templateDetails">
             <Fieldset legend='Template Details' className='ec3-template-details'>
               <Small className='ec3-template-field-legend'>
                 Asterisk * indicates mandatory fields.

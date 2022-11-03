@@ -38,7 +38,7 @@ export const WidgetHeader = ({
 };
 
 export const LoadingOverlay = () => (
-  <div className='gm-center-overlay'>
+  <div className='gm-center-overlay' data-testid="ec3-loading">
     <Text>Loading</Text>
     <ProgressRadial indeterminate />
     <Text>Please wait...</Text>
@@ -87,7 +87,7 @@ export const generateUrl = (baseUrl: string, newBaseUrl: string) => {
 
 export const LoadingSpinner = () => {
   return (
-    <div className="gm-loading-spinner">
+    <div className="gm-loading-spinner" data-testid="ec3-loadingSpinner">
       <ProgressRadial size="small" indeterminate />
     </div>
   );
