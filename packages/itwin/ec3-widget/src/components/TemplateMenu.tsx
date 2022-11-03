@@ -235,8 +235,17 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
                   />
                 </div>
               </div>
+            </Fieldset>
 
+            <Fieldset legend='Labels' className='ec3-template-details'>
               <Surface className="ec3-labels-container">
+                <Button
+                  styleType="default"
+                  onClick={addLabel}
+                  disabled={!childTemplate.reportId}
+                >
+                  Add Label
+                </Button>
                 <div className="ec3-labels-list">
                   {
                     childTemplate.labels
@@ -255,13 +264,6 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
                           }}
                         />
                       ))}
-                  <Button
-                    styleType="high-visibility"
-                    onClick={addLabel}
-                    disabled={!childTemplate.reportId}
-                  >
-                    Add Label
-                  </Button>
                 </div>
               </Surface>
             </Fieldset>

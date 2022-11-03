@@ -12,6 +12,7 @@
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
+    margin-bottom: $iui-baseline;
   }
 
   .ec3-template-field-legend {
@@ -33,10 +34,8 @@
 }
 
 .ec3-labels-container {
-  display: flex;
   flex-direction: column;
   flex-grow: 1;
-  padding: $iui-baseline $iui-m;
   min-height: 0;
 
   .ec3-labels-list {
@@ -45,6 +44,5 @@
     overflow-y: overlay;
     gap: 7.5px;
     margin-top: 7.5px;
-
   }
 }
