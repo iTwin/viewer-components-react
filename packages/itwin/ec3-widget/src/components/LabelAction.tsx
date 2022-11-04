@@ -51,7 +51,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   const [availableLabels, setLabels] = useState<string[]>();
   const [availableStringColumns, setStringColumns] = useState<string[]>([]);
   const [availableNumericalColumns, setNumericalColumns] = useState<string[]>([]);
-  const reportingClientApi = useMemo(() => new ReportingClient(), []);
+  const reportingClientApi = useMemo(() => new ReportingClient("https://dev-api.bentley.com/insights/reporting"), []);
 
   const onSave = async () => {
     const selectedLabel: EC3Label = {

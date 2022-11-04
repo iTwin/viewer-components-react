@@ -56,7 +56,7 @@ enum LabelView {
 
 const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  const reportingClientApi = useMemo(() => new ReportingClient(), []);
+  const reportingClientApi = useMemo(() => new ReportingClient("https://dev-api.bentley.com/insights/reporting"), []);
   const [token, setToken] = useState<EC3TokenCache>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
