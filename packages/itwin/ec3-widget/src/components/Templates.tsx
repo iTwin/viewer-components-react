@@ -4,24 +4,22 @@
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useMemo, useState } from "react";
 import DeleteModal from "./DeleteModal";
-import { Button, Table, DropdownMenu, MenuItem, IconButton, Surface, toaster } from "@itwin/itwinui-react";
+import { Button, DropdownMenu, IconButton, MenuItem, Surface, toaster } from "@itwin/itwinui-react";
 import {
+  SvgAdd,
   SvgDelete,
   SvgMore,
-  SvgAdd
 } from "@itwin/itwinui-icons-react";
-import { WidgetHeader, LoadingOverlay, EmptyMessage } from "./utils";
+import { EmptyMessage, LoadingOverlay, WidgetHeader } from "./utils";
 import "./Templates.scss";
-import TemplateClient from "./TemplateClient";
-import { Configuration } from "./Template"
+import type { Configuration } from "./Template";
 import TemplateMenu from "./TemplateMenu";
 import { SearchBar } from "./SearchBar";
 import { HorizontalTile } from "./HorizontalTile";
 import React from "react";
 import { EC3ConfigurationClient } from "./api/EC3ConfigurationClient";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { EC3Props } from "./EC3";
-
+import type { EC3Props } from "./EC3";
 
 enum TemplateView {
   TEMPLATES = "templates",
@@ -31,13 +29,12 @@ enum TemplateView {
 
 const Templates = ({ config }: EC3Props) => {
   const iTwinId = useActiveIModelConnection()?.iTwinId;
-  const templateClient = useMemo(() => { return new TemplateClient() }, []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [templates, setTemplates] = useState<Configuration[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Configuration>();
   const [searchValue, setSearchValue] = useState<string>("");
-  const configClient = new EC3ConfigurationClient();
+  const configClient = useMemo(() => new EC3ConfigurationClient(), []);
   const [templateView, setTemplateView] = useState<TemplateView>(
     TemplateView.TEMPLATES
   );
@@ -45,20 +42,19 @@ const Templates = ({ config }: EC3Props) => {
   const load = useCallback(async () => {
     setIsLoading(true);
     if (iTwinId) {
-      const templates = await configClient.getConfigurations(iTwinId);
-      setTemplates(templates.configurations);
-    }
-    else {
+      const templatesResponse = await configClient.getConfigurations(iTwinId);
+      setTemplates(templatesResponse.configurations);
+    } else {
       toaster.negative("Invalid iTwinId");
     }
 
     setIsLoading(false);
-  }, [templateClient])
+  }, [iTwinId, configClient]);
 
   const refresh = useCallback(async () => {
     setTemplateView(TemplateView.TEMPLATES);
-    load();
-  }, [load]);
+    void load();
+  }, []);
 
   const filteredTemplates = useMemo(
     () =>
@@ -72,7 +68,7 @@ const Templates = ({ config }: EC3Props) => {
   );
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   switch (templateView) {
@@ -91,8 +87,8 @@ const Templates = ({ config }: EC3Props) => {
       return (
         <TemplateMenu
           config={config}
-          template={selectedTemplate!}
-          //templateId={selectedTemplate!.id!}
+          template={selectedTemplate}
+          // templateId={selectedTemplate!.id!}
           goBack={async () => {
             setTemplateView(TemplateView.TEMPLATES);
             await refresh();
@@ -183,8 +179,8 @@ const Templates = ({ config }: EC3Props) => {
           />
         </>
       );
-  };
+  }
 
-}
+};
 
 export default Templates;

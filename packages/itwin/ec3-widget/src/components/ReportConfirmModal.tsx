@@ -30,7 +30,7 @@ export const ReportConfirmModal = ({
   const confirmCallback = async () => {
     try {
       setIsLoading(true);
-      await onConfirm();
+      onConfirm();
       setShow(false);
       await refresh();
     } catch (error: any) {

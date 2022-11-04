@@ -4,16 +4,17 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, waitForElementToBeRemoved, waitFor } from "@testing-library/react";
+import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
 import Templates from "../components/Templates";
 import * as moq from "typemoq";
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { AuthorizationClient } from "@itwin/core-common";
-import { ReportingClient } from "@itwin/insights-client";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
+import type { AuthorizationClient } from "@itwin/core-common";
+import type { ReportingClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import { setupServer } from "msw/node";
 import { EC3Config } from "../components/EC3/EC3Config";
-import { EC3ConfigurationClient } from "../components/api/EC3ConfigurationClient";
+import type { EC3ConfigurationClient } from "../components/api/EC3ConfigurationClient";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const reportingClient = moq.Mock.ofType<ReportingClient>();
@@ -26,12 +27,12 @@ jest.mock("@itwin/appui-react", () => ({
 
 jest.mock("@itwin/insights-client", () => ({
   ...jest.requireActual("@itwin/insights-client"),
-  ReportingClient: jest.fn().mockImplementation(() => reportingClient.object)
+  ReportingClient: jest.fn().mockImplementation(() => reportingClient.object),
 }));
 
 jest.mock("../components/api/EC3ConfigurationClient", () => ({
   ...jest.requireActual("../components/api/EC3ConfigurationClient"),
-  EC3ConfigurationClient: jest.fn().mockImplementation(() => ec3ConfigurationClient.object)
+  EC3ConfigurationClient: jest.fn().mockImplementation(() => ec3ConfigurationClient.object),
 }));
 
 describe("Templates view", () => {
@@ -53,7 +54,7 @@ describe("Templates view", () => {
   });
 
   const configId = faker.datatype.uuid();
-  const reportId = mockedReports.reports![0].id!;
+  const reportId = mockedReports.reports[0].id;
 
   const mockedConfigurations = {
     configurations: Array.from(
@@ -75,9 +76,9 @@ describe("Templates view", () => {
       _links: {
         report: {
           href: `base_path/reports/${reportId}`,
-        }
-      }
-    }
+        },
+      },
+    },
   };
 
   const iTwinId = faker.datatype.uuid();
@@ -87,12 +88,12 @@ describe("Templates view", () => {
   const config = new EC3Config({ clientId: "", redirectUri: "" });
 
   beforeAll(async () => {
-    authClient.setup((x) => x.getAccessToken()).returns(async () => accessToken);
+    authClient.setup(async (x) => x.getAccessToken()).returns(async () => accessToken);
     IModelApp.authorizationClient = authClient.object;
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
-    reportingClient.setup((x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports?.reports!);
-    ec3ConfigurationClient.setup((x) => x.getConfigurations(iTwinId)).returns(async () => mockedConfigurations);
-    ec3ConfigurationClient.setup((x) => x.getConfiguration(configId)).returns(async () => mockedConfiguration);
+    reportingClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports?.reports);
+    ec3ConfigurationClient.setup(async (x) => x.getConfigurations(iTwinId)).returns(async () => mockedConfigurations);
+    ec3ConfigurationClient.setup(async (x) => x.getConfiguration(configId)).returns(async () => mockedConfiguration);
   });
 
   afterEach(() => {
@@ -108,7 +109,7 @@ describe("Templates view", () => {
     render(<Templates config={config} />);
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
-    mockedConfigurations.configurations.forEach(c =>
+    mockedConfigurations.configurations.forEach((c) =>
       expect(screen.getByText(c.displayName)).toBeInTheDocument()
     );
   });
@@ -117,7 +118,7 @@ describe("Templates view", () => {
     render(<Templates config={config} />);
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
-    mockedConfigurations.configurations.forEach(c =>
+    mockedConfigurations.configurations.forEach((c) =>
       expect(screen.getByText(c.displayName)).toBeInTheDocument()
     );
   });

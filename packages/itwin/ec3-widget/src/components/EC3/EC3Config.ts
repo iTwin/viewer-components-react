@@ -16,7 +16,7 @@ export class EC3Config {
 }
 
 export interface EC3ConfigProps {
-  clientId: string,
-  redirectUri: string,
-  ec3Uri?: string,
+  clientId: string;
+  redirectUri: string;
+  ec3Uri?: string;
 }

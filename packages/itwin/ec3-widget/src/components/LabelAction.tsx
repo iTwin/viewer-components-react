@@ -2,19 +2,18 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { DropdownMenu, Fieldset, LabeledInput, Small, LabeledSelect } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import {
   SvgAdd,
   SvgDelete,
-  SvgMore,
 } from "@itwin/itwinui-icons-react";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import LabelActionPanel from "./LabelActionPanel";
 import { IModelApp } from "@itwin/core-frontend";
-import { Button, toaster, MenuItem, IconButton } from "@itwin/itwinui-react";
+import { Button, IconButton, toaster } from "@itwin/itwinui-react";
 import { WidgetHeader } from "./utils";
 import "./LabelAction.scss";
-import { Configuration, Label as EC3Label, Material } from "./Template"
+import type { Configuration, Label as EC3Label, Material } from "./Template";
 import { ReportingClient } from "@itwin/insights-client";
 import { DropdownTile } from "./DropdrownTile";
 import DeleteModal from "./DeleteModal";
@@ -23,7 +22,7 @@ import React from "react";
 import {
   ComboBox,
   Label,
-  Select
+  Select,
 } from "@itwin/itwinui-react";
 
 interface LabelActionProps {
@@ -45,9 +44,9 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   const [selectedMaterial, setSelectedMaterial] = useState<Material>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   // creating a copy of an array, so original isn't modified
-  const [materials, setMaterials] = useState<Material[]>(label?.materials.map(x => { return { nameColumn: x.nameColumn } }) ?? [{ nameColumn: undefined }]);
+  const [materials, setMaterials] = useState<Material[]>(label?.materials.map((x) => { return { nameColumn: x.nameColumn }; }) ?? [{ nameColumn: undefined }]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [validator, showValidationMessage] = useValidator();
+  const [validator, _showValidationMessage] = useValidator();
   const [availableLabels, setLabels] = useState<string[]>();
   const [availableStringColumns, setStringColumns] = useState<string[]>([]);
   const [availableNumericalColumns, setNumericalColumns] = useState<string[]>([]);
@@ -55,12 +54,12 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
 
   const onSave = async () => {
     const selectedLabel: EC3Label = {
-      reportTable: reportTable,
-      name: name,
+      reportTable,
+      name,
       elementNameColumn: itemName,
       elementQuantityColumn: itemQuantity,
-      materials: materials,
-    }
+      materials,
+    };
 
     if (label) {
       for (let i = 0; i < template.labels.length; i++) {
@@ -69,8 +68,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
           break;
         }
       }
-    }
-    else {
+    } else {
       template.labels.push(selectedLabel);
     }
 
@@ -87,7 +85,6 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       );
     }
 
-
     if (!template.reportId) {
       setIsLoading(false);
       throw new Error(
@@ -102,19 +99,16 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       const responseText = await fetchMetadata(accessToken, reportingClientApi, template.reportId);
       const dom = new DOMParser().parseFromString(responseText, "text/xml");
 
-      const c = dom.getElementsByTagName("EntityType");
-
-      const elems = Array.from(dom.getElementsByTagName("EntityType")).filter(x => x.attributes[0].value === labelName);
+      const elems = Array.from(dom.getElementsByTagName("EntityType")).filter((x) => x.attributes[0].value === labelName);
 
       if (elems.length > 0) {
-        const columns = Array.from(elems[0].children).map(x => x.attributes);
-        const stringColumns = columns.filter(x => x[1].value === "Edm.String").map(x => x[0].value);
-        const numericalColumns = columns.filter(x => x[1].value === "Edm.Double").map(x => x[0].value);
+        const columns = Array.from(elems[0].children).map((x) => x.attributes);
+        const stringColumns = columns.filter((x) => x[1].value === "Edm.String").map((x) => x[0].value);
+        const numericalColumns = columns.filter((x) => x[1].value === "Edm.Double").map((x) => x[0].value);
         setStringColumns(stringColumns);
         setNumericalColumns(numericalColumns);
       }
-    }
-    catch (err) {
+    } catch (err) {
       toaster.negative("You are not authorized to use this system.");
       /* eslint-disable no-console */
       console.error(err);
@@ -128,8 +122,6 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       value: g,
     })) ?? [];
   }, [availableLabels]);
-
-
 
   const StringColumnOptions = useMemo(() => {
     const options = availableStringColumns?.map((col) => ({
@@ -146,14 +138,13 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
 
   const getStringColumnOptions = ((material: string | undefined) => {
     const options = StringColumnOptions
-      .filter(x => materials.filter(p => p.nameColumn === x.label).length === 0)
-      .filter(x => x.label !== itemName);
-
+      .filter((x) => materials.filter((p) => p.nameColumn === x.label).length === 0)
+      .filter((x) => x.label !== itemName);
 
     if (material)
       options.push({ label: material, value: material });
     return options;
-  })
+  });
 
   const NumericalColumnOptions = useMemo(() => {
     const options = availableNumericalColumns?.map((col) => ({
@@ -182,12 +173,12 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     const data = await reportingClientApi
       .getODataReport(token, template.reportId);
     if (data) {
-      const labelItems = data.value.map(data =>
-        data.name ?? ""
+      const labelItems = data.value.map((d) =>
+        d.name ?? ""
       );
       const filteredLabels: string[] = label ? [label.reportTable] : [];
       for (const g of labelItems) {
-        if (template.labels.filter(x => x.reportTable === g).length === 0) {
+        if (template.labels.filter((x) => x.reportTable === g).length === 0) {
           filteredLabels.push(g);
         }
       }
@@ -195,7 +186,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       if (!availableLabels)
         setLabels(filteredLabels);
     }
-  })
+  });
 
   const refresh = useCallback(async () => {
     await load();
@@ -205,10 +196,10 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     const pair: Material = {
       nameColumn: undefined,
     };
-    const newMaterials = materials.map((x) => { return { nameColumn: x.nameColumn } });
+    const newMaterials = materials.map((x) => { return { nameColumn: x.nameColumn }; });
     newMaterials.push(pair);
     setMaterials(newMaterials);
-  })
+  });
 
   useEffect(() => {
     setIsLoading(true);
@@ -217,10 +208,9 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       setName(label.name);
       setItemName(label.elementNameColumn);
       setItemQuantity(label.elementQuantityColumn);
-      setMaterials(label.materials.map(x => { return { nameColumn: x.nameColumn } })); // creating a copy of array, so original (in the parent) isn't modified
-      updateColumns(label.reportTable);
-    }
-    else {
+      setMaterials(label.materials.map((x) => { return { nameColumn: x.nameColumn }; })); // creating a copy of array, so original (in the parent) isn't modified
+      void updateColumns(label.reportTable);
+    } else {
       setItemName("UserLabel");
     }
 
@@ -247,26 +237,25 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
           .getODataReport(accessToken, template.reportId);
 
         if (ODataReport) {
-          const labelItems = ODataReport.value.map(data =>
+          const labelItems = ODataReport.value.map((data) =>
             data.name ?? ""
           );
           const filteredLabels: string[] = label ? [label.reportTable] : [];
           for (const g of labelItems) {
-            if (template.labels.filter(x => x.reportTable === g).length === 0) {
+            if (template.labels.filter((x) => x.reportTable === g).length === 0) {
               filteredLabels.push(g);
             }
           }
           if (!availableLabels)
             setLabels(filteredLabels);
         }
-      }
-      catch (err) {
+      } catch (err) {
         toaster.negative("You are not authorized to get metadata for this report. Please contact project administrator.");
         console.error(err);
       }
 
       setIsLoading(false);
-    }
+    };
 
     void fetchMappings();
   }, []);
@@ -299,7 +288,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                   }
 
                   setReportTable(value);
-                  updateColumns(value);
+                  void updateColumns(value);
                 }}
                 message={
                   validator.message(
@@ -318,7 +307,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 }
                 inputProps={{
                   id: "combo-input",
-                  placeholder: isLoading ? "Loading report tables" : "Select report table"
+                  placeholder: isLoading ? "Loading report tables" : "Select report table",
                 }}
               />
             </div>
@@ -342,7 +331,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
               <Select
                 options={getStringColumnOptions(itemName)}
                 value={itemName}
-                //placeholder={isLoading ? "Loading elements" : "Select element quantity"}
+                // placeholder={isLoading ? "Loading elements" : "Select element quantity"}
                 onChange={async (value) => {
                   setItemName(value);
                 }}
@@ -360,7 +349,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
               <Select
                 options={NumericalColumnOptions}
                 value={itemQuantity}
-                //placeholder={isLoading ? "Loading elements" : "Select element quantity"}
+                // placeholder={isLoading ? "Loading elements" : "Select element quantity"}
                 onChange={async (value) => {
                   setItemQuantity(value);
                 }}
@@ -378,7 +367,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
               startIcon={<SvgAdd />}
               onClick={addPair}
               styleType="default"
-              disabled={isLoading || reportTable === "" || materials.filter(x => x.nameColumn === undefined).length > 0}
+              disabled={isLoading || reportTable === "" || materials.filter((x) => x.nameColumn === undefined).length > 0}
             >
               Add material
             </Button>
@@ -390,8 +379,8 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 stringColumnOptions={getStringColumnOptions(material.nameColumn)}
                 materialValue={material.nameColumn ?? ""}
                 onMaterialChange={async (value) => {
-                  const newPairs = materials.map(x => { return { nameColumn: x.nameColumn } });
-                  newPairs.forEach(p => {
+                  const newPairs = materials.map((x) => { return { nameColumn: x.nameColumn }; });
+                  newPairs.forEach((p) => {
                     if (p.nameColumn === material.nameColumn)
                       p.nameColumn = value;
                   });
@@ -423,7 +412,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
-          setMaterials(materials.filter(x => x.nameColumn !== selectedMaterial?.nameColumn));
+          setMaterials(materials.filter((x) => x.nameColumn !== selectedMaterial?.nameColumn));
         }}
         refresh={refresh}
       />
@@ -431,12 +420,12 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
       <LabelActionPanel
         isSavingDisabled={
           !validator.allValid() ||
-          materials.filter(x => x.nameColumn === undefined).length > 0 ||
+          materials.filter((x) => x.nameColumn === undefined).length > 0 ||
           itemQuantity === "" ||
           itemName === ""
         }
         onSave={async () => {
-          onSave();
+          void onSave();
           await goBack();
         }
         }

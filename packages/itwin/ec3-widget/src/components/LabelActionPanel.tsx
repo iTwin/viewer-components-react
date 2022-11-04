@@ -7,8 +7,8 @@ import * as React from "react";
 import "./LabelActionPanel.scss";
 import { LoadingSpinner } from "./utils";
 import {
+  SvgExit,
   SvgSave,
-  SvgExit
 } from "@itwin/itwinui-icons-react";
 
 export interface ActionPanelProps {

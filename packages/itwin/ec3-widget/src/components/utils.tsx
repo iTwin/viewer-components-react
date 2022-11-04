@@ -55,7 +55,6 @@ export const EmptyMessage = ({ message }: EmptyMessageProps) => (
   </div>
 );
 
-
 export const handleInputChange = <T,>(
   e: React.ChangeEvent<HTMLInputElement>,
   values: T,

@@ -33,7 +33,7 @@ export const DeleteModal = ({
   const deleteCallback = async () => {
     try {
       setIsLoading(true);
-      await onDelete();
+      onDelete();
       setShow(false);
       await refresh();
     } catch (error: any) {

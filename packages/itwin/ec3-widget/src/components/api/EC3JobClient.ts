@@ -2,10 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
-import { IModelApp } from "@itwin/core-frontend";
-import { Configuration } from "../Template";
-import isomorphicFetch from 'cross-fetch';
+import isomorphicFetch from "cross-fetch";
 
 const ACCEPT = "application/vnd.bentley.itwin-platform.v1+json";
 
@@ -13,8 +10,6 @@ export const BASE_PATH = "https://dev-api.bentley.com/insights/carbon-calculatio
   /\/+$/,
   ""
 );
-
-
 
 class EC3JobClient {
   public async createJob(accesToken: string, ec3BearerToken: string, configurationId: string, projectName: string) {
@@ -29,36 +24,33 @@ class EC3JobClient {
         "Accept": ACCEPT,
         "Authorization": accesToken,
       },
-      body: JSON.stringify(obj)
+      body: JSON.stringify(obj),
     };
     const response = await isomorphicFetch(url, prop);
-    return await response.json();
+    return response.json();
   }
 
   public async getEC3JobStatus(token: string, jobId: string) {
-    const url = " https://dev-api.bentley.com/insights/carbon-calculation/ec3/jobs/" + jobId;
+    const url = ` https://dev-api.bentley.com/insights/carbon-calculation/ec3/jobs/${jobId}`;
     const prop = {
       method: "GET",
       Request: "no-cors",
       headers: {
-        "Accept": ACCEPT,
-        "Authorization": token,
+        Accept: ACCEPT,
+        Authorization: token,
       },
     };
     const response = await isomorphicFetch(url, prop);
-    return await response.json();
+    return response.json();
   }
 
 }
 
-export interface FetchAPI {
-  (url: string, init?: any): Promise<Response>;
-}
+export type FetchAPI = (url: string, init?: any) => Promise<Response>;
 
 export interface FetchArgs {
   url: string;
   options: any;
 }
-
 
 export { EC3JobClient };

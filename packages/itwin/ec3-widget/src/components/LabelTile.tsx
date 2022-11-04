@@ -2,9 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { ReactNode } from "react";
 import React from "react";
-import { Text, IconButton } from "@itwin/itwinui-react";
+import { IconButton, Text } from "@itwin/itwinui-react";
 import {
   SvgDelete,
 } from "@itwin/itwinui-icons-react";

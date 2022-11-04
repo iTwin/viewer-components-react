@@ -12,19 +12,13 @@ import React, {
 } from "react";
 import { IModelApp } from "@itwin/core-frontend";
 import {
-  Alert,
   Button,
-  LabeledInput,
   Modal,
   ProgressLinear,
   ProgressRadial,
   Text,
   toaster,
 } from "@itwin/itwinui-react";
-import {
-  SvgVisibilityHide,
-  SvgVisibilityShow,
-} from "@itwin/itwinui-icons-react";
 import type { JobCreation, Link } from "@itwin/insights-client";
 import { JobStatus } from "@itwin/insights-client";
 import { EC3JobClient } from "./api/EC3JobClient";

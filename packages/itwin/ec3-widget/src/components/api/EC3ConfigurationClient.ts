@@ -2,30 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-/*
-import { IModelApp } from "@bentley/imodeljs-frontend";
-import { AuthorizationClient } from "@bentley/itwin-client";
-import { getConfig } from "../../config";
-import { prefixUrl } from "../useApiPrefix";
-import {
-  BASE_PATH,
-  CalculatedPropertyCreateReportingAPI,
-  CalculatedPropertyUpdateReportingAPI,
-  GroupCreateReportingAPI,
-  GroupPropertyCreateReportingAPI,
-  GroupPropertyUpdateReportingAPI,
-  GroupUpdateReportingAPI,
-  MappingCreateReportingAPI,
-  MappingsApi,
-  MappingUpdateReportingAPI,
-  ReportsApi,
-} from "./generated";
-*/
 import { IModelApp } from "@itwin/core-frontend";
-import { Configuration } from "../Template";
-//import * as isomorphicFetch from "isomorphic-fetch";
-//import * as url from "url";
-import isomorphicFetch from 'cross-fetch';
+import type { Configuration } from "../Template";
+import isomorphicFetch from "cross-fetch";
 
 const ACCEPT = "application/vnd.bentley.itwin-platform.v1+json";
 
@@ -41,26 +20,25 @@ class EC3ConfigurationClient {
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
     const _accessToken = await IModelApp.authorizationClient.getAccessToken();
-    const url = "https://dev-api.bentley.com/insights/carbon-calculation/ec3/configurations?iTwinId=" + contextId;
+    const url = `https://dev-api.bentley.com/insights/carbon-calculation/ec3/configurations?iTwinId=${contextId}`;
 
     const prop = {
       method: "GET",
       Request: "no-cors",
       headers: {
-        "Accept": ACCEPT,
-        "Authorization": _accessToken,
+        Accept: ACCEPT,
+        Authorization: _accessToken,
       },
     };
 
     const response = await isomorphicFetch(url, prop);
 
     if (response.ok) {
-      return await response.json();
-    }
-    else {
-      var empty: any = {
-        configurations: []
-      }
+      return response.json();
+    } else {
+      const empty: any = {
+        configurations: [],
+      };
 
       return empty;
     }
@@ -72,17 +50,17 @@ class EC3ConfigurationClient {
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
     const _accessToken = await IModelApp.authorizationClient.getAccessToken();
-    const url = "https://dev-api.bentley.com/insights/carbon-calculation/ec3/configurations/" + configurationId;
+    const url = `https://dev-api.bentley.com/insights/carbon-calculation/ec3/configurations/${configurationId}`;
     const prop = {
       method: "GET",
       Request: "no-cors",
       headers: {
-        "Accept": ACCEPT,
-        "Authorization": _accessToken,
+        Accept: ACCEPT,
+        Authorization: _accessToken,
       },
     };
     const response = await isomorphicFetch(url, prop);
-    return await response.json();
+    return response.json();
   }
 
   public async createConfiguration(configuration: Configuration) {
@@ -98,9 +76,9 @@ class EC3ConfigurationClient {
       headers: {
         "Accept": ACCEPT,
         "Authorization": _accessToken,
-        "content-type": "application/json"
+        "content-type": "application/json",
       },
-      body: JSON.stringify(configuration)
+      body: JSON.stringify(configuration),
     };
     const response = await isomorphicFetch(url, prop);
     return response;
@@ -114,16 +92,16 @@ class EC3ConfigurationClient {
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
     const _accessToken = await IModelApp.authorizationClient.getAccessToken();
-    const url = "https://dev-api.bentley.com/insights/carbon-calculation/ec3/configurations/" + configuration.id;
+    const url = `https://dev-api.bentley.com/insights/carbon-calculation/ec3/configurations/${configuration.id}`;
     const prop = {
       method: "PUT",
       Request: "no-cors",
       headers: {
         "Accept": ACCEPT,
         "Authorization": _accessToken,
-        "content-type": "application/json"
+        "content-type": "application/json",
       },
-      body: JSON.stringify(configuration)
+      body: JSON.stringify(configuration),
     };
     const response = await isomorphicFetch(url, prop);
     return response;
@@ -135,13 +113,13 @@ class EC3ConfigurationClient {
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
     const _accessToken = await IModelApp.authorizationClient.getAccessToken();
-    const url = "https://dev-api.bentley.com/insights/carbon-calculation/ec3/configurations/" + configurationId;
+    const url = `https://dev-api.bentley.com/insights/carbon-calculation/ec3/configurations/${configurationId}`;
     const prop = {
       method: "DELETE",
       Request: "no-cors",
       headers: {
-        "Accept": ACCEPT,
-        "Authorization": _accessToken,
+        Accept: ACCEPT,
+        Authorization: _accessToken,
       },
     };
     const response = await isomorphicFetch(url, prop);
@@ -150,9 +128,7 @@ class EC3ConfigurationClient {
 
 }
 
-export interface FetchAPI {
-  (url: string, init?: any): Promise<Response>;
-}
+export type FetchAPI = (url: string, init?: any) => Promise<Response>;
 
 export interface FetchArgs {
   url: string;

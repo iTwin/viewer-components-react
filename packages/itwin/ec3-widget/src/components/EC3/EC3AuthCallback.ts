@@ -2,8 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { EC3Config, EC3ConfigProps } from "./EC3Config";
-import { EC3TokenCache } from "./EC3TokenCache";
+import type { EC3ConfigProps } from "./EC3Config";
+import { EC3Config } from "./EC3Config";
+import type { EC3TokenCache } from "./EC3TokenCache";
 
 export class EC3AuthCallback {
   /* This function must be called in path set in process.env.EC3_AUTH_CLIENT_REDIRECT_URI.
@@ -41,6 +42,6 @@ export class EC3AuthCallback {
       parentWindow.postMessage(token, window.location.origin);
     }
 
-    exchangeToken();
+    void exchangeToken();
   }
 }

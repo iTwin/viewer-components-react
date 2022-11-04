@@ -13,7 +13,8 @@ import {
 } from "@itwin/appui-abstract";
 import EC3 from "../components/EC3";
 import React from "react";
-import { EC3Config, EC3ConfigProps } from "../components/EC3/EC3Config";
+import type { EC3ConfigProps } from "../components/EC3/EC3Config";
+import { EC3Config } from "../components/EC3/EC3Config";
 
 export class EC3Provider implements UiItemsProvider {
   public readonly id = "EC3Provider";

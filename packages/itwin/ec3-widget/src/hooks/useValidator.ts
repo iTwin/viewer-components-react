@@ -15,7 +15,7 @@ const useValidator = (
 ): [SimpleReactValidator, React.Dispatch<React.SetStateAction<boolean>>] => {
   const [show, setShow] = useState(false);
   const validator = new SimpleReactValidator({
-    messages: customMessage
+    messages: customMessage,
   });
 
   if (show) {

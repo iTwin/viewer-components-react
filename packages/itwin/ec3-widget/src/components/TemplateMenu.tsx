@@ -2,17 +2,17 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { Fieldset, LabeledInput, LabeledSelect, Small, SelectOption } from "@itwin/itwinui-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { SelectOption } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { Report } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
-import { WidgetHeader, handleSelectChange } from "./utils";
+import { handleSelectChange, WidgetHeader } from "./utils";
 import ExportModal from "./ExportModal";
-import TemplateClient from "./TemplateClient";
 import LabelAction from "./LabelAction";
-import { Configuration, Label as EC3Label } from "./Template"
+import type { Configuration, Label as EC3Label } from "./Template";
 import { LabelTile } from "./LabelTile";
 import DeleteModal from "./DeleteModal";
 import { handleInputChange } from "./utils";
@@ -21,26 +21,18 @@ import ReportConfirmModal from "./ReportConfirmModal";
 import { EC3ConfigurationClient } from "./api/EC3ConfigurationClient";
 import {
   ComboBox,
-  Label
+  Label,
 } from "@itwin/itwinui-react";
 
 import {
-  SvgDelete,
-  SvgMore,
-} from "@itwin/itwinui-icons-react";
-
-import {
   Button,
-  DropdownMenu,
-  IconButton,
-  MenuItem,
   Surface,
   toaster,
 } from "@itwin/itwinui-react";
 import "./TemplateMenu.scss";
 import React from "react";
-import { EC3TokenCache } from "./EC3/EC3TokenCache";
-import { EC3Config } from "./EC3/EC3Config";
+import type { EC3TokenCache } from "./EC3/EC3TokenCache";
+import type { EC3Config } from "./EC3/EC3Config";
 
 interface TemplateProps {
   template?: Configuration;
@@ -65,12 +57,12 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
   const [selectedReport, setSelectedReport] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
   const [availableReports, setReports] = useState<Report[]>([]);
-  const configurationClient = new EC3ConfigurationClient();
+  const configurationClient = useMemo(() => new EC3ConfigurationClient(), []);
   const [childTemplate, setChildTemplate] = useState<Configuration>({
     reportId: "",
     description: "",
     displayName: "",
-    labels: []
+    labels: [],
   });
 
   const [labelsView, setLabelsView] = useState<LabelView>(
@@ -78,7 +70,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
   );
 
   const onSave = async () => {
-    var response;
+    let response;
     if (childTemplate.id)
       response = await configurationClient.updateConfiguration(childTemplate);
     else
@@ -86,11 +78,11 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
 
     if (!response.ok) {
       toaster.negative("Saving failed");
+      // eslint-disable-next-line
       console.log(response.statusText);
-    }
-    else {
+    } else {
       toaster.positive("Saved successfully!");
-      goBack();
+      void goBack();
     }
   };
 
@@ -103,8 +95,8 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
 
     const fetchReports = async () => {
       if (template) {
-        const config = await configurationClient.getConfiguration(template.id!);
-        const configuration = config.configuration;
+        const configResponse = await configurationClient.getConfiguration(template.id!);
+        const configuration = configResponse.configuration;
         const reportId = configuration._links.report.href.split("/reports/")[1];
         configuration.reportId = reportId;
         setChildTemplate(configuration);
@@ -123,14 +115,13 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
           setReports(fetchedReports);
           setIsLoading(false);
         }
-      }
-      catch (err) {
+      } catch (err) {
         setIsLoading(false);
         toaster.negative("You are not authorized to use this system.");
         /* eslint-disable no-console */
         console.error(err);
       }
-    }
+    };
     void fetchReports();
   }, [projectId, reportingClientApi]);
 
@@ -166,7 +157,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
     case LabelView.MODIFY:
       return (
         <LabelAction
-          label={childTemplate.labels.filter(x => x.reportTable === selectedLabel?.reportTable)[0]}
+          label={childTemplate.labels.filter((x) => x.reportTable === selectedLabel?.reportTable)[0]}
           template={childTemplate}
           goBack={async () => {
             setLabelsView(LabelView.LABELS);
@@ -223,14 +214,13 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
                       if (template && value !== template.reportId) {
                         setSelectedReport(value);
                         setShowReportConfirmModal(true);
-                      }
-                      else {
+                      } else {
                         handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
                       }
                     }}
                     inputProps={{
                       id: "combo-input",
-                      placeholder: "Select report"
+                      placeholder: "Select report",
                     }}
                   />
                 </div>
@@ -274,7 +264,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
             onExport={async () => {
               if (!validateSignin()) {
                 const url = `${config.EC3_URI}oauth2/authorize?client_id=${config.CLIENT_ID}&redirect_uri=${config.REDIRECT_URI}&response_type=code&scope=${config.SCOPE}`;
-                const authWindow = window.open(url, '_blank', 'toolbar=0,location=0,menubar=0,width=800,height=700');
+                const authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
 
                 const receiveMessage = (event: MessageEvent<EC3TokenCache>) => {
                   authWindow?.close();
@@ -282,7 +272,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
                   openModal(true);
                 };
 
-                window.addEventListener('message', receiveMessage, false);
+                window.addEventListener("message", receiveMessage, false);
               } else {
                 openModal(true);
               }
@@ -304,7 +294,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={() => {
-              childTemplate.labels = childTemplate.labels.filter(x => x.reportTable !== selectedLabel?.reportTable);
+              childTemplate.labels = childTemplate.labels.filter((x) => x.reportTable !== selectedLabel?.reportTable);
             }}
             refresh={async () => { }}
           />
@@ -324,7 +314,5 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
       );
   }
 };
-
-
 
 export default TemplateMenu;
