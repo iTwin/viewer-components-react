@@ -828,7 +828,7 @@ importers:
       '@itwin/imodel-components-react': ^3.0.0
       '@itwin/imodels-access-frontend': ^1.0.1
       '@itwin/imodels-client-management': ^1.0.1
-      '@itwin/insights-client': ^0.3.0
+      '@itwin/insights-client': ^0.3.2
       '@itwin/itwinui-icons-color-react': ^1.0.1
       '@itwin/itwinui-icons-react': ^1.7.0
       '@itwin/itwinui-react': ~1.42.0
@@ -871,7 +871,7 @@ importers:
     dependencies:
       '@itwin/imodels-access-frontend': 1.0.1_e42c8153c9c78e18694e22e7ad06c7e0
       '@itwin/imodels-client-management': 1.0.1
-      '@itwin/insights-client': 0.3.0
+      '@itwin/insights-client': 0.3.2
       '@itwin/itwinui-icons-color-react': 1.0.2_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-icons-react': 1.8.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.42.0_react-dom@17.0.2+react@17.0.2
@@ -2834,6 +2834,15 @@ packages:
 
   /@itwin/insights-client/0.3.0:
     resolution: {integrity: sha512-QiulW7EeOab9qy5jKGZDEmeN3VmEx5dZ1DYAJbgdQDit+4eSFW/1jpmD2X8ZGADoW//FdI5dY+wTPaqrQACb9Q==}
+    dependencies:
+      cross-fetch: 3.1.5
+      fast-xml-parser: 4.0.9
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /@itwin/insights-client/0.3.2:
+    resolution: {integrity: sha512-bsT3H+0+EweG7+1mep8YrMgmUek+1HZAF9OvePTi07QbLOffnM5cs9Aw2fDI23Y5/qynNstTv5NhgMMggg2VwA==}
     dependencies:
       cross-fetch: 3.1.5
       fast-xml-parser: 4.0.9

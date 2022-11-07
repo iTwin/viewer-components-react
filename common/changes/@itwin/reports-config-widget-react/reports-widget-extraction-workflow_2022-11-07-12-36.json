@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/reports-config-widget-react",
+      "comment": "extraction workflow for mappings updated",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/reports-config-widget-react"
+}
