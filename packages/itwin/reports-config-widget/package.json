@@ -56,7 +56,7 @@
   "dependencies": {
     "@itwin/imodels-access-frontend": "^1.0.1",
     "@itwin/imodels-client-management": "^1.0.1",
-    "@itwin/insights-client": "^0.3.0",
+    "@itwin/insights-client": "^0.3.2",
     "@itwin/itwinui-icons-color-react": "^1.0.1",
     "@itwin/itwinui-icons-react": "^1.7.0",
     "@itwin/itwinui-react": "~1.42.0",

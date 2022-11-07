@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import {
   SvgAdd,
-  SvgRefresh,
+  SvgPlay,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
@@ -148,7 +148,7 @@ export const Reports = () => {
       ) : null;
     case ReportsView.REPORTSMAPPING:
       return selectedReport ? (
-        <ReportMappings report={selectedReport} goBack={refresh} />
+        <ReportMappings report={selectedReport} bulkExtractor={bulkExtractor} goBack={refresh} />
       ) : null;
     default:
       return (
@@ -176,7 +176,7 @@ export const Reports = () => {
                 onClick={updateDatasets}
                 disabled={selectedReportIds.length === 0}
               >
-                <SvgRefresh />
+                < SvgPlay />
               </IconButton>
               <div className="rcw-search-bar-container" data-testid="search-bar">
                 <div className="rcw-search-button">

@@ -56,7 +56,7 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
     if (jobStarted) {
       window.clearInterval(interval.current);
       interval.current = window.setInterval(async () => {
-        const state = props.bulkExtractor.getState(props.report.id);
+        const state = props.bulkExtractor.getReportState(props.report.id);
         if (state) {
           setExtractionState(state);
           if (state === ExtractionStates.Failed || state === ExtractionStates.Succeeded) {

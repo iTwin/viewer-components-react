@@ -5,15 +5,11 @@
 import {
   SvgAdd,
   SvgCopy,
-  SvgDelete,
-  SvgMore,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
-  DropdownMenu,
   IconButton,
   LabeledInput,
-  MenuItem,
   Surface,
   Text,
   toaster,
@@ -38,12 +34,14 @@ import type {
 } from "@itwin/imodels-client-management";
 import { Constants, IModelsClient } from "@itwin/imodels-client-management";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
-import { HorizontalTile } from "./HorizontalTile";
-import { Extraction, ExtractionStates, ExtractionStatus } from "./Extraction";
 import { SearchBar } from "./SearchBar";
 import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
+import { ReportMappingHorizontalTile } from "./ReportMappingHorizontalTile";
+import type BulkExtractor from "./BulkExtractor";
+import { BeEvent } from "@itwin/core-bentley";
+import { LoadingSpinner } from "./utils";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
@@ -125,23 +123,24 @@ const fetchReportMappings = async (
 
 interface ReportMappingsProps {
   report: Report;
+  bulkExtractor: BulkExtractor;
   goBack: () => Promise<void>;
 }
 
-export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
+export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappingsProps) => {
   const apiConfig = useReportsApiConfig();
   const [reportMappingsView, setReportMappingsView] =
     useState<ReportMappingsView>(ReportMappingsView.REPORTMAPPINGS);
   const [selectedReportMapping, setSelectedReportMapping] = useState<ReportMappingAndMapping | undefined>(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const [extractionState, setExtractionState] = useState<ExtractionStates>(
-    ExtractionStates.None
-  );
-  const [runningIModelId, setRunningIModelId] = useState<string>("");
   const [searchValue, setSearchValue] = useState<string>("");
   const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
+
+  const jobStartEvent = useMemo(
+    () => new BeEvent<(mappingId: string) => void>(),
+    []
+  );
 
   useEffect(() => {
     void fetchReportMappings(
@@ -165,17 +164,6 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   const addMapping = () => {
     setReportMappingsView(ReportMappingsView.ADDING);
   };
-
-  const uniqueIModels = useMemo(
-    () =>
-      new Map(
-        reportMappings.map((mapping) => [
-          mapping.imodelId,
-          mapping.iModelName,
-        ])
-      ),
-    [reportMappings]
-  );
 
   const odataFeedUrl = `${generateUrl(
     REPORTING_BASE_PATH,
@@ -224,13 +212,6 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           }
           iconDisplayStyle="inline"
         />
-        <Extraction
-          iModels={uniqueIModels}
-          extractionState={extractionState}
-          setExtractionState={setExtractionState}
-          setExtractingIModelId={setRunningIModelId}
-          isLoading={isLoading}
-        />
       </div>
       <Surface className="report-mappings-container">
         <div className="toolbar">
@@ -273,47 +254,18 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
         ) : (
           <div className="mapping-list">
             {filteredReportMappings.map((mapping) => (
-              <HorizontalTile
+              <ReportMappingHorizontalTile
                 key={mapping.mappingId}
-                title={mapping.mappingName}
-                subText={mapping.iModelName}
-                titleTooltip={mapping.mappingDescription}
-                actionGroup={
-                  <ExtractionStatus
-                    state={
-                      mapping.imodelId === runningIModelId
-                        ? extractionState
-                        : ExtractionStates.None
-                    }
-                  >
-                    <DropdownMenu
-                      menuItems={(close: () => void) => [
-                        <MenuItem
-                          key={0}
-                          onClick={() => {
-                            setSelectedReportMapping(mapping);
-                            setShowDeleteModal(true);
-                            close();
-                          }}
-                          icon={<SvgDelete />}
-                        >
-                          {ReportsConfigWidget.localization.getLocalizedString(
-                            "ReportsConfigWidget:Remove"
-                          )}
-                        </MenuItem>,
-                      ]}
-                    >
-                      <IconButton styleType="borderless">
-                        <SvgMore
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                          }}
-                        />
-                      </IconButton>
-                    </DropdownMenu>
-                  </ExtractionStatus>
-                }
+                bulkExtractor={bulkExtractor}
+                mapping={mapping}
+                onClickDelete={() => {
+                  setSelectedReportMapping(mapping);
+                  setShowDeleteModal(true);
+                  close();
+                }}
+                odataFeedUrl={odataFeedUrl}
+                jobStartEvent={jobStartEvent}
+                initialState={bulkExtractor.getIModelState(mapping.imodelId)}
               />
             ))}
           </div>
@@ -342,6 +294,40 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
         }}
         refresh={refresh}
       />
+      <div id="action">
+        <div className="rcw-action-panel">
+          {isLoading && <LoadingSpinner />}
+          <Button
+            disabled={isLoading}
+            styleType="high-visibility"
+            id="save-app"
+            onClick={() => {
+              bulkExtractor.runIModelExtractions(reportMappings).catch((e) => {
+                /* eslint-disable no-console */
+                console.error(e);
+              });
+              reportMappings.forEach((reportMapping) => {
+                jobStartEvent.raiseEvent(reportMapping.imodelId);
+              });
+            }}
+          >
+            {ReportsConfigWidget.localization.getLocalizedString(
+              "ReportsConfigWidget:UpdateAllDatasets"
+            )}
+          </Button>
+          <Button
+            styleType="default"
+            type="button"
+            id="cancel"
+            onClick={goBack}
+            disabled={isLoading}
+          >
+            {ReportsConfigWidget.localization.getLocalizedString(
+              "ReportsConfigWidget:Close"
+            )}
+          </Button>
+        </div>
+      </div>
     </>
   );
 };
