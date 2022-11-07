@@ -1,6 +1,13 @@
 # Change Log - @itwin/reports-config-widget-react
 
-This log was last generated on Thu, 29 Sep 2022 19:04:42 GMT and should not be manually modified.
+This log was last generated on Mon, 31 Oct 2022 19:03:27 GMT and should not be manually modified.
+
+## 0.1.0
+Mon, 31 Oct 2022 19:03:27 GMT
+
+### Minor changes
+
+- Datasets can be updated in the Reports page. Reports tiles are now selectable
 
 ## 0.0.8
 Thu, 29 Sep 2022 19:04:42 GMT

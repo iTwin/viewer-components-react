@@ -4,30 +4,24 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-@keyframes rcw-expand {
-  0% {
-    opacity: 0;
-    width: 20%;
-  }
+.rcw-extraction-status {
+  align-items: center;
+  margin: auto $iui-s * 2;
+  height: 38px;
+  display: flex;
 
-  100% {
-    opacity: 1;
-    width: 100%;
-  }
-}
-
-@keyframes rcw-shrink {
-  100% {
-    opacity: 0;
-    width: 20%;
-  }
-
-  0% {
-    opacity: 1;
-    width: 100%;
+  .rcw-status-icon {
+    width: $iui-icons-default;
+    height: $iui-icons-default;
   }
 }
 
-.rcw-search-button {
-  float: right;
+@keyframes rcw-fade-out {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }

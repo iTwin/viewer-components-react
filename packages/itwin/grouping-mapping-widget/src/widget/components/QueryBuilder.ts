@@ -395,6 +395,8 @@ export class QueryBuilder {
 
     const querySegments: string[] = [];
     for (const union of this.query.unions) {
+      const querySegments: string[] = [];
+
       const baseClass = union.classes[0];
       const baseClassName = baseClass.className;
       const baseIdName = baseClass.isAspect

@@ -2,32 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
-
-@keyframes rcw-expand {
-  0% {
-    opacity: 0;
-    width: 20%;
-  }
-
-  100% {
-    opacity: 1;
-    width: 100%;
-  }
-}
-
-@keyframes rcw-shrink {
-  100% {
-    opacity: 0;
-    width: 20%;
-  }
-
-  0% {
-    opacity: 1;
-    width: 100%;
-  }
-}
-
-.rcw-search-button {
-  float: right;
-}
+export const STATUS_CHECK_INTERVAL = 5000;
+export const ANIMATION_DELAY = "5s";
+export const ANIMATION_DURATION = "1s";

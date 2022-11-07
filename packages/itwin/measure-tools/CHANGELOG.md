@@ -1,6 +1,13 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Wed, 19 Oct 2022 14:17:36 GMT and should not be manually modified.
+This log was last generated on Mon, 31 Oct 2022 19:03:27 GMT and should not be manually modified.
+
+## 0.10.4
+Mon, 31 Oct 2022 19:03:27 GMT
+
+### Patches
+
+- Hide measurement tools button on sheet view.
 
 ## 0.10.3
 Wed, 19 Oct 2022 14:17:36 GMT
