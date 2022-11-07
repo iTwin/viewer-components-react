@@ -56,8 +56,9 @@
   "SelectIModel": "Select an iModel",
   "Starting": "Starting",
   "Success": "Success",
-  "ExtractionSuccess": "Extraction completed successfully.",
-  "ExtractionFailed": "Extraction failed.",
+  "ExtractionSuccess": "Extraction completed successfully for iModel: ",
+  "ExtractionFailed": "Extraction failed for iModel: ",
+  "CopyODataUrl": "Copy OData Feed URL",
   "Table": {
     "SizePerPage": "{{size}} per page",
     "StartIndexEndIndex": "{{startIndex}}-{{endIndex}}...",

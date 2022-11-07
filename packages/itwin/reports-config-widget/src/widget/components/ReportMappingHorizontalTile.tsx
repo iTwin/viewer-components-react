@@ -7,7 +7,7 @@ import React from "react";
 import type BulkExtractor from "./BulkExtractor";
 import { ExtractionStates, ExtractionStatus } from "./ExtractionStatus";
 import type { BeEvent } from "@itwin/core-bentley";
-import { STATUS_UPDATE_INTERVAL } from "./Constants";
+import { STATUS_CHECK_INTERVAL } from "./Constants";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import {
   IconButton,
@@ -52,17 +52,17 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
     if (jobStarted) {
       window.clearInterval(interval.current);
       interval.current = window.setInterval(async () => {
-        const state = props.bulkExtractor.getIModelState(props.mapping.imodelId);
+        const state = props.bulkExtractor.getIModelState(props.mapping.imodelId, props.mapping.iModelName, props.odataFeedUrl);
         if (state) {
           setExtractionState(state);
           if (state === ExtractionStates.Failed || state === ExtractionStates.Succeeded) {
             setJobStarted(false);
           }
         }
-      }, STATUS_UPDATE_INTERVAL);
+      }, STATUS_CHECK_INTERVAL);
     }
     return () => window.clearInterval(interval.current);
-  }, [props.mapping, props.bulkExtractor, jobStarted]);
+  }, [props.mapping, props.bulkExtractor, props.odataFeedUrl, jobStarted]);
 
   return (
     <HorizontalTile

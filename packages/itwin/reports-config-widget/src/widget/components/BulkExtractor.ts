@@ -9,7 +9,7 @@ import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ExtractionStates } from "./ExtractionStatus";
 import { STATUS_CHECK_INTERVAL } from "./Constants";
 import { toaster } from "@itwin/itwinui-react";
-import { ReportsConfigWidget } from "../../ReportsConfigWidget";
+import { FailedExtractionToast, SuccessfulExtractionToast } from "./ExtractionToast";
 
 export type ReportMappingAndMapping = ReportMapping & {
   mappingName: string;
@@ -27,6 +27,7 @@ export default class BulkExtractor {
   private _timeFetched = new Date();
   private _reportIds: string[];
   private _iModelRun = new Map<string, string>();
+  private _iModelToast = new Map<string, boolean>();
 
   constructor(apiConfig: ReportsApiConfig, reportIds: string[]) {
     const url = generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl);
@@ -36,7 +37,7 @@ export default class BulkExtractor {
     this._reportIds = reportIds;
   }
 
-  private async fetchStates(showCompletionToast = false) {
+  private async fetchStates() {
     const stateByReportId = new Map<string, ExtractionStates>();
     const stateByIModelId = new Map<string, ExtractionStates>();
     const stateByRunId = new Map<string, ExtractorState>();
@@ -77,20 +78,6 @@ export default class BulkExtractor {
 
     this._reportStates = stateByReportId;
     this._iModelStates = stateByIModelId;
-
-    if (showCompletionToast && stateByIModelId.size > 0) {
-      if (stateByIModelId.size === Array.from(stateByIModelId.values()).filter((x) => x === ExtractionStates.Succeeded).length) {
-        toaster.positive(
-          ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:ExtractionSuccess"
-          ));
-      } else if (Array.from(stateByIModelId.values()).filter((x) => x === ExtractionStates.Failed).length > 0) {
-        toaster.negative(
-          ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:ExtractionFailed"
-          ));
-      }
-    }
   }
 
   public getReportState(reportId: string): ExtractionStates {
@@ -104,16 +91,23 @@ export default class BulkExtractor {
     return this._reportStates.get(reportId) ?? ExtractionStates.None;
   }
 
-  public getIModelState(iModelId: string): ExtractionStates {
+  public getIModelState(iModelId: string, iModelName: string, odataFeedUrl: string): ExtractionStates {
     const state = this._iModelStates.get(iModelId) ?? ExtractionStates.None;
     if (!(state === ExtractionStates.Succeeded || state === ExtractionStates.Failed)) {
       if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
         this._timeFetched = new Date();
-        this.fetchStates(true).catch((e) =>
+        this.fetchStates().catch((e) =>
           /* eslint-disable no-console */
           console.error(e)
         );
       }
+    }
+    if (state === ExtractionStates.Succeeded && !this._iModelToast.get(iModelId)) {
+      toaster.positive(SuccessfulExtractionToast({ iModelName, odataFeedUrl }));
+      this._iModelToast.set(iModelId, true);
+    } else if (state === ExtractionStates.Failed && !this._iModelToast.get(iModelId)) {
+      toaster.negative(FailedExtractionToast({ iModelName }));
+      this._iModelToast.set(iModelId, true);
     }
     return state;
   }
@@ -127,6 +121,7 @@ export default class BulkExtractor {
   public clearIModelJob(iModelId: string) {
     this._iModelRun.delete(iModelId);
     this._iModelStates.delete(iModelId);
+    this._iModelToast.delete(iModelId);
   }
 
   private static getFinalState(states: ExtractorState[]): ExtractionStates {
@@ -191,6 +186,7 @@ export default class BulkExtractor {
         await this._accessToken(),
         iModelId
       );
+      this._iModelToast.set(iModelId, false);
       return response.id;
     } catch (error: any) {
       handleError(error.status);

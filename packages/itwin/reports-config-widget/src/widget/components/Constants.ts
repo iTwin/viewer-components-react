@@ -3,6 +3,5 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 export const STATUS_CHECK_INTERVAL = 5000;
-export const STATUS_UPDATE_INTERVAL = 1000;
 export const ANIMATION_DELAY = "5s";
 export const ANIMATION_DURATION = "1s";

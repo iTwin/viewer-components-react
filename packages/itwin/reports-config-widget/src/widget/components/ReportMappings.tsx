@@ -265,7 +265,7 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
                 }}
                 odataFeedUrl={odataFeedUrl}
                 jobStartEvent={jobStartEvent}
-                initialState={bulkExtractor.getIModelState(mapping.imodelId)}
+                initialState={bulkExtractor.getIModelState(mapping.imodelId, mapping.iModelName, odataFeedUrl)}
               />
             ))}
           </div>
