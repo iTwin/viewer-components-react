@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
+import { Text } from "@itwin/itwinui-react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 interface ExtractionToastProps {
@@ -13,8 +14,7 @@ interface ExtractionToastProps {
 export const SuccessfulExtractionToast = ({ iModelName, odataFeedUrl }: ExtractionToastProps) => {
   return (
     <div>
-      <text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionSuccess")}{iModelName} </text>
-      <br />
+      <Text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionSuccess")}{iModelName} </Text>
       <a href="javascript:;" onClick={async () => { await navigator.clipboard.writeText(odataFeedUrl!); }}>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CopyODataUrl")}</a>
     </div>
   );
@@ -23,7 +23,7 @@ export const SuccessfulExtractionToast = ({ iModelName, odataFeedUrl }: Extracti
 export const FailedExtractionToast = ({ iModelName }: ExtractionToastProps) => {
   return (
     <div>
-      <text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionFailed")}{iModelName}</text>
+      <Text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionFailed")}{iModelName}</Text>
     </div>
   );
 };
