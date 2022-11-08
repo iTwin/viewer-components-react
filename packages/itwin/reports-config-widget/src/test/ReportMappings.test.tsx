@@ -38,7 +38,7 @@ import {
 import { ReportMappings } from "../widget/components/ReportMappings";
 import { Constants, IModelState } from "@itwin/imodels-client-management";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
-import { REFRESH_DELAY } from "../widget/components/Extraction";
+import { REFRESH_DELAY } from "../widget/components/Constants";
 import type {
   SelectionManager,
   SelectionScopesManager,
@@ -51,7 +51,7 @@ import type { BeEvent } from "@itwin/core-bentley";
 import BulkExtractor from "../widget/components/BulkExtractor";
 
 // For the extraction test
-jest.setTimeout(20000);
+jest.setTimeout(40000);
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -484,11 +484,7 @@ describe("Report Mappings View", () => {
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const firstMenuDropdown = within(
-      screen.getAllByTestId(/tile-action-button/i)[0]
-    ).getByRole("button");
-    await user.click(firstMenuDropdown);
-    const removeButton = screen.getByRole("menuitem", { name: /remove/i });
+    const removeButton = screen.getAllByTitle("Remove")[0];
     await user.click(removeButton);
     // Delete modal dialog should appear
     expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -736,7 +732,7 @@ describe("Report Mappings View", () => {
     const mockReportMappings = mockReportMappingsFactory();
     const [_, iModelHandlers] = mockMappingsFactory(mockReportMappings);
 
-    const delay = REFRESH_DELAY + 1000;
+    const delay = REFRESH_DELAY;
 
     // Faking timers currently makes all promise based queries from RTL become unpredictable.
     // https://github.com/testing-library/dom-testing-library/issues/988
@@ -834,29 +830,12 @@ describe("Report Mappings View", () => {
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const comboBox = screen.getByRole("combobox", {
-      name: /updatedataset/i,
-    });
-    await user.type(comboBox, mockIModel.displayName);
+    const update = screen.getAllByTitle("UpdateDataset")[0];
+    await user.click(update);
 
-    const option = screen.getByRole("menuitem", {
-      name: mockIModel.displayName,
-    });
-
-    await user.click(option);
-
-    // Combobox should have correct status
-    const extractionComponent = screen.getByTestId("extraction-combo-box");
-    expect(
-      within(extractionComponent).getByDisplayValue(mockIModel.displayName)
-    ).toBeInTheDocument();
-    // Should be two in the document. One in the status and the other in the list.
     // TODO Assert that it is in the correct HorizontalTile
     const startingStates = await screen.findAllByTitle(/starting/i);
-    expect(startingStates).toHaveLength(2);
-
-    const loadingStates = await screen.findAllByTitle(/loading/i);
-    expect(loadingStates).toHaveLength(2);
+    expect(startingStates).toHaveLength(1);
 
     // act(() => {
     //   jest.advanceTimersByTime(2000)
@@ -864,7 +843,7 @@ describe("Report Mappings View", () => {
     const queuedStates = await screen.findAllByTitle(/queued/i, undefined, {
       timeout: delay,
     });
-    expect(queuedStates).toHaveLength(2);
+    expect(queuedStates).toHaveLength(1);
 
     mockStatusResponse = {
       status: {
@@ -882,7 +861,7 @@ describe("Report Mappings View", () => {
     const runningStates = await screen.findAllByTitle(/running/i, undefined, {
       timeout: delay,
     });
-    expect(runningStates).toHaveLength(2);
+    expect(runningStates).toHaveLength(1);
 
     mockStatusResponse = {
       status: {
@@ -900,6 +879,6 @@ describe("Report Mappings View", () => {
     const succeededStates = await screen.findAllByTitle(/success/i, undefined, {
       timeout: delay,
     });
-    expect(succeededStates).toHaveLength(2);
+    expect(succeededStates).toHaveLength(1);
   });
 });

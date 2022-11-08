@@ -261,7 +261,6 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
                 onClickDelete={() => {
                   setSelectedReportMapping(mapping);
                   setShowDeleteModal(true);
-                  close();
                 }}
                 odataFeedUrl={odataFeedUrl}
                 jobStartEvent={jobStartEvent}

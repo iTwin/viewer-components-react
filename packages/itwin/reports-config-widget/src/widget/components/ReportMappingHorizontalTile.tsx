@@ -105,7 +105,6 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
             )}
             onClick={() => {
               props.onClickDelete();
-              close();
             }}
             disabled={jobStarted}
           >
