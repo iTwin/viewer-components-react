@@ -55,7 +55,7 @@ export default class BulkExtractor {
         if (state) {
           states.push(state);
         } else {
-          const runState = await this.getSingleState(runId, await this._accessToken());
+          const runState = await this.getState(runId, await this._accessToken());
           states.push(runState);
           stateByRunId.set(runId, runState);
         }
@@ -68,7 +68,7 @@ export default class BulkExtractor {
       let state = stateByRunId.get(iModelRun[1]);
 
       if (!state) {
-        state = await this.getSingleState(iModelRun[1], await this._accessToken());
+        state = await this.getState(iModelRun[1], await this._accessToken());
         stateByRunId.set(iModelRun[1], state);
       }
 
@@ -112,7 +112,7 @@ export default class BulkExtractor {
     return state;
   }
 
-  public clearJob(reportId: string) {
+  public clearReportJob(reportId: string) {
     this._reportRunIds.delete(reportId);
     this._iModelStates = new Map<string, ExtractionStates>();
     this._iModelRun = new Map<string, string>();
@@ -140,7 +140,7 @@ export default class BulkExtractor {
     return ExtractionStates.Failed;
   }
 
-  private async getSingleState(runId: string, accessToken: string): Promise<ExtractorState> {
+  private async getState(runId: string, accessToken: string): Promise<ExtractorState> {
     try {
       const response = await this._extractionClientApi.getExtractionStatus(accessToken, runId);
       return response.state;
@@ -150,7 +150,7 @@ export default class BulkExtractor {
     return ExtractorState.Failed;
   }
 
-  public async startJobs(reportIds: string[]) {
+  public async runReportExtractions(reportIds: string[]) {
     const reportIModelIds = new Map<string, string[]>();
     for (const reportId of reportIds) {
       const reportIModels = await this.fetchReportIModels(reportId);

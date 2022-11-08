@@ -121,7 +121,7 @@ export const ReportHorizontalTile = (props: ReportHorizontalTileProps) => {
         <ExtractionStatus
           state={extractionState}
           clearExtractionState={() => {
-            props.bulkExtractor.clearJob(props.report.id);
+            props.bulkExtractor.clearReportJob(props.report.id);
             setExtractionState(ExtractionStates.None);
           }}
         ></ExtractionStatus>

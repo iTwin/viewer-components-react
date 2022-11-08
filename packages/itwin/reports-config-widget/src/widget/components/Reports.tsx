@@ -130,7 +130,7 @@ export const Reports = () => {
   const updateDatasets = useCallback(async () => {
     selectedReportIds.map((reportId) => jobStartEvent.raiseEvent(reportId));
     setSelectedReportIds([]);
-    await bulkExtractor.startJobs(selectedReportIds);
+    await bulkExtractor.runReportExtractions(selectedReportIds);
   }, [selectedReportIds, jobStartEvent, bulkExtractor]);
 
   switch (reportsView) {

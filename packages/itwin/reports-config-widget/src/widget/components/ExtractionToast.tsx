@@ -15,7 +15,7 @@ export const SuccessfulExtractionToast = ({ iModelName, odataFeedUrl }: Extracti
   return (
     <div>
       <Text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionSuccess")}{iModelName} </Text>
-      <a href="javascript:;" onClick={async () => { await navigator.clipboard.writeText(odataFeedUrl!); }}>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CopyODataUrl")}</a>
+      <a href="#" onClick={async () => { await navigator.clipboard.writeText(odataFeedUrl!); }}>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CopyODataUrl")}</a>
     </div>
   );
 };
