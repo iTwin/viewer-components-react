@@ -10,8 +10,8 @@ import { assert } from "chai";
 import { QueryBuilder } from "../widget/components/QueryBuilder";
 import { MockFactory } from "./MockFactory";
 import type { StubbedType } from "./MockFactory";
-import testData from "./QueryBuilder.testdata.json";
-import type { QueryBuilderTestData } from "./QueryBuilderTestData";
+import type { OperationTestData, PropertyRecordTestData, QueryBuilderTestData } from "./QueryBuilderTestData";
+import { testCases } from "./QueryBuilder.testdata";
 
 describe("QueryBuilder", () => {
   let sut: QueryBuilder;
@@ -25,11 +25,11 @@ describe("QueryBuilder", () => {
   });
 
   afterEach(() => {
-    dataProvider.getFieldByPropertyRecord.reset();
+    dataProvider.getFieldByPropertyRecord.restore();
   });
 
-  const queryBuildertestData: QueryBuilderTestData = testData;
-  queryBuildertestData.testCases.forEach((testCase) => {
+  const testData: QueryBuilderTestData = testCases;
+  testData.testCases.forEach((testCase) => {
     it(testCase.name, async () => executeTest(
       sut,
       testCase.expectedResult,
@@ -37,21 +37,21 @@ describe("QueryBuilder", () => {
     ));
   });
 
-  const mockPropertiesField = (propertyRecord: PropertyRecord, propertiesField: PropertiesField) => {
+  const createPropertyRecord = (propertyRecord: PropertyRecordTestData, propertiesField: PropertiesField) => {
     const propertiesFieldMock: StubbedType<PropertiesField> = MockFactory.create(PropertiesField);
 
     MockFactory.stubProperty(propertiesFieldMock, "parent", () => propertiesField.parent);
     MockFactory.stubProperty(propertiesFieldMock, "properties", () => propertiesField.properties);
     MockFactory.stubProperty(propertiesFieldMock, "type", () => propertiesField.type);
 
-    dataProvider.getFieldByPropertyRecord.withArgs(propertyRecord).returns(Promise.resolve(propertiesFieldMock));
+    const prop: PropertyRecord = new PropertyRecord(propertyRecord.value as PropertyValue, propertyRecord.property as PropertyDescription);
+    dataProvider.getFieldByPropertyRecord.withArgs(prop).resolves(propertiesFieldMock);
+    return prop;
   };
 
-  const executeTest = async (queryBuilder: QueryBuilder, expectedResult: string, operations: any[]) => {
+  const executeTest = async (queryBuilder: QueryBuilder, expectedResult: string, operations: OperationTestData[]) => {
     for (const op of operations) {
-      const prop: PropertyRecord = new PropertyRecord(op.propertyRecord.value as PropertyValue, op.propertyRecord.property as PropertyDescription);
-
-      mockPropertiesField(prop, op.propertiesField);
+      const prop = createPropertyRecord(op.propertyRecord, op.propertiesField as PropertiesField);
 
       if (op.operationType === "addProperty") {
         const result = await queryBuilder.addProperty(prop);
