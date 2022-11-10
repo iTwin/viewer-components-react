@@ -76,19 +76,19 @@ export class MeasureToolDefinitions {
       label: () =>
         MeasurementPreferences.current.displayMeasurementAxes
           ? MeasureTools.localization.getLocalizedString(
-            "MeasureTools:Generic.hideMeasurementAxes"
-          )
+              "MeasureTools:Generic.hideMeasurementAxes"
+            )
           : MeasureTools.localization.getLocalizedString(
-            "MeasureTools:Generic.displayMeasurementAxes"
-          ),
+              "MeasureTools:Generic.displayMeasurementAxes"
+            ),
       tooltip: () =>
         MeasurementPreferences.current.displayMeasurementAxes
           ? MeasureTools.localization.getLocalizedString(
-            "MeasureTools:Generic.hideMeasurementAxes"
-          )
+              "MeasureTools:Generic.hideMeasurementAxes"
+            )
           : MeasureTools.localization.getLocalizedString(
-            "MeasureTools:Generic.displayMeasurementAxes"
-          ),
+              "MeasureTools:Generic.displayMeasurementAxes"
+            ),
       execute: () => {
         void IModelApp.tools.run(ToggleDisplayMeasurementAxesTool.toolId);
       },
@@ -126,7 +126,7 @@ export class MeasureToolDefinitions {
       label: () => MeasurePerpendicularTool.flyover,
       tooltip: () => MeasurePerpendicularTool.description,
       isHidden: new ConditionalBooleanValue(
-        () => !!IModelApp.viewManager.selectedView?.view?.isDrawingView(),
+        () => !!IModelApp.viewManager.selectedView?.view?.is2d(),
         [SyncUiEventId.ViewStateChanged]
       ),
       execute: () => {
