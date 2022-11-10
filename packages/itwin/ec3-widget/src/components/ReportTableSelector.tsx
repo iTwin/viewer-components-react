@@ -29,7 +29,7 @@ export const ReportTableSelector = ({
   const [validator, _showValidationMessage] = useValidator();
   const [reportTable, setReportTable] = useState(selectedReportTable);
   const [reportTables, setReportTables] = useState<string[]>([]);
-  const reportingClientApi = useMemo(() => new ReportingClient("https://dev-api.bentley.com/insights/reporting"), []);
+  const reportingClientApi = useMemo(() => new ReportingClient(), []);
 
   const updateData = useCallback(async (reportTableName: string) => {
     if (!IModelApp.authorizationClient)
