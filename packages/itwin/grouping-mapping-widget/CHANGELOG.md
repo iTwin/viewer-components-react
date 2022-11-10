@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 17 Oct 2022 17:36:46 GMT and should not be manually modified.
+This log was last generated on Mon, 31 Oct 2022 19:03:27 GMT and should not be manually modified.
+
+## 0.8.3
+Mon, 31 Oct 2022 19:03:27 GMT
+
+### Patches
+
+- Fixed duplication of JOIN statements in query builder
 
 ## 0.8.2
 Mon, 17 Oct 2022 17:36:46 GMT
