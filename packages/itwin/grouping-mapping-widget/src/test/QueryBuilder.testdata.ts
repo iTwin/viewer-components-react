@@ -20,6 +20,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -56,7 +58,9 @@ export const testCases: QueryBuilderTestData = {
               value: "someString",
             },
             property: {
-              typename: "notnavigation",
+              typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -138,6 +142,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -171,6 +177,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -211,6 +219,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -285,6 +295,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -366,6 +378,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -399,6 +413,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -433,6 +449,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -473,6 +491,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -547,6 +567,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -622,6 +644,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -708,6 +732,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -745,6 +771,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {
@@ -783,6 +811,8 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "navigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
             },
           },
           propertiesField: {

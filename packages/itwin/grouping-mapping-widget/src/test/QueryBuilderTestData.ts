@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { Primitives } from "@itwin/appui-abstract";
+import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { RelationshipPath } from "@itwin/presentation-common";
 
 export interface ClassInfoTestData {
@@ -42,19 +42,9 @@ export interface PropertiesFieldTestData {
   parent: ParentTestData;
 }
 
-export interface PropertyRecordValueTestData {
-  valueFormat: number;
-  value: Primitives.Value;
-  displayValue?: Primitives.Value;
-}
-
-export interface PropertyRecordPropertyTestData {
-  typename: string;
-}
-
 export interface PropertyRecordTestData {
-  value: PropertyRecordValueTestData;
-  property: PropertyRecordPropertyTestData;
+  value: PropertyValue;
+  property: PropertyDescription;
 }
 
 export interface OperationTestData {

@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { PropertyRecord } from "@itwin/appui-abstract";
-import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import { PropertiesField } from "@itwin/presentation-common";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { assert } from "chai";
@@ -44,7 +43,7 @@ describe("QueryBuilder", () => {
     MockFactory.stubProperty(propertiesFieldMock, "properties", () => propertiesField.properties);
     MockFactory.stubProperty(propertiesFieldMock, "type", () => propertiesField.type);
 
-    const prop: PropertyRecord = new PropertyRecord(propertyRecord.value as PropertyValue, propertyRecord.property as PropertyDescription);
+    const prop: PropertyRecord = new PropertyRecord(propertyRecord.value, propertyRecord.property);
     dataProvider.getFieldByPropertyRecord.withArgs(prop).resolves(propertiesFieldMock);
     return prop;
   };
