@@ -18,11 +18,30 @@ Users must have the `imodels_read` and `insights_view` [permissions](https://dev
 
 ## Sample usage
 
+You first need to create an OAuth application in https://buildingtransparency.org/ec3/manage-apps/developers.
+Add the EC3Provider to UI providers using your Client Id and Redirect URI in App.tsx.
+
 ```tsx
 import { EC3Provider } from "@itwin/ec3-widget-react";
 
 <Viewer
   ...
-  uiProviders={[new EC3Provider()]}
+  uiProviders={[
+    new EC3Provider({
+      clientId: "...",
+      redirectUri: "...",
+    }),
+  ]}
 />
+```
+
+Then handle the redirect using the following code in Index.tsx.
+
+```tsx
+} else if (window.location.pathname === "/callback") {
+  EC3AuthCallback.handle({
+    clientId: "...",
+    redirectUri: ".../callback",
+  });
+} else {
 ```

@@ -7,14 +7,15 @@ import { EC3Config } from "./EC3Config";
 import type { EC3TokenCache } from "./EC3TokenCache";
 
 export class EC3AuthCallback {
-  /* This function must be called in path set in process.env.EC3_AUTH_CLIENT_REDIRECT_URI.
+  /* This function must be called in EC3 authentication redirect path.
   *
   * Example:
   * } else if (window.location.pathname === "/callback") {
-  *   EC3AuthCallback.handle();
+  *   EC3AuthCallback.handle({
+  *     clientId: "...",
+  *     redirectUri: "http://localhost:8887/callback",
+  *   });
   * } else {
-  *
-  * Here /callback is the relative path of the redirect URI
   */
   public static handle(props: EC3ConfigProps) {
     const MILI_SECONDS = 1000;
