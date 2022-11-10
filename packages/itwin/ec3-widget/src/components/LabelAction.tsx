@@ -9,31 +9,25 @@ import {
 } from "@itwin/itwinui-icons-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import LabelActionPanel from "./LabelActionPanel";
-import { IModelApp } from "@itwin/core-frontend";
-import { Button, IconButton, toaster } from "@itwin/itwinui-react";
+import { Button, IconButton } from "@itwin/itwinui-react";
 import { WidgetHeader } from "./utils";
 import "./LabelAction.scss";
 import type { Configuration, Label as EC3Label, Material } from "./Template";
-import { ReportingClient } from "@itwin/insights-client";
 import { DropdownTile } from "./DropdrownTile";
 import DeleteModal from "./DeleteModal";
-import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
+import useValidator from "../hooks/useValidator";
 import React from "react";
 import {
-  ComboBox,
   Label,
   Select,
 } from "@itwin/itwinui-react";
+import { ReportTableSelector } from "./ReportTableSelector";
 
 interface LabelActionProps {
   template: Configuration;
   label: EC3Label | undefined;
   goBack: () => Promise<void>;
   setTemplate: (sel: Configuration) => void;
-}
-
-async function fetchMetadata(token: string, reportingClientApi: ReportingClient, reportId: string) {
-  return (await reportingClientApi.getODataReportMetadata(token, reportId)).text();
 }
 
 const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps) => {
@@ -43,14 +37,11 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   const [itemQuantity, setItemQuantity] = useState<string>(label?.elementQuantityColumn ?? "");
   const [selectedMaterial, setSelectedMaterial] = useState<Material>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // creating a copy of an array, so original isn't modified
   const [materials, setMaterials] = useState<Material[]>(label?.materials.map((x) => { return { nameColumn: x.nameColumn }; }) ?? [{ nameColumn: undefined }]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [validator, _showValidationMessage] = useValidator();
-  const [availableLabels, setLabels] = useState<string[]>();
   const [availableStringColumns, setStringColumns] = useState<string[]>([]);
   const [availableNumericalColumns, setNumericalColumns] = useState<string[]>([]);
-  const reportingClientApi = useMemo(() => new ReportingClient("https://dev-api.bentley.com/insights/reporting"), []);
 
   const onSave = async () => {
     const selectedLabel: EC3Label = {
@@ -74,54 +65,6 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
 
     setTemplate(template);
   };
-
-  async function updateColumns(labelName: string) {
-    setIsLoading(true);
-
-    if (!IModelApp.authorizationClient) {
-      setIsLoading(false);
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
-    }
-
-    if (!template.reportId) {
-      setIsLoading(false);
-      throw new Error(
-        "Invalid report."
-      );
-    }
-
-    try {
-      const accessToken = await IModelApp.authorizationClient
-        .getAccessToken();
-
-      const responseText = await fetchMetadata(accessToken, reportingClientApi, template.reportId);
-      const dom = new DOMParser().parseFromString(responseText, "text/xml");
-
-      const elems = Array.from(dom.getElementsByTagName("EntityType")).filter((x) => x.attributes[0].value === labelName);
-
-      if (elems.length > 0) {
-        const columns = Array.from(elems[0].children).map((x) => x.attributes);
-        const stringColumns = columns.filter((x) => x[1].value === "Edm.String").map((x) => x[0].value);
-        const numericalColumns = columns.filter((x) => x[1].value === "Edm.Double").map((x) => x[0].value);
-        setStringColumns(stringColumns);
-        setNumericalColumns(numericalColumns);
-      }
-    } catch (err) {
-      toaster.negative("You are not authorized to use this system.");
-      /* eslint-disable no-console */
-      console.error(err);
-    }
-    setIsLoading(false);
-  }
-
-  const labelOptions = useMemo(() => {
-    return availableLabels?.map((g) => ({
-      label: g,
-      value: g,
-    })) ?? [];
-  }, [availableLabels]);
 
   const StringColumnOptions = useMemo(() => {
     const options = availableStringColumns?.map((col) => ({
@@ -158,40 +101,6 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     return options;
   }, [availableNumericalColumns]);
 
-  const load = (async () => {
-    if (!IModelApp.authorizationClient)
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
-    if (!template.reportId)
-      throw new Error(
-        "Invalid report."
-      );
-
-    const token = await IModelApp.authorizationClient
-      .getAccessToken();
-    const data = await reportingClientApi
-      .getODataReport(token, template.reportId);
-    if (data) {
-      const labelItems = data.value.map((d) =>
-        d.name ?? ""
-      );
-      const filteredLabels: string[] = label ? [label.reportTable] : [];
-      for (const g of labelItems) {
-        if (template.labels.filter((x) => x.reportTable === g).length === 0) {
-          filteredLabels.push(g);
-        }
-      }
-
-      if (!availableLabels)
-        setLabels(filteredLabels);
-    }
-  });
-
-  const refresh = useCallback(async () => {
-    await load();
-  }, []);
-
   const addPair = (() => {
     const pair: Material = {
       nameColumn: undefined,
@@ -204,61 +113,24 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   useEffect(() => {
     setIsLoading(true);
     if (label) {
-      setReportTable(label.reportTable);
       setName(label.name);
       setItemName(label.elementNameColumn);
       setItemQuantity(label.elementQuantityColumn);
       setMaterials(label.materials.map((x) => { return { nameColumn: x.nameColumn }; })); // creating a copy of array, so original (in the parent) isn't modified
-      void updateColumns(label.reportTable);
     } else {
       setItemName("UserLabel");
     }
-
-    const fetchMappings = async () => {
-      if (!IModelApp.authorizationClient) {
-        setIsLoading(false);
-        throw new Error(
-          "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-        );
-      }
-
-      if (!template.reportId) {
-        setIsLoading(false);
-        throw new Error(
-          "Invalid report."
-        );
-      }
-
-      try {
-        const accessToken = await IModelApp.authorizationClient
-          .getAccessToken();
-
-        const ODataReport = await reportingClientApi
-          .getODataReport(accessToken, template.reportId);
-
-        if (ODataReport) {
-          const labelItems = ODataReport.value.map((data) =>
-            data.name ?? ""
-          );
-          const filteredLabels: string[] = label ? [label.reportTable] : [];
-          for (const g of labelItems) {
-            if (template.labels.filter((x) => x.reportTable === g).length === 0) {
-              filteredLabels.push(g);
-            }
-          }
-          if (!availableLabels)
-            setLabels(filteredLabels);
-        }
-      } catch (err) {
-        toaster.negative("You are not authorized to get metadata for this report. Please contact project administrator.");
-        console.error(err);
-      }
-
-      setIsLoading(false);
-    };
-
-    void fetchMappings();
   }, []);
+
+  const onChangeCallback = useCallback(async (table: string, numCols: string[], strCols: string[]) => {
+    if (table !== reportTable) {
+      setMaterials([{ nameColumn: undefined }]);
+      setName(table);
+    }
+    setReportTable(table);
+    setNumericalColumns(numCols);
+    setStringColumns(strCols);
+  }, [reportTable]);
 
   return (
     <>
@@ -273,45 +145,13 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
             Asterisk * indicates mandatory fields.
           </Small>
 
-          <div className="dropdown-select-container">
-            <div className="dropdown-select-combo-box">
-              <Label htmlFor="combo-input" required>
-                Report table
-              </Label>
-              <ComboBox
-                options={labelOptions}
-                value={reportTable}
-                onChange={async (value) => {
-                  if (value !== reportTable) {
-                    setMaterials([{ nameColumn: undefined }]);
-                    setName(value);
-                  }
-
-                  setReportTable(value);
-                  void updateColumns(value);
-                }}
-                message={
-                  validator.message(
-                    "reportTable",
-                    reportTable,
-                    NAME_REQUIREMENTS,
-                  )}
-                status={
-                  validator.message(
-                    "reportTable",
-                    reportTable,
-                    NAME_REQUIREMENTS,
-                  )
-                    ? "negative"
-                    : undefined
-                }
-                inputProps={{
-                  id: "combo-input",
-                  placeholder: isLoading ? "Loading report tables" : "Select report table",
-                }}
-              />
-            </div>
-          </div>
+          <ReportTableSelector
+            selectedReportTable={reportTable}
+            template={template}
+            placeHolder={isLoading ? "Loading report tables" : "Select report table"}
+            onChange={onChangeCallback}
+            setLoading={setIsLoading}
+          />
 
           <LabeledInput
             id='name'
@@ -414,7 +254,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
         onDelete={async () => {
           setMaterials(materials.filter((x) => x.nameColumn !== selectedMaterial?.nameColumn));
         }}
-        refresh={refresh}
+        refresh={async () => { }}
       />
 
       <LabelActionPanel
