@@ -53,12 +53,8 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     };
 
     if (label) {
-      for (let i = 0; i < template.labels.length; i++) {
-        if (template.labels[i].reportTable === label.reportTable) {
-          template.labels[i] = selectedLabel;
-          break;
-        }
-      }
+      const i = template.labels.findIndex((l) => l.reportTable === label.reportTable);
+      template.labels[i] = selectedLabel;
     } else {
       template.labels.push(selectedLabel);
     }
@@ -67,21 +63,20 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   };
 
   const StringColumnOptions = useMemo(() => {
-    const options = availableStringColumns?.map((col) => ({
+    const options = availableStringColumns.map((col) => ({
       label: col,
       value: col,
-    })) ?? [];
+    }));
 
-    if (availableStringColumns.indexOf(itemName) === -1) {
+    if (availableStringColumns.indexOf(itemName) === -1)
       setItemName("");
-    }
 
     return options;
   }, [availableStringColumns]);
 
   const getStringColumnOptions = ((material: string | undefined) => {
     const options = StringColumnOptions
-      .filter((x) => materials.filter((p) => p.nameColumn === x.label).length === 0)
+      .filter((x) => !materials.some((m) => m.nameColumn === x.label))
       .filter((x) => x.label !== itemName);
 
     if (material)
@@ -90,14 +85,14 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   });
 
   const NumericalColumnOptions = useMemo(() => {
-    const options = availableNumericalColumns?.map((col) => ({
+    const options = availableNumericalColumns.map((col) => ({
       label: col,
       value: col,
-    })) ?? [];
+    }));
 
-    if (availableNumericalColumns.indexOf(itemQuantity) === -1) {
+    if (availableNumericalColumns.indexOf(itemQuantity) === -1)
       setItemQuantity("");
-    }
+
     return options;
   }, [availableNumericalColumns]);
 

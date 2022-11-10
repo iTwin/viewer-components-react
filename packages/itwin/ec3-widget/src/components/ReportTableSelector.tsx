@@ -28,7 +28,7 @@ export const ReportTableSelector = ({
 }: ReportTableSelectorProps) => {
   const [validator, _showValidationMessage] = useValidator();
   const [reportTable, setReportTable] = useState(selectedReportTable);
-  const [reportTables, setReportTables] = useState<string[]>([]);
+  const [reportTables, setReportTables] = useState<string[] | undefined>(undefined);
   const reportingClientApi = useMemo(() => new ReportingClient(), []);
 
   const updateData = useCallback(async (reportTableName: string) => {
@@ -42,50 +42,45 @@ export const ReportTableSelector = ({
       );
 
     setReportTable(reportTableName);
-
-    const token = await IModelApp.authorizationClient.getAccessToken();
-    const reportOData = await reportingClientApi.getODataReport(token, template.reportId);
-    if (!reportOData)
+    let reportODataResponse;
+    let reportMetadataResponse;
+    try {
+      const token = await IModelApp.authorizationClient.getAccessToken();
+      reportODataResponse = await reportingClientApi.getODataReport(token, template.reportId);
+      reportMetadataResponse = await reportingClientApi.getODataReportMetadata(token, template.reportId);
+    } catch (err) {
+      toaster.negative("You are not authorized to use this system.");
+      /* eslint-disable no-console */
+      console.error(err);
       return;
+    }
 
-    const oDataReportTables = reportOData.value.map((d) => d.name ?? "");
+    const oDataReportTables = reportODataResponse.value.map((d) => d.name ?? "");
     const filteredReportTables: string[] = reportTable ? [reportTable] : [];
-
     filteredReportTables.push(...oDataReportTables.filter((table) =>
       !template.labels.some((label) => label.reportTable === table)
     ));
-
-    if (reportTables.length === 0)
+    if (reportTables === undefined)
       setReportTables(filteredReportTables);
 
     if (!reportTableName)
       return;
 
-    let dom: Document = new Document();
-
-    try {
-      const reportMetadataResponse = await reportingClientApi.getODataReportMetadata(token, template.reportId);
-      const responseText = await reportMetadataResponse.text();
-      dom = new DOMParser().parseFromString(responseText, "text/xml");
-    } catch (err) {
-      toaster.negative("You are not authorized to use this system.");
-      /* eslint-disable no-console */
-      console.error(err);
-    }
-
+    const responseText = await reportMetadataResponse.text();
+    const dom = new DOMParser().parseFromString(responseText, "text/xml");
     const elems = Array.from(dom.getElementsByTagName("EntityType")).filter((x) => x.attributes[0].value === reportTableName);
-    if (elems.length === 0) {
+    if (elems.length === 0)
       return;
-    }
 
     const columns = Array.from(elems[0].children).map((x) => x.attributes);
     const filteredStringColumns = columns.filter((x) => x[1].value === "Edm.String").map((x) => x[0].value);
     const filteredNumericalColumns = columns.filter((x) => x[1].value === "Edm.Double").map((x) => x[0].value);
+
     await onChange(reportTableName, filteredNumericalColumns, filteredStringColumns);
   }, [reportTable, reportTables, template, onChange, reportingClientApi]);
 
   const reportTableLabels = useMemo(() => {
-    return reportTables.map((g) => ({
+    return reportTables?.map((g) => ({
       label: g,
       value: g,
     })) ?? [];

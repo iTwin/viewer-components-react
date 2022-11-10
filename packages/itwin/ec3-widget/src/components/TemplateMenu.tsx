@@ -293,7 +293,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
             entityName={selectedLabel?.name === "" ? selectedLabel.reportTable : selectedLabel?.name ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
-            onDelete={() => {
+            onDelete={async () => {
               childTemplate.labels = childTemplate.labels.filter((x) => x.reportTable !== selectedLabel?.reportTable);
             }}
             refresh={async () => { }}

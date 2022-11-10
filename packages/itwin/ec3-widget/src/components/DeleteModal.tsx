@@ -17,7 +17,7 @@ export interface DeleteModalProps {
   entityName: string;
   show: boolean;
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -33,7 +33,7 @@ export const DeleteModal = ({
   const deleteCallback = async () => {
     try {
       setIsLoading(true);
-      onDelete();
+      await onDelete();
       setShow(false);
       await refresh();
     } catch (error: any) {

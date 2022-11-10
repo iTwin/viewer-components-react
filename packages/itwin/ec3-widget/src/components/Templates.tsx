@@ -53,7 +53,7 @@ const Templates = ({ config }: EC3Props) => {
 
   const refresh = useCallback(async () => {
     setTemplateView(TemplateView.TEMPLATES);
-    void load();
+    await load();
   }, []);
 
   const filteredTemplates = useMemo(
