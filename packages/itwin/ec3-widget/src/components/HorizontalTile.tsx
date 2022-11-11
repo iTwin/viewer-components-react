@@ -26,12 +26,12 @@ export const HorizontalTile = ({
 }: HorizontalTileProps) => {
   return (
     <div
-      className="ec3-horizontal-tile-container"
+      className="ec3w-horizontal-tile-container"
       data-testid="horizontal-tile"
     >
-      <div className="body">
+      <div className="ec3w-body">
         <Text
-          className={`body-text ${onClickTitle ? "iui-anchor" : ""}`}
+          className={`ec3w-body-text ${onClickTitle ? "iui-anchor" : ""}`}
           onClick={onClickTitle}
           variant="body"
           title={titleTooltip}
@@ -40,7 +40,7 @@ export const HorizontalTile = ({
         </Text>
         {subText && (
           <Text
-            className="body-text"
+            className="ec3w-body-text"
             isMuted={true}
             title={subtextToolTip}
             variant="small"
@@ -49,7 +49,7 @@ export const HorizontalTile = ({
           </Text>
         )}
       </div>
-      <div className="action-button" data-testid="tile-action-button">
+      <div className="ec3w-action-button" data-testid="tile-action-button">
         {button}
       </div>
     </div>

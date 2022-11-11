@@ -51,14 +51,14 @@ export const ReportConfirmModal = ({
           setShow(false);
         }}
       >
-        <div className="delete-modal-body-text">
+        <div className="ec3w-delete-modal-body-text">
           <Leading>
             Are you sure you want to change template report? All labels will be reset.
           </Leading>
         </div>
         <ModalButtonBar>
           {isLoading &&
-            <div className="loading-delete">
+            <div className="ec3w-loading-delete">
               <LoadingSpinner />
             </div>}
           <Button styleType='high-visibility' onClick={confirmCallback} disabled={isLoading}>

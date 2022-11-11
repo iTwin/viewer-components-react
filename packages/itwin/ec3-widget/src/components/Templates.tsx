@@ -99,8 +99,8 @@ const Templates = ({ config }: EC3Props) => {
       return (
         <>
           <WidgetHeader title="Templates" />
-          <Surface className="ec3-templates-list-container">
-            <div className="toolbar" data-testId="ec3-templates">
+          <Surface className="ec3w-templates-list-container">
+            <div className="ec3w-toolbar" data-testId="ec3-templates">
               <Button
                 startIcon={<SvgAdd />}
                 onClick={() => setTemplateView(TemplateView.CREATE)}
@@ -108,7 +108,7 @@ const Templates = ({ config }: EC3Props) => {
               >
                 Create Template
               </Button>
-              <div className="search-bar-container" data-testid="search-bar">
+              <div className="ec3w-search-bar-container" data-testid="search-bar">
                 <SearchBar
                   searchValue={searchValue}
                   setSearchValue={setSearchValue}
@@ -123,7 +123,7 @@ const Templates = ({ config }: EC3Props) => {
                 message="No templates available"
               />
             ) : (
-              <div className="templates-list">
+              <div className="ec3w-templates-list">
                 {filteredTemplates.map((template) => (
                   <HorizontalTile
                     key={template.id}

@@ -112,18 +112,18 @@ const ExportModal = (props: ExportProps) => {
       switch (status) {
         case JobStatus.StatusEnum.Queued:
           return (
-            <div className="ec3-progress-radial-container">
+            <div className="ec3w-progress-radial-container">
               <ProgressRadial indeterminate size="small" value={50} />
-              <Text variant="leading" className="ec3-status-text">
+              <Text variant="leading" className="ec3w-status-text">
                 Export queued
               </Text>
             </div>
           );
         case JobStatus.StatusEnum.Running:
           return (
-            <div className="ec3-progress-linear-container">
+            <div className="ec3w-progress-linear-container">
               <ProgressLinear indeterminate />
-              <Text variant="leading" className="ec3-status-text">
+              <Text variant="leading" className="ec3w-status-text">
                 Export running
               </Text>
             </div>
@@ -131,10 +131,10 @@ const ExportModal = (props: ExportProps) => {
         case JobStatus.StatusEnum.Succeeded:
           return (
             link && (
-              <div className="ec3-progress-radial-container">
+              <div className="ec3w-progress-radial-container">
                 <ProgressRadial status="positive" size="small" value={50} />
                 <a
-                  className="ec3-report-button"
+                  className="ec3w-report-button"
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -146,16 +146,16 @@ const ExportModal = (props: ExportProps) => {
           );
         case JobStatus.StatusEnum.Failed:
           return (
-            <div className="ec3-progress-radial-container">
+            <div className="ec3w-progress-radial-container">
               <ProgressRadial status="negative" size="small" value={100} />
-              <Text variant="leading" className="ec3-status-text">
+              <Text variant="leading" className="ec3w-status-text">
                 Export failed
               </Text>
             </div>
           );
         default:
           return (
-            <div className="ec3-progress-radial-container">
+            <div className="ec3w-progress-radial-container">
               <Text>Invalid Job Status <span role="img" aria-label="sad">😔</span></Text>
             </div>
           );
@@ -195,7 +195,7 @@ const ExportModal = (props: ExportProps) => {
       closeOnExternalClick={false}
     >
       {!jobStatus && (
-        <div className="ec3-progress-radial-container">
+        <div className="ec3w-progress-radial-container">
           <ProgressRadial indeterminate size="large" value={50} />
         </div>
       )}

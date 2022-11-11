@@ -98,8 +98,8 @@ export const ReportTableSelector = ({
 
   return (
     <>
-      <div className="dropdown-select-container">
-        <div className="dropdown-select-combo-box">
+      <div className="ec3w-dropdown-select-container">
+        <div className="ec3w-dropdown-select-combo-box">
           <Label htmlFor="combo-input" required>
             Report table
           </Label>

@@ -134,9 +134,9 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
         returnFn={goBack}
         disabled={isLoading}
       />
-      <div className='ec3-label-details-container'>
-        <Fieldset legend='Label' className='ec3-label-details'>
-          <Small className='ec3-label-field-legend'>
+      <div className='ec3w-label-details-container'>
+        <Fieldset legend='Label' className='ec3w-label-details'>
+          <Small className='ec3w-label-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
 
@@ -158,8 +158,8 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
             }}
           />
 
-          <div className="dropdown-select-container">
-            <div className="dropdown-select-combo-box">
+          <div className="ec3w-dropdown-select-container">
+            <div className="ec3w-dropdown-select-combo-box">
               <Label htmlFor="combo-input" required>
                 Element
               </Label>
@@ -176,8 +176,8 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
             </div>
           </div>
 
-          <div className="dropdown-select-container">
-            <div className="dropdown-select-combo-box">
+          <div className="ec3w-dropdown-select-container">
+            <div className="ec3w-dropdown-select-combo-box">
               <Label htmlFor="combo-input" required>
                 Element quantity
               </Label>
@@ -195,10 +195,10 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
           </div>
         </Fieldset>
 
-        <Fieldset legend='Materials' className='ec3-label-details'>
-          <div className="ec3-pair-list">
+        <Fieldset legend='Materials' className='ec3w-label-details'>
+          <div className="ec3w-pair-list">
             <Button
-              className="ec3-label-button"
+              className="ec3w-label-button"
               startIcon={<SvgAdd />}
               onClick={addPair}
               styleType="default"

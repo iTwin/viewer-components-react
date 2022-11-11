@@ -4,15 +4,16 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.delete-modal-body-text {
+.ec3w-delete-modal-body-text {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
-  > strong {
+
+  >strong {
     min-width: 0px;
   }
 }
 
-.loading-delete {
+.ec3w-loading-delete {
   margin-right: $iui-s;
 }

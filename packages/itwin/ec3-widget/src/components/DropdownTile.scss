@@ -4,12 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.ec3-dropdown-tile-container {
+.ec3w-dropdown-tile-container {
   justify-content: space-between;
   border-radius: 5px;
   height: $iui-baseline * 6;
 
-  .body {
+  .ec3w-body {
     display: flex;
     flex-direction: row;
     min-width: 0;
@@ -23,7 +23,7 @@
     }
   }
 
-  .action-button {
+  .ec3w-action-button {
     margin-left: 0;
     align-self: flex-end;
     min-width: 36px;
@@ -31,25 +31,25 @@
     flex-shrink: 0;
   }
 
-  .combo-field {
+  .ec3w-combo-field {
     margin-left: 0;
     align-self: center;
     min-width: 36px;
     margin-right: $iui-xs;
   }
 
-  .material-combo {
+  .ec3w-material-combo {
     width: 100%;
   }
 }
 
-.dropdown-select-container {
+.ec3w-dropdown-select-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: $iui-s;
 
-  .dropdown-select-combo-box {
+  .ec3w-dropdown-select-combo-box {
     display: flex;
     flex-direction: column;
     flex-grow: 1;

@@ -30,14 +30,14 @@ export const DropdownTile = ({
 }: DropdownTileProps) => {
   return (
     <div
-      className="ec3-dropdown-tile-container"
-      data-testid="horizontal-tile"
+      className="ec3w-dropdown-tile-container"
+      data-testid="ec3w-horizontal-tile"
     >
-      <div className="body">
-        <div className="material-combo">
+      <div className="ec3w-body">
+        <div className="ec3w-material-combo">
 
-          <div className="dropdown-select-container">
-            <div className="dropdown-select-combo-box">
+          <div className="ec3w-dropdown-select-container">
+            <div className="ec3w-dropdown-select-combo-box">
               <Label htmlFor="combo-input" required>
                 Material
               </Label>
@@ -50,7 +50,7 @@ export const DropdownTile = ({
             </div>
           </div>
         </div>
-        <div className="action-button" data-testid="tile-action-button" hidden={deletionDisabled} >
+        <div className="ec3w-action-button" data-testid="tile-action-button" hidden={deletionDisabled} >
           {actionGroup}
         </div>
 

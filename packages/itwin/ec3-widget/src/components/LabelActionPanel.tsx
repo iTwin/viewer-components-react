@@ -28,7 +28,7 @@ const ActionPanel = ({
 }: ActionPanelProps): JSX.Element => {
   return (
     <div id='action'>
-      <div className='ec3-label-action-panel'>
+      <div className='ec3w-label-action-panel'>
         {isLoading &&
           <LoadingSpinner />
         }

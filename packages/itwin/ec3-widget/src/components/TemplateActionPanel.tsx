@@ -26,7 +26,7 @@ const TemplateActionPanel = ({
 }: TemplateActionPanelProps): JSX.Element => {
   return (
     <div id='action' className='action-panel-container'>
-      <div className='ec3-template-action-panel'>
+      <div className='ec3w-template-action-panel'>
         {isLoading &&
           <LoadingSpinner />
         }

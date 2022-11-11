@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-@keyframes ec3-expand {
+@keyframes ec3w-expand {
   0% {
     opacity: 0;
     width: 20%;
@@ -16,7 +16,7 @@
   }
 }
 
-@keyframes ec3-shrink {
+@keyframes ec3w-shrink {
   100% {
     opacity: 0;
     width: 20%;

@@ -13,7 +13,7 @@ export interface EC3Props {
 
 const EC3 = ({ config }: EC3Props) => {
   return (
-    <div className="ec3-container">
+    <div className="ec3w-container">
       <Templates
         config={config} />
     </div>

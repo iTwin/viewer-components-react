@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.ec3 {
+.ec3w {
   &-scrollable-table {
     overflow-y: scroll;
     max-height: 90%;
@@ -44,14 +44,14 @@
 }
 
 
-.ec3-templates-list-container {
+.ec3w-templates-list-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   padding: $iui-baseline $iui-m;
   min-height: 0;
 
-  .toolbar {
+  .ec3w-toolbar {
     display: flex;
     justify-content: space-between;
     gap: $iui-s;
@@ -60,13 +60,13 @@
     flex-wrap: wrap;
   }
 
-  .search-bar-container {
+  .ec3w-search-bar-container {
     flex-basis: $iui-3xl;
     flex-shrink: 1;
     flex-grow: 1;
   }
 
-  .templates-list {
+  .ec3w-templates-list {
     display: flex;
     flex-direction: column;
     overflow-y: overlay;

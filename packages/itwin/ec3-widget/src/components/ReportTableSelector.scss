@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.dropdown-select-container {
+.ec3w-dropdown-select-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: $iui-s;
 
-  .dropdown-select-combo-box {
+  .ec3w-dropdown-select-combo-box {
     display: flex;
     flex-direction: column;
     flex-grow: 1;

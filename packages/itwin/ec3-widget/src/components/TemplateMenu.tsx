@@ -175,9 +175,9 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
               await goBack();
             }}
           />
-          <div className='ec3-template-details-container' data-testId="ec3-templateDetails">
-            <Fieldset legend='Template Details' className='ec3-template-details'>
-              <Small className='ec3-template-field-legend'>
+          <div className='ec3w-template-details-container' data-testId="ec3-templateDetails">
+            <Fieldset legend='Template Details' className='ec3w-template-details'>
+              <Small className='ec3w-template-field-legend'>
                 Asterisk * indicates mandatory fields.
               </Small>
               <LabeledInput
@@ -201,8 +201,8 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
                 }}
               />
 
-              <div className="report-select-container">
-                <div className="report-select-combo-box">
+              <div className="ec3w-report-select-container">
+                <div className="ec3w-report-select-combo-box">
                   <Label htmlFor="combo-input" required={true}>
                     Report
                   </Label>
@@ -227,8 +227,8 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
               </div>
             </Fieldset>
 
-            <Fieldset legend='Labels' className='ec3-template-details'>
-              <Surface className="ec3-labels-container">
+            <Fieldset legend='Labels' className='ec3w-template-details'>
+              <Surface className="ec3w-labels-container">
                 <Button
                   styleType="default"
                   onClick={addLabel}
@@ -236,7 +236,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
                 >
                   Add Label
                 </Button>
-                <div className="ec3-labels-list">
+                <div className="ec3w-labels-list">
                   {
                     childTemplate.labels
                       .map((g) => (
