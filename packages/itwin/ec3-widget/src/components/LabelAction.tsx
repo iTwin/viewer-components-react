@@ -62,20 +62,20 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     setTemplate(template);
   };
 
-  const StringColumnOptions = useMemo(() => {
+  const stringColumnOptions = useMemo(() => {
     const options = availableStringColumns.map((col) => ({
       label: col,
       value: col,
     }));
 
-    if (availableStringColumns.indexOf(itemName) === -1)
+    if (availableStringColumns.indexOf(itemName) === -1 && options.length !== 0)
       setItemName("");
 
     return options;
-  }, [availableStringColumns]);
+  }, [availableStringColumns, itemName]);
 
   const getStringColumnOptions = ((material: string | undefined) => {
-    const options = StringColumnOptions
+    const options = stringColumnOptions
       .filter((x) => !materials.some((m) => m.nameColumn === x.label))
       .filter((x) => x.label !== itemName);
 
@@ -84,17 +84,17 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     return options;
   });
 
-  const NumericalColumnOptions = useMemo(() => {
+  const numericalColumnOptions = useMemo(() => {
     const options = availableNumericalColumns.map((col) => ({
       label: col,
       value: col,
     }));
 
-    if (availableNumericalColumns.indexOf(itemQuantity) === -1)
+    if (availableNumericalColumns.indexOf(itemQuantity) === -1 && options.length !== 0)
       setItemQuantity("");
 
     return options;
-  }, [availableNumericalColumns]);
+  }, [availableNumericalColumns, itemQuantity]);
 
   const addPair = (() => {
     const pair: Material = {
@@ -115,7 +115,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     } else {
       setItemName("UserLabel");
     }
-  }, []);
+  }, [label]);
 
   const onChangeCallback = useCallback(async (table: string, numCols: string[], strCols: string[]) => {
     if (table !== reportTable) {
@@ -182,7 +182,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 Element quantity
               </Label>
               <Select
-                options={NumericalColumnOptions}
+                options={numericalColumnOptions}
                 value={itemQuantity}
                 // placeholder={isLoading ? "Loading elements" : "Select element quantity"}
                 onChange={async (value) => {

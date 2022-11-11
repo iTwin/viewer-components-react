@@ -31,11 +31,9 @@ export const DropdownTile = ({
   return (
     <div
       className="ec3w-dropdown-tile-container"
-      data-testid="ec3w-horizontal-tile"
     >
       <div className="ec3w-body">
         <div className="ec3w-material-combo">
-
           <div className="ec3w-dropdown-select-container">
             <div className="ec3w-dropdown-select-combo-box">
               <Label htmlFor="combo-input" required>

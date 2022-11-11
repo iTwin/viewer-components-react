@@ -15,6 +15,7 @@ import faker from "@faker-js/faker";
 import { setupServer } from "msw/node";
 import { EC3Config } from "../components/EC3/EC3Config";
 import type { EC3ConfigurationClient } from "../components/api/EC3ConfigurationClient";
+import { EC3ConfigurationClientContext } from "../components/api/context/EC3ConfigurationClientContext";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const reportingClient = moq.Mock.ofType<ReportsClient>();
@@ -32,7 +33,7 @@ jest.mock("@itwin/insights-client", () => ({
 
 jest.mock("../components/api/EC3ConfigurationClient", () => ({
   ...jest.requireActual("../components/api/EC3ConfigurationClient"),
-  EC3ConfigurationClient: jest.fn().mockImplementation(() => ec3ConfigurationClient.object),
+  BASE_PATH: "https://api.bentley.com/insights/carbon-calculation/ec3",
 }));
 
 describe("Templates view", () => {
@@ -102,12 +103,20 @@ describe("Templates view", () => {
   });
 
   it("Templates view should render successfully", () => {
-    render(<Templates config={config} />);
+    render(
+      <EC3ConfigurationClientContext.Provider value={ec3ConfigurationClient.object}>
+        <Templates config={config} />
+      </EC3ConfigurationClientContext.Provider>
+    );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
   });
 
   it("Templates view should have mocked templates", async () => {
-    render(<Templates config={config} />);
+    render(
+      <EC3ConfigurationClientContext.Provider value={ec3ConfigurationClient.object}>
+        <Templates config={config} />
+      </EC3ConfigurationClientContext.Provider>
+    );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     mockedConfigurations.configurations.forEach((c) =>
@@ -116,7 +125,11 @@ describe("Templates view", () => {
   });
 
   it("Templates view should have mocked templates", async () => {
-    render(<Templates config={config} />);
+    render(
+      <EC3ConfigurationClientContext.Provider value={ec3ConfigurationClient.object}>
+        <Templates config={config} />
+      </EC3ConfigurationClientContext.Provider>
+    );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     mockedConfigurations.configurations.forEach((c) =>
@@ -125,7 +138,11 @@ describe("Templates view", () => {
   });
 
   it("Clicking on template should oper template menu", async () => {
-    render(<Templates config={config} />);
+    render(
+      <EC3ConfigurationClientContext.Provider value={ec3ConfigurationClient.object}>
+        <Templates config={config} />
+      </EC3ConfigurationClientContext.Provider>
+    );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     const configuration = screen.getByText(mockedConfigurations.configurations[0].displayName);
@@ -134,7 +151,11 @@ describe("Templates view", () => {
   });
 
   it("Clicking create button should open creating template menu", async () => {
-    render(<Templates config={config} />);
+    render(
+      <EC3ConfigurationClientContext.Provider value={ec3ConfigurationClient.object}>
+        <Templates config={config} />
+      </EC3ConfigurationClientContext.Provider>
+    );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const button = screen.getByText("Create Template");
     button.click();

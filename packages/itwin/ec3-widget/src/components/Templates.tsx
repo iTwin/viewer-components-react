@@ -54,7 +54,7 @@ const Templates = ({ config }: EC3Props) => {
   const refresh = useCallback(async () => {
     setTemplateView(TemplateView.TEMPLATES);
     await load();
-  }, []);
+  }, [load]);
 
   const filteredTemplates = useMemo(
     () =>
@@ -109,11 +109,13 @@ const Templates = ({ config }: EC3Props) => {
                 Create Template
               </Button>
               <div className="ec3w-search-bar-container" data-testid="search-bar">
-                <SearchBar
-                  searchValue={searchValue}
-                  setSearchValue={setSearchValue}
-                  disabled={isLoading}
-                />
+                <div className="ec3w-search-button">
+                  <SearchBar
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
             </div>
             {isLoading ? (

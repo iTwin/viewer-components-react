@@ -123,7 +123,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
       }
     };
     void fetchReports();
-  }, [projectId, reportingClientApi]);
+  }, [projectId, template, reportingClientApi, configurationClient]);
 
   const addLabel = () => {
     setLabelsView(LabelView.ADD);

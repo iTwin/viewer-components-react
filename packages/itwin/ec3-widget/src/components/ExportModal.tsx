@@ -100,9 +100,7 @@ const ExportModal = (props: ExportProps) => {
   const onClose = useCallback(() => {
     setJobStatus(undefined);
     setJobLink(undefined);
-    if (intervalRef.current) {
-      window.clearInterval(intervalRef.current);
-    }
+    window.clearInterval(intervalRef.current);
     props.close();
   }, [props]);
 
