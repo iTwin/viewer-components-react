@@ -7,11 +7,13 @@ export class EC3Config {
   public SCOPE = "read%20write";
   public REDIRECT_URI: string;
   public EC3_URI: string;
+  public prefix: "dev" | "qa" | undefined;
 
   constructor(props: EC3ConfigProps) {
     this.CLIENT_ID = props.clientId;
     this.REDIRECT_URI = props.redirectUri;
     this.EC3_URI = props.ec3Uri ?? "https://buildingtransparency.org/";
+    this.prefix = props.prefix;
   }
 }
 
@@ -19,4 +21,5 @@ export interface EC3ConfigProps {
   clientId: string;
   redirectUri: string;
   ec3Uri?: string;
+  prefix?: "dev" | "qa" | undefined;
 }

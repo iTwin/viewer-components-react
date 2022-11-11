@@ -6,7 +6,6 @@ import "./ExportModal.scss";
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -21,7 +20,7 @@ import {
 } from "@itwin/itwinui-react";
 import type { JobCreation, Link } from "@itwin/insights-client";
 import { JobStatus } from "@itwin/insights-client";
-import { EC3JobClient } from "./api/EC3JobClient";
+import { useEC3JobClient } from "./api/context/EC3JobClientContext";
 
 interface ExportProps {
   projectName: string;
@@ -33,7 +32,7 @@ interface ExportProps {
 
 const ExportModal = (props: ExportProps) => {
   const PIN_INTERVAL = 1000;
-  const ec3JobClient = useMemo(() => new EC3JobClient(), []);
+  const ec3JobClient = useEC3JobClient();
 
   const [jobStatus, setJobStatus] = useState<JobStatus.StatusEnum>();
   const [jobLink, setJobLink] = useState<Link>();

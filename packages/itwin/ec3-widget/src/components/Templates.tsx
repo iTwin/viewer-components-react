@@ -17,9 +17,9 @@ import TemplateMenu from "./TemplateMenu";
 import { SearchBar } from "./SearchBar";
 import { HorizontalTile } from "./HorizontalTile";
 import React from "react";
-import { EC3ConfigurationClient } from "./api/EC3ConfigurationClient";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { EC3Props } from "./EC3";
+import { useEC3ConfigurationClient } from "./api/context/EC3ConfigurationClientContext";
 
 enum TemplateView {
   TEMPLATES = "templates",
@@ -34,7 +34,7 @@ const Templates = ({ config }: EC3Props) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Configuration>();
   const [searchValue, setSearchValue] = useState<string>("");
-  const configClient = useMemo(() => new EC3ConfigurationClient(), []);
+  const configClient = useEC3ConfigurationClient();
   const [templateView, setTemplateView] = useState<TemplateView>(
     TemplateView.TEMPLATES
   );

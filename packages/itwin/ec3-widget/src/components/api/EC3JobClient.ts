@@ -3,19 +3,21 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import isomorphicFetch from "cross-fetch";
+import { BASE_PATH } from "./EC3ConfigurationClient";
 
 const ACCEPT = "application/vnd.bentley.itwin-platform.v1+json";
 
-export const BASE_PATH = "https://api.bentley.com/insights/carbon-calculation/ec3/configurations".replace(
-  /\/+$/,
-  ""
-);
-
 class EC3JobClient {
+  private basePath: string;
+
+  constructor(basePath?: string) {
+    this.basePath = basePath ?? BASE_PATH;
+  }
+
   public async createJob(accesToken: string, ec3BearerToken: string, configurationId: string, projectName: string) {
     const obj = { ec3BearerToken, configurationId, projectName };
 
-    const url = " https://api.bentley.com/insights/carbon-calculation/ec3/jobs";
+    const url = `${this.basePath}/jobs`;
     const prop = {
       method: "POST",
       Request: "no-cors",
@@ -31,7 +33,7 @@ class EC3JobClient {
   }
 
   public async getEC3JobStatus(token: string, jobId: string) {
-    const url = ` https://api.bentley.com/insights/carbon-calculation/ec3/jobs/${jobId}`;
+    const url = `${this.basePath}/jobs/${jobId}`;
     const prop = {
       method: "GET",
       Request: "no-cors",

@@ -10,14 +10,14 @@ import * as moq from "typemoq";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import type { AuthorizationClient } from "@itwin/core-common";
-import type { ReportingClient } from "@itwin/insights-client";
+import type { Report, ReportsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import { setupServer } from "msw/node";
 import { EC3Config } from "../components/EC3/EC3Config";
 import type { EC3ConfigurationClient } from "../components/api/EC3ConfigurationClient";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
-const reportingClient = moq.Mock.ofType<ReportingClient>();
+const reportingClient = moq.Mock.ofType<ReportsClient>();
 const ec3ConfigurationClient = moq.Mock.ofType<EC3ConfigurationClient>();
 
 jest.mock("@itwin/appui-react", () => ({
@@ -36,25 +36,26 @@ jest.mock("../components/api/EC3ConfigurationClient", () => ({
 }));
 
 describe("Templates view", () => {
-  const mockedReports = ({
-    reports: Array.from(
-      { length: faker.datatype.number({ min: 3, max: 5 }) },
-      (_, index) => ({
-        id: `${faker.datatype.uuid()}`,
-        displayName: `mOcKRePoRT${index}`,
-        description: `mOcKRePoRTDeScRiPtIoN${index}`,
-      })
-    ),
-    _links: {
-      next: undefined,
-      self: {
-        href: "",
+  const mockedReports: Report[] = Array.from(
+    { length: faker.datatype.number({ min: 3, max: 5 }) },
+    (_, index) => ({
+      id: `${faker.datatype.uuid()}`,
+      displayName: `mOcKRePoRT${index}`,
+      description: `mOcKRePoRTDeScRiPtIoN${index}`,
+      deleted: false,
+      _links: {
+        report: {
+          href: "",
+        },
+        project: {
+          href: "",
+        },
       },
-    },
-  });
+    })
+  );
 
   const configId = faker.datatype.uuid();
-  const reportId = mockedReports.reports[0].id;
+  const reportId = mockedReports[0].id;
 
   const mockedConfigurations = {
     configurations: Array.from(
@@ -91,7 +92,7 @@ describe("Templates view", () => {
     authClient.setup(async (x) => x.getAccessToken()).returns(async () => accessToken);
     IModelApp.authorizationClient = authClient.object;
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
-    reportingClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports?.reports);
+    reportingClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports);
     ec3ConfigurationClient.setup(async (x) => x.getConfigurations(iTwinId)).returns(async () => mockedConfigurations);
     ec3ConfigurationClient.setup(async (x) => x.getConfiguration(configId)).returns(async () => mockedConfiguration);
   });

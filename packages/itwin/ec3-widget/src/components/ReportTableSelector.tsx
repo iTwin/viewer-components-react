@@ -4,12 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { IModelApp } from "@itwin/core-frontend";
-import { ReportingClient } from "@itwin/insights-client";
 import { ComboBox, Label, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import type { Configuration } from "./Template";
 import "./ReportTableSelector.scss";
+import { useODataClient } from "./api/context/ODataClientContext";
 
 export interface ReportTableSelectorProps {
   selectedReportTable: string;
@@ -29,7 +29,7 @@ export const ReportTableSelector = ({
   const [validator, _showValidationMessage] = useValidator();
   const [reportTable, setReportTable] = useState(selectedReportTable);
   const [reportTables, setReportTables] = useState<string[] | undefined>(undefined);
-  const reportingClientApi = useMemo(() => new ReportingClient(), []);
+  const reportingClientApi = useODataClient();
 
   const updateData = useCallback(async (reportTableName: string) => {
     if (!IModelApp.authorizationClient)
@@ -60,21 +60,19 @@ export const ReportTableSelector = ({
     filteredReportTables.push(...oDataReportTables.filter((table) =>
       !template.labels.some((label) => label.reportTable === table)
     ));
+
     if (reportTables === undefined)
       setReportTables(filteredReportTables);
 
     if (!reportTableName)
       return;
 
-    const responseText = await reportMetadataResponse.text();
-    const dom = new DOMParser().parseFromString(responseText, "text/xml");
-    const elems = Array.from(dom.getElementsByTagName("EntityType")).filter((x) => x.attributes[0].value === reportTableName);
-    if (elems.length === 0)
+    const oDataTable = reportMetadataResponse.find((x) => x.name === reportTableName);
+    if (!oDataTable)
       return;
 
-    const columns = Array.from(elems[0].children).map((x) => x.attributes);
-    const filteredStringColumns = columns.filter((x) => x[1].value === "Edm.String").map((x) => x[0].value);
-    const filteredNumericalColumns = columns.filter((x) => x[1].value === "Edm.Double").map((x) => x[0].value);
+    const filteredStringColumns = oDataTable.columns.filter((x) => x.type === "Edm.String").map((x) => x.name);
+    const filteredNumericalColumns = oDataTable.columns.filter((x) => x.type === "Edm.Double").map((x) => x.name);
 
     await onChange(reportTableName, filteredNumericalColumns, filteredStringColumns);
   }, [reportTable, reportTables, template, onChange, reportingClientApi]);

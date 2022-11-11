@@ -8,19 +8,22 @@ import isomorphicFetch from "cross-fetch";
 
 const ACCEPT = "application/vnd.bentley.itwin-platform.v1+json";
 
-export const BASE_PATH = "https://api.bentley.com/insights/carbon-calculation/ec3/configurations".replace(
-  /\/+$/,
-  ""
-);
+export const BASE_PATH = "https://api.bentley.com/insights/carbon-calculation/ec3";
 
 class EC3ConfigurationClient {
+  private basePath: string;
+
+  constructor(basePath?: string) {
+    this.basePath = basePath ?? BASE_PATH;
+  }
+
   public async getConfigurations(contextId: string) {
     if (!IModelApp.authorizationClient)
       throw new Error(
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
     const _accessToken = await IModelApp.authorizationClient.getAccessToken();
-    const url = `https://api.bentley.com/insights/carbon-calculation/ec3/configurations?iTwinId=${contextId}`;
+    const url = `${this.basePath}/configurations?iTwinId=${contextId}`;
 
     const prop = {
       method: "GET",
@@ -50,7 +53,7 @@ class EC3ConfigurationClient {
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
     const _accessToken = await IModelApp.authorizationClient.getAccessToken();
-    const url = `https://api.bentley.com/insights/carbon-calculation/ec3/configurations/${configurationId}`;
+    const url = `${this.basePath}/configurations/${configurationId}`;
     const prop = {
       method: "GET",
       Request: "no-cors",
@@ -69,7 +72,7 @@ class EC3ConfigurationClient {
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
     const _accessToken = await IModelApp.authorizationClient.getAccessToken();
-    const url = "https://api.bentley.com/insights/carbon-calculation/ec3/configurations/";
+    const url = `${this.basePath}/configurations/`;
     const prop = {
       method: "POST",
       Request: "no-cors",
@@ -92,7 +95,7 @@ class EC3ConfigurationClient {
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
     const _accessToken = await IModelApp.authorizationClient.getAccessToken();
-    const url = `https://api.bentley.com/insights/carbon-calculation/ec3/configurations/${configuration.id}`;
+    const url = `${this.basePath}/configurations/${configuration.id}`;
     const prop = {
       method: "PUT",
       Request: "no-cors",
@@ -113,7 +116,7 @@ class EC3ConfigurationClient {
         "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
       );
     const _accessToken = await IModelApp.authorizationClient.getAccessToken();
-    const url = `https://api.bentley.com/insights/carbon-calculation/ec3/configurations/${configurationId}`;
+    const url = `${this.basePath}/configurations/${configurationId}`;
     const prop = {
       method: "DELETE",
       Request: "no-cors",

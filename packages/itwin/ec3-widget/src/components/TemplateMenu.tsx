@@ -8,7 +8,6 @@ import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { Report } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
 import { handleSelectChange, WidgetHeader } from "./utils";
 import ExportModal from "./ExportModal";
 import LabelAction from "./LabelAction";
@@ -18,7 +17,6 @@ import DeleteModal from "./DeleteModal";
 import { handleInputChange } from "./utils";
 import TemplateActionPanel from "./TemplateActionPanel";
 import ReportConfirmModal from "./ReportConfirmModal";
-import { EC3ConfigurationClient } from "./api/EC3ConfigurationClient";
 import {
   ComboBox,
   Label,
@@ -33,6 +31,8 @@ import "./TemplateMenu.scss";
 import React from "react";
 import type { EC3TokenCache } from "./EC3/EC3TokenCache";
 import type { EC3Config } from "./EC3/EC3Config";
+import { useReportsClient } from "./api/context/ReportsClientContext";
+import { useEC3ConfigurationClient } from "./api/context/EC3ConfigurationClientContext";
 
 interface TemplateProps {
   template?: Configuration;
@@ -48,7 +48,7 @@ enum LabelView {
 
 const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  const reportingClientApi = useMemo(() => new ReportingClient(), []);
+  const reportingClientApi = useReportsClient();
   const [token, setToken] = useState<EC3TokenCache>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -57,7 +57,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
   const [selectedReport, setSelectedReport] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
   const [availableReports, setReports] = useState<Report[]>([]);
-  const configurationClient = useMemo(() => new EC3ConfigurationClient(), []);
+  const configurationClient = useEC3ConfigurationClient();
   const [childTemplate, setChildTemplate] = useState<Configuration>({
     reportId: "",
     description: "",
