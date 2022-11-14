@@ -153,11 +153,15 @@ const extractNested = (propertyTraversal: string[], propertyFields: Field[]): Pr
       // Get structs
       case PropertyValueFormat.Struct: {
         const nestedContentField = property as NestedContentField;
-        // Only handling single path and not handling nested content fields within navigations
+        // Only handling single path and not handling nested content fields within navigations.
         if (
           nestedContentField.pathToPrimaryClass &&
           nestedContentField.pathToPrimaryClass.length > 1
         ) {
+          // Hardcoded navigation to source information.
+          if (nestedContentField.contentClassInfo.name === "BisCore:RepositoryLink") {
+            return extractNested([...propertyTraversal, "Source", "Repository"], nestedContentField.nestedFields);
+          }
           break;
         }
 
@@ -220,10 +224,10 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
                   .name === "BisCore:ElementOwnsMultiAspects")
             ) {
               const fullClassName = nestedContentField.contentClassInfo.name;
-              const schema = fullClassName.split(":")[0];
-              const className = fullClassName.split(":")[1];
+              const sourceSchema = fullClassName.split(":")[0];
+              const sourceClassName = fullClassName.split(":")[1];
               const extractedNested = extractNested([], nestedContentField.nestedFields);
-              const aspectExtractedNested = extractedNested.map((ecProperty) => ({ ...ecProperty, schema, className }));
+              const aspectExtractedNested = extractedNested.map((ecProperty) => ({ ...ecProperty, sourceSchema, sourceClassName }));
               return aspectExtractedNested;
             }
             break;
