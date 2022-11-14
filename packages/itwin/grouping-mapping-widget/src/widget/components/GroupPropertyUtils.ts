@@ -153,12 +153,12 @@ const extractNested = (propertyTraversal: string[], propertyFields: Field[]): Pr
       // Get structs
       case PropertyValueFormat.Struct: {
         const nestedContentField = property as NestedContentField;
-        // Only handling single path and not handling nested content fields within navigations.
+        // Only handling single path and not handling nested content fields within navigations
         if (
           nestedContentField.pathToPrimaryClass &&
           nestedContentField.pathToPrimaryClass.length > 1
         ) {
-          // Hardcoded navigation to source information.
+          // Hardcoded navigation to external source repository metadata.
           if (nestedContentField.contentClassInfo.name === "BisCore:RepositoryLink") {
             return extractNested([...propertyTraversal, "Source", "Repository"], nestedContentField.nestedFields);
           }
