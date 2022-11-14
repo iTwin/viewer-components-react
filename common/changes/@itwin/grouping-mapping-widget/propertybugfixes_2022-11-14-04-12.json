@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Added support for external source repository information (name/path) in group properties.",
+      "comment": "Added support for external source repository information (name/path) in group properties",
       "type": "patch"
     }
   ],
