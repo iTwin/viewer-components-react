@@ -38,7 +38,6 @@ import {
 import { ReportMappings } from "../widget/components/ReportMappings";
 import { Constants, IModelState } from "@itwin/imodels-client-management";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
-import { REFRESH_DELAY } from "../widget/components/Constants";
 import type {
   SelectionManager,
   SelectionScopesManager,
@@ -50,8 +49,6 @@ import {
 import type { BeEvent } from "@itwin/core-bentley";
 import BulkExtractor from "../widget/components/BulkExtractor";
 
-// For the extraction test
-jest.setTimeout(40000);
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -231,6 +228,10 @@ const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
   useActiveIModelConnection: () => connectionMock.object,
+}));
+
+jest.mock('../widget/components/Constants.ts', () => ({
+  STATUS_CHECK_INTERVAL: 10,
 }));
 
 const server = setupServer();
@@ -732,7 +733,7 @@ describe("Report Mappings View", () => {
     const mockReportMappings = mockReportMappingsFactory();
     const [_, iModelHandlers] = mockMappingsFactory(mockReportMappings);
 
-    const delay = REFRESH_DELAY;
+    const delay = 1000;
 
     // Faking timers currently makes all promise based queries from RTL become unpredictable.
     // https://github.com/testing-library/dom-testing-library/issues/988
@@ -837,9 +838,6 @@ describe("Report Mappings View", () => {
     const startingStates = await screen.findAllByTitle(/starting/i);
     expect(startingStates).toHaveLength(1);
 
-    // act(() => {
-    //   jest.advanceTimersByTime(2000)
-    // });
     const queuedStates = await screen.findAllByTitle(/queued/i, undefined, {
       timeout: delay,
     });
