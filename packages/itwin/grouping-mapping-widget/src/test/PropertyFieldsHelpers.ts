@@ -45,7 +45,7 @@ export const createTestRelatedClassInfo = (props?: Partial<RelatedClassInfo>) =>
   ...props,
 });
 
-export function createTestSimpleContentField(props?: {
+export const createTestSimpleContentField = (props?: {
   category?: CategoryDescription;
   type?: TypeDescription;
   name?: string;
@@ -54,7 +54,7 @@ export function createTestSimpleContentField(props?: {
   priority?: number;
   editor?: EditorDescription;
   renderer?: RendererDescription;
-}) {
+}) => {
   return new Field(
     props?.category ?? createTestCategoryDescription(),
     props?.name ?? "SimpleField",
@@ -68,9 +68,9 @@ export function createTestSimpleContentField(props?: {
     props?.editor,
     props?.renderer
   );
-}
+};
 
-export function createTestPropertiesContentField(props: {
+export const createTestPropertiesContentField = (props: {
   properties: Property[];
   category?: CategoryDescription;
   type?: TypeDescription;
@@ -80,7 +80,7 @@ export function createTestPropertiesContentField(props: {
   priority?: number;
   editor?: EditorDescription;
   renderer?: RendererDescription;
-}) {
+}) => {
   return new PropertiesField(
     props.category ?? createTestCategoryDescription(),
     props.name ?? "PropertiesField",
@@ -92,9 +92,9 @@ export function createTestPropertiesContentField(props: {
     props.editor,
     props.renderer
   );
-}
+};
 
-export function createTestNestedContentField(props: {
+export const createTestNestedContentField = (props: {
   nestedFields: Field[];
   category?: CategoryDescription;
   name?: string;
@@ -107,7 +107,7 @@ export function createTestNestedContentField(props: {
   editor?: EditorDescription;
   renderer?: RendererDescription;
   relationshipMeaning?: RelationshipMeaning;
-}) {
+}) => {
   const nestedContentFieldType: StructTypeDescription = {
     valueFormat: PropertyValueFormat.Struct,
     typeName: "NestedContentFieldType",
@@ -135,4 +135,4 @@ export function createTestNestedContentField(props: {
     field.relationshipMeaning = props.relationshipMeaning;
   field.rebuildParentship();
   return field;
-}
+};
