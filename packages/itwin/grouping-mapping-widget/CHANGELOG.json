@@ -2,6 +2,29 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.9.0",
+      "date": "Wed, 16 Nov 2022 16:49:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed cross references in query builder query string"
+          },
+          {
+            "comment": "Fixed group properties incorrectly generating aspects"
+          },
+          {
+            "comment": "Added support for external source repository information (name/path) in group properties"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Version bump"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.3",
       "tag": "@itwin/grouping-mapping-widget_v0.8.3",
       "date": "Mon, 31 Oct 2022 19:03:27 GMT",
