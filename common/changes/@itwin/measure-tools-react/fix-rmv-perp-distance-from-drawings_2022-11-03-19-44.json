@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/measure-tools-react",
+      "comment": "Hide perpendicular measure tool for drawing view",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/measure-tools-react"
+}
