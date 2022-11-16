@@ -5,7 +5,7 @@
 import type { ECProperty } from "@itwin/insights-client";
 import { DataType } from "@itwin/insights-client";
 import type { PropertyMetaData } from "../widget/components/GroupPropertyUtils";
-import { convertPresentationFields, convertToECProperties,  findProperties} from "../widget/components/GroupPropertyUtils";
+import { convertPresentationFields, convertToECProperties, findProperties } from "../widget/components/GroupPropertyUtils";
 import { createTestECClassInfo, createTestNestedContentField, createTestPropertiesContentField, createTestPropertyInfo, createTestRelatedClassInfo } from "./PropertyFieldsHelpers";
 import { assert, expect } from "chai";
 import type { NavigationPropertyInfo, StructTypeDescription } from "@itwin/presentation-common";
@@ -345,7 +345,7 @@ describe("Group properties utilities", () => {
 
     const structContentFieldDescription: StructTypeDescription = {
       valueFormat: PropertyValueFormat.Struct,
-      typeName: "NestedContentFieldType",
+      typeName: "StructType",
       members: [{
         name: "prop1",
         label: "prop one",
@@ -370,6 +370,73 @@ describe("Group properties utilities", () => {
         actualECClassName: "Struct:Class",
         parentPropertyClassName: undefined,
         key: "undefined|Struct:Class|PropertyName|prop1",
+        categoryLabel: "Test Category",
+      },
+    ];
+
+    assert.deepEqual(result, expectedResult);
+  }
+  );
+
+  it("handle simple nested structs correctly", () => {
+    const structPropertyClass = createTestPropertyInfo({ classInfo: { id: "0", label: "", name: "Struct:Class" } });
+
+    const structContentFieldDescription: StructTypeDescription = {
+      valueFormat: PropertyValueFormat.Struct,
+      typeName: "StructType",
+      members: [{
+        name: "prop1",
+        label: "prop one",
+        type: {
+          typeName: "string",
+          valueFormat: PropertyValueFormat.Primitive,
+        },
+      },
+      {
+        name: "struct1",
+        label: "struct1",
+        type: {
+          typeName: "string",
+          valueFormat: PropertyValueFormat.Struct,
+          members: [{
+            name: "prop2",
+            label: "prop 2",
+            type: {
+              typeName: "string",
+              valueFormat: PropertyValueFormat.Primitive,
+            },
+          }],
+        },
+      }],
+    };
+
+    const simpleStructField = createTestPropertiesContentField({ properties: [{ property: structPropertyClass }], type: structContentFieldDescription });
+
+    const result = convertPresentationFields([simpleStructField]);
+
+    const expectedResult: PropertyMetaData[] = [
+      {
+        displayLabel: "prop one",
+        sourceSchema: "*",
+        sourceClassName: "*",
+        ecPropertyTraversal: ["PropertyName", "prop1"],
+        propertyType: DataType.String,
+        primitiveNavigationClass: "",
+        actualECClassName: "Struct:Class",
+        parentPropertyClassName: undefined,
+        key: "undefined|Struct:Class|PropertyName|prop1",
+        categoryLabel: "Test Category",
+      },
+      {
+        displayLabel: "prop 2",
+        sourceSchema: "*",
+        sourceClassName: "*",
+        ecPropertyTraversal: ["PropertyName", "struct1", "prop2"],
+        propertyType: DataType.String,
+        primitiveNavigationClass: "",
+        actualECClassName: "Struct:Class",
+        parentPropertyClassName: undefined,
+        key: "undefined|Struct:Class|PropertyName|struct1|prop2",
         categoryLabel: "Test Category",
       },
     ];
@@ -619,7 +686,7 @@ describe("Group properties utilities", () => {
       parentPropertyClassName: undefined,
     }];
 
-    const ecProperties: ECProperty[] =  [
+    const ecProperties: ECProperty[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
@@ -656,7 +723,7 @@ describe("Group properties utilities", () => {
       parentPropertyClassName: undefined,
     }];
 
-    const ecProperties: ECProperty[] =  [
+    const ecProperties: ECProperty[] = [
       {
         ecSchemaName: "*",
         ecClassName: "*",
