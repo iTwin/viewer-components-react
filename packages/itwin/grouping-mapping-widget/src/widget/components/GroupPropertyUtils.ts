@@ -115,8 +115,9 @@ const extractPrimitiveStructProperties = (
     });
 
   } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
+    const structName = member.name;
     return extractPrimitiveStructProperties(
-      propertyTraversal,
+      [...propertyTraversal, structName],
       member.type.members,
       categoryLabel,
       actualECClassName,
