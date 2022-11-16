@@ -5,9 +5,7 @@
 import type { ECProperty } from "@itwin/insights-client";
 import { DataType } from "@itwin/insights-client";
 import type { PropertyMetaData } from "../widget/components/GroupPropertyUtils";
-import { findProperties } from "../widget/components/GroupPropertyUtils";
-import { convertToECProperties } from "../widget/components/GroupPropertyUtils";
-import { convertPresentationFields } from "../widget/components/GroupPropertyUtils";
+import { convertToECProperties, findProperties,  convertPresentationFields} from "../widget/components/GroupPropertyUtils";
 import { createTestECClassInfo, createTestNestedContentField, createTestPropertiesContentField, createTestPropertyInfo, createTestRelatedClassInfo } from "./PropertyFieldsHelpers";
 import { assert, expect } from "chai";
 import type { NavigationPropertyInfo, StructTypeDescription } from "@itwin/presentation-common";
