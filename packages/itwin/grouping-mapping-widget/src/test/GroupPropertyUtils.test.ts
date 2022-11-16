@@ -35,7 +35,7 @@ describe("Group properties utilities", () => {
     assert.deepEqual(result, expectedResult);
   });
 
-  it("multiple primitive property of different types", () => {
+  it("multiple primitive properies of different types", () => {
     const testProperties = [createTestPropertyInfo({ name: "propString" }),
       createTestPropertyInfo({ name: "propInt", type: "int" }),
       createTestPropertyInfo({ name: "propBool", type: "boolean" }),
@@ -378,7 +378,7 @@ describe("Group properties utilities", () => {
   }
   );
 
-  it("handle primitive navigations", () => {
+  it("handle primitive navigation (Model)", () => {
     const modelClassInfo = createTestECClassInfo({ name: "BisCore:Element", label: "Element" });
     const navigationClassInfo = createTestECClassInfo({ name: "BisCore:ModelContainsElements", label: "ModelContainsElements" });
 
@@ -444,7 +444,7 @@ describe("Group properties utilities", () => {
     assert.deepEqual(result, expectedResult);
   });
 
-  it("convert PropertyMetaData model primitive navigation into ECProperty", () => {
+  it("convert Model PropertyMetaData primitive navigation into ECProperty", () => {
     const propertyMetaData: PropertyMetaData = {
       displayLabel: "Model",
       sourceSchema: "*",
@@ -480,7 +480,7 @@ describe("Group properties utilities", () => {
     assert.deepEqual(result, expectedResult);
   });
 
-  it("convert PropertyMetaData category primitive navigation into ECProperty", () => {
+  it("convert Category PropertyMetaData primitive navigation into ECProperty", () => {
     const propertyMetaData: PropertyMetaData = {
       displayLabel: "Category",
       sourceSchema: "*",
@@ -516,7 +516,7 @@ describe("Group properties utilities", () => {
     assert.deepEqual(result, expectedResult);
   });
 
-  it("convert PropertyMetaData physical material primitive navigation into ECProperty", () => {
+  it("convert Physical Material PropertyMetaData primitive navigation into an ECProperty", () => {
     const propertyMetaData: PropertyMetaData = {
       displayLabel: "Physical Material",
       sourceSchema: "*",
