@@ -61,7 +61,7 @@ describe("QueryBuilder", () => {
       }
     }
 
-    const result = queryBuilder.buildQueryString();
+    const result = await queryBuilder.buildQueryString();
     assert.strictEqual(result, expectedResult);
   };
 });

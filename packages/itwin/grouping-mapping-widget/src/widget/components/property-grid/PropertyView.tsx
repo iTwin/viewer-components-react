@@ -104,7 +104,7 @@ export const PropertyView = (props: PropertyViewProps) => {
         context.setCurrentPropertyList(
           context.currentPropertyList.concat(prop)
         );
-        context.setQuery(context.queryBuilder.buildQueryString());
+        context.setQuery(await context.queryBuilder.buildQueryString());
       }
     },
     [context]
@@ -144,7 +144,7 @@ export const PropertyView = (props: PropertyViewProps) => {
           context.currentPropertyList.filter((x: PropertyRecord) => x !== prop)
         );
         await context.queryBuilder.removeProperty(prop);
-        context.setQuery(context.queryBuilder.buildQueryString());
+        context.setQuery(await context.queryBuilder.buildQueryString());
       }
     },
     [context]
@@ -293,19 +293,19 @@ export const PropertyView = (props: PropertyViewProps) => {
       <div className="gmw-components-property-record-label">
         {props.propertyRecord.value.valueFormat ===
           PropertyValueFormat.Primitive && (
-          <Checkbox
-            style={{ marginLeft: offset }}
-            className="gmw-components-property-selection-checkbox"
-            checked={isPropertySelected}
-            onChange={_onPropertySelectionChanged}
-            disabled={
-              context.isLoading ||
+            <Checkbox
+              style={{ marginLeft: offset }}
+              className="gmw-components-property-selection-checkbox"
+              checked={isPropertySelected}
+              onChange={_onPropertySelectionChanged}
+              disabled={
+                context.isLoading ||
                 context.isRendering ||
                 props.propertyRecord.value.value === undefined
-            }
-            isLoading={isCheckboxLoading}
-          />
-        )}
+              }
+              isLoading={isCheckboxLoading}
+            />
+          )}
         {props.labelElement}
       </div>
       {needElementSeparator ? (
@@ -322,14 +322,14 @@ export const PropertyView = (props: PropertyViewProps) => {
       ) : undefined}
       {props.propertyRecord.value.valueFormat ===
         PropertyValueFormat.Primitive ? (
-          <div className="gmw-components-property-record-value">
-            <span>
-              {props.valueElementRenderer
-                ? props.valueElementRenderer()
-                : props.valueElement}
-            </span>
-          </div>
-        ) : undefined}
+        <div className="gmw-components-property-record-value">
+          <span>
+            {props.valueElementRenderer
+              ? props.valueElementRenderer()
+              : props.valueElement}
+          </span>
+        </div>
+      ) : undefined}
       {props.actionButtonRenderers ? (
         <ActionButtonList
           orientation={props.orientation}

@@ -8,7 +8,7 @@ export const testCases: QueryBuilderTestData = {
   testCases: [
     {
       name: "when non-relational property added, return query string with property value",
-      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE A.B.somePropName=1",
+      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE A.B.somePropName = 1",
       operations: [
         {
           expectedResult: true,
@@ -47,7 +47,7 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when relational property added, return query string with property value and relation chain to it",
-      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Rel.CX.SourceECInstanceId=A.C.ECInstanceId JOIN A.C ON A.C.ECInstanceId=Rel.BC.SourceECInstanceId JOIN Rel.BC ON Rel.BC.TargetECInstanceId=A.B.ECInstanceId JOIN A.B ON A.B.somePropName='someString' WHERE Z.X.ECInstanceId=Rel.CX.TargetECInstanceId",
+      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString'",
       operations: [
         {
           expectedResult: true,
@@ -123,6 +123,398 @@ export const testCases: QueryBuilderTestData = {
               contentClassInfo: {
                 name: "A:B",
               },
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: "when multiple relational properties added, return query string with property values and relation chains to them",
+      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN G.H ON Rel.BC.TargetECInstanceId = G.H.ECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE G.H.someOtherPropName = 'someOtherString' AND A.B.somePropName = 'someString'",
+      operations: [
+        {
+          expectedResult: true,
+          operationType: "addProperty",
+          propertyRecord: {
+            value: {
+              valueFormat: 0,
+              value: "someOtherString",
+            },
+            property: {
+              typename: "notNavigation",
+              name: "otherPropertyName",
+              displayLabel: "propertyDisplayLabel",
+            },
+          },
+          propertiesField: {
+            properties: [
+              {
+                property: {
+                  name: "someOtherPropName",
+                  classInfo: {
+                    name: "A:B",
+                  },
+                },
+              },
+            ],
+            type: {
+              typeName: "string",
+            },
+            parent: {
+              pathToPrimaryClass: [
+                {
+                  sourceClassInfo: {
+                    id: "id1",
+                    name: "G:H",
+                    label: "AB label",
+                  },
+                  targetClassInfo: {
+                    id: "id2",
+                    name: "A:C",
+                    label: "AC label",
+                  },
+                  isPolymorphicTargetClass: true,
+                  relationshipInfo: {
+                    id: "id3",
+                    name: "Rel:BC",
+                    label: "Relationship BC label",
+                  },
+                  isPolymorphicRelationship: true,
+                  isForwardRelationship: false,
+                },
+                {
+                  sourceClassInfo: {
+                    id: "id2",
+                    name: "A:C",
+                    label: "AC label",
+                  },
+                  targetClassInfo: {
+                    id: "id4",
+                    name: "Z:X",
+                    label: "ZX label",
+                  },
+                  isPolymorphicTargetClass: false,
+                  relationshipInfo: {
+                    id: "id5",
+                    name: "Rel:CX",
+                    label: "Relationship CX label",
+                  },
+                  isPolymorphicRelationship: true,
+                  isForwardRelationship: true,
+                },
+              ],
+              contentClassInfo: {
+                name: "G:H",
+              },
+            },
+          },
+        },
+        {
+          expectedResult: true,
+          operationType: "addProperty",
+          propertyRecord: {
+            value: {
+              valueFormat: 0,
+              value: "someString",
+            },
+            property: {
+              typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
+            },
+          },
+          propertiesField: {
+            properties: [
+              {
+                property: {
+                  name: "somePropName",
+                  classInfo: {
+                    name: "A:B",
+                  },
+                },
+              },
+            ],
+            type: {
+              typeName: "string",
+            },
+            parent: {
+              pathToPrimaryClass: [
+                {
+                  sourceClassInfo: {
+                    id: "id1",
+                    name: "A:B",
+                    label: "AB label",
+                  },
+                  targetClassInfo: {
+                    id: "id2",
+                    name: "A:C",
+                    label: "AC label",
+                  },
+                  isPolymorphicTargetClass: true,
+                  relationshipInfo: {
+                    id: "id3",
+                    name: "Rel:BC",
+                    label: "Relationship BC label",
+                  },
+                  isPolymorphicRelationship: true,
+                  isForwardRelationship: false,
+                },
+                {
+                  sourceClassInfo: {
+                    id: "id2",
+                    name: "A:C",
+                    label: "AC label",
+                  },
+                  targetClassInfo: {
+                    id: "id4",
+                    name: "Z:X",
+                    label: "ZX label",
+                  },
+                  isPolymorphicTargetClass: false,
+                  relationshipInfo: {
+                    id: "id5",
+                    name: "Rel:CX",
+                    label: "Relationship CX label",
+                  },
+                  isPolymorphicRelationship: true,
+                  isForwardRelationship: true,
+                },
+              ],
+              contentClassInfo: {
+                name: "A:B",
+              },
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: "when relational property and non-relational property from one of relational chain classes added, return query string with property values and relation chain",
+      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString' AND A.C.SomeOtherPropName = 1",
+      operations: [
+        {
+          expectedResult: true,
+          operationType: "addProperty",
+          propertyRecord: {
+            value: {
+              valueFormat: 0,
+              value: "someString",
+            },
+            property: {
+              typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
+            },
+          },
+          propertiesField: {
+            properties: [
+              {
+                property: {
+                  name: "somePropName",
+                  classInfo: {
+                    name: "A:C",
+                  },
+                },
+              },
+            ],
+            type: {
+              typeName: "string",
+            },
+            parent: {
+              pathToPrimaryClass: [
+                {
+                  sourceClassInfo: {
+                    id: "id1",
+                    name: "A:B",
+                    label: "AB label",
+                  },
+                  targetClassInfo: {
+                    id: "id2",
+                    name: "A:C",
+                    label: "AC label",
+                  },
+                  isPolymorphicTargetClass: true,
+                  relationshipInfo: {
+                    id: "id3",
+                    name: "Rel:BC",
+                    label: "Relationship BC label",
+                  },
+                  isPolymorphicRelationship: true,
+                  isForwardRelationship: false,
+                },
+                {
+                  sourceClassInfo: {
+                    id: "id2",
+                    name: "A:C",
+                    label: "AC label",
+                  },
+                  targetClassInfo: {
+                    id: "id4",
+                    name: "Z:X",
+                    label: "ZX label",
+                  },
+                  isPolymorphicTargetClass: false,
+                  relationshipInfo: {
+                    id: "id5",
+                    name: "Rel:CX",
+                    label: "Relationship CX label",
+                  },
+                  isPolymorphicRelationship: true,
+                  isForwardRelationship: true,
+                },
+              ],
+              contentClassInfo: {
+                name: "A:B",
+              },
+            },
+          },
+        },
+        {
+          expectedResult: true,
+          operationType: "addProperty",
+          propertyRecord: {
+            value: {
+              valueFormat: 0,
+              value: 1,
+            },
+            property: {
+              typename: "notNavigation",
+              name: "propertyName2",
+              displayLabel: "propertyDisplayLabel",
+            },
+          },
+          propertiesField: {
+            properties: [
+              {
+                property: {
+                  name: "SomeOtherPropName",
+                  classInfo: {
+                    name: "A:C",
+                  },
+                },
+              },
+            ],
+            type: {
+              typeName: "number",
+            },
+            parent: {
+              pathToPrimaryClass: [],
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: "when relational and non-relational property from the same class added, return query string with property values and relation chain",
+      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString' AND A.B.SomeOtherPropName = 1",
+      operations: [
+        {
+          expectedResult: true,
+          operationType: "addProperty",
+          propertyRecord: {
+            value: {
+              valueFormat: 0,
+              value: "someString",
+            },
+            property: {
+              typename: "notNavigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
+            },
+          },
+          propertiesField: {
+            properties: [
+              {
+                property: {
+                  name: "somePropName",
+                  classInfo: {
+                    name: "A:B",
+                  },
+                },
+              },
+            ],
+            type: {
+              typeName: "string",
+            },
+            parent: {
+              pathToPrimaryClass: [
+                {
+                  sourceClassInfo: {
+                    id: "id1",
+                    name: "A:B",
+                    label: "AB label",
+                  },
+                  targetClassInfo: {
+                    id: "id2",
+                    name: "A:C",
+                    label: "AC label",
+                  },
+                  isPolymorphicTargetClass: true,
+                  relationshipInfo: {
+                    id: "id3",
+                    name: "Rel:BC",
+                    label: "Relationship BC label",
+                  },
+                  isPolymorphicRelationship: true,
+                  isForwardRelationship: false,
+                },
+                {
+                  sourceClassInfo: {
+                    id: "id2",
+                    name: "A:C",
+                    label: "AC label",
+                  },
+                  targetClassInfo: {
+                    id: "id4",
+                    name: "Z:X",
+                    label: "ZX label",
+                  },
+                  isPolymorphicTargetClass: false,
+                  relationshipInfo: {
+                    id: "id5",
+                    name: "Rel:CX",
+                    label: "Relationship CX label",
+                  },
+                  isPolymorphicRelationship: true,
+                  isForwardRelationship: true,
+                },
+              ],
+              contentClassInfo: {
+                name: "A:B",
+              },
+            },
+          },
+        },
+        {
+          expectedResult: true,
+          operationType: "addProperty",
+          propertyRecord: {
+            value: {
+              valueFormat: 0,
+              value: 1,
+            },
+            property: {
+              typename: "notNavigation",
+              name: "propertyName2",
+              displayLabel: "propertyDisplayLabel",
+            },
+          },
+          propertiesField: {
+            properties: [
+              {
+                property: {
+                  name: "SomeOtherPropName",
+                  classInfo: {
+                    name: "A:B",
+                  },
+                },
+              },
+            ],
+            type: {
+              typeName: "number",
+            },
+            parent: {
+              pathToPrimaryClass: [],
             },
           },
         },
@@ -366,7 +758,7 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when non-relational property re-added after removing, return query string with property value",
-      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE A.B.somePropName='someOtherString'",
+      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE A.B.somePropName = 'someOtherString'",
       operations: [
         {
           expectedResult: true,
@@ -479,7 +871,7 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when relational property re-added after removing, return query string with property value and relation chain to it",
-      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Rel.CX.SourceECInstanceId=A.C.ECInstanceId JOIN A.C ON A.C.ECInstanceId=Rel.BC.SourceECInstanceId JOIN Rel.BC ON Rel.BC.TargetECInstanceId=A.B.ECInstanceId JOIN A.B ON A.B.somePropName='someOtherString' WHERE Z.X.ECInstanceId=Rel.CX.TargetECInstanceId",
+      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someOtherString'",
       operations: [
         {
           expectedResult: true,
@@ -720,7 +1112,7 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when property is float, return query string with ROUND",
-      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE ROUND(A.B.somePropName, 4)=3.1416",
+      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE ROUND(A.B.somePropName, 4) = 3.1416",
       operations: [
         {
           expectedResult: true,
@@ -759,7 +1151,7 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when property needsQuotes, return query string with property value in quotes",
-      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE A.B.somePropName='https://valueThatNeedsQuotes.com'",
+      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE A.B.somePropName = 'https://valueThatNeedsQuotes.com'",
       operations: [
         {
           expectedResult: true,
@@ -798,7 +1190,52 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when property is category, return a category query string",
-      expectedResult: "SELECT BisCore.B.ECInstanceId FROM BisCore.B JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id AND ((bis.Category.CodeValue='displayValueString') OR (bis.Category.UserLabel='displayValueString'))",
+      expectedResult: "SELECT BisCore.B.ECInstanceId FROM BisCore.B JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id WHERE ((bis.Category.CodeValue = 'displayValueString') OR (bis.Category.UserLabel = 'displayValueString'))",
+      operations: [
+        {
+          expectedResult: true,
+          operationType: "addProperty",
+          propertyRecord: {
+            value: {
+              valueFormat: 0,
+              value: "someString",
+              displayValue: "displayValueString",
+            },
+            property: {
+              typename: "navigation",
+              name: "propertyName",
+              displayLabel: "propertyDisplayLabel",
+            },
+          },
+          propertiesField: {
+            properties: [
+              {
+                property: {
+                  name: "somePropName",
+                  classInfo: {
+                    name: "BisCore:B",
+                  },
+                  navigationPropertyInfo: {
+                    classInfo: {
+                      name: "BisCore:GeometricElement3dIsInCategory",
+                    },
+                  },
+                },
+              },
+            ],
+            type: {
+              typeName: "string",
+            },
+            parent: {
+              pathToPrimaryClass: [],
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: "when category property and relational property added, return query string with property value, relational chain and with category joined",
+      expectedResult: "SELECT BisCore.B.ECInstanceId FROM BisCore.B JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id WHERE ((bis.Category.CodeValue = 'displayValueString') OR (bis.Category.UserLabel = 'displayValueString'))",
       operations: [
         {
           expectedResult: true,
