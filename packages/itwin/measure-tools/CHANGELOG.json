@@ -2,6 +2,18 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.10.5",
+      "tag": "@itwin/measure-tools-react_v0.10.5",
+      "date": "Wed, 16 Nov 2022 19:55:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Hide perpendicular measure tool for drawing view"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.4",
       "tag": "@itwin/measure-tools-react_v0.10.4",
       "date": "Mon, 31 Oct 2022 19:03:27 GMT",

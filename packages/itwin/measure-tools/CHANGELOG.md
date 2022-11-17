@@ -1,6 +1,13 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Mon, 31 Oct 2022 19:03:27 GMT and should not be manually modified.
+This log was last generated on Wed, 16 Nov 2022 19:55:30 GMT and should not be manually modified.
+
+## 0.10.5
+Wed, 16 Nov 2022 19:55:30 GMT
+
+### Patches
+
+- Hide perpendicular measure tool for drawing view
 
 ## 0.10.4
 Mon, 31 Oct 2022 19:03:27 GMT

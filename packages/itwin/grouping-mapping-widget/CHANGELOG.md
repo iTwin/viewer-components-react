@@ -1,6 +1,27 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 31 Oct 2022 19:03:27 GMT and should not be manually modified.
+This log was last generated on Wed, 16 Nov 2022 19:55:30 GMT and should not be manually modified.
+
+## 0.9.1
+Wed, 16 Nov 2022 19:55:30 GMT
+
+### Patches
+
+- Test coverage added
+- Fixed group properties UI traversal to nested structs
+
+## 0.9.0
+Wed, 16 Nov 2022 16:49:55 GMT
+
+### Minor changes
+
+- Version bump
+
+### Patches
+
+- Fixed cross references in query builder query string
+- Fixed group properties incorrectly generating aspects
+- Added support for external source repository information (name/path) in group properties
 
 ## 0.8.3
 Mon, 31 Oct 2022 19:03:27 GMT
