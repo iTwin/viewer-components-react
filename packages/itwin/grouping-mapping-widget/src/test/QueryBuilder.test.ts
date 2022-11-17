@@ -57,7 +57,7 @@ describe("QueryBuilder", () => {
         assert.strictEqual(result, op.expectedResult);
       }
       if (op.operationType === "removeProperty") {
-        await queryBuilder.removeProperty(prop);
+        queryBuilder.removeProperty(prop);
       }
     }
 

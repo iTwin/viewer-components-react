@@ -27,13 +27,13 @@ export interface QueryClass {
 }
 
 export interface ClassJoin {
-  classProperty: string,
-  joinClassName: string,
-  joinClassProperty: string
+  classProperty: string;
+  joinClassName: string;
+  joinClassProperty: string;
 }
 
 export interface QueryProperty {
-  className: string,
+  className: string;
   classProperties: ClassProperty[];
   isCategory: boolean;
   isAspect: boolean;
@@ -46,8 +46,8 @@ export interface ClassProperty {
 }
 
 export interface AddedProperty {
-  propertyRecord: PropertyRecord,
-  propertiesField: PropertiesField
+  propertyRecord: PropertyRecord;
+  propertiesField: PropertiesField;
 }
 
 /* This class is to build adaptive and dynamic query for find similar property selections */
@@ -103,7 +103,7 @@ export class QueryBuilder {
     }
 
     this._propertyMap.set(prop.property.name, { propertyRecord: prop, propertiesField: propertyField });
-    return true
+    return true;
   }
 
   public removeProperty(prop: PropertyRecord) {
@@ -262,18 +262,18 @@ export class QueryBuilder {
     const classJoin: ClassJoin = {
       classProperty,
       joinClassName,
-      joinClassProperty
-    }
+      joinClassProperty,
+    };
 
     const queryClass: QueryClass = {
       className,
-      classJoins: [classJoin]
+      classJoins: [classJoin],
     };
 
     if (this.query.unions.length <= unionIndex) {
       this.query.unions.push({
         classes: [queryClass],
-        properties: []
+        properties: [],
       });
       return;
     }
@@ -283,7 +283,7 @@ export class QueryBuilder {
     );
 
     if (foundClass) {
-      const foundJoin = foundClass.classJoins.find(join =>
+      const foundJoin = foundClass.classJoins.find((join) =>
         join.classProperty === classProperty && join.joinClassName === joinClassName && join.joinClassProperty === joinClassProperty
       );
 
@@ -292,7 +292,7 @@ export class QueryBuilder {
       return;
     }
 
-    this.query.unions[unionIndex].classes.push(queryClass)
+    this.query.unions[unionIndex].classes.push(queryClass);
   }
 
   private addPropertyToQuery(
@@ -311,30 +311,30 @@ export class QueryBuilder {
     const queryJoin: ClassProperty = {
       name: propertyName,
       value: propertyValue,
-      needsQuote
-    }
+      needsQuote,
+    };
 
     const queryProperty: QueryProperty = {
       className,
       isCategory,
       isAspect,
-      classProperties: [queryJoin]
+      classProperties: [queryJoin],
     };
 
     if (this.query.unions.length <= unionIndex) {
       this.query.unions.push({
         classes: [],
-        properties: [queryProperty]
+        properties: [queryProperty],
       });
       return;
     }
 
-    const foundPropertyClass = this.query.unions[unionIndex].properties.find(p =>
+    const foundPropertyClass = this.query.unions[unionIndex].properties.find((p) =>
       p.className === className
     );
 
     if (foundPropertyClass) {
-      const foundJoin = foundPropertyClass?.classProperties.find(join =>
+      const foundJoin = foundPropertyClass?.classProperties.find((join) =>
         join.name === propertyName
       );
 
@@ -355,7 +355,7 @@ export class QueryBuilder {
     if (
       this.query === undefined ||
       this.query.unions.length === 0 ||
-      (this.query.unions.find(u => u.classes.length === 0 && u.properties.length === 0))
+      (this.query.unions.find((u) => u.classes.length === 0 && u.properties.length === 0))
     ) {
       return "";
     }
@@ -396,9 +396,9 @@ export class QueryBuilder {
         }
       }
 
-      const joinClauses: string[] = []
+      const joinClauses: string[] = [];
       for (const key of querySegments.keys()) {
-        joinClauses.push(`JOIN ${key} ON ${querySegments.get(key)?.join(" AND ")}`)
+        joinClauses.push(`JOIN ${key} ON ${querySegments.get(key)?.join(" AND ")}`);
       }
 
       const whereClause = `WHERE ${whereSegments.join(" AND ")}`;
@@ -428,10 +428,10 @@ export class QueryBuilder {
   private relationalJoinSegments = (classes: QueryClass[], querySegments: Map<string, string[]>): Map<string, string[]> => {
     for (const queryClass of classes) {
       for (const classJoin of queryClass.classJoins) {
-        var querySegment = [
+        const querySegment = [
           ...querySegments.get(classJoin.joinClassName) ?? [],
-          `${queryClass.className}.${classJoin.classProperty} = ${classJoin.joinClassName}.${classJoin.joinClassProperty}`
-        ]
+          `${queryClass.className}.${classJoin.classProperty} = ${classJoin.joinClassName}.${classJoin.joinClassProperty}`,
+        ];
         querySegments.set(classJoin.joinClassName, querySegment);
       }
     }
@@ -443,7 +443,7 @@ export class QueryBuilder {
     if (this.isFloat(property.value))
       return `ROUND(${className}.${property.name}, ` +
         `${QueryBuilder.DEFAULT_DOUBLE_PRECISION}) = ` +
-        `${Number(property.value).toFixed(QueryBuilder.DEFAULT_DOUBLE_PRECISION)}`
+        `${Number(property.value).toFixed(QueryBuilder.DEFAULT_DOUBLE_PRECISION)}`;
 
     const propertyValue = needsQuote ? `'${property.value}'` : property.value;
     return `${className}.${property.name} = ${propertyValue}`;
