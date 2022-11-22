@@ -52,17 +52,25 @@ export interface AddedProperty {
 
 /* This class is to build adaptive and dynamic query for find similar property selections */
 export class QueryBuilder {
-  public static readonly MULTI_ASPECT_PRIMARY_CLASS =
+  private static readonly MULTI_ASPECT_PRIMARY_CLASS =
     "BisCore:ElementOwnsMultiAspects";
-  public static readonly UNIQUE_ASPECT_PRIMARY_CLASS =
+  private static readonly UNIQUE_ASPECT_PRIMARY_CLASS =
     "BisCore:ElementOwnsUniqueAspect";
-  public static readonly DEFAULT_DOUBLE_PRECISION = 4;
+  private static readonly DEFAULT_DOUBLE_PRECISION = 4;
 
-  public dataProvider: PresentationPropertyDataProvider | undefined;
-  public query: Query | undefined;
+  private dataProvider: PresentationPropertyDataProvider | undefined;
+  private query: Query | undefined;
 
   constructor(provider: PresentationPropertyDataProvider | undefined) {
     this.dataProvider = provider;
+  }
+
+  public resetQuery = () => {
+    this.query = undefined;
+  }
+
+  public setDataProvider = (dataProvider: PresentationPropertyDataProvider | undefined) => {
+    this.dataProvider = dataProvider;
   }
 
   private isCategory(propertyField: PropertiesField): boolean {
@@ -74,7 +82,7 @@ export class QueryBuilder {
   private _propertyMap: Map<string, AddedProperty> = new Map();
 
   private regenerateQuery = () => {
-    this.query = undefined;
+    this.resetQuery();
 
     for (const property of this._propertyMap.values()) {
       this.buildProperty(property.propertyRecord, property.propertiesField);
@@ -259,7 +267,7 @@ export class QueryBuilder {
     joinClassName: string,
     joinClassProperty: string,
   ) {
-    if (this.query === undefined || this.query.unions.length === 0) {
+    if (this.query === undefined) {
       this.query = { unions: [] };
     }
 
@@ -308,7 +316,7 @@ export class QueryBuilder {
     isCategory: boolean,
     isAspect: boolean,
   ) {
-    if (this.query === undefined || this.query.unions.length === 0) {
+    if (this.query === undefined) {
       this.query = { unions: [] };
     }
 
@@ -358,7 +366,6 @@ export class QueryBuilder {
     this.regenerateQuery();
     if (
       this.query === undefined ||
-      this.query.unions.length === 0 ||
       (this.query.unions.find((u) => u.classes.length === 0 && u.properties.length === 0))
     ) {
       return "";

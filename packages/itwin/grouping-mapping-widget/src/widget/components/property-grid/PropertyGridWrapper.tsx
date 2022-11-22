@@ -37,7 +37,7 @@ PropertyGridWrapperState
       this.props.keys,
       this.props.imodel
     );
-    this.context.queryBuilder.dataProvider = dataProvider;
+    this.context.queryBuilder.setDataProvider(dataProvider);
 
     this.setState({ dataProvider });
   }
