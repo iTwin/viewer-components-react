@@ -2,17 +2,19 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import { FieldDescriptorType } from "@itwin/presentation-common";
 import type { QueryBuilderTestData } from "./QueryBuilderTestData";
 
 export const testCases: QueryBuilderTestData = {
   testCases: [
     {
       name: "when non-relational property added, return query string with property value",
-      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE A.B.somePropName = 1",
+      expectedResult: "SELECT A.B.ECInstanceId, A.B.ECClassId FROM A.B WHERE A.B.somePropName = 1",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -47,11 +49,12 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when relational property added, return query string with property value and relation chain to it",
-      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString'",
+      expectedResult: "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString'",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -130,11 +133,12 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when multiple relational properties added, return query string with property values and relation chains to them",
-      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN G.H ON Rel.BC.TargetECInstanceId = G.H.ECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE G.H.someOtherPropName = 'someOtherString' AND A.B.somePropName = 'someString'",
+      expectedResult: "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN G.H ON Rel.BC.TargetECInstanceId = G.H.ECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE G.H.someOtherPropName = 'someOtherString' AND A.B.somePropName = 'someString'",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -212,6 +216,7 @@ export const testCases: QueryBuilderTestData = {
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -290,11 +295,12 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when relational property and non-relational property from one of relational chain classes added, return query string with property values and relation chain",
-      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString' AND A.C.SomeOtherPropName = 1",
+      expectedResult: "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString' AND A.C.SomeOtherPropName = 1",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -302,7 +308,7 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
-              name: "propertyName",
+              name: "somePropName",
               displayLabel: "propertyDisplayLabel",
             },
           },
@@ -372,6 +378,7 @@ export const testCases: QueryBuilderTestData = {
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -379,7 +386,7 @@ export const testCases: QueryBuilderTestData = {
             },
             property: {
               typename: "notNavigation",
-              name: "propertyName2",
+              name: "SomeOtherPropName",
               displayLabel: "propertyDisplayLabel",
             },
           },
@@ -406,11 +413,12 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when relational and non-relational property from the same class added, return query string with property values and relation chain",
-      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString' AND A.B.SomeOtherPropName = 1",
+      expectedResult: "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someString' AND A.B.SomeOtherPropName = 1",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -488,6 +496,7 @@ export const testCases: QueryBuilderTestData = {
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -527,6 +536,7 @@ export const testCases: QueryBuilderTestData = {
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -562,6 +572,7 @@ export const testCases: QueryBuilderTestData = {
         },
         {
           operationType: "removeProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -604,6 +615,7 @@ export const testCases: QueryBuilderTestData = {
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -680,6 +692,7 @@ export const testCases: QueryBuilderTestData = {
         },
         {
           operationType: "removeProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -758,11 +771,12 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when non-relational property re-added after removing, return query string with property value",
-      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE A.B.somePropName = 'someOtherString'",
+      expectedResult: "SELECT A.B.ECInstanceId, A.B.ECClassId FROM A.B WHERE A.B.somePropName = 'someOtherString'",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -798,6 +812,7 @@ export const testCases: QueryBuilderTestData = {
         },
         {
           operationType: "removeProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -834,6 +849,7 @@ export const testCases: QueryBuilderTestData = {
         {
           operationType: "addProperty",
           expectedResult: true,
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -871,11 +887,12 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when relational property re-added after removing, return query string with property value and relation chain to it",
-      expectedResult: "SELECT Z.X.ECInstanceId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someOtherString'",
+      expectedResult: "SELECT Z.X.ECInstanceId, Z.X.ECClassId FROM Z.X JOIN Rel.CX ON Z.X.ECInstanceId = Rel.CX.TargetECInstanceId JOIN A.C ON Rel.CX.SourceECInstanceId = A.C.ECInstanceId JOIN Rel.BC ON A.C.ECInstanceId = Rel.BC.SourceECInstanceId JOIN A.B ON Rel.BC.TargetECInstanceId = A.B.ECInstanceId WHERE A.B.somePropName = 'someOtherString'",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -952,6 +969,7 @@ export const testCases: QueryBuilderTestData = {
         },
         {
           operationType: "removeProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -1029,6 +1047,7 @@ export const testCases: QueryBuilderTestData = {
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -1112,11 +1131,12 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when property is float, return query string with ROUND",
-      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE ROUND(A.B.somePropName, 4) = 3.1416",
+      expectedResult: "SELECT A.B.ECInstanceId, A.B.ECClassId FROM A.B WHERE ROUND(A.B.somePropName, 4) = 3.1416",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -1151,11 +1171,12 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when property needsQuotes, return query string with property value in quotes",
-      expectedResult: "SELECT A.B.ECInstanceId FROM A.B WHERE A.B.somePropName = 'https://valueThatNeedsQuotes.com'",
+      expectedResult: "SELECT A.B.ECInstanceId, A.B.ECClassId FROM A.B WHERE A.B.somePropName = 'https://valueThatNeedsQuotes.com'",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -1190,11 +1211,12 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when property is category, return a category query string",
-      expectedResult: "SELECT BisCore.B.ECInstanceId FROM BisCore.B JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id WHERE ((bis.Category.CodeValue = 'displayValueString') OR (bis.Category.UserLabel = 'displayValueString'))",
+      expectedResult: "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id WHERE ((bis.Category.CodeValue = 'displayValueString') OR (bis.Category.UserLabel = 'displayValueString'))",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,
@@ -1235,11 +1257,12 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when category property and relational property added, return query string with property value, relational chain and with category joined",
-      expectedResult: "SELECT BisCore.B.ECInstanceId FROM BisCore.B JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id WHERE ((bis.Category.CodeValue = 'displayValueString') OR (bis.Category.UserLabel = 'displayValueString'))",
+      expectedResult: "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id WHERE ((bis.Category.CodeValue = 'displayValueString') OR (bis.Category.UserLabel = 'displayValueString'))",
       operations: [
         {
           expectedResult: true,
           operationType: "addProperty",
+          fieldDescriptorType: FieldDescriptorType.Properties,
           propertyRecord: {
             value: {
               valueFormat: 0,

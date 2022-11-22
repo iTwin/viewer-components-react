@@ -104,7 +104,7 @@ export const PropertyView = (props: PropertyViewProps) => {
         context.setCurrentPropertyList(
           context.currentPropertyList.concat(prop)
         );
-        context.setQuery(await context.queryBuilder.buildQueryString());
+        context.setQuery(context.queryBuilder.buildQueryString());
       }
     },
     [context]
@@ -143,8 +143,8 @@ export const PropertyView = (props: PropertyViewProps) => {
         context.setCurrentPropertyList(
           context.currentPropertyList.filter((x: PropertyRecord) => x !== prop)
         );
-        context.queryBuilder.removeProperty(prop);
-        context.setQuery(await context.queryBuilder.buildQueryString());
+        await context.queryBuilder.removeProperty(prop);
+        context.setQuery(context.queryBuilder.buildQueryString());
       }
     },
     [context]

@@ -73,11 +73,11 @@ export class QueryBuilder {
 
   private _propertyMap: Map<string, AddedProperty> = new Map();
 
-  private regenerateQuery = async () => {
+  private regenerateQuery = () => {
     this.query = undefined;
 
     for (const property of this._propertyMap.values()) {
-      await this.buildProperty(property.propertyRecord, property.propertiesField);
+      this.buildProperty(property.propertyRecord, property.propertiesField);
     }
   }
 
@@ -102,15 +102,19 @@ export class QueryBuilder {
       return false;
     }
 
-    this._propertyMap.set(prop.property.name, { propertyRecord: prop, propertiesField: propertyField });
+    this._propertyMap.set(JSON.stringify(propertyField.getFieldDescriptor()), { propertyRecord: prop, propertiesField: propertyField });
     return true;
   }
 
-  public removeProperty(prop: PropertyRecord) {
-    this._propertyMap.delete(prop.property.name);
+  public async removeProperty(prop: PropertyRecord) {
+    const propertyField = (await this.dataProvider?.getFieldByPropertyRecord(
+      prop,
+    )) as PropertiesField;
+
+    this._propertyMap.delete(JSON.stringify(propertyField.getFieldDescriptor()));
   }
 
-  private async buildProperty(prop: PropertyRecord, propertiesField: PropertiesField) {
+  private buildProperty(prop: PropertyRecord, propertiesField: PropertiesField) {
     if (prop.value?.valueFormat !== PropertyValueFormat.Primitive || prop.value.value === undefined) {
       toaster.negative(
         "Error. An unexpected error has occured while building a query.",
@@ -350,8 +354,8 @@ export class QueryBuilder {
     this.query.unions[unionIndex].properties.push(queryProperty);
   }
 
-  public async buildQueryString() {
-    await this.regenerateQuery();
+  public buildQueryString() {
+    this.regenerateQuery();
     if (
       this.query === undefined ||
       this.query.unions.length === 0 ||
@@ -411,15 +415,15 @@ export class QueryBuilder {
 
   private selectClause(baseProperty: QueryProperty | undefined, baseClass: QueryClass | undefined) {
     if (baseClass) {
-      return `SELECT ${baseClass.className}.ECInstanceId FROM ${baseClass.className}`;
+      return `SELECT ${baseClass.className}.ECInstanceId, ${baseClass.className}.ECClassId FROM ${baseClass.className}`;
     }
 
     if (baseProperty) {
       const baseIdName = baseProperty.isAspect
-        ? `${baseProperty.className}.Element.id`
-        : `${baseProperty.className}.ECInstanceId`;
+        ? `${baseProperty.className}.Element.id ECInstanceId`
+        : `${baseProperty.className}.ECInstanceId, ${baseProperty.className}.ECClassId`;
 
-      return `SELECT ${baseIdName}${baseProperty.isAspect ? " ECInstanceId" : ""} FROM ${baseProperty.className}`;
+      return `SELECT ${baseIdName} FROM ${baseProperty.className}`;
     }
 
     return "";
