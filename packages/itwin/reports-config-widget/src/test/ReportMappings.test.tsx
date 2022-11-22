@@ -12,7 +12,6 @@ import type {
 } from "@itwin/core-frontend";
 import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
-import { setupServer } from "msw/node";
 import {
   render,
   screen,
@@ -22,12 +21,8 @@ import {
 } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import * as moq from "typemoq";
-import type { RequestHandler } from "msw";
-import { rest } from "msw";
 import type {
   ExtractionStatusSingle,
-  Mapping,
-  MappingCollection,
   MappingSingle,
   Report,
   ReportMappingCollection,
@@ -36,7 +31,8 @@ import {
   ExtractorState,
 } from "@itwin/insights-client";
 import { ReportMappings } from "../widget/components/ReportMappings";
-import { Constants, IModelState } from "@itwin/imodels-client-management";
+import type { GetSingleIModelParams, IModelOperations, OperationOptions } from "@itwin/imodels-client-management";
+import { IModelState } from "@itwin/imodels-client-management";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 import type {
   SelectionManager,
@@ -48,7 +44,6 @@ import {
 } from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
 import BulkExtractor from "../widget/components/BulkExtractor";
-
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -186,7 +181,7 @@ const mockReportMappingsFactory = (): ReportMappingCollection => {
 
 const mockMappingsFactory = (
   mockReportMappings: ReportMappingCollection
-): [MappingSingle[], RequestHandler[]] => {
+): MappingSingle[] => {
   const mockMappings: MappingSingle[] = mockReportMappings.mappings.map(
     (mapping, index) => ({
       mapping: {
@@ -208,33 +203,57 @@ const mockMappingsFactory = (
     })
   );
 
-  const iModelHandlers: RequestHandler[] = mockMappings.map((mapping) =>
-    rest.get(
-      `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mapping.mapping._links.imodel.href
-      }/mappings/${mapping.mapping.id}`,
-      async (_req, res, ctx) => {
-        return res(ctx.delay(), ctx.status(200), ctx.json(mapping));
-      }
-    )
-  );
-
-  return [mockMappings, iModelHandlers];
+  return mockMappings;
 };
 
 const connectionMock = moq.Mock.ofType<IModelConnection>();
 const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
 const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 
+jest.mock("../widget/components/Constants.ts", () => ({
+  STATUS_CHECK_INTERVAL: 10,
+}));
+
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
   useActiveIModelConnection: () => connectionMock.object,
 }));
 
-jest.mock('../widget/components/Constants.ts', () => ({
-  STATUS_CHECK_INTERVAL: 10,
+const mockIModelsClient = moq.Mock.ofType<IModelOperations<OperationOptions>>();
+
+jest.mock("@itwin/imodels-client-management", () => ({
+  ...jest.requireActual("@itwin/imodels-client-management"),
+  IModelsClient: jest.fn().mockImplementation(() => ({
+    iModels: mockIModelsClient.object,
+  })),
+  toArray: jest.fn().mockImplementation(async () => {
+    return mockProjectIModels.iModels;
+  }),
 }));
 
-const server = setupServer();
+const mockGetMapping = jest.fn();
+const mockGetMappings = jest.fn();
+const mockGetReportMappings = jest.fn();
+const mockDeleteReportMapping = jest.fn();
+const mockRunExtraction = jest.fn();
+const mockGetExtractionStatus = jest.fn();
+
+jest.mock("@itwin/insights-client", () => ({
+  ...jest.requireActual("@itwin/insights-client"),
+  MappingsClient: jest.fn().mockImplementation(() => ({
+    getMapping: mockGetMapping,
+    getMappings: mockGetMappings,
+  })),
+  ExtractionClient: jest.fn().mockImplementation(() => ({
+    runExtraction: () => mockRunExtraction(),
+    getExtractionStatus: () => mockGetExtractionStatus(),
+  })),
+  ReportsClient: jest.fn().mockImplementation(() => ({
+    getReportMappings: async () => mockGetReportMappings(),
+    deleteReportMapping: async () => mockDeleteReportMapping(),
+    createReportMapping: () => { },
+  })),
+}));
 
 beforeAll(async () => {
   // This is required by the i18n module within iTwin.js
@@ -265,57 +284,35 @@ beforeAll(async () => {
   Presentation.setSelectionManager(selectionManagerMock.object);
   await TestUtils.initializeUiFramework(connectionMock.object);
   await ReportsConfigWidget.initialize();
-  server.listen();
 });
 
 afterAll(() => {
   TestUtils.terminateUiFramework();
-  server.close();
 });
 
 afterEach(() => {
-  server.resetHandlers();
+  mockGetMapping.mockClear();
+  mockGetMappings.mockClear();
+  mockGetReportMappings.mockClear();
+  mockDeleteReportMapping.mockClear();
+  mockGetExtractionStatus.mockClear();
+  mockRunExtraction.mockClear();
 });
 
 describe("Report Mappings View", () => {
   it("shows all report mappings", async () => {
-    const mockReportMappings = mockReportMappingsFactory();
-    const [mockMappings, iModelHandlers] =
-      mockMappingsFactory(mockReportMappings);
 
-    server.use(
-      rest.get(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockReportMappings)
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId1}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[0])
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId2}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[1])
-          );
-        }
-      ),
-      ...iModelHandlers
-    );
+    const mockReportMappings = mockReportMappingsFactory();
+    const mockMappings = mockMappingsFactory(mockReportMappings);
+
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
+      .returns(async () => mockIModelsResponse[0].iModel);
+
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
+      .returns(async () => mockIModelsResponse[1].iModel);
+
+    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
+    mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
     render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />);
 
@@ -349,42 +346,15 @@ describe("Report Mappings View", () => {
 
   it("search for a report mapping", async () => {
     const mockReportMappings = mockReportMappingsFactory();
-    const [mockMappings, iModelHandlers] =
-      mockMappingsFactory(mockReportMappings);
+    const mockMappings = mockMappingsFactory(mockReportMappings);
 
-    server.use(
-      rest.get(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockReportMappings)
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId1}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[0])
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId2}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[1])
-          );
-        }
-      ),
-      ...iModelHandlers
-    );
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
+      .returns(async () => mockIModelsResponse[0].iModel);
+
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
+      .returns(async () => mockIModelsResponse[1].iModel);
+    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
+    mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
     const { user } = render(
       <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />
@@ -430,54 +400,28 @@ describe("Report Mappings View", () => {
 
   it("remove a report mapping", async () => {
     const mockReportMappings = mockReportMappingsFactory();
-    const [_, iModelHandlers] = mockMappingsFactory(mockReportMappings);
-
+    const mockMappings = mockMappingsFactory(mockReportMappings);
     const mockReportMappingsOriginalSize = mockReportMappings.mappings.length;
 
-    server.use(
-      rest.get(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockReportMappings)
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId1}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[0])
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId2}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[1])
-          );
-        }
-      ),
-      ...iModelHandlers,
-      rest.delete(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings/${mockReportMappings.mappings[0].mappingId
-        }`,
-        async (_req, res, ctx) => {
-          mockReportMappings.mappings = mockReportMappings.mappings.filter(
-            (mapping) =>
-              mapping.mappingId !== mockReportMappings.mappings[0].mappingId
-          );
-          return res(ctx.delay(100), ctx.status(204));
-        }
-      )
-    );
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
+      .returns(async () => mockIModelsResponse[0].iModel);
+
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
+      .returns(async () => mockIModelsResponse[1].iModel);
+
+    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
+    mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings).mockReturnValueOnce(mockReportMappings.mappings.filter(
+      (mapping) =>
+        mapping.mappingId !== mockReportMappings.mappings[0].mappingId
+    ));
+
+    mockDeleteReportMapping.mockImplementation(() => {
+      mockReportMappings.mappings = mockReportMappings.mappings.filter(
+        (mapping) =>
+          mapping.mappingId !== mockReportMappings.mappings[0].mappingId
+      );
+      return;
+    });
 
     const { user } = render(
       <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />
@@ -485,22 +429,35 @@ describe("Report Mappings View", () => {
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
+      .returns(async () => mockIModelsResponse[0].iModel);
+
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
+      .returns(async () => mockIModelsResponse[1].iModel);
+
+    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
+
     const removeButton = screen.getAllByTitle("Remove")[0];
     await user.click(removeButton);
     // Delete modal dialog should appear
     expect(screen.getByRole("dialog")).toBeInTheDocument();
 
-    const deleteButton = screen.getByRole("button", {
+    const modal = screen.getByRole("dialog");
+
+    const withinModal = within(modal);
+
+    const deleteButton = withinModal.getByRole("button", {
       name: /delete/i,
     });
 
     await user.click(deleteButton);
 
-    await waitForElementToBeRemoved(() =>
-      screen.getByTestId(/rcw-loading-delete/i)
-    );
     await waitForElementToBeRemoved(() => screen.getByRole("dialog"));
 
+    expect(mockDeleteReportMapping).toBeCalledTimes(1);
+    expect(mockReportMappings.mappings.length).toBe(mockReportMappingsOriginalSize - 1);
+
+    expect(mockGetReportMappings).toBeCalledTimes(2);
     // Should be one less mapping
     expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(
       mockReportMappingsOriginalSize - 1
@@ -509,8 +466,26 @@ describe("Report Mappings View", () => {
 
   it("add mapping", async () => {
     const mockReportMappings = mockReportMappingsFactory();
-    const [mockMappings, iModelHandlers] =
+    const mockMappings =
       mockMappingsFactory(mockReportMappings);
+
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
+      .returns(async () => mockIModelsResponse[0].iModel);
+
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
+      .returns(async () => mockIModelsResponse[1].iModel);
+
+    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
+    mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
+
+    mockIModelsClient.setup((x) => x.getMinimalList(moq.It.isAny()))
+      .returns(() => [] as any);
+
+    const { user } = render(
+      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />
+    );
+
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
     // Adding an extra unmapped mapping.
     const extraMappingId = faker.datatype.uuid();
@@ -535,81 +510,7 @@ describe("Report Mappings View", () => {
       },
     });
 
-    const mockMappingsResponse: MappingCollection = {
-      // Type guarding
-      mappings: mockMappings
-        .map((mapping) => mapping.mapping)
-        .filter((mapping): mapping is Mapping => !!mapping),
-      _links: {
-        next: undefined,
-        self: {
-          href: "",
-        },
-      },
-    };
-
-    server.use(
-      rest.get(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockReportMappings)
-          );
-        }
-      ),
-      rest.get(`${Constants.api.baseUrl}`, async (_req, res, ctx) => {
-        return res(ctx.delay(), ctx.status(200), ctx.json(mockProjectIModels));
-      }),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId1}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[0])
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId2}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[1])
-          );
-        }
-      ),
-      rest.get(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mockProjectIModels.iModels[0].id}/mappings`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockMappingsResponse)
-          );
-        }
-      ),
-      rest.post(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockReportMappings)
-          );
-        }
-      ),
-      ...iModelHandlers
-    );
-
-    const { user } = render(
-      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />
-    );
-
-    await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
+    mockGetMappings.mockReturnValueOnce(mockMappings.map((m: MappingSingle) => m.mapping));
 
     const addMappingButton = screen.getByRole("button", {
       name: /addmapping/i,
@@ -617,9 +518,6 @@ describe("Report Mappings View", () => {
 
     await user.click(addMappingButton);
 
-    await waitForElementToBeRemoved(() =>
-      screen.getByTestId(/rcw-action-loading-spinner/i)
-    );
     // Add modal dialog should appear
     const modal = screen.getByRole("dialog");
     expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -658,53 +556,12 @@ describe("Report Mappings View", () => {
     const enabledCheckbox = within(unmappedRow).getByRole("checkbox");
 
     await user.click(enabledCheckbox);
-
     await user.click(addButton);
-    // Modal should go away
-    await waitForElementToBeRemoved(() =>
-      screen.getByTestId(/rcw-action-loading-spinner/i)
-    );
+
     await waitForElementToBeRemoved(() => screen.getByRole("dialog"));
   });
 
   it("odata feed url", async () => {
-    const mockReportMappings = mockReportMappingsFactory();
-    const [_, iModelHandlers] = mockMappingsFactory(mockReportMappings);
-
-    server.use(
-      rest.get(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockReportMappings)
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId1}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[0])
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId2}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[1])
-          );
-        }
-      ),
-      ...iModelHandlers
-    );
-
     const { user } = render(
       <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />
     );
@@ -731,19 +588,11 @@ describe("Report Mappings View", () => {
 
   it("full extraction", async () => {
     const mockReportMappings = mockReportMappingsFactory();
-    const [_, iModelHandlers] = mockMappingsFactory(mockReportMappings);
+    const mockMappings = mockMappingsFactory(mockReportMappings);
 
     const delay = 1000;
 
-    // Faking timers currently makes all promise based queries from RTL become unpredictable.
-    // https://github.com/testing-library/dom-testing-library/issues/988
-    // Should come back to this later.
-    // Consequently, this test will be a bit slower.
-    // jest.useFakeTimers()
-
     Element.prototype.scrollIntoView = jest.fn();
-
-    const mockIModel = mockIModelsResponse[0].iModel;
     const mockRunId = faker.datatype.uuid();
 
     const mockExtractionResponse = {
@@ -757,7 +606,7 @@ describe("Report Mappings View", () => {
       },
     };
 
-    let mockStatusResponse: ExtractionStatusSingle = {
+    const mockStatusResponse: ExtractionStatusSingle = {
       status: {
         state: ExtractorState.Queued,
         reason: "",
@@ -770,59 +619,16 @@ describe("Report Mappings View", () => {
       },
     };
 
-    server.use(
-      rest.get(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports/${mockReportId}/datasources/imodelMappings`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockReportMappings)
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId1}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[0])
-          );
-        }
-      ),
-      rest.get(
-        `${Constants.api.baseUrl}/${mockIModelId2}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockIModelsResponse[1])
-          );
-        }
-      ),
-      ...iModelHandlers,
-      rest.post(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/imodels/${mockIModel.id}/extraction/run`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(800),
-            ctx.status(200),
-            ctx.json(mockExtractionResponse)
-          );
-        }
-      ),
-      rest.get(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/datasources/extraction/status/${mockRunId}`,
-        async (_req, res, ctx) => {
-          return res(
-            ctx.delay(),
-            ctx.status(200),
-            ctx.json(mockStatusResponse)
-          );
-        }
-      )
-    );
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
+      .returns(async () => mockIModelsResponse[0].iModel);
+
+    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
+      .returns(async () => mockIModelsResponse[1].iModel);
+
+    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
+    mockRunExtraction.mockReturnValueOnce(mockExtractionResponse.run);
+    mockGetExtractionStatus.mockReturnValue(mockStatusResponse.status);
+    mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
     render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />);
 
@@ -838,41 +644,21 @@ describe("Report Mappings View", () => {
     const startingStates = await screen.findAllByTitle(/starting/i);
     expect(startingStates).toHaveLength(1);
 
+    mockStatusResponse.status.state = ExtractorState.Queued;
+
     const queuedStates = await screen.findAllByTitle(/queued/i, undefined, {
       timeout: delay,
     });
     expect(queuedStates).toHaveLength(1);
 
-    mockStatusResponse = {
-      status: {
-        state: ExtractorState.Running,
-        reason: "",
-        containsIssues: false,
-        _links: {
-          logs: {
-            href: "",
-          },
-        },
-      },
-    };
+    mockStatusResponse.status.state = ExtractorState.Running;
 
     const runningStates = await screen.findAllByTitle(/running/i, undefined, {
       timeout: delay,
     });
     expect(runningStates).toHaveLength(1);
 
-    mockStatusResponse = {
-      status: {
-        state: ExtractorState.Succeeded,
-        reason: "",
-        containsIssues: false,
-        _links: {
-          logs: {
-            href: "",
-          },
-        },
-      },
-    };
+    mockStatusResponse.status.state = ExtractorState.Succeeded;
 
     const succeededStates = await screen.findAllByTitle(/success/i, undefined, {
       timeout: delay,

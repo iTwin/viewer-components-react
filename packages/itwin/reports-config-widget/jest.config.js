@@ -6,6 +6,12 @@ module.exports = {
   preset: 'ts-jest',
   testTimeout: 10000,
   testEnvironment: 'jsdom',
+  globals: {
+    'ts-jest': {
+      isolatedModules: true
+    }
+  },
+  moduleFileExtensions: ['tsx', 'ts', 'js', 'json'],
   transform: {
     "\\.(ts)$": ['ts-jest'],
   },
