@@ -44,6 +44,7 @@ import {
 } from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
 import BulkExtractor from "../widget/components/BulkExtractor";
+import { ExtractionStates } from "../widget/components/ExtractionStatus";
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -127,11 +128,6 @@ const mockReport: Report = {
   },
 };
 
-const mockApiConfig = {
-  getAccessToken: async () => "mockAccessToken",
-  baseUrl: REPORTS_CONFIG_BASE_URL,
-};
-
 const mockReportMappingsFactory = (): ReportMappingCollection => {
   return {
     mappings: [
@@ -205,8 +201,10 @@ const mockMappingsFactory = (
 };
 
 const connectionMock = moq.Mock.ofType<IModelConnection>();
+const mockBulkExtractor = moq.Mock.ofType<BulkExtractor>();
 const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
 const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
+const mockIModelsClient = moq.Mock.ofType<IModelOperations<OperationOptions>>();
 
 jest.mock("../widget/components/Constants.ts", () => ({
   STATUS_CHECK_INTERVAL: 10,
@@ -216,8 +214,6 @@ jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
   useActiveIModelConnection: () => connectionMock.object,
 }));
-
-const mockIModelsClient = moq.Mock.ofType<IModelOperations<OperationOptions>>();
 
 jest.mock("@itwin/imodels-client-management", () => ({
   ...jest.requireActual("@itwin/imodels-client-management"),
@@ -233,8 +229,6 @@ const mockGetMapping = jest.fn();
 const mockGetMappings = jest.fn();
 const mockGetReportMappings = jest.fn();
 const mockDeleteReportMapping = jest.fn();
-const mockRunExtraction = jest.fn();
-const mockGetExtractionStatus = jest.fn();
 const mockCreateReportMapping = jest.fn();
 
 jest.mock("@itwin/insights-client", () => ({
@@ -243,18 +237,12 @@ jest.mock("@itwin/insights-client", () => ({
     getMapping: mockGetMapping,
     getMappings: mockGetMappings,
   })),
-  ExtractionClient: jest.fn().mockImplementation(() => ({
-    runExtraction: mockRunExtraction,
-    getExtractionStatus: mockGetExtractionStatus,
-  })),
   ReportsClient: jest.fn().mockImplementation(() => ({
     getReportMappings: mockGetReportMappings,
     deleteReportMapping: mockDeleteReportMapping,
     createReportMapping: mockCreateReportMapping,
   })),
 }));
-
-const mockBulkExtractor = new BulkExtractor(mockApiConfig, []);
 
 beforeAll(async () => {
   // This is required by the i18n module within iTwin.js
@@ -296,14 +284,12 @@ afterEach(() => {
   mockGetMappings.mockReset();
   mockGetReportMappings.mockReset();
   mockDeleteReportMapping.mockReset();
-  mockGetExtractionStatus.mockReset();
-  mockRunExtraction.mockReset();
   mockIModelsClient.reset();
+  mockBulkExtractor.reset();
 });
 
 describe("Report Mappings View", () => {
   it("shows all report mappings", async () => {
-
     const mockReportMappings = mockReportMappingsFactory();
     const mockMappings = mockMappingsFactory(mockReportMappings);
 
@@ -316,7 +302,11 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />);
+    mockBulkExtractor
+      .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
+      .returns(() => ExtractionStates.None);
+
+    render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -358,8 +348,12 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
+    mockBulkExtractor
+      .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
+      .returns(() => ExtractionStates.None);
+
     const { user } = render(
-      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />
+      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -425,8 +419,12 @@ describe("Report Mappings View", () => {
       return;
     });
 
+    mockBulkExtractor
+      .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
+      .returns(() => ExtractionStates.None);
+
     const { user } = render(
-      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />
+      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -437,7 +435,7 @@ describe("Report Mappings View", () => {
     mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
       .returns(async () => mockIModelsResponse[1].iModel);
 
-    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping);
+    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
 
     const removeButton = screen.getAllByTitle("Remove")[0];
     await user.click(removeButton);
@@ -483,8 +481,12 @@ describe("Report Mappings View", () => {
     mockIModelsClient.setup((x) => x.getMinimalList(moq.It.isAny()))
       .returns(() => [] as any);
 
+    mockBulkExtractor
+      .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
+      .returns(() => ExtractionStates.None);
+
     const { user } = render(
-      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />
+      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -590,7 +592,7 @@ describe("Report Mappings View", () => {
 
   it("odata feed url", async () => {
     const { user } = render(
-      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />
+      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -620,31 +622,6 @@ describe("Report Mappings View", () => {
     const delay = 1000;
 
     Element.prototype.scrollIntoView = jest.fn();
-    const mockRunId = faker.datatype.uuid();
-
-    const mockExtractionResponse = {
-      run: {
-        id: mockRunId,
-        _links: {
-          status: {
-            href: "",
-          },
-        },
-      },
-    };
-
-    const mockStatusResponse: ExtractionStatusSingle = {
-      status: {
-        state: ExtractorState.Queued,
-        reason: "",
-        containsIssues: false,
-        _links: {
-          logs: {
-            href: "",
-          },
-        },
-      },
-    };
 
     mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
       .returns(async () => mockIModelsResponse[0].iModel);
@@ -652,12 +629,32 @@ describe("Report Mappings View", () => {
     mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
       .returns(async () => mockIModelsResponse[1].iModel);
 
+    mockBulkExtractor
+      .setup((x) => x.getIModelState(mockIModelId2, moq.It.isAny(), moq.It.isAny()))
+      .returns(() => ExtractionStates.None);
+
+    mockBulkExtractor
+      .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
+      .returns(() => ExtractionStates.Starting);
+
+    mockBulkExtractor
+      .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
+      .returns(() => ExtractionStates.Queued);
+
+    mockBulkExtractor
+      .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
+      .returns(() => ExtractionStates.Running);
+
+    mockBulkExtractor
+      .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
+      .returns(() => ExtractionStates.Succeeded);
+
+    mockBulkExtractor.setup((x) => x.runIModelExtraction(moq.It.isAny())).returns(async () => { });
+
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
-    mockRunExtraction.mockReturnValueOnce(mockExtractionResponse.run);
-    mockGetExtractionStatus.mockReturnValue(mockStatusResponse.status);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor} goBack={jest.fn()} />);
+    render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />);
 
     // https://github.com/testing-library/user-event/issues/833
     const user = userEvent.setup({ delay: null });
@@ -671,21 +668,15 @@ describe("Report Mappings View", () => {
     const startingStates = await screen.findAllByTitle(/starting/i);
     expect(startingStates).toHaveLength(1);
 
-    mockStatusResponse.status.state = ExtractorState.Queued;
-
     const queuedStates = await screen.findAllByTitle(/queued/i, undefined, {
       timeout: delay,
     });
     expect(queuedStates).toHaveLength(1);
 
-    mockStatusResponse.status.state = ExtractorState.Running;
-
     const runningStates = await screen.findAllByTitle(/running/i, undefined, {
       timeout: delay,
     });
     expect(runningStates).toHaveLength(1);
-
-    mockStatusResponse.status.state = ExtractorState.Succeeded;
 
     const succeededStates = await screen.findAllByTitle(/success/i, undefined, {
       timeout: delay,
