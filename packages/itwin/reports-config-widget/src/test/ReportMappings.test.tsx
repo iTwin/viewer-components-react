@@ -132,8 +132,6 @@ const mockApiConfig = {
   baseUrl: REPORTS_CONFIG_BASE_URL,
 };
 
-const mockBulkExtractor = new BulkExtractor(mockApiConfig, []);
-
 const mockReportMappingsFactory = (): ReportMappingCollection => {
   return {
     mappings: [
@@ -237,6 +235,7 @@ const mockGetReportMappings = jest.fn();
 const mockDeleteReportMapping = jest.fn();
 const mockRunExtraction = jest.fn();
 const mockGetExtractionStatus = jest.fn();
+const mockCreateReportMapping = jest.fn();
 
 jest.mock("@itwin/insights-client", () => ({
   ...jest.requireActual("@itwin/insights-client"),
@@ -245,15 +244,17 @@ jest.mock("@itwin/insights-client", () => ({
     getMappings: mockGetMappings,
   })),
   ExtractionClient: jest.fn().mockImplementation(() => ({
-    runExtraction: () => mockRunExtraction(),
-    getExtractionStatus: () => mockGetExtractionStatus(),
+    runExtraction: mockRunExtraction,
+    getExtractionStatus: mockGetExtractionStatus,
   })),
   ReportsClient: jest.fn().mockImplementation(() => ({
-    getReportMappings: async () => mockGetReportMappings(),
-    deleteReportMapping: async () => mockDeleteReportMapping(),
-    createReportMapping: () => { },
+    getReportMappings: mockGetReportMappings,
+    deleteReportMapping: mockDeleteReportMapping,
+    createReportMapping: mockCreateReportMapping,
   })),
 }));
+
+const mockBulkExtractor = new BulkExtractor(mockApiConfig, []);
 
 beforeAll(async () => {
   // This is required by the i18n module within iTwin.js
@@ -291,12 +292,13 @@ afterAll(() => {
 });
 
 afterEach(() => {
-  mockGetMapping.mockClear();
-  mockGetMappings.mockClear();
-  mockGetReportMappings.mockClear();
-  mockDeleteReportMapping.mockClear();
-  mockGetExtractionStatus.mockClear();
-  mockRunExtraction.mockClear();
+  mockGetMapping.mockReset();
+  mockGetMappings.mockReset();
+  mockGetReportMappings.mockReset();
+  mockDeleteReportMapping.mockReset();
+  mockGetExtractionStatus.mockReset();
+  mockRunExtraction.mockReset();
+  mockIModelsClient.reset();
 });
 
 describe("Report Mappings View", () => {
@@ -435,7 +437,7 @@ describe("Report Mappings View", () => {
     mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
       .returns(async () => mockIModelsResponse[1].iModel);
 
-    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
+    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping);
 
     const removeButton = screen.getAllByTitle("Remove")[0];
     await user.click(removeButton);
@@ -559,6 +561,31 @@ describe("Report Mappings View", () => {
     await user.click(addButton);
 
     await waitForElementToBeRemoved(() => screen.getByRole("dialog"));
+
+    const horizontalTiles = screen.getAllByTestId("horizontal-tile");
+
+    expect(horizontalTiles).toHaveLength(mockReportMappings.mappings.length);
+
+    for (const [index, horizontalTile] of horizontalTiles.entries()) {
+      const reportMappingTile = within(horizontalTile);
+      const mockiModel = mockIModelsResponse.find(
+        (iModel) =>
+          iModel.iModel.id === mockMappings[index].mapping._links.imodel.href
+      );
+      expect(
+        reportMappingTile.getByText(
+          mockMappings[index].mapping.mappingName
+        )
+      ).toBeInTheDocument();
+      expect(
+        reportMappingTile.getByTitle(
+          mockMappings[index].mapping.description ?? ""
+        )
+      ).toBeInTheDocument();
+      expect(
+        reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")
+      ).toBeInTheDocument();
+    }
   });
 
   it("odata feed url", async () => {
