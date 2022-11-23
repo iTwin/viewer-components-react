@@ -58,19 +58,15 @@ export class QueryBuilder {
     "BisCore:ElementOwnsUniqueAspect";
   private static readonly DEFAULT_DOUBLE_PRECISION = 4;
 
-  private dataProvider: PresentationPropertyDataProvider | undefined;
+  private dataProvider: PresentationPropertyDataProvider;
   private query: Query | undefined;
 
-  constructor(provider: PresentationPropertyDataProvider | undefined) {
+  constructor(provider: PresentationPropertyDataProvider) {
     this.dataProvider = provider;
   }
 
   public resetQuery = () => {
     this.query = undefined;
-  }
-
-  public setDataProvider = (dataProvider: PresentationPropertyDataProvider | undefined) => {
-    this.dataProvider = dataProvider;
   }
 
   private isCategory(propertyField: PropertiesField): boolean {
@@ -99,7 +95,7 @@ export class QueryBuilder {
       return false;
     }
 
-    const propertyField = (await this.dataProvider?.getFieldByPropertyRecord(
+    const propertyField = (await this.dataProvider.getFieldByPropertyRecord(
       prop,
     )) as PropertiesField;
 
@@ -115,7 +111,7 @@ export class QueryBuilder {
   }
 
   public async removeProperty(prop: PropertyRecord) {
-    const propertyField = (await this.dataProvider?.getFieldByPropertyRecord(
+    const propertyField = (await this.dataProvider.getFieldByPropertyRecord(
       prop,
     )) as PropertiesField;
 

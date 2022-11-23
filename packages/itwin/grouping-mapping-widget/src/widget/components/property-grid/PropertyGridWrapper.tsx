@@ -10,6 +10,7 @@ import { GroupQueryBuilderApi } from "../../../api/GroupQueryBuilderApi";
 import { PropertyGrid } from "./PropertyGrid";
 import "../GroupQueryBuilder.scss";
 import { GroupQueryBuilderContext } from "../context/GroupQueryBuilderContext";
+import { QueryBuilder } from "../QueryBuilder";
 
 interface PropertyGridWrapperState {
   dataProvider?: PresentationPropertyDataProvider;
@@ -37,7 +38,7 @@ PropertyGridWrapperState
       this.props.keys,
       this.props.imodel
     );
-    this.context.queryBuilder.setDataProvider(dataProvider);
+    this.context.setQueryBuilder(new QueryBuilder(dataProvider));
 
     this.setState({ dataProvider });
   }

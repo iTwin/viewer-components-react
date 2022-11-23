@@ -96,7 +96,7 @@ export const PropertyView = (props: PropertyViewProps) => {
         !context.currentPropertyList.includes(prop) &&
         prop.value.valueFormat === PropertyValueFormat.Primitive
       ) {
-        if (!(await context.queryBuilder.addProperty(prop))) {
+        if (!(await context.queryBuilder?.addProperty(prop))) {
           setIsCheckboxLoading(false);
           setIsPropertySelected(false);
           return;
@@ -104,7 +104,7 @@ export const PropertyView = (props: PropertyViewProps) => {
         context.setCurrentPropertyList(
           context.currentPropertyList.concat(prop)
         );
-        context.setQuery(context.queryBuilder.buildQueryString());
+        context.setQuery(context.queryBuilder?.buildQueryString() ?? "");
       }
     },
     [context]
@@ -143,8 +143,8 @@ export const PropertyView = (props: PropertyViewProps) => {
         context.setCurrentPropertyList(
           context.currentPropertyList.filter((x: PropertyRecord) => x !== prop)
         );
-        await context.queryBuilder.removeProperty(prop);
-        context.setQuery(context.queryBuilder.buildQueryString());
+        await context.queryBuilder?.removeProperty(prop);
+        context.setQuery(context.queryBuilder?.buildQueryString() ?? "");
       }
     },
     [context]

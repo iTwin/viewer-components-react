@@ -32,7 +32,7 @@ import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
-import { QueryBuilder } from "./QueryBuilder";
+import type { QueryBuilder } from "./QueryBuilder";
 import {
   transparentOverriddenElements,
   visualizeElementsByQuery,
@@ -74,9 +74,7 @@ const GroupAction = (props: GroupActionProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [currentPropertyList, setCurrentPropertyList] = useState<PropertyRecord[]>([]);
-  const [queryBuilder, setQueryBuilder] = useState<QueryBuilder>(
-    new QueryBuilder(undefined),
-  );
+  const [queryBuilder, setQueryBuilder] = useState<QueryBuilder>();
   const [queryGenerationType, setQueryGenerationType] = useState(
     props.queryGenerationType,
   );
@@ -210,7 +208,7 @@ const GroupAction = (props: GroupActionProps) => {
     iModelConnection,
   ]);
 
-  const createQueryBuilderComponent  = () => {
+  const createQueryBuilderComponent = () => {
     switch (queryGenerationType) {
       case "Selection": {
         return (

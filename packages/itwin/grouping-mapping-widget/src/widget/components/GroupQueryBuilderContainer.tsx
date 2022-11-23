@@ -45,7 +45,7 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
 
   const _onClickResetButton = () => {
     context.setQuery("");
-    context.queryBuilder.resetQuery();
+    context.queryBuilder?.resetQuery();
     context.setCurrentPropertyList([]);
     context.resetView().catch((e) =>
       /* eslint-disable no-console */

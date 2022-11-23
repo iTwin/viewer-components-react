@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import { QueryBuilder } from "../QueryBuilder";
+import type { QueryBuilder } from "../QueryBuilder";
 
 export interface PropertySelection {
   currentPropertyList: PropertyRecord[];
@@ -13,8 +13,8 @@ export interface PropertySelection {
   >;
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
-  queryBuilder: QueryBuilder;
-  setQueryBuilder: React.Dispatch<React.SetStateAction<QueryBuilder>>;
+  queryBuilder?: QueryBuilder;
+  setQueryBuilder: React.Dispatch<React.SetStateAction<QueryBuilder | undefined>>;
   isLoading: boolean;
   isRendering: boolean;
   resetView: () => Promise<void>;
@@ -24,8 +24,7 @@ export const GroupQueryBuilderContext = React.createContext<PropertySelection>({
   setCurrentPropertyList: () => [],
   query: "",
   setQuery: () => "",
-  queryBuilder: new QueryBuilder(undefined),
-  setQueryBuilder: () => new QueryBuilder(undefined),
+  setQueryBuilder: () => undefined,
   isLoading: false,
   isRendering: false,
   resetView: async () => { },
