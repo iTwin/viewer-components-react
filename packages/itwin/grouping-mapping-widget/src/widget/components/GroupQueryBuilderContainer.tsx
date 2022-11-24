@@ -29,7 +29,7 @@ export const GroupQueryBuilderContainer = ({ isUpdating, resetView, setQuery }: 
   const [keysState, setKeysState] = React.useState<KeySet>(new KeySet());
   const [selected, SetSelected] = React.useState<boolean>(false);
 
-  const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>();
+  const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder | undefined>();
   const [currentPropertyList, setCurrentPropertyList] = React.useState<PropertyRecord[]>([]);
 
   useEffect(() => {
