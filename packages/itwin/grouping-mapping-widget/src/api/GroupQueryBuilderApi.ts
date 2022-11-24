@@ -4,7 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import type { KeySet } from "@itwin/presentation-common";
 import type {
-  SelectionChangesListener} from "@itwin/presentation-frontend";
+  SelectionChangesListener,
+} from "@itwin/presentation-frontend";
 import {
   Presentation,
 } from "@itwin/presentation-frontend";
@@ -13,11 +14,6 @@ import {
   PresentationPropertyDataProvider,
 } from "@itwin/presentation-components";
 import type { IModelConnection } from "@itwin/core-frontend";
-
-export interface PropertyProps {
-  keys: KeySet;
-  imodel?: IModelConnection;
-}
 
 /* This class demonstrates the key APIs needed to access formatted property information
    suitable to present to end users. */

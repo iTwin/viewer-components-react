@@ -7,10 +7,9 @@ import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { ElementSeparator, Orientation } from "@itwin/core-react";
 import { ActionButtonList } from "@itwin/components-react";
-
 import "./PropertyView.scss";
 import type { SharedRendererProps } from "./PropertyRender";
-import { GroupQueryBuilderContext } from "../context/GroupQueryBuilderContext";
+import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
 import { useCallback } from "react";
 import { PropertyGridColumnStyleProvider } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
 import { Checkbox } from "@itwin/itwinui-react";
@@ -35,7 +34,7 @@ export interface PropertyViewProps extends SharedRendererProps {
  * @public
  */
 export const PropertyView = (props: PropertyViewProps) => {
-  const context = React.useContext(GroupQueryBuilderContext);
+  const context = React.useContext(PropertyGridWrapperContext);
   const [isCheckboxLoading, setIsCheckboxLoading] = React.useState(false);
 
   const _validatePropertySelection = () => {
@@ -186,7 +185,7 @@ export const PropertyView = (props: PropertyViewProps) => {
   React.useEffect(() => {
     if (props?.propertyRecord) {
       if (isPropertySelected) {
-        if (context.isRendering) {
+        if (context.isUpdating) {
           setIsCheckboxLoading(true);
         }
         _addNestedProperties(props.propertyRecord);
@@ -199,14 +198,14 @@ export const PropertyView = (props: PropertyViewProps) => {
     _removeNestedProperties,
     isPropertySelected,
     props.propertyRecord,
-    context.isRendering,
+    context.isUpdating,
   ]);
 
   React.useEffect(() => {
-    if (!context.isRendering) {
+    if (!context.isUpdating) {
       setIsCheckboxLoading(false);
     }
-  }, [context.isRendering]);
+  }, [context.isUpdating]);
 
   const _onPropertySelectionChanged = () => {
     setIsPropertySelected(!isPropertySelected);
@@ -299,8 +298,7 @@ export const PropertyView = (props: PropertyViewProps) => {
             checked={isPropertySelected}
             onChange={_onPropertySelectionChanged}
             disabled={
-              context.isLoading ||
-                context.isRendering ||
+              context.isUpdating ||
                 props.propertyRecord.value.value === undefined
             }
             isLoading={isCheckboxLoading}

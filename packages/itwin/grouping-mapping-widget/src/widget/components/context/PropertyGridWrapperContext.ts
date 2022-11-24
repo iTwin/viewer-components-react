@@ -11,21 +11,17 @@ export interface PropertySelection {
   setCurrentPropertyList: React.Dispatch<
   React.SetStateAction<PropertyRecord[]>
   >;
-  query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
   queryBuilder?: QueryBuilder;
   setQueryBuilder: React.Dispatch<React.SetStateAction<QueryBuilder | undefined>>;
-  isLoading: boolean;
-  isRendering: boolean;
+  isUpdating: boolean;
   resetView: () => Promise<void>;
 }
-export const GroupQueryBuilderContext = React.createContext<PropertySelection>({
+export const PropertyGridWrapperContext = React.createContext<PropertySelection>({
   currentPropertyList: [],
   setCurrentPropertyList: () => [],
-  query: "",
   setQuery: () => "",
   setQueryBuilder: () => undefined,
-  isLoading: false,
-  isRendering: false,
+  isUpdating: false,
   resetView: async () => { },
 });

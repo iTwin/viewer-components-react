@@ -26,7 +26,7 @@ import { PropertyList } from "./PropertyList";
 import "./PropertyGrid.scss";
 
 import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { GroupQueryBuilderContext } from "../context/GroupQueryBuilderContext";
+import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
 import { ProgressRadial } from "@itwin/itwinui-react";
 
 /** Properties for [[PropertyGrid]] React component
@@ -79,7 +79,7 @@ PropertyGridState
   private _isInDataRequest = false;
   private _hasPendingDataRequest = false;
 
-  static override contextType = GroupQueryBuilderContext;
+  static override contextType = PropertyGridWrapperContext;
 
   /** @internal */
   constructor(props: PropertyGridProps) {
@@ -130,7 +130,7 @@ PropertyGridState
       this.props.orientation !== prevProps.orientation ||
       this.props.isOrientationFixed !== prevProps.isOrientationFixed ||
       this.props.horizontalOrientationMinWidth !==
-        prevProps.horizontalOrientationMinWidth
+      prevProps.horizontalOrientationMinWidth
     ) {
       this.updateOrientation(this.state.width);
     }
@@ -282,7 +282,7 @@ PropertyGridState
                   "components-smallEditor-host"
                 )}
               >
-                <div className= "gmw-property-categories">
+                <div className="gmw-property-categories">
                   {this.state.categories.map(
                     (categorizedRecords: CategorizedPropertyGridRecords) => (
                       <NestedCategoryBlock

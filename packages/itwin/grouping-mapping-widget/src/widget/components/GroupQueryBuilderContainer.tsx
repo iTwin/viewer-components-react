@@ -10,17 +10,27 @@ import type {
 } from "@itwin/presentation-frontend";
 import { KeySet } from "@itwin/presentation-common";
 import { GroupQueryBuilderApi } from "../../api/GroupQueryBuilderApi";
-import { PropertyGridWrapperApp } from "./property-grid/PropertyGridWrapper";
-import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
+import { PropertyGridWrapper } from "./property-grid/PropertyGridWrapper";
+import { PropertyGridWrapperContext as PropertyGridWrapperContext } from "./context/PropertyGridWrapperContext";
 import { Button } from "@itwin/itwinui-react";
 import "./GroupQueryBuilder.scss";
+import type { QueryBuilder } from "./QueryBuilder";
+import type { PropertyRecord } from "@itwin/appui-abstract";
 
-export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
+export interface GroupQueryBuilderContainerProps {
+  setQuery: React.Dispatch<React.SetStateAction<string>>;
+  isUpdating: boolean;
+  resetView: () => (Promise<void>);
+}
+
+export const GroupQueryBuilderContainer = ({ isUpdating, resetView, setQuery }: GroupQueryBuilderContainerProps) => {
   const iModelConnection = useActiveIModelConnection();
-  const context = React.useContext(GroupQueryBuilderContext);
 
   const [keysState, setKeysState] = React.useState<KeySet>(new KeySet());
   const [selected, SetSelected] = React.useState<boolean>(false);
+
+  const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder>();
+  const [currentPropertyList, setCurrentPropertyList] = React.useState<PropertyRecord[]>([]);
 
   useEffect(() => {
     const _onSelectionChanged = async (
@@ -28,7 +38,7 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
       selectionProvider: ISelectionProvider
     ) => {
       SetSelected(true);
-      context.setCurrentPropertyList([]);
+      setCurrentPropertyList([]);
 
       const selection = selectionProvider.getSelection(evt.imodel, evt.level);
       const keys = new KeySet(selection);
@@ -41,13 +51,13 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
     return () => {
       GroupQueryBuilderApi.removeSelectionListener();
     };
-  }, [iModelConnection, context]);
+  }, [iModelConnection]);
 
   const _onClickResetButton = () => {
-    context.setQuery("");
-    context.queryBuilder?.resetQuery();
-    context.setCurrentPropertyList([]);
-    context.resetView().catch((e) =>
+    setQuery("");
+    queryBuilder?.resetQuery();
+    setCurrentPropertyList([]);
+    resetView().catch((e) =>
       /* eslint-disable no-console */
       console.error(e)
     );
@@ -55,7 +65,18 @@ export const GroupQueryBuilderContainer: React.FunctionComponent = () => {
 
   return (
     <div className="gmw-find-similar-container">
-      <PropertyGridWrapperApp keys={keysState} imodel={iModelConnection} />
+      <PropertyGridWrapperContext.Provider
+        value={{
+          currentPropertyList,
+          setCurrentPropertyList,
+          queryBuilder,
+          setQueryBuilder,
+          resetView,
+          setQuery,
+          isUpdating,
+        }}>
+        <PropertyGridWrapper keys={keysState} imodel={iModelConnection} />
+      </PropertyGridWrapperContext.Provider>
       {selected && (
         <div className="gmw-button-container">
           <Button

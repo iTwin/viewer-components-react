@@ -4,25 +4,30 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-
-import type { PropertyProps } from "../../../api/GroupQueryBuilderApi";
 import { GroupQueryBuilderApi } from "../../../api/GroupQueryBuilderApi";
 import { PropertyGrid } from "./PropertyGrid";
 import "../GroupQueryBuilder.scss";
-import { GroupQueryBuilderContext } from "../context/GroupQueryBuilderContext";
+import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
 import { QueryBuilder } from "../QueryBuilder";
+import type { KeySet } from "@itwin/presentation-common";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 interface PropertyGridWrapperState {
   dataProvider?: PresentationPropertyDataProvider;
 }
 
+interface PropertyProps {
+  keys: KeySet;
+  imodel?: IModelConnection;
+}
+
 /* This approach uses PresentationPropertyDataProvider to all the work of querying the backend and
    providing the content to the PropertyGrid component. */
-export class PropertyGridWrapperApp extends React.Component<
+export class PropertyGridWrapper extends React.Component<
 PropertyProps,
 PropertyGridWrapperState
 > {
-  static override contextType = GroupQueryBuilderContext;
+  static override contextType = PropertyGridWrapperContext;
   constructor(props: PropertyProps | Readonly<PropertyProps>) {
     super(props);
     this.state = {};
