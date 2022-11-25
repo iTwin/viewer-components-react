@@ -18,9 +18,8 @@ import {
   Text,
   toaster,
 } from "@itwin/itwinui-react";
-import type { JobCreation, Link } from "@itwin/insights-client";
-import { JobStatus } from "@itwin/insights-client";
-import { useEC3JobClient } from "./api/context/EC3JobClientContext";
+import { useEC3JobsClient } from "./api/context/EC3JobsClientContext";
+import { Link, EC3JobCreate, EC3Job, CarbonUploadState } from "@itwin/insights-client";
 
 interface ExportProps {
   projectName: string;
@@ -32,37 +31,37 @@ interface ExportProps {
 
 const ExportModal = (props: ExportProps) => {
   const PIN_INTERVAL = 1000;
-  const ec3JobClient = useEC3JobClient();
+  const ec3JobsClient = useEC3JobsClient();
 
-  const [jobStatus, setJobStatus] = useState<JobStatus.StatusEnum>();
+  const [jobStatus, setJobStatus] = useState<CarbonUploadState>();
   const [jobLink, setJobLink] = useState<Link>();
 
   const intervalRef = useRef<number>();
 
   const pinStatus = useCallback(
-    (job: JobCreation) => {
+    (job: EC3Job) => {
       const intervalId = window.setInterval(async () => {
         const token =
           (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
         if (job.id && token) {
           const currentJobStatus =
-            await ec3JobClient.getEC3JobStatus(token, job?.id);
-          if (currentJobStatus.job?.status) {
+            await ec3JobsClient.getEC3JobStatus(token, job.id);
+          if (currentJobStatus.status) {
             if (
-              currentJobStatus.job?.status === JobStatus.StatusEnum.Succeeded
+              currentJobStatus.status === CarbonUploadState.Succeeded
             ) {
-              setJobLink(currentJobStatus?.job._links?.ec3Project);
+              setJobLink(currentJobStatus._links.ec3Project);
             }
-            setJobStatus(currentJobStatus.job?.status);
+            setJobStatus(currentJobStatus.status);
           } else {
-            setJobStatus(JobStatus.StatusEnum.Failed);
+            setJobStatus(CarbonUploadState.Failed);
             toaster.negative("Failed to get job status. 😔");
           }
         }
       }, PIN_INTERVAL);
       intervalRef.current = intervalId;
     },
-    [setJobLink, setJobStatus, ec3JobClient]
+    [setJobLink, setJobStatus, ec3JobsClient]
   );
 
   const runJob = useCallback(
@@ -71,30 +70,33 @@ const ExportModal = (props: ExportProps) => {
         (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       if (props.templateId && token) {
         try {
-          const jobCreated = await ec3JobClient.createJob(
+          const jobRequest: EC3JobCreate = {
+            configurationId: props.templateId,
+            projectName: props.projectName,
+            ec3BearerToken: token,
+          }
+          const jobCreated = await ec3JobsClient.createJob(
             accessToken,
-            token,
-            props.templateId,
-            props.projectName
+            jobRequest
           );
-          if (jobCreated?.job?.id) {
-            pinStatus(jobCreated?.job);
+          if (jobCreated.id) {
+            pinStatus(jobCreated);
           } else {
-            setJobStatus(JobStatus.StatusEnum.Failed);
+            setJobStatus(CarbonUploadState.Failed);
             toaster.negative("Failed to create EC3 job. 😔");
           }
         } catch (e) {
-          setJobStatus(JobStatus.StatusEnum.Failed);
+          setJobStatus(CarbonUploadState.Failed);
           toaster.negative("You do not have the required permissions. Please contact the project administrator.");
           /* eslint-disable no-console */
           console.error(e);
         }
       } else {
-        setJobStatus(JobStatus.StatusEnum.Failed);
+        setJobStatus(CarbonUploadState.Failed);
         toaster.negative("Invalid reportId.");
       }
     },
-    [props, pinStatus, ec3JobClient]
+    [props, pinStatus, ec3JobsClient]
   );
 
   const onClose = useCallback(() => {
@@ -105,9 +107,9 @@ const ExportModal = (props: ExportProps) => {
   }, [props]);
 
   const getStatusComponent = useCallback(
-    (status: JobStatus.StatusEnum, link: string | undefined) => {
+    (status: CarbonUploadState, link: string | undefined) => {
       switch (status) {
-        case JobStatus.StatusEnum.Queued:
+        case CarbonUploadState.Queued:
           return (
             <div className="ec3w-progress-radial-container">
               <ProgressRadial indeterminate size="small" value={50} />
@@ -116,7 +118,7 @@ const ExportModal = (props: ExportProps) => {
               </Text>
             </div>
           );
-        case JobStatus.StatusEnum.Running:
+        case CarbonUploadState.Running:
           return (
             <div className="ec3w-progress-linear-container">
               <ProgressLinear indeterminate />
@@ -125,7 +127,7 @@ const ExportModal = (props: ExportProps) => {
               </Text>
             </div>
           );
-        case JobStatus.StatusEnum.Succeeded:
+        case CarbonUploadState.Succeeded:
           return (
             link && (
               <div className="ec3w-progress-radial-container">
@@ -141,7 +143,7 @@ const ExportModal = (props: ExportProps) => {
               </div>
             )
           );
-        case JobStatus.StatusEnum.Failed:
+        case CarbonUploadState.Failed:
           return (
             <div className="ec3w-progress-radial-container">
               <ProgressRadial status="negative" size="small" value={100} />
@@ -164,7 +166,7 @@ const ExportModal = (props: ExportProps) => {
   useEffect(() => {
     if (props.isOpen && props.token) {
       runJob(props.token).catch((err) => {
-        setJobStatus(JobStatus.StatusEnum.Failed);
+        setJobStatus(CarbonUploadState.Failed);
         toaster.negative("Error occurs while running the job. 😔");
         /* eslint-disable no-console */
         console.error(err);
@@ -174,8 +176,8 @@ const ExportModal = (props: ExportProps) => {
 
   useEffect(() => {
     if (
-      jobStatus === JobStatus.StatusEnum.Succeeded ||
-      jobStatus === JobStatus.StatusEnum.Failed
+      jobStatus === CarbonUploadState.Succeeded ||
+      jobStatus === CarbonUploadState.Failed
     ) {
       if (intervalRef.current) {
         window.clearInterval(intervalRef.current);

@@ -7,11 +7,11 @@ import type { SelectOption } from "@itwin/itwinui-react";
 import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import type { Report } from "@itwin/insights-client";
+import type { EC3ConfigurationCreate, EC3ConfigurationUpdate, Report } from "@itwin/insights-client";
 import { handleSelectChange, WidgetHeader } from "./utils";
 import ExportModal from "./ExportModal";
 import LabelAction from "./LabelAction";
-import type { Configuration, Label as EC3Label } from "./Template";
+import { Configuration, convertConfigurationCreate, convertConfigurationUpdate, Label as EC3Label } from "./Template";
 import { LabelTile } from "./LabelTile";
 import DeleteModal from "./DeleteModal";
 import { handleInputChange } from "./utils";
@@ -32,7 +32,7 @@ import React from "react";
 import type { EC3TokenCache } from "./EC3/EC3TokenCache";
 import type { EC3Config } from "./EC3/EC3Config";
 import { useReportsClient } from "./api/context/ReportsClientContext";
-import { useEC3ConfigurationClient } from "./api/context/EC3ConfigurationClientContext";
+import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
 
 interface TemplateProps {
   template?: Configuration;
@@ -57,7 +57,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
   const [selectedReport, setSelectedReport] = useState<string>();
   const [modalIsOpen, openModal] = useState(false);
   const [availableReports, setReports] = useState<Report[]>([]);
-  const configurationClient = useEC3ConfigurationClient();
+  const configurationsClient = useEC3ConfigurationsClient();
   const [childTemplate, setChildTemplate] = useState<Configuration>({
     reportId: "",
     description: "",
@@ -71,18 +71,21 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
 
   const onSave = async () => {
     let response;
-    if (childTemplate.id)
-      response = await configurationClient.updateConfiguration(childTemplate);
-    else
-      response = await configurationClient.createConfiguration(childTemplate);
+    try {
+      const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+      if (childTemplate.id) {
+        response = await configurationsClient.updateConfiguration(token, childTemplate.id, convertConfigurationUpdate(childTemplate));
+      }
+      else {
+        response = await configurationsClient.createConfiguration(token, convertConfigurationCreate(childTemplate));
+      }
 
-    if (!response.ok) {
-      toaster.negative("Saving failed");
-      // eslint-disable-next-line
-      console.log(response.statusText);
-    } else {
       toaster.positive("Saved successfully!");
       void goBack();
+    } catch (e) {
+      toaster.negative("Saving failed");
+      // eslint-disable-next-line
+      console.log(e);
     }
   };
 
@@ -95,11 +98,17 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
 
     const fetchReports = async () => {
       if (template) {
-        const configResponse = await configurationClient.getConfiguration(template.id!);
-        const configuration = configResponse.configuration;
+        const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+        const configuration = await configurationsClient.getConfiguration(token, template.id!);
         const reportId = configuration._links.report.href.split("/reports/")[1];
-        configuration.reportId = reportId;
-        setChildTemplate(configuration);
+        const childConfig: Configuration = {
+          displayName: configuration.displayName,
+          description: configuration.description ?? "",
+          reportId: reportId,
+          id: configuration.id,
+          labels: configuration.labels,
+        }
+        setChildTemplate(childConfig);
       }
 
       if (!IModelApp.authorizationClient)
@@ -123,7 +132,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
       }
     };
     void fetchReports();
-  }, [projectId, template, reportingClientApi, configurationClient]);
+  }, [projectId, template, reportingClientApi, configurationsClient]);
 
   const addLabel = () => {
     setLabelsView(LabelView.ADD);

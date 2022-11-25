@@ -2,12 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { IReportsClient } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
+import { IReportsClient, ReportsClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 
+export const BASE_PATH = "https://api.bentley.com/insights/reporting";
+
 const prefixUrl = (prefix: string) => {
-  return REPORTING_BASE_PATH.replace("api.bentley.com", `${prefix}-api.bentley.com`);
+  return BASE_PATH.replace("api.bentley.com", `${prefix}-api.bentley.com`);
 };
 
 export const createDefaultReportsClient = (prefix?: string): IReportsClient => {

@@ -19,7 +19,8 @@ import { HorizontalTile } from "./HorizontalTile";
 import React from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { EC3Props } from "./EC3";
-import { useEC3ConfigurationClient } from "./api/context/EC3ConfigurationClientContext";
+import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
+import { IModelApp } from "@itwin/core-frontend";
 
 enum TemplateView {
   TEMPLATES = "templates",
@@ -34,7 +35,7 @@ const Templates = ({ config }: EC3Props) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Configuration>();
   const [searchValue, setSearchValue] = useState<string>("");
-  const configClient = useEC3ConfigurationClient();
+  const configClient = useEC3ConfigurationsClient();
   const [templateView, setTemplateView] = useState<TemplateView>(
     TemplateView.TEMPLATES
   );
@@ -42,8 +43,18 @@ const Templates = ({ config }: EC3Props) => {
   const load = useCallback(async () => {
     setIsLoading(true);
     if (iTwinId) {
-      const templatesResponse = await configClient.getConfigurations(iTwinId);
-      setTemplates(templatesResponse.configurations);
+      const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+      const templatesResponse = await configClient.getConfigurations(token, iTwinId);
+      const templates: Configuration[] = templatesResponse.map((x) => {
+        return {
+          displayName: x.displayName,
+          description: x.description ?? "",
+          id: x.id,
+          labels: x.labels,
+          reportId: x._links.report.href.split("/reports/")[1],
+        };
+      })
+      setTemplates(templates);
     } else {
       toaster.negative("Invalid iTwinId");
     }
@@ -174,7 +185,8 @@ const Templates = ({ config }: EC3Props) => {
             setShow={setShowDeleteModal}
             onDelete={async () => {
               if (selectedTemplate && selectedTemplate.id) {
-                await configClient.deleteConfiguration(selectedTemplate.id);
+                const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+                await configClient.deleteConfiguration(token, selectedTemplate.id);
               }
             }}
             refresh={refresh}

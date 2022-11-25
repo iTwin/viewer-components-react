@@ -144,7 +144,7 @@ importers:
       '@itwin/core-react': ^3.2.0
       '@itwin/eslint-plugin': ^3.2.0
       '@itwin/imodel-components-react': ^3.2.0
-      '@itwin/insights-client': ^0.3.0
+      '@itwin/insights-client': ^0.3.3
       '@itwin/itwinui-icons-react': ^1.7.0
       '@itwin/itwinui-react': ^1.42.0
       '@itwin/presentation-common': ^3.2.0
@@ -174,7 +174,7 @@ importers:
       typemoq: ^2.1.0
       typescript: ~4.3.0
     dependencies:
-      '@itwin/insights-client': 0.3.0
+      '@itwin/insights-client': 0.3.3
       '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.42.0_react-dom@17.0.2+react@17.0.2
       simple-react-validator: 1.6.1
@@ -3280,6 +3280,15 @@ packages:
 
   /@itwin/insights-client/0.3.0:
     resolution: {integrity: sha512-QiulW7EeOab9qy5jKGZDEmeN3VmEx5dZ1DYAJbgdQDit+4eSFW/1jpmD2X8ZGADoW//FdI5dY+wTPaqrQACb9Q==}
+    dependencies:
+      cross-fetch: 3.1.5
+      fast-xml-parser: 4.0.9
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /@itwin/insights-client/0.3.3:
+    resolution: {integrity: sha512-7711WMafoBuALKHMLZAYuwbxrbIVjsjJVdMX57NSS2AajSsX4EVnmPKgfPL/RMuWW+xH4Vwm7AbIBPleKFtFfw==}
     dependencies:
       cross-fetch: 3.1.5
       fast-xml-parser: 4.0.9
