@@ -3,8 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
-import { GroupQueryBuilderApi } from "../../../api/GroupQueryBuilderApi";
+import { DEFAULT_PROPERTY_GRID_RULESET, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { PropertyGrid } from "./PropertyGrid";
 import "../GroupQueryBuilder.scss";
 import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
@@ -33,13 +32,23 @@ PropertyGridWrapperState
     this.state = {};
   }
 
+  private createPropertyDataProvider = (keys: KeySet, imodel: IModelConnection): PresentationPropertyDataProvider => {
+    const dataProvider = new PresentationPropertyDataProvider({
+      imodel,
+      ruleset: DEFAULT_PROPERTY_GRID_RULESET,
+    });
+    dataProvider.keys = keys;
+    dataProvider.isNestedPropertyCategoryGroupingEnabled = true;
+    return dataProvider;
+  }
+
   private createDataProvider() {
     if (!this.props.imodel || this.props.keys.isEmpty) {
       this.setState({ dataProvider: undefined });
       return;
     }
 
-    const dataProvider = GroupQueryBuilderApi.createPropertyDataProvider(
+    const dataProvider = this.createPropertyDataProvider(
       this.props.keys,
       this.props.imodel
     );

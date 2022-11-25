@@ -384,9 +384,9 @@ export class QueryBuilder {
       for (const property of union.properties) {
         if (property.isCategory) {
           if (property.className !== baseClassName)
-            querySegments.set("bis.GeometricElement3d", [`bis.GeometricElement3d.ECInstanceId = ${baseIdName}`]);
+            querySegments.set("BisCore.GeometricElement3d", [`BisCore.GeometricElement3d.ECInstanceId = ${baseIdName}`]);
 
-          querySegments.set("bis.Category", [`bis.Category.ECInstanceId = bis.GeometricElement3d.category.id`]);
+          querySegments.set("BisCore.Category", [`BisCore.Category.ECInstanceId = BisCore.GeometricElement3d.category.id`]);
           whereSegments.push(this.categoryWhereQuery(property.classProperties[0].value.toString()));
           continue;
         }
@@ -457,7 +457,7 @@ export class QueryBuilder {
   }
 
   private categoryWhereQuery(codeValue: string): string {
-    return `((bis.Category.CodeValue = '${codeValue}') OR (bis.Category.UserLabel = '${codeValue}'))`;
+    return `((BisCore.Category.CodeValue = '${codeValue}') OR (BisCore.Category.UserLabel = '${codeValue}'))`;
   }
 
   private isFloat(n: unknown): boolean {

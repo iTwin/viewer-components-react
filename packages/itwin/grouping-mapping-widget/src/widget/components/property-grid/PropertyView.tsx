@@ -2,18 +2,19 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import * as React from "react";
+import React from "react";
+import { useEffect, useState } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { ElementSeparator, Orientation } from "@itwin/core-react";
 import { ActionButtonList } from "@itwin/components-react";
 import "./PropertyView.scss";
 import type { SharedRendererProps } from "./PropertyRender";
-import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
 import { useCallback } from "react";
 import { PropertyGridColumnStyleProvider } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
 import { Checkbox } from "@itwin/itwinui-react";
 import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
+import { usePropertyGridWrapper } from "../context/PropertyGridWrapperContext";
 
 /** Properties of [[PropertyView]] React component
  * @public
@@ -34,11 +35,17 @@ export interface PropertyViewProps extends SharedRendererProps {
  * @public
  */
 export const PropertyView = (props: PropertyViewProps) => {
-  const context = React.useContext(PropertyGridWrapperContext);
-  const [isCheckboxLoading, setIsCheckboxLoading] = React.useState(false);
+  const [isCheckboxLoading, setIsCheckboxLoading] = useState(false);
+  const {
+    currentPropertyList,
+    queryBuilder,
+    setCurrentPropertyList,
+    setQuery,
+    isUpdating,
+  } = usePropertyGridWrapper();
 
   const _validatePropertySelection = () => {
-    if (context.currentPropertyList.includes(props.propertyRecord)) {
+    if (currentPropertyList.includes(props.propertyRecord)) {
       return true;
     }
     // Check if all subproperties are selected
@@ -51,13 +58,13 @@ export const PropertyView = (props: PropertyViewProps) => {
   const _validateNestedPropertiesSelection = (prop: PropertyRecord) => {
     switch (prop.value.valueFormat) {
       case PropertyValueFormat.Primitive:
-        if (!context.currentPropertyList.includes(prop)) {
+        if (!currentPropertyList.includes(prop)) {
           return false;
         }
         break;
       case PropertyValueFormat.Array:
         if (prop.value.items.length === 0) {
-          if (!context.currentPropertyList.includes(prop)) {
+          if (!currentPropertyList.includes(prop)) {
             return false;
           }
         }
@@ -83,8 +90,8 @@ export const PropertyView = (props: PropertyViewProps) => {
     return true;
   };
 
-  const [isHovered, setIsHovered] = React.useState<boolean>(false);
-  const [isPropertySelected, setIsPropertySelected] = React.useState<boolean>(
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isPropertySelected, setIsPropertySelected] = useState<boolean>(
     _validatePropertySelection()
   );
 
@@ -92,21 +99,21 @@ export const PropertyView = (props: PropertyViewProps) => {
     async (prop: PropertyRecord) => {
       // TODO: roof selected item/category value is an object but format is primitive(needs further exploration)
       if (
-        !context.currentPropertyList.includes(prop) &&
+        !currentPropertyList.includes(prop) &&
         prop.value.valueFormat === PropertyValueFormat.Primitive
       ) {
-        if (!(await context.queryBuilder?.addProperty(prop))) {
+        if (!(await queryBuilder?.addProperty(prop))) {
           setIsCheckboxLoading(false);
           setIsPropertySelected(false);
           return;
         }
-        context.setCurrentPropertyList(
-          context.currentPropertyList.concat(prop)
+        setCurrentPropertyList(
+          currentPropertyList.concat(prop)
         );
-        context.setQuery(context.queryBuilder?.buildQueryString() ?? "");
+        setQuery(queryBuilder?.buildQueryString() ?? "");
       }
     },
-    [context]
+    [currentPropertyList, queryBuilder, setCurrentPropertyList, setQuery]
   );
 
   const _addNestedProperties = useCallback(
@@ -138,15 +145,15 @@ export const PropertyView = (props: PropertyViewProps) => {
 
   const _removeSelectedProperty = useCallback(
     async (prop: PropertyRecord): Promise<void> => {
-      if (context.currentPropertyList.includes(prop)) {
-        context.setCurrentPropertyList(
-          context.currentPropertyList.filter((x: PropertyRecord) => x !== prop)
+      if (currentPropertyList.includes(prop)) {
+        setCurrentPropertyList(
+          currentPropertyList.filter((x: PropertyRecord) => x !== prop)
         );
-        await context.queryBuilder?.removeProperty(prop);
-        context.setQuery(context.queryBuilder?.buildQueryString() ?? "");
+        await queryBuilder?.removeProperty(prop);
+        setQuery(queryBuilder?.buildQueryString() ?? "");
       }
     },
-    [context]
+    [currentPropertyList, queryBuilder, setCurrentPropertyList, setQuery]
   );
 
   const _removeNestedProperties = useCallback(
@@ -176,16 +183,16 @@ export const PropertyView = (props: PropertyViewProps) => {
     [_removeSelectedProperty]
   );
 
-  React.useEffect(() => {
-    if (!context.currentPropertyList.includes(props.propertyRecord)) {
+  useEffect(() => {
+    if (!currentPropertyList.includes(props.propertyRecord)) {
       setIsPropertySelected(false);
     }
-  }, [context.currentPropertyList, props.propertyRecord]);
+  }, [currentPropertyList, props.propertyRecord]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (props?.propertyRecord) {
       if (isPropertySelected) {
-        if (context.isUpdating) {
+        if (isUpdating) {
           setIsCheckboxLoading(true);
         }
         _addNestedProperties(props.propertyRecord);
@@ -198,14 +205,14 @@ export const PropertyView = (props: PropertyViewProps) => {
     _removeNestedProperties,
     isPropertySelected,
     props.propertyRecord,
-    context.isUpdating,
+    isUpdating,
   ]);
 
-  React.useEffect(() => {
-    if (!context.isUpdating) {
+  useEffect(() => {
+    if (!isUpdating) {
       setIsCheckboxLoading(false);
     }
-  }, [context.isUpdating]);
+  }, [isUpdating]);
 
   const _onPropertySelectionChanged = () => {
     setIsPropertySelected(!isPropertySelected);
@@ -298,7 +305,7 @@ export const PropertyView = (props: PropertyViewProps) => {
             checked={isPropertySelected}
             onChange={_onPropertySelectionChanged}
             disabled={
-              context.isUpdating ||
+              isUpdating ||
                 props.propertyRecord.value.value === undefined
             }
             isLoading={isCheckboxLoading}

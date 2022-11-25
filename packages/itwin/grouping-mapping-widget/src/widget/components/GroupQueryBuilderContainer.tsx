@@ -2,42 +2,35 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import type {
-  ISelectionProvider,
-  SelectionChangeEventArgs,
-} from "@itwin/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
+import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import { KeySet } from "@itwin/presentation-common";
-import { GroupQueryBuilderApi } from "../../api/GroupQueryBuilderApi";
 import { PropertyGridWrapper } from "./property-grid/PropertyGridWrapper";
-import { PropertyGridWrapperContext as PropertyGridWrapperContext } from "./context/PropertyGridWrapperContext";
+import { PropertyGridWrapperContext } from "./context/PropertyGridWrapperContext";
 import { Button } from "@itwin/itwinui-react";
 import "./GroupQueryBuilder.scss";
 import type { QueryBuilder } from "./QueryBuilder";
 import type { PropertyRecord } from "@itwin/appui-abstract";
+import type { GroupingCustomUIProps } from "./customUI/GroupingMappingCustomUI";
+import React from "react";
 
-export interface GroupQueryBuilderContainerProps {
-  setQuery: React.Dispatch<React.SetStateAction<string>>;
-  isUpdating: boolean;
-  resetView: () => (Promise<void>);
-}
-
-export const GroupQueryBuilderContainer = ({ isUpdating, resetView, setQuery }: GroupQueryBuilderContainerProps) => {
+export const GroupQueryBuilderContainer = ({ isUpdating, resetView, updateQuery }: GroupingCustomUIProps) => {
   const iModelConnection = useActiveIModelConnection();
 
-  const [keysState, setKeysState] = React.useState<KeySet>(new KeySet());
-  const [selected, SetSelected] = React.useState<boolean>(false);
+  const [keysState, setKeysState] = useState<KeySet>(new KeySet());
+  const [selected, setSelected] = useState<boolean>(false);
 
-  const [queryBuilder, setQueryBuilder] = React.useState<QueryBuilder | undefined>();
-  const [currentPropertyList, setCurrentPropertyList] = React.useState<PropertyRecord[]>([]);
+  const [queryBuilder, setQueryBuilder] = useState<QueryBuilder | undefined>();
+  const [currentPropertyList, setCurrentPropertyList] = useState<PropertyRecord[]>([]);
 
   useEffect(() => {
     const _onSelectionChanged = async (
       evt: SelectionChangeEventArgs,
       selectionProvider: ISelectionProvider
     ) => {
-      SetSelected(true);
+      setSelected(true);
       setCurrentPropertyList([]);
 
       const selection = selectionProvider.getSelection(evt.imodel, evt.level);
@@ -45,19 +38,16 @@ export const GroupQueryBuilderContainer = ({ isUpdating, resetView, setQuery }: 
       setKeysState(keys);
     };
 
-    if (iModelConnection) {
-      GroupQueryBuilderApi.addSelectionListener(_onSelectionChanged);
-    }
-    return () => {
-      GroupQueryBuilderApi.removeSelectionListener();
-    };
+    return iModelConnection
+      ? Presentation.selection.selectionChange.addListener(_onSelectionChanged) :
+      () => { };
   }, [iModelConnection]);
 
-  const _onClickResetButton = () => {
-    setQuery("");
+  const _onClickResetButton = async () => {
+    updateQuery("");
     queryBuilder?.resetQuery();
     setCurrentPropertyList([]);
-    resetView().catch((e) =>
+    await resetView().catch((e) =>
       /* eslint-disable no-console */
       console.error(e)
     );
@@ -72,7 +62,7 @@ export const GroupQueryBuilderContainer = ({ isUpdating, resetView, setQuery }: 
           queryBuilder,
           setQueryBuilder,
           resetView,
-          setQuery,
+          setQuery: updateQuery,
           isUpdating,
         }}>
         <PropertyGridWrapper keys={keysState} imodel={iModelConnection} />

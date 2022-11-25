@@ -201,7 +201,7 @@ const GroupAction = (props: GroupActionProps) => {
       case "Selection": {
         return (
           <GroupQueryBuilderContainer
-            setQuery={setQuery}
+            updateQuery={setQuery}
             isUpdating={isUpdating}
             resetView={props.resetView}
           />

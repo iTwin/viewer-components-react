@@ -1211,7 +1211,7 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when property is category, return a category query string",
-      expectedResult: "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id WHERE ((bis.Category.CodeValue = 'displayValueString') OR (bis.Category.UserLabel = 'displayValueString'))",
+      expectedResult: "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN BisCore.Category ON BisCore.Category.ECInstanceId = BisCore.GeometricElement3d.category.id WHERE ((BisCore.Category.CodeValue = 'displayValueString') OR (BisCore.Category.UserLabel = 'displayValueString'))",
       operations: [
         {
           expectedResult: true,
@@ -1257,7 +1257,7 @@ export const testCases: QueryBuilderTestData = {
     },
     {
       name: "when category property and relational property added, return query string with property value, relational chain and with category joined",
-      expectedResult: "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN bis.Category ON bis.Category.ECInstanceId = bis.GeometricElement3d.category.id WHERE ((bis.Category.CodeValue = 'displayValueString') OR (bis.Category.UserLabel = 'displayValueString'))",
+      expectedResult: "SELECT BisCore.B.ECInstanceId, BisCore.B.ECClassId FROM BisCore.B JOIN BisCore.Category ON BisCore.Category.ECInstanceId = BisCore.GeometricElement3d.category.id WHERE ((BisCore.Category.CodeValue = 'displayValueString') OR (BisCore.Category.UserLabel = 'displayValueString'))",
       operations: [
         {
           expectedResult: true,

@@ -8,15 +8,14 @@ import type { QueryBuilder } from "../QueryBuilder";
 
 export interface PropertySelection {
   currentPropertyList: PropertyRecord[];
-  setCurrentPropertyList: React.Dispatch<
-  React.SetStateAction<PropertyRecord[]>
-  >;
-  setQuery: React.Dispatch<React.SetStateAction<string>>;
+  setCurrentPropertyList: (value: PropertyRecord[]) => void;
+  setQuery: (value: string) => void;
   queryBuilder?: QueryBuilder;
-  setQueryBuilder: React.Dispatch<React.SetStateAction<QueryBuilder | undefined>>;
+  setQueryBuilder: (value: QueryBuilder | undefined) => void;
   isUpdating: boolean;
   resetView: () => Promise<void>;
 }
+
 export const PropertyGridWrapperContext = React.createContext<PropertySelection>({
   currentPropertyList: [],
   setCurrentPropertyList: () => [],
@@ -25,3 +24,13 @@ export const PropertyGridWrapperContext = React.createContext<PropertySelection>
   isUpdating: false,
   resetView: async () => { },
 });
+
+export const usePropertyGridWrapper = (): PropertySelection => {
+  const context = React.useContext(PropertyGridWrapperContext);
+  if (!context) {
+    throw new Error(
+      "usePropertyGridWrapperContext should be used within a PropertyGridWrapperContext provider"
+    );
+  }
+  return context;
+};
