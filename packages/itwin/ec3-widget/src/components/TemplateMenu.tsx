@@ -70,14 +70,15 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
   );
 
   const onSave = async () => {
-    let response;
     try {
       const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
-      if (childTemplate.id) {
-        response = await configurationsClient.updateConfiguration(token, childTemplate.id, convertConfigurationUpdate(childTemplate));
-      }
-      else {
-        response = await configurationsClient.createConfiguration(token, convertConfigurationCreate(childTemplate));
+      if (childTemplate.id && childTemplate.changedReportId) {
+        await configurationsClient.deleteConfiguration(token, childTemplate.id)
+        await configurationsClient.createConfiguration(token, convertConfigurationCreate(childTemplate));
+      } else if (childTemplate.id) {
+        await configurationsClient.updateConfiguration(token, childTemplate.id, convertConfigurationUpdate(childTemplate));
+      } else {
+        await configurationsClient.createConfiguration(token, convertConfigurationCreate(childTemplate));
       }
 
       toaster.positive("Saved successfully!");
@@ -314,6 +315,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
             onConfirm={() => {
               if (selectedReport) {
                 childTemplate.labels = [];
+                childTemplate.changedReportId = true;
                 handleSelectChange(selectedReport, "reportId", childTemplate, setChildTemplate);
               }
             }}
