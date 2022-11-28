@@ -95,9 +95,9 @@ export interface GroupingCustomUIProps {
   /**
    * To get the query loading status.
    */
-  isUpdating: boolean;
+  isUpdating?: boolean;
   /**
    * To reset the viewer.
    */
-  resetView: () => Promise<void>;
+  resetView?: () => Promise<void>;
 }

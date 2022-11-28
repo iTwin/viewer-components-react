@@ -47,10 +47,11 @@ export const GroupQueryBuilderContainer = ({ isUpdating, resetView, updateQuery 
     updateQuery("");
     queryBuilder?.resetQuery();
     setCurrentPropertyList([]);
-    await resetView().catch((e) =>
-      /* eslint-disable no-console */
-      console.error(e)
-    );
+    if (resetView)
+      await resetView().catch((e) =>
+        /* eslint-disable no-console */
+        console.error(e)
+      );
   };
 
   return (
@@ -61,24 +62,26 @@ export const GroupQueryBuilderContainer = ({ isUpdating, resetView, updateQuery 
           setCurrentPropertyList,
           queryBuilder,
           setQueryBuilder,
-          resetView,
+          resetView: resetView ?? (async () => { }),
           setQuery: updateQuery,
-          isUpdating,
+          isUpdating: isUpdating ?? false,
         }}>
         <PropertyGridWrapper keys={keysState} imodel={iModelConnection} />
       </PropertyGridWrapperContext.Provider>
-      {selected && (
-        <div className="gmw-button-container">
-          <Button
-            styleType="default"
-            size="small"
-            className="gmw-reset-button"
-            onClick={_onClickResetButton}
-          >
-            Reset
-          </Button>
-        </div>
-      )}
-    </div>
+      {
+        selected && (
+          <div className="gmw-button-container">
+            <Button
+              styleType="default"
+              size="small"
+              className="gmw-reset-button"
+              onClick={_onClickResetButton}
+            >
+              Reset
+            </Button>
+          </div>
+        )
+      }
+    </div >
   );
 };
