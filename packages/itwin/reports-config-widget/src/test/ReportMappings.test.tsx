@@ -40,6 +40,7 @@ import {
 import type { BeEvent } from "@itwin/core-bentley";
 import type BulkExtractor from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
+import { act } from "react-dom/test-utils";
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -218,6 +219,14 @@ jest.mock("@itwin/appui-react", () => ({
   useActiveIModelConnection: () => connectionMock.object,
 }));
 
+let returnFn: () => Promise<void>;
+jest.mock('../widget/components/AddMappingsModal',
+  () => (props: AddMappingsModalProps) => {
+    returnFn = props.returnFn;
+    return <div />;
+  }
+);
+
 jest.mock("@itwin/imodels-client-management", () => ({
   ...jest.requireActual("@itwin/imodels-client-management"),
   IModelsClient: jest.fn().mockImplementation(() => ({
@@ -312,29 +321,7 @@ describe("Report Mappings View", () => {
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
     const horizontalTiles = screen.getAllByTestId("horizontal-tile");
-
-    expect(horizontalTiles).toHaveLength(mockMappings.length);
-
-    for (const [index, horizontalTile] of horizontalTiles.entries()) {
-      const reportMappingTile = within(horizontalTile);
-      const mockiModel = mockIModelsResponse.find(
-        (iModel) =>
-          iModel.iModel.id === mockMappings[index].mapping._links.imodel.href
-      );
-      expect(
-        reportMappingTile.getByText(
-          mockMappings[index].mapping.mappingName
-        )
-      ).toBeInTheDocument();
-      expect(
-        reportMappingTile.getByTitle(
-          mockMappings[index].mapping.description ?? ""
-        )
-      ).toBeInTheDocument();
-      expect(
-        reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")
-      ).toBeInTheDocument();
-    }
+    assertHorizontalTiles(horizontalTiles, mockMappings);
   });
 
   it("search for a report mapping", async () => {
@@ -482,7 +469,7 @@ describe("Report Mappings View", () => {
       .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
       .returns(() => ExtractionStates.None);
 
-    const { user } = render(
+    render(
       <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
     );
 
@@ -490,48 +477,14 @@ describe("Report Mappings View", () => {
 
     mockGetMappings.mockReturnValueOnce(mockMappings.map((m: MappingSingle) => m.mapping));
 
-    const addMappingButton = screen.getByRole("button", {
-      name: /addmapping/i,
+    act(() => {
+      returnFn();
     });
 
-    await user.click(addMappingButton);
-
-    // Add modal dialog should appear
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-    const modal = screen.getByRole("dialog");
-
-    const cancelButton = within(modal).getByRole("button", {
-      name: /cancel/i,
-    });
-
-    await user.click(cancelButton);
-
-    await waitForElementToBeRemoved(() => screen.getByRole("dialog"));
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
     const horizontalTiles = screen.getAllByTestId("horizontal-tile");
-
-    expect(horizontalTiles).toHaveLength(mockReportMappings.mappings.length);
-
-    for (const [index, horizontalTile] of horizontalTiles.entries()) {
-      const reportMappingTile = within(horizontalTile);
-      const mockiModel = mockIModelsResponse.find(
-        (iModel) =>
-          iModel.iModel.id === mockMappings[index].mapping._links.imodel.href
-      );
-      expect(
-        reportMappingTile.getByText(
-          mockMappings[index].mapping.mappingName
-        )
-      ).toBeInTheDocument();
-      expect(
-        reportMappingTile.getByTitle(
-          mockMappings[index].mapping.description ?? ""
-        )
-      ).toBeInTheDocument();
-      expect(
-        reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")
-      ).toBeInTheDocument();
-    }
+    assertHorizontalTiles(horizontalTiles, mockMappings);
 
     expect(mockGetReportMappings).toBeCalledTimes(2);
   });
@@ -629,4 +582,29 @@ describe("Report Mappings View", () => {
     });
     expect(succeededStates).toHaveLength(1);
   });
+
+  const assertHorizontalTiles = (horizontalTiles: HTMLElement[], mockMappings: MappingSingle[]) => {
+    expect(horizontalTiles).toHaveLength(mockMappings.length);
+
+    for (const [index, horizontalTile] of horizontalTiles.entries()) {
+      const reportMappingTile = within(horizontalTile);
+      const mockiModel = mockIModelsResponse.find(
+        (iModel) =>
+          iModel.iModel.id === mockMappings[index].mapping._links.imodel.href
+      );
+      expect(
+        reportMappingTile.getByText(
+          mockMappings[index].mapping.mappingName
+        )
+      ).toBeInTheDocument();
+      expect(
+        reportMappingTile.getByTitle(
+          mockMappings[index].mapping.description ?? ""
+        )
+      ).toBeInTheDocument();
+      expect(
+        reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")
+      ).toBeInTheDocument();
+    }
+  }
 });
