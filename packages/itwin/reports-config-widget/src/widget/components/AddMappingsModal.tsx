@@ -56,7 +56,7 @@ const AddMappingsModal = ({
   show,
   returnFn,
 }: AddMappingsModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const [selectedIModelId, setSelectediModelId] = useState<string>("");
   const [mappings, setMappings] = useState<Mapping[]>([]);

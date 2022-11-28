@@ -22,18 +22,13 @@ import {
 import userEvent from "@testing-library/user-event";
 import * as moq from "typemoq";
 import type {
-  ExtractionStatusSingle,
   MappingSingle,
   Report,
   ReportMappingCollection,
 } from "@itwin/insights-client";
-import {
-  ExtractorState,
-} from "@itwin/insights-client";
-import { ReportMappings } from "../widget/components/ReportMappings";
+import { ReportMappingAndMapping, ReportMappings } from "../widget/components/ReportMappings";
 import type { GetSingleIModelParams, IModelOperations, OperationOptions } from "@itwin/imodels-client-management";
 import { IModelState } from "@itwin/imodels-client-management";
-import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 import type {
   SelectionManager,
   SelectionScopesManager,
@@ -43,7 +38,7 @@ import {
   SelectionChangeEvent,
 } from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
-import BulkExtractor from "../widget/components/BulkExtractor";
+import type BulkExtractor from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 
 const mockITwinId = faker.datatype.uuid();
@@ -200,11 +195,19 @@ const mockMappingsFactory = (
   return mockMappings;
 };
 
+const mockAddMappingsModal = moq.Mock.ofType<JSX.Element>();
 const connectionMock = moq.Mock.ofType<IModelConnection>();
 const mockBulkExtractor = moq.Mock.ofType<BulkExtractor>();
 const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
 const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 const mockIModelsClient = moq.Mock.ofType<IModelOperations<OperationOptions>>();
+
+interface AddMappingsModalProps {
+  reportId: string;
+  existingMappings: ReportMappingAndMapping[];
+  show: boolean;
+  returnFn: () => Promise<void>;
+}
 
 jest.mock("../widget/components/Constants.ts", () => ({
   STATUS_CHECK_INTERVAL: 10,
@@ -229,7 +232,6 @@ const mockGetMapping = jest.fn();
 const mockGetMappings = jest.fn();
 const mockGetReportMappings = jest.fn();
 const mockDeleteReportMapping = jest.fn();
-const mockCreateReportMapping = jest.fn();
 
 jest.mock("@itwin/insights-client", () => ({
   ...jest.requireActual("@itwin/insights-client"),
@@ -240,7 +242,6 @@ jest.mock("@itwin/insights-client", () => ({
   ReportsClient: jest.fn().mockImplementation(() => ({
     getReportMappings: mockGetReportMappings,
     deleteReportMapping: mockDeleteReportMapping,
-    createReportMapping: mockCreateReportMapping,
   })),
 }));
 
@@ -441,7 +442,6 @@ describe("Report Mappings View", () => {
     await user.click(removeButton);
     // Delete modal dialog should appear
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-
     const modal = screen.getByRole("dialog");
 
     const withinModal = within(modal);
@@ -466,8 +466,7 @@ describe("Report Mappings View", () => {
 
   it("add mapping", async () => {
     const mockReportMappings = mockReportMappingsFactory();
-    const mockMappings =
-      mockMappingsFactory(mockReportMappings);
+    const mockMappings = mockMappingsFactory(mockReportMappings);
 
     mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
       .returns(async () => mockIModelsResponse[0].iModel);
@@ -476,10 +475,8 @@ describe("Report Mappings View", () => {
       .returns(async () => mockIModelsResponse[1].iModel);
 
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
-    mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    mockIModelsClient.setup((x) => x.getMinimalList(moq.It.isAny()))
-      .returns(() => [] as any);
+    mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
     mockBulkExtractor
       .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
@@ -491,29 +488,6 @@ describe("Report Mappings View", () => {
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    // Adding an extra unmapped mapping.
-    const extraMappingId = faker.datatype.uuid();
-    const extraMappingName = "mOcKNaMeExTrA";
-    const extraMappingDescription = "mOcKDeScRiPtIoNeXtRa";
-
-    mockMappings.push({
-      mapping: {
-        id: extraMappingId,
-        mappingName: extraMappingName,
-        description: extraMappingDescription,
-        extractionEnabled: false,
-        createdOn: "",
-        createdBy: "",
-        modifiedOn: "",
-        modifiedBy: "",
-        _links: {
-          imodel: {
-            href: "",
-          },
-        },
-      },
-    });
-
     mockGetMappings.mockReturnValueOnce(mockMappings.map((m: MappingSingle) => m.mapping));
 
     const addMappingButton = screen.getByRole("button", {
@@ -523,44 +497,14 @@ describe("Report Mappings View", () => {
     await user.click(addMappingButton);
 
     // Add modal dialog should appear
-    const modal = screen.getByRole("dialog");
     expect(screen.getByRole("dialog")).toBeInTheDocument();
+    const modal = screen.getByRole("dialog");
 
-    const withinModal = within(modal);
-    expect(withinModal.getByText(/addmappings/i)).toBeInTheDocument();
-
-    const addButton = withinModal.getByRole("button", {
-      name: /add/i,
-    });
-    // Add button should be disabled
-    expect(addButton).toBeDisabled();
-
-    // Already mapped mappings are disabled
-    for (let i = 0; i < mockMappings.length - 1; i++) {
-      const row = screen.getByRole("row", {
-        name: new RegExp(
-          `${mockMappings[i].mapping.mappingName} ${mockMappings[i].mapping.description}`,
-          "i"
-        ),
-      });
-
-      const checkbox = within(row).getByRole("checkbox");
-      expect(checkbox).toBeDisabled();
-    }
-
-    // Click on checkbox on new mapping
-    const unmappedRow = screen.getByRole("row", {
-      name: new RegExp(
-        `${mockMappings[mockMappings.length - 1].mapping.mappingName
-        } ${mockMappings[mockMappings.length - 1].mapping.description}`,
-        "i"
-      ),
+    const cancelButton = within(modal).getByRole("button", {
+      name: /cancel/i,
     });
 
-    const enabledCheckbox = within(unmappedRow).getByRole("checkbox");
-
-    await user.click(enabledCheckbox);
-    await user.click(addButton);
+    await user.click(cancelButton);
 
     await waitForElementToBeRemoved(() => screen.getByRole("dialog"));
 
@@ -588,6 +532,8 @@ describe("Report Mappings View", () => {
         reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")
       ).toBeInTheDocument();
     }
+
+    expect(mockGetReportMappings).toBeCalledTimes(2);
   });
 
   it("odata feed url", async () => {
@@ -649,7 +595,7 @@ describe("Report Mappings View", () => {
       .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
       .returns(() => ExtractionStates.Succeeded);
 
-    mockBulkExtractor.setup((x) => x.runIModelExtraction(moq.It.isAny())).returns(async () => { });
+    mockBulkExtractor.setup(async (x) => x.runIModelExtraction(moq.It.isAny())).returns(async () => { });
 
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
