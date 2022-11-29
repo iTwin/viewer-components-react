@@ -37,6 +37,7 @@ export class EC3AuthCallback {
       const token: EC3TokenCache = {
         token: tokenResponse.access_token,
         exp: Date.now() + (tokenResponse.expires_in - EXPIRATRION_REDUCTION) * MILI_SECONDS,
+        source: "ec3-auth",
       };
 
       const parentWindow = window.opener as Window;

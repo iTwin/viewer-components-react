@@ -5,4 +5,5 @@
 export interface EC3TokenCache {
   token: string;
   exp: number;
+  source: string;
 }

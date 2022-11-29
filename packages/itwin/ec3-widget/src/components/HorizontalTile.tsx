@@ -6,14 +6,16 @@ import type { ReactNode } from "react";
 import React from "react";
 import { Text } from "@itwin/itwinui-react";
 import "./HorizontalTile.scss";
+import classNames from "classnames";
 
-interface HorizontalTileProps {
+interface HorizontalTileProps extends React.ComponentPropsWithoutRef<"div"> {
   title: string;
   button: ReactNode;
   subText?: string;
   onClickTitle?: () => void;
   titleTooltip?: string;
   subtextToolTip?: string;
+  selected: boolean;
 }
 
 export const HorizontalTile = ({
@@ -23,11 +25,17 @@ export const HorizontalTile = ({
   titleTooltip,
   subtextToolTip,
   button,
+  selected,
+  ...rest
 }: HorizontalTileProps) => {
   return (
     <div
-      className="ec3w-horizontal-tile-container"
+      className={classNames(
+        "ec3w-horizontal-tile-container",
+        { "ec3w-horizontal-tile-container-selected": selected },
+      )}
       data-testid="horizontal-tile"
+      onClick={rest.onClick}
     >
       <div className="ec3w-body">
         <Text

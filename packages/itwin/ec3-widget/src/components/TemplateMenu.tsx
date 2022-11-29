@@ -2,16 +2,16 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import type { EC3ConfigurationCreate, EC3ConfigurationUpdate, Report } from "@itwin/insights-client";
+import type { Report } from "@itwin/insights-client";
 import { handleSelectChange, WidgetHeader } from "./utils";
-import ExportModal from "./ExportModal";
 import LabelAction from "./LabelAction";
-import { Configuration, convertConfigurationCreate, convertConfigurationUpdate, Label as EC3Label } from "./Template";
+import type { Configuration, Label as EC3Label } from "./Template";
+import { convertConfigurationCreate, convertConfigurationUpdate } from "./Template";
 import { LabelTile } from "./LabelTile";
 import DeleteModal from "./DeleteModal";
 import { handleInputChange } from "./utils";
@@ -29,7 +29,6 @@ import {
 } from "@itwin/itwinui-react";
 import "./TemplateMenu.scss";
 import React from "react";
-import type { EC3TokenCache } from "./EC3/EC3TokenCache";
 import type { EC3Config } from "./EC3/EC3Config";
 import { useReportsClient } from "./api/context/ReportsClientContext";
 import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
@@ -46,16 +45,14 @@ enum LabelView {
   MODIFY = "modify"
 }
 
-const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
+const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   const projectId = useActiveIModelConnection()?.iTwinId as string;
   const reportingClientApi = useReportsClient();
-  const [token, setToken] = useState<EC3TokenCache>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
   const [selectedLabel, setSelectedLabel] = useState<EC3Label>();
   const [selectedReport, setSelectedReport] = useState<string>();
-  const [modalIsOpen, openModal] = useState(false);
   const [availableReports, setReports] = useState<Report[]>([]);
   const configurationsClient = useEC3ConfigurationsClient();
   const [childTemplate, setChildTemplate] = useState<Configuration>({
@@ -73,7 +70,7 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
     try {
       const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       if (childTemplate.id && childTemplate.changedReportId) {
-        await configurationsClient.deleteConfiguration(token, childTemplate.id)
+        await configurationsClient.deleteConfiguration(token, childTemplate.id);
         await configurationsClient.createConfiguration(token, convertConfigurationCreate(childTemplate));
       } else if (childTemplate.id) {
         await configurationsClient.updateConfiguration(token, childTemplate.id, convertConfigurationUpdate(childTemplate));
@@ -90,10 +87,6 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
     }
   };
 
-  const validateSignin = useCallback(() => {
-    return token?.token && token?.exp > Date.now();
-  }, [token]);
-
   useEffect(() => {
     setIsLoading(true);
 
@@ -105,10 +98,10 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
         const childConfig: Configuration = {
           displayName: configuration.displayName,
           description: configuration.description ?? "",
-          reportId: reportId,
+          reportId,
           id: configuration.id,
           labels: configuration.labels,
-        }
+        };
         setChildTemplate(childConfig);
       }
 
@@ -271,34 +264,9 @@ const TemplateMenu = ({ template, goBack, config }: TemplateProps) => {
           <TemplateActionPanel
             onSave={onSave}
             onCancel={goBack}
-            onExport={async () => {
-              if (!validateSignin()) {
-                const url = `${config.EC3_URI}oauth2/authorize?client_id=${config.CLIENT_ID}&redirect_uri=${config.REDIRECT_URI}&response_type=code&scope=${config.SCOPE}`;
-                const authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
-
-                const receiveMessage = (event: MessageEvent<EC3TokenCache>) => {
-                  authWindow?.close();
-                  setToken(event.data);
-                  openModal(true);
-                };
-
-                window.addEventListener("message", receiveMessage, false);
-              } else {
-                openModal(true);
-              }
-            }}
             isSavingDisabled={!childTemplate.displayName || !childTemplate.reportId}
             isLoading={isLoading}
           />
-
-          <ExportModal
-            projectName={childTemplate.displayName}
-            isOpen={modalIsOpen}
-            close={() => openModal(false)}
-            templateId={childTemplate.id}
-            token={token?.token}
-          />
-
           <DeleteModal
             entityName={selectedLabel?.name === "" ? selectedLabel.reportTable : selectedLabel?.name ?? ""}
             show={showDeleteModal}

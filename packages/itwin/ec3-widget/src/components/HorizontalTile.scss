@@ -32,4 +32,13 @@
     margin-right: $iui-xs;
     flex-shrink: 0;
   }
+
+  &-selected {
+    @include themed {
+      border: 1px solid t(iui-color-foreground-primary);
+      background: linear-gradient(rgba(t(iui-color-foreground-primary-rgb), t(iui-opacity-6)),
+          rgba(t(iui-color-foreground-primary-rgb), t(iui-opacity-6))),
+        linear-gradient(t(iui-color-background-1), t(iui-color-background-1));
+    }
+  }
 }

@@ -21,6 +21,8 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { EC3Props } from "./EC3";
 import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
 import { IModelApp } from "@itwin/core-frontend";
+import type { EC3TokenCache } from "./EC3/EC3TokenCache";
+import ExportModal from "./ExportModal";
 
 enum TemplateView {
   TEMPLATES = "templates",
@@ -36,6 +38,8 @@ const Templates = ({ config }: EC3Props) => {
   const [selectedTemplate, setSelectedTemplate] = useState<Configuration>();
   const [searchValue, setSearchValue] = useState<string>("");
   const configClient = useEC3ConfigurationsClient();
+  const [token, setToken] = useState<EC3TokenCache>();
+  const [modalIsOpen, openModal] = useState(false);
   const [templateView, setTemplateView] = useState<TemplateView>(
     TemplateView.TEMPLATES
   );
@@ -43,9 +47,9 @@ const Templates = ({ config }: EC3Props) => {
   const load = useCallback(async () => {
     setIsLoading(true);
     if (iTwinId) {
-      const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
-      const templatesResponse = await configClient.getConfigurations(token, iTwinId);
-      const templates: Configuration[] = templatesResponse.map((x) => {
+      const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+      const templatesResponse = await configClient.getConfigurations(accessToken, iTwinId);
+      const configurations: Configuration[] = templatesResponse.map((x) => {
         return {
           displayName: x.displayName,
           description: x.description ?? "",
@@ -53,8 +57,8 @@ const Templates = ({ config }: EC3Props) => {
           labels: x.labels,
           reportId: x._links.report.href.split("/reports/")[1],
         };
-      })
-      setTemplates(templates);
+      });
+      setTemplates(configurations);
     } else {
       toaster.negative("Invalid iTwinId");
     }
@@ -77,6 +81,32 @@ const Templates = ({ config }: EC3Props) => {
       ),
     [templates, searchValue]
   );
+
+  const selectTemplateCallback = useCallback((template: Configuration) => {
+    if (selectedTemplate && selectedTemplate?.id === template.id)
+      setSelectedTemplate(undefined);
+    else
+      setSelectedTemplate(template);
+  }, [selectedTemplate]);
+
+  const onExport = useCallback(async () => {
+    if (!(token?.token && token?.exp > Date.now())) {
+      const url = `${config.EC3_URI}oauth2/authorize?client_id=${config.CLIENT_ID}&redirect_uri=${config.REDIRECT_URI}&response_type=code&scope=${config.SCOPE}`;
+      const authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
+
+      const receiveMessage = (event: MessageEvent<EC3TokenCache>) => {
+        if (event.data.source !== "ec3-auth")
+          return;
+        authWindow?.close();
+        setToken(event.data);
+        openModal(true);
+      };
+
+      window.addEventListener("message", receiveMessage, false);
+    } else {
+      openModal(true);
+    }
+  }, [config, token]);
 
   useEffect(() => {
     void load();
@@ -119,6 +149,13 @@ const Templates = ({ config }: EC3Props) => {
               >
                 Create Template
               </Button>
+              <Button
+                styleType="default"
+                onClick={onExport}
+                disabled={!selectedTemplate}
+              >
+                Export
+              </Button>
               <div className="ec3w-search-bar-container" data-testid="search-bar">
                 <div className="ec3w-search-button">
                   <SearchBar
@@ -148,6 +185,8 @@ const Templates = ({ config }: EC3Props) => {
                       setSelectedTemplate(template);
                       setTemplateView(TemplateView.MENU);
                     }}
+                    onClick={() => selectTemplateCallback(template)}
+                    selected={!!template.id && selectedTemplate?.id === template.id}
                     button={
                       <DropdownMenu
                         menuItems={(close: () => void) => [
@@ -179,14 +218,23 @@ const Templates = ({ config }: EC3Props) => {
               </div>
             )}
           </Surface>
+
+          <ExportModal
+            projectName={selectedTemplate?.displayName ?? ""}
+            isOpen={modalIsOpen}
+            close={() => openModal(false)}
+            templateId={selectedTemplate?.id}
+            token={token?.token}
+          />
+
           <DeleteModal
             entityName={selectedTemplate?.displayName ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
             onDelete={async () => {
               if (selectedTemplate && selectedTemplate.id) {
-                const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
-                await configClient.deleteConfiguration(token, selectedTemplate.id);
+                const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+                await configClient.deleteConfiguration(accessToken, selectedTemplate.id);
               }
             }}
             refresh={refresh}

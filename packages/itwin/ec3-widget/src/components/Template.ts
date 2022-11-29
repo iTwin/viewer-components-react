@@ -1,4 +1,4 @@
-import { EC3Configuration, EC3ConfigurationCreate, EC3ConfigurationUpdate } from "@itwin/insights-client";
+import type { EC3ConfigurationCreate, EC3ConfigurationUpdate } from "@itwin/insights-client";
 
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
@@ -30,38 +30,38 @@ export function convertConfigurationCreate(childTemplate: Configuration): EC3Con
     reportId: childTemplate.reportId,
     displayName: childTemplate.displayName,
     description: childTemplate.description,
-    labels: childTemplate.labels.map(x => {
+    labels: childTemplate.labels.map((x) => {
       return {
         name: x.name,
         reportTable: x.reportTable,
         elementNameColumn: x.elementNameColumn,
         elementQuantityColumn: x.elementQuantityColumn,
-        materials: x.materials.map((x) => {
+        materials: x.materials.map((m) => {
           return {
-            nameColumn: x.nameColumn ?? ""
-          }
-        })
-      }
-    })
-  }
+            nameColumn: m.nameColumn ?? "",
+          };
+        }),
+      };
+    }),
+  };
 }
 
 export function convertConfigurationUpdate(childTemplate: Configuration): EC3ConfigurationUpdate {
   return {
     displayName: childTemplate.displayName,
     description: childTemplate.description,
-    labels: childTemplate.labels.map(x => {
+    labels: childTemplate.labels.map((x) => {
       return {
         name: x.name,
         reportTable: x.reportTable,
         elementNameColumn: x.elementNameColumn,
         elementQuantityColumn: x.elementQuantityColumn,
-        materials: x.materials.map((x) => {
+        materials: x.materials.map((m) => {
           return {
-            nameColumn: x.nameColumn ?? ""
-          }
-        })
-      }
-    })
-  }
+            nameColumn: m.nameColumn ?? "",
+          };
+        }),
+      };
+    }),
+  };
 }

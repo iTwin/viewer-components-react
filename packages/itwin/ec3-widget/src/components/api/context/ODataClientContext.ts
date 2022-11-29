@@ -2,7 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IOdataClient, ODataClient } from "@itwin/insights-client";
+import type { IOdataClient} from "@itwin/insights-client";
+import { ODataClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 
 export const BASE_PATH = "https://api.bentley.com/insights/reporting";

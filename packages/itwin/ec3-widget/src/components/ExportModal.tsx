@@ -19,7 +19,8 @@ import {
   toaster,
 } from "@itwin/itwinui-react";
 import { useEC3JobsClient } from "./api/context/EC3JobsClientContext";
-import { Link, EC3JobCreate, EC3Job, CarbonUploadState } from "@itwin/insights-client";
+import type { EC3Job, EC3JobCreate, Link} from "@itwin/insights-client";
+import { CarbonUploadState } from "@itwin/insights-client";
 
 interface ExportProps {
   projectName: string;
@@ -34,6 +35,7 @@ const ExportModal = (props: ExportProps) => {
   const ec3JobsClient = useEC3JobsClient();
 
   const [jobStatus, setJobStatus] = useState<CarbonUploadState>();
+  const [jobMessage, setJobMessage] = useState<string | undefined>();
   const [jobLink, setJobLink] = useState<Link>();
 
   const intervalRef = useRef<number>();
@@ -53,6 +55,7 @@ const ExportModal = (props: ExportProps) => {
               setJobLink(currentJobStatus._links.ec3Project);
             }
             setJobStatus(currentJobStatus.status);
+            setJobMessage(currentJobStatus.message);
           } else {
             setJobStatus(CarbonUploadState.Failed);
             toaster.negative("Failed to get job status. 😔");
@@ -74,7 +77,7 @@ const ExportModal = (props: ExportProps) => {
             configurationId: props.templateId,
             projectName: props.projectName,
             ec3BearerToken: token,
-          }
+          };
           const jobCreated = await ec3JobsClient.createJob(
             accessToken,
             jobRequest
@@ -102,6 +105,7 @@ const ExportModal = (props: ExportProps) => {
   const onClose = useCallback(() => {
     setJobStatus(undefined);
     setJobLink(undefined);
+    setJobMessage(undefined);
     window.clearInterval(intervalRef.current);
     props.close();
   }, [props]);
@@ -148,7 +152,8 @@ const ExportModal = (props: ExportProps) => {
             <div className="ec3w-progress-radial-container">
               <ProgressRadial status="negative" size="small" value={100} />
               <Text variant="leading" className="ec3w-status-text">
-                Export failed
+                Export failed <br />
+                {jobMessage}
               </Text>
             </div>
           );
@@ -160,7 +165,7 @@ const ExportModal = (props: ExportProps) => {
           );
       }
     },
-    []
+    [jobMessage]
   );
 
   useEffect(() => {

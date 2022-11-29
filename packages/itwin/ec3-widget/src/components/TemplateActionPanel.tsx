@@ -10,7 +10,6 @@ import { LoadingSpinner } from "./utils";
 export interface TemplateActionPanelProps {
   onSave: () => void;
   onCancel: () => void;
-  onExport: () => void;
   isCancelDisabled?: boolean;
   isSavingDisabled?: boolean;
   isLoading?: boolean;
@@ -19,7 +18,6 @@ export interface TemplateActionPanelProps {
 const TemplateActionPanel = ({
   onSave,
   onCancel,
-  onExport,
   isCancelDisabled = false,
   isSavingDisabled = false,
   isLoading = false,
@@ -37,12 +35,6 @@ const TemplateActionPanel = ({
           onClick={onSave}
         >
           Save
-        </Button>
-        <Button
-          styleType="high-visibility"
-          onClick={onExport}
-        >
-          Export
         </Button>
         <Button
           styleType='default'
