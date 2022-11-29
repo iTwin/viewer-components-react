@@ -2,8 +2,18 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-export interface EC3TokenCache {
-  token: string;
-  exp: number;
-  source: string;
+@import '~@itwin/itwinui-css/scss/variables';
+
+.ec3w-delete-modal-body-text {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+
+  >strong {
+    min-width: 0px;
+  }
+}
+
+.ec3w-loading-delete {
+  margin-right: $iui-s;
 }

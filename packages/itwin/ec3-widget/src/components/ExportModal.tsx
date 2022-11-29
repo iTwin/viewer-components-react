@@ -9,18 +9,37 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { IModelApp } from "@itwin/core-frontend";
 import {
   Button,
   Modal,
   ProgressLinear,
   ProgressRadial,
   Text,
-  toaster,
 } from "@itwin/itwinui-react";
 import { useEC3JobsClient } from "./api/context/EC3JobsClientContext";
-import type { EC3Job, EC3JobCreate, Link} from "@itwin/insights-client";
+import type { EC3Job, EC3JobCreate } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
+import { useApiConfig } from "./api/context/ApiConfigContext";
+
+interface JobSuccess {
+  status: CarbonUploadState.Succeeded;
+  link: string;
+}
+
+interface JobFailed {
+  status: CarbonUploadState.Failed;
+  message: string;
+}
+
+interface JobQueued {
+  status: CarbonUploadState.Queued;
+}
+
+interface JobRunning {
+  status: CarbonUploadState.Running;
+}
+
+type JobStatus = JobSuccess | JobFailed | JobQueued | JobRunning;
 
 interface ExportProps {
   projectName: string;
@@ -31,46 +50,36 @@ interface ExportProps {
 }
 
 const ExportModal = (props: ExportProps) => {
-  const PIN_INTERVAL = 1000;
+  const PIN_INTERVAL = 5000;
   const ec3JobsClient = useEC3JobsClient();
+  const { getAccessToken } = useApiConfig();
 
-  const [jobStatus, setJobStatus] = useState<CarbonUploadState>();
-  const [jobMessage, setJobMessage] = useState<string | undefined>();
-  const [jobLink, setJobLink] = useState<Link>();
+  const [jobStatus, setJobStatus] = useState<JobStatus>({ status: CarbonUploadState.Queued });
 
   const intervalRef = useRef<number>();
 
   const pinStatus = useCallback(
     (job: EC3Job) => {
       const intervalId = window.setInterval(async () => {
-        const token =
-          (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
-        if (job.id && token) {
-          const currentJobStatus =
-            await ec3JobsClient.getEC3JobStatus(token, job.id);
-          if (currentJobStatus.status) {
-            if (
-              currentJobStatus.status === CarbonUploadState.Succeeded
-            ) {
-              setJobLink(currentJobStatus._links.ec3Project);
-            }
-            setJobStatus(currentJobStatus.status);
-            setJobMessage(currentJobStatus.message);
-          } else {
-            setJobStatus(CarbonUploadState.Failed);
-            toaster.negative("Failed to get job status. 😔");
-          }
-        }
+        const token = await getAccessToken();
+        if (!(job.id && token))
+          return;
+        const currentJobStatus = await ec3JobsClient.getEC3JobStatus(token, job.id);
+        if (currentJobStatus.status === CarbonUploadState.Succeeded)
+          setJobStatus({ status: CarbonUploadState.Succeeded, link: currentJobStatus._links.ec3Project.href });
+        else if (currentJobStatus.status === CarbonUploadState.Failed)
+          setJobStatus({ status: CarbonUploadState.Failed, message: currentJobStatus.message! });
+        else
+          setJobStatus({ status: currentJobStatus.status });
       }, PIN_INTERVAL);
       intervalRef.current = intervalId;
     },
-    [setJobLink, setJobStatus, ec3JobsClient]
+    [setJobStatus, ec3JobsClient, getAccessToken]
   );
 
   const runJob = useCallback(
     async (token: string) => {
-      const accessToken =
-        (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+      const accessToken = await getAccessToken();
       if (props.templateId && token) {
         try {
           const jobRequest: EC3JobCreate = {
@@ -85,34 +94,28 @@ const ExportModal = (props: ExportProps) => {
           if (jobCreated.id) {
             pinStatus(jobCreated);
           } else {
-            setJobStatus(CarbonUploadState.Failed);
-            toaster.negative("Failed to create EC3 job. 😔");
+            setJobStatus({ status: CarbonUploadState.Failed, message: "Failed to create Job" });
           }
         } catch (e) {
-          setJobStatus(CarbonUploadState.Failed);
-          toaster.negative("You do not have the required permissions. Please contact the project administrator.");
+          setJobStatus({ status: CarbonUploadState.Failed, message: "Missing required permissions. Please contact the project administrator." });
           /* eslint-disable no-console */
           console.error(e);
         }
       } else {
-        setJobStatus(CarbonUploadState.Failed);
-        toaster.negative("Invalid reportId.");
+        setJobStatus({ status: CarbonUploadState.Failed, message: "Invalid reportId" });
       }
     },
-    [props, pinStatus, ec3JobsClient]
+    [props, pinStatus, ec3JobsClient, getAccessToken]
   );
 
   const onClose = useCallback(() => {
-    setJobStatus(undefined);
-    setJobLink(undefined);
-    setJobMessage(undefined);
     window.clearInterval(intervalRef.current);
     props.close();
   }, [props]);
 
   const getStatusComponent = useCallback(
-    (status: CarbonUploadState, link: string | undefined) => {
-      switch (status) {
+    (state: JobStatus) => {
+      switch (state.status) {
         case CarbonUploadState.Queued:
           return (
             <div className="ec3w-progress-radial-container">
@@ -133,19 +136,17 @@ const ExportModal = (props: ExportProps) => {
           );
         case CarbonUploadState.Succeeded:
           return (
-            link && (
-              <div className="ec3w-progress-radial-container">
-                <ProgressRadial status="positive" size="small" value={50} />
-                <a
-                  className="ec3w-report-button"
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button styleType="cta">Open in EC3</Button>
-                </a>
-              </div>
-            )
+            <div className="ec3w-progress-radial-container">
+              <ProgressRadial status="positive" size="small" value={50} />
+              <a
+                className="ec3w-report-button"
+                href={state.link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button styleType="cta">Open in EC3</Button>
+              </a>
+            </div>
           );
         case CarbonUploadState.Failed:
           return (
@@ -153,7 +154,7 @@ const ExportModal = (props: ExportProps) => {
               <ProgressRadial status="negative" size="small" value={100} />
               <Text variant="leading" className="ec3w-status-text">
                 Export failed <br />
-                {jobMessage}
+                {state.message}
               </Text>
             </div>
           );
@@ -165,14 +166,20 @@ const ExportModal = (props: ExportProps) => {
           );
       }
     },
-    [jobMessage]
+    []
   );
 
   useEffect(() => {
+    return () => {
+      window.clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
     if (props.isOpen && props.token) {
+      setJobStatus({ status: CarbonUploadState.Queued });
       runJob(props.token).catch((err) => {
-        setJobStatus(CarbonUploadState.Failed);
-        toaster.negative("Error occurs while running the job. 😔");
+        setJobStatus({ status: CarbonUploadState.Failed, message: "Error while running job" });
         /* eslint-disable no-console */
         console.error(err);
       });
@@ -181,8 +188,8 @@ const ExportModal = (props: ExportProps) => {
 
   useEffect(() => {
     if (
-      jobStatus === CarbonUploadState.Succeeded ||
-      jobStatus === CarbonUploadState.Failed
+      jobStatus.status === CarbonUploadState.Succeeded ||
+      jobStatus.status === CarbonUploadState.Failed
     ) {
       if (intervalRef.current) {
         window.clearInterval(intervalRef.current);
@@ -203,7 +210,7 @@ const ExportModal = (props: ExportProps) => {
           <ProgressRadial indeterminate size="large" value={50} />
         </div>
       )}
-      {jobStatus && getStatusComponent(jobStatus, jobLink?.href)}
+      {jobStatus && getStatusComponent(jobStatus)}
     </Modal>
   );
 };

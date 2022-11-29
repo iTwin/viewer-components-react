@@ -20,9 +20,9 @@ import React from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { EC3Props } from "./EC3";
 import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
-import { IModelApp } from "@itwin/core-frontend";
-import type { EC3TokenCache } from "./EC3/EC3TokenCache";
+import type { EC3Token } from "./EC3/EC3Token";
 import ExportModal from "./ExportModal";
+import { useApiConfig } from "./api/context/ApiConfigContext";
 
 enum TemplateView {
   TEMPLATES = "templates",
@@ -31,6 +31,7 @@ enum TemplateView {
 }
 
 const Templates = ({ config }: EC3Props) => {
+  const { getAccessToken } = useApiConfig();
   const iTwinId = useActiveIModelConnection()?.iTwinId;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [templates, setTemplates] = useState<Configuration[]>([]);
@@ -38,7 +39,7 @@ const Templates = ({ config }: EC3Props) => {
   const [selectedTemplate, setSelectedTemplate] = useState<Configuration>();
   const [searchValue, setSearchValue] = useState<string>("");
   const configClient = useEC3ConfigurationsClient();
-  const [token, setToken] = useState<EC3TokenCache>();
+  const [token, setToken] = useState<EC3Token>();
   const [modalIsOpen, openModal] = useState(false);
   const [templateView, setTemplateView] = useState<TemplateView>(
     TemplateView.TEMPLATES
@@ -47,7 +48,7 @@ const Templates = ({ config }: EC3Props) => {
   const load = useCallback(async () => {
     setIsLoading(true);
     if (iTwinId) {
-      const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+      const accessToken = await getAccessToken();
       const templatesResponse = await configClient.getConfigurations(accessToken, iTwinId);
       const configurations: Configuration[] = templatesResponse.map((x) => {
         return {
@@ -64,7 +65,7 @@ const Templates = ({ config }: EC3Props) => {
     }
 
     setIsLoading(false);
-  }, [iTwinId, configClient]);
+  }, [iTwinId, configClient, getAccessToken]);
 
   const refresh = useCallback(async () => {
     setTemplateView(TemplateView.TEMPLATES);
@@ -91,10 +92,10 @@ const Templates = ({ config }: EC3Props) => {
 
   const onExport = useCallback(async () => {
     if (!(token?.token && token?.exp > Date.now())) {
-      const url = `${config.EC3_URI}oauth2/authorize?client_id=${config.CLIENT_ID}&redirect_uri=${config.REDIRECT_URI}&response_type=code&scope=${config.SCOPE}`;
+      const url = `${config.ec3Uri}oauth2/authorize?client_id=${config.clientId}&redirect_uri=${config.redirectUri}&response_type=code&scope=${config.scope}`;
       const authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
 
-      const receiveMessage = (event: MessageEvent<EC3TokenCache>) => {
+      const receiveMessage = (event: MessageEvent<EC3Token>) => {
         if (event.data.source !== "ec3-auth")
           return;
         authWindow?.close();
@@ -117,7 +118,6 @@ const Templates = ({ config }: EC3Props) => {
     case TemplateView.CREATE:
       return (
         <TemplateMenu
-          config={config}
           goBack={async () => {
             setTemplateView(TemplateView.TEMPLATES);
             await refresh();
@@ -127,7 +127,6 @@ const Templates = ({ config }: EC3Props) => {
     case TemplateView.MENU:
       return (
         <TemplateMenu
-          config={config}
           template={selectedTemplate}
           // templateId={selectedTemplate!.id!}
           goBack={async () => {
@@ -233,7 +232,7 @@ const Templates = ({ config }: EC3Props) => {
             setShow={setShowDeleteModal}
             onDelete={async () => {
               if (selectedTemplate && selectedTemplate.id) {
-                const accessToken = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+                const accessToken = await getAccessToken();
                 await configClient.deleteConfiguration(accessToken, selectedTemplate.id);
               }
             }}

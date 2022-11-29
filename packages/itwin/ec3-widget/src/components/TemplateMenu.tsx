@@ -5,7 +5,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
-import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { Report } from "@itwin/insights-client";
 import { handleSelectChange, WidgetHeader } from "./utils";
@@ -29,14 +28,13 @@ import {
 } from "@itwin/itwinui-react";
 import "./TemplateMenu.scss";
 import React from "react";
-import type { EC3Config } from "./EC3/EC3Config";
 import { useReportsClient } from "./api/context/ReportsClientContext";
 import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
+import { useApiConfig } from "./api/context/ApiConfigContext";
 
 interface TemplateProps {
   template?: Configuration;
   goBack: () => Promise<void>;
-  config: EC3Config;
 }
 
 enum LabelView {
@@ -46,6 +44,7 @@ enum LabelView {
 }
 
 const TemplateMenu = ({ template, goBack }: TemplateProps) => {
+  const { getAccessToken } = useApiConfig();
   const projectId = useActiveIModelConnection()?.iTwinId as string;
   const reportingClientApi = useReportsClient();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -68,7 +67,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
 
   const onSave = async () => {
     try {
-      const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+      const token = await getAccessToken();
       if (childTemplate.id && childTemplate.changedReportId) {
         await configurationsClient.deleteConfiguration(token, childTemplate.id);
         await configurationsClient.createConfiguration(token, convertConfigurationCreate(childTemplate));
@@ -92,7 +91,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
 
     const fetchReports = async () => {
       if (template) {
-        const token = (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+        const token = await getAccessToken();
         const configuration = await configurationsClient.getConfiguration(token, template.id!);
         const reportId = configuration._links.report.href.split("/reports/")[1];
         const childConfig: Configuration = {
@@ -105,13 +104,8 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
         setChildTemplate(childConfig);
       }
 
-      if (!IModelApp.authorizationClient)
-        throw new Error(
-          "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-        );
-
       try {
-        const accessToken = await IModelApp.authorizationClient.getAccessToken();
+        const accessToken = await getAccessToken();
         const data = await reportingClientApi.getReports(accessToken, projectId);
         if (data) {
           const fetchedReports = data.sort((a, b) => a.displayName?.localeCompare(b.displayName ?? "") ?? 0);
@@ -126,7 +120,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
       }
     };
     void fetchReports();
-  }, [projectId, template, reportingClientApi, configurationsClient]);
+  }, [projectId, template, reportingClientApi, configurationsClient, getAccessToken]);
 
   const addLabel = () => {
     setLabelsView(LabelView.ADD);

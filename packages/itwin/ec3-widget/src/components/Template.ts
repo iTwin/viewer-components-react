@@ -1,9 +1,9 @@
-import type { EC3ConfigurationCreate, EC3ConfigurationUpdate } from "@itwin/insights-client";
-
 /*---------------------------------------------------------------------------------------------
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import type { EC3ConfigurationCreate, EC3ConfigurationUpdate } from "@itwin/insights-client";
+
 export interface Configuration {
   displayName: string;
   description: string;

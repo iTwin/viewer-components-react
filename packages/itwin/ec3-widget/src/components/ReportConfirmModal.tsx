@@ -9,7 +9,7 @@ import {
   ModalButtonBar,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
-import "./DeleteModal.scss";
+import "./ReportConfirmModal.scss";
 import { handleError, LoadingSpinner } from "./utils";
 
 export interface ReportConfirmModalProps {

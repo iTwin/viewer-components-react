@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import type { EC3ConfigProps } from "./EC3Config";
 import { EC3Config } from "./EC3Config";
-import type { EC3TokenCache } from "./EC3TokenCache";
+import type { EC3Token } from "./EC3Token";
 
 export class EC3AuthCallback {
   /* This function must be called in EC3 authentication redirect path.
@@ -29,12 +29,12 @@ export class EC3AuthCallback {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: `client_id=${config.CLIENT_ID}&grant_type=authorization_code&code=${code}`,
+        body: `client_id=${config.clientId}&grant_type=authorization_code&code=${code}`,
       };
 
-      const response = await fetch(`${config.EC3_URI}api/oauth2/token`, prop);
+      const response = await fetch(`${config.ec3Uri}api/oauth2/token`, prop);
       const tokenResponse = await response.json();
-      const token: EC3TokenCache = {
+      const token: EC3Token = {
         token: tokenResponse.access_token,
         exp: Date.now() + (tokenResponse.expires_in - EXPIRATRION_REDUCTION) * MILI_SECONDS,
         source: "ec3-auth",

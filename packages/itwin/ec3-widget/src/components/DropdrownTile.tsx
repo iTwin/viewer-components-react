@@ -4,12 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 import type { ReactNode } from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
+import { LabeledSelect } from "@itwin/itwinui-react";
 import "./DropdownTile.scss";
 import React from "react";
-import {
-  Label,
-  Select,
-} from "@itwin/itwinui-react";
 
 interface DropdownTileProps {
   stringColumnOptions: SelectOption<string>[];
@@ -29,17 +26,13 @@ export const DropdownTile = ({
   deletionDisabled,
 }: DropdownTileProps) => {
   return (
-    <div
-      className="ec3w-dropdown-tile-container"
-    >
+    <div className="ec3w-dropdown-tile-container">
       <div className="ec3w-body">
         <div className="ec3w-material-combo">
           <div className="ec3w-dropdown-select-container">
             <div className="ec3w-dropdown-select-combo-box">
-              <Label htmlFor="combo-input" required>
-                Material
-              </Label>
-              <Select
+              <LabeledSelect
+                label={"Material"}
                 disabled={disabled}
                 options={stringColumnOptions}
                 value={materialValue}
@@ -48,10 +41,9 @@ export const DropdownTile = ({
             </div>
           </div>
         </div>
-        <div className="ec3w-action-button" data-testid="tile-action-button" hidden={deletionDisabled} >
+        <div className="ec3w-action-button" data-testid="tile-action-button" hidden={deletionDisabled}>
           {actionGroup}
         </div>
-
       </div>
     </div>
   );

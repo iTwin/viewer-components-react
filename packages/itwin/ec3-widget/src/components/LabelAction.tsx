@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, LabeledSelect, Small } from "@itwin/itwinui-react";
 import {
   SvgAdd,
   SvgDelete,
@@ -17,10 +17,6 @@ import { DropdownTile } from "./DropdrownTile";
 import DeleteModal from "./DeleteModal";
 import useValidator from "../hooks/useValidator";
 import React from "react";
-import {
-  Label,
-  Select,
-} from "@itwin/itwinui-react";
 import { ReportTableSelector } from "./ReportTableSelector";
 
 interface LabelActionProps {
@@ -160,13 +156,10 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
 
           <div className="ec3w-dropdown-select-container">
             <div className="ec3w-dropdown-select-combo-box">
-              <Label htmlFor="combo-input" required>
-                Element
-              </Label>
-              <Select
+              <LabeledSelect
+                label={"Element"}
                 options={getStringColumnOptions(itemName)}
                 value={itemName}
-                // placeholder={isLoading ? "Loading elements" : "Select element quantity"}
                 onChange={async (value) => {
                   setItemName(value);
                 }}
@@ -178,13 +171,10 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
 
           <div className="ec3w-dropdown-select-container">
             <div className="ec3w-dropdown-select-combo-box">
-              <Label htmlFor="combo-input" required>
-                Element quantity
-              </Label>
-              <Select
+              <LabeledSelect
+                label={"Element quantity"}
                 options={numericalColumnOptions}
                 value={itemQuantity}
-                // placeholder={isLoading ? "Loading elements" : "Select element quantity"}
                 onChange={async (value) => {
                   setItemQuantity(value);
                 }}
