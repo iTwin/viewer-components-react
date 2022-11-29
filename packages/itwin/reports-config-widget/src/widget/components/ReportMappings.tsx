@@ -264,7 +264,6 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
                 }}
                 odataFeedUrl={odataFeedUrl}
                 jobStartEvent={jobStartEvent}
-                initialState={bulkExtractor.getIModelState(mapping.imodelId, mapping.iModelName, odataFeedUrl)}
               />
             ))}
           </div>
@@ -301,7 +300,8 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
             styleType="high-visibility"
             id="save-app"
             onClick={() => {
-              bulkExtractor.runIModelExtractions(reportMappings).catch((e) => {
+              const uniqueIModels = Array.from(new Set(reportMappings.map((x) => x.imodelId)));
+              bulkExtractor.runIModelExtractions(uniqueIModels).catch((e) => {
                 /* eslint-disable no-console */
                 console.error(e);
               });

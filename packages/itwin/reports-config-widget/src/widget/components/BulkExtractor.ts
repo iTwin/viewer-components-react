@@ -25,16 +25,14 @@ export default class BulkExtractor {
   private _reportStates = new Map<string, ExtractionStates>();
   private _iModelStates = new Map<string, ExtractionStates>();
   private _timeFetched = new Date();
-  private _reportIds: string[];
   private _iModelRun = new Map<string, string>();
   private _iModelToast = new Map<string, boolean>();
 
-  constructor(apiConfig: ReportsApiConfig, reportIds: string[]) {
+  constructor(apiConfig: ReportsApiConfig) {
     const url = generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl);
     this._reportsClientApi = new ReportsClient(url);
     this._extractionClientApi = new ExtractionClient(url);
     this._accessToken = apiConfig.getAccessToken;
-    this._reportIds = reportIds;
   }
 
   private async fetchStates() {
@@ -42,8 +40,7 @@ export default class BulkExtractor {
     const stateByIModelId = new Map<string, ExtractionStates>();
     const stateByRunId = new Map<string, ExtractorState>();
 
-    for (const reportId of this._reportIds) {
-      const runs = this._reportRunIds.get(reportId);
+    for (const [reportId, runs] of this._reportRunIds) {
       if (!runs) {
         stateByReportId.set(reportId, ExtractionStates.None);
         continue;
@@ -91,15 +88,17 @@ export default class BulkExtractor {
     return this._reportStates.get(reportId) ?? ExtractionStates.None;
   }
 
-  public getIModelState(iModelId: string, iModelName: string, odataFeedUrl: string): ExtractionStates {
-    const state = this._iModelStates.get(iModelId) ?? ExtractionStates.None;
+  public async getIModelState(iModelId: string, iModelName: string, odataFeedUrl: string): Promise<ExtractionStates> {
+    let state = this._iModelStates.get(iModelId) ?? ExtractionStates.None;
+
     if (!(state === ExtractionStates.Succeeded || state === ExtractionStates.Failed)) {
       if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
         this._timeFetched = new Date();
-        this.fetchStates().catch((e) =>
+        await this.fetchStates().catch((e) =>
           /* eslint-disable no-console */
           console.error(e)
         );
+        state = this._iModelStates.get(iModelId) ?? ExtractionStates.None;
       }
     }
     if (state === ExtractionStates.Succeeded && !this._iModelToast.get(iModelId)) {
@@ -201,9 +200,8 @@ export default class BulkExtractor {
       this._iModelRun.set(iModelId, run);
   }
 
-  public async runIModelExtractions(reportMappings: ReportMappingAndMapping[]) {
-    const uniqueIModels = new Set(Array.from(reportMappings.map((x) => x.imodelId)));
-    for (const iModelId of uniqueIModels) {
+  public async runIModelExtractions(iModels: string[]) {
+    for (const iModelId of iModels) {
       const run = await this.runExtraction(iModelId);
       this._iModelStates.set(iModelId, ExtractionStates.Starting);
       if (run)

@@ -25,13 +25,12 @@ export interface ReportMappingHorizontalTileProps {
   mapping: ReportMappingAndMapping;
   onClickDelete: () => void;
   bulkExtractor: BulkExtractor;
-  initialState?: ExtractionStates;
   odataFeedUrl: string;
 }
 
 export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTileProps) => {
-  const [extractionState, setExtractionState] = useState<ExtractionStates>(props.initialState ?? ExtractionStates.None);
-  const [jobStarted, setJobStarted] = useState<boolean>(props.initialState !== ExtractionStates.None);
+  const [extractionState, setExtractionState] = useState<ExtractionStates>(ExtractionStates.None);
+  const [jobStarted, setJobStarted] = useState<boolean>(true);
   const interval = useRef<number>();
 
   useEffect(() => {
@@ -52,13 +51,12 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
     if (jobStarted) {
       window.clearInterval(interval.current);
       interval.current = window.setInterval(async () => {
-        const state = props.bulkExtractor.getIModelState(props.mapping.imodelId, props.mapping.iModelName, props.odataFeedUrl);
-        if (state) {
-          setExtractionState(state);
-          if (state === ExtractionStates.Failed || state === ExtractionStates.Succeeded) {
-            setJobStarted(false);
-          }
+        const state = await props.bulkExtractor.getIModelState(props.mapping.imodelId, props.mapping.iModelName, props.odataFeedUrl);
+        setExtractionState(state);
+        if (state === ExtractionStates.Failed || state === ExtractionStates.Succeeded || state === ExtractionStates.None) {
+          setJobStarted(false);
         }
+
       }, STATUS_CHECK_INTERVAL);
     }
     return () => window.clearInterval(interval.current);
@@ -86,6 +84,7 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
                   console.error(e);
                 });
               }}
+              disabled={jobStarted}
             >
               <SvgRefresh />
             </IconButton>

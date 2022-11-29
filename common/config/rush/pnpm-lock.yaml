@@ -839,6 +839,7 @@ importers:
       '@testing-library/jest-dom': ^5.16.3
       '@testing-library/react': ^12.1.4
       '@testing-library/user-event': ^14.1.1
+      '@types/chai': 4.2.11
       '@types/i18next': ^8.4.2
       '@types/jest': ^27.4.1
       '@types/node': ^14.14.20
@@ -848,6 +849,7 @@ importers:
       '@types/testing-library__jest-dom': ^5.14.3
       '@typescript-eslint/eslint-plugin': ^5.3.1
       '@typescript-eslint/parser': ^5.10.1
+      chai: ^4.2.0
       classnames: ^2.3.1
       cpx2: ^3.0.0
       eslint: ^7.32.0
@@ -901,6 +903,7 @@ importers:
       '@testing-library/jest-dom': 5.16.4
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
       '@testing-library/user-event': 14.1.1_@testing-library+dom@8.13.0
+      '@types/chai': 4.2.11
       '@types/i18next': 8.4.6
       '@types/jest': 27.4.1
       '@types/node': 14.18.12
@@ -910,6 +913,7 @@ importers:
       '@types/testing-library__jest-dom': 5.14.3
       '@typescript-eslint/eslint-plugin': 5.19.0_725bf6bcf2ceaaf4f4f9385fbbfa4252
       '@typescript-eslint/parser': 5.19.0_eslint@7.32.0+typescript@4.3.5
+      chai: 4.3.6
       cpx2: 3.0.2
       eslint: 7.32.0
       eslint-plugin-node: 11.1.0_eslint@7.32.0

@@ -196,7 +196,6 @@ const mockMappingsFactory = (
   return mockMappings;
 };
 
-const mockAddMappingsModal = moq.Mock.ofType<JSX.Element>();
 const connectionMock = moq.Mock.ofType<IModelConnection>();
 const mockBulkExtractor = moq.Mock.ofType<BulkExtractor>();
 const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
@@ -314,7 +313,7 @@ describe("Report Mappings View", () => {
 
     mockBulkExtractor
       .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
-      .returns(() => ExtractionStates.None);
+      .returns(async () => ExtractionStates.None);
 
     render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />);
 
@@ -338,7 +337,7 @@ describe("Report Mappings View", () => {
 
     mockBulkExtractor
       .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
-      .returns(() => ExtractionStates.None);
+      .returns(async () => ExtractionStates.None);
 
     const { user } = render(
       <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
@@ -409,7 +408,7 @@ describe("Report Mappings View", () => {
 
     mockBulkExtractor
       .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
-      .returns(() => ExtractionStates.None);
+      .returns(async () => ExtractionStates.None);
 
     const { user } = render(
       <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
@@ -467,7 +466,7 @@ describe("Report Mappings View", () => {
 
     mockBulkExtractor
       .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
-      .returns(() => ExtractionStates.None);
+      .returns(async () => ExtractionStates.None);
 
     render(
       <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
@@ -530,23 +529,23 @@ describe("Report Mappings View", () => {
 
     mockBulkExtractor
       .setup((x) => x.getIModelState(mockIModelId2, moq.It.isAny(), moq.It.isAny()))
-      .returns(() => ExtractionStates.None);
+      .returns(async () => ExtractionStates.None);
 
     mockBulkExtractor
       .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
-      .returns(() => ExtractionStates.Starting);
+      .returns(async () => ExtractionStates.Starting);
 
     mockBulkExtractor
       .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
-      .returns(() => ExtractionStates.Queued);
+      .returns(async () => ExtractionStates.Queued);
 
     mockBulkExtractor
       .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
-      .returns(() => ExtractionStates.Running);
+      .returns(async () => ExtractionStates.Running);
 
     mockBulkExtractor
       .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
-      .returns(() => ExtractionStates.Succeeded);
+      .returns(async () => ExtractionStates.Succeeded);
 
     mockBulkExtractor.setup(async (x) => x.runIModelExtraction(moq.It.isAny())).returns(async () => { });
 

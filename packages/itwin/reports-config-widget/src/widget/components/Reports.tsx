@@ -81,7 +81,7 @@ export const Reports = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
   const bulkExtractor = useMemo(
-    () => new BulkExtractor(apiConfig, reports.map((r) => r.id)),
+    () => new BulkExtractor(apiConfig),
     [apiConfig, reports]
   );
   const jobStartEvent = useMemo(
