@@ -9,13 +9,13 @@ import { faker } from "@faker-js/faker";
 import { Groupings } from "../grouping-mapping-widget";
 import type { GroupCollection, Mapping } from "@itwin/insights-client";
 import * as moq from "typemoq";
-import type { IModelConnection, SelectionSet, SelectionSetEvent} from "@itwin/core-frontend";
+import type { IModelConnection, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
 import { NoRenderApp } from "@itwin/core-frontend";
 import type { SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
-import type { ContextCustomUIProps, GroupingCustomUIProps, GroupingMappingCustomUI} from "../grouping-mapping-widget";
+import type { ContextCustomUIProps, GroupingCustomUIProps, GroupingMappingCustomUI } from "../grouping-mapping-widget";
 import { GroupingMappingCustomUIType } from "../grouping-mapping-widget";
 
 const mockITwinId = faker.datatype.uuid();
@@ -29,7 +29,7 @@ const mockMapping: Mapping = {
   createdOn: faker.date.past().toDateString(),
   modifiedBy: faker.random.alpha(),
   modifiedOn: faker.date.past().toDateString(),
-  extractionEnabled:false,
+  extractionEnabled: false,
   _links: {
     imodel: {
       href: "",
@@ -73,7 +73,7 @@ jest.mock("@itwin/appui-react", () => ({
 }));
 
 beforeAll(async () => {
-  await NoRenderApp.startup({localization: new EmptyLocalization()});
+  await NoRenderApp.startup({ localization: new EmptyLocalization() });
   await Presentation.initialize();
   const selectionSet = moq.Mock.ofType<SelectionSet>();
   const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
@@ -91,7 +91,7 @@ beforeAll(async () => {
 
   selectionScopesManagerMock
     .setup(async (x) => x.getSelectionScopes(connectionMock.object))
-    .returns(async () => []);
+    .returns(async () => Promise.resolve([]));
   selectionManagerMock
     .setup((x) => x.scopes)
     .returns(() => selectionScopesManagerMock.object);
@@ -107,7 +107,7 @@ describe("Groupings View with default UIs", () => {
     const mockedAccessToken = await mockAccessToken();
     mockMappingClient
       .setup(async (x) => x.getGroups(mockedAccessToken, mockIModelId, mockMappingId))
-      .returns(async () => mockGroups.groups);
+      .returns(async () => Promise.resolve(mockGroups.groups));
 
     // Act
     const { user } = render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
@@ -177,7 +177,7 @@ describe("Groupings View with default UIs", () => {
     const mockedAccessToken = await mockAccessToken();
     mockMappingClient
       .setup(async (x) => x.getGroups(mockedAccessToken, mockIModelId, mockMappingId))
-      .returns(async () => mockGroups.groups);
+      .returns(async () => Promise.resolve(mockGroups.groups));
     const mockedUIComponent = (_props: GroupingCustomUIProps) => React.createElement("div");
     const mockGroupingUI: GroupingMappingCustomUI = {
       type: GroupingMappingCustomUIType.Grouping,
@@ -236,7 +236,7 @@ describe("Groupings View with default UIs", () => {
     const mockedAccessToken = await mockAccessToken();
     mockMappingClient
       .setup(async (x) => x.getGroups(mockedAccessToken, mockIModelId, mockMappingId))
-      .returns(async () => mockGroups.groups);
+      .returns(async () => Promise.resolve(mockGroups.groups));
     const mockedUIComponent = (_props: ContextCustomUIProps) => React.createElement("div");
     const mockContextUI: GroupingMappingCustomUI = {
       type: GroupingMappingCustomUIType.Context,
@@ -292,7 +292,7 @@ describe("Groupings View with default UIs", () => {
     const mockedAccessToken = await mockAccessToken();
     mockMappingClient
       .setup(async (x) => x.getGroups(mockedAccessToken, mockIModelId, mockMappingId))
-      .returns(async () => mockGroups.groups);
+      .returns(async () => Promise.resolve(mockGroups.groups));
     const mockedGroupingUIComponent = (_props: GroupingCustomUIProps) => React.createElement("div");
     const mockedContextUIComponent = (_props: ContextCustomUIProps) => React.createElement("div");
     const mockGroupingUI: GroupingMappingCustomUI = {
