@@ -4,45 +4,48 @@
 *--------------------------------------------------------------------------------------------*/
 
 import BulkExtractor from "../widget/components/BulkExtractor";
-import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 import { assert } from "chai";
+import * as moq from "typemoq";
+import { ExtractorState } from "@itwin/insights-client";
+import type { AccessToken } from "@itwin/core-bentley";
 
-jest.mock('../widget/components/Constants.ts', () => ({
+jest.mock("../widget/components/Constants.ts", () => ({
   STATUS_CHECK_INTERVAL: -1,
 }));
 
-jest.mock('../widget/components/ExtractionToast.tsx', () => (
-  {
-    FailedExtractionToast: jest.fn(),
-    SuccessfulExtractionToast: jest.fn(),
-  }));
+jest.mock("../widget/components/ExtractionToast.tsx", () => ({
+  FailedExtractionToast: jest.fn(),
+  SuccessfulExtractionToast: jest.fn(),
+}));
 
-const mockRunExtraction = jest.fn();
-const mockGetStatus = jest.fn();
+const mockRunExtraction = moq.Mock.ofType<(accessToken: AccessToken, iModelId: string) => Promise<{ id: string; }>>();
+const mockGetStatus = moq.Mock.ofType<(accessToken: AccessToken, jobId: string) => Promise<{ state: ExtractorState; }>>();
+const mockGetReportMappings = moq.Mock.ofType<(accessToken: AccessToken, reportId: string) => Promise<{ imodelId: string }[]>>();
 
 jest.mock("@itwin/insights-client", () => ({
   ...jest.requireActual("@itwin/insights-client"),
   ReportsClient: jest.fn().mockImplementation(() => ({
-
+    getReportMappings: mockGetReportMappings.object,
   })),
   ExtractionClient: jest.fn().mockImplementation(() => ({
-    runExtraction: mockRunExtraction,
-    getExtractionStatus: mockGetStatus,
+    runExtraction: mockRunExtraction.object,
+    getExtractionStatus: mockGetStatus.object,
   })),
 }));
 
-beforeAll(() => {
-  //jest.useFakeTimers();
-});
-
 afterEach(() => {
-  mockRunExtraction.mockReset();
-  mockGetStatus.mockReset();
-
-  // mockRunExtraction.mockClear();
-  // mockGetStatus.mockClear();
+  mockRunExtraction.reset();
+  mockGetStatus.reset();
 });
+
+const mockToastCallback = jest.fn();
+
+const mockIModelId = "mockIModelId";
+const mockIModelId1 = "mockIModelId1";
+const mockReportId = "mockReportId";
+const mockRunId = "mockRunId";
+const mockRunId1 = "mockRunId1";
 
 describe("BulkExtractor", () => {
   const mockApiConfig = {
@@ -51,111 +54,296 @@ describe("BulkExtractor", () => {
   };
 
   it("should return status none for unknown iModel", async () => {
-    const sut = new BulkExtractor(mockApiConfig);
-    const result = await sut.getIModelState("mockIModelId", "mockIModelName", "mockFeedUrl");
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+    const result = await sut.getIModelState(mockIModelId, "", "");
     assert.strictEqual(result, ExtractionStates.None);
   });
 
   it("should return running status for started extraction", async () => {
-    mockRunExtraction.mockReturnValueOnce({
-      id: "mockRunId",
-    });
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
 
-    const time1 = performance.now();
-    const sut = new BulkExtractor(mockApiConfig);
-    const time2 = performance.now();
-    await sut.runIModelExtraction("mockIModelId");
-    const time3 = performance.now();
-    const result = await sut.getIModelState("mockIModelId", "mockIModelName", "mockFeedUrl");
-    const time4 = performance.now();
-    console.log("create bulk extractor:", time2 - time1);
-    console.log("run extraction:", time3 - time2);
-    console.log("get last state:", time4 - time3);
-    assert.strictEqual(result, ExtractionStates.Starting);
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Running })
+    );
+
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+    await sut.runIModelExtraction(mockIModelId);
+    const result = await sut.getIModelState(mockIModelId, "", "");
+    assert.strictEqual(result, ExtractionStates.Running);
   });
 
-  it("should return queued status after delay", async () => {
-    mockRunExtraction.mockReturnValueOnce({
-      id: "mockRunId",
-    });
+  it("should return failed status for failed extraction", async () => {
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
 
-    mockGetStatus.mockReturnValueOnce({
-      state: "Queued",
-    });
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Failed })
+    );
 
-    const sut = new BulkExtractor(mockApiConfig);
-    await sut.runIModelExtraction("mockIModelId");
-
-    const result = await sut.getIModelState("mockIModelId", "mockIModelName", "mockFeedUrl");
-    assert.strictEqual(result, ExtractionStates.Queued);
-
-    expect(mockRunExtraction).toHaveBeenCalledTimes(1);
-    expect(mockGetStatus).toHaveBeenCalledTimes(1);
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+    await sut.runIModelExtraction(mockIModelId);
+    const result = await sut.getIModelState(mockIModelId, "", "");
+    assert.strictEqual(result, ExtractionStates.Failed);
   });
 
   it("full status check cycle", async () => {
-    mockRunExtraction.mockReturnValueOnce({
-      id: "mockRunId",
-    });
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
 
-    mockGetStatus.mockReturnValueOnce({
-      state: "Queued",
-    });
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Queued })
+    );
 
-    mockGetStatus.mockReturnValueOnce({
-      state: "Running",
-    });
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Running })
+    );
 
-    mockGetStatus.mockReturnValueOnce({
-      state: "Succeeded",
-    });
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Succeeded })
+    );
 
-    const sut = new BulkExtractor(mockApiConfig);
-    await sut.runIModelExtraction("mockIModelId");
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+    await sut.runIModelExtraction(mockIModelId);
 
-
-    let result = await sut.getIModelState("mockIModelId", "mockIModelName", "mockFeedUrl");
+    let result = await sut.getIModelState(mockIModelId, "", "");
     assert.strictEqual(result, ExtractionStates.Queued);
 
-    result = await sut.getIModelState("mockIModelId", "mockIModelName", "mockFeedUrl");
+    result = await sut.getIModelState(mockIModelId, "", "");
     assert.strictEqual(result, ExtractionStates.Running);
 
-    result = await sut.getIModelState("mockIModelId", "mockIModelName", "mockFeedUrl");
+    result = await sut.getIModelState(mockIModelId, "", "");
     assert.strictEqual(result, ExtractionStates.Succeeded);
-
-    expect(mockRunExtraction).toHaveBeenCalledTimes(1);
-    expect(mockGetStatus).toHaveBeenCalledTimes(3);
   });
 
   it("two started jobs should return status", async () => {
-    mockRunExtraction.mockReturnValueOnce({
-      id: "mockRunId1",
-    });
+    const mockIModelIds = [mockIModelId, mockIModelId1];
+    const mockRunIds = [mockRunId, mockRunId1];
 
-    mockRunExtraction.mockReturnValueOnce({
-      id: "mockRunId2",
-    });
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
 
-    const mockIModelIds = ["mockIModelId1", "mockIModelId2"];
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(
+      async () => ({ id: mockRunId1 })
+    );
 
-    const sut = new BulkExtractor(mockApiConfig);
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Queued })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(
+      async () => ({ state: ExtractorState.Queued })
+    );
+
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
 
     await sut.runIModelExtractions(mockIModelIds);
 
-    mockGetStatus.mockReturnValueOnce({
-      state: "Queued",
-    });
-
-    mockGetStatus.mockReturnValueOnce({
-      state: "Queued",
-    });
-
-    const result1 = await sut.getIModelState("mockIModelId1", "mockIModelName1", "mockFeedUrl1");
-    const result2 = await sut.getIModelState("mockIModelId2", "mockIModelName2", "mockFeedUrl2");
+    const result1 = await sut.getIModelState(mockIModelId, "", "");
+    const result2 = await sut.getIModelState(mockIModelId1, "", "");
 
     assert.strictEqual(result1, ExtractionStates.Queued);
     assert.strictEqual(result2, ExtractionStates.Queued);
+  });
 
-    expect(mockRunExtraction).toHaveBeenCalledTimes(2);
+  it("should return status none for unknown report", async () => {
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+    const result = await sut.getReportState(mockReportId);
+    assert.strictEqual(result, ExtractionStates.None);
+  });
+
+  it("should return status running for running report", async () => {
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Running })
+    );
+
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
+      async () => ([{ imodelId: mockIModelId }])
+    );
+
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+
+    await sut.runReportExtractions([mockReportId]);
+
+    const result = await sut.getReportState(mockReportId);
+    assert.strictEqual(result, ExtractionStates.Running);
+  });
+
+  it("should return status running for both iModels in report", async () => {
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
+
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(
+      async () => ({ id: mockRunId1 })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Running })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(
+      async () => ({ state: ExtractorState.Running })
+    );
+
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
+      async () => ([{ imodelId: mockIModelId }, { imodelId: mockIModelId1 }])
+    );
+
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+
+    await sut.runReportExtractions([mockReportId]);
+
+    const result1 = await sut.getIModelState(mockIModelId, "", "");
+    const result2 = await sut.getIModelState(mockIModelId1, "", "");
+
+    assert.strictEqual(result1, ExtractionStates.Running);
+    assert.strictEqual(result2, ExtractionStates.Running);
+  });
+
+  it("should return lowest progress status for extractions in report", async () => {
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
+
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(
+      async () => ({ id: mockRunId1 })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Running })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(
+      async () => ({ state: ExtractorState.Queued })
+    );
+
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
+      async () => ([{ imodelId: mockIModelId }, { imodelId: mockIModelId1 }])
+    );
+
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+
+    await sut.runReportExtractions([mockReportId]);
+
+    const result = await sut.getReportState(mockReportId);
+    assert.strictEqual(result, ExtractionStates.Queued);
+  });
+
+  it("should return status failed if one of the extractions in report failed", async () => {
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
+
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId1)).returns(
+      async () => ({ id: mockRunId1 })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Succeeded })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId1)).returns(
+      async () => ({ state: ExtractorState.Failed })
+    );
+
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
+      async () => ([{ imodelId: mockIModelId1 }, { imodelId: mockIModelId1 }])
+    );
+
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+
+    await sut.runReportExtractions([mockReportId]);
+
+    const result = await sut.getReportState(mockReportId);
+    assert.strictEqual(result, ExtractionStates.Failed);
+  });
+
+  it("full report extraction status check cycle", async () => {
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Queued })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Running })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Succeeded })
+    );
+
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
+      async () => ([{ imodelId: mockIModelId }])
+    );
+
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+    await sut.runReportExtractions([mockReportId]);
+
+    let result = await sut.getReportState(mockReportId);
+    assert.strictEqual(result, ExtractionStates.Queued);
+
+    result = await sut.getReportState(mockReportId);
+    assert.strictEqual(result, ExtractionStates.Running);
+
+    result = await sut.getReportState(mockReportId);
+    assert.strictEqual(result, ExtractionStates.Succeeded);
+  });
+
+  it("should return status none after report extraction is finished", async () => {
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Succeeded })
+    );
+
+    mockGetReportMappings.setup(async (x) => x(moq.It.isAny(), mockReportId)).returns(
+      async () => ([{ imodelId: mockIModelId }])
+    );
+
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+    await sut.runReportExtractions([mockReportId]);
+
+    const result = await sut.getReportState(mockReportId);
+    assert.strictEqual(result, ExtractionStates.Succeeded);
+
+    sut.clearReportJob(mockReportId);
+
+    const result2 = await sut.getReportState(mockReportId);
+    assert.strictEqual(result2, ExtractionStates.None);
+  });
+
+  it("should return status none after imodel extraction is finished", async () => {
+    mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
+      async () => ({ id: mockRunId })
+    );
+
+    mockGetStatus.setup(async (x) => x(moq.It.isAny(), mockRunId)).returns(
+      async () => ({ state: ExtractorState.Succeeded })
+    );
+
+    const sut = new BulkExtractor(mockApiConfig, mockToastCallback, mockToastCallback);
+    await sut.runIModelExtractions([mockIModelId]);
+
+    const result = await sut.getIModelState(mockIModelId, "", "");
+    assert.strictEqual(result, ExtractionStates.Succeeded);
+
+    sut.clearIModelJob(mockIModelId);
+
+    const result2 = await sut.getIModelState(mockIModelId, "", "");
+    assert.strictEqual(result2, ExtractionStates.None);
   });
 });

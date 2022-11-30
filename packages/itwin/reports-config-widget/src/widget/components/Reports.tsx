@@ -34,6 +34,7 @@ import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import BulkExtractor from "./BulkExtractor";
 import { BeEvent } from "@itwin/core-bentley";
+import { FailedExtractionToast, SuccessfulExtractionToast } from "./ExtractionToast";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -67,6 +68,14 @@ const fetchReports = async (
 };
 
 export const Reports = () => {
+  const successfulExtractionToast = (iModelName: string, odataFeedUrl: string) => {
+    return (<SuccessfulExtractionToast iModelName={iModelName} odataFeedUrl={odataFeedUrl} />);
+  };
+
+  const failedExtractionToast = (iModelName: string) => {
+    return (<FailedExtractionToast iModelName={iModelName} />);
+  };
+
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const apiConfig = useReportsApiConfig();
   const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
@@ -81,8 +90,8 @@ export const Reports = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
   const bulkExtractor = useMemo(
-    () => new BulkExtractor(apiConfig),
-    [apiConfig, reports]
+    () => new BulkExtractor(apiConfig, successfulExtractionToast, failedExtractionToast),
+    [apiConfig]
   );
   const jobStartEvent = useMemo(
     () => new BeEvent<(reportId: string) => void>(),
