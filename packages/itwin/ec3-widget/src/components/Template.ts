@@ -10,7 +10,6 @@ export interface Configuration {
   id?: string;
   reportId?: string;
   labels: Label[];
-  changedReportId?: boolean;
 }
 
 export interface Label {

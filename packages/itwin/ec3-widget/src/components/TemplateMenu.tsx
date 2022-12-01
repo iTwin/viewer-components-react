@@ -68,10 +68,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   const onSave = async () => {
     try {
       const token = await getAccessToken();
-      if (childTemplate.id && childTemplate.changedReportId) {
-        await configurationsClient.deleteConfiguration(token, childTemplate.id);
-        await configurationsClient.createConfiguration(token, convertConfigurationCreate(childTemplate));
-      } else if (childTemplate.id) {
+      if (childTemplate.id) {
         await configurationsClient.updateConfiguration(token, childTemplate.id, convertConfigurationUpdate(childTemplate));
       } else {
         await configurationsClient.createConfiguration(token, convertConfigurationCreate(childTemplate));
@@ -198,7 +195,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                 }}
               />
 
-              <div className="ec3w-report-select-container">
+              {!isLoading && !childTemplate.id && <div className="ec3w-report-select-container">
                 <div className="ec3w-report-select-combo-box">
                   <Label htmlFor="combo-input" required={true}>
                     Report
@@ -221,7 +218,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                     }}
                   />
                 </div>
-              </div>
+              </div>}
             </Fieldset>
 
             <Fieldset legend='Labels' className='ec3w-template-details'>
@@ -277,7 +274,6 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
             onConfirm={() => {
               if (selectedReport) {
                 childTemplate.labels = [];
-                childTemplate.changedReportId = true;
                 handleSelectChange(selectedReport, "reportId", childTemplate, setChildTemplate);
               }
             }}
