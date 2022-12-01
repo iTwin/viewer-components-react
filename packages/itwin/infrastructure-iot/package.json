@@ -1,6 +1,6 @@
 {
   "name": "@itwin/infrastructure-iot-react",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "This package package provides pre-built UI components and data services to integrate Infrastructure IoT real-time sensor data into an iTwin application",
   "license": "MIT",
   "keywords": [

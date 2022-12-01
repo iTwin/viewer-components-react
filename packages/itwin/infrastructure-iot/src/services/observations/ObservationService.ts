@@ -256,7 +256,7 @@ class ObservationServiceSingleton {
   }
 
   // Correction for delta-like metrics - add START_DATE param of one week ago
-  // This is done so delta-like metrics don"t return a 0 with no reference params specified
+  // This is done so delta-like metrics don't return a 0 with no reference params specified
   private getMetricParamsForQuery(observationQuery: ObservationQuery): {[key: string]: any} {
     const metricParams = _cloneDeep(observationQuery.getMetricParams());
     const startDate = observationQuery.getStartDate() || UtilitiesService.addToDate(new Date(), -1, "week").toISOString();

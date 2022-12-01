@@ -2,6 +2,96 @@
   "name": "@itwin/breakdown-trees-react",
   "entries": [
     {
+      "version": "0.3.16",
+      "tag": "@itwin/breakdown-trees-react_v0.3.16",
+      "date": "Thu, 01 Dec 2022 14:13:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" to `0.10.6`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" from `^0.10.5` to `^0.10.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.15",
+      "tag": "@itwin/breakdown-trees-react_v0.3.15",
+      "date": "Wed, 16 Nov 2022 19:55:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" to `0.10.5`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" from `^0.10.4` to `^0.10.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.14",
+      "tag": "@itwin/breakdown-trees-react_v0.3.14",
+      "date": "Mon, 31 Oct 2022 19:03:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" to `0.10.4`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" from `^0.10.3` to `^0.10.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.13",
+      "tag": "@itwin/breakdown-trees-react_v0.3.13",
+      "date": "Wed, 19 Oct 2022 14:17:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" to `0.10.3`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" from `^0.10.2` to `^0.10.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.12",
+      "tag": "@itwin/breakdown-trees-react_v0.3.12",
+      "date": "Mon, 17 Oct 2022 17:36:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" to `0.10.2`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" from `^0.10.1` to `^0.10.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.11",
+      "tag": "@itwin/breakdown-trees-react_v0.3.11",
+      "date": "Mon, 26 Sep 2022 17:13:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" to `0.10.1`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" from `^0.10.0` to `^0.10.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.10",
       "tag": "@itwin/breakdown-trees-react_v0.3.10",
       "date": "Wed, 03 Aug 2022 16:36:24 GMT",

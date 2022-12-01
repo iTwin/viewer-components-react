@@ -1,6 +1,51 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Wed, 03 Aug 2022 16:36:24 GMT and should not be manually modified.
+This log was last generated on Thu, 01 Dec 2022 14:13:39 GMT and should not be manually modified.
+
+## 0.10.6
+Thu, 01 Dec 2022 14:13:39 GMT
+
+### Patches
+
+- Add listeners to quantityFormatter events we did not account for. Fix issues where a qf override was being set and the measure-tools weren't picking up the change.
+
+## 0.10.5
+Wed, 16 Nov 2022 19:55:30 GMT
+
+### Patches
+
+- Hide perpendicular measure tool for drawing view
+
+## 0.10.4
+Mon, 31 Oct 2022 19:03:27 GMT
+
+### Patches
+
+- Hide measurement tools button on sheet view.
+
+## 0.10.3
+Wed, 19 Oct 2022 14:17:36 GMT
+
+### Patches
+
+- customize widget placement in ui items provider
+
+## 0.10.2
+Mon, 17 Oct 2022 17:36:46 GMT
+
+### Patches
+
+- Added launch configs to debug tests properly. Change the minute/second symbols to match what is being used in IModelApp.quantityFormatter. Fix inconsistencies with the slope formatting.
+
+## 0.10.1
+Mon, 26 Sep 2022 17:13:11 GMT
+
+### Patches
+
+- Account for the global origin when displaying coordinate values if the measurement is tied to a spatial view.
+- Add missing event listener to update the measurement widget when the global origin is changed.
+- Make sure we also refresh displayed measurements if the global origin changes. Fix an issue where the text marker would go past the DistanceMeasurement line.
+- Factor our the point adjustment logic into a helper function. Add listener for the onGlobalOriginChanged event in the ui 2.0 widget.
 
 ## 0.10.0
 Wed, 03 Aug 2022 16:36:24 GMT

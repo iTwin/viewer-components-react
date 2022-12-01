@@ -1,6 +1,6 @@
 {
   "name": "@itwin/reports-config-widget-react",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
   "keywords": [
     "Bentley",
@@ -48,7 +48,9 @@
     "rules": {
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error",
-      "deprecation/deprecation": "off"
+      "deprecation/deprecation": "off",
+      "jsx-a11y/no-static-element-interactions": "off",
+      "jsx-a11y/click-events-have-key-events": "off"
     }
   },
   "dependencies": {
@@ -58,6 +60,7 @@
     "@itwin/itwinui-icons-color-react": "^1.0.1",
     "@itwin/itwinui-icons-react": "^1.7.0",
     "@itwin/itwinui-react": "~1.42.0",
+    "classnames": "^2.3.1",
     "simple-react-validator": "^1.6.1"
   },
   "devDependencies": {

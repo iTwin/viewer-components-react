@@ -101,7 +101,7 @@ export class DeviceMarker extends Marker {
 
   public selectAssociatedEntity(): void {
     if (this.entityData.length) {
-      IModelSettingsService.setSelectedEntity(this.entityData[0].sensor, this.elementId);
+      IModelSettingsService.setSelectedEntity(this.entityData[0].sensor);
     }
   }
 

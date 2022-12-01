@@ -6,6 +6,7 @@
 import { BeUiEvent } from "@itwin/core-bentley";
 import type { GeometryStreamProps } from "@itwin/core-common";
 import type { BeButtonEvent, DecorateContext, Decorator, HitDetail, ScreenViewport, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { EventHandled, IModelApp } from "@itwin/core-frontend";
 import type { Measurement} from "./Measurement";
 import { MeasurementPickContext } from "./Measurement";
@@ -38,8 +39,10 @@ export class MeasurementManager implements Decorator {
   private static _instance?: MeasurementManager;
 
   private _measurements: Measurement[] = new Array<Measurement>();
-  private _dropCallback?: () => void;
-  private _dropUnitCallback?: () => void;
+  private _dropDecoratorCallback?: () => void;
+  private _dropQuantityFormatterListeners?: () => void;
+  private _dropGlobalOriginChangedCallback?: () => void;
+  private _iModelIdForGlobalOrigin?: string;
   private _overrideToolTipHandler?: MeasurementToolTipHandler;
   private _overrideGeometryHandler?: MeasurementGeometryHandler;
   private _overrideHitHandler?: MeasurementHitHandler;
@@ -393,6 +396,7 @@ export class MeasurementManager implements Decorator {
    * @param context Decorate context for drawing to a viewport.
    */
   public decorate(context: DecorateContext): void {
+    this.tryAddGlobalOriginChangedListener(context.viewport.iModel);
     for (const measurement of this._measurements) {
       if (measurement.isVisible && measurement.viewTarget.isViewportCompatible(context.viewport))
         measurement.decorate(context);
@@ -403,9 +407,20 @@ export class MeasurementManager implements Decorator {
    * @param context Decorate context for drawing to a viewport.
    */
   public decorateCached(context: DecorateContext): void {
+    this.tryAddGlobalOriginChangedListener(context.viewport.iModel);
     for (const measurement of this._measurements) {
       if (measurement.isVisible && measurement.viewTarget.isViewportCompatible(context.viewport))
         measurement.decorateCached(context);
+    }
+  }
+
+  private tryAddGlobalOriginChangedListener(iModel: IModelConnection): void {
+    if (this._iModelIdForGlobalOrigin !== iModel.iModelId) {
+      if (this._dropGlobalOriginChangedCallback)
+        this._dropGlobalOriginChangedCallback();
+
+      this._dropGlobalOriginChangedCallback = iModel.onGlobalOriginChanged.addListener(this.onActiveUnitSystemChanged, this);
+      this._iModelIdForGlobalOrigin = iModel.iModelId;
     }
   }
 
@@ -429,15 +444,20 @@ export class MeasurementManager implements Decorator {
 
   /** Adds the decorator singleton to the view manager's list of active decorators. The decorator will participate in drawing and picking operations. */
   public startDecorator(): void {
-    if (this._dropCallback)
+    if (this._dropDecoratorCallback)
       return;
 
     MeasurementCachedGraphicsHandler.instance.setDecorateCallback(this.decorateCached.bind(this));
     MeasurementCachedGraphicsHandler.instance.startDecorator();
-    this._dropCallback = IModelApp.viewManager.addDecorator(this);
+    this._dropDecoratorCallback = IModelApp.viewManager.addDecorator(this);
 
-    if (undefined === this._dropUnitCallback) {
-      this._dropUnitCallback = IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener(this.onActiveUnitSystemChanged.bind(this));
+    if (undefined === this._dropQuantityFormatterListeners) {
+      this._dropQuantityFormatterListeners = () =>{
+        IModelApp.quantityFormatter.onActiveFormattingUnitSystemChanged.addListener(this.onActiveUnitSystemChanged, this);
+        IModelApp.quantityFormatter.onQuantityFormatsChanged.addListener(this.onActiveUnitSystemChanged, this);
+        IModelApp.quantityFormatter.onUnitsProviderChanged.addListener(this.onActiveUnitSystemChanged, this);
+      };
+
     } else {
       this.onActiveUnitSystemChanged();
     }
@@ -447,14 +467,14 @@ export class MeasurementManager implements Decorator {
    * participate in drawing or picking operations.
    */
   public stopDecorator(): void {
-    if (this._dropCallback) {
-      this._dropCallback();
-      this._dropCallback = undefined;
+    if (this._dropDecoratorCallback) {
+      this._dropDecoratorCallback();
+      this._dropDecoratorCallback = undefined;
     }
 
-    if (this._dropUnitCallback) {
-      this._dropUnitCallback();
-      this._dropUnitCallback = undefined;
+    if (this._dropQuantityFormatterListeners) {
+      this._dropQuantityFormatterListeners();
+      this._dropQuantityFormatterListeners = undefined;
     }
 
     MeasurementCachedGraphicsHandler.instance.setDecorateCallback(undefined);
