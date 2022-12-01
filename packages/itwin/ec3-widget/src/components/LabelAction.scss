@@ -21,7 +21,6 @@
 }
 
 .ec3w-pair-list {
-  flex-direction: column;
   overflow-y: overlay;
   height: auto;
 
@@ -34,19 +33,6 @@
     align-self: center;
     min-width: $iui-l;
     cursor: pointer;
-  }
-}
-
-.ec3w-dropdown-select-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: $iui-s;
-
-  .ec3w-dropdown-select-combo-box {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
   }
 }
 

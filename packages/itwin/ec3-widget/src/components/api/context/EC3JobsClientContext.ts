@@ -6,22 +6,11 @@ import type { IEC3JobsClient } from "@itwin/insights-client";
 import { EC3JobsClient } from "@itwin/insights-client";
 import { createContext, useContext } from "react";
 
-export const BASE_PATH = "https://api.bentley.com/insights/carbon-calculation";
-
-const prefixUrl = (prefix: string) => {
-  return BASE_PATH.replace("api.bentley.com", `${prefix}-api.bentley.com`);
-};
-
-export const createDefaultEC3JobsClient = (prefix?: string): IEC3JobsClient => {
-  const url = prefixUrl(prefix ?? "");
+export const createEC3JobsClient = (url: string) => {
   return new EC3JobsClient(url);
 };
 
-export const createEC3JobsClient = (prefix?: string) => {
-  return createDefaultEC3JobsClient(prefix);
-};
-
-export const EC3JobsClientContext = createContext<IEC3JobsClient>(createDefaultEC3JobsClient());
+export const EC3JobsClientContext = createContext<IEC3JobsClient>(createEC3JobsClient(""));
 
 export const useEC3JobsClient = () => {
   const context = useContext(EC3JobsClientContext);

@@ -29,17 +29,13 @@ export const DropdownTile = ({
     <div className="ec3w-dropdown-tile-container">
       <div className="ec3w-body">
         <div className="ec3w-material-combo">
-          <div className="ec3w-dropdown-select-container">
-            <div className="ec3w-dropdown-select-combo-box">
-              <LabeledSelect
-                label={"Material"}
-                disabled={disabled}
-                options={stringColumnOptions}
-                value={materialValue}
-                onChange={(value) => { onMaterialChange(value); }}
-              />
-            </div>
-          </div>
+          <LabeledSelect
+            label={"Material"}
+            disabled={disabled}
+            options={stringColumnOptions}
+            value={materialValue}
+            onChange={(value) => { onMaterialChange(value); }}
+          />
         </div>
         <div className="ec3w-action-button" data-testid="tile-action-button" hidden={deletionDisabled}>
           {actionGroup}

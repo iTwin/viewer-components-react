@@ -9,7 +9,7 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import type { Configuration } from "./Template";
 import "./ReportTableSelector.scss";
 import { useODataClient } from "./api/context/ODataClientContext";
-import { useApiConfig } from "./api/context/ApiConfigContext";
+import { useAccessTokenFn } from "./api/context/ApiConfigContext";
 
 export interface ReportTableSelectorProps {
   selectedReportTable: string;
@@ -26,7 +26,7 @@ export const ReportTableSelector = ({
   onChange,
   setLoading,
 }: ReportTableSelectorProps) => {
-  const { getAccessToken } = useApiConfig();
+  const getAccessToken = useAccessTokenFn();
   const [validator, _showValidationMessage] = useValidator();
   const [reportTable, setReportTable] = useState(selectedReportTable);
   const [reportTables, setReportTables] = useState<string[] | undefined>(undefined);

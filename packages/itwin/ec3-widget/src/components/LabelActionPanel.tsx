@@ -19,7 +19,7 @@ export interface ActionPanelProps {
   isLoading?: boolean;
 }
 
-const ActionPanel = ({
+const LabelActionPanel = ({
   onSave,
   onCancel,
   isCancelDisabled = false,
@@ -54,4 +54,4 @@ const ActionPanel = ({
   );
 };
 
-export default ActionPanel;
+export default LabelActionPanel;

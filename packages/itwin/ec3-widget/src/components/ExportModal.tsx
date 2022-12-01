@@ -19,7 +19,7 @@ import {
 import { useEC3JobsClient } from "./api/context/EC3JobsClientContext";
 import type { EC3Job, EC3JobCreate } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
-import { useApiConfig } from "./api/context/ApiConfigContext";
+import { useAccessTokenFn } from "./api/context/ApiConfigContext";
 
 interface JobSuccess {
   status: CarbonUploadState.Succeeded;
@@ -52,7 +52,7 @@ interface ExportProps {
 const ExportModal = (props: ExportProps) => {
   const PIN_INTERVAL = 5000;
   const ec3JobsClient = useEC3JobsClient();
-  const { getAccessToken } = useApiConfig();
+  const getAccessToken = useAccessTokenFn();
 
   const [jobStatus, setJobStatus] = useState<JobStatus>({ status: CarbonUploadState.Queued });
 
@@ -161,7 +161,7 @@ const ExportModal = (props: ExportProps) => {
         default:
           return (
             <div className="ec3w-progress-radial-container">
-              <Text>Invalid Job Status <span role="img" aria-label="sad">😔</span></Text>
+              <Text>Invalid Job Status</Text>
             </div>
           );
       }

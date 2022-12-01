@@ -8,6 +8,7 @@
   justify-content: space-between;
   border-radius: 5px;
   height: $iui-baseline * 6;
+  margin-top: $iui-baseline;
 
   .ec3w-body {
     display: flex;
@@ -40,18 +41,5 @@
 
   .ec3w-material-combo {
     width: 100%;
-  }
-}
-
-.ec3w-dropdown-select-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: $iui-s;
-
-  .ec3w-dropdown-select-combo-box {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
   }
 }

@@ -31,7 +31,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   const [name, setName] = useState<string>(label?.name ?? "");
   const [itemName, setItemName] = useState<string>(label?.elementNameColumn ?? "UserLabel");
   const [itemQuantity, setItemQuantity] = useState<string>(label?.elementQuantityColumn ?? "");
-  const [selectedMaterial, setSelectedMaterial] = useState<Material>();
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [materials, setMaterials] = useState<Material[]>(label?.materials.map((x) => { return { nameColumn: x.nameColumn }; }) ?? [{ nameColumn: undefined }]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -154,35 +154,27 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
             }}
           />
 
-          <div className="ec3w-dropdown-select-container">
-            <div className="ec3w-dropdown-select-combo-box">
-              <LabeledSelect
-                label={"Element"}
-                options={getStringColumnOptions(itemName)}
-                value={itemName}
-                onChange={async (value) => {
-                  setItemName(value);
-                }}
-                disabled={isLoading || reportTable === ""}
-                placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element")}
-              />
-            </div>
-          </div>
+          <LabeledSelect
+            label={"Element"}
+            options={getStringColumnOptions(itemName)}
+            value={itemName}
+            onChange={async (value) => {
+              setItemName(value);
+            }}
+            disabled={isLoading || reportTable === ""}
+            placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element")}
+          />
 
-          <div className="ec3w-dropdown-select-container">
-            <div className="ec3w-dropdown-select-combo-box">
-              <LabeledSelect
-                label={"Element quantity"}
-                options={numericalColumnOptions}
-                value={itemQuantity}
-                onChange={async (value) => {
-                  setItemQuantity(value);
-                }}
-                disabled={isLoading || reportTable === ""}
-                placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element quantity")}
-              />
-            </div>
-          </div>
+          <LabeledSelect
+            label={"Element quantity"}
+            options={numericalColumnOptions}
+            value={itemQuantity}
+            onChange={async (value) => {
+              setItemQuantity(value);
+            }}
+            disabled={isLoading || reportTable === ""}
+            placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element quantity")}
+          />
         </Fieldset>
 
         <Fieldset legend='Materials' className='ec3w-label-details'>

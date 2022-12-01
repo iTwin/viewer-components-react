@@ -30,7 +30,7 @@ import "./TemplateMenu.scss";
 import React from "react";
 import { useReportsClient } from "./api/context/ReportsClientContext";
 import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
-import { useApiConfig } from "./api/context/ApiConfigContext";
+import { useAccessTokenFn } from "./api/context/ApiConfigContext";
 
 interface TemplateProps {
   template?: Configuration;
@@ -44,7 +44,7 @@ enum LabelView {
 }
 
 const TemplateMenu = ({ template, goBack }: TemplateProps) => {
-  const { getAccessToken } = useApiConfig();
+  const getAccessToken = useAccessTokenFn();
   const projectId = useActiveIModelConnection()?.iTwinId as string;
   const reportingClientApi = useReportsClient();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -55,7 +55,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   const [availableReports, setReports] = useState<Report[]>([]);
   const configurationsClient = useEC3ConfigurationsClient();
   const [childTemplate, setChildTemplate] = useState<Configuration>({
-    reportId: "",
+    reportId: undefined,
     description: "",
     displayName: "",
     labels: [],

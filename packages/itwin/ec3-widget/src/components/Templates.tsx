@@ -22,7 +22,7 @@ import type { EC3Props } from "./EC3";
 import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
 import type { EC3Token } from "./EC3/EC3Token";
 import ExportModal from "./ExportModal";
-import { useApiConfig } from "./api/context/ApiConfigContext";
+import { useAccessTokenFn } from "./api/context/ApiConfigContext";
 
 enum TemplateView {
   TEMPLATES = "templates",
@@ -31,7 +31,7 @@ enum TemplateView {
 }
 
 const Templates = ({ config }: EC3Props) => {
-  const { getAccessToken } = useApiConfig();
+  const getAccessToken = useAccessTokenFn();
   const iTwinId = useActiveIModelConnection()?.iTwinId;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [templates, setTemplates] = useState<Configuration[]>([]);

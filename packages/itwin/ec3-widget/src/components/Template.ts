@@ -8,7 +8,7 @@ export interface Configuration {
   displayName: string;
   description: string;
   id?: string;
-  reportId: string;
+  reportId?: string;
   labels: Label[];
   changedReportId?: boolean;
 }
@@ -27,7 +27,7 @@ export interface Material {
 
 export function convertConfigurationCreate(childTemplate: Configuration): EC3ConfigurationCreate {
   return {
-    reportId: childTemplate.reportId,
+    reportId: childTemplate.reportId!,
     displayName: childTemplate.displayName,
     description: childTemplate.description,
     labels: childTemplate.labels.map((x) => {
