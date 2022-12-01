@@ -83,8 +83,18 @@ const Templates = ({ config }: EC3Props) => {
     [templates, searchValue]
   );
 
-  const selectTemplateCallback = useCallback((template: Configuration) => {
-    if (selectedTemplate && selectedTemplate?.id === template.id)
+  const clickedOnClassname = (e: Element, ...classNames: string[]) => {
+    for (const className of classNames)
+      if (e.className.toString().split(" ").includes(className))
+        return true;
+    return false;
+  };
+
+  const selectTemplateCallback = useCallback((template: Configuration, e: React.MouseEvent) => {
+    const element = e.target as (EventTarget & Element);
+
+    if (selectedTemplate && selectedTemplate?.id === template.id &&
+      clickedOnClassname(element, "ec3w-horizontal-tile-container", "ec3w-body"))
       setSelectedTemplate(undefined);
     else
       setSelectedTemplate(template);
@@ -184,7 +194,7 @@ const Templates = ({ config }: EC3Props) => {
                       setSelectedTemplate(template);
                       setTemplateView(TemplateView.MENU);
                     }}
-                    onClick={() => selectTemplateCallback(template)}
+                    onClick={(e) => selectTemplateCallback(template, e)}
                     selected={!!template.id && selectedTemplate?.id === template.id}
                     button={
                       <DropdownMenu
@@ -235,6 +245,7 @@ const Templates = ({ config }: EC3Props) => {
                 const accessToken = await getAccessToken();
                 await configClient.deleteConfiguration(accessToken, selectedTemplate.id);
               }
+              setSelectedTemplate(undefined);
             }}
             refresh={refresh}
           />
