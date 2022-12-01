@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { mockAccessToken, mockMappingClient, render, screen, TestUtils, waitForElementToBeRemoved, within } from "./test-utils";
+import { mockAccessToken, mockMappingClient, render, screen, TestUtils, waitFor, waitForElementToBeRemoved, within } from "./test-utils";
 import { faker } from "@faker-js/faker";
 import { Groupings } from "../grouping-mapping-widget";
 import type { GroupCollection, Mapping } from "@itwin/insights-client";
@@ -161,6 +161,9 @@ describe("Groupings View with default UIs", () => {
 
     // Hover on 'Edit'
     await user.hover(contextMenuItems[0]);
+    await waitFor(() => screen.getByTestId(`gmw-edit-0`));
+    await waitFor(() => screen.getByTestId(`gmw-edit-1`));
+    await waitFor(() => screen.getByTestId(`gmw-edit-2`));
 
     // Should have 3 sub menu items
     const editSelection = screen.getAllByTestId(`gmw-edit-0`);
@@ -217,6 +220,7 @@ describe("Groupings View with default UIs", () => {
 
     // Hover on 'Edit'
     await user.hover(contextMenuItems[0]);
+    await waitFor(() => screen.getByTestId(`gmw-edit-0`));
 
     // Should have exactly 1 sub menu item
     const editCustom = screen.getAllByTestId(`gmw-edit-0`);
