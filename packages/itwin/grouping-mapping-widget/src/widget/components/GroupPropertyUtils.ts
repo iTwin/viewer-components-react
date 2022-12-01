@@ -115,8 +115,9 @@ const extractPrimitiveStructProperties = (
     });
 
   } else if (member.type.valueFormat === PropertyValueFormat.Struct) {
+    const structName = member.name;
     return extractPrimitiveStructProperties(
-      propertyTraversal,
+      [...propertyTraversal, structName],
       member.type.members,
       categoryLabel,
       actualECClassName,
@@ -158,6 +159,10 @@ const extractNested = (propertyTraversal: string[], propertyFields: Field[]): Pr
           nestedContentField.pathToPrimaryClass &&
           nestedContentField.pathToPrimaryClass.length > 1
         ) {
+          // Hardcoded navigation to external source repository metadata.
+          if (nestedContentField.contentClassInfo.name === "BisCore:RepositoryLink") {
+            return extractNested([...propertyTraversal, "Source", "Repository"], nestedContentField.nestedFields);
+          }
           break;
         }
 
@@ -220,10 +225,10 @@ export const convertPresentationFields = (propertyFields: Field[]): PropertyMeta
                   .name === "BisCore:ElementOwnsMultiAspects")
             ) {
               const fullClassName = nestedContentField.contentClassInfo.name;
-              const schema = fullClassName.split(":")[0];
-              const className = fullClassName.split(":")[1];
+              const sourceSchema = fullClassName.split(":")[0];
+              const sourceClassName = fullClassName.split(":")[1];
               const extractedNested = extractNested([], nestedContentField.nestedFields);
-              const aspectExtractedNested = extractedNested.map((ecProperty) => ({ ...ecProperty, schema, className }));
+              const aspectExtractedNested = extractedNested.map((ecProperty) => ({ ...ecProperty, sourceSchema, sourceClassName }));
               return aspectExtractedNested;
             }
             break;
