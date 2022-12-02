@@ -36,7 +36,7 @@ const Templates = ({ config }: EC3Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [templates, setTemplates] = useState<Configuration[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<Configuration>();
+  const [selectedTemplate, setSelectedTemplate] = useState<Configuration | undefined>();
   const [searchValue, setSearchValue] = useState<string>("");
   const configClient = useEC3ConfigurationsClient();
   const [token, setToken] = useState<EC3Token>();
@@ -128,6 +128,7 @@ const Templates = ({ config }: EC3Props) => {
     case TemplateView.CREATE:
       return (
         <TemplateMenu
+          created={false}
           goBack={async () => {
             setTemplateView(TemplateView.TEMPLATES);
             await refresh();
@@ -137,8 +138,8 @@ const Templates = ({ config }: EC3Props) => {
     case TemplateView.MENU:
       return (
         <TemplateMenu
+          created={true}
           template={selectedTemplate}
-          // templateId={selectedTemplate!.id!}
           goBack={async () => {
             setTemplateView(TemplateView.TEMPLATES);
             await refresh();
@@ -153,7 +154,10 @@ const Templates = ({ config }: EC3Props) => {
             <div className="ec3w-toolbar" data-testId="ec3-templates">
               <Button
                 startIcon={<SvgAdd />}
-                onClick={() => setTemplateView(TemplateView.CREATE)}
+                onClick={() => {
+                  setTemplateView(TemplateView.CREATE);
+                  setSelectedTemplate(undefined);
+                }}
                 styleType="high-visibility"
               >
                 Create Template

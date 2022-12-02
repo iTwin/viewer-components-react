@@ -144,7 +144,7 @@ importers:
       '@itwin/core-react': ^3.2.0
       '@itwin/eslint-plugin': ^3.2.0
       '@itwin/imodel-components-react': ^3.2.0
-      '@itwin/insights-client': ^0.3.3
+      '@itwin/insights-client': ^0.3.4
       '@itwin/itwinui-icons-react': ^1.7.0
       '@itwin/itwinui-react': ^1.42.0
       '@itwin/presentation-common': ^3.2.0
@@ -158,6 +158,7 @@ importers:
       '@types/node': ^14.14.20
       '@types/react': ^18.0.15
       '@types/testing-library__jest-dom': ^5.14.3
+      classnames: ^2.3.1
       cpx2: ^3.0.0
       eslint: ^7.32.0
       jest: ^27.5.1
@@ -174,9 +175,10 @@ importers:
       typemoq: ^2.1.0
       typescript: ~4.3.0
     dependencies:
-      '@itwin/insights-client': 0.3.3
+      '@itwin/insights-client': 0.3.4
       '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.42.0_react-dom@17.0.2+react@17.0.2
+      classnames: 2.3.1
       simple-react-validator: 1.6.1
     devDependencies:
       '@faker-js/faker': 6.3.1
@@ -3287,8 +3289,8 @@ packages:
       - encoding
     dev: false
 
-  /@itwin/insights-client/0.3.3:
-    resolution: {integrity: sha512-7711WMafoBuALKHMLZAYuwbxrbIVjsjJVdMX57NSS2AajSsX4EVnmPKgfPL/RMuWW+xH4Vwm7AbIBPleKFtFfw==}
+  /@itwin/insights-client/0.3.4:
+    resolution: {integrity: sha512-xMNKiuHHh4q9cGIsgWiOdW6OMRSIMVitA9ABo4i6+7mIdQcwVpKUCk90hXaSCMBXAyVxusDNUDmvXoYLv05uAA==}
     dependencies:
       cross-fetch: 3.1.5
       fast-xml-parser: 4.0.9

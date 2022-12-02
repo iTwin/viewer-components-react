@@ -35,6 +35,7 @@ import { useAccessTokenFn } from "./api/context/ApiConfigContext";
 interface TemplateProps {
   template?: Configuration;
   goBack: () => Promise<void>;
+  created: boolean;
 }
 
 enum LabelView {
@@ -43,7 +44,7 @@ enum LabelView {
   MODIFY = "modify"
 }
 
-const TemplateMenu = ({ template, goBack }: TemplateProps) => {
+const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
   const getAccessToken = useAccessTokenFn();
   const projectId = useActiveIModelConnection()?.iTwinId as string;
   const reportingClientApi = useReportsClient();
@@ -195,7 +196,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                 }}
               />
 
-              {!isLoading && !childTemplate.id && <div className="ec3w-report-select-container">
+              {!created && <div className="ec3w-report-select-container">
                 <div className="ec3w-report-select-combo-box">
                   <Label htmlFor="combo-input" required={true}>
                     Report
