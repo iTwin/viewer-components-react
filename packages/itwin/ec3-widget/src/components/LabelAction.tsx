@@ -155,6 +155,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
           />
 
           <LabeledSelect
+            required
             label={"Element"}
             options={getStringColumnOptions(itemName)}
             value={itemName}
@@ -166,6 +167,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
           />
 
           <LabeledSelect
+            required
             label={"Element quantity"}
             options={numericalColumnOptions}
             value={itemQuantity}
@@ -186,12 +188,12 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
               styleType="default"
               disabled={isLoading || reportTable === "" || materials.filter((x) => x.nameColumn === undefined).length > 0}
             >
-              Add material
+              Add Material
             </Button>
             {materials.map((material, index) => (
               <DropdownTile
                 key={index}
-                deletionDisabled={index === 0}
+                required={index === 0}
                 disabled={reportTable === ""}
                 stringColumnOptions={getStringColumnOptions(material.nameColumn)}
                 materialValue={material.nameColumn ?? ""}
@@ -208,6 +210,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                     <IconButton
                       styleType="borderless"
                       className="delete-icon"
+                      disabled={index === 0}
                       onClick={() => {
                         setSelectedMaterial(material);
                         setShowDeleteModal(true);

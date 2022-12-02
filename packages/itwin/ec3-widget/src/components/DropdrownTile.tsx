@@ -14,7 +14,7 @@ interface DropdownTileProps {
   onMaterialChange: (value: string) => void;
   actionGroup: ReactNode;
   disabled: boolean;
-  deletionDisabled: boolean;
+  required: boolean;
 }
 
 export const DropdownTile = ({
@@ -23,21 +23,23 @@ export const DropdownTile = ({
   onMaterialChange,
   actionGroup,
   disabled,
-  deletionDisabled,
+  required,
 }: DropdownTileProps) => {
   return (
     <div className="ec3w-dropdown-tile-container">
       <div className="ec3w-body">
         <div className="ec3w-material-combo">
           <LabeledSelect
+            required={required}
             label={"Material"}
+            placeholder={"Select property containing Material names"}
             disabled={disabled}
             options={stringColumnOptions}
             value={materialValue}
             onChange={(value) => { onMaterialChange(value); }}
           />
         </div>
-        <div className="ec3w-action-button" data-testid="tile-action-button" hidden={deletionDisabled}>
+        <div className="ec3w-action-button" data-testid="tile-action-button">
           {actionGroup}
         </div>
       </div>

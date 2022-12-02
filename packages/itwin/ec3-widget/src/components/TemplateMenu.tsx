@@ -24,6 +24,7 @@ import {
 import {
   Button,
   Surface,
+  Text,
   toaster,
 } from "@itwin/itwinui-react";
 import "./TemplateMenu.scss";
@@ -31,6 +32,7 @@ import React from "react";
 import { useReportsClient } from "./api/context/ReportsClientContext";
 import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
 import { useAccessTokenFn } from "./api/context/ApiConfigContext";
+import { SvgAdd } from "@itwin/itwinui-icons-react";
 
 interface TemplateProps {
   template?: Configuration;
@@ -178,7 +180,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               <LabeledInput
                 id='templateName'
                 name='displayName'
-                label='Template name'
+                label='EC3 Project Template Name'
                 value={childTemplate.displayName}
                 required
                 onChange={(event) => {
@@ -226,13 +228,18 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               <Surface className="ec3w-labels-container">
                 <Button
                   styleType="default"
+                  startIcon={<SvgAdd />}
                   onClick={addLabel}
                   disabled={!childTemplate.reportId}
                 >
                   Add Label
                 </Button>
                 <div className="ec3w-labels-list">
-                  {
+                  {childTemplate.labels.length === 0 && !isLoading ?
+                    <div className="gmw-empty-selection">
+                      <Text>No labels selected.</Text>
+                      <Text>Press the &quot;Add Label&quot; button to create a Label.</Text>
+                    </div> :
                     childTemplate.labels
                       .map((g) => (
                         <LabelTile
