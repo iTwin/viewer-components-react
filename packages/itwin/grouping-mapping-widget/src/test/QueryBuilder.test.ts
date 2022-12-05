@@ -3,13 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { PropertiesField } from "@itwin/presentation-common";
+import { FieldDescriptorType, PropertiesField } from "@itwin/presentation-common";
+import type { FieldDescriptor, RelationshipPath, StrippedRelatedClassInfo } from "@itwin/presentation-common";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { assert } from "chai";
 import { QueryBuilder } from "../widget/components/QueryBuilder";
 import { MockFactory } from "./MockFactory";
 import type { StubbedType } from "./MockFactory";
-import type { OperationTestData, PropertyRecordTestData, QueryBuilderTestData } from "./QueryBuilderTestData";
+import type { OperationTestData, PropertiesTestData, PropertyRecordTestData, QueryBuilderTestData } from "./QueryBuilderTestData";
 import { testCases } from "./QueryBuilder.testdata";
 
 describe("QueryBuilder", () => {
@@ -36,12 +37,46 @@ describe("QueryBuilder", () => {
     ));
   });
 
-  const createPropertyRecord = (propertyRecord: PropertyRecordTestData, propertiesField: PropertiesField) => {
+  const createFieldDescriptor = (
+    pathToClass: RelationshipPath | undefined,
+    fieldProperties: PropertiesTestData[],
+    type: FieldDescriptorType,
+    fieldName: string | undefined
+  ): FieldDescriptor => {
+    switch (type) {
+      case FieldDescriptorType.Properties:
+        const pathFromSelectToPropertyClass: StrippedRelatedClassInfo[] = (pathToClass ?? []).map((x) => ({
+          sourceClassName: x.sourceClassInfo.name,
+          targetClassName: x.targetClassInfo.name,
+          relationshipName: x.relationshipInfo.name,
+          isForwardRelationship: x.isForwardRelationship,
+        }));
+
+        const properties = fieldProperties.map((x) => ({
+          class: x.property.classInfo.name,
+          name: x.property.name,
+        }));
+
+        return {
+          pathFromSelectToPropertyClass,
+          properties,
+          type,
+        };
+      case FieldDescriptorType.Name:
+        return {
+          type,
+          fieldName: fieldName ?? "",
+        };
+    }
+  };
+
+  const createPropertyRecord = (propertyRecord: PropertyRecordTestData, propertiesField: PropertiesField, fieldDescriptor: FieldDescriptor) => {
     const propertiesFieldMock: StubbedType<PropertiesField> = MockFactory.create(PropertiesField);
 
     MockFactory.stubProperty(propertiesFieldMock, "parent", () => propertiesField.parent);
     MockFactory.stubProperty(propertiesFieldMock, "properties", () => propertiesField.properties);
     MockFactory.stubProperty(propertiesFieldMock, "type", () => propertiesField.type);
+    MockFactory.stubProperty(propertiesFieldMock, "getFieldDescriptor", () => () => fieldDescriptor);
 
     const prop: PropertyRecord = new PropertyRecord(propertyRecord.value, propertyRecord.property);
     dataProvider.getFieldByPropertyRecord.withArgs(prop).resolves(propertiesFieldMock);
@@ -50,7 +85,14 @@ describe("QueryBuilder", () => {
 
   const executeTest = async (queryBuilder: QueryBuilder, expectedResult: string, operations: OperationTestData[]) => {
     for (const op of operations) {
-      const prop = createPropertyRecord(op.propertyRecord, op.propertiesField as PropertiesField);
+      const fieldDescriptor = createFieldDescriptor(
+        op.propertiesField.parent?.pathToPrimaryClass,
+        op.propertiesField.properties,
+        op.fieldDescriptorType,
+        op.fieldDescriptorName
+      );
+
+      const prop = createPropertyRecord(op.propertyRecord, op.propertiesField as PropertiesField, fieldDescriptor);
 
       if (op.operationType === "addProperty") {
         const result = await queryBuilder.addProperty(prop);
