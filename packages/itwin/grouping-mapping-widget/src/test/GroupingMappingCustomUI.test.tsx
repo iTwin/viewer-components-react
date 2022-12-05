@@ -15,7 +15,7 @@ import { SelectionChangeEvent } from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
 import type { ContextCustomUIProps, GroupingCustomUIProps, GroupingMappingCustomUI } from "../grouping-mapping-widget";
 import { GroupingMappingCustomUIType } from "../grouping-mapping-widget";
-import { GroupingMappingApiConfig } from "../widget/components/context/GroupingApiConfigContext";
+import type { GroupingMappingApiConfig } from "../widget/components/context/GroupingApiConfigContext";
 import userEvent from "@testing-library/user-event";
 import { render } from "@testing-library/react";
 
@@ -82,7 +82,7 @@ const mockAccessToken = jest.fn().mockResolvedValue("Bearer eyJhbGci");
 jest.mock("../widget/components/context/GroupingApiConfigContext", () => ({
   ...jest.requireActual("../widget/components/context/GroupingApiConfigContext"),
   useGroupingMappingApiConfig: () => ({
-    getAccessToken: mockAccessToken
+    getAccessToken: mockAccessToken,
   }),
 }));
 
@@ -133,11 +133,11 @@ describe("Groupings View with default UIs", () => {
   });
 
   afterEach(() => {
-    connectionMock.reset()
-    groupingMappingApiConfigMock.reset()
-    mappingClientMock.reset()
-    selectionManagerMock.reset()
-    selectionScopesManagerMock.reset()
+    connectionMock.reset();
+    groupingMappingApiConfigMock.reset();
+    mappingClientMock.reset();
+    selectionManagerMock.reset();
+    selectionScopesManagerMock.reset();
   });
 
   it("List all groups and click on add group and edit group buttons", async () => {
