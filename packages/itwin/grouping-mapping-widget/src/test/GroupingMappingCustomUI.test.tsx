@@ -9,13 +9,9 @@ import { faker } from "@faker-js/faker";
 import { Groupings } from "../grouping-mapping-widget";
 import type { GroupCollection, IMappingsClient, Mapping } from "@itwin/insights-client";
 import * as moq from "typemoq";
-import type { IModelConnection, SelectionSet, SelectionSetEvent } from "@itwin/core-frontend";
-import type { SelectionManager, SelectionScopesManager } from "@itwin/presentation-frontend";
-import { SelectionChangeEvent } from "@itwin/presentation-frontend";
-import type { BeEvent } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { ContextCustomUIProps, GroupingCustomUIProps, GroupingMappingCustomUI } from "../grouping-mapping-widget";
 import { GroupingMappingCustomUIType } from "../grouping-mapping-widget";
-import type { GroupingMappingApiConfig } from "../widget/components/context/GroupingApiConfigContext";
 import userEvent from "@testing-library/user-event";
 import { render } from "@testing-library/react";
 
@@ -65,12 +61,8 @@ const groupsFactory = (): GroupCollection => ({
 });
 
 const connectionMock = moq.Mock.ofType<IModelConnection>();
-const groupingMappingApiConfigMock = moq.Mock.ofType<GroupingMappingApiConfig>();
 let groupingMappingCustomUIMock: GroupingMappingCustomUI[] = [];
 const mappingClientMock = moq.Mock.ofType<IMappingsClient>();
-
-const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
-const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
@@ -100,31 +92,8 @@ const mockGroups = groupsFactory();
 
 describe("Groupings View with default UIs", () => {
   beforeEach(async () => {
-    const selectionSet = moq.Mock.ofType<SelectionSet>();
-    const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
-
-    selectionSet.setup((x) => x.elements).returns(() => new Set([]));
-    selectionSet.setup((x) => x.onChanged).returns(() => onChanged.object);
-    connectionMock
-      .setup((x) => x.selectionSet)
-      .returns(() => selectionSet.object);
     connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId);
     connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
-
-    groupingMappingApiConfigMock
-      .setup(async (x) => x.getAccessToken())
-      .returns(mockAccessToken);
-
-    selectionScopesManagerMock
-      .setup(async (x) => x.getSelectionScopes(connectionMock.object))
-      .returns(async () => Promise.resolve([]));
-    selectionManagerMock
-      .setup((x) => x.scopes)
-      .returns(() => selectionScopesManagerMock.object);
-
-    selectionManagerMock
-      .setup((x) => x.selectionChange)
-      .returns(() => new SelectionChangeEvent());
 
     const mockedAccessToken = await mockAccessToken();
     mappingClientMock
@@ -134,10 +103,8 @@ describe("Groupings View with default UIs", () => {
 
   afterEach(() => {
     connectionMock.reset();
-    groupingMappingApiConfigMock.reset();
     mappingClientMock.reset();
-    selectionManagerMock.reset();
-    selectionScopesManagerMock.reset();
+    groupingMappingCustomUIMock = [];
   });
 
   it("List all groups and click on add group and edit group buttons", async () => {
