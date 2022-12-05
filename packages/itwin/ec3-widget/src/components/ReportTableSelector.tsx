@@ -9,7 +9,7 @@ import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import type { Configuration } from "./Template";
 import "./ReportTableSelector.scss";
 import { useODataClient } from "./api/context/ODataClientContext";
-import { useAccessTokenFn } from "./api/context/ApiConfigContext";
+import { useAccessTokenFn } from "./api/context/AccessTokenFnContext";
 
 export interface ReportTableSelectorProps {
   selectedReportTable: string;

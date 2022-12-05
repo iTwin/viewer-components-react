@@ -19,7 +19,7 @@ import {
 import { useEC3JobsClient } from "./api/context/EC3JobsClientContext";
 import type { EC3Job, EC3JobCreate } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
-import { useAccessTokenFn } from "./api/context/ApiConfigContext";
+import { useAccessTokenFn } from "./api/context/AccessTokenFnContext";
 
 interface JobSuccess {
   status: CarbonUploadState.Succeeded;

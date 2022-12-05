@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { useEffect, useMemo, useState } from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
+import { Select } from "@itwin/itwinui-react";
 import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { Report } from "@itwin/insights-client";
@@ -31,7 +32,7 @@ import "./TemplateMenu.scss";
 import React from "react";
 import { useReportsClient } from "./api/context/ReportsClientContext";
 import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
-import { useAccessTokenFn } from "./api/context/ApiConfigContext";
+import { useAccessTokenFn } from "./api/context/AccessTokenFnContext";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
 
 interface TemplateProps {
@@ -198,30 +199,37 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                 }}
               />
 
-              {!created && <div className="ec3w-report-select-container">
+              <div className="ec3w-report-select-container">
                 <div className="ec3w-report-select-combo-box">
                   <Label htmlFor="combo-input" required={true}>
                     Report
                   </Label>
-
-                  <ComboBox
-                    options={ReportOptions}
-                    value={childTemplate.reportId}
-                    onChange={async (value) => {
-                      if (template && value !== template.reportId) {
-                        setSelectedReport(value);
-                        setShowReportConfirmModal(true);
-                      } else {
-                        handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
-                      }
-                    }}
-                    inputProps={{
-                      id: "combo-input",
-                      placeholder: "Select report",
-                    }}
-                  />
+                  {!created
+                    ?
+                    <ComboBox
+                      options={ReportOptions}
+                      value={childTemplate.reportId}
+                      onChange={async (value) => {
+                        if (template && value !== template.reportId) {
+                          setSelectedReport(value);
+                          setShowReportConfirmModal(true);
+                        } else {
+                          handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
+                        }
+                      }}
+                      inputProps={{
+                        id: "combo-input",
+                        placeholder: "Select report",
+                      }}
+                    />
+                    :
+                    <Select
+                      options={ReportOptions}
+                      value={childTemplate.reportId}
+                      disabled={true}
+                    />}
                 </div>
-              </div>}
+              </div>
             </Fieldset>
 
             <Fieldset legend='Labels' className='ec3w-template-details'>

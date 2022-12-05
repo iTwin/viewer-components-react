@@ -7,14 +7,12 @@ import "@testing-library/jest-dom";
 import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
 import Templates from "../components/Templates";
 import * as moq from "typemoq";
-import type { IModelConnection } from "@itwin/core-frontend";
-import { IModelApp } from "@itwin/core-frontend";
-import type { AuthorizationClient } from "@itwin/core-common";
 import type { EC3ConfigurationsClient, Report, ReportsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
-import { setupServer } from "msw/node";
 import { EC3Config } from "../components/EC3/EC3Config";
 import { EC3ConfigurationsClientContext } from "../components/api/context/EC3ConfigurationsClientContext";
+import { AccessTokenFnContext } from "../components/api/context/AccessTokenFnContext";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const reportingClient = moq.Mock.ofType<ReportsClient>();
@@ -89,27 +87,22 @@ describe("Templates view", () => {
 
   const iTwinId = faker.datatype.uuid();
   const accessToken = faker.datatype.uuid();
-  const authClient = moq.Mock.ofType<AuthorizationClient>();
-  const server = setupServer();
   const config = new EC3Config({ clientId: "", redirectUri: "" });
+  const getAccessTokenFn = async () => accessToken;
 
   beforeAll(async () => {
-    authClient.setup(async (x) => x.getAccessToken()).returns(async () => accessToken);
-    IModelApp.authorizationClient = authClient.object;
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
     reportingClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports);
     ec3ConfigurationsClient.setup(async (x) => x.getConfigurations(accessToken, iTwinId)).returns(async () => mockedConfigurations);
     ec3ConfigurationsClient.setup(async (x) => x.getConfiguration(accessToken, configId)).returns(async () => mockedConfiguration);
   });
 
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
   it("Templates view should render successfully", () => {
     render(
       <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <Templates config={config} />
+        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
+          <Templates config={config} />
+        </AccessTokenFnContext.Provider>
       </EC3ConfigurationsClientContext.Provider>
     );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
@@ -118,7 +111,9 @@ describe("Templates view", () => {
   it("Templates view should have mocked templates", async () => {
     render(
       <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <Templates config={config} />
+        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
+          <Templates config={config} />
+        </AccessTokenFnContext.Provider>
       </EC3ConfigurationsClientContext.Provider>
     );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
@@ -131,7 +126,9 @@ describe("Templates view", () => {
   it("Templates view should have mocked templates", async () => {
     render(
       <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <Templates config={config} />
+        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
+          <Templates config={config} />
+        </AccessTokenFnContext.Provider>
       </EC3ConfigurationsClientContext.Provider>
     );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
@@ -144,7 +141,9 @@ describe("Templates view", () => {
   it("Clicking on template should oper template menu", async () => {
     render(
       <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <Templates config={config} />
+        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
+          <Templates config={config} />
+        </AccessTokenFnContext.Provider>
       </EC3ConfigurationsClientContext.Provider>
     );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
@@ -157,7 +156,9 @@ describe("Templates view", () => {
   it("Clicking create button should open creating template menu", async () => {
     render(
       <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <Templates config={config} />
+        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
+          <Templates config={config} />
+        </AccessTokenFnContext.Provider>
       </EC3ConfigurationsClientContext.Provider>
     );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();

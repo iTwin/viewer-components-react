@@ -22,7 +22,7 @@ import type { EC3Props } from "./EC3";
 import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
 import type { EC3Token } from "./EC3/EC3Token";
 import ExportModal from "./ExportModal";
-import { useAccessTokenFn } from "./api/context/ApiConfigContext";
+import { useAccessTokenFn } from "./api/context/AccessTokenFnContext";
 
 enum TemplateView {
   TEMPLATES = "templates",

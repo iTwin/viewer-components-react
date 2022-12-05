@@ -15,7 +15,7 @@ export const useAccessTokenFn = () => {
   const context = React.useContext(AccessTokenFnContext);
   if (!context) {
     throw new Error(
-      "useGroupingMappingApiConfig should be used within a ApiConfigContext provider"
+      "useGroupingMappingApiConfig should be used within a AccessTokenFnContext provider"
     );
   }
   return context;

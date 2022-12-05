@@ -6,10 +6,6 @@ import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
 import "./LabelActionPanel.scss";
 import { LoadingSpinner } from "./utils";
-import {
-  SvgExit,
-  SvgSave,
-} from "@itwin/itwinui-icons-react";
 
 export interface ActionPanelProps {
   onSave: () => void;
@@ -32,7 +28,6 @@ const LabelActionPanel = ({
         <LoadingSpinner />
       }
       <Button
-        startIcon={<SvgSave />}
         disabled={isSavingDisabled || isLoading}
         styleType='high-visibility'
         id='save-app'
@@ -41,7 +36,6 @@ const LabelActionPanel = ({
         Save
       </Button>
       <Button
-        startIcon={<SvgExit />}
         styleType='default'
         type='button'
         id='cancel'

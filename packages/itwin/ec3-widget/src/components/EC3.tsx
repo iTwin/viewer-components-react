@@ -9,7 +9,7 @@ import Templates from "./Templates";
 import { createODataClient, ODataClientContext } from "./api/context/ODataClientContext";
 import { createEC3JobsClient, EC3JobsClientContext } from "./api/context/EC3JobsClientContext";
 import { createEC3ConfigurationsClient, EC3ConfigurationsClientContext } from "./api/context/EC3ConfigurationsClientContext";
-import { AccessTokenFnContext } from "./api/context/ApiConfigContext";
+import { AccessTokenFnContext } from "./api/context/AccessTokenFnContext";
 
 export interface EC3Props {
   config: EC3Config;
