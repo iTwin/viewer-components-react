@@ -19,7 +19,6 @@ import {
 import { HorizontalTile } from "./HorizontalTile";
 import type { ReportMappingAndMapping } from "./ReportMappings";
 import "./ReportMappingHorizontalTile.scss";
-import { LoadingExtractionState } from "./ExtractionStates/LoadingExtractionState";
 
 export interface ReportMappingHorizontalTileProps {
   jobStartEvent: BeEvent<(reportId: string) => void>;
@@ -61,6 +60,7 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
       getExtractionState().catch((error) => {
         setExtractionState(ExtractionStates.Failed);
         setJobStarted(false);
+        /* eslint-disable no-console */
         console.error(error);
       });
       window.clearInterval(interval.current);
@@ -81,25 +81,25 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
           className="rcw-action-button"
           data-testid="tile-action-button">
           {extractionState === ExtractionStates.None ?
-            jobStarted ? <LoadingExtractionState /> :
-              (
-                <IconButton
-                  styleType="borderless"
-                  title={ReportsConfigWidget.localization.getLocalizedString(
-                    "ReportsConfigWidget:UpdateDataset"
-                  )}
-                  onClick={() => {
-                    props.jobStartEvent.raiseEvent(props.mapping.imodelId);
-                    props.bulkExtractor.runIModelExtraction(props.mapping.imodelId).catch((e) => {
-                      /* eslint-disable no-console */
-                      console.error(e);
-                    });
-                  }}
-                  disabled={jobStarted}
-                >
-                  <SvgRefresh />
-                </IconButton>
-              ) : (
+            (
+              <IconButton
+                styleType="borderless"
+                title={ReportsConfigWidget.localization.getLocalizedString(
+                  "ReportsConfigWidget:UpdateDataset"
+                )}
+                onClick={async () => {
+                  setExtractionState(ExtractionStates.Starting);
+                  await props.bulkExtractor.runIModelExtraction(props.mapping.imodelId).catch((e) => {
+                    /* eslint-disable no-console */
+                    console.error(e);
+                  });
+                  props.jobStartEvent.raiseEvent(props.mapping.imodelId);
+                }}
+                disabled={jobStarted}
+              >
+                <SvgRefresh />
+              </IconButton>
+            ) : (
               <ExtractionStatus
                 state={extractionState}
                 clearExtractionState={() => {

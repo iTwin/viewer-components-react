@@ -83,37 +83,37 @@ const fetchReportMappings = async (
     const authorization =
       AccessTokenAdapter.toAuthorizationCallback(accessToken);
     const iModelNames = new Map<string, string>();
-    const reportMappingsAndMapping = await Promise.all(
-      reportMappings.map(async (reportMapping) => {
-        const iModelId = reportMapping.imodelId;
-        let iModelName = "";
-        const mapping = await mappingsClientApi.getMapping(
-          accessToken,
-          iModelId,
-          reportMapping.mappingId
-        );
-        if (iModelNames.has(iModelId)) {
-          iModelName = iModelNames.get(iModelId) ?? "";
-        } else {
-          const getSingleParams: GetSingleIModelParams = {
-            authorization,
-            iModelId,
-          };
-          const iModel = await iModelsClient.iModels.getSingle(getSingleParams);
-          iModelName = iModel.displayName;
-          iModelNames.set(iModelId, iModelName);
-        }
-        const reportMappingAndMapping: ReportMappingAndMapping = {
-          ...reportMapping,
-          iModelName,
-          mappingName: mapping.mappingName,
-          mappingDescription: mapping.description ?? "",
-        };
-        return reportMappingAndMapping;
-      }) ?? []
-    );
 
-    setReportMappings(reportMappingsAndMapping);
+    const reportMappingsAndMappings = [];
+    for (const reportMapping of reportMappings) {
+      const iModelId = reportMapping.imodelId;
+      let iModelName = "";
+      const mapping = await mappingsClientApi.getMapping(
+        accessToken,
+        iModelId,
+        reportMapping.mappingId
+      );
+      if (iModelNames.has(iModelId)) {
+        iModelName = iModelNames.get(iModelId) ?? "";
+      } else {
+        const getSingleParams: GetSingleIModelParams = {
+          authorization,
+          iModelId,
+        };
+        const iModel = await iModelsClient.iModels.getSingle(getSingleParams);
+        iModelName = iModel.displayName;
+        iModelNames.set(iModelId, iModelName);
+      }
+      const reportMappingAndMapping: ReportMappingAndMapping = {
+        ...reportMapping,
+        iModelName,
+        mappingName: mapping.mappingName,
+        mappingDescription: mapping.description ?? "",
+      };
+      reportMappingsAndMappings.push(reportMappingAndMapping);
+    }
+
+    setReportMappings(reportMappingsAndMappings);
   } catch (error: any) {
     handleError(error.status);
   } finally {

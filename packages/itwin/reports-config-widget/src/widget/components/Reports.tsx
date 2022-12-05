@@ -10,6 +10,7 @@ import {
   Button,
   IconButton,
   Surface,
+  toaster,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "./utils";
@@ -69,11 +70,11 @@ const fetchReports = async (
 
 export const Reports = () => {
   const successfulExtractionToast = (iModelName: string, odataFeedUrl: string) => {
-    return (<SuccessfulExtractionToast iModelName={iModelName} odataFeedUrl={odataFeedUrl} />);
+    toaster.positive(<SuccessfulExtractionToast iModelName={iModelName} odataFeedUrl={odataFeedUrl} />);
   };
 
   const failedExtractionToast = (iModelName: string) => {
-    return (<FailedExtractionToast iModelName={iModelName} />);
+    toaster.negative(<FailedExtractionToast iModelName={iModelName} />);
   };
 
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
