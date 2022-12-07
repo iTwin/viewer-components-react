@@ -2,15 +2,16 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useCallback } from "react";
-import { IModelApp } from "@itwin/core-frontend";
-import { CategoryTree, getCategories, toggleAllCategories, useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
-import { useTreeFilteringState } from "../TreeFilteringState";
 import "./CategoriesTree.scss";
+import React, { useCallback } from "react";
+import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
+import { IModelApp } from "@itwin/core-frontend";
+import { CategoryTree, getCategories, toggleAllCategories } from "../core-trees/category-tree/CategoriesTree";
+import { CategoryVisibilityHandler } from "../core-trees/category-tree/CategoryVisibilityHandler";
 import { TreeHeaderComponent } from "../header/TreeHeader";
-import { CategoryVisibilityHandler } from "@itwin/appui-react";
-import type { CategoriesTreeProps } from "../../types";
+import { useTreeFilteringState } from "../TreeFilteringState";
 import { AutoSizer } from "../utils/AutoSizer";
+import type { CategoriesTreeProps } from "../../types";
 
 export function CategoriesTreeComponent(props: CategoriesTreeProps) {
   const iModel = useActiveIModelConnection();

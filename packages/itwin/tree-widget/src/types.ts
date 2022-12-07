@@ -3,13 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { StagePanelLocation, StagePanelSection } from "@itwin/appui-abstract";
-import type {
-  CategoryTreeProps,
-  ModelsTreeProps,
-  SpatialContainmentTreeProps,
-} from "@itwin/appui-react";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
+import { CategoryTreeProps } from "./components/core-trees/category-tree/CategoriesTree";
+import { ModelsTreeProps } from "./components/core-trees/models-tree/ModelsTree";
+import { SpatialContainmentTreeProps } from "./components/core-trees/spatial-tree/SpatialContainmentTree";
 
 export interface IModelContentTreeProps
   extends Omit<React.AllHTMLAttributes<HTMLDivElement>, "children"> {
@@ -17,28 +15,28 @@ export interface IModelContentTreeProps
 }
 
 export type ModelTreeProps = Omit<
-ModelsTreeProps,
-| "iModel"
-| "activeView"
-| "width"
-| "height"
-| "filterInfo"
-| "onFilterApplied"
+  ModelsTreeProps,
+  | "iModel"
+  | "activeView"
+  | "width"
+  | "height"
+  | "filterInfo"
+  | "onFilterApplied"
 >;
 
 export type CategoriesTreeProps = Omit<
-CategoryTreeProps,
-| "iModel"
-| "activeView"
-| "width"
-| "height"
-| "filterInfo"
-| "onFilterApplied"
+  CategoryTreeProps,
+  | "iModel"
+  | "activeView"
+  | "width"
+  | "height"
+  | "filterInfo"
+  | "onFilterApplied"
 >;
 
 export type SpatialTreeProps = Omit<
-SpatialContainmentTreeProps,
-"iModel" | "width" | "height"
+  SpatialContainmentTreeProps,
+  "iModel" | "width" | "height"
 >;
 
 export const ModelsTreeId = "models-tree";

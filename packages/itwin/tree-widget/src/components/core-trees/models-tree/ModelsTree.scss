@@ -2,11 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+@import "../VisibilityTreeBase";
 
-export * from "./types";
-export * from "./TreeWidget";
-export * from "./components/TreeWidgetComponent";
-export * from "./components/header/TreeHeader";
-export * from "./components/core-trees"
-export * from "./components/trees";
-export * from "./components/TreeWidgetUiItemsProvider";
+.ui-fw-models-tree {
+  @include ui-fw-visibility-tree-base;
+}

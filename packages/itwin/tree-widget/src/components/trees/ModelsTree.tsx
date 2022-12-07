@@ -5,7 +5,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import { ModelsTree, useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
+import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../TreeFilteringState";
 import "./ModelsTree.scss";
 import type {
@@ -15,6 +15,7 @@ import type {
 import { TreeHeaderComponent } from "../header/TreeHeader";
 import type { ModelTreeProps } from "../../types";
 import { AutoSizer } from "../utils/AutoSizer";
+import { ModelsTree } from "../core-trees/models-tree/ModelsTree";
 
 interface TreeViewModelInfo {
   id: string;
