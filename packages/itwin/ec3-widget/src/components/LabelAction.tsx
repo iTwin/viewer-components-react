@@ -147,7 +147,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
           <LabeledInput
             id='name'
             name='name'
-            label='Name'
+            label='Label Name'
             value={name}
             onChange={(event) => {
               setName(event.target.value);
