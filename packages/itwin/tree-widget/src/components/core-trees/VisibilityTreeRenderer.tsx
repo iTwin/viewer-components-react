@@ -4,12 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { IPresentationTreeDataProvider, useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
-import {
-  AbstractTreeNodeLoaderWithProvider, TreeImageLoader, TreeNodeRenderer, TreeNodeRendererProps, TreeRenderer, TreeRendererProps,
+import { TreeImageLoader, TreeNodeRenderer, TreeRenderer } from "@itwin/components-react";
+import { ImageCheckBox } from "@itwin/core-react";
+import { useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type {
+  AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps, TreeRendererProps,
 } from "@itwin/components-react";
-import { ImageCheckBox, NodeCheckboxRenderProps } from "@itwin/core-react";
-import { VisibilityTreeFilterInfo } from "./Common";
+import type { NodeCheckboxRenderProps } from "@itwin/core-react";
+import type { VisibilityTreeFilterInfo } from "./Common";
 
 /**
  * Creates Visibility tree renderer which renders nodes with eye checkbox.

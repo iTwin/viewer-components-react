@@ -23,7 +23,7 @@ export class TreeWidget {
   public static async initialize(i18n?: Localization): Promise<void> {
     if (this._initialized) return;
 
-    this._initialized = true;
+    TreeWidget._initialized = true;
     TreeWidget._i18n = i18n ?? IModelApp.localization;
 
     return TreeWidget._i18n.registerNamespace(TreeWidget.i18nNamespace);
@@ -34,6 +34,7 @@ export class TreeWidget {
     if (TreeWidget._i18n)
       TreeWidget._i18n.unregisterNamespace(TreeWidget.i18nNamespace);
     TreeWidget._i18n = undefined;
+    TreeWidget._initialized = false;
   }
 
   /** The internationalization service created by the IModelApp. */
@@ -61,9 +62,9 @@ export class TreeWidget {
     key: string | string[],
     options?: LocalizationOptions
   ): string {
-    return TreeWidget.i18n.getLocalizedStringWithNamespace(
-      TreeWidget.i18nNamespace,
-      key,
+    const stringKey = `${TreeWidget.i18nNamespace}:${key}`;
+    return TreeWidget.i18n.getLocalizedString(
+      stringKey,
       options
     );
   }
