@@ -232,7 +232,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               </div>
             </Fieldset>
 
-            <Fieldset legend='Labels' className='ec3w-template-details'>
+            <Fieldset legend='Assemblies' className='ec3w-template-details'>
               <Surface className="ec3w-labels-container">
                 <Button
                   styleType="default"
@@ -240,13 +240,13 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                   onClick={addLabel}
                   disabled={!childTemplate.reportId}
                 >
-                  Add Label
+                  Add Assembly
                 </Button>
                 <div className="ec3w-labels-list">
                   {childTemplate.labels.length === 0 && !isLoading ?
                     <div className="gmw-empty-selection">
                       <Text>No labels selected.</Text>
-                      <Text>Press the &quot;Add Label&quot; button to create a Label.</Text>
+                      <Text>Press the &quot;Add Assembly&quot; button to create a Label.</Text>
                     </div> :
                     childTemplate.labels
                       .map((g) => (
