@@ -13,6 +13,7 @@ import { EC3Config } from "../components/EC3/EC3Config";
 import { EC3ConfigurationsClientContext } from "../components/api/context/EC3ConfigurationsClientContext";
 import { AccessTokenFnContext } from "../components/api/context/AccessTokenFnContext";
 import type { IModelConnection } from "@itwin/core-frontend";
+import { renderWithContext } from "./test-utils";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const reportingClient = moq.Mock.ofType<ReportsClient>();
@@ -55,7 +56,7 @@ describe("Templates view", () => {
     (_, index) => ({
       displayName: `config_${index}`,
       description: `config_decription_${index}`,
-      id: configId,
+      id: index.toString(),
       labels: [],
       createdOn: "",
       createdBy: "",
@@ -94,28 +95,24 @@ describe("Templates view", () => {
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
     reportingClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports);
     ec3ConfigurationsClient.setup(async (x) => x.getConfigurations(accessToken, iTwinId)).returns(async () => mockedConfigurations);
-    ec3ConfigurationsClient.setup(async (x) => x.getConfiguration(accessToken, configId)).returns(async () => mockedConfiguration);
+    ec3ConfigurationsClient.setup(async (x) => x.getConfiguration(accessToken, "0")).returns(async () => mockedConfiguration);
   });
 
   it("Templates view should render successfully", () => {
-    render(
-      <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
-          <Templates config={config} />
-        </AccessTokenFnContext.Provider>
-      </EC3ConfigurationsClientContext.Provider>
-    );
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
   });
 
   it("Templates view should have mocked templates", async () => {
-    render(
-      <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
-          <Templates config={config} />
-        </AccessTokenFnContext.Provider>
-      </EC3ConfigurationsClientContext.Provider>
-    );
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     mockedConfigurations.forEach((c) =>
@@ -124,13 +121,11 @@ describe("Templates view", () => {
   });
 
   it("Templates view should have mocked templates", async () => {
-    render(
-      <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
-          <Templates config={config} />
-        </AccessTokenFnContext.Provider>
-      </EC3ConfigurationsClientContext.Provider>
-    );
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     mockedConfigurations.forEach((c) =>
@@ -139,13 +134,11 @@ describe("Templates view", () => {
   });
 
   it("Clicking on template should oper template menu", async () => {
-    render(
-      <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
-          <Templates config={config} />
-        </AccessTokenFnContext.Provider>
-      </EC3ConfigurationsClientContext.Provider>
-    );
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     const configuration = screen.getByText(mockedConfigurations[0].displayName);
@@ -154,16 +147,47 @@ describe("Templates view", () => {
   });
 
   it("Clicking create button should open creating template menu", async () => {
-    render(
-      <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
-          <Templates config={config} />
-        </AccessTokenFnContext.Provider>
-      </EC3ConfigurationsClientContext.Provider>
-    );
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const button = screen.getByText("Create Template");
     button.click();
     expect(screen.getByTestId("ec3-templateDetails")).toBeInTheDocument();
+  });
+
+  it("Clicking on tile should select it", async () => {
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
+    const configuration = screen.getAllByTestId("horizontal-tile")[0];
+    configuration.click();
+    expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
+  });
+
+  it("Clicking again or on other tile should deselect", async () => {
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
+    const configurations = screen.getAllByTestId("horizontal-tile");
+    configurations[0].click();
+    expect(configurations[0].className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
+
+    configurations[1].click();
+    expect(configurations[0].className).toBe("ec3w-horizontal-tile-container");
+    expect(configurations[1].className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
+
+    configurations[1].click();
+    expect(configurations[1].className).toBe("ec3w-horizontal-tile-container");
   });
 });
