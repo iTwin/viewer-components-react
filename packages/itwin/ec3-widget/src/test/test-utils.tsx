@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { EC3ConfigurationsClient, EC3JobsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
-import { render } from "@testing-library/react";
+import { render, RenderResult } from "@testing-library/react";
 import React from "react";
 import { AccessTokenFnContext, GetAccessTokenFn } from "../components/api/context/AccessTokenFnContext";
 import { EC3ConfigurationsClientContext } from "../components/api/context/EC3ConfigurationsClientContext";
@@ -23,8 +23,8 @@ export interface RenderParameters {
 
 export function renderWithContext({
   component, ec3ConfigurationsClient, ec3JobsClient, reportsClient, oDataClient, getAccessTokenFn
-}: RenderParameters) {
-  render(
+}: RenderParameters): RenderResult {
+  return render(
     <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient ?? new EC3ConfigurationsClient()}>
       <EC3JobsClientContext.Provider value={ec3JobsClient ?? new EC3JobsClient()}>
         <ReportsClientContext.Provider value={reportsClient ?? new ReportsClient()}>

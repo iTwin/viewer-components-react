@@ -207,6 +207,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                   {!created
                     ?
                     <ComboBox
+                      data-testid="ec3-enabled-selection"
                       options={ReportOptions}
                       value={childTemplate.reportId}
                       onChange={async (value) => {
@@ -224,6 +225,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                     />
                     :
                     <Select
+                      data-testid="ec3-disabled-selection"
                       options={ReportOptions}
                       value={childTemplate.reportId}
                       disabled={true}
