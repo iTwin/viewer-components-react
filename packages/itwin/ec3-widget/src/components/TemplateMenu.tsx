@@ -245,8 +245,8 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                 <div className="ec3w-labels-list">
                   {childTemplate.labels.length === 0 && !isLoading ?
                     <div className="gmw-empty-selection">
-                      <Text>No labels selected.</Text>
-                      <Text>Press the &quot;Add Assembly&quot; button to create a Label.</Text>
+                      <Text>No Assemblies selected.</Text>
+                      <Text>Press the &quot;Add Assembly&quot; button to create an Assembly.</Text>
                     </div> :
                     childTemplate.labels
                       .map((g) => (
