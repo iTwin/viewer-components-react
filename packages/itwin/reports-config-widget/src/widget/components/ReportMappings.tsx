@@ -27,7 +27,7 @@ import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
 import type { Report, ReportMapping } from "@itwin/insights-client";
 import { MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
-import AddMappingsModal from "./AddMappingsModal";
+import { AddMappingsModal } from "./AddMappingsModal";
 import type {
   GetSingleIModelParams,
   IModelsClientOptions,

@@ -25,7 +25,7 @@ import type {
 import type { ReportMappingAndMapping } from "../widget/components/ReportMappings";
 import type { IModelOperations, OperationOptions } from "@itwin/imodels-client-management";
 import { IModelState } from "@itwin/imodels-client-management";
-import AddMappingsModal from "../widget/components/AddMappingsModal";
+import { AddMappingsModal } from "../widget/components/AddMappingsModal";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId1 = faker.datatype.uuid();

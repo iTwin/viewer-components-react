@@ -21,6 +21,7 @@ export const SucceededExtractionState = ({ animation, onAnimationEnd }: Extracti
   >
     <div
       className={`rcw-status-icon`}
+      data-testid="rcw-success-animation"
       style={{
         animationName: animation ? "rcw-fade-out" : "",
         animationDelay: ANIMATION_DELAY,

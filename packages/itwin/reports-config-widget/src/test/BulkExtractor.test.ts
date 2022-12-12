@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
 import BulkExtractor from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 import { assert } from "chai";
@@ -19,8 +18,8 @@ jest.mock("../widget/components/ExtractionToast.tsx", () => ({
   SuccessfulExtractionToast: jest.fn(),
 }));
 
-const mockRunExtraction = moq.Mock.ofType<(accessToken: AccessToken, iModelId: string) => Promise<{ id: string; }>>();
-const mockGetStatus = moq.Mock.ofType<(accessToken: AccessToken, jobId: string) => Promise<{ state: ExtractorState; }>>();
+const mockRunExtraction = moq.Mock.ofType<(accessToken: AccessToken, iModelId: string) => Promise<{ id: string }>>();
+const mockGetStatus = moq.Mock.ofType<(accessToken: AccessToken, jobId: string) => Promise<{ state: ExtractorState }>>();
 const mockGetReportMappings = moq.Mock.ofType<(accessToken: AccessToken, reportId: string) => Promise<{ imodelId: string }[]>>();
 
 jest.mock("@itwin/insights-client", () => ({
@@ -121,7 +120,6 @@ describe("BulkExtractor", () => {
 
   it("two started jobs should return status", async () => {
     const mockIModelIds = [mockIModelId, mockIModelId1];
-    const mockRunIds = [mockRunId, mockRunId1];
 
     mockRunExtraction.setup(async (x) => x(moq.It.isAny(), mockIModelId)).returns(
       async () => ({ id: mockRunId })

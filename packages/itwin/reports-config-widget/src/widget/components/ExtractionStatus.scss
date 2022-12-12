@@ -12,6 +12,9 @@
   .rcw-status-icon {
     width: $iui-icons-default;
     height: $iui-icons-default;
+    align-items: center;
+    margin: auto $iui-s * 1.5;
+    display: flex;
   }
 }
 
@@ -19,7 +22,7 @@
   align-items: center;
   height: 38px;
   display: flex;
-  margin: auto $iui-s * 2;
+  margin: auto $iui-s * 1.5;
 
   .rcw-status-icon {
     width: $iui-icons-default;

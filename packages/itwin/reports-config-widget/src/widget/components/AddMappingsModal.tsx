@@ -50,7 +50,7 @@ interface AddMappingsModalProps {
   returnFn: () => Promise<void>;
 }
 
-const AddMappingsModal = ({
+export const AddMappingsModal = ({
   reportId,
   existingMappings,
   show,
@@ -171,5 +171,3 @@ const AddMappingsModal = ({
     </Modal>
   );
 };
-
-export default AddMappingsModal;

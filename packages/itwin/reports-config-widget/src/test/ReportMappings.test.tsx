@@ -13,20 +13,21 @@ import type {
 import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import {
+  act,
   render,
   screen,
   TestUtils,
   waitForElementToBeRemoved,
   within,
 } from "./test-utils";
-import userEvent from "@testing-library/user-event";
 import * as moq from "typemoq";
 import type {
   MappingSingle,
   Report,
   ReportMappingCollection,
 } from "@itwin/insights-client";
-import { ReportMappingAndMapping, ReportMappings } from "../widget/components/ReportMappings";
+import type { ReportMappingAndMapping } from "../widget/components/ReportMappings";
+import { ReportMappings } from "../widget/components/ReportMappings";
 import type { GetSingleIModelParams, IModelOperations, OperationOptions } from "@itwin/imodels-client-management";
 import { IModelState } from "@itwin/imodels-client-management";
 import type {
@@ -39,8 +40,8 @@ import {
 } from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
 import type BulkExtractor from "../widget/components/BulkExtractor";
-import { ExtractionStates } from "../widget/components/ExtractionStatus";
-import { act } from "react-dom/test-utils";
+import type { ReportMappingHorizontalTileProps } from "../widget/components/ReportMappingHorizontalTile";
+import { Text } from "@itwin/itwinui-react";
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -213,18 +214,28 @@ jest.mock("../widget/components/Constants.ts", () => ({
   STATUS_CHECK_INTERVAL: 10,
 }));
 
+jest.mock("../widget/components/ReportMappingHorizontalTile", () => ({
+  ReportMappingHorizontalTile: (props: ReportMappingHorizontalTileProps) => {
+    return (<div data-testid="horizontal-tile">
+      <Text>{props.mapping.mappingName}</Text>
+      <Text title={props.mapping.mappingDescription}>{props.mapping.iModelName}</Text>
+    </div>);
+  },
+}));
+
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
   useActiveIModelConnection: () => connectionMock.object,
 }));
 
 let returnFn: () => Promise<void>;
-jest.mock('../widget/components/AddMappingsModal',
-  () => (props: AddMappingsModalProps) => {
+jest.mock("../widget/components/AddMappingsModal", () => ({
+  ...jest.requireActual("../widget/components/AddMappingsModal"),
+  AddMappingsModal: (props: AddMappingsModalProps) => {
     returnFn = props.returnFn;
     return <div />;
-  }
-);
+  },
+}));
 
 jest.mock("@itwin/imodels-client-management", () => ({
   ...jest.requireActual("@itwin/imodels-client-management"),
@@ -311,10 +322,6 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    mockBulkExtractor
-      .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => ExtractionStates.None);
-
     render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -334,10 +341,6 @@ describe("Report Mappings View", () => {
       .returns(async () => mockIModelsResponse[1].iModel);
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
-
-    mockBulkExtractor
-      .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => ExtractionStates.None);
 
     const { user } = render(
       <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
@@ -381,75 +384,6 @@ describe("Report Mappings View", () => {
     ).toBeInTheDocument();
   });
 
-  it("remove a report mapping", async () => {
-    const mockReportMappings = mockReportMappingsFactory();
-    const mockMappings = mockMappingsFactory(mockReportMappings);
-    const mockReportMappingsOriginalSize = mockReportMappings.mappings.length;
-
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
-      .returns(async () => mockIModelsResponse[0].iModel);
-
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
-      .returns(async () => mockIModelsResponse[1].iModel);
-
-    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
-    mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings).mockReturnValueOnce(mockReportMappings.mappings.filter(
-      (mapping) =>
-        mapping.mappingId !== mockReportMappings.mappings[0].mappingId
-    ));
-
-    mockDeleteReportMapping.mockImplementation(() => {
-      mockReportMappings.mappings = mockReportMappings.mappings.filter(
-        (mapping) =>
-          mapping.mappingId !== mockReportMappings.mappings[0].mappingId
-      );
-      return;
-    });
-
-    mockBulkExtractor
-      .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => ExtractionStates.None);
-
-    const { user } = render(
-      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
-    );
-
-    await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
-
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
-      .returns(async () => mockIModelsResponse[0].iModel);
-
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
-      .returns(async () => mockIModelsResponse[1].iModel);
-
-    mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
-
-    const removeButton = screen.getAllByTitle("Remove")[0];
-    await user.click(removeButton);
-    // Delete modal dialog should appear
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-    const modal = screen.getByRole("dialog");
-
-    const withinModal = within(modal);
-
-    const deleteButton = withinModal.getByRole("button", {
-      name: /delete/i,
-    });
-
-    await user.click(deleteButton);
-
-    await waitForElementToBeRemoved(() => screen.getByRole("dialog"));
-
-    expect(mockDeleteReportMapping).toBeCalledTimes(1);
-    expect(mockReportMappings.mappings.length).toBe(mockReportMappingsOriginalSize - 1);
-
-    expect(mockGetReportMappings).toBeCalledTimes(2);
-    // Should be one less mapping
-    expect(screen.getAllByTestId("horizontal-tile")).toHaveLength(
-      mockReportMappingsOriginalSize - 1
-    );
-  });
-
   it("add mapping", async () => {
     const mockReportMappings = mockReportMappingsFactory();
     const mockMappings = mockMappingsFactory(mockReportMappings);
@@ -461,12 +395,7 @@ describe("Report Mappings View", () => {
       .returns(async () => mockIModelsResponse[1].iModel);
 
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
-
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
-
-    mockBulkExtractor
-      .setup((x) => x.getIModelState(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => ExtractionStates.None);
 
     render(
       <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
@@ -476,11 +405,9 @@ describe("Report Mappings View", () => {
 
     mockGetMappings.mockReturnValueOnce(mockMappings.map((m: MappingSingle) => m.mapping));
 
-    act(() => {
-      returnFn();
+    await act(async () => {
+      await returnFn();
     });
-
-    await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
     const horizontalTiles = screen.getAllByTestId("horizontal-tile");
     assertHorizontalTiles(horizontalTiles, mockMappings);
@@ -513,13 +440,9 @@ describe("Report Mappings View", () => {
     expect(screen.getByText(/copiedtoclipboard/i)).toBeInTheDocument();
   });
 
-  it("full extraction", async () => {
+  it("update all datasets", async () => {
     const mockReportMappings = mockReportMappingsFactory();
     const mockMappings = mockMappingsFactory(mockReportMappings);
-
-    const delay = 1000;
-
-    Element.prototype.scrollIntoView = jest.fn();
 
     mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
       .returns(async () => mockIModelsResponse[0].iModel);
@@ -527,59 +450,21 @@ describe("Report Mappings View", () => {
     mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
       .returns(async () => mockIModelsResponse[1].iModel);
 
-    mockBulkExtractor
-      .setup((x) => x.getIModelState(mockIModelId2, moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => ExtractionStates.None);
-
-    mockBulkExtractor
-      .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => ExtractionStates.Starting);
-
-    mockBulkExtractor
-      .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => ExtractionStates.Queued);
-
-    mockBulkExtractor
-      .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => ExtractionStates.Running);
-
-    mockBulkExtractor
-      .setup((x) => x.getIModelState(mockIModelId1, moq.It.isAny(), moq.It.isAny()))
-      .returns(async () => ExtractionStates.Succeeded);
-
-    mockBulkExtractor.setup(async (x) => x.runIModelExtraction(moq.It.isAny())).returns(async () => { });
-
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />);
+    const iModels = mockIModelsResponse.map((iModel) => iModel.iModel.id);
+    mockBulkExtractor.setup(async (x) => x.runIModelExtractions(iModels)).returns(async () => Promise.resolve());
 
-    // https://github.com/testing-library/user-event/issues/833
-    const user = userEvent.setup({ delay: null });
+    const { user } = render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const update = screen.getAllByTitle("UpdateDataset")[0];
-    await user.click(update);
+    const extractAllButton = screen.getByText(/UpdateAllDatasets/i);
+    expect(extractAllButton).toBeInTheDocument();
 
-    // TODO Assert that it is in the correct HorizontalTile
-    const startingStates = await screen.findAllByTitle(/starting/i);
-    expect(startingStates).toHaveLength(1);
-
-    const queuedStates = await screen.findAllByTitle(/queued/i, undefined, {
-      timeout: delay,
-    });
-    expect(queuedStates).toHaveLength(1);
-
-    const runningStates = await screen.findAllByTitle(/running/i, undefined, {
-      timeout: delay,
-    });
-    expect(runningStates).toHaveLength(1);
-
-    const succeededStates = await screen.findAllByTitle(/success/i, undefined, {
-      timeout: delay,
-    });
-    expect(succeededStates).toHaveLength(1);
+    await user.click(extractAllButton);
+    mockBulkExtractor.verify(async (x) => x.runIModelExtractions(iModels), moq.Times.once());
   });
 
   const assertHorizontalTiles = (horizontalTiles: HTMLElement[], mockMappings: MappingSingle[]) => {
@@ -605,5 +490,5 @@ describe("Report Mappings View", () => {
         reportMappingTile.getByText(mockiModel?.iModel.displayName ?? "")
       ).toBeInTheDocument();
     }
-  }
+  };
 });

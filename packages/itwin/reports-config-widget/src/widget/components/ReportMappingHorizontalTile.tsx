@@ -2,23 +2,20 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import React from "react";
 import type BulkExtractor from "./BulkExtractor";
 import { ExtractionStates, ExtractionStatus } from "./ExtractionStatus";
 import type { BeEvent } from "@itwin/core-bentley";
 import { STATUS_CHECK_INTERVAL } from "./Constants";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
-import {
-  IconButton, ProgressRadial,
-} from "@itwin/itwinui-react";
+import { IconButton } from "@itwin/itwinui-react";
 import {
   SvgDelete,
   SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import { HorizontalTile } from "./HorizontalTile";
 import type { ReportMappingAndMapping } from "./ReportMappings";
-import "./ReportMappingHorizontalTile.scss";
 
 export interface ReportMappingHorizontalTileProps {
   jobStartEvent: BeEvent<(reportId: string) => void>;
@@ -47,13 +44,13 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
     };
   }, [props.jobStartEvent, props.mapping]);
 
-  const getExtractionState = async () => {
+  const getExtractionState = useCallback(async () => {
     const state = await props.bulkExtractor.getIModelState(props.mapping.imodelId, props.mapping.iModelName, props.odataFeedUrl);
     setExtractionState(state);
     if (state === ExtractionStates.Failed || state === ExtractionStates.Succeeded || state === ExtractionStates.None) {
       setJobStarted(false);
     }
-  };
+  }, [props.mapping, props.bulkExtractor, props.odataFeedUrl]);
 
   useEffect(() => {
     if (jobStarted) {
@@ -69,7 +66,7 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
       }, STATUS_CHECK_INTERVAL);
     }
     return () => window.clearInterval(interval.current);
-  }, [props.mapping, props.bulkExtractor, props.odataFeedUrl, jobStarted, getExtractionState]);
+  }, [jobStarted, getExtractionState]);
 
   return (
     <HorizontalTile
