@@ -12,7 +12,7 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import { SelectionMode } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { BisCodeSpec, Code, IModel, RelatedElement } from "@itwin/core-common";
-import { IModelApp, NoRenderApp, SnapshotConnection } from "@itwin/core-frontend";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
