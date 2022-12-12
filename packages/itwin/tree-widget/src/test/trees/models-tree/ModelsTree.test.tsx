@@ -20,8 +20,8 @@ import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { ModelsTree, RULESET_MODELS, RULESET_MODELS_GROUPED_BY_CLASS } from "../../../components/core-trees/models-tree/ModelsTree";
-import { ModelsTreeNodeType } from "../../../components/core-trees/models-tree/ModelsVisibilityHandler";
+import { ModelsTree, RULESET_MODELS, RULESET_MODELS_GROUPED_BY_CLASS } from "../../../components/trees/models-tree/ModelsTree";
+import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { deepEquals, mockPresentationManager, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
 import type { TreeNodeItem } from "@itwin/components-react";
@@ -30,8 +30,8 @@ import type { Node, NodeKey, NodePathElement } from "@itwin/presentation-common"
 import type { PresentationManager, RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { CategoryProps, ElementProps, ModelProps, PhysicalElementProps, RelatedElementProps } from "@itwin/core-common";
-import type { ModelsVisibilityHandler } from "../../../components/core-trees/models-tree/ModelsVisibilityHandler";
-import type { VisibilityChangeListener } from "../../../components/core-trees/VisibilityTreeEventHandler";
+import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 
 describe("ModelsTree", () => {
 

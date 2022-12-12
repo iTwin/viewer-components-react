@@ -12,7 +12,7 @@ import { KeySet, StandardNodeTypes } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import { render, waitFor } from "@testing-library/react";
-import { SpatialContainmentTree } from "../../../components/core-trees/spatial-tree/SpatialContainmentTree";
+import { SpatialContainmentTree } from "../../../components/trees/spatial-tree/SpatialContainmentTree";
 import { mockPresentationManager } from "../../TestUtils";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";

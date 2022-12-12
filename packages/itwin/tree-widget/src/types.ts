@@ -5,9 +5,9 @@
 import type { StagePanelLocation, StagePanelSection } from "@itwin/appui-abstract";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { CategoryTreeProps } from "./components/core-trees/category-tree/CategoriesTree";
-import type { ModelsTreeProps } from "./components/core-trees/models-tree/ModelsTree";
-import type { SpatialContainmentTreeProps } from "./components/core-trees/spatial-tree/SpatialContainmentTree";
+import type { CategoryTreeProps } from "./components/trees/category-tree/CategoriesTree";
+import type { ModelsTreeProps } from "./components/trees/models-tree/ModelsTree";
+import type { SpatialContainmentTreeProps } from "./components/trees/spatial-tree/SpatialContainmentTree";
 
 export interface IModelContentTreeProps
   extends Omit<React.AllHTMLAttributes<HTMLDivElement>, "children"> {

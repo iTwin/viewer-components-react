@@ -19,10 +19,10 @@ import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { CategoryTree, RULESET_CATEGORIES, toggleAllCategories } from "../../../components/core-trees/category-tree/CategoriesTree";
-import { CategoryVisibilityHandler } from "../../../components/core-trees/category-tree/CategoryVisibilityHandler";
+import { CategoryTree, RULESET_CATEGORIES, toggleAllCategories } from "../../../components/trees/category-tree/CategoriesTree";
+import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import { mockPresentationManager, TestUtils } from "../../TestUtils";
-import type { VisibilityChangeListener } from "../../../components/core-trees/VisibilityTreeEventHandler";
+import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, ScreenViewport, SpatialViewState, SubCategoriesCache, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { TreeDataChangesListener, TreeNodeItem } from "@itwin/components-react";

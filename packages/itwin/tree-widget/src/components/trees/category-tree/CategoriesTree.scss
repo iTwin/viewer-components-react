@@ -2,8 +2,17 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+@import "~@itwin/core-react/lib/cjs/core-react/index";
 @import "../VisibilityTreeBase";
 
-.ui-fw-models-tree {
+.ui-fw-categories-tree {
   @include ui-fw-visibility-tree-base;
+}
+
+.tree-widget-category-tree-search-bar {
+  margin-bottom: $uicore-s;
+}
+
+.tree-widget-category-tree-toolbar-icon {
+  color: $buic-icon-color;
 }

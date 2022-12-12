@@ -7,13 +7,13 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
 import { BeEvent, BeUiEvent, using } from "@itwin/core-bentley";
-import { VisibilityTreeEventHandler } from "../../components/core-trees/VisibilityTreeEventHandler";
+import { VisibilityTreeEventHandler } from "../../components/trees/VisibilityTreeEventHandler";
 import { flushAsyncOperations } from "../TestUtils";
 import { createSimpleTreeModelNode } from "./Common";
 import type { AbstractTreeNodeLoaderWithProvider, TreeModel, TreeModelChanges, TreeModelSource } from "@itwin/components-react";
 import type { SelectionHandler } from "@itwin/presentation-frontend";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus, VisibilityTreeEventHandlerParams } from "../../components/core-trees/VisibilityTreeEventHandler";
+import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus, VisibilityTreeEventHandlerParams } from "../../components/trees/VisibilityTreeEventHandler";
 
 describe("VisibilityTreeEventHandler", () => {
 

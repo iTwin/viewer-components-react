@@ -4,9 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import React from "react";
-import type { SpatialTreeProps } from "../../types";
-import { SpatialContainmentTree } from "../core-trees/spatial-tree/SpatialContainmentTree";
-import { AutoSizer } from "../utils/AutoSizer";
+import type { SpatialTreeProps } from "../../../types";
+import { SpatialContainmentTree } from "./SpatialContainmentTree";
+import { AutoSizer } from "../../utils/AutoSizer";
 
 export const SpatialTreeComponent = (
   props: SpatialTreeProps) => {

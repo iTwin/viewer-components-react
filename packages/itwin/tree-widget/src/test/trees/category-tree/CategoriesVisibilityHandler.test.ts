@@ -12,13 +12,13 @@ import { BeEvent, using } from "@itwin/core-bentley";
 import { PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { StandardNodeTypes } from "@itwin/presentation-common";
 import { renderHook } from "@testing-library/react-hooks";
-import { CategoryVisibilityHandler, useCategories } from "../../../components/core-trees/category-tree/CategoryVisibilityHandler";
+import { CategoryVisibilityHandler, useCategories } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import type { Id64String } from "@itwin/core-bentley";
 import type {
   IModelConnection, ScreenViewport, SubCategoriesCache, ViewManager, Viewport, ViewState,
 } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
-import type { Category, CategoryVisibilityHandlerParams } from "../../../components/core-trees/category-tree/CategoryVisibilityHandler";
+import type { Category, CategoryVisibilityHandlerParams } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 
 const createKey = (id: Id64String): ECInstancesNodeKey => {
   return {

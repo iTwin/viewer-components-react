@@ -6,12 +6,12 @@ import "./CategoriesTree.scss";
 import React, { useCallback } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
-import { CategoryTree, getCategories, toggleAllCategories } from "../core-trees/category-tree/CategoriesTree";
-import { CategoryVisibilityHandler } from "../core-trees/category-tree/CategoryVisibilityHandler";
-import { TreeHeaderComponent } from "../header/TreeHeader";
-import { useTreeFilteringState } from "../TreeFilteringState";
-import { AutoSizer } from "../utils/AutoSizer";
-import type { CategoriesTreeProps } from "../../types";
+import { CategoryTree, getCategories, toggleAllCategories } from "./CategoriesTree";
+import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
+import { TreeHeaderComponent } from "../../header/TreeHeader";
+import { useTreeFilteringState } from "../../TreeFilteringState";
+import { AutoSizer } from "../../utils/AutoSizer";
+import type { CategoriesTreeProps } from "../../../types";
 
 export function CategoriesTreeComponent(props: CategoriesTreeProps) {
   const iModel = useActiveIModelConnection();
