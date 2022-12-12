@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/reports-config-widget-react",
-      "comment": "Extraction workflow for mappings updated.",
+      "comment": "IModel extraction dropdown removed.",
       "type": "minor"
     }
   ],
