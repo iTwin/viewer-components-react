@@ -358,9 +358,6 @@ describe("ModelsTree", () => {
   });
 
   describe("#integration", () => {
-    let imodel: IModelConnection;
-    const testIModelPath = "src/test/test-data/JoesHouse.bim";
-
     beforeEach(async () => {
       await initializePresentationTesting({
         backendProps: {
@@ -372,30 +369,10 @@ describe("ModelsTree", () => {
         },
         testOutputDir: join(__dirname, "output"),
       });
-      imodel = await SnapshotConnection.openFile(testIModelPath);
     });
 
     afterEach(async () => {
-      await imodel.close();
       await terminatePresentationTesting();
-    });
-
-    it("shows correct hierarchy", async () => {
-      const hierarchyBuilder = new HierarchyBuilder({ imodel });
-      const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_MODELS);
-      expect(hierarchy).to.matchSnapshot();
-    });
-
-    it("shows correct hierarchy with class grouping", async () => {
-      const hierarchyBuilder = new HierarchyBuilder({ imodel });
-      const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_MODELS_GROUPED_BY_CLASS);
-      expect(hierarchy).to.matchSnapshot();
-    });
-
-    it("renders component with real data and no active viewport", async () => {
-      const result = render(<ModelsTree {...sizeProps} iModel={imodel} />);
-      await waitFor(() => result.getByText("Joe's house.bim"), { timeout: 60 * 1000 });
-      expect(result.container).to.matchSnapshot();
     });
 
     it("does not show private categories with RULESET_MODELS", async () => {
