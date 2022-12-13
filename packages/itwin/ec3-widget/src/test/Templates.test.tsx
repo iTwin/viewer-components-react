@@ -112,7 +112,7 @@ describe("Templates view", () => {
     expect(screen.getByTestId("ec3-templateDetails")).toBeInTheDocument();
   });
 
-  it("Clicking on tile should select it", async () => {
+  it("Clicking on tile should select it and enable export button", async () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
@@ -120,9 +120,14 @@ describe("Templates view", () => {
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
+
+    const button = screen.getByTestId("ec3-export-button") as HTMLInputElement;
+    expect(button.disabled).toBe(true);
+
     const configuration = screen.getAllByTestId("horizontal-tile")[0];
     configuration.click();
     expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
+    expect(button.disabled).toBe(false);
   });
 
   it("Clicking again or on other tile should deselect", async () => {

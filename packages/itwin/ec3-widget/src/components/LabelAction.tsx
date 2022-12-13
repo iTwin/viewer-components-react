@@ -130,7 +130,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
         returnFn={goBack}
         disabled={isLoading}
       />
-      <div className='ec3w-label-details-container'>
+      <div className='ec3w-label-details-container' data-testid="ec3-label-action">
         <Fieldset legend='Label' className='ec3w-label-details'>
           <Small className='ec3w-label-field-legend'>
             Asterisk * indicates mandatory fields.

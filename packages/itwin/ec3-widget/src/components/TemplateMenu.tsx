@@ -180,6 +180,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               </Small>
               <LabeledInput
                 id='templateName'
+                data-testId={'ec3-template-name-input'}
                 name='displayName'
                 label='EC3 Project Template Name'
                 value={childTemplate.displayName}
@@ -191,6 +192,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               />
               <LabeledInput
                 id='templateDescription'
+                data-testId={'ec3-template-description-input'}
                 name='description'
                 label='Template description'
                 value={childTemplate.description}
@@ -237,6 +239,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
             <Fieldset legend='Labels' className='ec3w-template-details'>
               <Surface className="ec3w-labels-container">
                 <Button
+                  data-testid={"ec3-add-assembly-button"}
                   styleType="default"
                   startIcon={<SvgAdd />}
                   onClick={addLabel}

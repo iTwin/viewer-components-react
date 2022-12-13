@@ -29,6 +29,7 @@ const TemplateActionPanel = ({
           <LoadingSpinner />
         }
         <Button
+          data-testid={'ec3-save-button'}
           disabled={isSavingDisabled || isLoading}
           styleType='high-visibility'
           id='save-app'
