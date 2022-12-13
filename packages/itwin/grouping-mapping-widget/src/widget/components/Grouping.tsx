@@ -158,7 +158,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       getAccessToken,
       mappingClient,
     );
-  }, [getAccessToken, mappingClient, iModelId, mapping.id, setIsLoading]);
+  }, [getAccessToken, mappingClient, iModelId, mapping.id]);
 
   const getGroupColor = function (index: number) {
     return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
@@ -612,12 +612,12 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
                                   return <MenuItem
                                     key={p.name}
                                     onClick={() => {
-                                      if(p.uiComponent) {
+                                      if (p.uiComponent) {
                                         setSelectedGroup(g);
                                         setSelectedContextCustomUI(p);
                                         setGroupsView(GroupsView.CustomUI);
                                       }
-                                      if(p.onClick) {
+                                      if (p.onClick) {
                                         p.onClick(g.id, mapping.id, iModelId);
                                       }
                                       close();
@@ -692,7 +692,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
         : null;
     default:
       return (
-        <EmptyMessage message="No given group view"/>
+        <EmptyMessage message="No given group view" />
       );
   }
 };

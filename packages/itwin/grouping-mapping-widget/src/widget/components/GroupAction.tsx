@@ -30,15 +30,12 @@ import { defaultUIMetadata } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import type { PropertyRecord } from "@itwin/appui-abstract";
 import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
-import { QueryBuilder } from "./QueryBuilder";
 import {
   transparentOverriddenElements,
   visualizeElementsByQuery,
   zoomToElements,
 } from "./viewerUtils";
-import { GroupQueryBuilderContext } from "./context/GroupQueryBuilderContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
@@ -73,10 +70,6 @@ const GroupAction = (props: GroupActionProps) => {
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const [currentPropertyList, setCurrentPropertyList] = useState<PropertyRecord[]>([]);
-  const [queryBuilder, setQueryBuilder] = useState<QueryBuilder>(
-    new QueryBuilder(undefined),
-  );
   const [queryGenerationType, setQueryGenerationType] = useState(
     props.queryGenerationType,
   );
@@ -129,13 +122,6 @@ const GroupAction = (props: GroupActionProps) => {
           return;
         }
 
-        if (
-          queryGenerationType === "Selection" &&
-          currentPropertyList.length === 0
-        ) {
-          return;
-        }
-
         setIsRendering(true);
         transparentOverriddenElements();
         const resolvedHiliteIds = await visualizeElementsByQuery(
@@ -152,7 +138,7 @@ const GroupAction = (props: GroupActionProps) => {
     };
 
     void reemphasize();
-  }, [iModelConnection, query, currentPropertyList, queryGenerationType]);
+  }, [iModelConnection, query]);
 
   useEffect(() => {
     Presentation.selection.clearSelection(
@@ -210,25 +196,15 @@ const GroupAction = (props: GroupActionProps) => {
     iModelConnection,
   ]);
 
-  const createQueryBuilderComponent  = () => {
+  const createQueryBuilderComponent = () => {
     switch (queryGenerationType) {
       case "Selection": {
         return (
-          <GroupQueryBuilderContext.Provider
-            value={{
-              currentPropertyList,
-              setCurrentPropertyList,
-              query,
-              setQuery,
-              queryBuilder,
-              setQueryBuilder,
-              isLoading,
-              isRendering,
-              resetView: props.resetView,
-            }}
-          >
-            <GroupQueryBuilderContainer />
-          </GroupQueryBuilderContext.Provider>
+          <GroupQueryBuilderContainer
+            updateQuery={setQuery}
+            isUpdating={isUpdating}
+            resetView={props.resetView}
+          />
         );
       }
       case "Search": {

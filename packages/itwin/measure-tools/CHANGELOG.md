@@ -1,6 +1,20 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Mon, 31 Oct 2022 19:03:27 GMT and should not be manually modified.
+This log was last generated on Thu, 01 Dec 2022 14:13:39 GMT and should not be manually modified.
+
+## 0.10.6
+Thu, 01 Dec 2022 14:13:39 GMT
+
+### Patches
+
+- Add listeners to quantityFormatter events we did not account for. Fix issues where a qf override was being set and the measure-tools weren't picking up the change.
+
+## 0.10.5
+Wed, 16 Nov 2022 19:55:30 GMT
+
+### Patches
+
+- Hide perpendicular measure tool for drawing view
 
 ## 0.10.4
 Mon, 31 Oct 2022 19:03:27 GMT
