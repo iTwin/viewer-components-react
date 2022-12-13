@@ -375,8 +375,6 @@ export const manufactureKeys = async (
   query: string,
   iModelConnection: IModelConnection,
 ): Promise<KeySet> => {
-  query;
-  iModelConnection;
   if (query === "") {
     new KeySet();
   }
