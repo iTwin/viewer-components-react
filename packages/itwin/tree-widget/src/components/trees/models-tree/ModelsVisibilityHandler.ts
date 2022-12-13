@@ -572,12 +572,12 @@ async function createGroupedElementsInfo(imodel: IModelConnection, rulesetId: st
 }
 
 const createTooltip = (status: "visible" | "hidden" | "disabled", tooltipStringId: string | undefined): string => {
-  const statusStringId = `coreTrees.modelTree.status.${status}`;
+  const statusStringId = `modelTree.status.${status}`;
   const statusString = TreeWidget.translate(statusStringId);
   if (!tooltipStringId)
     return statusString;
 
-  tooltipStringId = `coreTrees.modelTree.tooltips.${tooltipStringId}`;
+  tooltipStringId = `modelTree.tooltips.${tooltipStringId}`;
   const tooltipString = TreeWidget.translate(tooltipStringId);
   return `${statusString}: ${tooltipString}`;
 };

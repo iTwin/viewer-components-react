@@ -102,8 +102,8 @@ export function CategoryTree(props: CategoryTreeProps) {
 
   const noFilteredDataRenderer = React.useCallback(() => {
     return <VisibilityTreeNoFilteredData
-      title={TreeWidget.translate("coreTrees.categoriesTree.noCategoryFound")}
-      message={TreeWidget.translate("coreTrees.categoriesTree.noMatchingCategoryNames")}
+      title={TreeWidget.translate("categoriesTree.noCategoryFound")}
+      message={TreeWidget.translate("categoriesTree.noMatchingCategoryNames")}
     />;
   }, []);
 

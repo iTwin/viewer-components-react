@@ -414,7 +414,7 @@ describe("CategoryTree", () => {
             filterInfo={{ filter: "filtered-node1", activeMatchIndex: 0 }}
           />);
 
-          await waitFor(() => result.getByText("coreTrees.categoriesTree.noCategoryFound"));
+          await waitFor(() => result.getByText("categoriesTree.noCategoryFound"));
         });
       });
 
