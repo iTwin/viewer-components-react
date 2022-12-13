@@ -375,9 +375,6 @@ export const manufactureKeys = async (
   query: string,
   iModelConnection: IModelConnection,
 ): Promise<KeySet> => {
-  if (query === "") {
-    new KeySet();
-  }
   const queryWithIdAndECClassName = `SELECT q.ECInstanceId, ec_classname(e.ECClassId) FROM (${query}) q JOIN BisCore.Element e on e.ECInstanceId = q.ECInstanceId`;
 
   const rowIterator = iModelConnection.query(queryWithIdAndECClassName, undefined, {
