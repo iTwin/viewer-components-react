@@ -1,6 +1,6 @@
 {
   "$schema": "../../../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-  "id": "ui-framework/ModelsTree.GroupedByClass",
+  "id": "tree-widget-react/ModelsTree.GroupedByClass",
   "requiredSchemas": [
     {
       "name": "BisCore"

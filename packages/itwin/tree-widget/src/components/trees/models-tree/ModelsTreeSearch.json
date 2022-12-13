@@ -1,6 +1,6 @@
 {
-  "$schema": "../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-  "id": "ui-framework/ModelsTreeSearch",
+  "$schema": "../../../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
+  "id": "tree-widget-react/ModelsTreeSearch",
   "rules": [
     {
       "ruleType": "RootNodes",

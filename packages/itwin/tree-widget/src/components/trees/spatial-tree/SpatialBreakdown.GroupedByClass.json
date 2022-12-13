@@ -1,6 +1,6 @@
 {
   "$schema": "../../../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-  "id": "ui-framework/SpatialBreakdown.GroupedByClass",
+  "id": "tree-widget-react/SpatialBreakdown.GroupedByClass",
   "rules": [
     {
       "ruleType": "RootNodes",
