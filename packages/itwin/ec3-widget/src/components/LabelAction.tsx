@@ -126,12 +126,12 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   return (
     <>
       <WidgetHeader
-        title={label?.name ?? "Label"}
+        title={label?.name ?? "Assembly"}
         returnFn={goBack}
         disabled={isLoading}
       />
       <div className='ec3w-label-details-container'>
-        <Fieldset legend='Label' className='ec3w-label-details'>
+        <Fieldset legend='Assembly' className='ec3w-label-details'>
           <Small className='ec3w-label-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
@@ -147,7 +147,7 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
           <LabeledInput
             id='name'
             name='name'
-            label='Name'
+            label='Assembly Name'
             value={name}
             onChange={(event) => {
               setName(event.target.value);
