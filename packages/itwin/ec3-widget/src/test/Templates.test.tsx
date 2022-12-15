@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
+import { fireEvent, render, screen, waitForElementToBeRemoved } from "@testing-library/react";
 import Templates from "../components/Templates";
 import * as moq from "typemoq";
 import type { EC3ConfigurationsClient } from "@itwin/insights-client";
@@ -124,7 +124,7 @@ describe("Templates view", () => {
     const button = screen.getByTestId("ec3-export-button") as HTMLInputElement;
     expect(button.disabled).toBe(true);
 
-    const configuration = screen.getAllByTestId("horizontal-tile")[0];
+    const configuration = screen.getAllByTestId("ec3-horizontal-tile")[0];
     configuration.click();
     expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
     expect(button.disabled).toBe(false);
@@ -138,7 +138,7 @@ describe("Templates view", () => {
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
-    const configurations = screen.getAllByTestId("horizontal-tile");
+    const configurations = screen.getAllByTestId("ec3-horizontal-tile");
     configurations[0].click();
     expect(configurations[0].className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
 
@@ -148,5 +148,26 @@ describe("Templates view", () => {
 
     configurations[1].click();
     expect(configurations[1].className).toBe("ec3w-horizontal-tile-container");
+  });
+
+  it("Search option filters out configurations", async () => {
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
+
+    const container = screen.getByTestId("ec3-search-bar");
+    const button = container.querySelector(".iui-button") as HTMLInputElement;
+    button.click();
+
+    const input = container.querySelector(".iui-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'config_0' } });
+
+    const configurations = screen.getAllByTestId("ec3-horizontal-tile");
+    expect(configurations.length).toBe(1);
+    expect(screen.getByText("config_0")).toBeInTheDocument();
   });
 });

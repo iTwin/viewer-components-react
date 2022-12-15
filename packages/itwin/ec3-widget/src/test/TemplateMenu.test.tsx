@@ -189,25 +189,25 @@ describe("Templates view", () => {
       labels: [],
       reportId: "",
     }
-    const { container } = renderWithContext({
+    renderWithContext({
       component: < TemplateMenu
         goBack={async () => { }}
         created={true}
         template={t}
       />,
       reportsClient: reportsClient.object,
+      ec3ConfigurationsClient: configClient.object,
       getAccessTokenFn: getAccessTokenFn,
     });
 
     expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
     expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
+    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    let rootElement = container.querySelector('.ec3w-report-select-container',) as HTMLDivElement;
-    let input = rootElement.querySelector('.iui-content') as HTMLInputElement;
-    expect(input.value).toEqual('report_0');
+    expect(screen.getByText("report_0")).toBeInTheDocument();
 
-    input = screen.getByTestId('ec3-template-name-input') as HTMLInputElement;
-    expect(input.value).toEqual('mocked_name');
+    let input = screen.getByTestId('ec3-template-name-input') as HTMLInputElement;
+    expect(input.value).toEqual('mocked_configuration');
 
     input = screen.getByTestId('ec3-template-description-input') as HTMLInputElement;
     expect(input.value).toEqual('mocked_description');

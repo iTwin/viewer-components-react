@@ -34,7 +34,7 @@ export const HorizontalTile = ({
         "ec3w-horizontal-tile-container",
         { "ec3w-horizontal-tile-container-selected": selected },
       )}
-      data-testid="horizontal-tile"
+      data-testid="ec3-horizontal-tile"
       onClick={rest.onClick}
     >
       <div className="ec3w-body">

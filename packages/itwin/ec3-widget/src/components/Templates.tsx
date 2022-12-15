@@ -151,7 +151,7 @@ const Templates = ({ config }: EC3Props) => {
         <>
           <WidgetHeader title="Templates" />
           <Surface className="ec3w-templates-list-container">
-            <div className="ec3w-toolbar" data-testId="ec3-templates">
+            <div className="ec3w-toolbar" data-testid="ec3-templates">
               <Button
                 startIcon={<SvgAdd />}
                 onClick={() => {
@@ -170,7 +170,7 @@ const Templates = ({ config }: EC3Props) => {
               >
                 Export
               </Button>
-              <div className="ec3w-search-bar-container" data-testid="search-bar">
+              <div className="ec3w-search-bar-container" data-testid="ec3-search-bar">
                 <div className="ec3w-search-button">
                   <SearchBar
                     searchValue={searchValue}

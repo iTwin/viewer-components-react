@@ -173,14 +173,14 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               await goBack();
             }}
           />
-          <div className='ec3w-template-details-container' data-testId="ec3-templateDetails">
+          <div className='ec3w-template-details-container' data-testid="ec3-templateDetails">
             <Fieldset legend='Template Details' className='ec3w-template-details'>
               <Small className='ec3w-template-field-legend'>
                 Asterisk * indicates mandatory fields.
               </Small>
               <LabeledInput
                 id='templateName'
-                data-testId={'ec3-template-name-input'}
+                data-testid={'ec3-template-name-input'}
                 name='displayName'
                 label='EC3 Project Template Name'
                 value={childTemplate.displayName}
@@ -192,7 +192,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               />
               <LabeledInput
                 id='templateDescription'
-                data-testId={'ec3-template-description-input'}
+                data-testid={'ec3-template-description-input'}
                 name='description'
                 label='Template description'
                 value={childTemplate.description}
