@@ -24,7 +24,7 @@ jest.mock("@itwin/appui-react", () => ({
 }));
 
 
-describe("Templates view", () => {
+describe("TemplatesMenu", () => {
   const mockedReports = Array.from(
     { length: 5 },
     (_, index) => ({
@@ -95,7 +95,7 @@ describe("Templates view", () => {
     expect(container.querySelector(".ec3-disabled-selection")).toBeDefined();
   });
 
-  it("Reports should appear in comboBox", async () => {
+  it("Mocked reports should appear in comboBox", async () => {
     const { container } = renderWithContext({
       component: < TemplateMenu
         goBack={async () => { }}

@@ -239,7 +239,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
             <Fieldset legend='Labels' className='ec3w-template-details'>
               <Surface className="ec3w-labels-container">
                 <Button
-                  data-testid={"ec3-add-assembly-button"}
+                  data-testid="ec3-add-assembly-button"
                   styleType="default"
                   startIcon={<SvgAdd />}
                   onClick={addLabel}

@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { EC3ConfigurationsClient, EC3JobsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
+import { EC3ConfigurationsClient, EC3JobsClient, IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
 import { render, RenderResult } from "@testing-library/react";
 import React from "react";
 import { AccessTokenFnContext, GetAccessTokenFn } from "../components/api/context/AccessTokenFnContext";
@@ -14,10 +14,10 @@ import { ReportsClientContext } from "../components/api/context/ReportsClientCon
 
 export interface RenderParameters {
   component: React.ReactNode,
-  ec3ConfigurationsClient?: EC3ConfigurationsClient,
-  ec3JobsClient?: EC3JobsClient,
-  reportsClient?: ReportsClient,
-  oDataClient?: ODataClient,
+  ec3ConfigurationsClient?: IEC3ConfigurationsClient,
+  ec3JobsClient?: IEC3JobsClient,
+  reportsClient?: IReportsClient,
+  oDataClient?: IOdataClient,
   getAccessTokenFn?: GetAccessTokenFn
 }
 

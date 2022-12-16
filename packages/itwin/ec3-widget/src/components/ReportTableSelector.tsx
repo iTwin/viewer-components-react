@@ -90,7 +90,7 @@ export const ReportTableSelector = ({
   }, [reportTable, onChangeCallback]);
 
   return (
-    <div className="ec3w-dropdown-select-container">
+    <div className="ec3w-dropdown-select-container" data-testid="ec3-report-table-selector">
       <div className="ec3w-dropdown-select-combo-box">
         <Label htmlFor="combo-input" required>
           Report table

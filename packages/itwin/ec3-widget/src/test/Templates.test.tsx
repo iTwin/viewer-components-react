@@ -21,7 +21,7 @@ jest.mock("@itwin/appui-react", () => ({
   useActiveIModelConnection: () => activeIModelConnection.object,
 }));
 
-describe("Templates view", () => {
+describe("Templates", () => {
   const mockedConfigurations = Array.from(
     { length: faker.datatype.number({ min: 3, max: 5 }) },
     (_, index) => ({
