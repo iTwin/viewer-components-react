@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, waitFor, waitForElementToBeRemoved, within } from "./test-utils";
+import { render, screen, waitForElementToBeRemoved, within } from "./test-utils";
 import { faker } from "@faker-js/faker";
 import { Groupings } from "../grouping-mapping-widget";
 import type { GroupCollection, IMappingsClient, Mapping } from "@itwin/insights-client";
@@ -115,20 +115,18 @@ describe("Groupings View", () => {
     const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
     expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
 
-    await waitFor(() => {
-      horizontalTiles.forEach((horizontalTile, index) => {
-        const groupTile = within(horizontalTile);
-        expect(
-          groupTile.getByText(
-            mockGroups.groups[index].groupName
-          )
-        ).toBeInTheDocument();
-        expect(
-          groupTile.getByText(
-            mockGroups.groups[index].description ?? ""
-          )
-        ).toBeInTheDocument();
-      });
+    horizontalTiles.forEach((horizontalTile, index) => {
+      const groupTile = within(horizontalTile);
+      expect(
+        groupTile.getByText(
+          mockGroups.groups[index].groupName
+        )
+      ).toBeInTheDocument();
+      expect(
+        groupTile.getByText(
+          mockGroups.groups[index].description ?? ""
+        )
+      ).toBeInTheDocument();
     });
 
     // Click on first group more icon
@@ -202,14 +200,12 @@ describe("Groupings View", () => {
     await user.hover(contextMenuItems[0]);
 
     // Should have exactly 1 sub menu item
+    const editCustom = screen.getAllByTestId(`gmw-edit-0`);
+    expect(editCustom).toHaveLength(1);
+    expect(editCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
 
-    await waitFor(async () => {
-      const editCustom = screen.getAllByTestId(`gmw-edit-0`);
-      expect(editCustom).toHaveLength(1);
-      expect(editCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
-      // Click on the edit custom UI
-      await user.click(editCustom[0]);
-    });
+    // Click on the edit custom UI
+    await user.click(editCustom[0]);
 
     const groupName = screen.getAllByText(mockGroups.groups[0].groupName);
     expect(groupName).toHaveLength(1);
