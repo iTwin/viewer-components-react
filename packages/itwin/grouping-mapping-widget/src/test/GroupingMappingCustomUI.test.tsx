@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, waitForElementToBeRemoved, within } from "./test-utils";
+import { screen, waitForElementToBeRemoved, within } from "./test-utils";
 import { faker } from "@faker-js/faker";
 import { Groupings } from "../grouping-mapping-widget";
 import type { GroupCollection, IMappingsClient, Mapping } from "@itwin/insights-client";
@@ -12,6 +12,8 @@ import * as moq from "typemoq";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ContextCustomUIProps, GroupingCustomUIProps, GroupingMappingCustomUI } from "../grouping-mapping-widget";
 import { GroupingMappingCustomUIType } from "../grouping-mapping-widget";
+import userEvent from "@testing-library/user-event";
+import { render } from "@testing-library/react";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
@@ -59,11 +61,26 @@ const groupsFactory = (): GroupCollection => ({
 });
 
 const connectionMock = moq.Mock.ofType<IModelConnection>();
+let groupingMappingCustomUIMock: GroupingMappingCustomUI[] = [];
 const mappingClientMock = moq.Mock.ofType<IMappingsClient>();
 
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
   useActiveIModelConnection: () => connectionMock.object,
+}));
+
+const mockAccessToken = jest.fn().mockResolvedValue("Bearer eyJhbGci");
+
+jest.mock("../widget/components/context/GroupingApiConfigContext", () => ({
+  ...jest.requireActual("../widget/components/context/GroupingApiConfigContext"),
+  useGroupingMappingApiConfig: () => ({
+    getAccessToken: mockAccessToken,
+  }),
+}));
+
+jest.mock("../widget/components/context/GroupingMappingCustomUIContext", () => ({
+  ...jest.requireActual("../widget/components/context/GroupingMappingCustomUIContext"),
+  useGroupingMappingCustomUI: () => groupingMappingCustomUIMock,
 }));
 
 jest.mock("../widget/components/context/MappingClientContext", () => ({
@@ -73,26 +90,29 @@ jest.mock("../widget/components/context/MappingClientContext", () => ({
 
 const mockGroups = groupsFactory();
 
-describe("Groupings View", () => {
-  beforeEach(() => {
+describe("Groupings View with default UIs", () => {
+  beforeEach(async () => {
     connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId);
     connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
 
+    const mockedAccessToken = await mockAccessToken();
     mappingClientMock
-      .setup(async (x) => x.getGroups(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
+      .setup(async (x) => x.getGroups(mockedAccessToken, mockIModelId, mockMappingId))
       .returns(async () => Promise.resolve(mockGroups.groups));
   });
 
   afterEach(() => {
     connectionMock.reset();
     mappingClientMock.reset();
+    groupingMappingCustomUIMock = [];
   });
 
   it("List all groups and click on add group and edit group buttons", async () => {
     // Arange
 
     // Act
-    const { user } = render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
+    const user = userEvent.setup();
+    render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -164,10 +184,11 @@ describe("Groupings View", () => {
       uiComponent: mockedUIComponent,
     };
 
-    const groupingMappingCustomUIMock = [mockGroupingUI];
+    groupingMappingCustomUIMock = [mockGroupingUI];
 
     // Act
-    const { user } = render(<Groupings mapping={mockMapping} goBack={jest.fn()} />, groupingMappingCustomUIMock);
+    const user = userEvent.setup();
+    render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -221,10 +242,11 @@ describe("Groupings View", () => {
       uiComponent: mockedUIComponent,
     };
 
-    const groupingMappingCustomUIMock = [mockContextUI];
+    groupingMappingCustomUIMock = [mockContextUI];
 
     // Act
-    const { user } = render(<Groupings mapping={mockMapping} goBack={jest.fn()} />, groupingMappingCustomUIMock);
+    const user = userEvent.setup();
+    render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -282,10 +304,11 @@ describe("Groupings View", () => {
       uiComponent: mockedContextUIComponent,
     };
 
-    const groupingMappingCustomUIMock = [mockContextUI, mockGroupingUI];
+    groupingMappingCustomUIMock = [mockContextUI, mockGroupingUI];
 
     // Act
-    const { user } = render(<Groupings mapping={mockMapping} goBack={jest.fn()} />, groupingMappingCustomUIMock);
+    const user = userEvent.setup();
+    render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
