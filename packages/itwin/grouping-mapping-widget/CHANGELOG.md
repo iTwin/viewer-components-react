@@ -1,6 +1,14 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 16 Nov 2022 19:55:30 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Dec 2022 13:51:28 GMT and should not be manually modified.
+
+## 0.9.2
+Fri, 16 Dec 2022 13:51:28 GMT
+
+### Patches
+
+- Modified border to the color legend for group hiliting to be narrower
+- QueryBuilder: separated relational classes from properties, transferred properties from JOIN to WHERE clauses
 
 ## 0.9.1
 Wed, 16 Nov 2022 19:55:30 GMT
