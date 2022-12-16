@@ -5,8 +5,8 @@
 @import "~@itwin/core-react/lib/cjs/core-react/index";
 @import "../VisibilityTreeBase";
 
-.ui-fw-categories-tree {
-  @include ui-fw-visibility-tree-base;
+.tree-widget-categories-tree {
+  @include tree-widget-visibility-tree-base;
 }
 
 .tree-widget-category-tree-search-bar {

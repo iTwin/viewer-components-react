@@ -108,7 +108,7 @@ export function CategoryTree(props: CategoryTreeProps) {
   }, []);
 
   return (
-    <div className="ui-fw-categories-tree">
+    <div className="tree-widget-categories-tree">
       <ControlledTree
         nodeLoader={filteredNodeLoader}
         model={treeModel}

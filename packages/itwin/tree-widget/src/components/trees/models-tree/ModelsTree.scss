@@ -5,8 +5,8 @@
 @import "~@itwin/core-react/lib/cjs/core-react/index";
 @import "../VisibilityTreeBase";
 
-.ui-fw-models-tree {
-  @include ui-fw-visibility-tree-base;
+.tree-widget-models-tree {
+  @include tree-widget-visibility-tree-base;
 }
 
 .tree-widget-models-tree-container {
