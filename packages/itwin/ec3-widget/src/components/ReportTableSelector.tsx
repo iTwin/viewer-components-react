@@ -5,11 +5,10 @@
 
 import { ComboBox, Label, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import type { Configuration } from "./Template";
 import "./ReportTableSelector.scss";
-import { useODataClient } from "./api/context/ODataClientContext";
-import { useAccessTokenFn } from "./api/context/AccessTokenFnContext";
+import SimpleReactValidator from "simple-react-validator";
+import { useApiContext } from "./api/APIContext";
 
 export interface ReportTableSelectorProps {
   selectedReportTable: string;
@@ -26,11 +25,12 @@ export const ReportTableSelector = ({
   onChange,
   setLoading,
 }: ReportTableSelectorProps) => {
-  const getAccessToken = useAccessTokenFn();
-  const [validator, _showValidationMessage] = useValidator();
+  const getAccessToken = useApiContext().getAccessTokenFn;
   const [reportTable, setReportTable] = useState(selectedReportTable);
   const [reportTables, setReportTables] = useState<string[] | undefined>(undefined);
-  const reportingClientApi = useODataClient();
+  const oDataClient = useApiContext().oDataClient;
+  const validator = new SimpleReactValidator();
+  const nameRequirements = "required";
 
   const updateData = useCallback(async (reportTableName: string) => {
     if (!template.reportId)
@@ -42,7 +42,7 @@ export const ReportTableSelector = ({
     let reportMetadataResponse;
     try {
       const token = await getAccessToken();
-      reportMetadataResponse = await reportingClientApi.getODataReportMetadata(token, template.reportId);
+      reportMetadataResponse = await oDataClient.getODataReportMetadata(token, template.reportId);
     } catch (err) {
       toaster.negative("You are not authorized to use this system.");
       /* eslint-disable no-console */
@@ -70,7 +70,7 @@ export const ReportTableSelector = ({
     const filteredNumericalColumns = oDataTable.columns.filter((x) => x.type === "Edm.Double").map((x) => x.name);
 
     await onChange(reportTableName, filteredNumericalColumns, filteredStringColumns);
-  }, [reportTable, reportTables, template, onChange, reportingClientApi, getAccessToken]);
+  }, [reportTable, reportTables, template, onChange, oDataClient, getAccessToken]);
 
   const reportTableLabels = useMemo(() => {
     return reportTables?.map((g) => ({
@@ -99,8 +99,8 @@ export const ReportTableSelector = ({
           options={reportTableLabels}
           value={reportTable}
           onChange={onChangeCallback}
-          message={validator.message("reportTable", reportTable, NAME_REQUIREMENTS)}
-          status={validator.message("reportTable", reportTable, NAME_REQUIREMENTS) ? "negative" : undefined}
+          message={validator.message("reportTable", reportTable, nameRequirements)}
+          status={validator.message("reportTable", reportTable, nameRequirements) ? "negative" : undefined}
           inputProps={{
             id: "combo-input",
             placeholder: placeHolder,

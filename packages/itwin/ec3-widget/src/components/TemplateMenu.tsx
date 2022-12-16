@@ -9,14 +9,10 @@ import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { Report } from "@itwin/insights-client";
 import { handleSelectChange, WidgetHeader } from "./utils";
-import LabelAction from "./LabelAction";
 import type { Configuration, Label as EC3Label } from "./Template";
 import { convertConfigurationCreate, convertConfigurationUpdate } from "./Template";
 import { LabelTile } from "./LabelTile";
-import DeleteModal from "./DeleteModal";
 import { handleInputChange } from "./utils";
-import TemplateActionPanel from "./TemplateActionPanel";
-import ReportConfirmModal from "./ReportConfirmModal";
 import {
   ComboBox,
   Label,
@@ -30,10 +26,12 @@ import {
 } from "@itwin/itwinui-react";
 import "./TemplateMenu.scss";
 import React from "react";
-import { useReportsClient } from "./api/context/ReportsClientContext";
-import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
-import { useAccessTokenFn } from "./api/context/AccessTokenFnContext";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
+import { useApiContext } from "./api/APIContext";
+import { LabelAction } from "./LabelAction";
+import { TemplateActionPanel } from "./TemplateActionPanel";
+import { DeleteModal } from "./DeleteModal";
+import { ReportConfirmModal } from "./ReportConfirmModal";
 
 interface TemplateProps {
   template?: Configuration;
@@ -47,17 +45,17 @@ enum LabelView {
   MODIFY = "modify"
 }
 
-const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
-  const getAccessToken = useAccessTokenFn();
+export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
+  const getAccessToken = useApiContext().getAccessTokenFn;
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  const reportingClientApi = useReportsClient();
+  const reportsClient = useApiContext().reportsClient;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
   const [selectedLabel, setSelectedLabel] = useState<EC3Label>();
   const [selectedReport, setSelectedReport] = useState<string>();
   const [availableReports, setReports] = useState<Report[]>([]);
-  const configurationsClient = useEC3ConfigurationsClient();
+  const configurationsClient = useApiContext().ec3ConfigurationsClient;
   const [childTemplate, setChildTemplate] = useState<Configuration>({
     reportId: undefined,
     description: "",
@@ -107,7 +105,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
 
       try {
         const accessToken = await getAccessToken();
-        const data = await reportingClientApi.getReports(accessToken, projectId);
+        const data = await reportsClient.getReports(accessToken, projectId);
         if (data) {
           const fetchedReports = data.sort((a, b) => a.displayName?.localeCompare(b.displayName ?? "") ?? 0);
           setReports(fetchedReports);
@@ -121,7 +119,7 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
       }
     };
     void fetchReports();
-  }, [projectId, template, reportingClientApi, configurationsClient, getAccessToken]);
+  }, [projectId, template, reportsClient, configurationsClient, getAccessToken]);
 
   const addLabel = () => {
     setLabelsView(LabelView.ADD);
@@ -299,5 +297,3 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
       );
   }
 };
-
-export default TemplateMenu;

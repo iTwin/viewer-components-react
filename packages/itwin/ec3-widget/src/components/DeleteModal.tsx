@@ -58,7 +58,7 @@ export const DeleteModal = ({
           Are you sure you want to delete
         </Leading>
         <strong>
-          {<MiddleTextTruncation text={`${entityName}?`} />}
+          <MiddleTextTruncation text={`${entityName}?`} />
         </strong>
       </div>
       <ModalButtonBar>
@@ -82,5 +82,3 @@ export const DeleteModal = ({
     </Modal>
   );
 };
-
-export default DeleteModal;

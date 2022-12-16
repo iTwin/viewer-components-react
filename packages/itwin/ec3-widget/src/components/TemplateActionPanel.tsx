@@ -15,7 +15,7 @@ export interface TemplateActionPanelProps {
   isLoading?: boolean;
 }
 
-const TemplateActionPanel = ({
+export const TemplateActionPanel = ({
   onSave,
   onCancel,
   isCancelDisabled = false,
@@ -49,5 +49,3 @@ const TemplateActionPanel = ({
     </div>
   );
 };
-
-export default TemplateActionPanel;

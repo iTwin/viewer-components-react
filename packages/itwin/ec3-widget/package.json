@@ -48,7 +48,7 @@
     "rules": {
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error",
-      "deprecation/deprecation": "off",
+      "deprecation/deprecation": "error",
       "jsx-a11y/no-static-element-interactions": "off",
       "jsx-a11y/click-events-have-key-events": "off"
     }

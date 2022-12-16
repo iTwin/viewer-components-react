@@ -5,17 +5,17 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
-import Templates from "../components/Templates";
 import * as moq from "typemoq";
 import type { EC3ConfigurationsClient, Report, ReportsClient } from "@itwin/insights-client";
+import { EC3JobsClient, ODataClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import { EC3Config } from "../components/EC3/EC3Config";
-import { EC3ConfigurationsClientContext } from "../components/api/context/EC3ConfigurationsClientContext";
-import { AccessTokenFnContext } from "../components/api/context/AccessTokenFnContext";
 import type { IModelConnection } from "@itwin/core-frontend";
+import { Templates } from "../components/Templates";
+import { ApiContext } from "../components/api/APIContext";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
-const reportingClient = moq.Mock.ofType<ReportsClient>();
+const reportsClient = moq.Mock.ofType<ReportsClient>();
 const ec3ConfigurationsClient = moq.Mock.ofType<EC3ConfigurationsClient>();
 
 jest.mock("@itwin/appui-react", () => ({
@@ -25,7 +25,7 @@ jest.mock("@itwin/appui-react", () => ({
 
 jest.mock("@itwin/insights-client", () => ({
   ...jest.requireActual("@itwin/insights-client"),
-  ReportingClient: jest.fn().mockImplementation(() => reportingClient.object),
+  ReportingClient: jest.fn().mockImplementation(() => reportsClient.object),
 }));
 
 describe("Templates view", () => {
@@ -92,29 +92,37 @@ describe("Templates view", () => {
 
   beforeAll(async () => {
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
-    reportingClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports);
+    reportsClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports);
     ec3ConfigurationsClient.setup(async (x) => x.getConfigurations(accessToken, iTwinId)).returns(async () => mockedConfigurations);
     ec3ConfigurationsClient.setup(async (x) => x.getConfiguration(accessToken, configId)).returns(async () => mockedConfiguration);
   });
 
   it("Templates view should render successfully", () => {
     render(
-      <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
-          <Templates config={config} />
-        </AccessTokenFnContext.Provider>
-      </EC3ConfigurationsClientContext.Provider>
+      <ApiContext.Provider value={{
+        reportsClient: reportsClient.object,
+        oDataClient: new ODataClient(),
+        ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+        ec3JobsClient: new EC3JobsClient(),
+        getAccessTokenFn,
+      }}>
+        <Templates config={config} />
+      </ApiContext.Provider>
     );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
   });
 
   it("Templates view should have mocked templates", async () => {
     render(
-      <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
-          <Templates config={config} />
-        </AccessTokenFnContext.Provider>
-      </EC3ConfigurationsClientContext.Provider>
+      <ApiContext.Provider value={{
+        reportsClient: reportsClient.object,
+        oDataClient: new ODataClient(),
+        ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+        ec3JobsClient: new EC3JobsClient(),
+        getAccessTokenFn,
+      }}>
+        <Templates config={config} />
+      </ApiContext.Provider>
     );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -125,11 +133,15 @@ describe("Templates view", () => {
 
   it("Templates view should have mocked templates", async () => {
     render(
-      <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
-          <Templates config={config} />
-        </AccessTokenFnContext.Provider>
-      </EC3ConfigurationsClientContext.Provider>
+      <ApiContext.Provider value={{
+        reportsClient: reportsClient.object,
+        oDataClient: new ODataClient(),
+        ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+        ec3JobsClient: new EC3JobsClient(),
+        getAccessTokenFn,
+      }}>
+        <Templates config={config} />
+      </ApiContext.Provider>
     );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -140,11 +152,15 @@ describe("Templates view", () => {
 
   it("Clicking on template should oper template menu", async () => {
     render(
-      <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
-          <Templates config={config} />
-        </AccessTokenFnContext.Provider>
-      </EC3ConfigurationsClientContext.Provider>
+      <ApiContext.Provider value={{
+        reportsClient: reportsClient.object,
+        oDataClient: new ODataClient(),
+        ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+        ec3JobsClient: new EC3JobsClient(),
+        getAccessTokenFn,
+      }}>
+        <Templates config={config} />
+      </ApiContext.Provider>
     );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -155,11 +171,15 @@ describe("Templates view", () => {
 
   it("Clicking create button should open creating template menu", async () => {
     render(
-      <EC3ConfigurationsClientContext.Provider value={ec3ConfigurationsClient.object}>
-        <AccessTokenFnContext.Provider value={getAccessTokenFn}>
-          <Templates config={config} />
-        </AccessTokenFnContext.Provider>
-      </EC3ConfigurationsClientContext.Provider>
+      <ApiContext.Provider value={{
+        reportsClient: reportsClient.object,
+        oDataClient: new ODataClient(),
+        ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+        ec3JobsClient: new EC3JobsClient(),
+        getAccessTokenFn,
+      }}>
+        <Templates config={config} />
+      </ApiContext.Provider>
     );
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const button = screen.getByText("Create Template");

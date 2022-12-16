@@ -8,16 +8,16 @@ import {
   SvgDelete,
 } from "@itwin/itwinui-icons-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import LabelActionPanel from "./LabelActionPanel";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import { WidgetHeader } from "./utils";
 import "./LabelAction.scss";
 import type { Configuration, Label as EC3Label, Material } from "./Template";
 import { DropdownTile } from "./DropdrownTile";
-import DeleteModal from "./DeleteModal";
-import useValidator from "../hooks/useValidator";
 import React from "react";
 import { ReportTableSelector } from "./ReportTableSelector";
+import SimpleReactValidator from "simple-react-validator";
+import { DeleteModal } from "./DeleteModal";
+import { LabelActionPanel } from "./LabelActionPanel";
 
 interface LabelActionProps {
   template: Configuration;
@@ -26,7 +26,7 @@ interface LabelActionProps {
   setTemplate: (sel: Configuration) => void;
 }
 
-const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps) => {
+export const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps) => {
   const [reportTable, setReportTable] = useState<string>(label?.reportTable ?? "");
   const [name, setName] = useState<string>(label?.name ?? "");
   const [itemName, setItemName] = useState<string>(label?.elementNameColumn ?? "UserLabel");
@@ -35,9 +35,9 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [materials, setMaterials] = useState<Material[]>(label?.materials.map((x) => { return { nameColumn: x.nameColumn }; }) ?? [{ nameColumn: undefined }]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [validator, _showValidationMessage] = useValidator();
   const [availableStringColumns, setStringColumns] = useState<string[]>([]);
   const [availableNumericalColumns, setNumericalColumns] = useState<string[]>([]);
+  const validator = new SimpleReactValidator();
 
   const onSave = async () => {
     const selectedLabel: EC3Label = {
@@ -255,5 +255,3 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     </>
   );
 };
-
-export default LabelAction;

@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useCallback, useEffect, useMemo, useState } from "react";
-import DeleteModal from "./DeleteModal";
 import { Button, DropdownMenu, IconButton, MenuItem, Surface, toaster } from "@itwin/itwinui-react";
 import {
   SvgAdd,
@@ -13,16 +12,16 @@ import {
 import { EmptyMessage, LoadingOverlay, WidgetHeader } from "./utils";
 import "./Templates.scss";
 import type { Configuration } from "./Template";
-import TemplateMenu from "./TemplateMenu";
 import { SearchBar } from "./SearchBar";
 import { HorizontalTile } from "./HorizontalTile";
 import React from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { EC3Props } from "./EC3";
-import { useEC3ConfigurationsClient } from "./api/context/EC3ConfigurationsClientContext";
 import type { EC3Token } from "./EC3/EC3Token";
-import ExportModal from "./ExportModal";
-import { useAccessTokenFn } from "./api/context/AccessTokenFnContext";
+import { useApiContext } from "./api/APIContext";
+import { TemplateMenu } from "./TemplateMenu";
+import { ExportModal } from "./ExportModal";
+import { DeleteModal } from "./DeleteModal";
 
 enum TemplateView {
   TEMPLATES = "templates",
@@ -30,15 +29,15 @@ enum TemplateView {
   MENU = "menu",
 }
 
-const Templates = ({ config }: EC3Props) => {
-  const getAccessToken = useAccessTokenFn();
+export const Templates = ({ config }: EC3Props) => {
+  const getAccessToken = useApiContext().getAccessTokenFn;
   const iTwinId = useActiveIModelConnection()?.iTwinId;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [templates, setTemplates] = useState<Configuration[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Configuration | undefined>();
   const [searchValue, setSearchValue] = useState<string>("");
-  const configClient = useEC3ConfigurationsClient();
+  const configClient = useApiContext().ec3ConfigurationsClient;
   const [token, setToken] = useState<EC3Token>();
   const [modalIsOpen, openModal] = useState(false);
   const [templateView, setTemplateView] = useState<TemplateView>(
@@ -256,7 +255,4 @@ const Templates = ({ config }: EC3Props) => {
         </>
       );
   }
-
 };
-
-export default Templates;
