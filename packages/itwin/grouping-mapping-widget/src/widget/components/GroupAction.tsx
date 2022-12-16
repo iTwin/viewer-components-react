@@ -23,15 +23,13 @@ import {
   EmptyMessage,
   handleError,
   handleInputChange,
-  WidgetHeader,
 } from "./utils";
-import type { IGroupTyped } from "./Grouping";
-import { defaultUIMetadata } from "./Grouping";
 import "./GroupAction.scss";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
 import {
+  clearEmphasizedElements,
+  clearOverriddenElements,
   transparentOverriddenElements,
   visualizeElementsByQuery,
   zoomToElements,
@@ -40,27 +38,26 @@ import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext"
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
-import SearchGroupingCustomUI from "./customUI/SearchGroupingCustomUI";
-import ManualGroupingCustomUI from "./customUI/ManualGroupingCustomUI";
 import type { GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
+import type { Group } from "@itwin/insights-client";
+import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
+import { visualizeGroupColors } from "./groupsHelpers";
 
 interface GroupActionProps {
-  iModelId: string;
   mappingId: string;
-  group?: IGroupTyped;
-  queryGenerationType?: string;
-  goBack: () => Promise<void>;
-  resetView: () => Promise<void>;
+  group?: Group;
+  queryGenerationType: string;
+  onClose: () => void;
 }
 
 const GroupAction = (props: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
-  const { getAccessToken } = useGroupingMappingApiConfig();
+  const { showGroupColor, groups, hiddenGroupsIds, hilitedElementsQueryCache } = useGroupHilitedElementsContext();
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI()
+  const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs
     .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];
-
   const [details, setDetails] = useState({
     groupName: props.group?.groupName ?? "",
     description: props.group?.description ?? "",
@@ -76,6 +73,17 @@ const GroupAction = (props: GroupActionProps) => {
 
   const isUpdating = isLoading || isRendering;
 
+  const resetView = async () => {
+    if (groups.length > 0) {
+      if (showGroupColor) {
+        await visualizeGroupColors(iModelConnection, groups, groups, hiddenGroupsIds, hilitedElementsQueryCache);
+      } else {
+        clearOverriddenElements();
+      }
+    }
+    clearEmphasizedElements();
+  };
+
   const changeGroupByType = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -89,7 +97,7 @@ const GroupAction = (props: GroupActionProps) => {
     );
     setQuery("");
     setSimpleSelectionQuery("");
-    await props.resetView();
+    await resetView();
   };
 
   useEffect(() => {
@@ -161,14 +169,14 @@ const GroupAction = (props: GroupActionProps) => {
       props.group
         ? await mappingClient.updateGroup(
           accessToken,
-          props.iModelId,
+          iModelId,
           props.mappingId,
           props.group.id ?? "",
           { ...details, query: currentQuery },
         )
         : await mappingClient.createGroup(
           accessToken,
-          props.iModelId,
+          iModelId,
           props.mappingId,
           {
             ...details,
@@ -179,68 +187,27 @@ const GroupAction = (props: GroupActionProps) => {
         "GroupingMappingWidget",
         iModelConnection,
       );
-      await props.goBack();
+      props.onClose();
     } catch (error: any) {
       handleError(error.status);
       setIsLoading(false);
     }
-  }, [
-    validator,
-    showValidationMessage,
-    query,
-    simpleSelectionQuery,
-    getAccessToken,
-    props,
-    mappingClient,
-    details,
-    iModelConnection,
-  ]);
+  }, [validator, showValidationMessage, query, simpleSelectionQuery, getAccessToken, props, mappingClient, iModelId, details, iModelConnection]);
 
   const createQueryBuilderComponent = () => {
-    switch (queryGenerationType) {
-      case "Selection": {
-        return (
-          <GroupQueryBuilderContainer
-            updateQuery={setQuery}
-            isUpdating={isUpdating}
-            resetView={props.resetView}
-          />
-        );
-      }
-      case "Search": {
-        return (
-          <SearchGroupingCustomUI
-            updateQuery={setQuery}
-            isUpdating={isUpdating}
-            resetView={props.resetView}
-          />
-        );
-      }
-      case "Manual": {
-        return (
-          <ManualGroupingCustomUI
-            updateQuery={setQuery}
-            isUpdating={isUpdating}
-            resetView={props.resetView}
-          />
-        );
-      }
-      default: {
-        if (queryGenerationType && queryGenerationType.length > 0) {
-          const selectedCustomUI = groupUIs.find(
-            (e) => e.name === queryGenerationType,
-          );
-          if (selectedCustomUI) {
-            return React.createElement(selectedCustomUI.uiComponent, {
-              updateQuery: setQuery,
-              isUpdating,
-              resetView: props.resetView,
-            });
-          }
-        }
-        return <EmptyMessage message='No query generation method selected. ' />;
+    if (queryGenerationType && queryGenerationType.length > 0) {
+      const selectedCustomUI = groupUIs.find(
+        (e) => e.name === queryGenerationType,
+      );
+      if (selectedCustomUI) {
+        return React.createElement(selectedCustomUI.uiComponent, {
+          updateQuery: setQuery,
+          isUpdating,
+          resetView,
+        });
       }
     }
+    return <EmptyMessage message='No query generation method selected. ' />;
   };
 
   const isBlockingActions = !(
@@ -271,16 +238,6 @@ const GroupAction = (props: GroupActionProps) => {
 
   return (
     <>
-      <WidgetHeader
-        title={props.group ? props.group.groupName ?? "" : "Add Group"}
-        returnFn={async () => {
-          Presentation.selection.clearSelection(
-            "GroupingMappingWidget",
-            iModelConnection,
-          );
-          await props.goBack();
-        }}
-      />
       <div className='gmw-group-add-modify-container'>
         <Fieldset legend='Group Details' className='gmw-group-details'>
           <Small className='gmw-field-legend'>
@@ -330,17 +287,7 @@ const GroupAction = (props: GroupActionProps) => {
         </Fieldset>
         <Fieldset legend='Group By' className='gmw-query-builder-container'>
           <RadioTileGroup className='gmw-radio-group-tile' required>
-            {groupUIs.length === 0
-              ? (
-                defaultUIMetadata.map((p) =>
-                  getRadioTileComponent(p.icon, p.name, p.displayLabel)
-                )
-              )
-              : (
-                groupUIs.map((ext) =>
-                  getRadioTileComponent(ext.icon ?? <SvgAdd />, ext.name, ext.displayLabel),
-                )
-              )}
+            {groupUIs.map((ext) => getRadioTileComponent(ext.icon ?? <SvgAdd />, ext.name, ext.displayLabel))}
           </RadioTileGroup>
           {queryGenerationType && createQueryBuilderComponent()}
         </Fieldset>
@@ -354,7 +301,7 @@ const GroupAction = (props: GroupActionProps) => {
             "GroupingMappingWidget",
             iModelConnection,
           );
-          await props.goBack();
+          props.onClose();
         }}
         isSavingDisabled={isBlockingActions}
         isLoading={isLoading}

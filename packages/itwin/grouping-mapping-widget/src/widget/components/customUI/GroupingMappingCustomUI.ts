@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import type { Group, Mapping } from "@itwin/insights-client";
 import type { ReactElement } from "react";
 
 export enum GroupingMappingCustomUIType {
@@ -43,11 +44,11 @@ export interface ContextCustomUI extends IGroupingMappingCustomUI {
   /**
    * User defined component for UI interaction with grouping mapping widget.
    */
-  uiComponent?: (props: ContextCustomUIProps) => JSX.Element;
+  uiComponent?:  React.ComponentType<ContextCustomUIProps>;
   /**
    * Callback function for context custom UI menu item click event.
    */
-  onClick?: (groupId: string, mappingId: string, iModelId: string) => void;
+  onClick?: (group: Group, mapping: Mapping, iModelId: string) => void;
 }
 
 /**

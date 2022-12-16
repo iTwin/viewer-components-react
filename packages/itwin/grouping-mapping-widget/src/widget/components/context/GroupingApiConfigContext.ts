@@ -10,12 +10,14 @@ export type ClientPrefix = "" | "dev" | "qa" | undefined;
 export type GetAccessTokenFn = () => Promise<AccessToken>;
 export interface GroupingMappingApiConfig {
   getAccessToken: GetAccessTokenFn;
+  iModelId: string;
   prefix?: ClientPrefix;
 }
 
 export const GroupingMappingApiConfigContext =
   createContext<GroupingMappingApiConfig>({
     getAccessToken: async () => "",
+    iModelId: "",
     prefix: undefined,
   });
 

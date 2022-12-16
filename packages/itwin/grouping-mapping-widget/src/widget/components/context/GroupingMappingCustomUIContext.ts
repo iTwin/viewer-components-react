@@ -8,13 +8,18 @@ import type { GroupingMappingCustomUI } from "../customUI/GroupingMappingCustomU
 export const createGroupingMappingCustomUI = (
   customUIs: GroupingMappingCustomUI[] | undefined,
 ): GroupingMappingCustomUI[] => {
-  if (undefined === customUIs) {
-    return [];
-  }
-  return customUIs;
+  return customUIs ?? [];
 };
 
-export const GroupingMappingCustomUIContext = createContext<GroupingMappingCustomUI[]>([]);
+export interface IGroupingMappingCustomUI {
+  customUIs: GroupingMappingCustomUI[];
+  setCustomUIs: (customUI: GroupingMappingCustomUI[] | ((customUI: GroupingMappingCustomUI[]) => GroupingMappingCustomUI[])) => void;
+}
+
+export const GroupingMappingCustomUIContext = createContext<IGroupingMappingCustomUI>({
+  customUIs: [],
+  setCustomUIs: (customUI) => customUI,
+});
 
 export const useGroupingMappingCustomUI = () => {
   const context = useContext(GroupingMappingCustomUIContext);

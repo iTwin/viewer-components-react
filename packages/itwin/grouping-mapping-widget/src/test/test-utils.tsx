@@ -13,29 +13,29 @@ import {
 } from "@itwin/appui-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import userEvent from "@testing-library/user-event";
-import { GroupingMappingApiConfigContext } from "../widget/components/context/GroupingApiConfigContext";
 import type { IMappingsClient } from "@itwin/insights-client";
-import { MappingClientContext } from "../widget/components/context/MappingClientContext";
-import { GroupingMappingCustomUIContext } from "../widget/components/context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "../grouping-mapping-widget";
 import * as moq from "typemoq";
+import type { GroupingMappingContextProps } from "../widget/components/GroupingMappingContext";
+import { GroupingMappingContext } from "../widget/components/GroupingMappingContext";
 
 export const mockAccessToken = async () => "Bearer eyJhbGci";
-export const mockMappingClient =  moq.Mock.ofType<IMappingsClient>();
+export const mockMappingClient = moq.Mock.ofType<IMappingsClient>();
 
 interface WrapperProps {
   children?: React.ReactNode;
 }
 
 function render(ui: React.ReactElement, mockUIs: GroupingMappingCustomUI[] = [], { ...options } = {}) {
+  const contextProps: GroupingMappingContextProps = {
+    getAccessToken: mockAccessToken,
+    iModelId: "mock",
+    customUIs: mockUIs,
+  };
   const Wrapper = ({ children }: WrapperProps) => (
-    <GroupingMappingApiConfigContext.Provider value={{ getAccessToken: mockAccessToken }}>
-      <MappingClientContext.Provider value={mockMappingClient.object}>
-        <GroupingMappingCustomUIContext.Provider value={mockUIs}>
-          {children}
-        </GroupingMappingCustomUIContext.Provider>
-      </MappingClientContext.Provider>
-    </GroupingMappingApiConfigContext.Provider>
+    <GroupingMappingContext {...contextProps}>
+      {children}
+    </GroupingMappingContext>
   );
 
   return {
