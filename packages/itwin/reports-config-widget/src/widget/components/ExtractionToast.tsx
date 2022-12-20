@@ -6,16 +6,28 @@ import React from "react";
 import { Text } from "@itwin/itwinui-react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
-interface ExtractionToastProps {
-  iModelName: string;
-  odataFeedUrl?: string;
+interface SuccessfulExtractionToastProps extends ExtractionToastProps {
+  odataFeedUrl: string;
 }
 
-export const SuccessfulExtractionToast = ({ iModelName, odataFeedUrl }: ExtractionToastProps) => {
+interface ExtractionToastProps {
+  iModelName: string;
+}
+
+export const SuccessfulExtractionToast = ({ iModelName, odataFeedUrl }: SuccessfulExtractionToastProps) => {
+  const onClick = async (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    e.preventDefault();
+    await navigator.clipboard.writeText(odataFeedUrl);
+  };
   return (
     <div>
-      <Text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionSuccess")}{iModelName} </Text>
-      <a href="#" onClick={async () => { await navigator.clipboard.writeText(odataFeedUrl!); }}>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CopyODataUrl")}</a>
+      <Text>{ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:ExtractionSuccess")}{iModelName}</Text>
+      <a
+        href="#"
+        onClick={onClick}
+      >
+        {ReportsConfigWidget.localization.getLocalizedString("ReportsConfigWidget:CopyODataUrl")}
+      </a>
     </div>
   );
 };

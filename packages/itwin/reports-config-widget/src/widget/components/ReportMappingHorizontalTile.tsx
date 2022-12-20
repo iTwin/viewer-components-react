@@ -18,7 +18,7 @@ import { HorizontalTile } from "./HorizontalTile";
 import type { ReportMappingAndMapping } from "./ReportMappings";
 
 export interface ReportMappingHorizontalTileProps {
-  jobStartEvent: BeEvent<(reportId: string) => void>;
+  jobStartEvent: BeEvent<(iModelId: string) => void>;
   mapping: ReportMappingAndMapping;
   onClickDelete: () => void;
   bulkExtractor: BulkExtractor;
@@ -86,10 +86,7 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
                 )}
                 onClick={async () => {
                   setExtractionState(ExtractionStates.Starting);
-                  await props.bulkExtractor.runIModelExtraction(props.mapping.imodelId).catch((e) => {
-                    /* eslint-disable no-console */
-                    console.error(e);
-                  });
+                  await props.bulkExtractor.runIModelExtraction(props.mapping.imodelId);
                   props.jobStartEvent.raiseEvent(props.mapping.imodelId);
                 }}
                 disabled={jobStarted}

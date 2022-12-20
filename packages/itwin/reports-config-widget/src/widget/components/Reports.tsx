@@ -138,9 +138,9 @@ export const Reports = () => {
   };
 
   const updateDatasets = useCallback(async () => {
+    await bulkExtractor.runReportExtractions(selectedReportIds);
     selectedReportIds.map((reportId) => jobStartEvent.raiseEvent(reportId));
     setSelectedReportIds([]);
-    await bulkExtractor.runReportExtractions(selectedReportIds);
   }, [selectedReportIds, jobStartEvent, bulkExtractor]);
 
   switch (reportsView) {
@@ -168,7 +168,7 @@ export const Reports = () => {
               "ReportsConfigWidget:ITwinReports"
             )}
           />
-          <Surface className="reports-list-container">
+          <Surface className="rcw-reports-list-container">
             <div className="rcw-toolbar">
               <Button
                 startIcon={<SvgAdd />}
@@ -186,9 +186,9 @@ export const Reports = () => {
                 onClick={updateDatasets}
                 disabled={selectedReportIds.length === 0}
               >
-                < SvgPlay />
+                <SvgPlay />
               </IconButton>
-              <div className="rcw-search-bar-container" data-testid="search-bar">
+              <div className="rcw-search-bar-container" data-testid="rcw-search-bar">
                 <div className="rcw-search-button">
                   <SearchBar
                     searchValue={searchValue}

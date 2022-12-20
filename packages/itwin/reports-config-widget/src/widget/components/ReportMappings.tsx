@@ -136,9 +136,10 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchValue, setSearchValue] = useState<string>("");
   const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
+  const [jobRunning, setJobRunning] = useState<boolean>(false);
 
   const jobStartEvent = useMemo(
-    () => new BeEvent<(mappingId: string) => void>(),
+    () => new BeEvent<(iModelId: string) => void>(),
     []
   );
 
@@ -150,6 +151,10 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
       apiConfig
     );
   }, [apiConfig, report.id, setIsLoading]);
+
+  useEffect(() => {
+    bulkExtractor.setHook(setJobRunning, reportMappings.map((x) => x.imodelId));
+  }, [bulkExtractor, reportMappings]);
 
   const refresh = useCallback(async () => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
@@ -184,12 +189,12 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
   return (
     <>
       <WidgetHeader title={report.displayName} returnFn={goBack} />
-      <div className="report-mapping-misc">
+      <div className="rcw-report-mapping-misc">
         <LabeledInput
           label={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:ODataFeedURL"
           )}
-          className="odata-url-input"
+          className="rcw-odata-url-input"
           readOnly={true}
           value={odataFeedUrl}
           svgIcon={
@@ -213,8 +218,8 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
           iconDisplayStyle="inline"
         />
       </div>
-      <Surface className="report-mappings-container">
-        <div className="toolbar">
+      <Surface className="rcw-report-mappings-container">
+        <div className="rcw-toolbar">
           <Button
             startIcon={<SvgAdd />}
             onClick={() => addMapping()}
@@ -224,7 +229,7 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
               "ReportsConfigWidget:AddMapping"
             )}
           </Button>
-          <div className="search-bar-container" data-testid="search-bar">
+          <div className="rcw-search-bar-container" data-testid="rcw-search-bar">
             <SearchBar
               searchValue={searchValue}
               setSearchValue={setSearchValue}
@@ -252,7 +257,7 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
             </>
           </EmptyMessage>
         ) : (
-          <div className="mapping-list">
+          <div className="rcw-mapping-list">
             {filteredReportMappings.map((mapping) => (
               <ReportMappingHorizontalTile
                 key={mapping.mappingId}
@@ -292,40 +297,34 @@ export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappings
         }}
         refresh={refresh}
       />
-      <div id="action">
-        <div className="rcw-action-panel">
-          {isLoading && <LoadingSpinner />}
-          <Button
-            disabled={isLoading}
-            styleType="high-visibility"
-            id="save-app"
-            onClick={() => {
-              const uniqueIModels = Array.from(new Set(reportMappings.map((x) => x.imodelId)));
-              bulkExtractor.runIModelExtractions(uniqueIModels).catch((e) => {
-                /* eslint-disable no-console */
-                console.error(e);
-              });
-              reportMappings.forEach((reportMapping) => {
-                jobStartEvent.raiseEvent(reportMapping.imodelId);
-              });
-            }}
-          >
-            {ReportsConfigWidget.localization.getLocalizedString(
-              "ReportsConfigWidget:UpdateAllDatasets"
-            )}
-          </Button>
-          <Button
-            styleType="default"
-            type="button"
-            id="cancel"
-            onClick={goBack}
-            disabled={isLoading}
-          >
-            {ReportsConfigWidget.localization.getLocalizedString(
-              "ReportsConfigWidget:Close"
-            )}
-          </Button>
-        </div>
+      <div className="rcw-action-panel">
+        {isLoading && <LoadingSpinner />}
+        <Button
+          disabled={isLoading || jobRunning || reportMappings.length === 0}
+          styleType="high-visibility"
+          onClick={async () => {
+            setJobRunning(true);
+            const uniqueIModels = Array.from(new Set(reportMappings.map((x) => x.imodelId)));
+            await bulkExtractor.runIModelExtractions(uniqueIModels);
+            reportMappings.forEach((reportMapping) => {
+              jobStartEvent.raiseEvent(reportMapping.imodelId);
+            });
+          }}
+        >
+          {ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:UpdateAllDatasets"
+          )}
+        </Button>
+        <Button
+          styleType="default"
+          type="button"
+          onClick={goBack}
+          disabled={isLoading}
+        >
+          {ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:Close"
+          )}
+        </Button>
       </div>
     </>
   );

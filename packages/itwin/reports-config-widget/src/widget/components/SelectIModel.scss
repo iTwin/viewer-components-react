@@ -4,10 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.reports-select-imodel {
+.rcw-select-imodel {
   position: relative;
   margin-bottom: $iui-baseline * 2;
-  .combobox {
+
+  .rcw-combobox {
     display: flex;
     gap: $iui-s;
     width: 100%;

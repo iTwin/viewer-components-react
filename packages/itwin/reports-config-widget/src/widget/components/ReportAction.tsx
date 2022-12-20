@@ -82,7 +82,7 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
           legend={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:ReportDetails"
           )}
-          className="details-form"
+          className="rcw-details-form"
         >
           <Small className="field-legend">
             {ReportsConfigWidget.localization.getLocalizedString(
@@ -90,7 +90,6 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
             )}
           </Small>
           <LabeledInput
-            id="name"
             name="name"
             label={ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:Name"
@@ -117,7 +116,6 @@ const ReportAction = ({ iTwinId, report, returnFn }: ReportActionProps) => {
             }}
           />
           <LabeledInput
-            id="description"
             name="description"
             label={ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:Description"

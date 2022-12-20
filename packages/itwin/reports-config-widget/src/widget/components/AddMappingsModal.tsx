@@ -135,7 +135,7 @@ export const AddMappingsModal = ({
       }}
       style={{ display: "flex", flexDirection: "column", maxHeight: "77vh" }}
     >
-      <div className="add-mappings-container">
+      <div className="rcw-add-mappings-container">
         <SelectIModel
           selectedIModelId={selectedIModelId}
           setSelectedIModelId={setSelectediModelId}
@@ -143,7 +143,7 @@ export const AddMappingsModal = ({
         <Table<MappingType>
           data={isLoading ? [] : mappings}
           columns={mappingsColumns}
-          className="add-mappings-table"
+          className="rcw-add-mappings-table"
           emptyTableContent={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:NoMappingsAvailable"
           )}
