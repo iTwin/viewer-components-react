@@ -2,6 +2,30 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.10.6",
+      "tag": "@itwin/measure-tools-react_v0.10.6",
+      "date": "Thu, 01 Dec 2022 14:13:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add listeners to quantityFormatter events we did not account for. Fix issues where a qf override was being set and the measure-tools weren't picking up the change."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.5",
+      "tag": "@itwin/measure-tools-react_v0.10.5",
+      "date": "Wed, 16 Nov 2022 19:55:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Hide perpendicular measure tool for drawing view"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.4",
       "tag": "@itwin/measure-tools-react_v0.10.4",
       "date": "Mon, 31 Oct 2022 19:03:27 GMT",
