@@ -12,6 +12,7 @@ import faker from "@faker-js/faker";
 import { EC3Config } from "../components/EC3/EC3Config";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { renderWithContext } from "./test-utils";
+import userEvent from "@testing-library/user-event";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const ec3ConfigurationsClient = moq.Mock.ofType<EC3ConfigurationsClient>();
@@ -169,5 +170,23 @@ describe("Templates", () => {
     const configurations = screen.getAllByTestId("ec3-horizontal-tile");
     expect(configurations.length).toBe(1);
     expect(screen.getByText("config_0")).toBeInTheDocument();
+  });
+
+  it("Deleting report brings up delete modal", async () => {
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
+
+    const dropdown = screen.getAllByTestId("tile-action-button")[0]
+      .querySelector(".iui-button") as HTMLInputElement;
+    await userEvent.click(dropdown);
+    const button = screen.getByTestId("ec3-templates-delete-button");
+    await userEvent.click(button);
+
+    expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
   });
 });

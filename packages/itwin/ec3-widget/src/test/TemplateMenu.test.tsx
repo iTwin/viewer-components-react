@@ -63,6 +63,14 @@ describe("TemplatesMenu", () => {
     },
   }
 
+  const template: Configuration = {
+    id: configId,
+    displayName: "",
+    description: "",
+    labels: [],
+    reportId: "",
+  }
+
   const iTwinId = faker.datatype.uuid();
   const accessToken = faker.datatype.uuid();
   const getAccessTokenFn = async () => accessToken;
@@ -182,18 +190,11 @@ describe("TemplatesMenu", () => {
   });
 
   it("Template menu has correct data", async () => {
-    const t: Configuration = {
-      id: configId,
-      displayName: "",
-      description: "",
-      labels: [],
-      reportId: "",
-    }
     renderWithContext({
       component: < TemplateMenu
         goBack={async () => { }}
         created={true}
-        template={t}
+        template={template}
       />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
@@ -208,10 +209,53 @@ describe("TemplatesMenu", () => {
 
     let input = screen.getByTestId('ec3-template-name-input') as HTMLInputElement;
     expect(input.value).toEqual('mocked_configuration');
-
     input = screen.getByTestId('ec3-template-description-input') as HTMLInputElement;
     expect(input.value).toEqual('mocked_description');
 
     expect(screen.getByText("mocked_label")).toBeInTheDocument();
+  });
+
+  it("Clicking on label opens label action menu", async () => {
+    renderWithContext({
+      component: < TemplateMenu
+        goBack={async () => { }}
+        created={true}
+        template={template}
+      />,
+      reportsClient: reportsClient.object,
+      ec3ConfigurationsClient: configClient.object,
+      getAccessTokenFn: getAccessTokenFn,
+    });
+
+    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
+    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
+
+    const configuration = screen.getByText(config.labels[0].name);
+    configuration.click();
+    expect(screen.getByTestId("ec3-label-action")).toBeInTheDocument();
+  });
+
+  it("Template menu has correct data", async () => {
+
+    renderWithContext({
+      component: < TemplateMenu
+        goBack={async () => { }}
+        created={true}
+        template={template}
+      />,
+      reportsClient: reportsClient.object,
+      ec3ConfigurationsClient: configClient.object,
+      getAccessTokenFn: getAccessTokenFn,
+    });
+
+    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
+    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
+
+    const button = screen.getAllByTestId("ec3-labels-delete-button")[0];
+    await userEvent.click(button);
+
+    expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
   });
 });

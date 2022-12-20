@@ -29,6 +29,7 @@ export const LabelTile = ({ title, subText, onClickTitle, titleTooltip, subtextT
       <IconButton
         styleType="borderless"
         className="ec3w-delete-icon"
+        data-testid="ec3-labels-delete-button"
         onClick={onDelete}
       >
         <SvgDelete />

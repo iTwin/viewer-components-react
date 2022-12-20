@@ -31,6 +31,7 @@ export const DropdownTile = ({
         <div className="ec3w-material-combo">
           <LabeledSelect
             required={required}
+            data-testid="ec3-dropdown-tile-select"
             label={"Material"}
             placeholder={"Select property containing Material names"}
             disabled={disabled}

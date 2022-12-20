@@ -46,6 +46,7 @@ export const DeleteModal = ({
   return (
     <Modal
       title='Confirm'
+      data-testid="ec3-delete-modal"
       modalRootId='ec3-widget-react'
       isOpen={show}
       isDismissible={!isLoading}

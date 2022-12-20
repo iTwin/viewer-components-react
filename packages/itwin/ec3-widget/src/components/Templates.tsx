@@ -205,6 +205,7 @@ const Templates = ({ config }: EC3Props) => {
                       <DropdownMenu
                         menuItems={(close: () => void) => [
                           <MenuItem
+                            data-testid="ec3-templates-delete-button"
                             key={0}
                             onClick={() => {
                               setSelectedTemplate(template);

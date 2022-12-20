@@ -261,7 +261,6 @@ const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                           onDelete={() => {
                             setSelectedLabel(g);
                             setShowDeleteModal(true);
-                            close();
                           }}
                           onClickTitle={() => {
                             setSelectedLabel(g);
