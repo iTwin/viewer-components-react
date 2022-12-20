@@ -18,9 +18,9 @@ import {
 import { ClassGroupingOption, UiFramework } from "@itwin/appui-react";
 import React from "react";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
-import { CategoriesTreeComponent } from "./trees/CategoriesTree";
-import { ModelsTreeComponent } from "./trees/ModelsTree";
-import { SpatialTreeComponent } from "./trees/SpatialTree";
+import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
+import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
+import { SpatialTreeComponent } from "./trees/spatial-tree/SpatialTreeComponent";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
 import type { TreeWidgetOptions } from "../types";
@@ -99,10 +99,10 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
         trees.push(...this._treeWidgetOptions.additionalTrees);
       }
 
-      if(this._treeWidgetOptions?.defaultTreeId && trees.length !== 0){
+      if (this._treeWidgetOptions?.defaultTreeId && trees.length !== 0) {
         // Adding the defaultTree to first index
         const { defaultTreeId } = this._treeWidgetOptions;
-        const extractedDefaultTree = trees.filter((tree) => tree.id===defaultTreeId)[0];
+        const extractedDefaultTree = trees.filter((tree) => tree.id === defaultTreeId)[0];
         const index = trees.indexOf(extractedDefaultTree);
         trees.unshift(trees.splice(index, 1)[0]);
       }

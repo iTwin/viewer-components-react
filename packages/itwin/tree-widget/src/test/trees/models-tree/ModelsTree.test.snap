@@ -1,0 +1,268 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ModelsTree #integration does not show private categories with RULESET_MODELS 1`] = `
+Array [
+  Object {
+    "autoExpand": true,
+    "children": Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "extendedData": Object {
+                  "categoryId": "0x13",
+                  "modelId": "0x11",
+                },
+                "icon": "icon-item",
+                "label": PropertyRecord {
+                  "property": Object {
+                    "displayLabel": "Label",
+                    "name": "node_label",
+                    "typename": "string",
+                  },
+                  "value": Object {
+                    "displayValue": "Physical Object [0-L]",
+                    "value": "Physical Object [0-L]",
+                    "valueFormat": 0,
+                  },
+                },
+              },
+            ],
+            "extendedData": Object {
+              "isCategory": true,
+              "modelId": "0x11",
+            },
+            "hasChildren": true,
+            "icon": "icon-layers",
+            "label": PropertyRecord {
+              "property": Object {
+                "displayLabel": "Label",
+                "name": "node_label",
+                "typename": "string",
+              },
+              "value": Object {
+                "displayValue": "Test Spatial Category",
+                "value": "Test Spatial Category",
+                "valueFormat": 0,
+              },
+            },
+          },
+        ],
+        "extendedData": Object {
+          "isModel": true,
+        },
+        "hasChildren": true,
+        "icon": "icon-model",
+        "label": PropertyRecord {
+          "property": Object {
+            "displayLabel": "Label",
+            "name": "node_label",
+            "typename": "string",
+          },
+          "value": Object {
+            "displayValue": "TestPhysicalModel",
+            "value": "TestPhysicalModel",
+            "valueFormat": 0,
+          },
+        },
+      },
+    ],
+    "extendedData": Object {
+      "isSubject": true,
+    },
+    "hasChildren": true,
+    "icon": "icon-imodel-hollow-2",
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "ModelsTreeModels",
+        "value": "ModelsTreeModels",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
+exports[`ModelsTree #integration does not show private categories with RULESET_MODELS_GROUPED_BY_CLASS 1`] = `
+Array [
+  Object {
+    "autoExpand": true,
+    "children": Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": Array [
+                  Object {
+                    "extendedData": Object {
+                      "categoryId": "0x13",
+                      "modelId": "0x11",
+                    },
+                    "icon": "icon-item",
+                    "label": PropertyRecord {
+                      "property": Object {
+                        "displayLabel": "Label",
+                        "name": "node_label",
+                        "typename": "string",
+                      },
+                      "value": Object {
+                        "displayValue": "Physical Object [0-L]",
+                        "value": "Physical Object [0-L]",
+                        "valueFormat": 0,
+                      },
+                    },
+                  },
+                ],
+                "description": "The generic:PhysicalObject class is used for bis:PhysicalElements which cannot be further classified. More-specific bis:PhysicalElement subclasses should be used wherever possible.",
+                "hasChildren": true,
+                "icon": "icon-ec-class",
+                "label": PropertyRecord {
+                  "property": Object {
+                    "displayLabel": "Label",
+                    "name": "node_label",
+                    "typename": "string",
+                  },
+                  "value": Object {
+                    "displayValue": "Physical Object",
+                    "value": "Physical Object",
+                    "valueFormat": 0,
+                  },
+                },
+              },
+            ],
+            "extendedData": Object {
+              "isCategory": true,
+              "modelId": "0x11",
+            },
+            "hasChildren": true,
+            "icon": "icon-layers",
+            "label": PropertyRecord {
+              "property": Object {
+                "displayLabel": "Label",
+                "name": "node_label",
+                "typename": "string",
+              },
+              "value": Object {
+                "displayValue": "Test Spatial Category",
+                "value": "Test Spatial Category",
+                "valueFormat": 0,
+              },
+            },
+          },
+        ],
+        "extendedData": Object {
+          "isModel": true,
+        },
+        "hasChildren": true,
+        "icon": "icon-model",
+        "label": PropertyRecord {
+          "property": Object {
+            "displayLabel": "Label",
+            "name": "node_label",
+            "typename": "string",
+          },
+          "value": Object {
+            "displayValue": "TestPhysicalModel",
+            "value": "TestPhysicalModel",
+            "valueFormat": 0,
+          },
+        },
+      },
+    ],
+    "extendedData": Object {
+      "isSubject": true,
+    },
+    "hasChildren": true,
+    "icon": "icon-imodel-hollow-2",
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "ModelsTreeModelsGroupedByClass",
+        "value": "ModelsTreeModelsGroupedByClass",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
+exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
+<body>
+  <div>
+    <div
+      class="tree-widget-models-tree"
+    >
+      <div
+        class="core-tree components-controlledTree components-smallEditor-host"
+        role="tree"
+        tabindex="-1"
+      >
+        <div
+          class="ReactWindow__VariableSizeList"
+          style="position: relative; height: 200px; width: 200px; overflow: auto; will-change: transform; direction: ltr;"
+        >
+          <div
+            style="height: 25px; width: 100%; min-width: 0;"
+          >
+            <div
+              class="node-wrapper"
+              style="position: absolute; left: 0px; top: 0px; height: 25px; width: 100%;"
+            >
+              <div
+                class="core-tree-node with-checkbox"
+                data-testid="tree-node"
+                role="treeitem"
+                tabindex="-1"
+              >
+                <div
+                  class="contents"
+                  data-testid="tree-node-contents"
+                  style="margin-left: 24px;"
+                >
+                  <label
+                    class="core-image-checkbox"
+                  >
+                    <input
+                      type="checkbox"
+                    />
+                    <span
+                      class="image"
+                    >
+                      <i
+                        class="icon icon-visibility-hide-2"
+                      />
+                    </span>
+                  </label>
+                  <div
+                    class="core-tree-node-icon"
+                  />
+                  <div
+                    class="components-controlledTree-node-content"
+                  >
+                    <span
+                      title="test-node"
+                    >
+                      test-node
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+`;

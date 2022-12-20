@@ -4,5 +4,9 @@
 !lib/**/*.js
 !lib/**/*.js.map
 !lib/**/*.*css
+!lib/**/*.json
 !lib/public/**/*
 !lib/**/components/rulesets/**/*
+
+# ignore some stuff again
+lib/**/test/**
