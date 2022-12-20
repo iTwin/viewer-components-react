@@ -5,7 +5,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitForElementToBeRemoved } from "@testing-library/react";
-import Templates from "../components/Templates";
+import { Templates } from "../components/Templates";
 import * as moq from "typemoq";
 import type { EC3ConfigurationsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";

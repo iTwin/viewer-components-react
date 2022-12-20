@@ -76,5 +76,3 @@ export const ReportConfirmModal = ({
     </Modal>
   );
 };
-
-export default ReportConfirmModal;

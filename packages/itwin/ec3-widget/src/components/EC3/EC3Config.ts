@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
 import { CARBON_CALCULATION_BASE_PATH, REPORTING_BASE_PATH } from "@itwin/insights-client";
-import type { GetAccessTokenFn } from "../api/context/AccessTokenFnContext";
+import type { GetAccessTokenFn } from "../api/APIContext";
 
 export class EC3Config {
   public readonly clientId: string;

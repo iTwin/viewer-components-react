@@ -80,10 +80,6 @@ export const handleSelectChange = <T,>(
   });
 };
 
-export const generateUrl = (baseUrl: string, newBaseUrl: string) => {
-  return baseUrl.replace("https://api.bentley.com", newBaseUrl);
-};
-
 export const LoadingSpinner = () => {
   return (
     <div className="ec3w-loading-spinner" data-testid="ec3-loadingSpinner">

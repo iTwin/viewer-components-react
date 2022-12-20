@@ -11,8 +11,8 @@ import {
   StagePanelSection,
   StageUsage,
 } from "@itwin/appui-abstract";
-import EC3 from "../components/EC3";
 import React from "react";
+import { EC3 } from "../components/EC3";
 import type { EC3ConfigProps } from "../components/EC3/EC3Config";
 import { EC3Config } from "../components/EC3/EC3Config";
 
@@ -40,8 +40,7 @@ export class EC3Provider implements UiItemsProvider {
         id: "EC3Widget",
         label: "EC3",
         getWidgetContent: () => {
-          return <EC3
-            config={this.config} />;
+          return <EC3 config={this.config} />;
         },
       };
 

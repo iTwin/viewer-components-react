@@ -48,7 +48,7 @@
     "rules": {
       "no-duplicate-imports": "off",
       "@typescript-eslint/consistent-type-imports": "error",
-      "deprecation/deprecation": "off",
+      "deprecation/deprecation": "error",
       "jsx-a11y/no-static-element-interactions": "off",
       "jsx-a11y/click-events-have-key-events": "off"
     }
@@ -86,7 +86,7 @@
     "@testing-library/user-event": "^14.1.1",
     "@types/jest": "^27.5.2",
     "@types/node": "^14.14.20",
-    "@types/react": "^18.0.15",
+    "@types/react": "^17.0.38",
     "@types/testing-library__jest-dom": "^5.14.3",
     "cpx2": "^3.0.0",
     "eslint": "^7.32.0",

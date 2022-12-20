@@ -38,8 +38,10 @@ import { EC3Provider } from "@itwin/ec3-widget-react";
 Then handle the redirect using the following code in Index.tsx.
 
 ```tsx
+import { handleEC3AuthCallback } from "@itwin/ec3-widget-react";
+
 } else if (window.location.pathname === "/callback") {
-  EC3AuthCallback.handle({
+  handleEC3AuthCallback({
     clientId: "...",
     redirectUri: ".../callback",
   });

@@ -10,7 +10,7 @@ import { EC3Configuration, EC3ConfigurationsClient, ReportsClient } from "@itwin
 import faker from "@faker-js/faker";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { renderWithContext } from "./test-utils";
-import TemplateMenu from "../components/TemplateMenu";
+import { TemplateMenu } from "../components/TemplateMenu";
 import userEvent from '@testing-library/user-event';
 import { Configuration, Label } from "../components/Template";
 

@@ -9,7 +9,7 @@ import * as moq from "typemoq";
 import type { EC3ConfigurationsClient, IOdataClient, ODataTable } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import { renderWithContext } from "./test-utils";
-import LabelAction from "../components/LabelAction";
+import { LabelAction } from "../components/LabelAction";
 import { Configuration, Label, Material } from "../components/Template";
 import userEvent from "@testing-library/user-event";
 
