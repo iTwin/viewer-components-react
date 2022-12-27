@@ -16,12 +16,12 @@ export type ReportMappingAndMapping = ReportMapping & {
 };
 
 export default class BulkExtractor {
-  private _reportRunIds = new Map<string, string[]>(); // key: reportId, value: runIds
   private _reportsClientApi: ReportsClient;
   private _extractionClientApi: ExtractionClient;
   private _accessToken: () => Promise<string>;
-  private _reportStates = new Map<string, ExtractionStates>(); // key: reportId, value: state
-  private _iModelStates = new Map<string, ExtractionStates>(); // key: iModelId, value: state
+
+  private _reportIModels = new Map<string, string[]>(); // key: reportId, value: iModels
+  private _iModelStates = new Map<string, ExtractorState>(); // key: iModelId, value: state
   private _timeFetched = new Date();
   private _iModelRun = new Map<string, string>(); // key: iModelId, value: runId
   private _iModelToast = new Set<string>();
@@ -44,45 +44,13 @@ export default class BulkExtractor {
   }
 
   private async fetchStates(): Promise<void> {
-    const stateByReportId = new Map<string, ExtractionStates>();
-    const stateByIModelId = new Map<string, ExtractionStates>();
-    const stateByRunId = new Map<string, ExtractorState>();
-
-    for (const [reportId, runs] of this._reportRunIds) {
-      if (!runs) {
-        stateByReportId.set(reportId, ExtractionStates.None);
-        continue;
+    for (const [iModelId, runId] of this._iModelRun) {
+      const state = await this.getState(runId);
+      if (state === ExtractorState.Succeeded || state === ExtractorState.Failed) {
+        this._iModelRun.delete(iModelId);
       }
-
-      const states: ExtractorState[] = [];
-      for (const runId of runs) {
-        const state = stateByRunId.get(runId);
-        if (state) {
-          states.push(state);
-        } else {
-          const runState = await this.getState(runId);
-          states.push(runState);
-          stateByRunId.set(runId, runState);
-        }
-      }
-      const finalState = BulkExtractor.getFinalState(states);
-      stateByReportId.set(reportId, finalState);
+      this._iModelStates.set(iModelId, state);
     }
-
-    for (const iModelRun of this._iModelRun) {
-      let state = stateByRunId.get(iModelRun[1]);
-
-      if (!state) {
-        state = await this.getState(iModelRun[1]);
-        stateByRunId.set(iModelRun[1], state);
-      }
-
-      const finalState = BulkExtractor.getFinalState([state]);
-      stateByIModelId.set(iModelRun[0], finalState);
-    }
-
-    this._reportStates = stateByReportId;
-    this._iModelStates = stateByIModelId;
   }
 
   public async getReportState(reportId: string): Promise<ExtractionStates> {
@@ -90,42 +58,38 @@ export default class BulkExtractor {
       this._timeFetched = new Date();
       await this.fetchStates();
     }
-    return this._reportStates.get(reportId) ?? ExtractionStates.None;
+
+    const iModels = this._reportIModels.get(reportId);
+    if (!iModels) return ExtractionStates.None;
+    const states: ExtractorState[] = [];
+    for (const iModelId of iModels) {
+      const state = this._iModelStates.get(iModelId);
+      if (!state) continue;
+      states.push(state);
+    }
+    return BulkExtractor.getFinalState(states);
   }
 
   public async getIModelState(iModelId: string, iModelName: string, odataFeedUrl: string): Promise<ExtractionStates> {
-    let state = this._iModelStates.get(iModelId) ?? ExtractionStates.None;
+    if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
+      this._timeFetched = new Date();
+      await this.fetchStates();
+    }
 
-    if (!(state === ExtractionStates.Succeeded || state === ExtractionStates.Failed)) {
-      if ((new Date().getTime() - this._timeFetched.getTime()) > STATUS_CHECK_INTERVAL) {
-        this._timeFetched = new Date();
-        await this.fetchStates();
-
-        state = this._iModelStates.get(iModelId) ?? ExtractionStates.None;
+    const state = this._iModelStates.get(iModelId);
+    if (!state) return ExtractionStates.None;
+    if (!this._iModelToast.has(iModelId)) {
+      if (state === ExtractorState.Succeeded) {
+        this._successfulExtractionToast(iModelName, odataFeedUrl);
+        this._iModelToast.add(iModelId);
+        this.checkRunning();
+      } else if (state === ExtractorState.Failed) {
+        this._failedExtractionToast(iModelName);
+        this._iModelToast.add(iModelId);
+        this.checkRunning();
       }
     }
-    if (state === ExtractionStates.Succeeded && !this._iModelToast.has(iModelId)) {
-      this._successfulExtractionToast(iModelName, odataFeedUrl);
-      this._iModelToast.add(iModelId);
-      this.checkRunning();
-    } else if (state === ExtractionStates.Failed && !this._iModelToast.has(iModelId)) {
-      this._failedExtractionToast(iModelName);
-      this._iModelToast.add(iModelId);
-      this.checkRunning();
-    }
-    return state;
-  }
-
-  public clearReportJob(reportId: string): void {
-    this._reportRunIds.delete(reportId);
-    this._iModelStates = new Map<string, ExtractionStates>();
-    this._iModelRun = new Map<string, string>();
-  }
-
-  public clearIModelJob(iModelId: string): void {
-    this._iModelRun.delete(iModelId);
-    this._iModelStates.delete(iModelId);
-    this._iModelToast.delete(iModelId);
+    return BulkExtractor.getFinalState([state]);
   }
 
   private static getFinalState(states: ExtractorState[]): ExtractionStates {
@@ -160,10 +124,7 @@ export default class BulkExtractor {
       let allFinished = true;
       this._iModels.forEach((iModelId) => {
         const state = this._iModelStates.get(iModelId);
-        if (
-          state === ExtractionStates.Queued ||
-          state === ExtractionStates.Running ||
-          state === ExtractionStates.Starting) {
+        if (state === ExtractorState.Queued || state === ExtractorState.Running) {
           allFinished = false;
         }
       });
@@ -177,29 +138,13 @@ export default class BulkExtractor {
     for (const reportId of reportIds) {
       const reportIModels = await this.fetchReportIModels(reportId);
       reportIModelIds.set(reportId, reportIModels);
-      this._reportStates.set(reportId, ExtractionStates.Starting);
+      this._reportIModels.set(reportId, reportIModels);
     }
     const iModels = new Set(Array.from(reportIModelIds.values()).flat());
-    const extractionMap =
-      Array.from(iModels).map(async (iModel): Promise<[string, string | undefined]> => {
-        const run = await this.runExtraction(iModel);
-        return [iModel, run];
-      });
 
-    const extractionByIModel = new Map<string, string | undefined>(await Promise.all(extractionMap));
-    reportIds.forEach((reportId) => {
-      const reportIModels = reportIModelIds.get(reportId)!;
-      const runs: string[] = [];
-      reportIModels.forEach((iModelId) => {
-        const runId = extractionByIModel.get(iModelId);
-        if (runId) {
-          runs.push(runId);
-          this._iModelStates.set(iModelId, ExtractionStates.Starting);
-          this._iModelRun.set(iModelId, runId);
-        }
-      });
-      this._reportRunIds.set(reportId, runs);
-    });
+    for (const iModel of iModels) {
+      await this.runIModelExtractions([iModel]);
+    }
   }
 
   private async runExtraction(iModelId: string): Promise<string | undefined> {
@@ -229,10 +174,11 @@ export default class BulkExtractor {
   public async runIModelExtractions(iModels: string[]): Promise<void> {
     for (const iModelId of iModels) {
       const run = await this.runExtraction(iModelId);
-      this._iModelStates.set(iModelId, ExtractionStates.Starting);
-      this.checkRunning();
-      if (run)
+      if (run) {
+        this._iModelStates.set(iModelId, ExtractorState.Queued);
         this._iModelRun.set(iModelId, run);
+      }
+      this.checkRunning();
     }
   }
 

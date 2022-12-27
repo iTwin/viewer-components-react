@@ -29,6 +29,7 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
   const [extractionState, setExtractionState] = useState<ExtractionStates>(ExtractionStates.None);
   const [jobStarted, setJobStarted] = useState<boolean>(true);
   const interval = useRef<number>();
+  const initialLoad = useRef<boolean>(true);
 
   useEffect(() => {
     const listener = (startedIModelId: string) => {
@@ -46,10 +47,17 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
 
   const getExtractionState = useCallback(async () => {
     const state = await props.bulkExtractor.getIModelState(props.mapping.imodelId, props.mapping.iModelName, props.odataFeedUrl);
-    setExtractionState(state);
     if (state === ExtractionStates.Failed || state === ExtractionStates.Succeeded || state === ExtractionStates.None) {
       setJobStarted(false);
+      if (initialLoad.current) {
+        initialLoad.current = false;
+        setExtractionState(ExtractionStates.None);
+        return;
+      }
+    } else {
+      initialLoad.current = false;
     }
+    setExtractionState(state);
   }, [props.mapping, props.bulkExtractor, props.odataFeedUrl]);
 
   useEffect(() => {
@@ -97,7 +105,6 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
               <ExtractionStatus
                 state={extractionState}
                 clearExtractionState={() => {
-                  props.bulkExtractor.clearIModelJob(props.mapping.imodelId);
                   setExtractionState(ExtractionStates.None);
                 }}
               ></ExtractionStatus>

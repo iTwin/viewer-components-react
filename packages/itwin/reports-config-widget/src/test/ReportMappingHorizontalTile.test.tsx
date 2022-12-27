@@ -369,8 +369,6 @@ describe("Report Mapping Horizontal Tile", () => {
     mockBulkExtractor.setup(async (x) => x.getIModelState(firstMockMapping.imodelId, firstMockMapping.iModelName, mockOdataFeedUrl))
       .returns(async () => ExtractionStates.Starting);
 
-    mockBulkExtractor.setup((x) => x.clearIModelJob(firstMockMapping.imodelId));
-
     const startExtractionButton = screen.getByRole("button", { name: "UpdateDataset" });
     await user.click(startExtractionButton);
 
@@ -397,8 +395,6 @@ describe("Report Mapping Horizontal Tile", () => {
     mockBulkExtractor.reset();
     fireEvent.animationEnd(screen.getByTestId("rcw-success-animation"));
     await waitFor(() => expect(screen.getByRole("button", { name: "UpdateDataset" })).toBeInTheDocument(), { timeout: 1000 });
-
-    mockBulkExtractor.verify((x) => x.clearIModelJob(firstMockMapping.imodelId), moq.Times.once());
   });
 
   it("second tile should update status", async () => {
