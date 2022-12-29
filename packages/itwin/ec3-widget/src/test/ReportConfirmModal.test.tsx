@@ -20,6 +20,7 @@ describe("Report Confirm Modal", () => {
         setShow={() => { }}
         onConfirm={() => { }}
         refresh={async () => { }}
+        onCancel={() => { }}
       />,
     });
     expect(screen.getByTestId("ec3-report-confirm-modal")).toBeDefined();
@@ -33,20 +34,23 @@ describe("Report Confirm Modal", () => {
         setShow={() => { }}
         onConfirm={() => { }}
         refresh={async () => { }}
+        onCancel={() => { }}
       />,
     });
     expect(document.querySelector("ec3-report-confirm-modal")).toBeDefined();
     expect(document.querySelector(".iui-dialog-visible")).toBeNull();
   });
 
-  it("Closing using button in top right calls setShow function", async () => {
+  it("Closing using button in top right calls setShow and onCancel function", async () => {
     const show = jest.fn();
+    const cancel = jest.fn();
     await renderWithContext({
       component: <ReportConfirmModal
         show={true}
         setShow={show}
         onConfirm={() => { }}
         refresh={async () => { }}
+        onCancel={cancel}
       />,
     });
     expect(screen.getByTestId("ec3-report-confirm-modal")).toBeDefined();
@@ -60,16 +64,19 @@ describe("Report Confirm Modal", () => {
       await userEvent.click(button);
     });
     expect(show).toHaveBeenCalledWith(false);
+    expect(cancel).toHaveBeenCalled();
   });
 
   it("Closing using cancel button calls setShow function", async () => {
     const show = jest.fn();
+    const cancel = jest.fn();
     await renderWithContext({
       component: <ReportConfirmModal
         show={true}
         setShow={show}
         onConfirm={() => { }}
         refresh={async () => { }}
+        onCancel={cancel}
       />,
     });
     expect(screen.getByTestId("ec3-report-confirm-modal")).toBeDefined();
@@ -81,6 +88,7 @@ describe("Report Confirm Modal", () => {
       await userEvent.click(button);
     });
     expect(show).toHaveBeenCalledWith(false);
+    expect(cancel).toHaveBeenCalled();
   });
 
   it("Reports confirm modal calls confirm, refresh and setShow functions after pressing the confirm button", async () => {
@@ -94,6 +102,7 @@ describe("Report Confirm Modal", () => {
         setShow={show}
         onConfirm={confirm}
         refresh={refresh}
+        onCancel={() => { }}
       />,
     });
     expect(screen.getByTestId("ec3-report-confirm-modal")).toBeDefined();

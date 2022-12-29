@@ -17,6 +17,7 @@ export interface ReportConfirmModalProps {
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
   onConfirm: () => void;
   refresh: () => Promise<void>;
+  onCancel: () => void;
 }
 
 export const ReportConfirmModal = ({
@@ -24,6 +25,7 @@ export const ReportConfirmModal = ({
   setShow,
   onConfirm,
   refresh,
+  onCancel,
 }: ReportConfirmModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -49,6 +51,7 @@ export const ReportConfirmModal = ({
       isDismissible={!isLoading}
       onClose={() => {
         setShow(false);
+        onCancel();
       }}
     >
       <div className="ec3w-delete-modal-body-text">
@@ -69,6 +72,7 @@ export const ReportConfirmModal = ({
           data-testid="ec3-report-confirm-modal-cancel-button"
           onClick={() => {
             setShow(false);
+            onCancel();
           }}
           disabled={isLoading}
         >

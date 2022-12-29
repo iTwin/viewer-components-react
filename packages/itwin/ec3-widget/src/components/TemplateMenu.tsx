@@ -53,7 +53,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
   const [selectedLabel, setSelectedLabel] = useState<EC3Label>();
-  const [selectedReport, setSelectedReport] = useState<string>();
+  const [lastReport, setLastReport] = useState<string>();
   const [availableReports, setReports] = useState<Report[]>([]);
   const configurationsClient = useApiContext().ec3ConfigurationsClient;
   const [childTemplate, setChildTemplate] = useState<Configuration>({
@@ -212,11 +212,10 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                       value={childTemplate.reportId}
                       onChange={async (value) => {
                         if (childTemplate.labels.length > 0 && value !== childTemplate.reportId) {
-                          setSelectedReport(value);
+                          setLastReport(childTemplate.reportId);
                           setShowReportConfirmModal(true);
-                        } else {
-                          handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
                         }
+                        handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
                       }}
                       inputProps={{
                         id: "combo-input",
@@ -290,10 +289,10 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
             show={showReportConfirmModal}
             setShow={setShowReportConfirmModal}
             onConfirm={() => {
-              if (selectedReport) {
-                childTemplate.labels = [];
-                handleSelectChange(selectedReport, "reportId", childTemplate, setChildTemplate);
-              }
+              childTemplate.labels = [];
+            }}
+            onCancel={() => {
+              handleSelectChange(lastReport ?? "", "reportId", childTemplate, setChildTemplate);
             }}
             refresh={async () => { }}
           />
