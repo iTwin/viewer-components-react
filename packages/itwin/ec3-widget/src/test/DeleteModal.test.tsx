@@ -4,14 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import { renderWithContext } from "./test-utils";
 import { DeleteModal } from "../components/DeleteModal";
 import userEvent from "@testing-library/user-event";
 
 describe("Delete Modal", () => {
   it("Delete modal with the show prop should render successfully and be visible", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <DeleteModal
         entityName="template"
         show={true}
@@ -25,7 +25,7 @@ describe("Delete Modal", () => {
   });
 
   it("Delete modal without the show prop should not be visible", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <DeleteModal
         entityName="template"
         show={false}
@@ -40,7 +40,7 @@ describe("Delete Modal", () => {
 
   it("Closing using button in top right calls setShow function", async () => {
     const show = jest.fn();
-    renderWithContext({
+    await renderWithContext({
       component: <DeleteModal
         entityName="template"
         show={true}
@@ -56,13 +56,15 @@ describe("Delete Modal", () => {
       .querySelector(".iui-dialog-title-bar")
       ?.querySelector(".iui-button") as HTMLInputElement;
     expect(button).toBeDefined();
-    await userEvent.click(button);
+    await act(async () => {
+      await userEvent.click(button);
+    });
     expect(show).toHaveBeenCalledWith(false);
   });
 
   it("Closing using cancel button calls setShow function", async () => {
     const show = jest.fn();
-    renderWithContext({
+    await renderWithContext({
       component: <DeleteModal
         entityName="template"
         show={true}
@@ -76,7 +78,9 @@ describe("Delete Modal", () => {
 
     const button = screen.getByTestId("ec3-delete-modal-calcel-button");
     expect(button).toBeDefined();
-    await userEvent.click(button);
+    await act(async () => {
+      await userEvent.click(button);
+    });
     expect(show).toHaveBeenCalledWith(false);
   });
 
@@ -85,7 +89,7 @@ describe("Delete Modal", () => {
     const refresh = jest.fn();
     const show = jest.fn();
 
-    renderWithContext({
+    await renderWithContext({
       component: <DeleteModal
         entityName="template"
         show={true}
@@ -98,7 +102,9 @@ describe("Delete Modal", () => {
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
 
     const button = screen.getByTestId("ec3-delete-modal-button");
-    await userEvent.click(button);
+    await act(async () => {
+      await userEvent.click(button);
+    });
 
     expect(deleteing).toHaveBeenCalled();
     expect(refresh).toHaveBeenCalled();

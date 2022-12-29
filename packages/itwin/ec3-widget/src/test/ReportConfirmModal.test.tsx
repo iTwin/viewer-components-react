@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import { renderWithContext } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { ReportConfirmModal } from "../components/ReportConfirmModal";
@@ -14,7 +14,7 @@ describe("Report Confirm Modal", () => {
   });
 
   it("Report Confirm modal with the show prop should render successfully and be visible", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <ReportConfirmModal
         show={true}
         setShow={() => { }}
@@ -27,7 +27,7 @@ describe("Report Confirm Modal", () => {
   });
 
   it("Report Confirm modal without the show prop should not be visible", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <ReportConfirmModal
         show={false}
         setShow={() => { }}
@@ -41,7 +41,7 @@ describe("Report Confirm Modal", () => {
 
   it("Closing using button in top right calls setShow function", async () => {
     const show = jest.fn();
-    renderWithContext({
+    await renderWithContext({
       component: <ReportConfirmModal
         show={true}
         setShow={show}
@@ -56,13 +56,15 @@ describe("Report Confirm Modal", () => {
       .querySelector(".iui-dialog-title-bar")
       ?.querySelector(".iui-button") as HTMLInputElement;
     expect(button).toBeDefined();
-    await userEvent.click(button);
+    await act(async () => {
+      await userEvent.click(button);
+    });
     expect(show).toHaveBeenCalledWith(false);
   });
 
   it("Closing using cancel button calls setShow function", async () => {
     const show = jest.fn();
-    renderWithContext({
+    await renderWithContext({
       component: <ReportConfirmModal
         show={true}
         setShow={show}
@@ -75,7 +77,9 @@ describe("Report Confirm Modal", () => {
 
     const button = screen.getByTestId("ec3-report-confirm-modal-cancel-button");
     expect(button).toBeDefined();
-    await userEvent.click(button);
+    await act(async () => {
+      await userEvent.click(button);
+    });
     expect(show).toHaveBeenCalledWith(false);
   });
 
@@ -84,7 +88,7 @@ describe("Report Confirm Modal", () => {
     const refresh = jest.fn().mockImplementation((f) => setTimeout(f, 1));
     const show = jest.fn();
 
-    renderWithContext({
+    await renderWithContext({
       component: <ReportConfirmModal
         show={true}
         setShow={show}
@@ -96,7 +100,9 @@ describe("Report Confirm Modal", () => {
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
 
     const button = screen.getByTestId("ec3-report-confirm-modal-button");
-    await userEvent.click(button);
+    await act(async () => {
+      await userEvent.click(button);
+    });
 
     expect(confirm).toHaveBeenCalled();
     expect(refresh).toHaveBeenCalled();

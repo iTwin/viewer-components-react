@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { screen, waitForElementToBeRemoved } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import * as moq from "typemoq";
 import type { IOdataClient, ODataTable } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
@@ -72,8 +72,8 @@ describe("LabelAction", () => {
     oDataClient.setup(async (x) => x.getODataReportMetadata(accessToken, reportId)).returns(async () => mockedOData);
   });
 
-  it("Label Action menu should render successfully", () => {
-    renderWithContext({
+  it("Label Action menu should render successfully", async () => {
+    await renderWithContext({
       component: <LabelAction
         template={emptyTemplate}
         label={undefined}
@@ -87,7 +87,7 @@ describe("LabelAction", () => {
   });
 
   it("Mocked report tables should appear in dropdown", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <LabelAction
         template={emptyTemplate}
         label={undefined}
@@ -98,7 +98,6 @@ describe("LabelAction", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
     const items = getComboboxOptions(screen.getByTestId("ec3-report-table-select"));
     items.forEach((item, index) => {
@@ -107,7 +106,7 @@ describe("LabelAction", () => {
   });
 
   it("Selecting report table should enable other inputs", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <LabelAction
         template={emptyTemplate}
         label={undefined}
@@ -118,7 +117,6 @@ describe("LabelAction", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
     const elementInput = screen.getByTestId("ec3-element-select");
     const elementQuantityInput = screen.getByTestId("ec3-element-quantity-select");
@@ -136,7 +134,7 @@ describe("LabelAction", () => {
   });
 
   it("The correct element name and quantity should appear", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <LabelAction
         template={template}
         label={label}
@@ -147,7 +145,6 @@ describe("LabelAction", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
     let items = await getInputOptions(screen.getByTestId("ec3-element-select"));
     expect(items.length).toBe(2);
@@ -160,7 +157,7 @@ describe("LabelAction", () => {
   });
 
   it("Selected label properties should be displayed correctly", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <LabelAction
         template={template}
         label={label}
@@ -171,7 +168,6 @@ describe("LabelAction", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
     const reportTableInput = screen.getByTestId("ec3-report-table-select")
       .querySelector(".iui-input") as HTMLInputElement;
@@ -189,7 +185,7 @@ describe("LabelAction", () => {
   });
 
   it("Filling out required fields enables add material and save buttons", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <LabelAction
         template={emptyTemplate}
         label={undefined}
@@ -200,7 +196,6 @@ describe("LabelAction", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
     const saveButton: HTMLInputElement = screen.getByTestId("ec3-save-button");
     const addButton: HTMLInputElement = screen.getByTestId("ec3-add-material-button");
@@ -217,7 +212,7 @@ describe("LabelAction", () => {
   });
 
   it("Adding material allows deletion, deletion brings up delete modal", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <LabelAction
         template={template}
         label={label}
@@ -228,10 +223,11 @@ describe("LabelAction", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
     const addButton = screen.getByTestId("ec3-add-material-button");
-    await userEvent.click(addButton);
+    await act(async () => {
+      await userEvent.click(addButton);
+    });
 
     const dropdowns = screen.getAllByTestId("ec3-dropdown-tile-select");
     expect(dropdowns.length).toBe(label.materials.length + 1);
@@ -241,14 +237,16 @@ describe("LabelAction", () => {
     const buttons: HTMLInputElement[] = screen.getAllByTestId("ec3-materials-delete-button");
     expect(buttons[0].disabled).toBe(true);
     expect(buttons[dropdowns.length - 1].disabled).toBe(false);
-    await userEvent.click(buttons[dropdowns.length - 1]);
+    await act(async () => {
+      await userEvent.click(buttons[dropdowns.length - 1]);
+    });
 
     expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
   });
 
   it("Saving updates the template state", async () => {
     const setter = jest.fn();
-    renderWithContext({
+    await renderWithContext({
       component: <LabelAction
         template={template}
         label={label}
@@ -259,7 +257,6 @@ describe("LabelAction", () => {
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
     await simulateCombobox(screen.getByTestId("ec3-report-table-select"), "table_1");
     await simulateInput(screen.getByTestId("ec3-element-select"), "string_column_1");
@@ -267,7 +264,9 @@ describe("LabelAction", () => {
     await simulateInput(screen.getByTestId("ec3-dropdown-tile-select"), "material_1");
 
     const button = screen.getByTestId("ec3-save-button");
-    button.click();
+    await act(async () => {
+      button.click();
+    });
 
     const expectedArg = template;
     template.labels = [{

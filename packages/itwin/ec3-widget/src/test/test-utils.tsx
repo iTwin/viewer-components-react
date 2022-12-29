@@ -3,14 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient} from "@itwin/insights-client";
-import { EC3ConfigurationsClient, EC3JobsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
-import type { RenderResult} from "@testing-library/react";
+import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient } from "@itwin/insights-client";
+import type { RenderResult } from "@testing-library/react";
+import { act } from "@testing-library/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import type { GetAccessTokenFn } from "../components/api/APIContext";
 import { ApiContext } from "../components/api/APIContext";
+import * as moq from "typemoq";
 
 export interface RenderParameters {
   component: React.ReactNode;
@@ -21,20 +22,24 @@ export interface RenderParameters {
   getAccessTokenFn?: GetAccessTokenFn;
 }
 
-export function renderWithContext({
+export async function renderWithContext({
   component, ec3ConfigurationsClient, ec3JobsClient, reportsClient, oDataClient, getAccessTokenFn,
-}: RenderParameters): RenderResult {
-  return render(
-    <ApiContext.Provider value={{
-      reportsClient: reportsClient ?? new ReportsClient(),
-      oDataClient: oDataClient ?? new ODataClient(),
-      ec3JobsClient: ec3JobsClient ?? new EC3JobsClient(),
-      ec3ConfigurationsClient: ec3ConfigurationsClient ?? new EC3ConfigurationsClient(),
-      getAccessTokenFn: getAccessTokenFn ?? (async () => ""),
-    }}>
-      {component}
-    </ApiContext.Provider>
-  );
+}: RenderParameters): Promise<RenderResult> {
+  let result: RenderResult;
+  await act(async () => {
+    result = render(
+      <ApiContext.Provider value={{
+        reportsClient: reportsClient ?? moq.Mock.ofType<IReportsClient>().object,
+        oDataClient: oDataClient ?? moq.Mock.ofType<IOdataClient>().object,
+        ec3JobsClient: ec3JobsClient ?? moq.Mock.ofType<IEC3JobsClient>().object,
+        ec3ConfigurationsClient: ec3ConfigurationsClient ?? moq.Mock.ofType<IEC3ConfigurationsClient>().object,
+        getAccessTokenFn: getAccessTokenFn ?? (async () => ""),
+      }}>
+        {component}
+      </ApiContext.Provider>
+    );
+  });
+  return result!;
 }
 
 export async function simulateInput(rootElement: HTMLElement, text: string) {
@@ -49,13 +54,17 @@ export async function simulateCombobox(rootElement: HTMLElement, text: string) {
   const input = rootElement.querySelector(".iui-input") as HTMLInputElement;
   fireEvent.focus(input);
   const item = screen.getByText(text);
-  await userEvent.click(item);
+  await act(async () => {
+    await userEvent.click(item);
+  });
   expect(input.value).toEqual(text);
 }
 
 export async function simulateTextInput(rootElement: HTMLElement, text: string) {
   const input = rootElement as HTMLInputElement;
-  fireEvent.change(input, { target: { value: text } });
+  await act(async () => {
+    fireEvent.change(input, { target: { value: text } });
+  });
   expect(input.value).toEqual(text);
 }
 

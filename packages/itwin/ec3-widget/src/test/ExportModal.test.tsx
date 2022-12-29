@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import * as moq from "typemoq";
 import type { EC3Job, IEC3JobsClient } from "@itwin/insights-client";
 import { CarbonUploadState } from "@itwin/insights-client";
@@ -55,7 +55,7 @@ describe("Export Modal", () => {
   });
 
   it("Export modal with the isOpen prop should render successfully and be visible", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <ExportModal
         projectName=""
         isOpen={true}
@@ -69,7 +69,7 @@ describe("Export Modal", () => {
   });
 
   it("Export modal without the isOpen prop should be invisible", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: <ExportModal
         projectName=""
         isOpen={false}
@@ -90,7 +90,7 @@ describe("Export Modal", () => {
     });
 
     expect(event).toBe(undefined);
-    renderWithContext({
+    await renderWithContext({
       component: <ExportModal
         projectName=""
         isOpen={true}
@@ -115,7 +115,7 @@ describe("Export Modal", () => {
     });
 
     expect(event).toBe(undefined);
-    renderWithContext({
+    await renderWithContext({
       component: <ExportModal
         projectName=""
         isOpen={true}
@@ -133,19 +133,27 @@ describe("Export Modal", () => {
     expect(event).not.toBe(undefined);
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Queued));
-    await event!();
+    await act(async () => {
+      await event!();
+    });
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export queued");
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Running));
-    await event!();
+    await act(async () => {
+      await event!();
+    });
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export running");
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Succeeded));
-    await event!();
+    await act(async () => {
+      await event!();
+    });
     expect(modal.querySelector(".iui-button-label")).toHaveTextContent("Open in EC3");
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Failed));
-    await event!();
+    await act(async () => {
+      await event!();
+    });
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export failed");
   });
 });

@@ -4,10 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { fireEvent, screen, waitForElementToBeRemoved } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import { Templates } from "../components/Templates";
 import * as moq from "typemoq";
-import type { EC3ConfigurationsClient } from "@itwin/insights-client";
+import type { EC3ConfigurationsClient, EC3Job, EC3JobsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import { EC3Config } from "../components/EC3/EC3Config";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -17,6 +17,7 @@ import type { EC3Token } from "../components/EC3/EC3Token";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const ec3ConfigurationsClient = moq.Mock.ofType<EC3ConfigurationsClient>();
+const ec3JobsClient = moq.Mock.ofType<EC3JobsClient>();
 
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
@@ -43,6 +44,15 @@ describe("Templates", () => {
     })
   );
 
+  const job: EC3Job = {
+    id: "1111-2222-3333-4444",
+    _links: {
+      status: {
+        href: "status",
+      },
+    },
+  };
+
   const iTwinId = faker.datatype.uuid();
   const accessToken = faker.datatype.uuid();
   const config = new EC3Config({ clientId: "", redirectUri: "" });
@@ -52,10 +62,11 @@ describe("Templates", () => {
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
     ec3ConfigurationsClient.setup(async (x) => x.getConfigurations(accessToken, iTwinId)).returns(async () => mockedConfigurations);
     ec3ConfigurationsClient.setup(async (x) => x.getConfiguration(accessToken, "0")).returns(async () => mockedConfigurations[0]);
+    ec3JobsClient.setup(async (x) => x.createJob(accessToken, moq.It.isAny())).returns(async () => job);
   });
 
-  it("Templates view should render successfully", () => {
-    renderWithContext({
+  it("Templates view should render successfully", async () => {
+    await renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
@@ -64,109 +75,119 @@ describe("Templates", () => {
   });
 
   it("Templates view should have mocked templates", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     mockedConfigurations.forEach((c) =>
       expect(screen.getByText(c.displayName)).toBeInTheDocument()
     );
   });
 
   it("Templates view should have mocked templates", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     mockedConfigurations.forEach((c) =>
       expect(screen.getByText(c.displayName)).toBeInTheDocument()
     );
   });
 
   it("Clicking on template should oper template menu", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     const configuration = screen.getByText(mockedConfigurations[0].displayName);
-    configuration.click();
+    await act(async () => {
+      configuration.click();
+    });
     expect(screen.getByTestId("ec3-templateDetails")).toBeInTheDocument();
   });
 
   it("Clicking create button should open creating template menu", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const button = screen.getByText("Create Template");
-    button.click();
+    await act(async () => {
+      button.click();
+    });
     expect(screen.getByTestId("ec3-templateDetails")).toBeInTheDocument();
   });
 
   it("Clicking on tile should select it and enable export button", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
 
     const button: HTMLInputElement = screen.getByTestId("ec3-export-button");
     expect(button.disabled).toBe(true);
 
     const configuration = screen.getAllByTestId("ec3-horizontal-tile")[0];
-    configuration.click();
+    await act(async () => {
+      configuration.click();
+    });
     expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
     expect(button.disabled).toBe(false);
   });
 
   it("Clicking again or on other tile should deselect", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     const configurations = screen.getAllByTestId("ec3-horizontal-tile");
-    configurations[0].click();
+    await act(async () => {
+      configurations[0].click();
+    });
     expect(configurations[0].className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
 
-    configurations[1].click();
+    await act(async () => {
+      configurations[1].click();
+    });
     expect(configurations[0].className).toBe("ec3w-horizontal-tile-container");
     expect(configurations[1].className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
 
-    configurations[1].click();
+    await act(async () => {
+      configurations[2].click();
+    });
     expect(configurations[1].className).toBe("ec3w-horizontal-tile-container");
   });
 
   it("Search option filters out configurations", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
 
     const searchBar = screen.getByTestId("ec3-search-bar");
     const button = searchBar.querySelector(".iui-button") as HTMLInputElement;
-    button.click();
+    await act(async () => {
+      button.click();
+    });
 
     const input = searchBar.querySelector(".iui-input") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "config_0" } });
+    await act(async () => {
+      fireEvent.change(input, { target: { value: "config_0" } });
+    });
 
     const configurations = screen.getAllByTestId("ec3-horizontal-tile");
     expect(configurations.length).toBe(1);
@@ -174,39 +195,45 @@ describe("Templates", () => {
   });
 
   it("Search bar opens and closes on click", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
     expect(document.querySelector(".ec3-close-search-bar")).toBe(null);
 
     const searchBar = screen.getByTestId("ec3-search-bar");
     const button = searchBar.querySelector(".iui-button") as HTMLInputElement;
-    button.click();
+    await act(async () => {
+      button.click();
+    });
 
     const closeButton = screen.getByTestId("ec3-close-search-bar");
-    closeButton.click();
+    await act(async () => {
+      closeButton.click();
+    });
 
     expect(document.querySelector(".ec3-close-search-bar")).toBe(null);
   });
 
   it("Deleting report brings up delete modal", async () => {
-    renderWithContext({
+    await renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
 
     const dropdown = screen.getAllByTestId("tile-action-button")[0]
       .querySelector(".iui-button") as HTMLInputElement;
-    await userEvent.click(dropdown);
+    await act(async () => {
+      await userEvent.click(dropdown);
+    });
     const button = screen.getByTestId("ec3-templates-delete-button");
-    await userEvent.click(button);
+    await act(async () => {
+      await userEvent.click(button);
+    });
 
     expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
   });
@@ -219,21 +246,25 @@ describe("Templates", () => {
     const mockOpen = jest.fn();
     global.window.open = mockOpen;
 
-    renderWithContext({
+    await renderWithContext({
       component: < Templates config={config} />,
+      ec3JobsClient: ec3JobsClient.object,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
-    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
 
     const configuration = screen.getAllByTestId("ec3-horizontal-tile")[0];
-    configuration.click();
+    await act(async () => {
+      configuration.click();
+    });
     expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
 
     const button: HTMLInputElement = screen.getByTestId("ec3-export-button");
     expect(button.disabled).toBe(false);
-    await userEvent.click(button);
+    await act(async () => {
+      await userEvent.click(button);
+    });
     expect(mockOpen).toHaveBeenCalled();
 
     const ec3Token: EC3Token = {
@@ -241,7 +272,9 @@ describe("Templates", () => {
       exp: Date.now() + 10000,
       source: "ec3-auth",
     };
-    eventListeners.message({ data: ec3Token });
+    await act(async () => {
+      eventListeners.message({ data: ec3Token });
+    });
     expect(screen.getByTestId("ec3-export-modal")).toBeDefined();
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
   });
