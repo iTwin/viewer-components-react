@@ -8,7 +8,7 @@ import { fireEvent, render, screen, waitForElementToBeRemoved } from "@testing-l
 import * as moq from "typemoq";
 import type { EC3ConfigurationsClient, IOdataClient, ODataTable } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
-import { renderWithContext } from "./test-utils";
+import { getComboboxOptions, getInputOptions, renderWithContext, simulateCombobox, simulateInput } from "./test-utils";
 import { LabelAction } from "../components/LabelAction";
 import { Configuration, Label, Material } from "../components/Template";
 import userEvent from "@testing-library/user-event";
@@ -100,11 +100,7 @@ describe("LabelAction", () => {
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    const rootElement = screen.getByTestId('ec3-report-table-select') as HTMLDivElement;
-    const input = rootElement.querySelector('.iui-input') as HTMLInputElement;
-    fireEvent.focus(input);
-
-    const items = document.querySelectorAll('.iui-menu-item');
+    const items = getComboboxOptions(screen.getByTestId('ec3-report-table-select'));
     items.forEach((item, index) => {
       expect(item).toHaveTextContent(`table_${index}`);
     });
@@ -124,8 +120,6 @@ describe("LabelAction", () => {
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    const rootElement = screen.getByTestId("ec3-report-table-select");
-    const reportTableInput = rootElement.querySelector(".iui-input") as HTMLInputElement;
     const elementInput = screen.getByTestId("ec3-element-select");
     const elementQuantityInput = screen.getByTestId("ec3-element-quantity-select");
     const dropdownTileInput = screen.getByTestId("ec3-dropdown-tile-select");
@@ -134,10 +128,7 @@ describe("LabelAction", () => {
     expect(elementQuantityInput.querySelector(".iui-disabled")).toBeInTheDocument();
     expect(dropdownTileInput.querySelector(".iui-disabled")).toBeInTheDocument();
 
-    fireEvent.focus(reportTableInput);
-    const item = screen.getByText('table_0');
-    await userEvent.click(item);
-    expect(reportTableInput.value).toEqual('table_0');
+    await simulateCombobox(screen.getByTestId("ec3-report-table-select"), "table_0");
 
     expect(elementInput.querySelector(".iui-disabled")).toBeNull();
     expect(elementQuantityInput.querySelector(".iui-disabled")).toBeNull();
@@ -158,19 +149,12 @@ describe("LabelAction", () => {
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    const nameSelect = screen.getByTestId("ec3-element-select")
-      .querySelector(".iui-select-button") as HTMLInputElement;
-    const quantitySelect = screen.getByTestId("ec3-element-quantity-select")
-      .querySelector(".iui-select-button") as HTMLInputElement;
-
-    await userEvent.click(nameSelect);
-    let items = document.querySelectorAll(".iui-menu-item");
+    let items = await getInputOptions(screen.getByTestId("ec3-element-select"));
     expect(items.length).toBe(2);
     expect(items[0]).toHaveTextContent(`extra_material_0`);
     expect(items[1]).toHaveTextContent(`string_column_0`);
 
-    await userEvent.click(quantitySelect);
-    items = document.querySelectorAll(".iui-menu-item");
+    items = await getInputOptions(screen.getByTestId("ec3-element-quantity-select"));
     expect(items.length).toBe(1);
     expect(items[0]).toHaveTextContent(`number_column_0`);
   });
@@ -218,39 +202,15 @@ describe("LabelAction", () => {
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    const reportTableInput = screen.getByTestId("ec3-report-table-select")
-      .querySelector(".iui-input") as HTMLInputElement;
-    const elementInput = screen.getByTestId("ec3-element-select")
-      .querySelector(".iui-select-button") as HTMLInputElement;
-    const elementQuantityInput = screen.getByTestId("ec3-element-quantity-select")
-      .querySelector(".iui-select-button") as HTMLInputElement;
-    const dropdownTileInput = screen.getByTestId("ec3-dropdown-tile-select")
-      .querySelector(".iui-select-button") as HTMLInputElement;
     const saveButton = screen.getByTestId("ec3-save-button") as HTMLInputElement;
     const addButton = screen.getByTestId("ec3-add-material-button") as HTMLInputElement;
-
     expect(saveButton.disabled).toBe(true);
     expect(addButton.disabled).toBe(true);
 
-    fireEvent.focus(reportTableInput);
-    let item = screen.getByText('table_0');
-    await userEvent.click(item);
-    expect(reportTableInput.value).toEqual('table_0');
-
-    await userEvent.click(elementInput);
-    item = screen.getByText('string_column_0');
-    await userEvent.click(item);
-    expect(elementInput.querySelector(".iui-content")).toHaveTextContent('string_column_0');
-
-    await userEvent.click(elementQuantityInput);
-    item = screen.getByText('number_column_0');
-    await userEvent.click(item);
-    expect(elementQuantityInput.querySelector(".iui-content")).toHaveTextContent('number_column_0');
-
-    await userEvent.click(dropdownTileInput);
-    item = screen.getByText('material_0');
-    await userEvent.click(item);
-    expect(dropdownTileInput.querySelector(".iui-content")).toHaveTextContent('material_0');
+    await simulateCombobox(screen.getByTestId("ec3-report-table-select"), "table_0")
+    await simulateInput(screen.getByTestId("ec3-element-select"), "string_column_0");
+    await simulateInput(screen.getByTestId("ec3-element-quantity-select"), "number_column_0");
+    await simulateInput(screen.getByTestId("ec3-dropdown-tile-select"), "material_0");
 
     expect(saveButton.disabled).toBe(false);
     expect(addButton.disabled).toBe(false);
@@ -275,19 +235,50 @@ describe("LabelAction", () => {
 
     const dropdowns = screen.getAllByTestId("ec3-dropdown-tile-select");
     expect(dropdowns.length).toBe(label.materials.length + 1);
-    const newDropdown = dropdowns[label.materials.length]
-      .querySelector(".iui-select-button") as HTMLInputElement;
-
-    await userEvent.click(newDropdown);
-    const item = screen.getByText('extra_material_0');
-    await userEvent.click(item);
-    expect(newDropdown.querySelector(".iui-content")).toHaveTextContent('extra_material_0');
+    const newDropdown = dropdowns[label.materials.length];
+    await simulateInput(newDropdown, "extra_material_0");
 
     const buttons = screen.getAllByTestId("ec3-materials-delete-button") as HTMLInputElement[];
     expect(buttons[0].disabled).toBe(true);
-    expect(buttons[1].disabled).toBe(false);
-    await userEvent.click(buttons[1]);
+    expect(buttons[dropdowns.length - 1].disabled).toBe(false);
+    await userEvent.click(buttons[dropdowns.length - 1]);
 
     expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
+  });
+
+  it("Saving updates the template state", async () => {
+    const setter = jest.fn();
+    renderWithContext({
+      component: <LabelAction
+        template={template}
+        label={label}
+        goBack={async () => { }}
+        setTemplate={setter}
+      />,
+      oDataClient: oDataClient.object,
+      getAccessTokenFn
+    });
+    expect(screen.getByTestId("ec3-label-action")).toBeDefined();
+    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
+
+    await simulateCombobox(screen.getByTestId("ec3-report-table-select"), "table_1")
+    await simulateInput(screen.getByTestId("ec3-element-select"), "string_column_1");
+    await simulateInput(screen.getByTestId("ec3-element-quantity-select"), "number_column_1");
+    await simulateInput(screen.getByTestId("ec3-dropdown-tile-select"), "material_1");
+
+    const button = screen.getByTestId("ec3-save-button");
+    button.click();
+
+    const expectedArg = template;
+    template.labels = [{
+      name: label.name,
+      reportTable: "table_1",
+      elementNameColumn: "string_column_1",
+      elementQuantityColumn: "number_column_1",
+      materials: [{
+        nameColumn: "material_1",
+      }]
+    }]
+    expect(setter).toHaveBeenCalledWith(expectedArg);
   });
 });

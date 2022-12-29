@@ -39,6 +39,7 @@ export const SearchBar = ({
         placeholder="Search templates"
         svgIcon={
           <IconButton
+            data-testid="ec3-close-search-bar"
             onClick={() => setSearchBarClosing(true)}
             styleType="borderless"
           >

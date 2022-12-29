@@ -13,6 +13,7 @@ import { EC3Config } from "../components/EC3/EC3Config";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { renderWithContext } from "./test-utils";
 import userEvent from "@testing-library/user-event";
+import { EC3Token } from "../components/EC3/EC3Token";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const ec3ConfigurationsClient = moq.Mock.ofType<EC3ConfigurationsClient>();
@@ -160,16 +161,36 @@ describe("Templates", () => {
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
 
-    const container = screen.getByTestId("ec3-search-bar");
-    const button = container.querySelector(".iui-button") as HTMLInputElement;
+    const searchBar = screen.getByTestId("ec3-search-bar");
+    const button = searchBar.querySelector(".iui-button") as HTMLInputElement;
     button.click();
 
-    const input = container.querySelector(".iui-input") as HTMLInputElement;
+    const input = searchBar.querySelector(".iui-input") as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'config_0' } });
 
     const configurations = screen.getAllByTestId("ec3-horizontal-tile");
     expect(configurations.length).toBe(1);
     expect(screen.getByText("config_0")).toBeInTheDocument();
+  });
+
+  it("Search bar opens and closes on click", async () => {
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
+    expect(document.querySelector(".ec3-close-search-bar")).toBe(null);
+
+    const searchBar = screen.getByTestId("ec3-search-bar");
+    const button = searchBar.querySelector(".iui-button") as HTMLInputElement;
+    button.click();
+
+    const closeButton = screen.getByTestId("ec3-close-search-bar");
+    closeButton.click();
+
+    expect(document.querySelector(".ec3-close-search-bar")).toBe(null);
   });
 
   it("Deleting report brings up delete modal", async () => {
@@ -188,5 +209,41 @@ describe("Templates", () => {
     await userEvent.click(button);
 
     expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
+  });
+
+  it("Exporting and recieving ec3 token opens export modal", async () => {
+    const eventListeners: Record<string, Function> = {};
+    jest.spyOn(window, 'addEventListener').mockImplementation((event, handle, _?) => {
+      // @ts-ignore
+      eventListeners[event] = handle;
+    });
+    const mockOpen = jest.fn();
+    global.window.open = mockOpen;
+
+    renderWithContext({
+      component: < Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn: getAccessTokenFn
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
+
+    const configuration = screen.getAllByTestId("ec3-horizontal-tile")[0];
+    configuration.click();
+    expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
+
+    const button = screen.getByTestId("ec3-export-button") as HTMLInputElement;
+    expect(button.disabled).toBe(false);
+    await userEvent.click(button);
+    expect(mockOpen).toHaveBeenCalled();
+
+    const ec3Token: EC3Token = {
+      token: "ec3_token",
+      exp: Date.now() + 10000,
+      source: "ec3-auth",
+    };
+    eventListeners['message']({ data: ec3Token });
+    expect(screen.getByTestId("ec3-export-modal")).toBeDefined();
+    expect(document.querySelectorAll('.iui-dialog-visible')).toBeDefined();
   });
 });

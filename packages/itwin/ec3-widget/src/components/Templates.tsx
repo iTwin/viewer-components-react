@@ -101,8 +101,7 @@ export const Templates = ({ config }: EC3Props) => {
 
   const onExport = useCallback(async () => {
     if (!(token?.token && token?.exp > Date.now())) {
-      const url = `${config.ec3Uri}oauth2/authorize?client_id=${config.clientId}&redirect_uri=${config.redirectUri}&response_type=code&scope=${config.scope}`;
-      const authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
+      let authWindow: Window | null;
 
       const receiveMessage = (event: MessageEvent<EC3Token>) => {
         if (event.data.source !== "ec3-auth")
@@ -111,8 +110,10 @@ export const Templates = ({ config }: EC3Props) => {
         setToken(event.data);
         openModal(true);
       };
-
       window.addEventListener("message", receiveMessage, false);
+
+      const url = `${config.ec3Uri}oauth2/authorize?client_id=${config.clientId}&redirect_uri=${config.redirectUri}&response_type=code&scope=${config.scope}`;
+      authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
     } else {
       openModal(true);
     }

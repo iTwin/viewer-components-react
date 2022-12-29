@@ -211,7 +211,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                       options={ReportOptions}
                       value={childTemplate.reportId}
                       onChange={async (value) => {
-                        if (template && value !== template.reportId) {
+                        if (childTemplate.labels.length > 0 && value !== childTemplate.reportId) {
                           setSelectedReport(value);
                           setShowReportConfirmModal(true);
                         } else {

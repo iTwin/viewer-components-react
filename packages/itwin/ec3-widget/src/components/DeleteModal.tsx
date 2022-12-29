@@ -67,10 +67,11 @@ export const DeleteModal = ({
           <div className="ec3w-loading-delete">
             <LoadingSpinner />
           </div>}
-        <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>
+        <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading} data-testid="ec3-delete-modal-button">
           Delete
         </Button>
         <Button
+          data-testid="ec3-delete-modal-calcel-button"
           styleType='default'
           onClick={() => {
             setShow(false);
