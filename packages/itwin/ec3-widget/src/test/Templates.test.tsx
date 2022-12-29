@@ -11,7 +11,7 @@ import type { EC3ConfigurationsClient, EC3Job, EC3JobsClient } from "@itwin/insi
 import faker from "@faker-js/faker";
 import { EC3Config } from "../components/EC3/EC3Config";
 import type { IModelConnection } from "@itwin/core-frontend";
-import { renderWithContext } from "./test-utils";
+import { renderWithContext, simulateClick } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import type { EC3Token } from "../components/EC3/EC3Token";
 
@@ -106,9 +106,7 @@ describe("Templates", () => {
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const configuration = screen.getByText(mockedConfigurations[0].displayName);
-    await act(async () => {
-      configuration.click();
-    });
+    await simulateClick(configuration);
     expect(screen.getByTestId("ec3-templateDetails")).toBeInTheDocument();
   });
 
@@ -120,9 +118,7 @@ describe("Templates", () => {
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const button = screen.getByText("Create Template");
-    await act(async () => {
-      button.click();
-    });
+    await simulateClick(button);
     expect(screen.getByTestId("ec3-templateDetails")).toBeInTheDocument();
   });
 
@@ -138,9 +134,7 @@ describe("Templates", () => {
     expect(button.disabled).toBe(true);
 
     const configuration = screen.getAllByTestId("ec3-horizontal-tile")[0];
-    await act(async () => {
-      configuration.click();
-    });
+    await simulateClick(configuration);
     expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
     expect(button.disabled).toBe(false);
   });
@@ -153,20 +147,14 @@ describe("Templates", () => {
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const configurations = screen.getAllByTestId("ec3-horizontal-tile");
-    await act(async () => {
-      configurations[0].click();
-    });
+    await simulateClick(configurations[0]);
     expect(configurations[0].className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
 
-    await act(async () => {
-      configurations[1].click();
-    });
+    await simulateClick(configurations[1]);
     expect(configurations[0].className).toBe("ec3w-horizontal-tile-container");
     expect(configurations[1].className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
 
-    await act(async () => {
-      configurations[2].click();
-    });
+    await simulateClick(configurations[2]);
     expect(configurations[1].className).toBe("ec3w-horizontal-tile-container");
   });
 
@@ -180,9 +168,7 @@ describe("Templates", () => {
 
     const searchBar = screen.getByTestId("ec3-search-bar");
     const button = searchBar.querySelector(".iui-button") as HTMLInputElement;
-    await act(async () => {
-      button.click();
-    });
+    await simulateClick(button);
 
     const input = searchBar.querySelector(".iui-input") as HTMLInputElement;
     await act(async () => {
@@ -205,14 +191,10 @@ describe("Templates", () => {
 
     const searchBar = screen.getByTestId("ec3-search-bar");
     const button = searchBar.querySelector(".iui-button") as HTMLInputElement;
-    await act(async () => {
-      button.click();
-    });
+    await simulateClick(button);
 
     const closeButton = screen.getByTestId("ec3-close-search-bar");
-    await act(async () => {
-      closeButton.click();
-    });
+    await simulateClick(closeButton);
 
     expect(document.querySelector(".ec3-close-search-bar")).toBe(null);
   });
@@ -227,13 +209,9 @@ describe("Templates", () => {
 
     const dropdown = screen.getAllByTestId("tile-action-button")[0]
       .querySelector(".iui-button") as HTMLInputElement;
-    await act(async () => {
-      await userEvent.click(dropdown);
-    });
+    await simulateClick(dropdown);
     const button = screen.getByTestId("ec3-templates-delete-button");
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
 
     expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
   });
@@ -255,16 +233,12 @@ describe("Templates", () => {
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
 
     const configuration = screen.getAllByTestId("ec3-horizontal-tile")[0];
-    await act(async () => {
-      configuration.click();
-    });
+    await simulateClick(configuration);
     expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
 
     const button: HTMLInputElement = screen.getByTestId("ec3-export-button");
     expect(button.disabled).toBe(false);
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
     expect(mockOpen).toHaveBeenCalled();
 
     const ec3Token: EC3Token = {

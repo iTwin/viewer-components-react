@@ -5,7 +5,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { act, screen } from "@testing-library/react";
-import { renderWithContext } from "./test-utils";
+import { renderWithContext, simulateClick } from "./test-utils";
 import { DeleteModal } from "../components/DeleteModal";
 import userEvent from "@testing-library/user-event";
 
@@ -56,9 +56,7 @@ describe("Delete Modal", () => {
       .querySelector(".iui-dialog-title-bar")
       ?.querySelector(".iui-button") as HTMLInputElement;
     expect(button).toBeDefined();
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
     expect(show).toHaveBeenCalledWith(false);
   });
 
@@ -78,9 +76,7 @@ describe("Delete Modal", () => {
 
     const button = screen.getByTestId("ec3-delete-modal-calcel-button");
     expect(button).toBeDefined();
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
     expect(show).toHaveBeenCalledWith(false);
   });
 
@@ -102,9 +98,7 @@ describe("Delete Modal", () => {
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
 
     const button = screen.getByTestId("ec3-delete-modal-button");
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
 
     expect(deleteing).toHaveBeenCalled();
     expect(refresh).toHaveBeenCalled();

@@ -8,7 +8,7 @@ import { act, screen } from "@testing-library/react";
 import * as moq from "typemoq";
 import type { IOdataClient, ODataTable } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
-import { getComboboxOptions, getInputOptions, renderWithContext, simulateCombobox, simulateInput } from "./test-utils";
+import { getComboboxOptions, getInputOptions, renderWithContext, simulateClick, simulateCombobox, simulateInput } from "./test-utils";
 import { LabelAction } from "../components/LabelAction";
 import type { Configuration, Label, Material } from "../components/Template";
 import userEvent from "@testing-library/user-event";
@@ -225,9 +225,7 @@ describe("LabelAction", () => {
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
 
     const addButton = screen.getByTestId("ec3-add-material-button");
-    await act(async () => {
-      await userEvent.click(addButton);
-    });
+    await simulateClick(addButton);
 
     const dropdowns = screen.getAllByTestId("ec3-dropdown-tile-select");
     expect(dropdowns.length).toBe(label.materials.length + 1);
@@ -237,9 +235,7 @@ describe("LabelAction", () => {
     const buttons: HTMLInputElement[] = screen.getAllByTestId("ec3-materials-delete-button");
     expect(buttons[0].disabled).toBe(true);
     expect(buttons[dropdowns.length - 1].disabled).toBe(false);
-    await act(async () => {
-      await userEvent.click(buttons[dropdowns.length - 1]);
-    });
+    await simulateClick(buttons[dropdowns.length - 1]);
 
     expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
   });
@@ -264,9 +260,7 @@ describe("LabelAction", () => {
     await simulateInput(screen.getByTestId("ec3-dropdown-tile-select"), "material_1");
 
     const button = screen.getByTestId("ec3-save-button");
-    await act(async () => {
-      button.click();
-    });
+    await simulateClick(button);
 
     const expectedArg = template;
     template.labels = [{

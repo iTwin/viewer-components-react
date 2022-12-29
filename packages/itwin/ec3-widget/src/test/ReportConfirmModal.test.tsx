@@ -5,7 +5,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { act, screen } from "@testing-library/react";
-import { renderWithContext } from "./test-utils";
+import { renderWithContext, simulateClick } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { ReportConfirmModal } from "../components/ReportConfirmModal";
 
@@ -60,9 +60,7 @@ describe("Report Confirm Modal", () => {
       .querySelector(".iui-dialog-title-bar")
       ?.querySelector(".iui-button") as HTMLInputElement;
     expect(button).toBeDefined();
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
     expect(show).toHaveBeenCalledWith(false);
     expect(cancel).toHaveBeenCalled();
   });
@@ -84,9 +82,7 @@ describe("Report Confirm Modal", () => {
 
     const button = screen.getByTestId("ec3-report-confirm-modal-cancel-button");
     expect(button).toBeDefined();
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
     expect(show).toHaveBeenCalledWith(false);
     expect(cancel).toHaveBeenCalled();
   });
@@ -109,9 +105,7 @@ describe("Report Confirm Modal", () => {
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
 
     const button = screen.getByTestId("ec3-report-confirm-modal-button");
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
 
     expect(confirm).toHaveBeenCalled();
     expect(refresh).toHaveBeenCalled();

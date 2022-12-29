@@ -79,3 +79,9 @@ export async function getInputOptions(rootElement: HTMLElement) {
   await userEvent.click(input);
   return document.querySelectorAll(".iui-menu-item");
 }
+
+export async function simulateClick(button: HTMLElement) {
+  await act(async () => {
+    await userEvent.click(button);
+  });
+}

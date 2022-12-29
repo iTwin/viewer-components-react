@@ -9,7 +9,7 @@ import * as moq from "typemoq";
 import type { EC3Configuration, EC3ConfigurationsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import type { IModelConnection } from "@itwin/core-frontend";
-import { getComboboxOptions, renderWithContext, simulateCombobox, simulateTextInput } from "./test-utils";
+import { getComboboxOptions, renderWithContext, simulateClick, simulateCombobox, simulateTextInput } from "./test-utils";
 import { TemplateMenu } from "../components/TemplateMenu";
 import userEvent from "@testing-library/user-event";
 import type { Configuration } from "../components/Template";
@@ -155,9 +155,7 @@ describe("TemplatesMenu", () => {
     await simulateTextInput(screen.getByTestId("ec3-template-name-input"), "Test Name");
     expect(button.disabled).toBe(false);
 
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
     configClient.verify(async (x) => x.createConfiguration(accessToken, moq.It.isAny()), moq.Times.atLeastOnce());
   });
 
@@ -181,9 +179,7 @@ describe("TemplatesMenu", () => {
     await simulateCombobox(screen.getByTestId("ec3-enabled-selection"), "report_0");
     expect(button.disabled).toBe(false);
 
-    await act(async () => {
-      button.click();
-    });
+    await simulateClick(button);
     expect(screen.getByTestId("ec3-label-action")).toBeInTheDocument();
   });
 
@@ -229,9 +225,7 @@ describe("TemplatesMenu", () => {
     expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
 
     const configuration = screen.getByText(config.labels[0].name);
-    await act(async () => {
-      configuration.click();
-    });
+    await simulateClick(configuration);
     expect(screen.getByTestId("ec3-label-action")).toBeInTheDocument();
   });
 
@@ -251,9 +245,7 @@ describe("TemplatesMenu", () => {
     expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
 
     const button = screen.getAllByTestId("ec3-labels-delete-button")[0];
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
 
     expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
   });
@@ -274,9 +266,7 @@ describe("TemplatesMenu", () => {
     expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
 
     const button = screen.getByTestId("ec3-save-button");
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await simulateClick(button);
 
     configClient.verify(async (x) => x.updateConfiguration(accessToken, configId, moq.It.isAny()), moq.Times.atLeastOnce());
   });
