@@ -4,11 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen, waitForElementToBeRemoved } from "@testing-library/react";
-import { getComboboxOptions, getInputOptions, renderWithContext, simulateCombobox, simulateInput } from "./test-utils";
+import { screen } from "@testing-library/react";
+import { renderWithContext } from "./test-utils";
 import { DeleteModal } from "../components/DeleteModal";
 import userEvent from "@testing-library/user-event";
-
 
 describe("Delete Modal", () => {
   it("Delete modal with the show prop should render successfully and be visible", async () => {
@@ -19,10 +18,10 @@ describe("Delete Modal", () => {
         setShow={() => { }}
         onDelete={async () => { }}
         refresh={async () => { }}
-      />
+      />,
     });
     expect(screen.getByTestId("ec3-delete-modal")).toBeDefined();
-    expect(document.querySelectorAll('.iui-dialog-visible')).toBeDefined();
+    expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
   });
 
   it("Delete modal without the show prop should not be visible", async () => {
@@ -33,10 +32,10 @@ describe("Delete Modal", () => {
         setShow={() => { }}
         onDelete={async () => { }}
         refresh={async () => { }}
-      />
+      />,
     });
     expect(document.querySelector(".ec3-delete-modal")).toBeDefined();
-    expect(document.querySelector('.iui-dialog-visible')).toBeNull();
+    expect(document.querySelector(".iui-dialog-visible")).toBeNull();
   });
 
   it("Closing using button in top right calls setShow function", async () => {
@@ -48,10 +47,10 @@ describe("Delete Modal", () => {
         setShow={show}
         onDelete={async () => { }}
         refresh={async () => { }}
-      />
+      />,
     });
     expect(screen.getByTestId("ec3-delete-modal")).toBeDefined();
-    expect(document.querySelectorAll('.iui-dialog-visible')).toBeDefined();
+    expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
 
     const button = document
       .querySelector(".iui-dialog-title-bar")
@@ -70,10 +69,10 @@ describe("Delete Modal", () => {
         setShow={show}
         onDelete={async () => { }}
         refresh={async () => { }}
-      />
+      />,
     });
     expect(screen.getByTestId("ec3-delete-modal")).toBeDefined();
-    expect(document.querySelectorAll('.iui-dialog-visible')).toBeDefined();
+    expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
 
     const button = screen.getByTestId("ec3-delete-modal-calcel-button");
     expect(button).toBeDefined();
@@ -81,9 +80,8 @@ describe("Delete Modal", () => {
     expect(show).toHaveBeenCalledWith(false);
   });
 
-
   it("Delete modal calls onDelete and refresh and setShow functions after pressing the delete button", async () => {
-    const deleteing = jest.fn().mockImplementation(f => setTimeout(f, 1));
+    const deleteing = jest.fn().mockImplementation((f) => setTimeout(f, 1));
     const refresh = jest.fn();
     const show = jest.fn();
 
@@ -94,10 +92,10 @@ describe("Delete Modal", () => {
         setShow={show}
         onDelete={deleteing}
         refresh={refresh}
-      />
+      />,
     });
     expect(screen.getByTestId("ec3-delete-modal")).toBeDefined();
-    expect(document.querySelectorAll('.iui-dialog-visible')).toBeDefined();
+    expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
 
     const button = screen.getByTestId("ec3-delete-modal-button");
     await userEvent.click(button);

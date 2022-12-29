@@ -101,7 +101,7 @@ export const Templates = ({ config }: EC3Props) => {
 
   const onExport = useCallback(async () => {
     if (!(token?.token && token?.exp > Date.now())) {
-      let authWindow: Window | null;
+      let authWindow: Window | null = null;
 
       const receiveMessage = (event: MessageEvent<EC3Token>) => {
         if (event.data.source !== "ec3-auth")

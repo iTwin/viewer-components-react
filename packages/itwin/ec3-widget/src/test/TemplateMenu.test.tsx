@@ -4,16 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { fireEvent, screen, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
+import { screen, waitForElementToBeRemoved } from "@testing-library/react";
 import * as moq from "typemoq";
-import { EC3Configuration, EC3ConfigurationsClient, EC3ConfigurationUpdate, ReportsClient, ReportUpdate } from "@itwin/insights-client";
+import type { EC3Configuration, EC3ConfigurationsClient, ReportsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import type { IModelConnection } from "@itwin/core-frontend";
-import { getComboboxOptions, renderWithContext, simulateCombobox, simulateInput, simulateTextInput } from "./test-utils";
+import { getComboboxOptions, renderWithContext, simulateCombobox, simulateTextInput } from "./test-utils";
 import { TemplateMenu } from "../components/TemplateMenu";
-import userEvent from '@testing-library/user-event';
-import { Configuration, convertConfigurationUpdate, Label } from "../components/Template";
-import { Templates } from "../components/Templates";
+import userEvent from "@testing-library/user-event";
+import type { Configuration } from "../components/Template";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const reportsClient = moq.Mock.ofType<ReportsClient>();
@@ -37,14 +36,14 @@ describe("TemplatesMenu", () => {
     { length: 5 },
     (_, index) => ({
       id: index.toString(),
-      displayName: "report_" + index,
+      displayName: `report_${index}`,
       description: "desc",
       deleted: false,
       _links: {
         project: {
-          href: "reportLink"
-        }
-      }
+          href: "reportLink",
+        },
+      },
     })
   );
 
@@ -58,7 +57,7 @@ describe("TemplatesMenu", () => {
       reportTable: "",
       elementNameColumn: "",
       elementQuantityColumn: "",
-      materials: []
+      materials: [],
     }],
     createdBy: "",
     modifiedBy: "",
@@ -69,7 +68,7 @@ describe("TemplatesMenu", () => {
         href: "link/reports/0",
       },
     },
-  }
+  };
 
   const template: Configuration = {
     id: configId,
@@ -77,7 +76,7 @@ describe("TemplatesMenu", () => {
     description: "",
     labels: [],
     reportId: "",
-  }
+  };
 
   const iTwinId = faker.datatype.uuid();
   const accessToken = faker.datatype.uuid();
@@ -88,8 +87,8 @@ describe("TemplatesMenu", () => {
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
     reportsClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports);
     configClient.setup(async (x) => x.getConfiguration(accessToken, configId)).returns(async () => config);
-    configClient.setup(x => x.updateConfiguration(accessToken, configId, moq.It.isAny())).returns(async () => config);
-    configClient.setup(x => x.createConfiguration(accessToken, moq.It.isAny())).returns(async () => config);
+    configClient.setup(async (x) => x.updateConfiguration(accessToken, configId, moq.It.isAny())).returns(async () => config);
+    configClient.setup(async (x) => x.createConfiguration(accessToken, moq.It.isAny())).returns(async () => config);
   });
 
   it("Template Menu should render successfully for creating template", async () => {
@@ -97,7 +96,7 @@ describe("TemplatesMenu", () => {
       component: < TemplateMenu
         goBack={async () => { }}
         created={false}
-      />
+      />,
     });
     expect(container.querySelector("ec3-templateDetails")).toBeDefined();
     expect(container.querySelector(".ec3-enabled-selection")).toBeDefined();
@@ -108,20 +107,20 @@ describe("TemplatesMenu", () => {
       component: < TemplateMenu
         goBack={async () => { }}
         created={true}
-      />
+      />,
     });
     expect(container.querySelector(".ec3-templateDetails")).toBeDefined();
     expect(container.querySelector(".ec3-disabled-selection")).toBeDefined();
   });
 
   it("Mocked reports should appear in comboBox", async () => {
-    const { container } = renderWithContext({
+    renderWithContext({
       component: < TemplateMenu
         goBack={async () => { }}
         created={false}
       />,
       reportsClient: reportsClient.object,
-      getAccessTokenFn: getAccessTokenFn,
+      getAccessTokenFn,
     });
 
     expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
@@ -142,22 +141,22 @@ describe("TemplatesMenu", () => {
       />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
-      getAccessTokenFn: getAccessTokenFn,
+      getAccessTokenFn,
     });
 
     expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
     expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    const button = screen.getByTestId("ec3-save-button") as HTMLInputElement;
+    const button: HTMLInputElement = screen.getByTestId("ec3-save-button");
     expect(button.disabled).toBe(true);
     await simulateCombobox(screen.getByTestId("ec3-enabled-selection"), "report_0");
     expect(button.disabled).toBe(true);
-    await simulateTextInput(screen.getByTestId('ec3-template-name-input'), "Test Name");
+    await simulateTextInput(screen.getByTestId("ec3-template-name-input"), "Test Name");
     expect(button.disabled).toBe(false);
 
     await userEvent.click(button);
-    configClient.verify(x => x.createConfiguration(accessToken, moq.It.isAny()), moq.Times.atLeastOnce());
+    configClient.verify(async (x) => x.createConfiguration(accessToken, moq.It.isAny()), moq.Times.atLeastOnce());
   });
 
   it("Add assembly button opens label action menu", async () => {
@@ -167,14 +166,14 @@ describe("TemplatesMenu", () => {
         created={false}
       />,
       reportsClient: reportsClient.object,
-      getAccessTokenFn: getAccessTokenFn,
+      getAccessTokenFn,
     });
 
     expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
     expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    const button = screen.getByTestId("ec3-add-assembly-button") as HTMLInputElement;
+    const button: HTMLInputElement = screen.getByTestId("ec3-add-assembly-button");
     expect(button.disabled).toBe(true);
 
     await simulateCombobox(screen.getByTestId("ec3-enabled-selection"), "report_0");
@@ -193,7 +192,7 @@ describe("TemplatesMenu", () => {
       />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
-      getAccessTokenFn: getAccessTokenFn,
+      getAccessTokenFn,
     });
 
     expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
@@ -202,10 +201,10 @@ describe("TemplatesMenu", () => {
 
     expect(screen.getByText("report_0")).toBeInTheDocument();
 
-    let input = screen.getByTestId('ec3-template-name-input') as HTMLInputElement;
-    expect(input.value).toEqual('mocked_configuration');
-    input = screen.getByTestId('ec3-template-description-input') as HTMLInputElement;
-    expect(input.value).toEqual('mocked_description');
+    let input: HTMLInputElement = screen.getByTestId("ec3-template-name-input");
+    expect(input.value).toEqual("mocked_configuration");
+    input = screen.getByTestId("ec3-template-description-input");
+    expect(input.value).toEqual("mocked_description");
 
     expect(screen.getByText("mocked_label")).toBeInTheDocument();
   });
@@ -219,7 +218,7 @@ describe("TemplatesMenu", () => {
       />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
-      getAccessTokenFn: getAccessTokenFn,
+      getAccessTokenFn,
     });
 
     expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
@@ -240,7 +239,7 @@ describe("TemplatesMenu", () => {
       />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
-      getAccessTokenFn: getAccessTokenFn,
+      getAccessTokenFn,
     });
 
     expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
@@ -262,7 +261,7 @@ describe("TemplatesMenu", () => {
       />,
       reportsClient: reportsClient.object,
       ec3ConfigurationsClient: configClient.object,
-      getAccessTokenFn: getAccessTokenFn,
+      getAccessTokenFn,
     });
 
     expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
@@ -272,6 +271,6 @@ describe("TemplatesMenu", () => {
     const button = screen.getByTestId("ec3-save-button");
     await userEvent.click(button);
 
-    configClient.verify(x => x.updateConfiguration(accessToken, configId, moq.It.isAny()), moq.Times.atLeastOnce());
+    configClient.verify(async (x) => x.updateConfiguration(accessToken, configId, moq.It.isAny()), moq.Times.atLeastOnce());
   });
 });

@@ -3,23 +3,26 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { EC3ConfigurationsClient, EC3JobsClient, IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
-import { fireEvent, render, RenderResult, screen } from "@testing-library/react";
+import type { IEC3ConfigurationsClient, IEC3JobsClient, IOdataClient, IReportsClient} from "@itwin/insights-client";
+import { EC3ConfigurationsClient, EC3JobsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
+import type { RenderResult} from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { ApiContext, GetAccessTokenFn } from "../components/api/APIContext"
+import type { GetAccessTokenFn } from "../components/api/APIContext";
+import { ApiContext } from "../components/api/APIContext";
 
 export interface RenderParameters {
-  component: React.ReactNode,
-  ec3ConfigurationsClient?: IEC3ConfigurationsClient,
-  ec3JobsClient?: IEC3JobsClient,
-  reportsClient?: IReportsClient,
-  oDataClient?: IOdataClient,
-  getAccessTokenFn?: GetAccessTokenFn
+  component: React.ReactNode;
+  ec3ConfigurationsClient?: IEC3ConfigurationsClient;
+  ec3JobsClient?: IEC3JobsClient;
+  reportsClient?: IReportsClient;
+  oDataClient?: IOdataClient;
+  getAccessTokenFn?: GetAccessTokenFn;
 }
 
 export function renderWithContext({
-  component, ec3ConfigurationsClient, ec3JobsClient, reportsClient, oDataClient, getAccessTokenFn
+  component, ec3ConfigurationsClient, ec3JobsClient, reportsClient, oDataClient, getAccessTokenFn,
 }: RenderParameters): RenderResult {
   return render(
     <ApiContext.Provider value={{
@@ -31,7 +34,7 @@ export function renderWithContext({
     }}>
       {component}
     </ApiContext.Provider>
-  )
+  );
 }
 
 export async function simulateInput(rootElement: HTMLElement, text: string) {
@@ -57,9 +60,9 @@ export async function simulateTextInput(rootElement: HTMLElement, text: string) 
 }
 
 export function getComboboxOptions(rootElement: HTMLElement) {
-  const input = rootElement.querySelector('.iui-input') as HTMLInputElement;
+  const input = rootElement.querySelector(".iui-input") as HTMLInputElement;
   fireEvent.focus(input);
-  return document.querySelectorAll('.iui-menu-item');
+  return document.querySelectorAll(".iui-menu-item");
 }
 
 export async function getInputOptions(rootElement: HTMLElement) {

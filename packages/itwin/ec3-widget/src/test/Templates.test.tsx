@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen, waitForElementToBeRemoved } from "@testing-library/react";
+import { fireEvent, screen, waitForElementToBeRemoved } from "@testing-library/react";
 import { Templates } from "../components/Templates";
 import * as moq from "typemoq";
 import type { EC3ConfigurationsClient } from "@itwin/insights-client";
@@ -13,7 +13,7 @@ import { EC3Config } from "../components/EC3/EC3Config";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { renderWithContext } from "./test-utils";
 import userEvent from "@testing-library/user-event";
-import { EC3Token } from "../components/EC3/EC3Token";
+import type { EC3Token } from "../components/EC3/EC3Token";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
 const ec3ConfigurationsClient = moq.Mock.ofType<EC3ConfigurationsClient>();
@@ -58,7 +58,7 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
   });
@@ -67,7 +67,7 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -80,7 +80,7 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -93,7 +93,7 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -106,7 +106,7 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const button = screen.getByText("Create Template");
@@ -118,12 +118,12 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
 
-    const button = screen.getByTestId("ec3-export-button") as HTMLInputElement;
+    const button: HTMLInputElement = screen.getByTestId("ec3-export-button");
     expect(button.disabled).toBe(true);
 
     const configuration = screen.getAllByTestId("ec3-horizontal-tile")[0];
@@ -136,7 +136,7 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -156,7 +156,7 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -166,7 +166,7 @@ describe("Templates", () => {
     button.click();
 
     const input = searchBar.querySelector(".iui-input") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'config_0' } });
+    fireEvent.change(input, { target: { value: "config_0" } });
 
     const configurations = screen.getAllByTestId("ec3-horizontal-tile");
     expect(configurations.length).toBe(1);
@@ -177,7 +177,7 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -197,7 +197,7 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -213,9 +213,8 @@ describe("Templates", () => {
 
   it("Exporting and recieving ec3 token opens export modal", async () => {
     const eventListeners: Record<string, Function> = {};
-    jest.spyOn(window, 'addEventListener').mockImplementation((event, handle, _?) => {
-      // @ts-ignore
-      eventListeners[event] = handle;
+    jest.spyOn(window, "addEventListener").mockImplementation((event, handle, _?) => {
+      eventListeners[event] = handle as Function;
     });
     const mockOpen = jest.fn();
     global.window.open = mockOpen;
@@ -223,7 +222,7 @@ describe("Templates", () => {
     renderWithContext({
       component: < Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
-      getAccessTokenFn: getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loading"));
@@ -232,7 +231,7 @@ describe("Templates", () => {
     configuration.click();
     expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
 
-    const button = screen.getByTestId("ec3-export-button") as HTMLInputElement;
+    const button: HTMLInputElement = screen.getByTestId("ec3-export-button");
     expect(button.disabled).toBe(false);
     await userEvent.click(button);
     expect(mockOpen).toHaveBeenCalled();
@@ -242,8 +241,8 @@ describe("Templates", () => {
       exp: Date.now() + 10000,
       source: "ec3-auth",
     };
-    eventListeners['message']({ data: ec3Token });
+    eventListeners.message({ data: ec3Token });
     expect(screen.getByTestId("ec3-export-modal")).toBeDefined();
-    expect(document.querySelectorAll('.iui-dialog-visible')).toBeDefined();
+    expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
   });
 });

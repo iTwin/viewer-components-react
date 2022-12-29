@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen, waitForElementToBeRemoved } from "@testing-library/react";
+import { screen, waitForElementToBeRemoved } from "@testing-library/react";
 import * as moq from "typemoq";
-import type { EC3ConfigurationsClient, IOdataClient, ODataTable } from "@itwin/insights-client";
+import type { IOdataClient, ODataTable } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import { getComboboxOptions, getInputOptions, renderWithContext, simulateCombobox, simulateInput } from "./test-utils";
 import { LabelAction } from "../components/LabelAction";
-import { Configuration, Label, Material } from "../components/Template";
+import type { Configuration, Label, Material } from "../components/Template";
 import userEvent from "@testing-library/user-event";
 
 const oDataClient = moq.Mock.ofType<IOdataClient>();
@@ -19,8 +19,8 @@ describe("LabelAction", () => {
   const reportId = "1111-2222-3333-4444";
 
   const material: Material = {
-    nameColumn: "material_0"
-  }
+    nameColumn: "material_0",
+  };
 
   const label: Label = {
     reportTable: "table_0",
@@ -28,21 +28,21 @@ describe("LabelAction", () => {
     elementNameColumn: "string_column_0",
     elementQuantityColumn: "number_column_0",
     materials: [material],
-  }
+  };
 
   const emptyTemplate: Configuration = {
     displayName: "configuration",
     description: "description",
     reportId,
     labels: [],
-  }
+  };
 
   const template: Configuration = {
     displayName: "configuration",
     description: "description",
     reportId,
     labels: [label],
-  }
+  };
 
   const mockedOData: ODataTable[] = Array.from(
     { length: 5 },
@@ -60,7 +60,7 @@ describe("LabelAction", () => {
       }, {
         name: `extra_material_${index}`,
         type: `Edm.String`,
-      }]
+      }],
     })
   );
 
@@ -81,7 +81,7 @@ describe("LabelAction", () => {
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
-      getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
   });
@@ -95,12 +95,12 @@ describe("LabelAction", () => {
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
-      getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    const items = getComboboxOptions(screen.getByTestId('ec3-report-table-select'));
+    const items = getComboboxOptions(screen.getByTestId("ec3-report-table-select"));
     items.forEach((item, index) => {
       expect(item).toHaveTextContent(`table_${index}`);
     });
@@ -115,7 +115,7 @@ describe("LabelAction", () => {
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
-      getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
@@ -144,7 +144,7 @@ describe("LabelAction", () => {
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
-      getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
@@ -168,7 +168,7 @@ describe("LabelAction", () => {
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
-      getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
@@ -197,17 +197,17 @@ describe("LabelAction", () => {
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
-      getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    const saveButton = screen.getByTestId("ec3-save-button") as HTMLInputElement;
-    const addButton = screen.getByTestId("ec3-add-material-button") as HTMLInputElement;
+    const saveButton: HTMLInputElement = screen.getByTestId("ec3-save-button");
+    const addButton: HTMLInputElement = screen.getByTestId("ec3-add-material-button");
     expect(saveButton.disabled).toBe(true);
     expect(addButton.disabled).toBe(true);
 
-    await simulateCombobox(screen.getByTestId("ec3-report-table-select"), "table_0")
+    await simulateCombobox(screen.getByTestId("ec3-report-table-select"), "table_0");
     await simulateInput(screen.getByTestId("ec3-element-select"), "string_column_0");
     await simulateInput(screen.getByTestId("ec3-element-quantity-select"), "number_column_0");
     await simulateInput(screen.getByTestId("ec3-dropdown-tile-select"), "material_0");
@@ -225,12 +225,12 @@ describe("LabelAction", () => {
         setTemplate={() => { }}
       />,
       oDataClient: oDataClient.object,
-      getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    const addButton = screen.getByTestId("ec3-add-material-button") as HTMLInputElement;
+    const addButton = screen.getByTestId("ec3-add-material-button");
     await userEvent.click(addButton);
 
     const dropdowns = screen.getAllByTestId("ec3-dropdown-tile-select");
@@ -238,7 +238,7 @@ describe("LabelAction", () => {
     const newDropdown = dropdowns[label.materials.length];
     await simulateInput(newDropdown, "extra_material_0");
 
-    const buttons = screen.getAllByTestId("ec3-materials-delete-button") as HTMLInputElement[];
+    const buttons: HTMLInputElement[] = screen.getAllByTestId("ec3-materials-delete-button");
     expect(buttons[0].disabled).toBe(true);
     expect(buttons[dropdowns.length - 1].disabled).toBe(false);
     await userEvent.click(buttons[dropdowns.length - 1]);
@@ -256,12 +256,12 @@ describe("LabelAction", () => {
         setTemplate={setter}
       />,
       oDataClient: oDataClient.object,
-      getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
     await waitForElementToBeRemoved(() => screen.getByTestId("ec3-loadingSpinner"));
 
-    await simulateCombobox(screen.getByTestId("ec3-report-table-select"), "table_1")
+    await simulateCombobox(screen.getByTestId("ec3-report-table-select"), "table_1");
     await simulateInput(screen.getByTestId("ec3-element-select"), "string_column_1");
     await simulateInput(screen.getByTestId("ec3-element-quantity-select"), "number_column_1");
     await simulateInput(screen.getByTestId("ec3-dropdown-tile-select"), "material_1");
@@ -277,8 +277,8 @@ describe("LabelAction", () => {
       elementQuantityColumn: "number_column_1",
       materials: [{
         nameColumn: "material_1",
-      }]
-    }]
+      }],
+    }];
     expect(setter).toHaveBeenCalledWith(expectedArg);
   });
 });

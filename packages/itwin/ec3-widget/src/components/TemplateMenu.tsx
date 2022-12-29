@@ -178,7 +178,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               </Small>
               <LabeledInput
                 id='templateName'
-                data-testid={'ec3-template-name-input'}
+                data-testid={"ec3-template-name-input"}
                 name='displayName'
                 label='EC3 Project Template Name'
                 value={childTemplate.displayName}
@@ -190,7 +190,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               />
               <LabeledInput
                 id='templateDescription'
-                data-testid={'ec3-template-description-input'}
+                data-testid={"ec3-template-description-input"}
                 name='description'
                 label='Template description'
                 value={childTemplate.description}

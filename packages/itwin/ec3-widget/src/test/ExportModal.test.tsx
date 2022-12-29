@@ -4,11 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen, waitForElementToBeRemoved } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import * as moq from "typemoq";
-import { CarbonUploadState, EC3ConfigurationsClient, EC3Job, EC3JobStatus, IEC3JobsClient, IOdataClient, ODataTable } from "@itwin/insights-client";
+import type { EC3Job, IEC3JobsClient } from "@itwin/insights-client";
+import { CarbonUploadState } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
-import { getComboboxOptions, getInputOptions, renderWithContext, simulateCombobox, simulateInput } from "./test-utils";
+import { renderWithContext } from "./test-utils";
 import { ExportModal } from "../components/ExportModal";
 
 jest.mock("@itwin/itwinui-react", () => ({
@@ -29,20 +30,20 @@ describe("Export Modal", () => {
     id: jobId,
     _links: {
       status: {
-        href: "status"
-      }
-    }
-  }
+        href: "status",
+      },
+    },
+  };
 
   function status(state: CarbonUploadState) {
     return {
       status: state,
       _links: {
         ec3Project: {
-          href: jobId
-        }
-      }
-    }
+          href: jobId,
+        },
+      },
+    };
   }
 
   const accessToken = faker.datatype.uuid();
@@ -50,7 +51,7 @@ describe("Export Modal", () => {
   const getAccessTokenFn = async () => accessToken;
 
   beforeAll(async () => {
-    jobsClient.setup(x => x.createJob(accessToken, moq.It.isAny())).returns(async () => job);
+    jobsClient.setup(async (x) => x.createJob(accessToken, moq.It.isAny())).returns(async () => job);
   });
 
   it("Export modal with the isOpen prop should render successfully and be visible", async () => {
@@ -61,10 +62,10 @@ describe("Export Modal", () => {
         close={() => { }}
         templateId={templateId}
         token={undefined}
-      />
+      />,
     });
     expect(screen.getByTestId("ec3-export-modal")).toBeDefined();
-    expect(document.querySelectorAll('.iui-dialog-visible')).toBeDefined();
+    expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
   });
 
   it("Export modal without the isOpen prop should be invisible", async () => {
@@ -75,15 +76,15 @@ describe("Export Modal", () => {
         close={() => { }}
         templateId={templateId}
         token={undefined}
-      />
+      />,
     });
     expect(document.querySelector(".ec3-export-modal")).toBeDefined();
-    expect(document.querySelector('.iui-dialog-visible')).toBeNull();
+    expect(document.querySelector(".iui-dialog-visible")).toBeNull();
   });
 
   it("Interval should be set when modal is open and ec3 token is received", async () => {
-    let event: Function | undefined = undefined;
-    jest.spyOn(window, 'setInterval').mockImplementation((callback, _) => {
+    let event: Function | undefined;
+    jest.spyOn(window, "setInterval").mockImplementation((callback, _) => {
       event = callback;
       return setTimeout(() => { });
     });
@@ -98,17 +99,17 @@ describe("Export Modal", () => {
         token={ec3Token}
       />,
       ec3JobsClient: jobsClient.object,
-      getAccessTokenFn
+      getAccessTokenFn,
     });
     expect(screen.getByTestId("ec3-export-modal")).toBeDefined();
-    expect(document.querySelector('.iui-dialog-visible')).toBeDefined();
-    await new Promise(f => setTimeout(f, 1));
+    expect(document.querySelector(".iui-dialog-visible")).toBeDefined();
+    await new Promise((f) => setTimeout(f, 1));
     expect(event).not.toBe(undefined);
   });
 
   it("Correct info should be displayed for each status", async () => {
-    let event: Function | undefined = undefined;
-    jest.spyOn(window, 'setInterval').mockImplementation((callback, _) => {
+    let event: Function | undefined;
+    jest.spyOn(window, "setInterval").mockImplementation((callback, _) => {
       event = callback;
       return setTimeout(() => { });
     });
@@ -123,27 +124,27 @@ describe("Export Modal", () => {
         token={ec3Token}
       />,
       ec3JobsClient: jobsClient.object,
-      getAccessTokenFn
+      getAccessTokenFn,
     });
-    const modal = screen.getByTestId("ec3-export-modal")
+    const modal = screen.getByTestId("ec3-export-modal");
     expect(modal).toBeDefined();
-    expect(document.querySelector('.iui-dialog-visible')).toBeDefined();
-    await new Promise(f => setTimeout(f, 1));
+    expect(document.querySelector(".iui-dialog-visible")).toBeDefined();
+    await new Promise((f) => setTimeout(f, 1));
     expect(event).not.toBe(undefined);
 
-    jobsClient.setup(x => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Queued));
+    jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Queued));
     await event!();
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export queued");
 
-    jobsClient.setup(x => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Running));
+    jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Running));
     await event!();
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export running");
 
-    jobsClient.setup(x => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Succeeded));
+    jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Succeeded));
     await event!();
     expect(modal.querySelector(".iui-button-label")).toHaveTextContent("Open in EC3");
 
-    jobsClient.setup(x => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Failed));
+    jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Failed));
     await event!();
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export failed");
   });

@@ -43,6 +43,7 @@ export const ReportConfirmModal = ({
   return (
     <Modal
       title='Confirm'
+      data-testid="ec3-report-confirm-modal"
       modalRootId='ec3-widget-react'
       isOpen={show}
       isDismissible={!isLoading}
@@ -60,11 +61,12 @@ export const ReportConfirmModal = ({
           <div className="ec3w-loading-delete">
             <LoadingSpinner />
           </div>}
-        <Button styleType='high-visibility' onClick={confirmCallback} disabled={isLoading}>
+        <Button styleType='high-visibility' onClick={confirmCallback} disabled={isLoading} data-testid="ec3-report-confirm-modal-button">
           Confirm
         </Button>
         <Button
           styleType='default'
+          data-testid="ec3-report-confirm-modal-cancel-button"
           onClick={() => {
             setShow(false);
           }}
