@@ -67,7 +67,12 @@ export const DeleteModal = ({
           <div className="ec3w-loading-delete">
             <LoadingSpinner />
           </div>}
-        <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading} data-testid="ec3-delete-modal-button">
+        <Button
+          styleType='high-visibility'
+          onClick={deleteCallback}
+          disabled={isLoading}
+          data-testid="ec3-delete-modal-button"
+        >
           Delete
         </Button>
         <Button

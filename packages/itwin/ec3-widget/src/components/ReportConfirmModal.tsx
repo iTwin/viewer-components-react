@@ -64,7 +64,12 @@ export const ReportConfirmModal = ({
           <div className="ec3w-loading-delete">
             <LoadingSpinner />
           </div>}
-        <Button styleType='high-visibility' onClick={confirmCallback} disabled={isLoading} data-testid="ec3-report-confirm-modal-button">
+        <Button
+          styleType='high-visibility'
+          onClick={confirmCallback}
+          disabled={isLoading}
+          data-testid="ec3-report-confirm-modal-button"
+        >
           Confirm
         </Button>
         <Button
