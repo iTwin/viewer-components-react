@@ -4,12 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { act, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { renderWithContext, simulateClick } from "./test-utils";
-import userEvent from "@testing-library/user-event";
 import { ReportConfirmModal } from "../components/ReportConfirmModal";
 
-describe("Report Confirm Modal", () => {
+describe("ReportConfirmModal", () => {
   beforeAll(async () => {
   });
 
@@ -65,7 +64,7 @@ describe("Report Confirm Modal", () => {
     expect(cancel).toHaveBeenCalled();
   });
 
-  it("Closing using cancel button calls setShow function", async () => {
+  it("Closing using cancel button calls setShow and onCancel functions", async () => {
     const show = jest.fn();
     const cancel = jest.fn();
     await renderWithContext({

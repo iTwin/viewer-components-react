@@ -4,19 +4,18 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { act, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import * as moq from "typemoq";
 import type { IOdataClient, ODataTable } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import { getComboboxOptions, getInputOptions, renderWithContext, simulateClick, simulateCombobox, simulateInput } from "./test-utils";
 import { LabelAction } from "../components/LabelAction";
 import type { Configuration, Label, Material } from "../components/Template";
-import userEvent from "@testing-library/user-event";
 
 const oDataClient = moq.Mock.ofType<IOdataClient>();
 
 describe("LabelAction", () => {
-  const reportId = "1111-2222-3333-4444";
+  const reportId = faker.datatype.uuid();
 
   const material: Material = {
     nameColumn: "material_0",
@@ -86,7 +85,7 @@ describe("LabelAction", () => {
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
   });
 
-  it("Mocked report tables should appear in dropdown", async () => {
+  it("Mocked report tables should appear in comboBox", async () => {
     await renderWithContext({
       component: <LabelAction
         template={emptyTemplate}

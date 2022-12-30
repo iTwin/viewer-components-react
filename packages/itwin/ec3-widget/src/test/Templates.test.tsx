@@ -12,7 +12,6 @@ import faker from "@faker-js/faker";
 import { EC3Config } from "../components/EC3/EC3Config";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { renderWithContext, simulateClick } from "./test-utils";
-import userEvent from "@testing-library/user-event";
 import type { EC3Token } from "../components/EC3/EC3Token";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
@@ -45,7 +44,7 @@ describe("Templates", () => {
   );
 
   const job: EC3Job = {
-    id: "1111-2222-3333-4444",
+    id: faker.datatype.uuid(),
     _links: {
       status: {
         href: "status",
@@ -67,7 +66,7 @@ describe("Templates", () => {
 
   it("Templates view should render successfully", async () => {
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -76,7 +75,7 @@ describe("Templates", () => {
 
   it("Templates view should have mocked templates", async () => {
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -88,7 +87,7 @@ describe("Templates", () => {
 
   it("Templates view should have mocked templates", async () => {
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -98,9 +97,9 @@ describe("Templates", () => {
     );
   });
 
-  it("Clicking on template should oper template menu", async () => {
+  it("Clicking on template should open template menu", async () => {
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -110,9 +109,9 @@ describe("Templates", () => {
     expect(screen.getByTestId("ec3-templateDetails")).toBeInTheDocument();
   });
 
-  it("Clicking create button should open creating template menu", async () => {
+  it("Clicking create button should open create template menu", async () => {
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -124,7 +123,7 @@ describe("Templates", () => {
 
   it("Clicking on tile should select it and enable export button", async () => {
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -141,7 +140,7 @@ describe("Templates", () => {
 
   it("Clicking again or on other tile should deselect", async () => {
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -160,7 +159,7 @@ describe("Templates", () => {
 
   it("Search option filters out configurations", async () => {
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -182,7 +181,7 @@ describe("Templates", () => {
 
   it("Search bar opens and closes on click", async () => {
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -201,7 +200,7 @@ describe("Templates", () => {
 
   it("Deleting report brings up delete modal", async () => {
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,
     });
@@ -225,7 +224,7 @@ describe("Templates", () => {
     global.window.open = mockOpen;
 
     await renderWithContext({
-      component: < Templates config={config} />,
+      component: <Templates config={config} />,
       ec3JobsClient: ec3JobsClient.object,
       ec3ConfigurationsClient: ec3ConfigurationsClient.object,
       getAccessTokenFn,

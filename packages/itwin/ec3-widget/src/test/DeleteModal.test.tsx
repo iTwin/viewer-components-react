@@ -4,13 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { act, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { renderWithContext, simulateClick } from "./test-utils";
 import { DeleteModal } from "../components/DeleteModal";
-import userEvent from "@testing-library/user-event";
 
-describe("Delete Modal", () => {
-  it("Delete modal with the show prop should render successfully and be visible", async () => {
+describe("DeleteModal", () => {
+  it("Delete modal with the show prop should be visible", async () => {
     await renderWithContext({
       component: <DeleteModal
         entityName="template"

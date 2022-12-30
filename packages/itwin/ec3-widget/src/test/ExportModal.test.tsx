@@ -22,9 +22,9 @@ jest.mock("@itwin/itwinui-react", () => ({
 
 const jobsClient = moq.Mock.ofType<IEC3JobsClient>();
 
-describe("Export Modal", () => {
-  const templateId = "1111-2222-3333-4444";
-  const jobId = "4444-3333-2222-1111";
+describe("ExportModal", () => {
+  const templateId = faker.datatype.uuid();
+  const jobId = faker.datatype.uuid();
 
   const job: EC3Job = {
     id: jobId,
@@ -133,27 +133,19 @@ describe("Export Modal", () => {
     expect(event).not.toBe(undefined);
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Queued));
-    await act(async () => {
-      await event!();
-    });
+    await act(async () => { await event!(); });
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export queued");
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Running));
-    await act(async () => {
-      await event!();
-    });
+    await act(async () => { await event!(); });
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export running");
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Succeeded));
-    await act(async () => {
-      await event!();
-    });
+    await act(async () => { await event!(); });
     expect(modal.querySelector(".iui-button-label")).toHaveTextContent("Open in EC3");
 
     jobsClient.setup(async (x) => x.getEC3JobStatus(accessToken, jobId)).returns(async () => status(CarbonUploadState.Failed));
-    await act(async () => {
-      await event!();
-    });
+    await act(async () => { await event!(); });
     expect(modal.querySelector(".iui-text-leading")).toHaveTextContent("Export failed");
   });
 });

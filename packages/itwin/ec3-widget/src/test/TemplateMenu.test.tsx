@@ -4,14 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { act, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import * as moq from "typemoq";
 import type { EC3Configuration, EC3ConfigurationsClient, ODataClient, ReportsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { getComboboxOptions, renderWithContext, simulateClick, simulateCombobox, simulateTextInput } from "./test-utils";
 import { TemplateMenu } from "../components/TemplateMenu";
-import userEvent from "@testing-library/user-event";
 import type { Configuration } from "../components/Template";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
@@ -32,7 +31,7 @@ jest.mock("@itwin/itwinui-react", () => ({
   },
 }));
 
-describe("TemplatesMenu", () => {
+describe("TemplateMenu", () => {
   const mockedReports = Array.from(
     { length: 5 },
     (_, index) => ({
@@ -94,30 +93,30 @@ describe("TemplatesMenu", () => {
   });
 
   it("Template Menu should render successfully for creating template", async () => {
-    const { container } = await renderWithContext({
-      component: < TemplateMenu
+    await renderWithContext({
+      component: <TemplateMenu
         goBack={async () => { }}
         created={false}
       />,
     });
-    expect(container.querySelector("ec3-templateDetails")).toBeDefined();
-    expect(container.querySelector(".ec3-enabled-selection")).toBeDefined();
+    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
   });
 
   it("Template Menu should render successfully for updating template", async () => {
-    const { container } = await renderWithContext({
-      component: < TemplateMenu
+    await renderWithContext({
+      component: <TemplateMenu
         goBack={async () => { }}
         created={true}
       />,
     });
-    expect(container.querySelector(".ec3-templateDetails")).toBeDefined();
-    expect(container.querySelector(".ec3-disabled-selection")).toBeDefined();
+    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
   });
 
   it("Mocked reports should appear in comboBox", async () => {
     await renderWithContext({
-      component: < TemplateMenu
+      component: <TemplateMenu
         goBack={async () => { }}
         created={false}
       />,
@@ -136,7 +135,7 @@ describe("TemplatesMenu", () => {
 
   it("Selecting name and report should enable save button, saving calls client", async () => {
     await renderWithContext({
-      component: < TemplateMenu
+      component: <TemplateMenu
         goBack={async () => { }}
         created={false}
       />,
@@ -159,9 +158,9 @@ describe("TemplatesMenu", () => {
     configClient.verify(async (x) => x.createConfiguration(accessToken, moq.It.isAny()), moq.Times.atLeastOnce());
   });
 
-  it("Add assembly button opens label action menu", async () => {
+  it("Add assembly button in enabled after selecting report and it opens label action menu", async () => {
     await renderWithContext({
-      component: < TemplateMenu
+      component: <TemplateMenu
         goBack={async () => { }}
         created={false}
       />,
@@ -185,7 +184,7 @@ describe("TemplatesMenu", () => {
 
   it("Template menu has correct data", async () => {
     await renderWithContext({
-      component: < TemplateMenu
+      component: <TemplateMenu
         goBack={async () => { }}
         created={true}
         template={template}
@@ -210,7 +209,7 @@ describe("TemplatesMenu", () => {
 
   it("Clicking on label opens label action menu", async () => {
     await renderWithContext({
-      component: < TemplateMenu
+      component: <TemplateMenu
         goBack={async () => { }}
         created={true}
         template={template}
@@ -231,7 +230,7 @@ describe("TemplatesMenu", () => {
 
   it("Deleting label opens delete modal", async () => {
     await renderWithContext({
-      component: < TemplateMenu
+      component: <TemplateMenu
         goBack={async () => { }}
         created={true}
         template={template}
@@ -252,7 +251,7 @@ describe("TemplatesMenu", () => {
 
   it("Saving existing template updates it", async () => {
     await renderWithContext({
-      component: < TemplateMenu
+      component: <TemplateMenu
         goBack={async () => { }}
         created={true}
         template={template}
