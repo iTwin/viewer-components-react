@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
 import { ComboBox, Label, toaster } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { Configuration } from "./Template";
@@ -96,6 +95,7 @@ export const ReportTableSelector = ({
           Report table
         </Label>
         <ComboBox
+          data-testid="ec3-report-table-select"
           options={reportTableLabels}
           value={reportTable}
           onChange={onChangeCallback}

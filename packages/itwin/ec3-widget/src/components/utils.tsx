@@ -38,7 +38,7 @@ export const WidgetHeader = ({
 };
 
 export const LoadingOverlay = () => (
-  <div className='ec3w-center-overlay' data-testid="ec3-loading">
+  <div className='ec3w-center-overlay'>
     <Text>Loading</Text>
     <ProgressRadial indeterminate />
     <Text>Please wait...</Text>
@@ -82,7 +82,7 @@ export const handleSelectChange = <T,>(
 
 export const LoadingSpinner = () => {
   return (
-    <div className="ec3w-loading-spinner" data-testid="ec3-loadingSpinner">
+    <div className="ec3w-loading-spinner">
       <ProgressRadial size="small" indeterminate />
     </div>
   );

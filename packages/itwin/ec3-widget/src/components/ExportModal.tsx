@@ -198,7 +198,7 @@ export const ExportModal = (props: ExportProps) => {
 
   return (
     <Modal
-      data-testid="export-modal"
+      data-testid="ec3-export-modal"
       isOpen={props.isOpen}
       onClose={onClose}
       title={null}

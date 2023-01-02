@@ -101,8 +101,7 @@ export const Templates = ({ config }: EC3Props) => {
 
   const onExport = useCallback(async () => {
     if (!(token?.token && token?.exp > Date.now())) {
-      const url = `${config.ec3Uri}oauth2/authorize?client_id=${config.clientId}&redirect_uri=${config.redirectUri}&response_type=code&scope=${config.scope}`;
-      const authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
+      let authWindow: Window | null = null;
 
       const receiveMessage = (event: MessageEvent<EC3Token>) => {
         if (event.data.source !== "ec3-auth")
@@ -111,8 +110,10 @@ export const Templates = ({ config }: EC3Props) => {
         setToken(event.data);
         openModal(true);
       };
-
       window.addEventListener("message", receiveMessage, false);
+
+      const url = `${config.ec3Uri}oauth2/authorize?client_id=${config.clientId}&redirect_uri=${config.redirectUri}&response_type=code&scope=${config.scope}`;
+      authWindow = window.open(url, "_blank", "toolbar=0,location=0,menubar=0,width=800,height=700");
     } else {
       openModal(true);
     }
@@ -150,7 +151,7 @@ export const Templates = ({ config }: EC3Props) => {
         <>
           <WidgetHeader title="Templates" />
           <Surface className="ec3w-templates-list-container">
-            <div className="ec3w-toolbar" data-testId="ec3-templates">
+            <div className="ec3w-toolbar" data-testid="ec3-templates">
               <Button
                 startIcon={<SvgAdd />}
                 onClick={() => {
@@ -162,13 +163,14 @@ export const Templates = ({ config }: EC3Props) => {
                 Create Template
               </Button>
               <Button
+                data-testid="ec3-export-button"
                 styleType="default"
                 onClick={onExport}
                 disabled={!selectedTemplate}
               >
                 Export
               </Button>
-              <div className="ec3w-search-bar-container" data-testid="search-bar">
+              <div className="ec3w-search-bar-container" data-testid="ec3-search-bar">
                 <div className="ec3w-search-button">
                   <SearchBar
                     searchValue={searchValue}
@@ -203,6 +205,7 @@ export const Templates = ({ config }: EC3Props) => {
                       <DropdownMenu
                         menuItems={(close: () => void) => [
                           <MenuItem
+                            data-testid="ec3-templates-delete-button"
                             key={0}
                             onClick={() => {
                               setSelectedTemplate(template);

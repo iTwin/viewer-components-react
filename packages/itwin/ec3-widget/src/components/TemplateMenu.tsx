@@ -53,7 +53,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
   const [selectedLabel, setSelectedLabel] = useState<EC3Label>();
-  const [selectedReport, setSelectedReport] = useState<string>();
+  const [previouslySelectedReport, setPreviouslySelectedReport] = useState<string>();
   const [availableReports, setReports] = useState<Report[]>([]);
   const configurationsClient = useApiContext().ec3ConfigurationsClient;
   const [childTemplate, setChildTemplate] = useState<Configuration>({
@@ -171,13 +171,14 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               await goBack();
             }}
           />
-          <div className='ec3w-template-details-container' data-testId="ec3-templateDetails">
+          <div className='ec3w-template-details-container' data-testid="ec3-template-details">
             <Fieldset legend='Template Details' className='ec3w-template-details'>
               <Small className='ec3w-template-field-legend'>
                 Asterisk * indicates mandatory fields.
               </Small>
               <LabeledInput
                 id='templateName'
+                data-testid="ec3-template-name-input"
                 name='displayName'
                 label='EC3 Project Template Name'
                 value={childTemplate.displayName}
@@ -189,6 +190,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               />
               <LabeledInput
                 id='templateDescription'
+                data-testid="ec3-template-description-input"
                 name='description'
                 label='Template description'
                 value={childTemplate.description}
@@ -205,15 +207,15 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                   {!created
                     ?
                     <ComboBox
+                      data-testid="ec3-enabled-selection"
                       options={ReportOptions}
                       value={childTemplate.reportId}
                       onChange={async (value) => {
-                        if (template && value !== template.reportId) {
-                          setSelectedReport(value);
+                        if (childTemplate.labels.length > 0 && value !== childTemplate.reportId) {
+                          setPreviouslySelectedReport(childTemplate.reportId);
                           setShowReportConfirmModal(true);
-                        } else {
-                          handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
                         }
+                        handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
                       }}
                       inputProps={{
                         id: "combo-input",
@@ -222,6 +224,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                     />
                     :
                     <Select
+                      data-testid="ec3-disabled-selection"
                       options={ReportOptions}
                       value={childTemplate.reportId}
                       disabled={true}
@@ -233,6 +236,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
             <Fieldset legend='Assemblies' className='ec3w-template-details'>
               <Surface className="ec3w-labels-container">
                 <Button
+                  data-testid="ec3-add-assembly-button"
                   styleType="default"
                   startIcon={<SvgAdd />}
                   onClick={addLabel}
@@ -254,7 +258,6 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                           onDelete={() => {
                             setSelectedLabel(g);
                             setShowDeleteModal(true);
-                            close();
                           }}
                           onClickTitle={() => {
                             setSelectedLabel(g);
@@ -286,10 +289,10 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
             show={showReportConfirmModal}
             setShow={setShowReportConfirmModal}
             onConfirm={() => {
-              if (selectedReport) {
-                childTemplate.labels = [];
-                handleSelectChange(selectedReport, "reportId", childTemplate, setChildTemplate);
-              }
+              childTemplate.labels = [];
+            }}
+            onCancel={() => {
+              handleSelectChange(previouslySelectedReport ?? "", "reportId", childTemplate, setChildTemplate);
             }}
             refresh={async () => { }}
           />

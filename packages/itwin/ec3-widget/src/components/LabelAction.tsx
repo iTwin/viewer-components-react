@@ -130,7 +130,7 @@ export const LabelAction = ({ template, goBack, label, setTemplate }: LabelActio
         returnFn={goBack}
         disabled={isLoading}
       />
-      <div className='ec3w-label-details-container'>
+      <div className='ec3w-label-details-container' data-testid="ec3-label-action">
         <Fieldset legend='Assembly' className='ec3w-label-details'>
           <Small className='ec3w-label-field-legend'>
             Asterisk * indicates mandatory fields.
@@ -155,6 +155,7 @@ export const LabelAction = ({ template, goBack, label, setTemplate }: LabelActio
           />
 
           <LabeledSelect
+            data-testid="ec3-element-select"
             required
             label={"Element"}
             options={getStringColumnOptions(itemName)}
@@ -167,6 +168,7 @@ export const LabelAction = ({ template, goBack, label, setTemplate }: LabelActio
           />
 
           <LabeledSelect
+            data-testid="ec3-element-quantity-select"
             required
             label={"Element quantity"}
             options={numericalColumnOptions}
@@ -183,6 +185,7 @@ export const LabelAction = ({ template, goBack, label, setTemplate }: LabelActio
           <div className="ec3w-pair-list">
             <Button
               className="ec3w-label-button"
+              data-testid="ec3-add-material-button"
               startIcon={<SvgAdd />}
               onClick={addPair}
               styleType="default"
@@ -208,13 +211,13 @@ export const LabelAction = ({ template, goBack, label, setTemplate }: LabelActio
                 actionGroup={
                   <div className="actions">
                     <IconButton
+                      data-testid="ec3-materials-delete-button"
                       styleType="borderless"
                       className="delete-icon"
                       disabled={index === 0}
                       onClick={() => {
                         setSelectedMaterial(material);
                         setShowDeleteModal(true);
-                        close();
                       }}
                     >
                       <SvgDelete />
