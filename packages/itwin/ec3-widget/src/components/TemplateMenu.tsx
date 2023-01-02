@@ -53,7 +53,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
   const [selectedLabel, setSelectedLabel] = useState<EC3Label>();
-  const [lastReport, setLastReport] = useState<string>();
+  const [previouslySelectedReport, setPreviouslySelectedReport] = useState<string>();
   const [availableReports, setReports] = useState<Report[]>([]);
   const configurationsClient = useApiContext().ec3ConfigurationsClient;
   const [childTemplate, setChildTemplate] = useState<Configuration>({
@@ -212,7 +212,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
                       value={childTemplate.reportId}
                       onChange={async (value) => {
                         if (childTemplate.labels.length > 0 && value !== childTemplate.reportId) {
-                          setLastReport(childTemplate.reportId);
+                          setPreviouslySelectedReport(childTemplate.reportId);
                           setShowReportConfirmModal(true);
                         }
                         handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
@@ -292,7 +292,7 @@ export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
               childTemplate.labels = [];
             }}
             onCancel={() => {
-              handleSelectChange(lastReport ?? "", "reportId", childTemplate, setChildTemplate);
+              handleSelectChange(previouslySelectedReport ?? "", "reportId", childTemplate, setChildTemplate);
             }}
             refresh={async () => { }}
           />
