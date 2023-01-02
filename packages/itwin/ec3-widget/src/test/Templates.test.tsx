@@ -65,7 +65,7 @@ describe("Templates", () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("Templates view should render successfully", async () => {

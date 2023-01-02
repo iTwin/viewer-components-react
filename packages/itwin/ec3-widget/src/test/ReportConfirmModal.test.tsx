@@ -10,7 +10,7 @@ import { ReportConfirmModal } from "../components/ReportConfirmModal";
 
 describe("ReportConfirmModal", () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("Report Confirm modal with the show prop should render successfully and be visible", async () => {

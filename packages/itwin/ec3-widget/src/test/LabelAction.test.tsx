@@ -71,7 +71,7 @@ describe("LabelAction", () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("Label Action menu should render successfully", async () => {

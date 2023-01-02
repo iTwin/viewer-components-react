@@ -92,7 +92,7 @@ describe("TemplateMenu", () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("Template Menu should render successfully for creating template", async () => {

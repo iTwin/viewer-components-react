@@ -55,7 +55,7 @@ describe("ExportModal", () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("Export modal with the isOpen prop should render successfully and be visible", async () => {

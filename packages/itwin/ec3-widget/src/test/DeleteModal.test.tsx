@@ -10,7 +10,7 @@ import { DeleteModal } from "../components/DeleteModal";
 
 describe("DeleteModal", () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("Delete modal with the show prop should be visible", async () => {
