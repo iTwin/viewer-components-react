@@ -83,13 +83,16 @@ describe("TemplateMenu", () => {
   const getAccessTokenFn = async () => accessToken;
 
   beforeAll(async () => {
-    Element.prototype.scrollIntoView = jest.fn();
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
     reportsClient.setup(async (x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports);
     configClient.setup(async (x) => x.getConfiguration(accessToken, configId)).returns(async () => config);
     configClient.setup(async (x) => x.updateConfiguration(accessToken, configId, moq.It.isAny())).returns(async () => config);
     configClient.setup(async (x) => x.createConfiguration(accessToken, moq.It.isAny())).returns(async () => config);
     oDataClient.setup(async (x) => x.getODataReportMetadata(accessToken, moq.It.isAny())).returns(async () => []);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   it("Template Menu should render successfully for creating template", async () => {
@@ -99,7 +102,7 @@ describe("TemplateMenu", () => {
         created={false}
       />,
     });
-    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
     expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
   });
 
@@ -110,7 +113,7 @@ describe("TemplateMenu", () => {
         created={true}
       />,
     });
-    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
     expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
   });
 
@@ -124,10 +127,10 @@ describe("TemplateMenu", () => {
       getAccessTokenFn,
     });
 
-    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
     expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
 
-    const items = getComboboxOptions(screen.getByTestId("ec3-enabled-selection"));
+    const items = await getComboboxOptions(screen.getByTestId("ec3-enabled-selection"));
     items.forEach((item, index) => {
       expect(item).toHaveTextContent(`report_${index}`);
     });
@@ -144,7 +147,7 @@ describe("TemplateMenu", () => {
       getAccessTokenFn,
     });
 
-    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
     expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
 
     const button: HTMLInputElement = screen.getByTestId("ec3-save-button");
@@ -169,7 +172,7 @@ describe("TemplateMenu", () => {
       getAccessTokenFn,
     });
 
-    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
     expect(screen.getByTestId("ec3-enabled-selection")).toBeDefined();
 
     const button: HTMLInputElement = screen.getByTestId("ec3-add-assembly-button");
@@ -182,7 +185,7 @@ describe("TemplateMenu", () => {
     expect(screen.getByTestId("ec3-label-action")).toBeInTheDocument();
   });
 
-  it("Template menu has correct data", async () => {
+  it("Template menu displays the data of the selected template", async () => {
     await renderWithContext({
       component: <TemplateMenu
         goBack={async () => { }}
@@ -194,7 +197,7 @@ describe("TemplateMenu", () => {
       getAccessTokenFn,
     });
 
-    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
     expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
 
     expect(screen.getByText("report_0")).toBeInTheDocument();
@@ -220,7 +223,7 @@ describe("TemplateMenu", () => {
       getAccessTokenFn,
     });
 
-    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
     expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
 
     const configuration = screen.getByText(config.labels[0].name);
@@ -240,7 +243,7 @@ describe("TemplateMenu", () => {
       getAccessTokenFn,
     });
 
-    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
     expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
 
     const button = screen.getAllByTestId("ec3-labels-delete-button")[0];
@@ -261,7 +264,7 @@ describe("TemplateMenu", () => {
       getAccessTokenFn,
     });
 
-    expect(screen.getByTestId("ec3-templateDetails")).toBeDefined();
+    expect(screen.getByTestId("ec3-template-details")).toBeDefined();
     expect(screen.getByTestId("ec3-disabled-selection")).toBeDefined();
 
     const button = screen.getByTestId("ec3-save-button");

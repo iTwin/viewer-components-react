@@ -40,7 +40,7 @@ export const DropdownTile = ({
             onChange={(value) => { onMaterialChange(value); }}
           />
         </div>
-        <div className="ec3w-action-button" data-testid="tile-action-button">
+        <div className="ec3w-action-button" data-testid="ec3-tile-action-button">
           {actionGroup}
         </div>
       </div>

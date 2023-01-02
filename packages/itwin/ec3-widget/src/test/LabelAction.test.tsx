@@ -67,8 +67,11 @@ describe("LabelAction", () => {
   const getAccessTokenFn = async () => accessToken;
 
   beforeAll(async () => {
-    Element.prototype.scrollIntoView = jest.fn();
     oDataClient.setup(async (x) => x.getODataReportMetadata(accessToken, reportId)).returns(async () => mockedOData);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   it("Label Action menu should render successfully", async () => {
@@ -98,7 +101,7 @@ describe("LabelAction", () => {
     });
     expect(screen.getByTestId("ec3-label-action")).toBeDefined();
 
-    const items = getComboboxOptions(screen.getByTestId("ec3-report-table-select"));
+    const items = await getComboboxOptions(screen.getByTestId("ec3-report-table-select"));
     items.forEach((item, index) => {
       expect(item).toHaveTextContent(`table_${index}`);
     });
@@ -132,7 +135,7 @@ describe("LabelAction", () => {
     expect(dropdownTileInput.querySelector(".iui-disabled")).toBeNull();
   });
 
-  it("The correct element name and quantity should appear", async () => {
+  it("String colunms appear in the element select, number collumns in the quantity select", async () => {
     await renderWithContext({
       component: <LabelAction
         template={template}
@@ -155,7 +158,7 @@ describe("LabelAction", () => {
     expect(items[0]).toHaveTextContent(`number_column_0`);
   });
 
-  it("Selected label properties should be displayed correctly", async () => {
+  it("Selected label properties should be displayed in the inputs", async () => {
     await renderWithContext({
       component: <LabelAction
         template={template}

@@ -9,6 +9,10 @@ import { renderWithContext, simulateClick } from "./test-utils";
 import { DeleteModal } from "../components/DeleteModal";
 
 describe("DeleteModal", () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it("Delete modal with the show prop should be visible", async () => {
     await renderWithContext({
       component: <DeleteModal
@@ -51,9 +55,7 @@ describe("DeleteModal", () => {
     expect(screen.getByTestId("ec3-delete-modal")).toBeDefined();
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
 
-    const button = document
-      .querySelector(".iui-dialog-title-bar")
-      ?.querySelector(".iui-button") as HTMLInputElement;
+    const button = document.querySelector(".iui-dialog-title-bar > .iui-button") as HTMLInputElement;
     expect(button).toBeDefined();
     await simulateClick(button);
     expect(show).toHaveBeenCalledWith(false);
@@ -73,7 +75,7 @@ describe("DeleteModal", () => {
     expect(screen.getByTestId("ec3-delete-modal")).toBeDefined();
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
 
-    const button = screen.getByTestId("ec3-delete-modal-calcel-button");
+    const button = screen.getByTestId("ec3-delete-modal-cancel-button");
     expect(button).toBeDefined();
     await simulateClick(button);
     expect(show).toHaveBeenCalledWith(false);

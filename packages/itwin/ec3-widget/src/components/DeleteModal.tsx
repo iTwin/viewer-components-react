@@ -76,7 +76,7 @@ export const DeleteModal = ({
           Delete
         </Button>
         <Button
-          data-testid="ec3-delete-modal-calcel-button"
+          data-testid="ec3-delete-modal-cancel-button"
           styleType='default'
           onClick={() => {
             setShow(false);

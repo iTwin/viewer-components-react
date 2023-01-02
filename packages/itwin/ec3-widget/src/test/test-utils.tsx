@@ -43,15 +43,22 @@ export async function renderWithContext({
 
 export async function simulateInput(rootElement: HTMLElement, text: string) {
   const input = rootElement.querySelector(".iui-select-button") as HTMLInputElement;
-  await userEvent.click(input);
+  await act(async () => {
+    await userEvent.click(input);
+  });
   const item = screen.getByText(text);
-  await userEvent.click(item);
+  await act(async () => {
+    await userEvent.click(item);
+  });
   expect(input.querySelector(".iui-content")).toHaveTextContent(text);
 }
 
 export async function simulateCombobox(rootElement: HTMLElement, text: string) {
+  Element.prototype.scrollIntoView = jest.fn();
   const input = rootElement.querySelector(".iui-input") as HTMLInputElement;
-  fireEvent.focus(input);
+  await act(async () => {
+    fireEvent.focus(input);
+  });
   const item = screen.getByText(text);
   await act(async () => {
     await userEvent.click(item);
@@ -67,15 +74,19 @@ export async function simulateTextInput(rootElement: HTMLElement, text: string) 
   expect(input.value).toEqual(text);
 }
 
-export function getComboboxOptions(rootElement: HTMLElement) {
+export async function getComboboxOptions(rootElement: HTMLElement) {
   const input = rootElement.querySelector(".iui-input") as HTMLInputElement;
-  fireEvent.focus(input);
+  await act(async () => {
+    fireEvent.focus(input);
+  });
   return document.querySelectorAll(".iui-menu-item");
 }
 
 export async function getInputOptions(rootElement: HTMLElement) {
   const input = rootElement.querySelector(".iui-select-button") as HTMLInputElement;
-  await userEvent.click(input);
+  await act(async () => {
+    await userEvent.click(input);
+  });
   return document.querySelectorAll(".iui-menu-item");
 }
 

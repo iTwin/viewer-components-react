@@ -64,6 +64,10 @@ describe("Templates", () => {
     ec3JobsClient.setup(async (x) => x.createJob(accessToken, moq.It.isAny())).returns(async () => job);
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it("Templates view should render successfully", async () => {
     await renderWithContext({
       component: <Templates config={config} />,
@@ -106,7 +110,7 @@ describe("Templates", () => {
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const configuration = screen.getByText(mockedConfigurations[0].displayName);
     await simulateClick(configuration);
-    expect(screen.getByTestId("ec3-templateDetails")).toBeInTheDocument();
+    expect(screen.getByTestId("ec3-template-details")).toBeInTheDocument();
   });
 
   it("Clicking create button should open create template menu", async () => {
@@ -118,7 +122,7 @@ describe("Templates", () => {
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const button = screen.getByText("Create Template");
     await simulateClick(button);
-    expect(screen.getByTestId("ec3-templateDetails")).toBeInTheDocument();
+    expect(screen.getByTestId("ec3-template-details")).toBeInTheDocument();
   });
 
   it("Clicking on tile should select it and enable export button", async () => {
@@ -206,7 +210,7 @@ describe("Templates", () => {
     });
     expect(screen.getByTestId("ec3-templates")).toBeDefined();
 
-    const dropdown = screen.getAllByTestId("tile-action-button")[0]
+    const dropdown = screen.getAllByTestId("ec3-tile-action-button")[0]
       .querySelector(".iui-button") as HTMLInputElement;
     await simulateClick(dropdown);
     const button = screen.getByTestId("ec3-templates-delete-button");

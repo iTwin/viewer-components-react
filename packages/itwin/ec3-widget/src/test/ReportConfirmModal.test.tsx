@@ -9,7 +9,8 @@ import { renderWithContext, simulateClick } from "./test-utils";
 import { ReportConfirmModal } from "../components/ReportConfirmModal";
 
 describe("ReportConfirmModal", () => {
-  beforeAll(async () => {
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   it("Report Confirm modal with the show prop should render successfully and be visible", async () => {
@@ -55,9 +56,7 @@ describe("ReportConfirmModal", () => {
     expect(screen.getByTestId("ec3-report-confirm-modal")).toBeDefined();
     expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
 
-    const button = document
-      .querySelector(".iui-dialog-title-bar")
-      ?.querySelector(".iui-button") as HTMLInputElement;
+    const button = document.querySelector(".iui-dialog-title-bar > .iui-button") as HTMLInputElement;
     expect(button).toBeDefined();
     await simulateClick(button);
     expect(show).toHaveBeenCalledWith(false);

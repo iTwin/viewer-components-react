@@ -163,7 +163,7 @@ export const Templates = ({ config }: EC3Props) => {
                 Create Template
               </Button>
               <Button
-                data-testid={"ec3-export-button"}
+                data-testid="ec3-export-button"
                 styleType="default"
                 onClick={onExport}
                 disabled={!selectedTemplate}

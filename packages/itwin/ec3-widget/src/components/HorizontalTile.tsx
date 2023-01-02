@@ -57,7 +57,7 @@ export const HorizontalTile = ({
           </Text>
         )}
       </div>
-      <div className="ec3w-action-button" data-testid="tile-action-button">
+      <div className="ec3w-action-button" data-testid="ec3-tile-action-button">
         {button}
       </div>
     </div>

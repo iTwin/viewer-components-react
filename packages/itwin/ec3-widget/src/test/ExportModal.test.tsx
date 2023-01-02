@@ -54,6 +54,10 @@ describe("ExportModal", () => {
     jobsClient.setup(async (x) => x.createJob(accessToken, moq.It.isAny())).returns(async () => job);
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it("Export modal with the isOpen prop should render successfully and be visible", async () => {
     await renderWithContext({
       component: <ExportModal
@@ -107,7 +111,7 @@ describe("ExportModal", () => {
     expect(event).not.toBe(undefined);
   });
 
-  it("Correct info should be displayed for each status", async () => {
+  it("Text describing the status of an export should be displayed for each status", async () => {
     let event: Function | undefined;
     jest.spyOn(window, "setInterval").mockImplementation((callback, _) => {
       event = callback;
