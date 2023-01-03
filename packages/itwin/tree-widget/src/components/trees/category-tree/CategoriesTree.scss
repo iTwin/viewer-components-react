@@ -3,6 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/core-react/lib/cjs/core-react/index";
+@import "../VisibilityTreeBase";
+
+.tree-widget-categories-tree {
+  @include tree-widget-visibility-tree-base;
+}
 
 .tree-widget-category-tree-search-bar {
   margin-bottom: $uicore-s;

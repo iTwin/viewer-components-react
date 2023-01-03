@@ -5,16 +5,17 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import type { Viewport } from "@itwin/core-frontend";
-import { ModelsTree, useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
-import { useTreeFilteringState } from "../TreeFilteringState";
+import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
+import { useTreeFilteringState } from "../../TreeFilteringState";
 import "./ModelsTree.scss";
 import type {
   GeometricModel3dProps,
   ModelQueryParams,
 } from "@itwin/core-common";
-import { TreeHeaderComponent } from "../header/TreeHeader";
-import type { ModelTreeProps } from "../../types";
-import { AutoSizer } from "../utils/AutoSizer";
+import { TreeHeaderComponent } from "../../header/TreeHeader";
+import type { ModelTreeProps } from "../../../types";
+import { AutoSizer } from "../../utils/AutoSizer";
+import { ModelsTree } from "./ModelsTree";
 
 interface TreeViewModelInfo {
   id: string;
