@@ -123,6 +123,6 @@ export const ReportMappingHorizontalTile = (props: ReportMappingHorizontalTilePr
           </IconButton>
         </div >
       )}
-    ></HorizontalTile >
+    />
   );
 };

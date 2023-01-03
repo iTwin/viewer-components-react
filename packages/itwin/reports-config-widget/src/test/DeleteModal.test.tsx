@@ -12,8 +12,8 @@ import type {
 } from "@itwin/core-frontend";
 import { NoRenderApp } from "@itwin/core-frontend";
 import {
-  fireEvent,
   render,
+  screen,
   TestUtils,
 } from "./test-utils";
 import * as moq from "typemoq";
@@ -28,6 +28,7 @@ import {
 import type { BeEvent } from "@itwin/core-bentley";
 import DeleteModal from "../widget/components/DeleteModal";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
+import { EmptyLocalization } from "@itwin/core-common";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId1 = faker.datatype.uuid();
@@ -37,9 +38,7 @@ const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
 const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 
 beforeAll(async () => {
-  // This is required by the i18n module within iTwin.js
-  (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
-  await NoRenderApp.startup();
+  await NoRenderApp.startup({localization: new EmptyLocalization()});
   await Presentation.initialize();
   const selectionSet = moq.Mock.ofType<SelectionSet>();
   const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
@@ -83,7 +82,7 @@ describe("Delete modal", () => {
 
   it("should call onDelete when delete button is clicked", async () => {
     const onDelete = jest.fn();
-    const { getByText, user } = render(
+    const { user } = render(
       <DeleteModal
         entityName="test"
         show={true}
@@ -92,14 +91,16 @@ describe("Delete modal", () => {
         refresh={jest.fn()}
       />
     );
-    const deleteButton = getByText("Delete");
+    const deleteButton = screen.getByRole("button", {
+      name: /delete/i,
+    });
     await user.click(deleteButton);
     expect(onDelete).toHaveBeenCalled();
   });
 
   it("should call setShow when cancel button is clicked", async () => {
     const setShow = jest.fn();
-    const { getByText } = render(
+    const { user } = render(
       <DeleteModal
         entityName="test"
         show={true}
@@ -108,8 +109,10 @@ describe("Delete modal", () => {
         refresh={jest.fn()}
       />
     );
-    const cancelButton = getByText("Cancel");
-    fireEvent.click(cancelButton);
+    const cancelButton = screen.getByRole("button", {
+      name: /cancel/i,
+    });
+    await user.click(cancelButton);
     expect(setShow).toHaveBeenCalled();
   });
 });

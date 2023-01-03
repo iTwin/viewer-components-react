@@ -40,6 +40,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import type BulkExtractor from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 import { ReportMappingHorizontalTile } from "../widget/components/ReportMappingHorizontalTile";
+import { EmptyLocalization } from "@itwin/core-common";
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -219,9 +220,7 @@ jest.mock("@itwin/appui-react", () => ({
 const mockOdataFeedUrl = "mockOdataFeedUrl";
 
 beforeAll(async () => {
-  // This is required by the i18n module within iTwin.js
-  (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
-  await NoRenderApp.startup();
+  await NoRenderApp.startup({localization: new EmptyLocalization()});
   await Presentation.initialize();
   const selectionSet = moq.Mock.ofType<SelectionSet>();
   const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
@@ -274,13 +273,13 @@ describe("Report Mapping Horizontal Tile", () => {
     />);
 
     mockBulkExtractor.verify(async (x) => x.getIModelState(firstMockMapping.imodelId, firstMockMapping.iModelName, mockOdataFeedUrl), moq.Times.once());
-    await waitFor(() => expect(screen.getByRole("button", { name: "UpdateDataset" })).not.toBeDisabled(), { timeout: 1000 });
+    await waitFor(() => expect(screen.getByRole("button", { name: /UpdateDataset/i })).not.toBeDisabled(), { timeout: 1000 });
 
     expect(screen.getByText(firstMockMapping.mappingName)).toBeInTheDocument();
     expect(screen.getByTitle(firstMockMapping.mappingDescription)).toBeInTheDocument();
     expect(screen.getByText(firstMockMapping.iModelName)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "UpdateDataset" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /UpdateDataset/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Remove/i })).toBeInTheDocument();
   });
 
   it("starting extraction sends request", async () => {
@@ -303,9 +302,9 @@ describe("Report Mapping Horizontal Tile", () => {
     />);
 
     mockBulkExtractor.verify(async (x) => x.getIModelState(firstMockMapping.imodelId, firstMockMapping.iModelName, mockOdataFeedUrl), moq.Times.once());
-    await waitFor(() => expect(screen.getByRole("button", { name: "UpdateDataset" })).not.toBeDisabled(), { timeout: 1000 });
+    await waitFor(() => expect(screen.getByRole("button", { name: /UpdateDataset/i })).not.toBeDisabled(), { timeout: 1000 });
 
-    const startExtractionButton = screen.getByRole("button", { name: "UpdateDataset" });
+    const startExtractionButton = screen.getByRole("button", { name: /UpdateDataset/i });
     await user.click(startExtractionButton);
 
     mockBulkExtractor.verify(async (x) => x.runIModelExtraction(firstMockMapping.imodelId), moq.Times.once());
@@ -332,9 +331,9 @@ describe("Report Mapping Horizontal Tile", () => {
       odataFeedUrl={mockOdataFeedUrl}
     />);
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Remove" })).not.toBeDisabled(), { timeout: 1000 });
+    await waitFor(() => expect(screen.getByRole("button", { name: /Remove/i })).not.toBeDisabled(), { timeout: 1000 });
 
-    const removeButton = screen.getByRole("button", { name: "Remove" });
+    const removeButton = screen.getByRole("button", { name: /Remove/i });
     await user.click(removeButton);
 
     expect(mockOnClickDelete).toBeCalledTimes(1);
@@ -364,37 +363,37 @@ describe("Report Mapping Horizontal Tile", () => {
       odataFeedUrl={mockOdataFeedUrl}
     />);
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "UpdateDataset" })).not.toBeDisabled(), { timeout: 1000 });
+    await waitFor(() => expect(screen.getByRole("button", { name: /UpdateDataset/i })).not.toBeDisabled(), { timeout: 1000 });
 
     mockBulkExtractor.setup(async (x) => x.getIModelState(firstMockMapping.imodelId, firstMockMapping.iModelName, mockOdataFeedUrl))
       .returns(async () => ExtractionStates.Starting);
 
-    const startExtractionButton = screen.getByRole("button", { name: "UpdateDataset" });
+    const startExtractionButton = screen.getByRole("button", { name: /UpdateDataset/i });
     await user.click(startExtractionButton);
 
     mockBulkExtractor.verify(async (x) => x.runIModelExtraction(firstMockMapping.imodelId), moq.Times.once());
 
-    expect(screen.getByTitle("Starting")).toBeInTheDocument();
+    expect(screen.getByTitle(/Starting/i)).toBeInTheDocument();
 
     mockBulkExtractor.reset();
     mockBulkExtractor.setup(async (x) => x.getIModelState(firstMockMapping.imodelId, firstMockMapping.iModelName, mockOdataFeedUrl))
       .returns(async () => ExtractionStates.Queued);
 
-    await waitFor(() => expect(screen.getByTitle("Queued")).toBeInTheDocument(), { timeout: 1000 });
+    await waitFor(() => expect(screen.getByTitle(/Queued/i)).toBeInTheDocument(), { timeout: 1000 });
 
     mockBulkExtractor.reset();
     mockBulkExtractor.setup(async (x) => x.getIModelState(firstMockMapping.imodelId, firstMockMapping.iModelName, mockOdataFeedUrl))
       .returns(async () => ExtractionStates.Running);
-    await waitFor(() => expect(screen.getByTitle("Running")).toBeInTheDocument(), { timeout: 1000 });
+    await waitFor(() => expect(screen.getByTitle(/Running/i)).toBeInTheDocument(), { timeout: 1000 });
 
     mockBulkExtractor.reset();
     mockBulkExtractor.setup(async (x) => x.getIModelState(firstMockMapping.imodelId, firstMockMapping.iModelName, mockOdataFeedUrl))
       .returns(async () => ExtractionStates.Succeeded);
-    await waitFor(() => expect(screen.getByTitle("Success")).toBeInTheDocument(), { timeout: 1000 });
+    await waitFor(() => expect(screen.getByTitle(/Success/i)).toBeInTheDocument(), { timeout: 1000 });
 
     mockBulkExtractor.reset();
     fireEvent.animationEnd(screen.getByTestId("rcw-success-animation"));
-    await waitFor(() => expect(screen.getByRole("button", { name: "UpdateDataset" })).toBeInTheDocument(), { timeout: 1000 });
+    await waitFor(() => expect(screen.getByRole("button", { name: /UpdateDataset/i })).toBeInTheDocument(), { timeout: 1000 });
   });
 
   it("second tile should update status", async () => {
@@ -429,7 +428,7 @@ describe("Report Mapping Horizontal Tile", () => {
 
     for (const tile of tiles) {
       const preview = within(tile);
-      await waitFor(() => expect(preview.getByRole("button", { name: "UpdateDataset" })).not.toBeDisabled(), { timeout: 1000 });
+      await waitFor(() => expect(preview.getByRole("button", { name: /UpdateDataset/i })).not.toBeDisabled(), { timeout: 1000 });
     }
 
     mockBulkExtractor.reset();
@@ -439,14 +438,14 @@ describe("Report Mapping Horizontal Tile", () => {
     mockBulkExtractor.setup(async (x) => x.runIModelExtraction(firstMockMapping.imodelId))
       .returns(async () => { return Promise.resolve(); });
 
-    const startExtractionButton = screen.getAllByRole("button", { name: "UpdateDataset" })[0];
+    const startExtractionButton = screen.getAllByRole("button", { name: /UpdateDataset/i })[0];
     await user.click(startExtractionButton);
 
     for (const tile of tiles) {
       const preview = within(tile);
-      await waitFor(() => expect(preview.getByTitle("Queued")).toBeInTheDocument(), { timeout: 1000 });
+      await waitFor(() => expect(preview.getByTitle(/Queued/i)).toBeInTheDocument(), { timeout: 1000 });
     }
 
-    expect(screen.getAllByTitle("Queued")).toHaveLength(2);
+    expect(screen.getAllByTitle(/Queued/i)).toHaveLength(2);
   });
 });

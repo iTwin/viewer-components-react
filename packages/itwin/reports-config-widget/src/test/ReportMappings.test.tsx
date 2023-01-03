@@ -42,6 +42,7 @@ import type { BeEvent } from "@itwin/core-bentley";
 import type BulkExtractor from "../widget/components/BulkExtractor";
 import type { ReportMappingHorizontalTileProps } from "../widget/components/ReportMappingHorizontalTile";
 import { Text } from "@itwin/itwinui-react";
+import { EmptyLocalization } from "@itwin/core-common";
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -233,7 +234,7 @@ jest.mock("../widget/components/AddMappingsModal", () => ({
   ...jest.requireActual("../widget/components/AddMappingsModal"),
   AddMappingsModal: (props: AddMappingsModalProps) => {
     returnFn = props.returnFn;
-    return <div />;
+    return <div data-testid="add-mappings-modal"/>;
   },
 }));
 
@@ -265,9 +266,7 @@ jest.mock("@itwin/insights-client", () => ({
 }));
 
 beforeAll(async () => {
-  // This is required by the i18n module within iTwin.js
-  (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
-  await NoRenderApp.startup();
+  await NoRenderApp.startup({localization: new EmptyLocalization()});
   await Presentation.initialize();
   const selectionSet = moq.Mock.ofType<SelectionSet>();
   const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
@@ -397,13 +396,22 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    render(
+    const { user } = render(
       <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
     mockGetMappings.mockReturnValueOnce(mockMappings.map((m: MappingSingle) => m.mapping));
+
+    const addMappingButton = screen.getByRole("button", {
+      name: /addmapping/i,
+    });
+
+    await user.click(addMappingButton);
+
+    const addMappingsModal = await screen.findByTestId("add-mappings-modal");
+    expect(addMappingsModal).toBeInTheDocument();
 
     await act(async () => {
       await returnFn();

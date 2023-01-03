@@ -26,6 +26,7 @@ import type { ReportMappingAndMapping } from "../widget/components/ReportMapping
 import type { IModelOperations, OperationOptions } from "@itwin/imodels-client-management";
 import { IModelState } from "@itwin/imodels-client-management";
 import { AddMappingsModal } from "../widget/components/AddMappingsModal";
+import { EmptyLocalization } from "@itwin/core-common";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId1 = faker.datatype.uuid();
@@ -238,9 +239,7 @@ jest.mock("@itwin/insights-client", () => ({
 }));
 
 beforeAll(async () => {
-  // This is required by the i18n module within iTwin.js
-  (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
-  await NoRenderApp.startup();
+  await NoRenderApp.startup({localization: new EmptyLocalization()});
   connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId1);
   await ReportsConfigWidget.initialize();
 });
