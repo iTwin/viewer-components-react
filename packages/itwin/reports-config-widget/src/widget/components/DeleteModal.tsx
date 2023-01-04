@@ -57,7 +57,7 @@ export const DeleteModal = ({
       }}
     >
       <ModalContent>
-        <div className="delete-modal-body-text">
+        <div className="rcw-delete-modal-body-text">
           <Leading>
             {ReportsConfigWidget.localization.getLocalizedString(
               "ReportsConfigWidget:AreYouSureYouWantToDelete"

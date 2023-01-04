@@ -5,15 +5,11 @@
 import {
   SvgAdd,
   SvgCopy,
-  SvgDelete,
-  SvgMore,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
-  DropdownMenu,
   IconButton,
   LabeledInput,
-  MenuItem,
   Surface,
   Text,
   toaster,
@@ -31,19 +27,21 @@ import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
 import type { Report, ReportMapping } from "@itwin/insights-client";
 import { MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
-import AddMappingsModal from "./AddMappingsModal";
+import { AddMappingsModal } from "./AddMappingsModal";
 import type {
   GetSingleIModelParams,
   IModelsClientOptions,
 } from "@itwin/imodels-client-management";
 import { Constants, IModelsClient } from "@itwin/imodels-client-management";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
-import { HorizontalTile } from "./HorizontalTile";
-import { Extraction, ExtractionStates, ExtractionStatus } from "./Extraction";
 import { SearchBar } from "./SearchBar";
 import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
+import { ReportMappingHorizontalTile } from "./ReportMappingHorizontalTile";
+import type BulkExtractor from "./BulkExtractor";
+import { BeEvent } from "@itwin/core-bentley";
+import { LoadingSpinner } from "./utils";
 
 export type ReportMappingType = CreateTypeFromInterface<ReportMapping>;
 
@@ -85,37 +83,37 @@ const fetchReportMappings = async (
     const authorization =
       AccessTokenAdapter.toAuthorizationCallback(accessToken);
     const iModelNames = new Map<string, string>();
-    const reportMappingsAndMapping = await Promise.all(
-      reportMappings.map(async (reportMapping) => {
-        const iModelId = reportMapping.imodelId;
-        let iModelName = "";
-        const mapping = await mappingsClientApi.getMapping(
-          accessToken,
-          iModelId,
-          reportMapping.mappingId
-        );
-        if (iModelNames.has(iModelId)) {
-          iModelName = iModelNames.get(iModelId) ?? "";
-        } else {
-          const getSingleParams: GetSingleIModelParams = {
-            authorization,
-            iModelId,
-          };
-          const iModel = await iModelsClient.iModels.getSingle(getSingleParams);
-          iModelName = iModel.displayName;
-          iModelNames.set(iModelId, iModelName);
-        }
-        const reportMappingAndMapping: ReportMappingAndMapping = {
-          ...reportMapping,
-          iModelName,
-          mappingName: mapping.mappingName,
-          mappingDescription: mapping.description ?? "",
-        };
-        return reportMappingAndMapping;
-      }) ?? []
-    );
 
-    setReportMappings(reportMappingsAndMapping);
+    const reportMappingsAndMappings = [];
+    for (const reportMapping of reportMappings) {
+      const iModelId = reportMapping.imodelId;
+      let iModelName = "";
+      const mapping = await mappingsClientApi.getMapping(
+        accessToken,
+        iModelId,
+        reportMapping.mappingId
+      );
+      if (iModelNames.has(iModelId)) {
+        iModelName = iModelNames.get(iModelId) ?? "";
+      } else {
+        const getSingleParams: GetSingleIModelParams = {
+          authorization,
+          iModelId,
+        };
+        const iModel = await iModelsClient.iModels.getSingle(getSingleParams);
+        iModelName = iModel.displayName;
+        iModelNames.set(iModelId, iModelName);
+      }
+      const reportMappingAndMapping: ReportMappingAndMapping = {
+        ...reportMapping,
+        iModelName,
+        mappingName: mapping.mappingName,
+        mappingDescription: mapping.description ?? "",
+      };
+      reportMappingsAndMappings.push(reportMappingAndMapping);
+    }
+
+    setReportMappings(reportMappingsAndMappings);
   } catch (error: any) {
     handleError(error.status);
   } finally {
@@ -125,23 +123,25 @@ const fetchReportMappings = async (
 
 interface ReportMappingsProps {
   report: Report;
+  bulkExtractor: BulkExtractor;
   goBack: () => Promise<void>;
 }
 
-export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
+export const ReportMappings = ({ report, bulkExtractor, goBack }: ReportMappingsProps) => {
   const apiConfig = useReportsApiConfig();
   const [reportMappingsView, setReportMappingsView] =
     useState<ReportMappingsView>(ReportMappingsView.REPORTMAPPINGS);
   const [selectedReportMapping, setSelectedReportMapping] = useState<ReportMappingAndMapping | undefined>(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const [extractionState, setExtractionState] = useState<ExtractionStates>(
-    ExtractionStates.None
-  );
-  const [runningIModelId, setRunningIModelId] = useState<string>("");
   const [searchValue, setSearchValue] = useState<string>("");
   const [reportMappings, setReportMappings] = useState<ReportMappingAndMapping[]>([]);
+  const [jobRunning, setJobRunning] = useState<boolean>(false);
+
+  const jobStartEvent = useMemo(
+    () => new BeEvent<(iModelId: string) => void>(),
+    []
+  );
 
   useEffect(() => {
     void fetchReportMappings(
@@ -151,6 +151,10 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
       apiConfig
     );
   }, [apiConfig, report.id, setIsLoading]);
+
+  useEffect(() => {
+    bulkExtractor.setHook(setJobRunning, reportMappings.map((x) => x.imodelId));
+  }, [bulkExtractor, reportMappings]);
 
   const refresh = useCallback(async () => {
     setReportMappingsView(ReportMappingsView.REPORTMAPPINGS);
@@ -165,17 +169,6 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   const addMapping = () => {
     setReportMappingsView(ReportMappingsView.ADDING);
   };
-
-  const uniqueIModels = useMemo(
-    () =>
-      new Map(
-        reportMappings.map((mapping) => [
-          mapping.imodelId,
-          mapping.iModelName,
-        ])
-      ),
-    [reportMappings]
-  );
 
   const odataFeedUrl = `${generateUrl(
     REPORTING_BASE_PATH,
@@ -196,12 +189,12 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
   return (
     <>
       <WidgetHeader title={report.displayName} returnFn={goBack} />
-      <div className="report-mapping-misc">
+      <div className="rcw-report-mapping-misc">
         <LabeledInput
           label={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:ODataFeedURL"
           )}
-          className="odata-url-input"
+          className="rcw-odata-url-input"
           readOnly={true}
           value={odataFeedUrl}
           svgIcon={
@@ -224,16 +217,9 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
           }
           iconDisplayStyle="inline"
         />
-        <Extraction
-          iModels={uniqueIModels}
-          extractionState={extractionState}
-          setExtractionState={setExtractionState}
-          setExtractingIModelId={setRunningIModelId}
-          isLoading={isLoading}
-        />
       </div>
-      <Surface className="report-mappings-container">
-        <div className="toolbar">
+      <Surface className="rcw-report-mappings-container">
+        <div className="rcw-toolbar">
           <Button
             startIcon={<SvgAdd />}
             onClick={() => addMapping()}
@@ -243,7 +229,7 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
               "ReportsConfigWidget:AddMapping"
             )}
           </Button>
-          <div className="search-bar-container" data-testid="search-bar">
+          <div className="rcw-search-bar-container" data-testid="rcw-search-bar">
             <SearchBar
               searchValue={searchValue}
               setSearchValue={setSearchValue}
@@ -271,49 +257,18 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
             </>
           </EmptyMessage>
         ) : (
-          <div className="mapping-list">
+          <div className="rcw-mapping-list">
             {filteredReportMappings.map((mapping) => (
-              <HorizontalTile
+              <ReportMappingHorizontalTile
                 key={mapping.mappingId}
-                title={mapping.mappingName}
-                subText={mapping.iModelName}
-                titleTooltip={mapping.mappingDescription}
-                actionGroup={
-                  <ExtractionStatus
-                    state={
-                      mapping.imodelId === runningIModelId
-                        ? extractionState
-                        : ExtractionStates.None
-                    }
-                  >
-                    <DropdownMenu
-                      menuItems={(close: () => void) => [
-                        <MenuItem
-                          key={0}
-                          onClick={() => {
-                            setSelectedReportMapping(mapping);
-                            setShowDeleteModal(true);
-                            close();
-                          }}
-                          icon={<SvgDelete />}
-                        >
-                          {ReportsConfigWidget.localization.getLocalizedString(
-                            "ReportsConfigWidget:Remove"
-                          )}
-                        </MenuItem>,
-                      ]}
-                    >
-                      <IconButton styleType="borderless">
-                        <SvgMore
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                          }}
-                        />
-                      </IconButton>
-                    </DropdownMenu>
-                  </ExtractionStatus>
-                }
+                bulkExtractor={bulkExtractor}
+                mapping={mapping}
+                onClickDelete={() => {
+                  setSelectedReportMapping(mapping);
+                  setShowDeleteModal(true);
+                }}
+                odataFeedUrl={odataFeedUrl}
+                jobStartEvent={jobStartEvent}
               />
             ))}
           </div>
@@ -342,6 +297,35 @@ export const ReportMappings = ({ report, goBack }: ReportMappingsProps) => {
         }}
         refresh={refresh}
       />
+      <div className="rcw-action-panel">
+        {isLoading && <LoadingSpinner />}
+        <Button
+          disabled={isLoading || jobRunning || reportMappings.length === 0}
+          styleType="high-visibility"
+          onClick={async () => {
+            setJobRunning(true);
+            const uniqueIModels = Array.from(new Set(reportMappings.map((x) => x.imodelId)));
+            await bulkExtractor.runIModelExtractions(uniqueIModels);
+            reportMappings.forEach((reportMapping) => {
+              jobStartEvent.raiseEvent(reportMapping.imodelId);
+            });
+          }}
+        >
+          {ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:UpdateAllDatasets"
+          )}
+        </Button>
+        <Button
+          styleType="default"
+          type="button"
+          onClick={goBack}
+          disabled={isLoading}
+        >
+          {ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:Close"
+          )}
+        </Button>
+      </div>
     </>
   );
 };

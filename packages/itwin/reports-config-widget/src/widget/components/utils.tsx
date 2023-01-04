@@ -35,7 +35,7 @@ export const WidgetHeader = ({
           <SvgChevronLeft />
         </IconButton>
       )}
-      <Text className="title" variant="title">
+      <Text className="rcw-title" variant="title">
         {title}
       </Text>
     </div>

@@ -50,13 +50,13 @@ interface AddMappingsModalProps {
   returnFn: () => Promise<void>;
 }
 
-const AddMappingsModal = ({
+export const AddMappingsModal = ({
   reportId,
   existingMappings,
   show,
   returnFn,
 }: AddMappingsModalProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedMappings, setSelectedMappings] = useState<Mapping[]>([]);
   const [selectedIModelId, setSelectediModelId] = useState<string>("");
   const [mappings, setMappings] = useState<Mapping[]>([]);
@@ -135,7 +135,7 @@ const AddMappingsModal = ({
       }}
       style={{ display: "flex", flexDirection: "column", maxHeight: "77vh" }}
     >
-      <div className="add-mappings-container">
+      <div className="rcw-add-mappings-container">
         <SelectIModel
           selectedIModelId={selectedIModelId}
           setSelectedIModelId={setSelectediModelId}
@@ -143,7 +143,7 @@ const AddMappingsModal = ({
         <Table<MappingType>
           data={isLoading ? [] : mappings}
           columns={mappingsColumns}
-          className="add-mappings-table"
+          className="rcw-add-mappings-table"
           emptyTableContent={ReportsConfigWidget.localization.getLocalizedString(
             "ReportsConfigWidget:NoMappingsAvailable"
           )}
@@ -171,5 +171,3 @@ const AddMappingsModal = ({
     </Modal>
   );
 };
-
-export default AddMappingsModal;

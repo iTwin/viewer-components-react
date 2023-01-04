@@ -4,11 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.delete-modal-body-text {
+.rcw-delete-modal-body-text {
   display: flex;
   gap: $iui-xs;
   flex-wrap: wrap;
-  > strong {
+
+  >strong {
     min-width: 0px;
   }
 }

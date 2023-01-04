@@ -4,12 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 import {
   SvgAdd,
-  SvgRefresh,
+  SvgPlay,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
   IconButton,
   Surface,
+  toaster,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "./utils";
@@ -34,6 +35,7 @@ import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import BulkExtractor from "./BulkExtractor";
 import { BeEvent } from "@itwin/core-bentley";
+import { FailedExtractionToast, SuccessfulExtractionToast } from "./ExtractionToast";
 
 export type ReportType = CreateTypeFromInterface<Report>;
 
@@ -67,6 +69,14 @@ const fetchReports = async (
 };
 
 export const Reports = () => {
+  const successfulExtractionToast = (iModelName: string, odataFeedUrl: string) => {
+    toaster.positive(<SuccessfulExtractionToast iModelName={iModelName} odataFeedUrl={odataFeedUrl} />);
+  };
+
+  const failedExtractionToast = (iModelName: string) => {
+    toaster.negative(<FailedExtractionToast iModelName={iModelName} />);
+  };
+
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const apiConfig = useReportsApiConfig();
   const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
@@ -81,8 +91,8 @@ export const Reports = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [reports, setReports] = useState<Report[]>([]);
   const bulkExtractor = useMemo(
-    () => new BulkExtractor(apiConfig, reports.map((r) => r.id)),
-    [apiConfig, reports]
+    () => new BulkExtractor(apiConfig, successfulExtractionToast, failedExtractionToast),
+    [apiConfig]
   );
   const jobStartEvent = useMemo(
     () => new BeEvent<(reportId: string) => void>(),
@@ -128,9 +138,9 @@ export const Reports = () => {
   };
 
   const updateDatasets = useCallback(async () => {
+    await bulkExtractor.runReportExtractions(selectedReportIds);
     selectedReportIds.map((reportId) => jobStartEvent.raiseEvent(reportId));
     setSelectedReportIds([]);
-    await bulkExtractor.startJobs(selectedReportIds);
   }, [selectedReportIds, jobStartEvent, bulkExtractor]);
 
   switch (reportsView) {
@@ -148,7 +158,7 @@ export const Reports = () => {
       ) : null;
     case ReportsView.REPORTSMAPPING:
       return selectedReport ? (
-        <ReportMappings report={selectedReport} goBack={refresh} />
+        <ReportMappings report={selectedReport} bulkExtractor={bulkExtractor} goBack={refresh} />
       ) : null;
     default:
       return (
@@ -158,7 +168,7 @@ export const Reports = () => {
               "ReportsConfigWidget:ITwinReports"
             )}
           />
-          <Surface className="reports-list-container">
+          <Surface className="rcw-reports-list-container">
             <div className="rcw-toolbar">
               <Button
                 startIcon={<SvgAdd />}
@@ -176,9 +186,9 @@ export const Reports = () => {
                 onClick={updateDatasets}
                 disabled={selectedReportIds.length === 0}
               >
-                <SvgRefresh />
+                <SvgPlay />
               </IconButton>
-              <div className="rcw-search-bar-container" data-testid="search-bar">
+              <div className="rcw-search-bar-container" data-testid="rcw-search-bar">
                 <div className="rcw-search-button">
                   <SearchBar
                     searchValue={searchValue}

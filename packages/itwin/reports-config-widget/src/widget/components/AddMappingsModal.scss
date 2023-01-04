@@ -4,14 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.add-mappings-container {
+.rcw-add-mappings-container {
   display: flex;
   flex-direction: column;
   gap: $iui-baseline;
   width: 45vw;
   min-width: 100%;
   overflow: auto;
-  .add-mappings-table {
+
+  .rcw-add-mappings-table {
     flex-grow: 1;
     overflow: auto;
   }

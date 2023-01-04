@@ -291,7 +291,7 @@ describe("Reports View", () => {
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const searchButton = within(screen.getByTestId(/search-bar/i)).getByRole(
+    const searchButton = within(screen.getByTestId(/rcw-search-bar/i)).getByRole(
       "button"
     );
     await user.click(searchButton);

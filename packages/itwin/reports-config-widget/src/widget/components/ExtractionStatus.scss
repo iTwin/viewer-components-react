@@ -6,9 +6,23 @@
 
 .rcw-extraction-status {
   align-items: center;
-  margin: auto $iui-s * 2;
   height: 38px;
   display: flex;
+
+  .rcw-status-icon {
+    width: $iui-icons-default;
+    height: $iui-icons-default;
+    align-items: center;
+    margin: auto $iui-xs * 3;
+    display: flex;
+  }
+}
+
+.rcw-extraction-status-running {
+  align-items: center;
+  height: 38px;
+  display: flex;
+  margin: auto $iui-xs * 3;
 
   .rcw-status-icon {
     width: $iui-icons-default;

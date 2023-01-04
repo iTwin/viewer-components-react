@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 12 Sep 2022 19:50:36 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Dec 2022 15:12:29 GMT and should not be manually modified.
+
+## 0.6.0
+Tue, 20 Dec 2022 15:12:29 GMT
+
+### Minor changes
+
+- Moved core trees implementation from @itwin/appui-react package to @itwin/tree-widget-react
 
 ## 0.5.0
 Mon, 12 Sep 2022 19:50:36 GMT

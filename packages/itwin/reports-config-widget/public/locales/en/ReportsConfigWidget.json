@@ -5,6 +5,7 @@
   "AddReport": "Add Report",
   "AreYouSureYouWantToDelete": "Are you sure you want to delete",
   "Cancel": "Cancel",
+  "Close": "Close",
   "Checking": "Checking",
   "Confirm": "Confirm",
   "CopiedToClipboard": "Copied to clipboard!",
@@ -55,6 +56,9 @@
   "SelectIModel": "Select an iModel",
   "Starting": "Starting",
   "Success": "Success",
+  "ExtractionSuccess": "Extraction completed successfully for iModel: ",
+  "ExtractionFailed": "Extraction failed for iModel: ",
+  "CopyODataUrl": "Copy OData Feed URL",
   "Table": {
     "SizePerPage": "{{size}} per page",
     "StartIndexEndIndex": "{{startIndex}}-{{endIndex}}...",
@@ -66,6 +70,7 @@
   },
   "UpdateDataset": "Update your dataset",
   "UpdateDatasets": "Update your datasets for selected reports",
+  "UpdateAllDatasets": "Update all datasets",
   "UpdateInProgress": "Update in progress...",
   "Validators": {
     "NoDuplicateUnderscore": "Remove duplicate \"_\"",
