@@ -11,7 +11,7 @@ export const RunningExtractionState = () => (
     title={ReportsConfigWidget.localization.getLocalizedString(
       "ReportsConfigWidget:Running"
     )}
-    className="rcw-extraction-status"
+    className="rcw-extraction-status-running"
   >
     <ProgressRadial size="x-small" indeterminate />
   </div>

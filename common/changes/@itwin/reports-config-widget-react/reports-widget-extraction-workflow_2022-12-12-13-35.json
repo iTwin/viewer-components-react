@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/reports-config-widget-react",
+      "comment": "IModel extraction dropdown removed.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/reports-config-widget-react"
+}
