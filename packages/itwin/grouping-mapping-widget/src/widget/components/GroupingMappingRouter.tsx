@@ -39,80 +39,88 @@ export const GroupingMappingRouter = ({
     }
   }, [routingHistory, setHiddenGroupsIds, setShowGroupColor]);
 
-  if (currentRoute.step === RouteStep.Mappings) {
-    return (
-      <Mappings
-        onClickAddMapping={() =>
-          navigateTo({ step: RouteStep.MappingsAction, title: "Add Mapping" })
-        }
-        onClickMappingTitle={(mapping) => {
-          navigateTo({ step: RouteStep.Groups, mapping, title: mapping.mappingName });
-        }}
-        onClickMappingModify={(mapping) => {
-          navigateTo({
-            step: RouteStep.MappingsAction,
-            mapping,
-            title: mapping.mappingName,
-          });
-        }}
-      />
-    );
-  } else if (currentRoute.step === RouteStep.MappingsAction) {
-    return <MappingAction mapping={currentRoute.mapping} onClose={goBack} />;
-  } else if (currentRoute.mapping) {
-    if (currentRoute.step === RouteStep.Groups) {
+  switch (currentRoute.step) {
+    case RouteStep.Mappings:
       return (
-        // TODO somehow make the highlighting optional
-        <Groupings
-          mapping={currentRoute.mapping}
-          onClickAddGroup={(qType) =>
-            navigateTo({
-              ...currentRoute,
-              step: RouteStep.GroupAction,
-              queryGenerationType: qType,
-              title: "Add Group",
-            })
+        <Mappings
+          onClickAddMapping={() =>
+            navigateTo({ step: RouteStep.MappingsAction, title: "Add Mapping" })
           }
-          onClickGroupTitle={(group) => navigateTo({
-            ...currentRoute,
-            step: RouteStep.Properties,
-            group,
-            title: group.groupName,
-          })}
-          onClickGroupModify={(group, qType) =>
+          onClickMappingTitle={(mapping) => {
+            navigateTo({ step: RouteStep.Groups, mapping, title: mapping.mappingName });
+          }}
+          onClickMappingModify={(mapping) => {
             navigateTo({
-              ...currentRoute,
-              step: RouteStep.GroupAction,
-              queryGenerationType: qType,
-              title: group.groupName,
-              group,
-            })
-          }
-          onClickRenderContextCustomUI={(ccUI, group) =>
-            navigateTo({
-              ...currentRoute,
-              step: RouteStep.GroupAction,
-              groupContextCustomUI: ccUI,
-              group,
-            })
-          }
+              step: RouteStep.MappingsAction,
+              mapping,
+              title: mapping.mappingName,
+            });
+          }}
         />
       );
-    } else if (currentRoute.step === RouteStep.GroupAction) {
-      if (currentRoute.queryGenerationType) {
-        return <GroupAction mappingId={currentRoute.mapping.id} group={currentRoute.group} onClose={goBack} queryGenerationType={currentRoute.queryGenerationType} />;
-      } else if (currentRoute.group && currentRoute.groupContextCustomUI) {
+    case RouteStep.MappingsAction:
+      return <MappingAction mapping={currentRoute.mapping} onClose={goBack} />;
+    case RouteStep.Groups:
+      if (currentRoute.mapping) {
         return (
-          React.createElement(currentRoute.groupContextCustomUI, {
-            iModelId,
-            mappingId: currentRoute.mapping.id,
-            groupId: currentRoute.group.id,
-          })
+          <Groupings
+            mapping={currentRoute.mapping}
+            onClickAddGroup={(qType) =>
+              navigateTo({
+                ...currentRoute,
+                step: RouteStep.GroupAction,
+                queryGenerationType: qType,
+                title: "Add Group",
+              })
+            }
+            onClickGroupTitle={(group) => navigateTo({
+              ...currentRoute,
+              step: RouteStep.Properties,
+              group,
+              title: group.groupName,
+            })}
+            onClickGroupModify={(group, qType) =>
+              navigateTo({
+                ...currentRoute,
+                step: RouteStep.GroupAction,
+                queryGenerationType: qType,
+                title: group.groupName,
+                group,
+              })
+            }
+            onClickRenderContextCustomUI={(ccUI, group) =>
+              navigateTo({
+                ...currentRoute,
+                step: RouteStep.GroupAction,
+                groupContextCustomUI: ccUI,
+                group,
+              })
+            }
+          />
         );
       }
-    } else if (currentRoute.group && currentRoute.step === RouteStep.Properties) {
-      return (<PropertyMenu iModelId={iModelId} mappingId={currentRoute.mapping.id} group={currentRoute.group} goBack={async () => goBack()} />);
-    }
+      return null;
+    case RouteStep.GroupAction:
+      if (currentRoute.mapping) {
+        if (currentRoute.queryGenerationType) {
+          return <GroupAction mappingId={currentRoute.mapping.id} group={currentRoute.group} onClose={goBack} queryGenerationType={currentRoute.queryGenerationType} />;
+        } else if (currentRoute.group && currentRoute.groupContextCustomUI) {
+          return (
+            React.createElement(currentRoute.groupContextCustomUI, {
+              iModelId,
+              mappingId: currentRoute.mapping.id,
+              groupId: currentRoute.group.id,
+            })
+          );
+        }
+      }
+      return null;
+    case RouteStep.Properties:
+      if (currentRoute.mapping && currentRoute.group) {
+        return (<PropertyMenu iModelId={iModelId} mappingId={currentRoute.mapping.id} group={currentRoute.group} goBack={async () => goBack()} />);
+      }
+      return null;
+    default:
+      return null;
   }
-  return null;
 };

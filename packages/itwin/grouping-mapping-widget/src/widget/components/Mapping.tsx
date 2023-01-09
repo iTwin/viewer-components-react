@@ -116,7 +116,6 @@ export const Mappings = ({
 
   const refresh = useCallback(async () => {
     clearAll();
-    // setMappingView(MappingView.MAPPINGS);
     setSelectedMapping(undefined);
     setMappings([]);
     await fetchMappings(
@@ -128,9 +127,6 @@ export const Mappings = ({
     );
   }, [getAccessToken, mappingClient, iModelId, setMappings]);
 
-  // const addMapping = async () => {
-  //   setMappingView(MappingView.ADDING);
-  // };
   return (
     <>
       <BlockingOverlay isVisible={showBlockingOverlay} />

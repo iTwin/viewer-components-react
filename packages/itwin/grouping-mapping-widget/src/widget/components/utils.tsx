@@ -43,7 +43,7 @@ export const onSelectionChanged = (
 export interface WidgetHeaderProps {
   title: string;
   disabled?: boolean;
-  returnFn?: () => Promise<void>;
+  returnFn?: () => void;
 }
 
 export const WidgetHeader = ({

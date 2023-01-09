@@ -50,7 +50,7 @@ export interface Route {
   title: string;
   mapping?: Mapping;
   group?: Group;
-  // Optional but the value cannot be undefined.
+  // Optional prop but cannot be declared undefined.
   groupContextCustomUI?: Exclude<ContextCustomUI["uiComponent"], undefined>;
   queryGenerationType?: string;
   property?: GroupProperty;
@@ -58,7 +58,6 @@ export interface Route {
   customCalculation?: CustomCalculation;
 }
 
-// TODO make this go away when provided with grouping UI
 const defaultGroupingUI: GroupingMappingCustomUI[] = [
   {
     name: "Selection",
@@ -126,7 +125,6 @@ const GroupingMapping = (props: GroupingMappingProps) => {
     [currentRoute, groupUIs, navigateTo, props.customUIs]
   );
 
-  // TODO Remove widget header async
   return (
     <GroupingMappingContext
       iModelId={iModelId}
@@ -134,16 +132,18 @@ const GroupingMapping = (props: GroupingMappingProps) => {
       customUIs={injectedCustomUI}
     >
       <div className="gmw-group-mapping-container">
-        <WidgetHeader
-          returnFn={
-            routingHistory.length > 1
-              ? async () => {
-                goBack();
-              }
-              : undefined
-          }
-          title={currentRoute.title}
-        />
+        {currentRoute.step !== RouteStep.Properties && routingHistory.length < 4 &&
+          <WidgetHeader
+            returnFn={
+              routingHistory.length > 1
+                ? () => {
+                  goBack();
+                }
+                : undefined
+            }
+            title={currentRoute.title}
+          />
+        }
         <GroupingMappingRouter
           routingHistory={routingHistory}
           navigateTo={navigateTo}

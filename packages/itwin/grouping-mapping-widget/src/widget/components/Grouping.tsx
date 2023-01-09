@@ -475,16 +475,4 @@ export const Groupings = ({
       />
     </>
   );
-  // case GroupsView.CustomUI:
-  //   return selectedContextCustomUI && selectedContextCustomUI.uiComponent && selectedGroup
-  //     ? (
-  //       <>
-  //         {React.createElement(selectedContextCustomUI.uiComponent, {
-  //           iModelId,
-  //           mappingId: mapping.id,
-  //           groupId: selectedGroup.id,
-  //         })}
-  //       </>
-  //     )
-  //     : null;
 };
