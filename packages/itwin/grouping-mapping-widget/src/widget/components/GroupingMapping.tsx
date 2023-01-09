@@ -135,6 +135,7 @@ const GroupingMapping = (props: GroupingMappingProps) => {
         {currentRoute.step !== RouteStep.Properties && routingHistory.length < 4 &&
           <WidgetHeader
             returnFn={
+              // Will remove until all components are correctly componentized
               routingHistory.length > 1
                 ? () => {
                   goBack();
