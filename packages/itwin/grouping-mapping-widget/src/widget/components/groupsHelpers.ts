@@ -10,7 +10,7 @@ import { clearEmphasizedOverriddenElements, emphasizeElements, getHiliteIds, hid
 
 const goldenAngle = 180 * (3 - Math.sqrt(5));
 
-const getGroupColor = function (index: number) {
+export const getGroupColor = function (index: number) {
   return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
 };
 

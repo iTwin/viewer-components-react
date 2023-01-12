@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Presentation } from "@itwin/presentation-frontend";
 import {
   SvgAdd,
   SvgDelete,
@@ -23,7 +22,6 @@ import {
   EmptyMessage,
   handleError,
   LoadingOverlay,
-  onSelectionChanged,
 } from "./utils";
 import "./Mapping.scss";
 import DeleteModal from "./DeleteModal";
@@ -105,14 +103,6 @@ export const Mappings = ({
       mappingClient
     );
   }, [getAccessToken, mappingClient, iModelId, setIsLoading]);
-
-  useEffect(() => {
-    const removeListener =
-      Presentation.selection.selectionChange.addListener(onSelectionChanged);
-    return () => {
-      removeListener();
-    };
-  }, []);
 
   const refresh = useCallback(async () => {
     clearAll();

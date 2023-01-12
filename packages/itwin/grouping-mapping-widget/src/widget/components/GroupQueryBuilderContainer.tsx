@@ -26,6 +26,12 @@ export const GroupQueryBuilderContainer = ({ isUpdating, resetView, updateQuery 
   const [currentPropertyList, setCurrentPropertyList] = useState<PropertyRecord[]>([]);
 
   useEffect(() => {
+    if (!iModelConnection) {
+      throw new Error("This component requires an active iModelConnection.");
+    }
+  }, [iModelConnection]);
+
+  useEffect(() => {
     const _onSelectionChanged = async (
       evt: SelectionChangeEventArgs,
       selectionProvider: ISelectionProvider

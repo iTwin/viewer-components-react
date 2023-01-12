@@ -12,9 +12,7 @@ import type {
 import React, { useCallback, useMemo, useState } from "react";
 import type { GroupingMappingContextProps } from "./GroupingMappingContext";
 import { GroupingMappingContext } from "./GroupingMappingContext";
-import { WidgetHeader } from "./utils";
 import "./GroupingMapping.scss";
-import { GroupingMappingRouter } from "./GroupingMappingRouter";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type {
   ContextCustomUI,
@@ -30,6 +28,8 @@ import {
 import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
 import SearchGroupingCustomUI from "./customUI/SearchGroupingCustomUI";
 import ManualGroupingCustomUI from "./customUI/ManualGroupingCustomUI";
+import { GroupingMappingContent } from "./GroupingMappingContent";
+import { GroupingMappingHeader } from "./GroupingMappingHeader";
 
 export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId">;
 
@@ -48,14 +48,17 @@ export enum RouteStep {
 export interface Route {
   step: RouteStep;
   title: string;
+  groupingRouteFields: GroupingRouteFields;
+}
+export interface GroupingRouteFields {
   mapping?: Mapping;
   group?: Group;
-  // Optional prop but cannot be declared undefined.
-  groupContextCustomUI?: Exclude<ContextCustomUI["uiComponent"], undefined>;
-  queryGenerationType?: string;
   property?: GroupProperty;
   calculatedProperty?: CalculatedProperty;
   customCalculation?: CustomCalculation;
+  // Optional prop but cannot be declared undefined.
+  groupContextCustomUI?: Exclude<ContextCustomUI["uiComponent"], undefined>;
+  queryGenerationType?: string;
 }
 
 const defaultGroupingUI: GroupingMappingCustomUI[] = [
@@ -84,17 +87,16 @@ const defaultGroupingUI: GroupingMappingCustomUI[] = [
 
 const GroupingMapping = (props: GroupingMappingProps) => {
   const [routingHistory, setRoutingHistory] = useState<Route[]>([
-    { step: RouteStep.Mappings, title: "Mapping" },
+    { step: RouteStep.Mappings, title: "Mapping", groupingRouteFields: {} },
   ]);
-  // const [isLoading, setIsLoading] = useState<boolean>(false);
   const currentRoute = routingHistory[routingHistory.length - 1];
   const iModelId = useActiveIModelConnection()?.iModelId ?? "";
   const groupUIs =
     props.customUIs?.filter(
       (p) => p.type === GroupingMappingCustomUIType.Grouping
     );
-  const navigateTo = useCallback((newRoute: Route) => {
-    setRoutingHistory((r) => [...r, newRoute]);
+  const navigateTo = useCallback((toRoute: (prev: Route | undefined) => Route) => {
+    setRoutingHistory((r) => [...r, toRoute(r[r.length - 1])]);
   }, []);
 
   const goBack = useCallback(() => {
@@ -111,18 +113,17 @@ const GroupingMapping = (props: GroupingMappingProps) => {
         type: GroupingMappingCustomUIType.Context,
         icon: <SvgList />,
         onClick: (group) =>
-          navigateTo({
-            ...currentRoute,
+          navigateTo((prev) => ({
             step: RouteStep.Properties,
-            group,
             title: group.groupName,
-          }),
+            groupingRouteFields: { ...prev?.groupingRouteFields, group },
+          })),
       },
       ...(props.customUIs ?? []),
       // No group UI's provided means the widget provides its own
       ...groupUIs ?? defaultGroupingUI,
     ],
-    [currentRoute, groupUIs, navigateTo, props.customUIs]
+    [groupUIs, navigateTo, props.customUIs]
   );
 
   return (
@@ -132,20 +133,14 @@ const GroupingMapping = (props: GroupingMappingProps) => {
       customUIs={injectedCustomUI}
     >
       <div className="gmw-group-mapping-container">
-        {currentRoute.step !== RouteStep.Properties && routingHistory.length < 4 &&
-          <WidgetHeader
-            returnFn={
-              // Will remove until all components are correctly componentized
-              routingHistory.length > 1
-                ? () => {
-                  goBack();
-                }
-                : undefined
-            }
-            title={currentRoute.title}
-          />
-        }
-        <GroupingMappingRouter
+        {// Will remove until all components are correctly componentized
+          currentRoute.step !== RouteStep.Properties && routingHistory.length < 4 &&
+          <GroupingMappingHeader
+            routingHistory={routingHistory}
+            goBack={goBack}
+            currentRoute={currentRoute}
+          />}
+        <GroupingMappingContent
           routingHistory={routingHistory}
           navigateTo={navigateTo}
           goBack={goBack}

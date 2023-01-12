@@ -17,7 +17,7 @@ interface MappingActionProps {
   onClose: () => void;
 }
 
-const MappingAction = ({ mapping, onClose }: MappingActionProps) => {
+export const MappingAction = ({ mapping, onClose }: MappingActionProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [values, setValues] = useState({
@@ -115,5 +115,3 @@ const MappingAction = ({ mapping, onClose }: MappingActionProps) => {
     </>
   );
 };
-
-export default MappingAction;

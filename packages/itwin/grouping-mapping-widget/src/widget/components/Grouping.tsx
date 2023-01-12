@@ -25,7 +25,6 @@ import {
 } from "@itwin/itwinui-icons-react";
 import DeleteModal from "./DeleteModal";
 import "./Grouping.scss";
-import type { IModelConnection } from "@itwin/core-frontend";
 import {
   clearEmphasizedElements,
   clearEmphasizedOverriddenElements,
@@ -47,7 +46,7 @@ import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUICon
 import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
 import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
-import { getHiliteIdsFromGroups, hideGroups, visualizeGroupColors } from "./groupsHelpers";
+import { getGroupColor, getHiliteIdsFromGroups, hideGroups, visualizeGroupColors } from "./groupsHelpers";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
@@ -58,8 +57,6 @@ interface GroupingProps {
   onClickGroupModify: (group: Group, queryGenerationType: string) => void;
   onClickRenderContextCustomUI: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: Group) => void;
 }
-
-const goldenAngle = 180 * (3 - Math.sqrt(5));
 
 const fetchGroups = async (
   setGroups: React.Dispatch<React.SetStateAction<IGroupTyped[]>>,
@@ -94,7 +91,7 @@ export const Groupings = ({
   onClickGroupModify,
   onClickRenderContextCustomUI,
 }: GroupingProps) => {
-  const iModelConnection = useActiveIModelConnection() as IModelConnection;
+  const iModelConnection = useActiveIModelConnection();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const { showGroupColor, setShowGroupColor, hiddenGroupsIds, setHiddenGroupsIds, hilitedElementsQueryCache, groups, setGroups } = useGroupHilitedElementsContext();
   const mappingClient = useMappingClient();
@@ -121,17 +118,14 @@ export const Groupings = ({
     );
   }, [getAccessToken, mappingClient, iModelId, mapping.id, setGroups]);
 
-  const getGroupColor = function (index: number) {
-    return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
-  };
-
   const getHiliteIdsFromGroupsWrapper = useCallback(
-    async (groups: Group[]) => getHiliteIdsFromGroups(iModelConnection, groups, hilitedElementsQueryCache),
+    async (groups: Group[]): Promise<string[]> => iModelConnection ? getHiliteIdsFromGroups(iModelConnection, groups, hilitedElementsQueryCache) : [],
     [iModelConnection, hilitedElementsQueryCache],
   );
 
   const visualizeGroupColorsWrapper = useCallback(
     async (viewGroups: Group[]) => {
+      if (!iModelConnection) return;
       setLoadingQuery(true);
       await visualizeGroupColors(iModelConnection, groups, viewGroups, hiddenGroupsIds, hilitedElementsQueryCache);
       setLoadingQuery(false);
@@ -141,6 +135,7 @@ export const Groupings = ({
 
   const hideGroupsWrapper = useCallback(
     async (viewGroups: Group[]) => {
+      if (!iModelConnection) return;
       setLoadingQuery(true);
       await hideGroups(iModelConnection, viewGroups, hilitedElementsQueryCache);
       setLoadingQuery(false);
@@ -289,34 +284,35 @@ export const Groupings = ({
                 {isLoadingQuery ? "Loading" : "Add Group"}
               </Button>
             </DropdownMenu>}
-          <ButtonGroup className='gmw-toolbar-buttons'>
-            <ToggleSwitch
-              label='Color by Group'
-              labelPosition='left'
-              className='gmw-toggle'
-              disabled={isLoadingQuery}
-              checked={showGroupColor}
-              onChange={toggleGroupColor}
-            ></ToggleSwitch>
-            <IconButton
-              title='Show All'
-              onClick={showAll}
-              disabled={isLoadingQuery}
-              styleType='borderless'
-              className='gmw-group-view-icon'
-            >
-              <SvgVisibilityShow />
-            </IconButton>
-            <IconButton
-              title='Hide All'
-              onClick={hideAll}
-              disabled={isLoadingQuery}
-              styleType='borderless'
-              className='gmw-group-view-icon'
-            >
-              <SvgVisibilityHide />
-            </IconButton>
-          </ButtonGroup>
+          {iModelConnection &&
+            <ButtonGroup className='gmw-toolbar-buttons'>
+              <ToggleSwitch
+                label='Color by Group'
+                labelPosition='left'
+                className='gmw-toggle'
+                disabled={isLoadingQuery}
+                checked={showGroupColor}
+                onChange={toggleGroupColor}
+              ></ToggleSwitch>
+              <IconButton
+                title='Show All'
+                onClick={showAll}
+                disabled={isLoadingQuery}
+                styleType='borderless'
+                className='gmw-group-view-icon'
+              >
+                <SvgVisibilityShow />
+              </IconButton>
+              <IconButton
+                title='Hide All'
+                onClick={hideAll}
+                disabled={isLoadingQuery}
+                styleType='borderless'
+                className='gmw-group-view-icon'
+              >
+                <SvgVisibilityHide />
+              </IconButton>
+            </ButtonGroup>}
         </div>
         {isLoading ? (
           <LoadingOverlay />
@@ -336,48 +332,50 @@ export const Groupings = ({
                   subText={g.description}
                   actionGroup={
                     <div className='gmw-actions'>
-                      {showGroupColor && (
-                        <IconButton
-                          styleType='borderless'
-                          className='gmw-group-view-icon'
-                        >
-                          <div
-                            className="gmw-color-legend"
-                            style={{
-                              backgroundColor: getGroupColor(groups.findIndex((group) => g.id === group.id)),
+                      {iModelConnection && <>
+                        {showGroupColor && (
+                          <IconButton
+                            styleType='borderless'
+                            className='gmw-group-view-icon'
+                          >
+                            <div
+                              className="gmw-color-legend"
+                              style={{
+                                backgroundColor: getGroupColor(groups.findIndex((group) => g.id === group.id)),
+                              }}
+                            />
+                          </IconButton>
+                        )}
+                        {g.id && hiddenGroupsIds.includes(g.id) ? (
+                          <IconButton
+                            disabled={isLoadingQuery}
+                            styleType='borderless'
+                            className='gmw-group-view-icon'
+                            onClick={async () => {
+                              await showGroup(g);
+                              setHiddenGroupsIds(
+                                hiddenGroupsIds.filter((id) => g.id !== id),
+                              );
                             }}
-                          />
-                        </IconButton>
-                      )}
-                      {g.id && hiddenGroupsIds.includes(g.id) ? (
-                        <IconButton
-                          disabled={isLoadingQuery}
-                          styleType='borderless'
-                          className='gmw-group-view-icon'
-                          onClick={async () => {
-                            await showGroup(g);
-                            setHiddenGroupsIds(
-                              hiddenGroupsIds.filter((id) => g.id !== id),
-                            );
-                          }}
-                        >
-                          <SvgVisibilityHide />
-                        </IconButton>
-                      ) : (
-                        <IconButton
-                          disabled={isLoadingQuery}
-                          styleType='borderless'
-                          className='gmw-group-view-icon'
-                          onClick={async () => {
-                            await hideGroupsWrapper([g]);
-                            setHiddenGroupsIds(
-                              hiddenGroupsIds.concat(g.id ? [g.id] : []),
-                            );
-                          }}
-                        >
-                          <SvgVisibilityShow />
-                        </IconButton>
-                      )}
+                          >
+                            <SvgVisibilityHide />
+                          </IconButton>
+                        ) : (
+                          <IconButton
+                            disabled={isLoadingQuery}
+                            styleType='borderless'
+                            className='gmw-group-view-icon'
+                            onClick={async () => {
+                              await hideGroupsWrapper([g]);
+                              setHiddenGroupsIds(
+                                hiddenGroupsIds.concat(g.id ? [g.id] : []),
+                              );
+                            }}
+                          >
+                            <SvgVisibilityShow />
+                          </IconButton>
+                        )}
+                      </>}
                       <DropdownMenu
                         className='gmw-custom-ui-dropdown'
                         disabled={isLoadingQuery}

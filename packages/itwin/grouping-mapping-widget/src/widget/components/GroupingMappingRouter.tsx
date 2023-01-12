@@ -2,122 +2,122 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useEffect } from "react";
-import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
+import React from "react";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import GroupAction from "./GroupAction";
+import { GroupAction } from "./GroupAction";
 import { Groupings } from "./Grouping";
 import type { Route } from "./GroupingMapping";
 import { RouteStep } from "./GroupingMapping";
 import { Mappings } from "./Mapping";
-import MappingAction from "./MappingAction";
+import { MappingAction } from "./MappingAction";
 import { PropertyMenu } from "./PropertyMenu";
-import { clearEmphasizedElements, clearHiddenElements, clearOverriddenElements } from "./viewerUtils";
 
 export const GroupingMappingRouter = ({
   routingHistory,
   navigateTo,
   goBack,
 }: {
-  // Maybe we don't need the entire route history? Remove at the end of this if it's still not needed.
   routingHistory: Route[];
-  navigateTo: (toRoute: Route) => void;
+  navigateTo: (toRoute: (prev: Route | undefined) => Route) => void;
   goBack: () => void;
 }) => {
-  const { setShowGroupColor, setHiddenGroupsIds } = useGroupHilitedElementsContext();
   const { iModelId } = useGroupingMappingApiConfig();
   const currentRoute = routingHistory[routingHistory.length - 1];
-
-  // Clean up group visualization when in mappings
-  useEffect(() => {
-    if (routingHistory.length === 1) {
-      setShowGroupColor(false);
-      setHiddenGroupsIds([]);
-      clearOverriddenElements();
-      clearEmphasizedElements();
-      clearHiddenElements();
-    }
-  }, [routingHistory, setHiddenGroupsIds, setShowGroupColor]);
+  const { mapping, group, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
 
   switch (currentRoute.step) {
     case RouteStep.Mappings:
       return (
         <Mappings
           onClickAddMapping={() =>
-            navigateTo({ step: RouteStep.MappingsAction, title: "Add Mapping" })
+            navigateTo(() => ({ step: RouteStep.MappingsAction, title: "Add Mapping", groupingRouteFields: {} }))
           }
           onClickMappingTitle={(mapping) => {
-            navigateTo({ step: RouteStep.Groups, mapping, title: mapping.mappingName });
+            navigateTo(() => ({
+              step: RouteStep.Groups,
+              groupingRouteFields: { mapping },
+              title: mapping.mappingName,
+            }));
           }}
           onClickMappingModify={(mapping) => {
-            navigateTo({
+            navigateTo(() => ({
               step: RouteStep.MappingsAction,
-              mapping,
+              groupingRouteFields: { mapping },
               title: mapping.mappingName,
-            });
+            }));
           }}
-        />
-      );
+        />);
     case RouteStep.MappingsAction:
-      return <MappingAction mapping={currentRoute.mapping} onClose={goBack} />;
+      return (<MappingAction mapping={mapping} onClose={goBack} />);
     case RouteStep.Groups:
-      if (currentRoute.mapping) {
+      if (mapping) {
         return (
           <Groupings
-            mapping={currentRoute.mapping}
+            mapping={mapping}
             onClickAddGroup={(qType) =>
-              navigateTo({
-                ...currentRoute,
+              navigateTo((prev) => ({
                 step: RouteStep.GroupAction,
-                queryGenerationType: qType,
+                groupingRouteFields: { ...prev?.groupingRouteFields, queryGenerationType: qType },
                 title: "Add Group",
-              })
+              }))
             }
-            onClickGroupTitle={(group) => navigateTo({
-              ...currentRoute,
-              step: RouteStep.Properties,
-              group,
-              title: group.groupName,
-            })}
-            onClickGroupModify={(group, qType) =>
-              navigateTo({
-                ...currentRoute,
-                step: RouteStep.GroupAction,
-                queryGenerationType: qType,
-                title: group.groupName,
-                group,
-              })
+            onClickGroupTitle={(g) =>
+              navigateTo((prev) => ({
+                step: RouteStep.Properties,
+                title: g.groupName,
+                groupingRouteFields: { ...prev?.groupingRouteFields, group: g },
+              }))
             }
-            onClickRenderContextCustomUI={(ccUI, group) =>
-              navigateTo({
-                ...currentRoute,
+            onClickGroupModify={(g, qType) =>
+              navigateTo((prev) => ({
                 step: RouteStep.GroupAction,
-                groupContextCustomUI: ccUI,
-                group,
-              })
+                title: g.groupName,
+                groupingRouteFields: { ...prev?.groupingRouteFields, group: g, queryGenerationType: qType },
+              }))
+            }
+            onClickRenderContextCustomUI={(ccUI, g) =>
+              navigateTo((prev) => ({
+                step: RouteStep.GroupAction,
+                title: ccUI.displayName ?? "",
+                groupingRouteFields: { ...prev?.groupingRouteFields, group: g, groupContextCustomUI: ccUI },
+              }))
             }
           />
         );
       }
       return null;
     case RouteStep.GroupAction:
-      if (currentRoute.mapping) {
-        if (currentRoute.queryGenerationType) {
-          return <GroupAction mappingId={currentRoute.mapping.id} group={currentRoute.group} onClose={goBack} queryGenerationType={currentRoute.queryGenerationType} />;
-        } else if (currentRoute.group && currentRoute.groupContextCustomUI) {
+      if (mapping) {
+        if (queryGenerationType) {
           return (
-            React.createElement(currentRoute.groupContextCustomUI, {
+            <GroupAction
+              mappingId={mapping.id}
+              group={group}
+              onClose={goBack}
+              queryGenerationType={queryGenerationType}
+            />
+          );
+        } else if (group && groupContextCustomUI) {
+          return (
+            React.createElement(groupContextCustomUI, {
               iModelId,
-              mappingId: currentRoute.mapping.id,
-              groupId: currentRoute.group.id,
+              mappingId: mapping.id,
+              groupId: group.id,
             })
           );
         }
       }
       return null;
     case RouteStep.Properties:
-      if (currentRoute.mapping && currentRoute.group) {
-        return (<PropertyMenu iModelId={iModelId} mappingId={currentRoute.mapping.id} group={currentRoute.group} goBack={async () => goBack()} />);
+      if (mapping && group) {
+        return (
+          <PropertyMenu
+            iModelId={iModelId}
+            mappingId={mapping.id}
+            group={group}
+            goBack={async () => goBack()}
+          />
+        );
       }
       return null;
     default:

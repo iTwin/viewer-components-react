@@ -26,10 +26,13 @@ export interface GroupingMappingContextProps {
    */
   getAccessToken?: GetAccessTokenFn;
   /**
+   * The iTwin iModel Id.
+   */
+  iModelId: string;
+  /**
    * Used for iTwin and iModel APIs.
    * Also used for Mapping API if a custom {@link client} is not provided.
    */
-  iModelId: string;
   prefix?: ClientPrefix;
   /**
    * A custom implementation of MappingClient.

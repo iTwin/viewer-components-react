@@ -51,7 +51,7 @@ interface GroupActionProps {
   onClose: () => void;
 }
 
-const GroupAction = (props: GroupActionProps) => {
+export const GroupAction = (props: GroupActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { showGroupColor, groups, hiddenGroupsIds, hilitedElementsQueryCache } = useGroupHilitedElementsContext();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
@@ -70,8 +70,13 @@ const GroupAction = (props: GroupActionProps) => {
   const [queryGenerationType, setQueryGenerationType] = useState(
     props.queryGenerationType,
   );
-
   const isUpdating = isLoading || isRendering;
+
+  useEffect(() => {
+    if (!iModelConnection) {
+      throw new Error("This component requires an active iModelConnection.");
+    }
+  }, [iModelConnection]);
 
   const resetView = async () => {
     if (groups.length > 0) {
@@ -309,5 +314,3 @@ const GroupAction = (props: GroupActionProps) => {
     </>
   );
 };
-
-export default GroupAction;
