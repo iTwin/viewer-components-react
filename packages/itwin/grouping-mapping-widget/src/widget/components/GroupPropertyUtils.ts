@@ -348,6 +348,10 @@ export const fetchPresentationDescriptor = async (iModelConnection: IModelConnec
         specifications: [
           {
             specType: ContentSpecificationTypes.SelectedNodeInstances,
+            propertyOverrides: [{
+              name: "*",
+              isDisplayed: true,
+            }],
           },
         ],
       }],
