@@ -22,6 +22,7 @@ import { fireEvent, render, waitFor } from "@testing-library/react";
 import { CategoryTree, RULESET_CATEGORIES, toggleAllCategories } from "../../../components/trees/category-tree/CategoriesTree";
 import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import { mockPresentationManager, TestUtils } from "../../TestUtils";
+
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, ScreenViewport, SpatialViewState, SubCategoriesCache, ViewManager, Viewport } from "@itwin/core-frontend";
@@ -30,7 +31,7 @@ import type { ECInstancesNodeKey, Node, NodePathElement } from "@itwin/presentat
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { PresentationManager, RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
-import type { CategoryProps, ElementProps, ModelProps, PhysicalElementProps, RelatedElementProps } from "@itwin/core-common";
+import type { CategoryProps, ElementProps, ModelProps, PhysicalElementProps, RelatedElementProps, SubCategoryProps } from "@itwin/core-common";
 
 describe("CategoryTree", () => {
 
@@ -139,14 +140,13 @@ describe("CategoryTree", () => {
             categoryVisibilityHandler={visibilityHandler.object}
           />,
         );
-        let node: HTMLElement;
-        await waitFor(() => node = result.getByText("test-node"));
+        const node = await waitFor(() => result.getByText("test-node"));
         const tree = result.getByRole("tree");
         const item = result.getByRole("treeitem");
         const check = result.getByRole("checkbox");
         expect(tree.contains(item)).to.be.true;
         expect(item.contains(check)).to.be.true;
-        expect(item.contains(node!)).to.be.true;
+        expect(item.contains(node)).to.be.true;
       });
 
       it("renders without viewport", async () => {
@@ -520,6 +520,28 @@ describe("CategoryTree", () => {
       expect({ hierarchy }).to.nested.include({ "hierarchy[0].label.value.value": "Test SpatialCategory" });
     });
 
+    it("does not show private 3d subCategories with RULESET_CATEGORIES", async () => {
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", (builder) => {
+        const physicalPartitionId = addPartition("BisCore:PhysicalPartition", builder, "TestDrawingModel");
+        const definitionPartitionId = addPartition("BisCore:DefinitionPartition", builder, "TestDefinitionModel");
+        const physicalModelId = addModel("BisCore:PhysicalModel", builder, physicalPartitionId);
+        const definitionModelId = addModel("BisCore:DefinitionModel", builder, definitionPartitionId);
+
+        const categoryId = addSpatialCategory(builder, definitionModelId, "Test SpatialCategory");
+        addPhysicalObject(builder, physicalModelId, categoryId);
+
+        addSubCategory(builder, definitionModelId, categoryId, "Test SpatialSubCategory");
+        addSubCategory(builder, definitionModelId, categoryId, "Private Test SpatialSubCategory", true);
+      });
+
+      await Presentation.presentation.vars(RULESET_CATEGORIES.id).setString("ViewType", "3d");
+
+      const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+      const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_CATEGORIES);
+
+      expect(hierarchy).to.matchSnapshot();
+    });
+
     it("does not show private 2d categories with RULESET_CATEGORIES", async () => {
       const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", (builder) => {
         const drawingPartitionId = addPartition("BisCore:Drawing", builder, "TestDrawingModel");
@@ -532,6 +554,28 @@ describe("CategoryTree", () => {
 
         const privateCategoryId = addDrawingCategory(builder, definitionModelId, "Private Test DrawingCategory", true);
         addDrawingGraphic(builder, drawingModelId, privateCategoryId);
+      });
+
+      await Presentation.presentation.vars(RULESET_CATEGORIES.id).setString("ViewType", "2d");
+
+      const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+      const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_CATEGORIES);
+
+      expect(hierarchy).to.matchSnapshot();
+    });
+
+    it("does not show private 2d subCategories with RULESET_CATEGORIES", async () => {
+      const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", (builder) => {
+        const drawingPartitionId = addPartition("BisCore:Drawing", builder, "TestDrawingModel");
+        const definitionPartitionId = addPartition("BisCore:DefinitionPartition", builder, "TestDefinitionModel");
+        const drawingModelId = addModel("BisCore:DrawingModel", builder, drawingPartitionId);
+        const definitionModelId = addModel("BisCore:DefinitionModel", builder, definitionPartitionId);
+
+        const categoryId = addDrawingCategory(builder, definitionModelId, "Test Drawing Category");
+        addDrawingGraphic(builder, drawingModelId, categoryId);
+
+        addSubCategory(builder, definitionModelId, categoryId, "Test DrawingSubCategory");
+        addSubCategory(builder, definitionModelId, categoryId, "Private Test DrawingSubCategory", true);
       });
 
       await Presentation.presentation.vars(RULESET_CATEGORIES.id).setString("ViewType", "2d");
@@ -569,7 +613,7 @@ describe("CategoryTree", () => {
     const addSpatialCategory = (builder: TestIModelBuilder, modelId: string, name: string, isPrivate?: boolean) => {
       const spatialCategoryProps: CategoryProps = {
         classFullName: "BisCore:SpatialCategory",
-        model: IModel.dictionaryId,
+        model: modelId,
         code: builder.createCode(modelId, BisCodeSpec.spatialCategory, name),
         isPrivate,
       };
@@ -589,7 +633,7 @@ describe("CategoryTree", () => {
     const addDrawingCategory = (builder: TestIModelBuilder, modelId: string, name: string, isPrivate?: boolean) => {
       const spatialCategoryProps: CategoryProps = {
         classFullName: "BisCore:DrawingCategory",
-        model: IModel.dictionaryId,
+        model: modelId,
         code: builder.createCode(modelId, BisCodeSpec.drawingCategory, name),
         isPrivate,
       };
@@ -604,6 +648,17 @@ describe("CategoryTree", () => {
         code: elemCode,
       };
       builder.insertElement(physicalObjectProps);
+    };
+
+    const addSubCategory = (builder: TestIModelBuilder, modelId: string, parentId: string, name: string, isPrivate?: boolean) => {
+      const subCategoryProps: SubCategoryProps = {
+        classFullName: "BisCore:SubCategory",
+        parent: { id: parentId, relClassName: "BisCore:CategoryOwnsSubCategories" },
+        model: modelId,
+        code: builder.createCode(parentId, BisCodeSpec.subCategory, name),
+        isPrivate,
+      };
+      return builder.insertElement(subCategoryProps);
     };
   });
 });
