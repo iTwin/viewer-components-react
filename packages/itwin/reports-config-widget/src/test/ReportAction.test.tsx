@@ -34,6 +34,7 @@ import {
   SelectionChangeEvent,
 } from "@itwin/presentation-frontend";
 import type { BeEvent } from "@itwin/core-bentley";
+import { EmptyLocalization } from "@itwin/core-common";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
@@ -54,10 +55,7 @@ jest.mock("@itwin/appui-react", () => ({
 const server = setupServer();
 
 beforeAll(async () => {
-  // This is required by the i18n module within iTwin.js
-  (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
-
-  await NoRenderApp.startup();
+  await NoRenderApp.startup({localization: new EmptyLocalization()});
   await Presentation.initialize();
   const selectionSet = moq.Mock.ofType<SelectionSet>();
   const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
