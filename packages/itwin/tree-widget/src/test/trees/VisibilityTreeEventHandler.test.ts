@@ -126,12 +126,6 @@ describe("VisibilityTreeEventHandler", () => {
       const eventHandler = createHandler({ visibilityHandler });
       const changes: CheckboxStateChange[] = [{ nodeItem: node1.item, newState: CheckBoxState.On }];
       const changesSubject = new Subject<CheckboxStateChange[]>();
-      changesSubject.subscribe({
-        next: (change) => {
-          return change;
-        },
-        complete: () => { },
-      });
 
       changeVisibility.returns(EMPTY);
       await using(eventHandler, async (_) => {
@@ -142,7 +136,6 @@ describe("VisibilityTreeEventHandler", () => {
         onVisibilityChange.raiseEvent(["testId1"]);
         changesSubject.complete();
         onVisibilityChange.raiseEvent(["testId1"]);
-        await flushAsyncOperations();
       });
 
       expect(getVisibilityStatus.callCount).to.eq(1);
@@ -155,11 +148,6 @@ describe("VisibilityTreeEventHandler", () => {
       const eventHandler = createHandler({ visibilityHandler });
       const changes: CheckboxStateChange[] = [{ nodeItem: node1.item, newState: CheckBoxState.Off }];
       const errorSubject = new Subject();
-      errorSubject.subscribe({
-        error: (err) => {
-          return err;
-        },
-      });
 
       changeVisibility.returns(errorSubject);
       await using(eventHandler, async (_) => {
@@ -169,7 +157,6 @@ describe("VisibilityTreeEventHandler", () => {
         onVisibilityChange.raiseEvent(["testId1"]);
         errorSubject.error(new Error());
         onVisibilityChange.raiseEvent(["testId1"]);
-        await flushAsyncOperations();
       });
       expect(getVisibilityStatus.callCount).to.eq(1);
     });

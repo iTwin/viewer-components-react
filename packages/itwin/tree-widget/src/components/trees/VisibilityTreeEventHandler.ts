@@ -87,8 +87,6 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     }
 
     this._listeners.push(this.modelSource.onModelChanged.addListener(async ([_, changes]) => {
-      if (this._isChangingVisibility)
-        return;
       void this.updateCheckboxes([...changes.addedNodeIds, ...changes.modifiedNodeIds]);
     }));
     this.updateCheckboxes(); // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -139,7 +137,16 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
       .pipe(
         mergeMap((changes) => this.changeVisibility(changes)),
       )
-      .subscribe({ complete: () => { this._isChangingVisibility = false; }, error: () => { this._isChangingVisibility = false; } });
+      .subscribe({
+        complete: () => {
+          this._isChangingVisibility = false;
+          void this.updateCheckboxes();
+        },
+        error: () => {
+          this._isChangingVisibility = false;
+          void this.updateCheckboxes();
+        },
+      });
     return undefined;
   }
 
