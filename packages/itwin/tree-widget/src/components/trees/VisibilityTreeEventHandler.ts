@@ -143,9 +143,7 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
       )
       .subscribe({
         complete: handleStateChanged,
-        error: () => {
-          handleStateChanged();
-        },
+        error: handleStateChanged,
       });
     return undefined;
   }
