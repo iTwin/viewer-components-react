@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "Bug fix for changing visibility of multiple nodes at once",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/tree-widget-react"
+}
