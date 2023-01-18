@@ -142,9 +142,7 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
         mergeMap((changes) => this.changeVisibility(changes)),
       )
       .subscribe({
-        complete: () => {
-          handleStateChanged();
-        },
+        complete: handleStateChanged,
         error: () => {
           handleStateChanged();
         },
