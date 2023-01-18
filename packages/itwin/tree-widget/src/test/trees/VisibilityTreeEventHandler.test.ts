@@ -136,6 +136,7 @@ describe("VisibilityTreeEventHandler", () => {
         onVisibilityChange.raiseEvent(["testId1"]);
         changesSubject.complete();
         onVisibilityChange.raiseEvent(["testId1"]);
+        await flushAsyncOperations();
       });
 
       expect(getVisibilityStatus.callCount).to.eq(1);
@@ -157,6 +158,7 @@ describe("VisibilityTreeEventHandler", () => {
         onVisibilityChange.raiseEvent(["testId1"]);
         errorSubject.error(new Error());
         onVisibilityChange.raiseEvent(["testId1"]);
+        await flushAsyncOperations();
       });
       expect(getVisibilityStatus.callCount).to.eq(1);
     });

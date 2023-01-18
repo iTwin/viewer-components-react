@@ -129,6 +129,10 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   public override onCheckboxStateChanged(event: TreeCheckboxStateChangeEventArgs) {
+    const handleStateChanged = () => {
+      this._isChangingVisibility = false;
+      void this.updateCheckboxes();
+    };
     // istanbul ignore if
     if (!this._visibilityHandler)
       return undefined;
@@ -139,12 +143,10 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
       )
       .subscribe({
         complete: () => {
-          this._isChangingVisibility = false;
-          void this.updateCheckboxes();
+          handleStateChanged();
         },
         error: () => {
-          this._isChangingVisibility = false;
-          void this.updateCheckboxes();
+          handleStateChanged();
         },
       });
     return undefined;
