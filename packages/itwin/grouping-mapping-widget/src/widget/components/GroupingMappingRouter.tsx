@@ -13,16 +13,15 @@ import { MappingAction } from "./MappingAction";
 import { PropertyMenu } from "./PropertyMenu";
 
 export const GroupingMappingRouter = ({
-  routingHistory,
+  currentRoute,
   navigateTo,
   goBack,
 }: {
-  routingHistory: Route[];
+  currentRoute: Route;
   navigateTo: (toRoute: (prev: Route | undefined) => Route) => void;
   goBack: () => void;
 }) => {
   const { iModelId } = useGroupingMappingApiConfig();
-  const currentRoute = routingHistory[routingHistory.length - 1];
   const { mapping, group, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
 
   switch (currentRoute.step) {

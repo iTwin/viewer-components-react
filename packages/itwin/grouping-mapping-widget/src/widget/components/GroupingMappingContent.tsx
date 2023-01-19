@@ -14,6 +14,7 @@ export const GroupingMappingContent = ({
   goBack: () => void;
 }) => {
   const { setShowGroupColor, setHiddenGroupsIds } = useGroupHilitedElementsContext();
+  const currentRoute = routingHistory[routingHistory.length - 1];
 
   // Clean up group visualization when in mappings
   useEffect(() => {
@@ -28,7 +29,7 @@ export const GroupingMappingContent = ({
 
   return (
     <GroupingMappingRouter
-      routingHistory={routingHistory}
+      currentRoute={currentRoute}
       navigateTo={navigateTo}
       goBack={goBack}
     />
