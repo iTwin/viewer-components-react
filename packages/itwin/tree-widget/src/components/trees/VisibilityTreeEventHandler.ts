@@ -70,17 +70,25 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   private _visibilityHandler: IVisibilityHandler | undefined;
   private _selectionPredicate?: VisibilityTreeSelectionPredicate;
   private _listeners = new Array<() => void>();
+  private _isChangingVisibility: boolean;
 
   constructor(params: VisibilityTreeEventHandlerParams) {
     super(params);
     this._visibilityHandler = params.visibilityHandler;
     this._selectionPredicate = params.selectionPredicate;
+    this._isChangingVisibility = false;
 
     if (this._visibilityHandler) {
-      this._listeners.push(this._visibilityHandler.onVisibilityChange.addListener(async (nodeIds, visibilityStatus) => this.updateCheckboxes(nodeIds, visibilityStatus)));
+      this._listeners.push(this._visibilityHandler.onVisibilityChange.addListener(async (nodeIds, visibilityStatus) => {
+        if (this._isChangingVisibility)
+          return;
+        void this.updateCheckboxes(nodeIds, visibilityStatus);
+      }));
     }
 
-    this._listeners.push(this.modelSource.onModelChanged.addListener(async ([_, changes]) => this.updateCheckboxes([...changes.addedNodeIds, ...changes.modifiedNodeIds])));
+    this._listeners.push(this.modelSource.onModelChanged.addListener(async ([_, changes]) => {
+      void this.updateCheckboxes([...changes.addedNodeIds, ...changes.modifiedNodeIds]);
+    }));
     this.updateCheckboxes(); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
@@ -121,6 +129,10 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   public override onCheckboxStateChanged(event: TreeCheckboxStateChangeEventArgs) {
+    const handleStateChanged = () => {
+      this._isChangingVisibility = false;
+      void this.updateCheckboxes();
+    };
     // istanbul ignore if
     if (!this._visibilityHandler)
       return undefined;
@@ -129,7 +141,10 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
       .pipe(
         mergeMap((changes) => this.changeVisibility(changes)),
       )
-      .subscribe();
+      .subscribe({
+        complete: handleStateChanged,
+        error: handleStateChanged,
+      });
     return undefined;
   }
 
@@ -140,8 +155,9 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
           // istanbul ignore if
           if (!this._visibilityHandler)
             return EMPTY;
+          this._isChangingVisibility = true;
           return from(this._visibilityHandler.changeVisibility(nodeItem, this.getNodeKey(nodeItem), newState === CheckBoxState.On));
-        }),
+        }, 1),
       );
   }
 
