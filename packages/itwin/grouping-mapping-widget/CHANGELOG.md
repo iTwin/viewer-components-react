@@ -1,6 +1,14 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Fri, 16 Dec 2022 13:51:28 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Jan 2023 10:29:18 GMT and should not be manually modified.
+
+## 0.9.3
+Thu, 19 Jan 2023 10:29:18 GMT
+
+### Patches
+
+- Exposed MappingClient context, related hooks and types.
+- Exposed GroupingMappingApiConfig context, related hooks and types.
 
 ## 0.9.2
 Fri, 16 Dec 2022 13:51:28 GMT

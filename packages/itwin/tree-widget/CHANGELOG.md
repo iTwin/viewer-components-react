@@ -1,6 +1,14 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Tue, 20 Dec 2022 15:12:29 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Jan 2023 10:29:18 GMT and should not be manually modified.
+
+## 0.6.1
+Thu, 19 Jan 2023 10:29:18 GMT
+
+### Patches
+
+- CategoriesTree: Updated ruleset to not show private SubCategories
+- Bug fix for changing visibility of multiple nodes at once
 
 ## 0.6.0
 Tue, 20 Dec 2022 15:12:29 GMT
