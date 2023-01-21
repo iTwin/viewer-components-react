@@ -52,10 +52,10 @@ export type IGroupTyped = CreateTypeFromInterface<Group>;
 
 interface GroupingProps {
   mapping: Mapping;
-  onClickAddGroup: (queryGenerationType: string) => void;
-  onClickGroupTitle: (group: Group) => void;
-  onClickGroupModify: (group: Group, queryGenerationType: string) => void;
-  onClickRenderContextCustomUI: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: Group) => void;
+  onClickAddGroup?: (queryGenerationType: string) => void;
+  onClickGroupTitle?: (group: Group) => void;
+  onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
+  onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: Group) => void;
 }
 
 const fetchGroups = async (
@@ -164,11 +164,13 @@ export const Groupings = ({
   );
 
   const addGroup = (type: string) => {
+    if (!onClickAddGroup) return;
     onClickAddGroup(type);
     clearEmphasizedElements();
   };
 
   const onModify = async (group: Group, type: string) => {
+    if (!onClickGroupModify) return;
     if (group.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
@@ -407,7 +409,7 @@ export const Groupings = ({
                               key={p.name}
                               onClick={async () => {
                                 showGroupColor && await showGroup(g);
-                                if (p.uiComponent) {
+                                if (p.uiComponent && onClickRenderContextCustomUI) {
                                   onClickRenderContextCustomUI(p.uiComponent, g);
                                 }
                                 if (p.onClick) {
@@ -447,9 +449,11 @@ export const Groupings = ({
                     </div>
                   }
                   onClickTitle={
-                    isLoadingQuery
-                      ? undefined
-                      : async () => { await colorGroup(g); onClickGroupTitle(g); }
+                    onClickGroupTitle && !isLoadingQuery ?
+                      async () => {
+                        await colorGroup(g);
+                        onClickGroupTitle(g);
+                      } : undefined
                   }
                 />
               ))}

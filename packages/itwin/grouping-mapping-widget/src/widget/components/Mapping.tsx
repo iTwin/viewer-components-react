@@ -78,9 +78,9 @@ export const Mappings = ({
   onClickMappingTitle,
   onClickMappingModify,
 }: {
-  onClickAddMapping: () => void;
-  onClickMappingTitle: (mapping: Mapping) => void;
-  onClickMappingModify: (mapping: Mapping) => void;
+  onClickAddMapping?: () => void;
+  onClickMappingTitle?: (mapping: Mapping) => void;
+  onClickMappingModify?: (mapping: Mapping) => void;
 }) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -123,13 +123,15 @@ export const Mappings = ({
       <Surface className="gmw-mappings-container">
         <div className="gmw-table-toolbar">
           <div className="gmw-button-spacing">
-            <Button
-              startIcon={<SvgAdd />}
-              onClick={onClickAddMapping}
-              styleType="high-visibility"
-            >
-              New
-            </Button>
+            {onClickAddMapping &&
+              <Button
+                startIcon={<SvgAdd />}
+                onClick={onClickAddMapping}
+                styleType="high-visibility"
+              >
+                New
+              </Button>
+            }
             <IconButton
               title="Import Mappings"
               onClick={() => setShowImportModal(true)}
@@ -157,19 +159,21 @@ export const Mappings = ({
                   subText={mapping.description ?? ""}
                   subtextToolTip={mapping.description ?? ""}
                   titleTooltip={mapping.mappingName}
-                  onClickTitle={() => onClickMappingTitle(mapping)}
+                  onClickTitle={() => onClickMappingTitle ? onClickMappingTitle(mapping) : undefined}
                   actionGroup={
                     <DropdownMenu
                       menuItems={(close: () => void) => [
-                        <MenuItem
-                          key={0}
-                          onClick={() => {
-                            onClickMappingModify(mapping);
-                          }}
-                          icon={<SvgEdit />}
-                        >
-                          Modify
-                        </MenuItem>,
+                        onClickMappingModify ? (
+                          <MenuItem
+                            key={0}
+                            onClick={() => {
+                              onClickMappingModify(mapping);
+                            }}
+                            icon={<SvgEdit />}
+                          >
+                            Modify
+                          </MenuItem>
+                        ) : [],
                         <MenuItem
                           key={1}
                           onClick={async () => {
@@ -202,7 +206,7 @@ export const Mappings = ({
                         >
                           Remove
                         </MenuItem>,
-                      ]}
+                      ].flatMap((m) => m)}
                     >
                       <IconButton styleType="borderless">
                         <SvgMore
