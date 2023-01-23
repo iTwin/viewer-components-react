@@ -10,10 +10,12 @@ import { BeEvent, BeUiEvent, using } from "@itwin/core-bentley";
 import { VisibilityTreeEventHandler } from "../../components/trees/VisibilityTreeEventHandler";
 import { flushAsyncOperations } from "../TestUtils";
 import { createSimpleTreeModelNode } from "./Common";
-import type { AbstractTreeNodeLoaderWithProvider, TreeModel, TreeModelChanges, TreeModelSource } from "@itwin/components-react";
+import type { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange, TreeModel, TreeModelChanges, TreeModelSource } from "@itwin/components-react";
 import type { SelectionHandler } from "@itwin/presentation-frontend";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus, VisibilityTreeEventHandlerParams } from "../../components/trees/VisibilityTreeEventHandler";
+import { EMPTY, from, Subject } from "rxjs";
+import { CheckBoxState } from "@itwin/core-react";
 
 describe("VisibilityTreeEventHandler", () => {
 
@@ -24,10 +26,11 @@ describe("VisibilityTreeEventHandler", () => {
   const selectionHandlerMock = moq.Mock.ofType<SelectionHandler>();
 
   const getVisibilityStatus = sinon.stub();
+  const changeVisibility = sinon.stub();
   const onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
   const visibilityHandler: IVisibilityHandler = {
-    changeVisibility: sinon.fake(),
+    changeVisibility,
     getVisibilityStatus,
     onVisibilityChange,
     dispose: sinon.fake(),
@@ -45,6 +48,7 @@ describe("VisibilityTreeEventHandler", () => {
     dataProviderMock.reset();
     selectionHandlerMock.reset();
     getVisibilityStatus.reset();
+    changeVisibility.reset();
 
     getVisibilityStatus.returns(testVisibilityStatus);
     modelMock.setup((x) => x.getNode(moq.It.isAny())).returns(() => createSimpleTreeModelNode());
@@ -110,6 +114,50 @@ describe("VisibilityTreeEventHandler", () => {
 
       await using(createHandler({ visibilityHandler }), async (_) => {
         onVisibilityChange.raiseEvent(["testId1", "testId2"], visibilityStatus);
+        await flushAsyncOperations();
+      });
+      expect(getVisibilityStatus.callCount).to.eq(1);
+    });
+
+    it("does not call 'getVisibilityStatus' while changing visibility", async () => {
+      const node1 = createSimpleTreeModelNode("testId1");
+      modelMock.reset();
+      modelMock.setup((x) => x.getNode("testId1")).returns(() => node1);
+      const eventHandler = createHandler({ visibilityHandler });
+      const changes: CheckboxStateChange[] = [{ nodeItem: node1.item, newState: CheckBoxState.On }];
+      const changesSubject = new Subject<CheckboxStateChange[]>();
+
+      changeVisibility.returns(EMPTY);
+      await using(eventHandler, async (_) => {
+        eventHandler.onCheckboxStateChanged({
+          stateChanges: changesSubject,
+        });
+        changesSubject.next(changes);
+        onVisibilityChange.raiseEvent(["testId1"]);
+        changesSubject.complete();
+        onVisibilityChange.raiseEvent(["testId1"]);
+        await flushAsyncOperations();
+      });
+
+      expect(getVisibilityStatus.callCount).to.eq(1);
+    });
+
+    it("handles errors while changing visibility", async () => {
+      const node1 = createSimpleTreeModelNode("testId1");
+      modelMock.reset();
+      modelMock.setup((x) => x.getNode("testId1")).returns(() => node1);
+      const eventHandler = createHandler({ visibilityHandler });
+      const changes: CheckboxStateChange[] = [{ nodeItem: node1.item, newState: CheckBoxState.Off }];
+      const errorSubject = new Subject();
+
+      changeVisibility.returns(errorSubject);
+      await using(eventHandler, async (_) => {
+        eventHandler.onCheckboxStateChanged({
+          stateChanges: from([changes]),
+        });
+        onVisibilityChange.raiseEvent(["testId1"]);
+        errorSubject.error(new Error());
+        onVisibilityChange.raiseEvent(["testId1"]);
         await flushAsyncOperations();
       });
       expect(getVisibilityStatus.callCount).to.eq(1);

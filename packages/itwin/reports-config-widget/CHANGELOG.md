@@ -1,6 +1,14 @@
 # Change Log - @itwin/reports-config-widget-react
 
-This log was last generated on Mon, 31 Oct 2022 19:03:27 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Jan 2023 10:29:18 GMT and should not be manually modified.
+
+## 0.2.0
+Thu, 19 Jan 2023 10:29:18 GMT
+
+### Minor changes
+
+- Extraction workflow for mappings updated.
+- IModel extraction dropdown removed.
 
 ## 0.1.0
 Mon, 31 Oct 2022 19:03:27 GMT

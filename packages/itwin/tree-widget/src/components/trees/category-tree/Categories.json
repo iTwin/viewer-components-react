@@ -88,6 +88,7 @@
               "direction": "Forward"
             }
           ],
+          "instanceFilter": "NOT this.IsPrivate",
           "groupByClass": false,
           "groupByLabel": false
         }
