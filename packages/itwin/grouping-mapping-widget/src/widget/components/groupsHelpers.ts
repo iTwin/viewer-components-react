@@ -84,7 +84,8 @@ export const visualizeGroupColors = async (
   groups: Group[],
   viewGroups: Group[],
   hiddenGroupsIds: string[],
-  hilitedElementsQueryCache: React.MutableRefObject<Map<string, string[]>>
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, string[]>>,
+  doEmphasizeElements: boolean = true
 ) => {
   clearEmphasizedOverriddenElements();
   let allIds: string[] = [];
@@ -99,7 +100,7 @@ export const visualizeGroupColors = async (
       getGroupColor(index),
       FeatureOverrideType.ColorAndAlpha,
     );
-    emphasizeElements(hilitedIds, undefined);
+    doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
     if (!hiddenGroupsIds.includes(group.id)) {
       allIds = allIds.concat(hilitedIds);
     }

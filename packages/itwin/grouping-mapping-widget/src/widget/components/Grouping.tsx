@@ -57,6 +57,7 @@ export interface GroupingProps {
   onClickGroupTitle?: (group: Group) => void;
   onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
   onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: Group) => void;
+  emphasizeElements?: boolean;
 }
 
 const fetchGroups = async (
@@ -89,6 +90,7 @@ export const Groupings = ({
   onClickGroupTitle,
   onClickGroupModify,
   onClickRenderContextCustomUI,
+  emphasizeElements = true,
 }: GroupingProps) => {
   const iModelConnection = useActiveIModelConnection();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
@@ -122,10 +124,10 @@ export const Groupings = ({
     async (viewGroups: Group[]) => {
       if (!iModelConnection) return;
       setLoadingQuery(true);
-      await visualizeGroupColors(iModelConnection, groups, viewGroups, hiddenGroupsIds, hilitedElementsQueryCache);
+      await visualizeGroupColors(iModelConnection, groups, viewGroups, hiddenGroupsIds, hilitedElementsQueryCache, emphasizeElements);
       setLoadingQuery(false);
     },
-    [iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache],
+    [iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache, emphasizeElements],
   );
 
   useEffect(() => {
@@ -257,7 +259,7 @@ export const Groupings = ({
     <>
       <Surface className='gmw-groups-container'>
         <div className='gmw-toolbar'>
-          {groupUIs.length > 0 &&
+          {onClickAddGroup && groupUIs.length > 0 &&
             <DropdownMenu
               className='gmw-custom-ui-dropdown'
               disabled={isLoadingQuery}
