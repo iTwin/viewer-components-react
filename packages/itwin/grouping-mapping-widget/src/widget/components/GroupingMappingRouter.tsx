@@ -47,7 +47,7 @@ export const GroupingMappingRouter = ({
           }}
         />);
     case RouteStep.MappingsAction:
-      return (<MappingAction mapping={mapping} onClose={goBack} />);
+      return (<MappingAction mapping={mapping} onClickCancel={goBack} onSaveSuccess={goBack} />);
     case RouteStep.Groups:
       if (mapping) {
         return (
@@ -92,7 +92,8 @@ export const GroupingMappingRouter = ({
             <GroupAction
               mappingId={mapping.id}
               group={group}
-              onClose={goBack}
+              onClickCancel={goBack}
+              onSaveSuccess={goBack}
               queryGenerationType={queryGenerationType}
             />
           );

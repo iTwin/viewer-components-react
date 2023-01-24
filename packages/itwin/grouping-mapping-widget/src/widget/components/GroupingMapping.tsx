@@ -25,7 +25,7 @@ import {
   SvgList,
   SvgSearch,
 } from "@itwin/itwinui-icons-react";
-import { GroupQueryBuilderContainer } from "./GroupQueryBuilderContainer";
+import { GroupQueryBuilderCustomUI } from "./customUI/GroupQueryBuilderCustomUI";
 import SearchGroupingCustomUI from "./customUI/SearchGroupingCustomUI";
 import ManualGroupingCustomUI from "./customUI/ManualGroupingCustomUI";
 import { GroupingMappingContent } from "./GroupingMappingContent";
@@ -67,7 +67,7 @@ const defaultGroupingUI: GroupingMappingCustomUI[] = [
     displayLabel: "Selection",
     type: GroupingMappingCustomUIType.Grouping,
     icon: <SvgCursor />,
-    uiComponent: GroupQueryBuilderContainer,
+    uiComponent: GroupQueryBuilderCustomUI,
   },
   {
     name: "Search",

@@ -44,11 +44,12 @@ import type { Group } from "@itwin/insights-client";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { visualizeGroupColors } from "./groupsHelpers";
 
-interface GroupActionProps {
+export interface GroupActionProps {
   mappingId: string;
   group?: Group;
   queryGenerationType: string;
-  onClose: () => void;
+  onSaveSuccess: () => void;
+  onClickCancel: () => void;
 }
 
 export const GroupAction = (props: GroupActionProps) => {
@@ -192,7 +193,7 @@ export const GroupAction = (props: GroupActionProps) => {
         "GroupingMappingWidget",
         iModelConnection,
       );
-      props.onClose();
+      props.onSaveSuccess();
     } catch (error: any) {
       handleError(error.status);
       setIsLoading(false);
@@ -306,7 +307,7 @@ export const GroupAction = (props: GroupActionProps) => {
             "GroupingMappingWidget",
             iModelConnection,
           );
-          props.onClose();
+          props.onClickCancel();
         }}
         isSavingDisabled={isBlockingActions}
         isLoading={isLoading}

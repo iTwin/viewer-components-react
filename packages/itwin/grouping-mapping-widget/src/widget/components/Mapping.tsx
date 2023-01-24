@@ -37,6 +37,12 @@ import type { CreateTypeFromInterface } from "../utils";
 
 export type IMappingTyped = CreateTypeFromInterface<Mapping>;
 
+export interface MappingsProps {
+  onClickAddMapping?: () => void;
+  onClickMappingTitle?: (mapping: Mapping) => void;
+  onClickMappingModify?: (mapping: Mapping) => void;
+}
+
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
@@ -77,11 +83,7 @@ export const Mappings = ({
   onClickAddMapping,
   onClickMappingTitle,
   onClickMappingModify,
-}: {
-  onClickAddMapping?: () => void;
-  onClickMappingTitle?: (mapping: Mapping) => void;
-  onClickMappingModify?: (mapping: Mapping) => void;
-}) => {
+}: MappingsProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);

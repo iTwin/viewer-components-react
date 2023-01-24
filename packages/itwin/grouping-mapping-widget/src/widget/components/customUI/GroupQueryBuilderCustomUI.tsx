@@ -7,16 +7,16 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Presentation } from "@itwin/presentation-frontend";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import { KeySet } from "@itwin/presentation-common";
-import { PropertyGridWrapper } from "./property-grid/PropertyGridWrapper";
-import { PropertyGridWrapperContext } from "./context/PropertyGridWrapperContext";
+import { PropertyGridWrapper } from "../property-grid/PropertyGridWrapper";
+import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
 import { Button } from "@itwin/itwinui-react";
-import "./GroupQueryBuilder.scss";
-import type { QueryBuilder } from "./QueryBuilder";
+import "./GroupQueryBuilderCustomUI.scss";
+import type { QueryBuilder } from "../QueryBuilder";
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import type { GroupingCustomUIProps } from "./customUI/GroupingMappingCustomUI";
+import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
 import React from "react";
 
-export const GroupQueryBuilderContainer = ({ isUpdating, resetView, updateQuery }: GroupingCustomUIProps) => {
+export const GroupQueryBuilderCustomUI = ({ isUpdating, resetView, updateQuery }: GroupingCustomUIProps) => {
   const iModelConnection = useActiveIModelConnection();
 
   const [keysState, setKeysState] = useState<KeySet>(new KeySet());

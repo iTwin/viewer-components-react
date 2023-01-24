@@ -12,12 +12,13 @@ import { useMappingClient } from "./context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
-interface MappingActionProps {
+export interface MappingActionProps {
   mapping?: Mapping;
-  onClose: () => void;
+  onSaveSuccess: () => void;
+  onClickCancel: () => void;
 }
 
-export const MappingAction = ({ mapping, onClose }: MappingActionProps) => {
+export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel }: MappingActionProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [values, setValues] = useState({
@@ -47,7 +48,7 @@ export const MappingAction = ({ mapping, onClose }: MappingActionProps) => {
           description: values.description,
           extractionEnabled: values.extractionEnabled,
         });
-      onClose();
+      onSaveSuccess();
     } catch (error: any) {
       handleError(error.status);
       setIsLoading(false);
@@ -108,7 +109,7 @@ export const MappingAction = ({ mapping, onClose }: MappingActionProps) => {
       </div>
       <ActionPanel
         onSave={onSave}
-        onCancel={onClose}
+        onCancel={onClickCancel}
         isSavingDisabled={!values.name}
         isLoading={isLoading}
       />

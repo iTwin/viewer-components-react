@@ -50,7 +50,7 @@ import { getGroupColor, getHiliteIdsFromGroups, hideGroups, visualizeGroupColors
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
-interface GroupingProps {
+export interface GroupingProps {
   mapping: Mapping;
   onClickAddGroup?: (queryGenerationType: string) => void;
   onClickGroupTitle?: (group: Group) => void;
