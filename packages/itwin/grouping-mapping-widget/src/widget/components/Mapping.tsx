@@ -9,6 +9,7 @@ import {
   SvgImport,
   SvgMore,
   SvgProcess,
+  SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
@@ -141,6 +142,14 @@ export const Mappings = ({
               <SvgImport />
             </IconButton>
           </div>
+          <IconButton
+            title="Refresh"
+            onClick={refresh}
+            disabled={isLoading}
+            styleType='borderless'
+          >
+            <SvgRefresh />
+          </IconButton>
         </div>
         {isLoading ? (
           <LoadingOverlay />

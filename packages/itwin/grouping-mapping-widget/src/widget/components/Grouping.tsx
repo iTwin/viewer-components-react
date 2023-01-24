@@ -20,6 +20,7 @@ import {
   SvgDelete,
   SvgEdit,
   SvgMore,
+  SvgRefresh,
   SvgVisibilityHide,
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
@@ -65,7 +66,7 @@ const fetchGroups = async (
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   getAccessToken: GetAccessTokenFn,
   mappingsClient: IMappingsClient,
-): Promise<Group[] | undefined> => {
+): Promise<void> => {
   try {
     setIsLoading(true);
     const accessToken = await getAccessToken();
@@ -75,13 +76,11 @@ const fetchGroups = async (
       mappingId,
     );
     setGroups(groups);
-    return groups;
   } catch (error: any) {
     handleError(error.status);
   } finally {
     setIsLoading(false);
   }
-  return undefined;
 };
 
 export const Groupings = ({
@@ -107,20 +106,16 @@ export const Groupings = ({
   );
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
 
-  useEffect(() => {
-    void fetchGroups(
-      setGroups,
-      iModelId,
-      mapping.id,
-      setIsLoading,
-      getAccessToken,
-      mappingClient,
-    );
-  }, [getAccessToken, mappingClient, iModelId, mapping.id, setGroups]);
-
   const getHiliteIdsFromGroupsWrapper = useCallback(
-    async (groups: Group[]): Promise<string[]> => iModelConnection ? getHiliteIdsFromGroups(iModelConnection, groups, hilitedElementsQueryCache) : [],
-    [iModelConnection, hilitedElementsQueryCache],
+    async (groups: Group[]): Promise<string[]> =>
+      iModelConnection
+        ? getHiliteIdsFromGroups(
+          iModelConnection,
+          groups,
+          hilitedElementsQueryCache
+        )
+        : [],
+    [iModelConnection, hilitedElementsQueryCache]
   );
 
   const visualizeGroupColorsWrapper = useCallback(
@@ -132,6 +127,31 @@ export const Groupings = ({
     },
     [iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache],
   );
+
+  useEffect(() => {
+    const initialize = async () => {
+      await fetchGroups(
+        setGroups,
+        iModelId,
+        mapping.id,
+        setIsLoading,
+        getAccessToken,
+        mappingClient,
+      );
+    };
+    void initialize();
+  }, [getAccessToken, mappingClient, iModelId, mapping.id, setGroups]);
+
+  useEffect(() => {
+    const visualize = async () => {
+      if (groups && showGroupColor) {
+        await visualizeGroupColorsWrapper(groups);
+      } else {
+        clearEmphasizedOverriddenElements();
+      }
+    };
+    void visualize();
+  }, [groups, showGroupColor, visualizeGroupColorsWrapper]);
 
   const hideGroupsWrapper = useCallback(
     async (viewGroups: Group[]) => {
@@ -190,7 +210,7 @@ export const Groupings = ({
   const refresh = useCallback(async () => {
     setSelectedGroup(undefined);
     setGroups([]);
-    const groups = await fetchGroups(
+    await fetchGroups(
       setGroups,
       iModelId,
       mapping.id,
@@ -198,22 +218,7 @@ export const Groupings = ({
       getAccessToken,
       mappingClient,
     );
-    if (groups) {
-      if (showGroupColor) {
-        await visualizeGroupColorsWrapper(groups);
-      } else {
-        clearEmphasizedOverriddenElements();
-      }
-    }
-  }, [
-    getAccessToken,
-    mappingClient,
-    iModelId,
-    mapping.id,
-    setGroups,
-    showGroupColor,
-    visualizeGroupColorsWrapper,
-  ]);
+  }, [getAccessToken, mappingClient, iModelId, mapping.id, setGroups]);
 
   const showAll = async () => {
     setLoadingQuery(true);
@@ -313,6 +318,14 @@ export const Groupings = ({
                 className='gmw-group-view-icon'
               >
                 <SvgVisibilityHide />
+              </IconButton>
+              <IconButton
+                title="Refresh"
+                onClick={refresh}
+                disabled={isLoading || isLoadingQuery}
+                styleType='borderless'
+              >
+                <SvgRefresh />
               </IconButton>
             </ButtonGroup>}
         </div>

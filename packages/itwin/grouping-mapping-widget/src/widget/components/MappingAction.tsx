@@ -48,9 +48,15 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel }: Mapping
           description: values.description,
           extractionEnabled: values.extractionEnabled,
         });
+      setValues({
+        name: mapping?.mappingName ?? "",
+        description: mapping?.description ?? "",
+        extractionEnabled: mapping?.extractionEnabled ?? true,
+      });
       onSaveSuccess();
     } catch (error: any) {
       handleError(error.status);
+    } finally {
       setIsLoading(false);
     }
   };

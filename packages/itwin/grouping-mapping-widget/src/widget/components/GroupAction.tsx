@@ -193,9 +193,14 @@ export const GroupAction = (props: GroupActionProps) => {
         "GroupingMappingWidget",
         iModelConnection,
       );
+      setDetails({
+        groupName: props.group?.groupName ?? "",
+        description: props.group?.description ?? "",
+      });
       props.onSaveSuccess();
     } catch (error: any) {
       handleError(error.status);
+    } finally {
       setIsLoading(false);
     }
   }, [validator, showValidationMessage, query, simpleSelectionQuery, getAccessToken, props, mappingClient, iModelId, details, iModelConnection]);
