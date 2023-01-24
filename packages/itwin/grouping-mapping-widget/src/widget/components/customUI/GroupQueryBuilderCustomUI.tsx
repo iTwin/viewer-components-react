@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Presentation } from "@itwin/presentation-frontend";
 import type { ISelectionProvider, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
@@ -14,7 +14,6 @@ import "./GroupQueryBuilderCustomUI.scss";
 import type { QueryBuilder } from "../QueryBuilder";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
-import React from "react";
 
 export const GroupQueryBuilderCustomUI = ({ isUpdating, resetView, updateQuery }: GroupingCustomUIProps) => {
   const iModelConnection = useActiveIModelConnection();

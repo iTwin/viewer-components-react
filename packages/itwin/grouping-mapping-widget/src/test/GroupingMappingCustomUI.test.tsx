@@ -5,12 +5,11 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { faker } from "@faker-js/faker";
-import { Groupings } from "../grouping-mapping-widget";
+import { GroupingMappingCustomUIType, Groupings } from "../grouping-mapping-widget";
 import type { GroupCollection, IMappingsClient, Mapping } from "@itwin/insights-client";
 import * as moq from "typemoq";
 import type { IModelConnection, ViewManager } from "@itwin/core-frontend";
 import type { ContextCustomUIProps, GroupingCustomUIProps, GroupingMappingCustomUI } from "../grouping-mapping-widget";
-import { GroupingMappingCustomUIType } from "../grouping-mapping-widget";
 import userEvent from "@testing-library/user-event";
 import { render, screen, waitForElementToBeRemoved, within } from "../test/test-utils";
 
