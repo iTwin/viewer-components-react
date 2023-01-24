@@ -15,7 +15,7 @@ import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext"
 export interface MappingActionProps {
   mapping?: Mapping;
   onSaveSuccess: () => void;
-  onClickCancel: () => void;
+  onClickCancel?: () => void;
 }
 
 export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel }: MappingActionProps) => {

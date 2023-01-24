@@ -49,7 +49,7 @@ export interface GroupActionProps {
   group?: Group;
   queryGenerationType: string;
   onSaveSuccess: () => void;
-  onClickCancel: () => void;
+  onClickCancel?: () => void;
 }
 
 export const GroupAction = (props: GroupActionProps) => {
@@ -307,13 +307,13 @@ export const GroupAction = (props: GroupActionProps) => {
         onSave={async () => {
           await save();
         }}
-        onCancel={async () => {
+        onCancel={props.onClickCancel ? async () => {
           Presentation.selection.clearSelection(
             "GroupingMappingWidget",
             iModelConnection,
           );
-          props.onClickCancel();
-        }}
+          props.onClickCancel && props.onClickCancel();
+        } : undefined}
         isSavingDisabled={isBlockingActions}
         isLoading={isLoading}
       />
