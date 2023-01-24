@@ -397,7 +397,7 @@ export const Groupings = ({
                         className='gmw-custom-ui-dropdown'
                         disabled={isLoadingQuery}
                         menuItems={(close: () => void) =>
-                          [...(groupUIs.length > 0 ?
+                          [...(groupUIs.length > 0 && onClickAddGroup ?
                             [<MenuItem
                               key={0}
                               icon={<SvgEdit />}
