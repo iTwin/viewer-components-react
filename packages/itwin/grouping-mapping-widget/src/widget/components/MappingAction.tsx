@@ -12,13 +12,18 @@ import { useMappingClient } from "./context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
+const defaultDisplayStrings = {
+  mappingDetails: "Mapping Details",
+};
+
 export interface MappingActionProps {
   mapping?: Mapping;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
+  displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
-export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel }: MappingActionProps) => {
+export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displayStrings: userDisplayStrings }: MappingActionProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [values, setValues] = useState({
@@ -28,6 +33,8 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel }: Mapping
   });
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
 
   const onSave = async () => {
     try {
@@ -64,7 +71,7 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel }: Mapping
   return (
     <>
       <div className='gmw-details-form-container'>
-        <Fieldset legend='Mapping Details' className='gmw-details-form'>
+        <Fieldset legend={displayStrings.mappingDetails} className='gmw-details-form'>
           <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>

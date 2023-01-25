@@ -44,12 +44,18 @@ import type { Group } from "@itwin/insights-client";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { visualizeGroupColors } from "./groupsHelpers";
 
+const defaultDisplayStrings = {
+  groupDetails: "Group Details",
+  groupBy: "Group By",
+};
+
 export interface GroupActionProps {
   mappingId: string;
   group?: Group;
   queryGenerationType: string;
   onSaveSuccess: () => void;
   onClickCancel?: () => void;
+  displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
 export const GroupAction = (props: GroupActionProps) => {
@@ -78,6 +84,8 @@ export const GroupAction = (props: GroupActionProps) => {
       throw new Error("This component requires an active iModelConnection.");
     }
   }, [iModelConnection]);
+
+  const displayStrings = { ...defaultDisplayStrings, ...props.displayStrings };
 
   const resetView = async () => {
     if (groups.length > 0) {
@@ -250,7 +258,7 @@ export const GroupAction = (props: GroupActionProps) => {
   return (
     <>
       <div className='gmw-group-add-modify-container'>
-        <Fieldset legend='Group Details' className='gmw-group-details'>
+        <Fieldset legend={displayStrings.groupDetails} className='gmw-group-details'>
           <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
@@ -296,7 +304,7 @@ export const GroupAction = (props: GroupActionProps) => {
             }}
           />
         </Fieldset>
-        <Fieldset legend='Group By' className='gmw-query-builder-container'>
+        <Fieldset legend={displayStrings.groupBy} className='gmw-query-builder-container'>
           <RadioTileGroup className='gmw-radio-group-tile' required>
             {groupUIs.map((ext) => getRadioTileComponent(ext.icon ?? <SvgAdd />, ext.name, ext.displayLabel))}
           </RadioTileGroup>
