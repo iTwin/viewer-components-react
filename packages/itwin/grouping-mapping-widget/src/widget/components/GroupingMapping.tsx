@@ -17,19 +17,14 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import type {
   ContextCustomUI,
   GroupingMappingCustomUI,
-} from "./customUI/GroupingMappingCustomUI";
-import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
+} from "./customUI/groupingMappingCustomUI";
+import { GroupingMappingCustomUIType } from "./customUI/groupingMappingCustomUI";
 import {
-  SvgCursor,
-  SvgDraw,
   SvgList,
-  SvgSearch,
 } from "@itwin/itwinui-icons-react";
-import { GroupQueryBuilderCustomUI } from "./customUI/GroupQueryBuilderCustomUI";
-import SearchGroupingCustomUI from "./customUI/SearchGroupingCustomUI";
-import ManualGroupingCustomUI from "./customUI/ManualGroupingCustomUI";
 import { GroupingMappingContent } from "./GroupingMappingContent";
 import { GroupingMappingHeader } from "./GroupingMappingHeader";
+import { defaultGroupingUI } from "./customUI/defaultGroupingUI";
 
 export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId">;
 
@@ -60,30 +55,6 @@ export interface GroupingRouteFields {
   groupContextCustomUI?: Exclude<ContextCustomUI["uiComponent"], undefined>;
   queryGenerationType?: string;
 }
-
-const defaultGroupingUI: GroupingMappingCustomUI[] = [
-  {
-    name: "Selection",
-    displayLabel: "Selection",
-    type: GroupingMappingCustomUIType.Grouping,
-    icon: <SvgCursor />,
-    uiComponent: GroupQueryBuilderCustomUI,
-  },
-  {
-    name: "Search",
-    displayLabel: "Search",
-    type: GroupingMappingCustomUIType.Grouping,
-    icon: <SvgSearch />,
-    uiComponent: SearchGroupingCustomUI,
-  },
-  {
-    name: "Manual",
-    displayLabel: "Manual",
-    type: GroupingMappingCustomUIType.Grouping,
-    icon: <SvgDraw />,
-    uiComponent: ManualGroupingCustomUI,
-  },
-];
 
 const GroupingMapping = (props: GroupingMappingProps) => {
   const [routingHistory, setRoutingHistory] = useState<Route[]>([

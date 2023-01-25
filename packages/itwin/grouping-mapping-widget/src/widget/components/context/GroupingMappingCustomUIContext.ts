@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { createContext, useContext } from "react";
-import type { GroupingMappingCustomUI } from "../customUI/GroupingMappingCustomUI";
+import type { GroupingMappingCustomUI } from "../customUI/groupingMappingCustomUI";
 
 export const createGroupingMappingCustomUI = (
   customUIs: GroupingMappingCustomUI[] | undefined,

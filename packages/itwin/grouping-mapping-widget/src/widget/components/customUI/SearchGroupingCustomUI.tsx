@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
-import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
+import type { GroupingCustomUIProps } from "./groupingMappingCustomUI";
 import { LoadingSpinner } from "../utils";
 import "./SearchGroupingCustomUI.scss";
 
@@ -168,4 +168,3 @@ export const SearchGroupingCustomUI = ({
   );
 };
 
-export default SearchGroupingCustomUI;

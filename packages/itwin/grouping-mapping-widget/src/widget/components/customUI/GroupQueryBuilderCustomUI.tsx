@@ -13,7 +13,7 @@ import { Button } from "@itwin/itwinui-react";
 import "./GroupQueryBuilderCustomUI.scss";
 import type { QueryBuilder } from "../QueryBuilder";
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
+import type { GroupingCustomUIProps } from "./groupingMappingCustomUI";
 
 export const GroupQueryBuilderCustomUI = ({ isUpdating, resetView, updateQuery }: GroupingCustomUIProps) => {
   const iModelConnection = useActiveIModelConnection();

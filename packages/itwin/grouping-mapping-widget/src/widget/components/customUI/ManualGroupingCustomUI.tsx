@@ -6,7 +6,7 @@ import React from "react";
 import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
 import { LoadingSpinner } from "../utils";
 import "./ManualGroupingCustomUI.scss";
-import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
+import type { GroupingCustomUIProps } from "./groupingMappingCustomUI";
 
 export const ManualGroupingCustomUI = ({
   updateQuery,
@@ -49,5 +49,3 @@ export const ManualGroupingCustomUI = ({
     </div>
   );
 };
-
-export default ManualGroupingCustomUI;
