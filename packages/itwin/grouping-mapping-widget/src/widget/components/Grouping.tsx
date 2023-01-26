@@ -44,8 +44,8 @@ import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
-import { GroupingMappingCustomUIType } from "./customUI/groupingMappingCustomUI";
-import type { ContextCustomUI, GroupingCustomUI } from "./customUI/groupingMappingCustomUI";
+import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
+import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { getGroupColor, getHiliteIdsFromGroups, hideGroups, visualizeGroupColors } from "./groupsHelpers";
 

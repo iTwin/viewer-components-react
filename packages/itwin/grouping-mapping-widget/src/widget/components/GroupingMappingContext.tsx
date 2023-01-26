@@ -17,7 +17,7 @@ import {
 } from "./context/MappingClientContext";
 import type { Group, IMappingsClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
-import type { GroupingMappingCustomUI } from "./customUI/groupingMappingCustomUI";
+import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 
 export interface GroupingMappingContextProps {

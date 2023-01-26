@@ -17,14 +17,14 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import type {
   ContextCustomUI,
   GroupingMappingCustomUI,
-} from "./customUI/groupingMappingCustomUI";
-import { GroupingMappingCustomUIType } from "./customUI/groupingMappingCustomUI";
+} from "./customUI/GroupingMappingCustomUI";
+import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
 import {
   SvgList,
 } from "@itwin/itwinui-icons-react";
 import { GroupingMappingContent } from "./GroupingMappingContent";
 import { GroupingMappingHeader } from "./GroupingMappingHeader";
-import { defaultGroupingUI } from "./customUI/defaultGroupingUI";
+import { defaultGroupingUI } from "./customUI/DefaultGroupingUI";
 
 export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId">;
 

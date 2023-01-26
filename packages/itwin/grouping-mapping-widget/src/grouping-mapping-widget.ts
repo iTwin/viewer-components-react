@@ -20,7 +20,7 @@ export { PropertyMenu } from "./widget/components/PropertyMenu";
 export { SearchGroupingCustomUI } from "./widget/components/customUI/SearchGroupingCustomUI";
 export { ManualGroupingCustomUI } from "./widget/components/customUI/ManualGroupingCustomUI";
 export { GroupQueryBuilderCustomUI } from "./widget/components/customUI/GroupQueryBuilderCustomUI";
-export { GroupingMappingCustomUI, GroupingMappingCustomUIType, ContextCustomUI, GroupingCustomUI, GroupingCustomUIProps, ContextCustomUIProps } from "./widget/components/customUI/groupingMappingCustomUI";
+export { GroupingMappingCustomUI, GroupingMappingCustomUIType, ContextCustomUI, GroupingCustomUI, GroupingCustomUIProps, ContextCustomUIProps } from "./widget/components/customUI/GroupingMappingCustomUI";
 
 /** Formula DataType resolver */
 export { resolveFormulaDataType } from "./formula/FormulaDataTypeResolver";

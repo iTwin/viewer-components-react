@@ -59,13 +59,13 @@ import {
 import SortableHorizontalTile from "./SortableHorizontalTile";
 import Split from "react-split";
 import "./GroupPropertyAction.scss";
-import type { PropertyMetaData } from "./groupPropertyUtils";
+import type { PropertyMetaData } from "./GroupPropertyUtils";
 import {
   convertPresentationFields,
   convertToECProperties,
   fetchPresentationDescriptor,
   findProperties,
-} from "./groupPropertyUtils";
+} from "./GroupPropertyUtils";
 
 export interface GroupPropertyActionProps {
   iModelId: string;

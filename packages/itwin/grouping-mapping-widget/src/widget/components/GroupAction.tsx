@@ -38,8 +38,8 @@ import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext"
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
 import { SvgAdd } from "@itwin/itwinui-icons-react";
-import type { GroupingCustomUI } from "./customUI/groupingMappingCustomUI";
-import { GroupingMappingCustomUIType } from "./customUI/groupingMappingCustomUI";
+import type { GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
+import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
 import type { Group } from "@itwin/insights-client";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { visualizeGroupColors } from "./groupsHelpers";
