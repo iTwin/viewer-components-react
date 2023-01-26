@@ -116,7 +116,7 @@ describe("Groupings View", () => {
 
     // Assert
 
-    // Should have the correct group count listed
+    // Should have the correct random mockGroups.groups count listed
     const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
     expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
 
@@ -192,7 +192,7 @@ describe("Groupings View", () => {
     // Click on first more icon
     await user.click(moreButton[0]);
 
-    // Should have 2 context menu item
+    // Should have 2 context menu items
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
     expect(contextMenuItems).toHaveLength(2);
     expect(contextMenuItems[0]).toHaveTextContent("Edit");
