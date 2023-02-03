@@ -66,6 +66,11 @@
       "packageName": "@itwin/infrastructure-iot-react",
       "projectFolder": "packages/itwin/infrastructure-iot",
       "versionPolicyName": "infrastructure-iot"
-    }
+    },
+    {
+      "packageName": "@itwin/map-layers",
+      "projectFolder": "packages/itwin/map-layers",
+      "versionPolicyName": "itwin-map-layers"
+    },
   ]
 }
