@@ -61,7 +61,7 @@ export interface GroupingProps {
 }
 
 const fetchGroups = async (
-  setGroups: React.Dispatch<React.SetStateAction<IGroupTyped[]>>,
+  setGroups: (groups: Group[]) => void,
   iModelId: string,
   mappingId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
