@@ -18,7 +18,7 @@ export interface IGroupingMappingCustomUI {
 
 export const GroupingMappingCustomUIContext = createContext<IGroupingMappingCustomUI>({
   customUIs: [],
-  setCustomUIs: (customUI) => customUI,
+  setCustomUIs: () => { },
 });
 
 export const useGroupingMappingCustomUI = () => {
