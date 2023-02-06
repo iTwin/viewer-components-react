@@ -196,13 +196,8 @@ export class QueryBuilder {
 
   private needsQuote(propertyField: PropertiesField): boolean {
     // list of property types that need quote around property value
-    if (propertyField.type.typeName.toLowerCase() === "string") {
-      return true;
-    }
-    if (propertyField.type.typeName.toLowerCase() === "uri") {
-      return true;
-    }
-    return false;
+    const typeName = propertyField.type.typeName.toLowerCase();
+    return "string" === typeName || "uri" === typeName;
   }
 
   private addRelatedToQuery(
