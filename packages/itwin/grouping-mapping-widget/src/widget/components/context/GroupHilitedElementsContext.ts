@@ -21,7 +21,7 @@ export const GroupHilitedElementsContext = React.createContext<GroupHilitedEleme
   hiddenGroupsIds: [],
   showGroupColor: false,
   groups: [],
-  setGroups: (groups)=> groups,
+  setGroups: (groups) => groups,
   setHiddenGroupsIds: (hiddenGroupIds) => hiddenGroupIds,
   setShowGroupColor: (showGroupColor) => showGroupColor,
 });
