@@ -145,15 +145,16 @@ export const Groupings = ({
   }, [getAccessToken, mappingClient, iModelId, mapping.id, setGroups]);
 
   useEffect(() => {
+    if (isLoading) return;
     const visualize = async () => {
-      if (groups && showGroupColor) {
+      if (groups.length > 0 && showGroupColor) {
         await visualizeGroupColorsWrapper(groups);
       } else {
         clearEmphasizedOverriddenElements();
       }
     };
     void visualize();
-  }, [groups, showGroupColor, visualizeGroupColorsWrapper]);
+  }, [groups, isLoading, showGroupColor, visualizeGroupColorsWrapper]);
 
   const hideGroupsWrapper = useCallback(
     async (viewGroups: Group[]) => {
