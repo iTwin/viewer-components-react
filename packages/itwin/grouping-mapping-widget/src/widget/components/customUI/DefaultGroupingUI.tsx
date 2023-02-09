@@ -19,8 +19,8 @@ export const defaultGroupingUI: GroupingMappingCustomUI[] = [
     uiComponent: GroupQueryBuilderCustomUI,
   },
   {
-    name: "Search",
-    displayLabel: "Search",
+    name: "Query Keywords",
+    displayLabel: "Query Keywords",
     type: GroupingMappingCustomUIType.Grouping,
     icon: <SvgSearch />,
     uiComponent: SearchGroupingCustomUI,
