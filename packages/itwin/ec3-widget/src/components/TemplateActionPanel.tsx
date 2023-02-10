@@ -10,39 +10,32 @@ import { LoadingSpinner } from "./utils";
 export interface TemplateActionPanelProps {
   onSave: () => void;
   onCancel: () => void;
-  onExport: () => void;
   isCancelDisabled?: boolean;
   isSavingDisabled?: boolean;
   isLoading?: boolean;
 }
 
-const TemplateActionPanel = ({
+export const TemplateActionPanel = ({
   onSave,
   onCancel,
-  onExport,
   isCancelDisabled = false,
   isSavingDisabled = false,
   isLoading = false,
 }: TemplateActionPanelProps): JSX.Element => {
   return (
-    <div id='action' className='action-panel-container'>
-      <div className='ec3-template-action-panel'>
+    <div id='action' className='ec3w-action-panel-container'>
+      <div className='ec3w-template-action-panel'>
         {isLoading &&
           <LoadingSpinner />
         }
         <Button
+          data-testid='ec3-save-button'
           disabled={isSavingDisabled || isLoading}
           styleType='high-visibility'
           id='save-app'
           onClick={onSave}
         >
           Save
-        </Button>
-        <Button
-          styleType="high-visibility"
-          onClick={onExport}
-        >
-          Export
         </Button>
         <Button
           styleType='default'
@@ -57,5 +50,3 @@ const TemplateActionPanel = ({
     </div>
   );
 };
-
-export default TemplateActionPanel;

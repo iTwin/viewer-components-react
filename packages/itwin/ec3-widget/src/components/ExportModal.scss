@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.ec3 {
+.ec3w {
   &-signin {
     display: flex;
     flex-direction: column;
@@ -73,6 +73,7 @@
     margin: $iui-l;
     height: $iui-3xl;
     place-content: space-evenly;
+    text-align: center;
   }
 
   &-progress-linear-container {

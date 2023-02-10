@@ -9,6 +9,7 @@
     opacity: 0;
     width: 20%;
   }
+
   100% {
     opacity: 1;
     width: 100%;
@@ -20,8 +21,13 @@
     opacity: 0;
     width: 20%;
   }
+
   0% {
     opacity: 1;
     width: 100%;
   }
+}
+
+.rcw-search-button {
+  float: right;
 }

@@ -53,5 +53,10 @@
     "policyName": "reports-config-widget",
     "definitionName": "individualVersion",
     "lockedMajor": 0
+  },
+  {
+    "policyName": "ec3-widget",
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   }
 ]

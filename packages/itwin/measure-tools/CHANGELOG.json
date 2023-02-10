@@ -2,6 +2,87 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.10.6",
+      "tag": "@itwin/measure-tools-react_v0.10.6",
+      "date": "Thu, 01 Dec 2022 14:13:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add listeners to quantityFormatter events we did not account for. Fix issues where a qf override was being set and the measure-tools weren't picking up the change."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.5",
+      "tag": "@itwin/measure-tools-react_v0.10.5",
+      "date": "Wed, 16 Nov 2022 19:55:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Hide perpendicular measure tool for drawing view"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.4",
+      "tag": "@itwin/measure-tools-react_v0.10.4",
+      "date": "Mon, 31 Oct 2022 19:03:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Hide measurement tools button on sheet view."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.3",
+      "tag": "@itwin/measure-tools-react_v0.10.3",
+      "date": "Wed, 19 Oct 2022 14:17:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "customize widget placement in ui items provider"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.2",
+      "tag": "@itwin/measure-tools-react_v0.10.2",
+      "date": "Mon, 17 Oct 2022 17:36:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added launch configs to debug tests properly. Change the minute/second symbols to match what is being used in IModelApp.quantityFormatter. Fix inconsistencies with the slope formatting."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.1",
+      "tag": "@itwin/measure-tools-react_v0.10.1",
+      "date": "Mon, 26 Sep 2022 17:13:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Account for the global origin when displaying coordinate values if the measurement is tied to a spatial view."
+          },
+          {
+            "comment": "Add missing event listener to update the measurement widget when the global origin is changed."
+          },
+          {
+            "comment": "Make sure we also refresh displayed measurements if the global origin changes. Fix an issue where the text marker would go past the DistanceMeasurement line."
+          },
+          {
+            "comment": "Factor our the point adjustment logic into a helper function. Add listener for the onGlobalOriginChanged event in the ui 2.0 widget."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.0",
       "tag": "@itwin/measure-tools-react_v0.10.0",
       "date": "Wed, 03 Aug 2022 16:36:24 GMT",

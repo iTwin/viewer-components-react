@@ -4,189 +4,255 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, waitForElementToBeRemoved, waitFor } from "@testing-library/react";
-import Templates from "../components/Templates";
-import TemplateMenu from "../components/TemplateMenu";
+import { act, fireEvent, screen } from "@testing-library/react";
+import { Templates } from "../components/Templates";
 import * as moq from "typemoq";
-import { IModelApp, IModelConnection } from "@itwin/core-frontend";
-import { AuthorizationClient } from "@itwin/core-common";
-import { ReportingClient } from "@itwin/insights-client";
+import type { EC3ConfigurationsClient, EC3Job, EC3JobsClient } from "@itwin/insights-client";
 import faker from "@faker-js/faker";
-import { setupServer } from "msw/node";
-import userEvent from "@testing-library/user-event";
-import sampleMetadata from "./metadataSample";
+import { EC3Config } from "../components/EC3/EC3Config";
+import type { IModelConnection } from "@itwin/core-frontend";
+import { renderWithContext, simulateClick } from "./test-utils";
+import type { EC3Token } from "../components/EC3/EC3Token";
 
 const activeIModelConnection = moq.Mock.ofType<IModelConnection>();
-const reportingClient = moq.Mock.ofType<ReportingClient>();
+const ec3ConfigurationsClient = moq.Mock.ofType<EC3ConfigurationsClient>();
+const ec3JobsClient = moq.Mock.ofType<EC3JobsClient>();
 
 jest.mock("@itwin/appui-react", () => ({
   ...jest.requireActual("@itwin/appui-react"),
   useActiveIModelConnection: () => activeIModelConnection.object,
 }));
 
-jest.mock("@itwin/insights-client", () => ({
-  ...jest.requireActual("@itwin/insights-client"),
-  ReportingClient: jest.fn().mockImplementation(() => reportingClient.object)
-}));
+describe("Templates", () => {
+  const mockedConfigurations = Array.from(
+    { length: faker.datatype.number({ min: 3, max: 5 }) },
+    (_, index) => ({
+      displayName: `config_${index}`,
+      description: `config_decription_${index}`,
+      id: index.toString(),
+      labels: [],
+      createdOn: "",
+      createdBy: "",
+      modifiedBy: "",
+      modifiedOn: "",
+      _links: {
+        report: {
+          href: `base_path/reports/reportId`,
+        },
+      },
+    })
+  );
 
-
-describe("Templates view", () => {
-  const mockedReports = ({
-    reports: Array.from(
-      { length: faker.datatype.number({ min: 3, max: 5 }) },
-      (_, index) => ({
-        id: `${faker.datatype.uuid()}`,
-        displayName: `mOcKRePoRT${index}`,
-        description: `mOcKRePoRTDeScRiPtIoN${index}`,
-      })
-    ),
+  const job: EC3Job = {
+    id: faker.datatype.uuid(),
     _links: {
-      next: undefined,
-      self: {
-        href: "",
+      status: {
+        href: "status",
       },
     },
-  });
+  };
 
-  const mockedResponses = ({
-    "@odata.context": "context",
-    value: Array.from(
-      { length: faker.datatype.number({ min: 3, max: 5 }) },
-      (_, index) => ({
-        name: `mapping${index}`
-      })
-    ),
-  });
-
-  var firstMapping = mockedResponses.value[0].name!;
   const iTwinId = faker.datatype.uuid();
   const accessToken = faker.datatype.uuid();
-  const authClient = moq.Mock.ofType<AuthorizationClient>();
-  const server = setupServer();
+  const config = new EC3Config({ clientId: "", redirectUri: "" });
+  const getAccessTokenFn = async () => accessToken;
 
   beforeAll(async () => {
-    const metadata: Response = {
-      text: async () => { return sampleMetadata },
-    } as unknown as Response;
-
-    authClient.setup((x) => x.getAccessToken()).returns(async () => accessToken);
-    IModelApp.authorizationClient = authClient.object;
     activeIModelConnection.setup((x) => x.iTwinId).returns(() => iTwinId);
-    reportingClient.setup((x) => x.getReports(accessToken, iTwinId)).returns(async () => mockedReports?.reports!);
-    const reportId = mockedReports.reports![0].id!;
-    reportingClient.setup((x) => x.getODataReport(accessToken, reportId)).returns(async () => mockedResponses);
-    reportingClient.setup((x) => x.getODataReportMetadata(accessToken, reportId)).returns(async () => metadata);
+    ec3ConfigurationsClient.setup(async (x) => x.getConfigurations(accessToken, iTwinId)).returns(async () => mockedConfigurations);
+    ec3ConfigurationsClient.setup(async (x) => x.getConfiguration(accessToken, "0")).returns(async () => mockedConfigurations[0]);
+    ec3JobsClient.setup(async (x) => x.createJob(accessToken, moq.It.isAny())).returns(async () => job);
   });
 
   afterEach(() => {
-    server.resetHandlers();
+    jest.restoreAllMocks();
   });
 
-  it("Templates view should render successfully", function () {
-    render(<Templates />);
-    expect(screen.getByText("Templates")).toBeDefined();
-  });
-
-  it("Template Menu should render successfully", async () => {
-    const returnfn = async () => { };
-    render(<TemplateMenu goBack={returnfn} />);
-    expect(screen.getByText("Create template")).toBeInTheDocument();
-  });
-
-  it("Clicking create button should open creating template menu", async () => {
-    const user = render(<Templates />);
-    const button = screen.getByText("Create Template");
-    button.click();
-    expect(screen.getByText("Create template")).toBeInTheDocument();
-  });
-
-  it("Reports dropdown should be populated with data", async () => {
-    const returnfn = async () => { };
-    render(<TemplateMenu goBack={returnfn} />);
-    await waitForElementToBeRemoved(() => screen.getByText("Loading"));
-    const dropdown = screen.getByText("Select report");
-    dropdown.click();
-    mockedReports.reports!.forEach(report => {
-      expect(screen.getByText(report.displayName!)).toBeInTheDocument();
+  it("Templates view should render successfully", async () => {
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
     });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
   });
 
-  it("Created template should appear in the list", async () => {
-    const user = render(<Templates />);
-    const button = screen.getByText("Create Template");
-    button.click();
-    await waitForElementToBeRemoved(() => screen.getByText("Loading"));
-    const dropdown = screen.getByText("Select report");
-    dropdown.click();
-    const report = mockedReports.reports![0];
-    const option = user.getAllByRole("option")[0];
-    option.scrollIntoView = jest.fn();
-    option.click();
-    expect(screen.getByText(report.displayName!)).toBeInTheDocument();
-
-    const labeledDescriptionInput = screen.getByText("Template description");
-    const descriptionInput = labeledDescriptionInput.parentElement!.children[1] as HTMLInputElement;
-    const templateDescription = faker.animal.dog();
-    userEvent.type(descriptionInput, templateDescription);
-    await waitFor(() => screen.getByDisplayValue(templateDescription));
-
-    const labeledInput = screen.getByText("Template name");
-    const nameInput = labeledInput.parentElement!.children[1] as HTMLInputElement;
-    const templateName = faker.animal.cat();
-    userEvent.type(nameInput, templateName);
-    await waitFor(() => screen.getByDisplayValue(templateName));
-
-    const saveButton = screen.getByText("Save");
-    saveButton.click();
-    expect(screen.getByText("Templates")).toBeInTheDocument();
-    expect(screen.getByText(templateName)).toBeInTheDocument();
-    expect(screen.getByText(templateDescription)).toBeInTheDocument();
+  it("Templates view should have mocked templates", async () => {
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    mockedConfigurations.forEach((c) =>
+      expect(screen.getByText(c.displayName)).toBeInTheDocument()
+    );
   });
 
-  it("Added label should appear in the list", async () => {
-    const user = render(<Templates />);
+  it("Templates view should have mocked templates", async () => {
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    mockedConfigurations.forEach((c) =>
+      expect(screen.getByText(c.displayName)).toBeInTheDocument()
+    );
+  });
+
+  it("Clicking on template should open template menu", async () => {
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    const configuration = screen.getByText(mockedConfigurations[0].displayName);
+    await simulateClick(configuration);
+    expect(screen.getByTestId("ec3-template-details")).toBeInTheDocument();
+  });
+
+  it("Clicking create button should open create template menu", async () => {
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
     const button = screen.getByText("Create Template");
-    button.click();
-    await waitForElementToBeRemoved(() => screen.getByText("Loading"));
-    const dropdown = screen.getByText("Select report");
-    dropdown.click();
+    await simulateClick(button);
+    expect(screen.getByTestId("ec3-template-details")).toBeInTheDocument();
+  });
 
-    const report = mockedReports.reports![0];
-    const option = user.getAllByRole("option")[0];
-    option.scrollIntoView = jest.fn();
-    option.click();
-    expect(screen.getByText(report.displayName!)).toBeInTheDocument();
+  it("Clicking on tile should select it and enable export button", async () => {
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
 
-    const labeledInput = screen.getByText("Template name");
-    const nameInput = labeledInput.parentElement!.children[1] as HTMLInputElement;
-    const templateName = faker.animal.cat();
-    userEvent.type(nameInput, templateName);
-    await waitFor(() => screen.getByDisplayValue(templateName));
+    const button: HTMLInputElement = screen.getByTestId("ec3-export-button");
+    expect(button.disabled).toBe(true);
 
-    const addLabelButton = screen.getByText("Add Label");
-    addLabelButton.click();
+    const configuration = screen.getAllByTestId("ec3-horizontal-tile")[0];
+    await simulateClick(configuration);
+    expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
+    expect(button.disabled).toBe(false);
+  });
 
-    await waitForElementToBeRemoved(() => screen.getByText("Loading report tables"));
+  it("Clicking again or on other tile should deselect", async () => {
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    const configurations = screen.getAllByTestId("ec3-horizontal-tile");
+    await simulateClick(configurations[0]);
+    expect(configurations[0].className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
 
-    const reportTableDropdown = screen.getByText("Select report table");
-    reportTableDropdown.click();
+    await simulateClick(configurations[1]);
+    expect(configurations[0].className).toBe("ec3w-horizontal-tile-container");
+    expect(configurations[1].className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
 
-    const reportOption = user.getAllByRole("option")[0];
-    reportOption.scrollIntoView = jest.fn();
-    reportOption.click();
+    await simulateClick(configurations[2]);
+    expect(configurations[1].className).toBe("ec3w-horizontal-tile-container");
+  });
 
-    await waitForElementToBeRemoved(() => screen.getByText("Loading elements"));
+  it("Search option filters out configurations", async () => {
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
 
-    const quantityInput = screen.getByText("Element quantity");
-    const quantityDropdown = quantityInput.parentElement!.children[1].children[0].children[0] as HTMLSelectElement;
-    quantityDropdown.click();
-    const quantityOption = user.getAllByRole("option")[0];
-    quantityOption.scrollIntoView = jest.fn();
-    quantityOption.click();
+    const searchBar = screen.getByTestId("ec3-search-bar");
+    const button = searchBar.querySelector(".iui-button") as HTMLInputElement;
+    await simulateClick(button);
 
-    const saveButton = screen.getByText("Save");
-    saveButton.click();
+    const input = searchBar.querySelector(".iui-input") as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(input, { target: { value: "config_0" } });
+    });
 
-    expect(screen.getByText(firstMapping)).toBeInTheDocument();
+    const configurations = screen.getAllByTestId("ec3-horizontal-tile");
+    expect(configurations.length).toBe(1);
+    expect(screen.getByText("config_0")).toBeInTheDocument();
+  });
+
+  it("Search bar opens and closes on click", async () => {
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+    expect(document.querySelector(".ec3-close-search-bar")).toBe(null);
+
+    const searchBar = screen.getByTestId("ec3-search-bar");
+    const button = searchBar.querySelector(".iui-button") as HTMLInputElement;
+    await simulateClick(button);
+
+    const closeButton = screen.getByTestId("ec3-close-search-bar");
+    await simulateClick(closeButton);
+
+    expect(document.querySelector(".ec3-close-search-bar")).toBe(null);
+  });
+
+  it("Deleting report brings up delete modal", async () => {
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+
+    const dropdown = screen.getAllByTestId("ec3-tile-action-button")[0]
+      .querySelector(".iui-button") as HTMLInputElement;
+    await simulateClick(dropdown);
+    const button = screen.getByTestId("ec3-templates-delete-button");
+    await simulateClick(button);
+
+    expect(screen.getByTestId("ec3-delete-modal")).toBeInTheDocument();
+  });
+
+  it("Exporting and recieving ec3 token opens export modal", async () => {
+    const eventListeners: Record<string, Function> = {};
+    jest.spyOn(window, "addEventListener").mockImplementation((event, handle, _?) => {
+      eventListeners[event] = handle as Function;
+    });
+    const mockOpen = jest.fn();
+    global.window.open = mockOpen;
+
+    await renderWithContext({
+      component: <Templates config={config} />,
+      ec3JobsClient: ec3JobsClient.object,
+      ec3ConfigurationsClient: ec3ConfigurationsClient.object,
+      getAccessTokenFn,
+    });
+    expect(screen.getByTestId("ec3-templates")).toBeDefined();
+
+    const configuration = screen.getAllByTestId("ec3-horizontal-tile")[0];
+    await simulateClick(configuration);
+    expect(configuration.className).toBe("ec3w-horizontal-tile-container ec3w-horizontal-tile-container-selected");
+
+    const button: HTMLInputElement = screen.getByTestId("ec3-export-button");
+    expect(button.disabled).toBe(false);
+    await simulateClick(button);
+    expect(mockOpen).toHaveBeenCalled();
+
+    const ec3Token: EC3Token = {
+      token: "ec3_token",
+      exp: Date.now() + 10000,
+      source: "ec3-auth",
+    };
+    await act(async () => {
+      eventListeners.message({ data: ec3Token });
+    });
+    expect(screen.getByTestId("ec3-export-modal")).toBeDefined();
+    expect(document.querySelectorAll(".iui-dialog-visible")).toBeDefined();
   });
 });

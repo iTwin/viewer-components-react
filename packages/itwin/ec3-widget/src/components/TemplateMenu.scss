@@ -4,47 +4,55 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.ec3-template-details-container {
+.ec3w-template-details-container {
   overflow-x: auto;
   height: 100%;
 
-  .ec3-template-details {
+  .ec3w-template-details {
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
+    margin-bottom: $iui-baseline;
   }
 
-  .ec3-template-field-legend {
+  .ec3w-template-field-legend {
     color: $iui-color-system-gray;
   }
 }
 
-.report-select-container {
+.ec3w-report-select-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: $iui-s;
 
-  .report-select-combo-box {
+  .ec3w-report-select-combo-box {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
   }
 }
 
-.ec3-labels-container {
-  display: flex;
+.ec3w-labels-container {
   flex-direction: column;
   flex-grow: 1;
-  padding: $iui-baseline $iui-m;
   min-height: 0;
 
-  .ec3-labels-list {
+  .ec3w-labels-list {
     display: flex;
     flex-direction: column;
     overflow-y: overlay;
     gap: 7.5px;
     margin-top: 7.5px;
-
   }
+}
+
+.ec3w-empty-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: $iui-baseline;
+  padding: $iui-baseline $iui-m;
+  height: 100%;
 }

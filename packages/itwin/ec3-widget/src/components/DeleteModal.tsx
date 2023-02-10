@@ -17,7 +17,7 @@ export interface DeleteModalProps {
   entityName: string;
   show: boolean;
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -44,45 +44,48 @@ export const DeleteModal = ({
   };
 
   return (
-    <>
-      <Modal
-        title='Confirm'
-        modalRootId='ec3-widget-react'
-        isOpen={show}
-        isDismissible={!isLoading}
-        onClose={() => {
-          setShow(false);
-        }}
-      >
-        <div className="delete-modal-body-text">
-          <Leading>
-            Are you sure you want to delete
-          </Leading>
-          <strong>
-            {<MiddleTextTruncation text={`${entityName}?`} />}
-          </strong>
-        </div>
-        <ModalButtonBar>
-          {isLoading &&
-            <div className="loading-delete">
-              <LoadingSpinner />
-            </div>}
-          <Button styleType='high-visibility' onClick={deleteCallback} disabled={isLoading}>
-            Delete
-          </Button>
-          <Button
-            styleType='default'
-            onClick={() => {
-              setShow(false);
-            }}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-        </ModalButtonBar>
-      </Modal>
-    </>
+    <Modal
+      title='Confirm'
+      data-testid="ec3-delete-modal"
+      modalRootId='ec3-widget-react'
+      isOpen={show}
+      isDismissible={!isLoading}
+      onClose={() => {
+        setShow(false);
+      }}
+    >
+      <div className="ec3w-delete-modal-body-text">
+        <Leading>
+          Are you sure you want to delete
+        </Leading>
+        <strong>
+          <MiddleTextTruncation text={`${entityName}?`} />
+        </strong>
+      </div>
+      <ModalButtonBar>
+        {isLoading &&
+          <div className="ec3w-loading-delete">
+            <LoadingSpinner />
+          </div>}
+        <Button
+          styleType='high-visibility'
+          onClick={deleteCallback}
+          disabled={isLoading}
+          data-testid="ec3-delete-modal-button"
+        >
+          Delete
+        </Button>
+        <Button
+          data-testid="ec3-delete-modal-cancel-button"
+          styleType='default'
+          onClick={() => {
+            setShow(false);
+          }}
+          disabled={isLoading}
+        >
+          Cancel
+        </Button>
+      </ModalButtonBar>
+    </Modal>
   );
 };
-
-export default DeleteModal;

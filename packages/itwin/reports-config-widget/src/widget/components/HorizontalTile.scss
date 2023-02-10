@@ -3,30 +3,50 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
+@import "~@itwin/itwinui-css/scss/icon/index";
 
-.rcw-horizontal-tile-container {
-  display: flex;
-  justify-content: space-between;
-  border-radius: 5px;
-  background-color: var(--iui-color-background-2);
-  height: $iui-baseline * 4;
-  padding: 5.5px $iui-s;
-  .body {
+.rcw-horizontal-tile {
+  &-container {
     display: flex;
-    flex-direction: column;
-    min-width: 0;
-    justify-content: center;
-    &-text {
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+    justify-content: space-between;
+    border-radius: 5px;
+    background-color: var(--iui-color-background-2);
+    height: $iui-baseline * 4;
+    padding: 5.5px $iui-s;
+
+    .rcw-body-container {
+      display: flex;
+      min-width: 0;
+
+      .rcw-body {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        justify-content: center;
+
+        &-text {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+
+    .rcw-action-button {
+      margin-left: 0;
+      align-self: center;
+      min-width: 36px;
+      margin-right: $iui-xs;
+      flex-shrink: 0;
     }
   }
-  .action-button {
-    margin-left: 0;
-    align-self: center;
-    min-width: 36px;
-    margin-right: $iui-xs;
-    flex-shrink: 0;
+
+  &-selected {
+    @include themed {
+      border: 1px solid t(iui-color-foreground-primary);
+      background: linear-gradient(rgba(t(iui-color-foreground-primary-rgb), t(iui-opacity-6)),
+          rgba(t(iui-color-foreground-primary-rgb), t(iui-opacity-6))),
+        linear-gradient(t(iui-color-background-1), t(iui-color-background-1));
+    }
   }
 }

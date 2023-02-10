@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/ec3-widget-react",
+      "comment": "Initial commit",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/ec3-widget-react"
+}

@@ -14,15 +14,36 @@ This package provides a viewer _widget_. Documentation on how to add a widget to
 ## Permissions and Scopes
 
 The SPA client used by your iTwin viewer application must have allowed scopes `insights:read` and `insights:write`, found under the Reporting & Insights category.
-Users must have the `imodels_read` and `insights_view` [permissions](https://developer.bentley.com/apis/carbon-calculation/operations/create-oneclicklca-job/#authorization) assigned at either the Project or iModel level. Additional instruction on how to create roles and assign permissions can be found in the [iTwin Platform Projects API documentation](https://developer.bentley.com/apis/projects/tutorials/).
+Users must have the `carbon_calculate` and `insights_view` [permissions](https://developer.bentley.com/apis/carbon-calculation/operations/create-oneclicklca-job/#authorization) assigned at either the Project or iModel level. Additional instruction on how to create roles and assign permissions can be found in the [iTwin Platform Projects API documentation](https://developer.bentley.com/apis/projects/tutorials/).
 
 ## Sample usage
+
+You first need to create an OAuth application in https://buildingtransparency.org/ec3/manage-apps/developers.
+Add the EC3Provider to UI providers using your Client Id and Redirect URI in App.tsx.
 
 ```tsx
 import { EC3Provider } from "@itwin/ec3-widget-react";
 
 <Viewer
   ...
-  uiProviders={[new EC3Provider()]}
+  uiProviders={[
+    new EC3Provider({
+      clientId: "...",
+      redirectUri: "...",
+    }),
+  ]}
 />
+```
+
+Then handle the redirect using the following code in Index.tsx.
+
+```tsx
+import { handleEC3AuthCallback } from "@itwin/ec3-widget-react";
+
+} else if (window.location.pathname === "/callback") {
+  handleEC3AuthCallback({
+    clientId: "...",
+    redirectUri: ".../callback",
+  });
+} else {
 ```

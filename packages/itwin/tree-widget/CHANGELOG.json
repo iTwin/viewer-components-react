@@ -2,6 +2,18 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@itwin/tree-widget-react_v0.5.0",
+      "date": "Mon, 12 Sep 2022 19:50:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new `defaultTreeId` prop to specify default tree for TreeWidgetUiItemsProvider"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.7",
       "tag": "@itwin/tree-widget-react_v0.4.7",
       "date": "Mon, 30 May 2022 12:44:10 GMT",

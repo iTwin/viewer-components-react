@@ -2,49 +2,41 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { Fieldset, LabeledInput, LabeledSelect, Small, SelectOption } from "@itwin/itwinui-react";
-import { IModelApp } from "@itwin/core-frontend";
+import { useEffect, useMemo, useState } from "react";
+import type { SelectOption } from "@itwin/itwinui-react";
+import { Select } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, Small } from "@itwin/itwinui-react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { Report } from "@itwin/insights-client";
-import { ReportingClient } from "@itwin/insights-client";
-import { WidgetHeader, handleSelectChange } from "./utils";
-import ExportModal from "./ExportModal";
-import TemplateClient from "./TemplateClient";
-import LabelAction from "./LabelAction";
-import { Configuration, Label as EC3Label } from "./Template"
+import { handleSelectChange, WidgetHeader } from "./utils";
+import type { Configuration, Label as EC3Label } from "./Template";
+import { convertConfigurationCreate, convertConfigurationUpdate } from "./Template";
 import { LabelTile } from "./LabelTile";
-import DeleteModal from "./DeleteModal";
 import { handleInputChange } from "./utils";
-import TemplateActionPanel from "./TemplateActionPanel";
-import ReportConfirmModal from "./ReportConfirmModal";
-import { EC3ConfigurationClient } from "./api/EC3ConfigurationClient";
 import {
   ComboBox,
-  Label
+  Label,
 } from "@itwin/itwinui-react";
 
 import {
-  SvgDelete,
-  SvgMore,
-} from "@itwin/itwinui-icons-react";
-
-import {
   Button,
-  DropdownMenu,
-  IconButton,
-  MenuItem,
   Surface,
+  Text,
   toaster,
 } from "@itwin/itwinui-react";
 import "./TemplateMenu.scss";
 import React from "react";
-import { EC3TokenCache } from "./EC3/EC3TokenCache";
-import { EC3Config } from "./EC3/EC3Config";
+import { SvgAdd } from "@itwin/itwinui-icons-react";
+import { useApiContext } from "./api/APIContext";
+import { LabelAction } from "./LabelAction";
+import { TemplateActionPanel } from "./TemplateActionPanel";
+import { DeleteModal } from "./DeleteModal";
+import { ReportConfirmModal } from "./ReportConfirmModal";
 
 interface TemplateProps {
   template?: Configuration;
   goBack: () => Promise<void>;
+  created: boolean;
 }
 
 enum LabelView {
@@ -53,23 +45,22 @@ enum LabelView {
   MODIFY = "modify"
 }
 
-const TemplateMenu = ({ template, goBack }: TemplateProps) => {
+export const TemplateMenu = ({ template, goBack, created }: TemplateProps) => {
+  const getAccessToken = useApiContext().getAccessTokenFn;
   const projectId = useActiveIModelConnection()?.iTwinId as string;
-  const reportingClientApi = useMemo(() => new ReportingClient(), []);
-  const [token, setToken] = useState<EC3TokenCache>();
+  const reportsClient = useApiContext().reportsClient;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showReportConfirmModal, setShowReportConfirmModal] = useState<boolean>(false);
   const [selectedLabel, setSelectedLabel] = useState<EC3Label>();
-  const [selectedReport, setSelectedReport] = useState<string>();
-  const [modalIsOpen, openModal] = useState(false);
+  const [previouslySelectedReport, setPreviouslySelectedReport] = useState<string>();
   const [availableReports, setReports] = useState<Report[]>([]);
-  const configurationClient = new EC3ConfigurationClient();
+  const configurationsClient = useApiContext().ec3ConfigurationsClient;
   const [childTemplate, setChildTemplate] = useState<Configuration>({
-    reportId: "",
+    reportId: undefined,
     description: "",
     displayName: "",
-    labels: []
+    labels: [],
   });
 
   const [labelsView, setLabelsView] = useState<LabelView>(
@@ -77,61 +68,58 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
   );
 
   const onSave = async () => {
-    var response;
-    if (childTemplate.id)
-      response = await configurationClient.updateConfiguration(childTemplate);
-    else
-      response = await configurationClient.createConfiguration(childTemplate);
+    try {
+      const token = await getAccessToken();
+      if (childTemplate.id) {
+        await configurationsClient.updateConfiguration(token, childTemplate.id, convertConfigurationUpdate(childTemplate));
+      } else {
+        await configurationsClient.createConfiguration(token, convertConfigurationCreate(childTemplate));
+      }
 
-    if (!response.ok) {
-      toaster.negative("Saving failed");
-      console.log(response.statusText);
-    }
-    else {
       toaster.positive("Saved successfully!");
-      goBack();
+      void goBack();
+    } catch (e) {
+      toaster.negative("Saving failed");
+      // eslint-disable-next-line
+      console.log(e);
     }
   };
-
-  const validateSignin = useCallback(() => {
-    return token?.token && token?.exp > Date.now();
-  }, [token]);
 
   useEffect(() => {
     setIsLoading(true);
 
     const fetchReports = async () => {
       if (template) {
-        const config = await configurationClient.getConfiguration(template.id!);
-        const configuration = config.configuration;
+        const token = await getAccessToken();
+        const configuration = await configurationsClient.getConfiguration(token, template.id!);
         const reportId = configuration._links.report.href.split("/reports/")[1];
-        configuration.reportId = reportId;
-        setChildTemplate(configuration);
+        const childConfig: Configuration = {
+          displayName: configuration.displayName,
+          description: configuration.description ?? "",
+          reportId,
+          id: configuration.id,
+          labels: configuration.labels,
+        };
+        setChildTemplate(childConfig);
       }
 
-      if (!IModelApp.authorizationClient)
-        throw new Error(
-          "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-        );
-
       try {
-        const accessToken = await IModelApp.authorizationClient.getAccessToken();
-        const data = await reportingClientApi.getReports(accessToken, projectId);
+        const accessToken = await getAccessToken();
+        const data = await reportsClient.getReports(accessToken, projectId);
         if (data) {
           const fetchedReports = data.sort((a, b) => a.displayName?.localeCompare(b.displayName ?? "") ?? 0);
           setReports(fetchedReports);
           setIsLoading(false);
         }
-      }
-      catch (err) {
+      } catch (err) {
         setIsLoading(false);
         toaster.negative("You are not authorized to use this system.");
         /* eslint-disable no-console */
         console.error(err);
       }
-    }
+    };
     void fetchReports();
-  }, [projectId, reportingClientApi]);
+  }, [projectId, template, reportsClient, configurationsClient, getAccessToken]);
 
   const addLabel = () => {
     setLabelsView(LabelView.ADD);
@@ -165,7 +153,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
     case LabelView.MODIFY:
       return (
         <LabelAction
-          label={childTemplate.labels.filter(x => x.reportTable === selectedLabel?.reportTable)[0]}
+          label={childTemplate.labels.filter((x) => x.reportTable === selectedLabel?.reportTable)[0]}
           template={childTemplate}
           goBack={async () => {
             setLabelsView(LabelView.LABELS);
@@ -183,15 +171,16 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
               await goBack();
             }}
           />
-          <div className='ec3-template-details-container'>
-            <Fieldset legend='Template Details' className='ec3-template-details'>
-              <Small className='ec3-template-field-legend'>
+          <div className='ec3w-template-details-container' data-testid="ec3-template-details">
+            <Fieldset legend='Template Details' className='ec3w-template-details'>
+              <Small className='ec3w-template-field-legend'>
                 Asterisk * indicates mandatory fields.
               </Small>
               <LabeledInput
                 id='templateName'
+                data-testid="ec3-template-name-input"
                 name='displayName'
-                label='Template name'
+                label='EC3 Project Template Name'
                 value={childTemplate.displayName}
                 required
                 onChange={(event) => {
@@ -201,6 +190,7 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
               />
               <LabeledInput
                 id='templateDescription'
+                data-testid="ec3-template-description-input"
                 name='description'
                 label='Template description'
                 value={childTemplate.description}
@@ -209,35 +199,57 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                 }}
               />
 
-              <div className="report-select-container">
-                <div className="report-select-combo-box">
+              <div className="ec3w-report-select-container">
+                <div className="ec3w-report-select-combo-box">
                   <Label htmlFor="combo-input" required={true}>
                     Report
                   </Label>
-
-                  <ComboBox
-                    options={ReportOptions}
-                    value={childTemplate.reportId}
-                    onChange={async (value) => {
-                      if (template && value !== template.reportId) {
-                        setSelectedReport(value);
-                        setShowReportConfirmModal(true);
-                      }
-                      else {
+                  {!created
+                    ?
+                    <ComboBox
+                      data-testid="ec3-enabled-selection"
+                      options={ReportOptions}
+                      value={childTemplate.reportId}
+                      onChange={async (value) => {
+                        if (childTemplate.labels.length > 0 && value !== childTemplate.reportId) {
+                          setPreviouslySelectedReport(childTemplate.reportId);
+                          setShowReportConfirmModal(true);
+                        }
                         handleSelectChange(value, "reportId", childTemplate, setChildTemplate);
-                      }
-                    }}
-                    inputProps={{
-                      id: "combo-input",
-                      placeholder: "Select report"
-                    }}
-                  />
+                      }}
+                      inputProps={{
+                        id: "combo-input",
+                        placeholder: "Select report",
+                      }}
+                    />
+                    :
+                    <Select
+                      data-testid="ec3-disabled-selection"
+                      options={ReportOptions}
+                      value={childTemplate.reportId}
+                      disabled={true}
+                    />}
                 </div>
               </div>
+            </Fieldset>
 
-              <Surface className="ec3-labels-container">
-                <div className="ec3-labels-list">
-                  {
+            <Fieldset legend='Assemblies' className='ec3w-template-details'>
+              <Surface className="ec3w-labels-container">
+                <Button
+                  data-testid="ec3-add-assembly-button"
+                  styleType="default"
+                  startIcon={<SvgAdd />}
+                  onClick={addLabel}
+                  disabled={!childTemplate.reportId}
+                >
+                  Add Assembly
+                </Button>
+                <div className="ec3w-labels-list">
+                  {childTemplate.labels.length === 0 && !isLoading ?
+                    <div className="gmw-empty-selection">
+                      <Text>No Assemblies selected.</Text>
+                      <Text>Press the &quot;Add Assembly&quot; button to create an Assembly.</Text>
+                    </div> :
                     childTemplate.labels
                       .map((g) => (
                         <LabelTile
@@ -246,7 +258,6 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                           onDelete={() => {
                             setSelectedLabel(g);
                             setShowDeleteModal(true);
-                            close();
                           }}
                           onClickTitle={() => {
                             setSelectedLabel(g);
@@ -254,13 +265,6 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
                           }}
                         />
                       ))}
-                  <Button
-                    styleType="high-visibility"
-                    onClick={addLabel}
-                    disabled={!childTemplate.reportId}
-                  >
-                    Add Label
-                  </Button>
                 </div>
               </Surface>
             </Fieldset>
@@ -268,40 +272,15 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
           <TemplateActionPanel
             onSave={onSave}
             onCancel={goBack}
-            onExport={async () => {
-              if (validateSignin()) {
-                const url = `${EC3Config.EC3_URI}oauth2/authorize?client_id=${EC3Config.CLIENT_ID}&redirect_uri=${EC3Config.REDIRECT_URI}&response_type=code&scope=${EC3Config.SCOPE}`;
-                const authWindow = window.open(url, '_blank', 'toolbar=0,location=0,menubar=0,width=800,height=700');
-
-                const receiveMessage = (event: MessageEvent<EC3TokenCache>) => {
-                  authWindow?.close();
-                  setToken(event.data);
-                  openModal(true);
-                };
-
-                window.addEventListener('message', receiveMessage, false);
-              } else {
-                openModal(true);
-              }
-            }}
             isSavingDisabled={!childTemplate.displayName || !childTemplate.reportId}
             isLoading={isLoading}
           />
-
-          <ExportModal
-            projectName={childTemplate.displayName}
-            isOpen={modalIsOpen}
-            close={() => openModal(false)}
-            templateId={childTemplate.id}
-            token={token?.token}
-          />
-
           <DeleteModal
             entityName={selectedLabel?.name === "" ? selectedLabel.reportTable : selectedLabel?.name ?? ""}
             show={showDeleteModal}
             setShow={setShowDeleteModal}
-            onDelete={() => {
-              childTemplate.labels = childTemplate.labels.filter(x => x.reportTable !== selectedLabel?.reportTable);
+            onDelete={async () => {
+              childTemplate.labels = childTemplate.labels.filter((x) => x.reportTable !== selectedLabel?.reportTable);
             }}
             refresh={async () => { }}
           />
@@ -310,10 +289,10 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
             show={showReportConfirmModal}
             setShow={setShowReportConfirmModal}
             onConfirm={() => {
-              if (selectedReport) {
-                childTemplate.labels = [];
-                handleSelectChange(selectedReport, "reportId", childTemplate, setChildTemplate);
-              }
+              childTemplate.labels = [];
+            }}
+            onCancel={() => {
+              handleSelectChange(previouslySelectedReport ?? "", "reportId", childTemplate, setChildTemplate);
             }}
             refresh={async () => { }}
           />
@@ -321,7 +300,3 @@ const TemplateMenu = ({ template, goBack }: TemplateProps) => {
       );
   }
 };
-
-
-
-export default TemplateMenu;

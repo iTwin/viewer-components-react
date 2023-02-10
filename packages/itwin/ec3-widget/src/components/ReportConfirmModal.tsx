@@ -9,7 +9,7 @@ import {
   ModalButtonBar,
 } from "@itwin/itwinui-react";
 import React, { useState } from "react";
-import "./DeleteModal.scss";
+import "./ReportConfirmModal.scss";
 import { handleError, LoadingSpinner } from "./utils";
 
 export interface ReportConfirmModalProps {
@@ -17,6 +17,7 @@ export interface ReportConfirmModalProps {
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
   onConfirm: () => void;
   refresh: () => Promise<void>;
+  onCancel: () => void;
 }
 
 export const ReportConfirmModal = ({
@@ -24,13 +25,14 @@ export const ReportConfirmModal = ({
   setShow,
   onConfirm,
   refresh,
+  onCancel,
 }: ReportConfirmModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const confirmCallback = async () => {
     try {
       setIsLoading(true);
-      await onConfirm();
+      onConfirm();
       setShow(false);
       await refresh();
     } catch (error: any) {
@@ -41,42 +43,47 @@ export const ReportConfirmModal = ({
   };
 
   return (
-    <>
-      <Modal
-        title='Confirm'
-        modalRootId='ec3-widget-react'
-        isOpen={show}
-        isDismissible={!isLoading}
-        onClose={() => {
-          setShow(false);
-        }}
-      >
-        <div className="delete-modal-body-text">
-          <Leading>
-            Are you sure you want to change template report? All labels will be reset.
-          </Leading>
-        </div>
-        <ModalButtonBar>
-          {isLoading &&
-            <div className="loading-delete">
-              <LoadingSpinner />
-            </div>}
-          <Button styleType='high-visibility' onClick={confirmCallback} disabled={isLoading}>
-            Confirm
-          </Button>
-          <Button
-            styleType='default'
-            onClick={() => {
-              setShow(false);
-            }}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-        </ModalButtonBar>
-      </Modal>
-    </>
+    <Modal
+      title='Confirm'
+      data-testid="ec3-report-confirm-modal"
+      modalRootId='ec3-widget-react'
+      isOpen={show}
+      isDismissible={!isLoading}
+      onClose={() => {
+        setShow(false);
+        onCancel();
+      }}
+    >
+      <div className="ec3w-delete-modal-body-text">
+        <Leading>
+          Are you sure you want to change template report? All labels will be reset.
+        </Leading>
+      </div>
+      <ModalButtonBar>
+        {isLoading &&
+          <div className="ec3w-loading-delete">
+            <LoadingSpinner />
+          </div>}
+        <Button
+          styleType='high-visibility'
+          onClick={confirmCallback}
+          disabled={isLoading}
+          data-testid="ec3-report-confirm-modal-button"
+        >
+          Confirm
+        </Button>
+        <Button
+          styleType='default'
+          data-testid="ec3-report-confirm-modal-cancel-button"
+          onClick={() => {
+            setShow(false);
+            onCancel();
+          }}
+          disabled={isLoading}
+        >
+          Cancel
+        </Button>
+      </ModalButtonBar>
+    </Modal>
   );
 };
-
-export default ReportConfirmModal;

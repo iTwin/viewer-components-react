@@ -3,15 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { ReactNode } from "react";
-import { SelectOption, LabeledSelect } from "@itwin/itwinui-react";
+import type { SelectOption } from "@itwin/itwinui-react";
+import { LabeledSelect } from "@itwin/itwinui-react";
 import "./DropdownTile.scss";
-import { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import SimpleReactValidator from "simple-react-validator";
 import React from "react";
-import {
-  Select,
-  Label
-} from "@itwin/itwinui-react";
 
 interface DropdownTileProps {
   stringColumnOptions: SelectOption<string>[];
@@ -19,7 +14,7 @@ interface DropdownTileProps {
   onMaterialChange: (value: string) => void;
   actionGroup: ReactNode;
   disabled: boolean;
-  deletionDisabled: boolean;
+  required: boolean;
 }
 
 export const DropdownTile = ({
@@ -28,34 +23,26 @@ export const DropdownTile = ({
   onMaterialChange,
   actionGroup,
   disabled,
-  deletionDisabled
+  required,
 }: DropdownTileProps) => {
   return (
-    <div
-      className="ec3-dropdown-tile-container"
-      data-testid="horizontal-tile"
-    >
-      <div className="body">
-        <div className="material-combo">
-
-          <div className="dropdown-select-container">
-            <div className="dropdown-select-combo-box">
-              <Label htmlFor="combo-input" required>
-                Material
-              </Label>
-              <Select
-                disabled={disabled}
-                options={stringColumnOptions}
-                value={materialValue}
-                onChange={(value) => { onMaterialChange(value); }}
-              />
-            </div>
-          </div>
+    <div className="ec3w-dropdown-tile-container">
+      <div className="ec3w-body">
+        <div className="ec3w-material-combo">
+          <LabeledSelect
+            required={required}
+            data-testid="ec3-dropdown-tile-select"
+            label={"Material"}
+            placeholder={"Select property containing Material names"}
+            disabled={disabled}
+            options={stringColumnOptions}
+            value={materialValue}
+            onChange={(value) => { onMaterialChange(value); }}
+          />
         </div>
-        <div className="action-button" data-testid="tile-action-button" hidden={deletionDisabled} >
+        <div className="ec3w-action-button" data-testid="ec3-tile-action-button">
           {actionGroup}
         </div>
-
       </div>
     </div>
   );

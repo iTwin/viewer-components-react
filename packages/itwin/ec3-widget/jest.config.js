@@ -5,6 +5,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
+  testTimeout: 20000,
   transform: {
     "\\.(ts)$": ['ts-jest'],
   },
@@ -16,5 +17,5 @@ module.exports = {
   roots: [
     "./src/",
   ],
-  
+
 }

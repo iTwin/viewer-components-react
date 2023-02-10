@@ -13,7 +13,7 @@ import {
   ToolbarOrientation, ToolbarUsage,
 } from "@itwin/appui-abstract";
 import type { ToolItemDef } from "@itwin/appui-react";
-import { ToolbarHelper } from "@itwin/appui-react";
+import { SyncUiEventId, ToolbarHelper } from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";
@@ -21,10 +21,21 @@ import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions";
 import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget";
 import { AbstractZoneLocation } from "@itwin/appui-abstract";
 import { UiFramework } from "@itwin/appui-react";
+import { IModelApp } from "@itwin/core-frontend";
+
+// Note: measure tools cannot pick geometry when a sheet view is active to snap to and therefore must be hidden
+//  to avoid giving the user the impression they should work
+const isSheetViewActive = () => !!IModelApp.viewManager.selectedView?.view?.isSheetView();
 
 export interface MeasureToolsUiProviderOptions {
   itemPriority?: number;
   groupPriority?: number;
+  widgetPlacement?: {
+    location: StagePanelLocation;
+    section?: StagePanelSection;
+    // eslint-disable-next-line deprecation/deprecation
+    zoneLocation?: AbstractZoneLocation;
+  };
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
@@ -73,25 +84,31 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
               "MeasureTools:MeasurementGroupButton.tooltip",
             ),
             ToolbarHelper.constructChildToolbarItems(tools),
-            { groupPriority: this._props?.groupPriority ?? 10 },
+            {
+              groupPriority: this._props?.groupPriority ?? 10,
+              isHidden: new ConditionalBooleanValue(
+                isSheetViewActive,
+                [SyncUiEventId.ViewStateChanged],
+              ),
+            },
           ),
         ];
       }
 
       if (tools.length > 0 && toolbarOrientation === ToolbarOrientation.Horizontal) {
-        const isHidden = new ConditionalBooleanValue(
-          () => !MeasurementUIEvents.isClearMeasurementButtonVisible,
-          [
-            MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
-            MeasurementSyncUiEventId.DynamicMeasurementChanged,
-          ],
-        );
         return [
           ToolbarHelper.createToolbarItemFromItemDef(
             100,
             MeasureToolDefinitions.clearMeasurementsToolCommand,
             {
-              isHidden,
+              isHidden: new ConditionalBooleanValue(
+                () => isSheetViewActive() || !MeasurementUIEvents.isClearMeasurementButtonVisible,
+                [
+                  SyncUiEventId.ViewStateChanged,
+                  MeasurementSyncUiEventId.MeasurementSelectionSetChanged,
+                  MeasurementSyncUiEventId.DynamicMeasurementChanged,
+                ],
+              ),
             },
           ),
         ];
@@ -110,18 +127,23 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     zoneLocation?: AbstractZoneLocation
   ): ReadonlyArray<AbstractWidgetProps> {
     const widgets: AbstractWidgetProps[] = [];
+
+    const preferredLocation = this._props?.widgetPlacement?.location ?? StagePanelLocation.Right;
+    const preferredSection = this._props?.widgetPlacement?.section ?? StagePanelSection.Start;
+    // eslint-disable-next-line deprecation/deprecation
+    const preferredZoneLocation = this._props?.widgetPlacement?.zoneLocation ?? AbstractZoneLocation.CenterRight;
+
     if (
       (
         stageUsage === StageUsage.General &&
-        location === StagePanelLocation.Right &&
-        section === StagePanelSection.Start &&
+        location === preferredLocation &&
+        section === preferredSection &&
         UiFramework.uiVersion !== "1"
       ) ||
       (
         !section &&
         stageUsage === StageUsage.General &&
-        // eslint-disable-next-line deprecation/deprecation
-        zoneLocation === AbstractZoneLocation.CenterRight
+        zoneLocation === preferredZoneLocation
       )
     ) {
       widgets.push({

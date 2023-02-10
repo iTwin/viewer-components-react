@@ -20,17 +20,17 @@ export const WidgetHeader = ({
   returnFn,
 }: WidgetHeaderProps) => {
   return (
-    <div className="ec3-widget-header-container">
+    <div className="ec3w-widget-header-container">
       {returnFn && (
         <div
-          className={disabled ? "ec3-chevron-disabled" : "ec3-chevron"}
+          className={disabled ? "ec3w-chevron-disabled" : "ec3w-chevron"}
           onClick={disabled ? undefined : returnFn}
           onKeyUp={disabled ? undefined : returnFn}
         >
           <SvgChevronLeft />
         </div>
       )}
-      <Text className="ec3-title" variant="title">
+      <Text className="ec3w-title" variant="title">
         {title}
       </Text>
     </div>
@@ -38,7 +38,7 @@ export const WidgetHeader = ({
 };
 
 export const LoadingOverlay = () => (
-  <div className='gm-center-overlay'>
+  <div className='ec3w-center-overlay'>
     <Text>Loading</Text>
     <ProgressRadial indeterminate />
     <Text>Please wait...</Text>
@@ -50,11 +50,10 @@ interface EmptyMessageProps {
 }
 
 export const EmptyMessage = ({ message }: EmptyMessageProps) => (
-  <div className='gm-center-overlay'>
+  <div className='ec3w-center-overlay'>
     <Text>{message}</Text>
   </div>
 );
-
 
 export const handleInputChange = <T,>(
   e: React.ChangeEvent<HTMLInputElement>,
@@ -81,13 +80,9 @@ export const handleSelectChange = <T,>(
   });
 };
 
-export const generateUrl = (baseUrl: string, newBaseUrl: string) => {
-  return baseUrl.replace("https://api.bentley.com", newBaseUrl);
-};
-
 export const LoadingSpinner = () => {
   return (
-    <div className="gm-loading-spinner">
+    <div className="ec3w-loading-spinner">
       <ProgressRadial size="small" indeterminate />
     </div>
   );

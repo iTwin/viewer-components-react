@@ -1,6 +1,76 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Wed, 24 Aug 2022 14:01:03 GMT and should not be manually modified.
+This log was last generated on Wed, 16 Nov 2022 19:55:30 GMT and should not be manually modified.
+
+## 0.9.1
+Wed, 16 Nov 2022 19:55:30 GMT
+
+### Patches
+
+- Test coverage added
+- Fixed group properties UI traversal to nested structs
+
+## 0.9.0
+Wed, 16 Nov 2022 16:49:55 GMT
+
+### Minor changes
+
+- Version bump
+
+### Patches
+
+- Fixed cross references in query builder query string
+- Fixed group properties incorrectly generating aspects
+- Added support for external source repository information (name/path) in group properties
+
+## 0.8.3
+Mon, 31 Oct 2022 19:03:27 GMT
+
+### Patches
+
+- Fixed duplication of JOIN statements in query builder
+
+## 0.8.2
+Mon, 17 Oct 2022 17:36:46 GMT
+
+### Patches
+
+- Fixed readme image render error and added tests for Custom UI providers
+- Fixed key uniqueness issue in group properties.
+- Fixed formula interpreter sometimes not recognising unary operators leading to errors in formula order.
+
+## 0.8.1
+Thu, 29 Sep 2022 19:04:42 GMT
+
+### Patches
+
+- Fixed text overflow issue.
+
+## 0.8.0
+Wed, 28 Sep 2022 20:44:12 GMT
+
+### Minor changes
+
+- Redesigned group properties UI.
+
+## 0.7.0
+Mon, 26 Sep 2022 17:13:11 GMT
+
+### Minor changes
+
+- Add context custom UI support
+- Add custom UI extensibility for grouping and mapping and refactor default UI accordingly
+
+## 0.6.0
+Mon, 12 Sep 2022 19:50:36 GMT
+
+### Minor changes
+
+- Updated to insights client version 0.3.0
+
+### Patches
+
+- Added border to the color legend for group hiliting
 
 ## 0.5.8
 Wed, 24 Aug 2022 14:01:03 GMT

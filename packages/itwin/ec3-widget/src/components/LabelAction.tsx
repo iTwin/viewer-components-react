@@ -2,29 +2,22 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { DropdownMenu, Fieldset, LabeledInput, Small, LabeledSelect } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, LabeledSelect, Small } from "@itwin/itwinui-react";
 import {
   SvgAdd,
   SvgDelete,
-  SvgMore,
 } from "@itwin/itwinui-icons-react";
-import { useState, useMemo, useEffect, useCallback } from "react";
-import LabelActionPanel from "./LabelActionPanel";
-import { IModelApp } from "@itwin/core-frontend";
-import { Button, toaster, MenuItem, IconButton } from "@itwin/itwinui-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button, IconButton } from "@itwin/itwinui-react";
 import { WidgetHeader } from "./utils";
 import "./LabelAction.scss";
-import { Configuration, Label as EC3Label, Material } from "./Template"
-import { ReportingClient } from "@itwin/insights-client";
+import type { Configuration, Label as EC3Label, Material } from "./Template";
 import { DropdownTile } from "./DropdrownTile";
-import DeleteModal from "./DeleteModal";
-import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import React from "react";
-import {
-  ComboBox,
-  Label,
-  Select
-} from "@itwin/itwinui-react";
+import { ReportTableSelector } from "./ReportTableSelector";
+import SimpleReactValidator from "simple-react-validator";
+import { DeleteModal } from "./DeleteModal";
+import { LabelActionPanel } from "./LabelActionPanel";
 
 interface LabelActionProps {
   template: Configuration;
@@ -33,359 +26,183 @@ interface LabelActionProps {
   setTemplate: (sel: Configuration) => void;
 }
 
-async function fetchMetadata(token: string, reportingClientApi: ReportingClient, reportId: string) {
-  return (await reportingClientApi.getODataReportMetadata(token, reportId)).text();
-}
-
-const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps) => {
+export const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps) => {
   const [reportTable, setReportTable] = useState<string>(label?.reportTable ?? "");
   const [name, setName] = useState<string>(label?.name ?? "");
   const [itemName, setItemName] = useState<string>(label?.elementNameColumn ?? "UserLabel");
   const [itemQuantity, setItemQuantity] = useState<string>(label?.elementQuantityColumn ?? "");
-  const [selectedMaterial, setSelectedMaterial] = useState<Material>();
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // creating a copy of an array, so original isn't modified
-  const [materials, setMaterials] = useState<Material[]>(label?.materials.map(x => { return { nameColumn: x.nameColumn } }) ?? [{ nameColumn: undefined }]);
+  const [materials, setMaterials] = useState<Material[]>(label?.materials.map((x) => { return { nameColumn: x.nameColumn }; }) ?? [{ nameColumn: undefined }]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [validator, showValidationMessage] = useValidator();
-  const [availableLabels, setLabels] = useState<string[]>();
   const [availableStringColumns, setStringColumns] = useState<string[]>([]);
   const [availableNumericalColumns, setNumericalColumns] = useState<string[]>([]);
-  const reportingClientApi = useMemo(() => new ReportingClient(), []);
+  const validator = new SimpleReactValidator();
 
   const onSave = async () => {
     const selectedLabel: EC3Label = {
-      reportTable: reportTable,
-      name: name,
+      reportTable,
+      name,
       elementNameColumn: itemName,
       elementQuantityColumn: itemQuantity,
-      materials: materials,
-    }
+      materials,
+    };
 
     if (label) {
-      for (let i = 0; i < template.labels.length; i++) {
-        if (template.labels[i].reportTable === label.reportTable) {
-          template.labels[i] = selectedLabel;
-          break;
-        }
-      }
-    }
-    else {
+      const i = template.labels.findIndex((l) => l.reportTable === label.reportTable);
+      template.labels[i] = selectedLabel;
+    } else {
       template.labels.push(selectedLabel);
     }
 
     setTemplate(template);
   };
 
-  async function updateColumns(labelName: string) {
-    setIsLoading(true);
-
-    if (!IModelApp.authorizationClient) {
-      setIsLoading(false);
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
-    }
-
-
-    if (!template.reportId) {
-      setIsLoading(false);
-      throw new Error(
-        "Invalid report."
-      );
-    }
-
-    try {
-      const accessToken = await IModelApp.authorizationClient
-        .getAccessToken();
-
-      const responseText = await fetchMetadata(accessToken, reportingClientApi, template.reportId);
-      const dom = new DOMParser().parseFromString(responseText, "text/xml");
-
-      const c = dom.getElementsByTagName("EntityType");
-
-      const elems = Array.from(dom.getElementsByTagName("EntityType")).filter(x => x.attributes[0].value === labelName);
-
-      if (elems.length > 0) {
-        const columns = Array.from(elems[0].children).map(x => x.attributes);
-        const stringColumns = columns.filter(x => x[1].value === "Edm.String").map(x => x[0].value);
-        const numericalColumns = columns.filter(x => x[1].value === "Edm.Double").map(x => x[0].value);
-        setStringColumns(stringColumns);
-        setNumericalColumns(numericalColumns);
-      }
-    }
-    catch (err) {
-      toaster.negative("You are not authorized to use this system.");
-      /* eslint-disable no-console */
-      console.error(err);
-    }
-    setIsLoading(false);
-  }
-
-  const labelOptions = useMemo(() => {
-    return availableLabels?.map((g) => ({
-      label: g,
-      value: g,
-    })) ?? [];
-  }, [availableLabels]);
-
-
-
-  const StringColumnOptions = useMemo(() => {
-    const options = availableStringColumns?.map((col) => ({
+  const stringColumnOptions = useMemo(() => {
+    const options = availableStringColumns.map((col) => ({
       label: col,
       value: col,
-    })) ?? [];
+    }));
 
-    if (availableStringColumns.indexOf(itemName) === -1) {
+    if (availableStringColumns.indexOf(itemName) === -1 && options.length !== 0)
       setItemName("");
-    }
 
     return options;
-  }, [availableStringColumns]);
+  }, [availableStringColumns, itemName]);
 
   const getStringColumnOptions = ((material: string | undefined) => {
-    const options = StringColumnOptions
-      .filter(x => materials.filter(p => p.nameColumn === x.label).length === 0)
-      .filter(x => x.label !== itemName);
-
+    const options = stringColumnOptions
+      .filter((x) => !materials.some((m) => m.nameColumn === x.label))
+      .filter((x) => x.label !== itemName);
 
     if (material)
       options.push({ label: material, value: material });
     return options;
-  })
+  });
 
-  const NumericalColumnOptions = useMemo(() => {
-    const options = availableNumericalColumns?.map((col) => ({
+  const numericalColumnOptions = useMemo(() => {
+    const options = availableNumericalColumns.map((col) => ({
       label: col,
       value: col,
-    })) ?? [];
+    }));
 
-    if (availableNumericalColumns.indexOf(itemQuantity) === -1) {
+    if (availableNumericalColumns.indexOf(itemQuantity) === -1 && options.length !== 0)
       setItemQuantity("");
-    }
+
     return options;
-  }, [availableNumericalColumns]);
-
-  const load = (async () => {
-    if (!IModelApp.authorizationClient)
-      throw new Error(
-        "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-      );
-    if (!template.reportId)
-      throw new Error(
-        "Invalid report."
-      );
-
-    const token = await IModelApp.authorizationClient
-      .getAccessToken();
-    const data = await reportingClientApi
-      .getODataReport(token, template.reportId);
-    if (data) {
-      const labelItems = data.value.map(data =>
-        data.name ?? ""
-      );
-      const filteredLabels: string[] = label ? [label.reportTable] : [];
-      for (const g of labelItems) {
-        if (template.labels.filter(x => x.reportTable === g).length === 0) {
-          filteredLabels.push(g);
-        }
-      }
-
-      if (!availableLabels)
-        setLabels(filteredLabels);
-    }
-  })
-
-  const refresh = useCallback(async () => {
-    await load();
-  }, []);
+  }, [availableNumericalColumns, itemQuantity]);
 
   const addPair = (() => {
     const pair: Material = {
       nameColumn: undefined,
     };
-    const newMaterials = materials.map((x) => { return { nameColumn: x.nameColumn } });
+    const newMaterials = materials.map((x) => { return { nameColumn: x.nameColumn }; });
     newMaterials.push(pair);
     setMaterials(newMaterials);
-  })
+  });
 
   useEffect(() => {
     setIsLoading(true);
     if (label) {
-      setReportTable(label.reportTable);
       setName(label.name);
       setItemName(label.elementNameColumn);
       setItemQuantity(label.elementQuantityColumn);
-      setMaterials(label.materials.map(x => { return { nameColumn: x.nameColumn } })); // creating a copy of array, so original (in the parent) isn't modified
-      updateColumns(label.reportTable);
-    }
-    else {
+      setMaterials(label.materials.map((x) => { return { nameColumn: x.nameColumn }; })); // creating a copy of array, so original (in the parent) isn't modified
+    } else {
       setItemName("UserLabel");
     }
+  }, [label]);
 
-    const fetchMappings = async () => {
-      if (!IModelApp.authorizationClient) {
-        setIsLoading(false);
-        throw new Error(
-          "AuthorizationClient is not defined. Most likely IModelApp.startup was not called yet."
-        );
-      }
-
-      if (!template.reportId) {
-        setIsLoading(false);
-        throw new Error(
-          "Invalid report."
-        );
-      }
-
-      try {
-        const accessToken = await IModelApp.authorizationClient
-          .getAccessToken();
-
-        const ODataReport = await reportingClientApi
-          .getODataReport(accessToken, template.reportId);
-
-        if (ODataReport) {
-          const labelItems = ODataReport.value.map(data =>
-            data.name ?? ""
-          );
-          const filteredLabels: string[] = label ? [label.reportTable] : [];
-          for (const g of labelItems) {
-            if (template.labels.filter(x => x.reportTable === g).length === 0) {
-              filteredLabels.push(g);
-            }
-          }
-          if (!availableLabels)
-            setLabels(filteredLabels);
-        }
-      }
-      catch (err) {
-        toaster.negative("You are not authorized to get metadata for this report. Please contact project administrator.");
-        console.error(err);
-      }
-
-      setIsLoading(false);
+  const onChangeCallback = useCallback(async (table: string, numCols: string[], strCols: string[]) => {
+    if (table !== reportTable) {
+      setMaterials([{ nameColumn: undefined }]);
+      setName(table);
     }
-
-    void fetchMappings();
-  }, []);
+    setReportTable(table);
+    setNumericalColumns(numCols);
+    setStringColumns(strCols);
+  }, [reportTable]);
 
   return (
     <>
       <WidgetHeader
-        title={label?.name ?? "Label"}
+        title={label?.name ?? "Assembly"}
         returnFn={goBack}
         disabled={isLoading}
       />
-      <div className='ec3-label-details-container'>
-        <Fieldset legend='Label' className='ec3-label-details'>
-          <Small className='ec3-label-field-legend'>
+      <div className='ec3w-label-details-container' data-testid="ec3-label-action">
+        <Fieldset legend='Assembly' className='ec3w-label-details'>
+          <Small className='ec3w-label-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
 
-          <div className="dropdown-select-container">
-            <div className="dropdown-select-combo-box">
-              <Label htmlFor="combo-input" required>
-                Report table
-              </Label>
-              <ComboBox
-                options={labelOptions}
-                value={reportTable}
-                onChange={async (value) => {
-                  if (value !== reportTable) {
-                    setMaterials([{ nameColumn: undefined }]);
-                    setName(value);
-                  }
-
-                  setReportTable(value);
-                  updateColumns(value);
-                }}
-                message={
-                  validator.message(
-                    "reportTable",
-                    reportTable,
-                    NAME_REQUIREMENTS,
-                  )}
-                status={
-                  validator.message(
-                    "reportTable",
-                    reportTable,
-                    NAME_REQUIREMENTS,
-                  )
-                    ? "negative"
-                    : undefined
-                }
-                inputProps={{
-                  id: "combo-input",
-                  placeholder: isLoading ? "Loading report tables" : "Select report table"
-                }}
-              />
-            </div>
-          </div>
+          <ReportTableSelector
+            selectedReportTable={reportTable}
+            template={template}
+            placeHolder={isLoading ? "Loading report tables" : "Select report table"}
+            onChange={onChangeCallback}
+            setLoading={setIsLoading}
+          />
 
           <LabeledInput
             id='name'
             name='name'
-            label='Name'
+            label='Assembly Name'
             value={name}
             onChange={(event) => {
               setName(event.target.value);
             }}
           />
-          <div className="body">
-            <div className="ec3-label-combo-field">
-              <div className="dropdown-select-container">
-                <div className="dropdown-select-combo-box">
-                  <Label htmlFor="combo-input" required>
-                    Element
-                  </Label>
-                  <Select
-                    options={getStringColumnOptions(itemName)}
-                    value={itemName}
-                    //placeholder={isLoading ? "Loading elements" : "Select element quantity"}
-                    onChange={async (value) => {
-                      setItemName(value);
-                    }}
-                    disabled={isLoading || reportTable === ""}
-                    placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element")}
-                  />
-                </div>
-              </div>
-            </div>
 
-            <div className="ec3-label-combo-field">
-              <div className="dropdown-select-container">
-                <div className="dropdown-select-combo-box">
-                  <Label htmlFor="combo-input" required>
-                    Element quantity
-                  </Label>
-                  <Select
-                    options={NumericalColumnOptions}
-                    value={itemQuantity}
-                    //placeholder={isLoading ? "Loading elements" : "Select element quantity"}
-                    onChange={async (value) => {
-                      setItemQuantity(value);
-                    }}
-                    disabled={isLoading || reportTable === ""}
-                    placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element quantity")}
-                  />
-                </div>
-              </div>
-            </div>
+          <LabeledSelect
+            data-testid="ec3-element-select"
+            required
+            label={"Element"}
+            options={getStringColumnOptions(itemName)}
+            value={itemName}
+            onChange={async (value) => {
+              setItemName(value);
+            }}
+            disabled={isLoading || reportTable === ""}
+            placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element")}
+          />
 
-          </div>
-          <div className="ec3-pair-list">
+          <LabeledSelect
+            data-testid="ec3-element-quantity-select"
+            required
+            label={"Element quantity"}
+            options={numericalColumnOptions}
+            value={itemQuantity}
+            onChange={async (value) => {
+              setItemQuantity(value);
+            }}
+            disabled={isLoading || reportTable === ""}
+            placeholder={isLoading ? "Loading elements" : (reportTable === "" ? "Select report table first" : "Select element quantity")}
+          />
+        </Fieldset>
+
+        <Fieldset legend='Materials' className='ec3w-label-details'>
+          <div className="ec3w-pair-list">
+            <Button
+              className="ec3w-label-button"
+              data-testid="ec3-add-material-button"
+              startIcon={<SvgAdd />}
+              onClick={addPair}
+              styleType="default"
+              disabled={isLoading || reportTable === "" || materials.filter((x) => x.nameColumn === undefined).length > 0}
+            >
+              Add Material
+            </Button>
             {materials.map((material, index) => (
               <DropdownTile
                 key={index}
-                deletionDisabled={index === 0}
+                required={index === 0}
                 disabled={reportTable === ""}
                 stringColumnOptions={getStringColumnOptions(material.nameColumn)}
                 materialValue={material.nameColumn ?? ""}
                 onMaterialChange={async (value) => {
-                  const newPairs = materials.map(x => { return { nameColumn: x.nameColumn } });
-                  newPairs.forEach(p => {
+                  const newPairs = materials.map((x) => { return { nameColumn: x.nameColumn }; });
+                  newPairs.forEach((p) => {
                     if (p.nameColumn === material.nameColumn)
                       p.nameColumn = value;
                   });
@@ -394,12 +211,13 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 actionGroup={
                   <div className="actions">
                     <IconButton
+                      data-testid="ec3-materials-delete-button"
                       styleType="borderless"
                       className="delete-icon"
+                      disabled={index === 0}
                       onClick={() => {
                         setSelectedMaterial(material);
                         setShowDeleteModal(true);
-                        close();
                       }}
                     >
                       <SvgDelete />
@@ -408,15 +226,6 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
                 }
               />
             ))}
-            <Button
-              className="ec3-label-button"
-              startIcon={<SvgAdd />}
-              onClick={addPair}
-              styleType="high-visibility"
-              disabled={isLoading || reportTable === "" || materials.filter(x => x.nameColumn === undefined).length > 0}
-            >
-              {"Add material"}
-            </Button>
           </div>
         </Fieldset>
       </div>
@@ -426,20 +235,20 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         onDelete={async () => {
-          setMaterials(materials.filter(x => x.nameColumn !== selectedMaterial?.nameColumn));
+          setMaterials(materials.filter((x) => x.nameColumn !== selectedMaterial?.nameColumn));
         }}
-        refresh={refresh}
+        refresh={async () => { }}
       />
 
       <LabelActionPanel
         isSavingDisabled={
           !validator.allValid() ||
-          materials.filter(x => x.nameColumn === undefined).length > 0 ||
+          materials.filter((x) => x.nameColumn === undefined).length > 0 ||
           itemQuantity === "" ||
           itemName === ""
         }
         onSave={async () => {
-          onSave();
+          void onSave();
           await goBack();
         }
         }
@@ -449,5 +258,3 @@ const LabelAction = ({ template, goBack, label, setTemplate }: LabelActionProps)
     </>
   );
 };
-
-export default LabelAction;

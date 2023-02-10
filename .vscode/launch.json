@@ -1,0 +1,61 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "measure-tools tests (chrome)",
+      "presentation": {
+        "hidden": false,
+        "group": "1_ChromeTests",
+        "order": 1
+      },
+      "configurations": [
+        "[CERTA] measure-tools tests",
+        "[ATTACH] measure-tools tests",
+      ]
+    },
+  ],
+  "configurations": [
+    { /* Partial */
+      "name": "[CERTA] measure-tools tests",
+      "presentation": {
+        "hidden": true,
+      },
+      "type": "node",
+      "request": "launch",
+      "outputCapture": "std",
+      "cwd": "${workspaceFolder}/packages/itwin/measure-tools",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "test:certa",
+        "--",
+        "--debug"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/itwin/measure-tools/lib/**/*.js",
+      ],
+      "cascadeTerminateToConfigurations": [
+        "[ATTACH] measure-tools tests"
+      ]
+    },
+    { /* Partial */
+      "name": "[ATTACH] measure-tools tests",
+      "presentation": {
+        "hidden": true,
+      },
+      "type": "chrome",
+      "request": "attach",
+      "port": 9223, // NB: This must match ports.frontendDebugging in the package's certa.json
+      "timeout": 200000,
+      "outFiles": [
+        "${workspaceFolder}/packages/itwin/measure-tools/lib/**/*.js",
+      ],
+      "cascadeTerminateToConfigurations": [
+        "[CERTA] measure-tools tests"
+      ]
+    },
+  ]
+}
