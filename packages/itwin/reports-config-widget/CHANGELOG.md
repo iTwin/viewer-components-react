@@ -75,3 +75,4 @@ Tue, 14 Jun 2022 16:01:06 GMT
 ### Patches
 
 - Initial release of the reports config widget for Reporting Platform
+

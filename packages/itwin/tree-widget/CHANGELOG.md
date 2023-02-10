@@ -268,3 +268,4 @@ Tue, 14 Jul 2020 22:54:18 GMT
 
 - Functional component.
 - Model tree search box will now properly clear itself in addition to closing when its "X" icon is hit
+
