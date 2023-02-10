@@ -78,13 +78,13 @@ export const SelectIModel = ({
   }, [iModels]);
 
   return (
-    <div className="reports-select-imodel">
+    <div className="rcw-select-imodel">
       <Label htmlFor="combo-input">
         {ReportsConfigWidget.localization.getLocalizedString(
           "ReportsConfigWidget:SelectIModel"
         )}
       </Label>
-      <div className="combobox">
+      <div className="rcw-combobox">
         <ComboBox<string>
           options={iModelOptions}
           value={selectedIModelId}

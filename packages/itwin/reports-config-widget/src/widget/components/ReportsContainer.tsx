@@ -36,7 +36,7 @@ const ReportsContainer = ({
 
   return (
     <ReportsApiConfigContext.Provider value={apiConfig}>
-      <div className="reports-container">
+      <div className="rcw-reports-container">
         <Reports />
       </div>
     </ReportsApiConfigContext.Provider>

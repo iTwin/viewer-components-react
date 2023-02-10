@@ -2,8 +2,12 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
 @import "~@itwin/core-react/lib/cjs/core-react/index";
+@import "../VisibilityTreeBase";
+
+.tree-widget-models-tree {
+  @include tree-widget-visibility-tree-base;
+}
 
 .tree-widget-models-tree-container {
   flex: 1;

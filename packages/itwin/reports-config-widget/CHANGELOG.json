@@ -2,6 +2,21 @@
   "name": "@itwin/reports-config-widget-react",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@itwin/reports-config-widget-react_v0.2.0",
+      "date": "Thu, 19 Jan 2023 10:29:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Extraction workflow for mappings updated."
+          },
+          {
+            "comment": "IModel extraction dropdown removed."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@itwin/reports-config-widget-react_v0.1.0",
       "date": "Mon, 31 Oct 2022 19:03:27 GMT",

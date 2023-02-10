@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Modified border to the color legend for group hiliting to be narrower",
+      "comment": "Change itwinui-react dependency version control to caret.",
       "type": "patch"
     }
   ],

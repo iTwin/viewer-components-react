@@ -2,6 +2,36 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.9.3",
+      "tag": "@itwin/grouping-mapping-widget_v0.9.3",
+      "date": "Thu, 19 Jan 2023 10:29:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Exposed MappingClient context, related hooks and types."
+          },
+          {
+            "comment": "Exposed GroupingMappingApiConfig context, related hooks and types."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.2",
+      "tag": "@itwin/grouping-mapping-widget_v0.9.2",
+      "date": "Fri, 16 Dec 2022 13:51:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Modified border to the color legend for group hiliting to be narrower"
+          },
+          {
+            "comment": "QueryBuilder: separated relational classes from properties, transferred properties from JOIN to WHERE clauses"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.1",
       "tag": "@itwin/grouping-mapping-widget_v0.9.1",
       "date": "Wed, 16 Nov 2022 19:55:30 GMT",

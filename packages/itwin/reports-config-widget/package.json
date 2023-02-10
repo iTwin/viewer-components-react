@@ -1,6 +1,6 @@
 {
   "name": "@itwin/reports-config-widget-react",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
   "keywords": [
     "Bentley",
@@ -50,16 +50,17 @@
       "@typescript-eslint/consistent-type-imports": "error",
       "deprecation/deprecation": "off",
       "jsx-a11y/no-static-element-interactions": "off",
-      "jsx-a11y/click-events-have-key-events": "off"
+      "jsx-a11y/click-events-have-key-events": "off",
+      "jsx-a11y/anchor-is-valid": "off"
     }
   },
   "dependencies": {
     "@itwin/imodels-access-frontend": "^1.0.1",
     "@itwin/imodels-client-management": "^1.0.1",
-    "@itwin/insights-client": "^0.3.0",
+    "@itwin/insights-client": "^0.3.2",
     "@itwin/itwinui-icons-color-react": "^1.0.1",
     "@itwin/itwinui-icons-react": "^1.7.0",
-    "@itwin/itwinui-react": "~1.42.0",
+    "@itwin/itwinui-react": "^1.42.0",
     "classnames": "^2.3.1",
     "simple-react-validator": "^1.6.1"
   },
@@ -87,6 +88,7 @@
     "@testing-library/jest-dom": "^5.16.3",
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^14.1.1",
+    "@types/chai": "4.2.11",
     "@types/i18next": "^8.4.2",
     "@types/jest": "^27.4.1",
     "@types/node": "^14.14.20",
@@ -96,6 +98,7 @@
     "@types/testing-library__jest-dom": "^5.14.3",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
     "@typescript-eslint/parser": "^5.10.1",
+    "chai": "^4.2.0",
     "cpx2": "^3.0.0",
     "eslint": "^7.32.0",
     "eslint-plugin-node": "^11.1.0",

@@ -26,29 +26,25 @@ const ActionPanel = ({
   isLoading = false,
 }: ActionPanelProps): JSX.Element => {
   return (
-    <div id="action">
-      <div className="rcw-action-panel">
-        {isLoading && <LoadingSpinner />}
-        <Button
-          disabled={isSavingDisabled || isLoading}
-          styleType="high-visibility"
-          id="save-app"
-          onClick={onAction}
-        >
-          {actionLabel}
-        </Button>
-        <Button
-          styleType="default"
-          type="button"
-          id="cancel"
-          onClick={onCancel}
-          disabled={isCancelDisabled || isLoading}
-        >
-          {ReportsConfigWidget.localization.getLocalizedString(
-            "ReportsConfigWidget:Cancel"
-          )}
-        </Button>
-      </div>
+    <div className="rcw-action-panel">
+      {isLoading && <LoadingSpinner />}
+      <Button
+        disabled={isSavingDisabled || isLoading}
+        styleType="high-visibility"
+        onClick={onAction}
+      >
+        {actionLabel}
+      </Button>
+      <Button
+        styleType="default"
+        type="button"
+        onClick={onCancel}
+        disabled={isCancelDisabled || isLoading}
+      >
+        {ReportsConfigWidget.localization.getLocalizedString(
+          "ReportsConfigWidget:Cancel"
+        )}
+      </Button>
     </div>
   );
 };
