@@ -6,20 +6,25 @@ import { Fieldset, LabeledInput, Small, ToggleSwitch } from "@itwin/itwinui-reac
 import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleError, handleInputChange, WidgetHeader } from "./utils";
+import { handleError, handleInputChange } from "./utils";
 import "./MappingAction.scss";
 import { useMappingClient } from "./context/MappingClientContext";
 import type { Mapping } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
-interface MappingActionProps {
-  iModelId: string;
+const defaultDisplayStrings = {
+  mappingDetails: "Mapping Details",
+};
+
+export interface MappingActionProps {
   mapping?: Mapping;
-  returnFn: () => Promise<void>;
+  onSaveSuccess: () => void;
+  onClickCancel?: () => void;
+  displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
-const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
-  const { getAccessToken } = useGroupingMappingApiConfig();
+export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displayStrings: userDisplayStrings }: MappingActionProps) => {
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [values, setValues] = useState({
     name: mapping?.mappingName ?? "",
@@ -29,7 +34,8 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // TODO ERRORED STATE
+  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
+
   const onSave = async () => {
     try {
       if (!validator.allValid()) {
@@ -49,21 +55,23 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
           description: values.description,
           extractionEnabled: values.extractionEnabled,
         });
-      await returnFn();
+      setValues({
+        name: mapping?.mappingName ?? "",
+        description: mapping?.description ?? "",
+        extractionEnabled: mapping?.extractionEnabled ?? true,
+      });
+      onSaveSuccess();
     } catch (error: any) {
       handleError(error.status);
+    } finally {
       setIsLoading(false);
     }
   };
 
   return (
     <>
-      <WidgetHeader
-        title={mapping ? "Modify Mapping" : "Add Mapping"}
-        returnFn={returnFn}
-      />
       <div className='gmw-details-form-container'>
-        <Fieldset legend='Mapping Details' className='gmw-details-form'>
+        <Fieldset legend={displayStrings.mappingDetails} className='gmw-details-form'>
           <Small className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
@@ -114,12 +122,10 @@ const MappingAction = ({ iModelId, mapping, returnFn }: MappingActionProps) => {
       </div>
       <ActionPanel
         onSave={onSave}
-        onCancel={returnFn}
+        onCancel={onClickCancel}
         isSavingDisabled={!values.name}
         isLoading={isLoading}
       />
     </>
   );
 };
-
-export default MappingAction;

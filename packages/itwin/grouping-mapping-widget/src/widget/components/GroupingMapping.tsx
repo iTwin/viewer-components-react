@@ -2,83 +2,122 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useEffect, useState } from "react";
-import { Mappings } from "./Mapping";
-import "./GroupingMapping.scss";
-import { IModelApp } from "@itwin/core-frontend";
 import type {
-  ClientPrefix,
-  GetAccessTokenFn,
-  GroupingMappingApiConfig,
-} from "./context/GroupingApiConfigContext";
-import { GroupingMappingApiConfigContext } from "./context/GroupingApiConfigContext";
+  CalculatedProperty,
+  CustomCalculation,
+  Group,
+  GroupProperty,
+  Mapping,
+} from "@itwin/insights-client";
+import React, { useCallback, useMemo, useState } from "react";
+import type { GroupingMappingContextProps } from "./GroupingMappingContext";
+import { GroupingMappingContext } from "./GroupingMappingContext";
+import "./GroupingMapping.scss";
+import { useActiveIModelConnection } from "@itwin/appui-react";
+import type {
+  ContextCustomUI,
+  GroupingMappingCustomUI,
+} from "./customUI/GroupingMappingCustomUI";
+import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
 import {
-  createMappingClient,
-  MappingClientContext,
-} from "./context/MappingClientContext";
-import type { IMappingsClient } from "@itwin/insights-client";
-import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
-import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
+  SvgList,
+} from "@itwin/itwinui-icons-react";
+import { GroupingMappingContent } from "./GroupingMappingContent";
+import { GroupingMappingHeader } from "./GroupingMappingHeader";
+import { defaultGroupingUI } from "./customUI/DefaultGroupingUI";
 
-export interface GroupingMappingProps {
-  /**
-   * Custom callback to retrieve access token.
-   */
-  getAccessToken?: GetAccessTokenFn;
-  /**
-   * Used for iTwin and iModel APIs.
-   * Also used for Mapping API if a custom {@link client} is not provided.
-   */
-  prefix?: ClientPrefix;
-  /**
-   * A custom implementation of MappingClient.
-   */
-  client?: IMappingsClient;
-  /**
-   * Custom UI to add and update groups or provide additional group context capabilities.
-   */
-  customUIs?: GroupingMappingCustomUI[];
+export type GroupingMappingProps = Omit<GroupingMappingContextProps, "iModelId">;
+
+export enum RouteStep {
+  Mappings,
+  MappingsAction,
+  Groups,
+  GroupAction,
+  GroupContextCustomUI,
+  Properties,
+  PropertyAction,
+  CalculatedPropertyAction,
+  CustomCalculationPropertyAction,
 }
 
-const authorizationClientGetAccessToken = async () =>
-  (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+export interface Route {
+  step: RouteStep;
+  title: string;
+  groupingRouteFields: GroupingRouteFields;
+}
+export interface GroupingRouteFields {
+  mapping?: Mapping;
+  group?: Group;
+  property?: GroupProperty;
+  calculatedProperty?: CalculatedProperty;
+  customCalculation?: CustomCalculation;
+  // Optional prop but cannot be declared undefined.
+  groupContextCustomUI?: Exclude<ContextCustomUI["uiComponent"], undefined>;
+  queryGenerationType?: string;
+}
 
 const GroupingMapping = (props: GroupingMappingProps) => {
-  const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
-  const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
-  const [customUIs, setCustomUIs] = useState<GroupingMappingCustomUI[]>(
-    createGroupingMappingCustomUI(props.customUIs),
+  const [routingHistory, setRoutingHistory] = useState<Route[]>([
+    { step: RouteStep.Mappings, title: "Mapping", groupingRouteFields: {} },
+  ]);
+  const currentRoute = routingHistory[routingHistory.length - 1];
+  const iModelId = useActiveIModelConnection()?.iModelId ?? "";
+  const groupUIs =
+    props.customUIs?.filter(
+      (p) => p.type === GroupingMappingCustomUIType.Grouping
+    );
+  const navigateTo = useCallback((toRoute: (prev: Route | undefined) => Route) => {
+    setRoutingHistory((r) => [...r, toRoute(r[r.length - 1])]);
+  }, []);
+
+  const goBack = useCallback(() => {
+    const updatedRouting = [...routingHistory];
+    updatedRouting.pop();
+    setRoutingHistory(updatedRouting);
+  }, [routingHistory]);
+
+  const injectedCustomUI = useMemo<GroupingMappingCustomUI[]>(
+    () => [
+      {
+        name: "Properties",
+        displayLabel: "Properties",
+        type: GroupingMappingCustomUIType.Context,
+        icon: <SvgList />,
+        onClick: (group) =>
+          navigateTo((prev) => ({
+            step: RouteStep.Properties,
+            title: group.groupName,
+            groupingRouteFields: { ...prev?.groupingRouteFields, group },
+          })),
+      },
+      ...(props.customUIs ?? []),
+      // No group UI's provided means the widget provides its own
+      ...groupUIs ?? defaultGroupingUI,
+    ],
+    [groupUIs, navigateTo, props.customUIs]
   );
-  const [apiConfig, setApiConfig] = useState<GroupingMappingApiConfig>({
-    getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
-    prefix: props.prefix,
-  });
-
-  useEffect(() => {
-    setApiConfig(() => ({
-      prefix: props.prefix,
-      getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
-    }));
-  }, [props.getAccessToken, props.prefix]);
-
-  useEffect(() => {
-    setMappingClient(createMappingClient(clientProp));
-  }, [clientProp]);
-
-  useEffect(() => {
-    setCustomUIs(createGroupingMappingCustomUI(props.customUIs));
-  }, [props.customUIs]);
 
   return (
-    <GroupingMappingApiConfigContext.Provider value={apiConfig}>
-      <MappingClientContext.Provider value={mappingClient}>
-        <GroupingMappingCustomUIContext.Provider value={customUIs}>
-          <div className='gmw-group-mapping-container'>
-            <Mappings />
-          </div>
-        </GroupingMappingCustomUIContext.Provider>
-      </MappingClientContext.Provider>
-    </GroupingMappingApiConfigContext.Provider>
+    <GroupingMappingContext
+      iModelId={iModelId}
+      {...props}
+      customUIs={injectedCustomUI}
+    >
+      <div className="gmw-group-mapping-container">
+        {// Will remove until all components are correctly componentized
+          currentRoute.step !== RouteStep.Properties && routingHistory.length < 4 &&
+          <GroupingMappingHeader
+            routingHistory={routingHistory}
+            goBack={goBack}
+            currentRoute={currentRoute}
+          />}
+        <GroupingMappingContent
+          routingHistory={routingHistory}
+          navigateTo={navigateTo}
+          goBack={goBack}
+        />
+      </div>
+    </GroupingMappingContext>
   );
 };
 
