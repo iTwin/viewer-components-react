@@ -82,7 +82,7 @@ export const hideElementsByQuery = async (
   replace = false,
 ) => {
   if (!IModelApp.viewManager.selectedView) {
-    return [];
+    return ({ keySet: new KeySet(), ids: [] });
   }
 
   const vp = IModelApp.viewManager.selectedView;
@@ -95,9 +95,9 @@ export const hideElementsByQuery = async (
   if (set.elements) {
     const ids = [...set.elements];
     hideElements(ids, replace);
-    return ids;
+    return { keySet, ids };
   }
-  return [];
+  return ({ keySet: new KeySet(), ids: [] });
 };
 
 export const hideElements = (hilitedIds: string[], replace = false) => {
@@ -355,7 +355,7 @@ export const getHiliteIds = async (
   iModelConnection: IModelConnection,
 ) => {
   if (!IModelApp.viewManager.selectedView) {
-    return [];
+    return ({ keySet: new KeySet(), ids: [] });
   }
 
   const vp = IModelApp.viewManager.selectedView;
@@ -366,9 +366,9 @@ export const getHiliteIds = async (
   });
   const set = await hiliteProvider.getHiliteSet(keySet);
   if (set.elements) {
-    return [...set.elements];
+    return { keySet, ids: [...set.elements] };
   }
-  return [];
+  return ({ keySet: new KeySet(), ids: [] });
 };
 
 export const manufactureKeys = async (

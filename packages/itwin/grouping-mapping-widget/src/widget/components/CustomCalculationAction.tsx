@@ -9,38 +9,80 @@ import {
   LabeledTextarea,
   Small,
 } from "@itwin/itwinui-react";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleError, WidgetHeader } from "./utils";
+import { handleError } from "./utils";
 import "./CalculatedPropertyAction.scss";
-import type { ICustomCalculationTyped } from "./CustomCalculationTable";
 import "./CustomCalculationAction.scss";
 import { quantityTypesSelectionOptions } from "./GroupPropertyAction";
 import { useFormulaValidation } from "../hooks/useFormulaValidation";
-import type { PropertyMap } from "../../formula/Types";
+import type { PossibleDataType, PropertyMap } from "../../formula/Types";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type { CalculatedProperty, CustomCalculation, GroupProperty } from "@itwin/insights-client";
 import { QuantityType } from "@itwin/insights-client";
+import { usePropertiesContext } from "./context/PropertiesContext";
 
-interface CalculatedPropertyActionProps {
-  iModelId: string;
+export interface CustomCalculationActionProps {
   mappingId: string;
   groupId: string;
-  properties: PropertyMap;
-  customCalculation?: ICustomCalculationTyped;
-  returnFn: (modified: boolean) => Promise<void>;
+  customCalculation?: CustomCalculation;
+  onSaveSuccess: () => void;
+  onClickCancel?: () => void;
 }
 
-const CustomCalculationAction = ({
-  iModelId,
+const stringToPossibleDataType = (str?: string): PossibleDataType => {
+  if (!str)
+    return "Undefined";
+
+  switch (str.toLowerCase()) {
+    case "double":
+    case "number": return "Number";
+    case "string": return "String";
+    case "boolean": return "Boolean";
+    default: return "Undefined";
+  }
+};
+
+const convertToPropertyMap = (
+  groupProperties: GroupProperty[],
+  calculatedProperties: CalculatedProperty[],
+  customCalculations: CustomCalculation[],
+  selectedPropertyName?: string
+): PropertyMap => {
+  const map: PropertyMap = {};
+  const selectedLowerName = selectedPropertyName?.toLowerCase();
+
+  groupProperties.forEach((p) => {
+    const lowerName = p.propertyName?.toLowerCase();
+    if (lowerName && lowerName !== selectedLowerName)
+      map[lowerName] = stringToPossibleDataType(p.dataType);
+  });
+
+  calculatedProperties.forEach((p) => {
+    const lowerName = p.propertyName?.toLowerCase();
+    if (lowerName)
+      map[lowerName] = "Number";
+  });
+
+  customCalculations.forEach((p) => {
+    const lowerName = p.propertyName?.toLowerCase();
+    if (lowerName && lowerName !== selectedLowerName)
+      map[lowerName] = stringToPossibleDataType(p.dataType);
+  });
+
+  return map;
+};
+
+export const CustomCalculationAction = ({
   mappingId,
   groupId,
-  properties,
   customCalculation,
-  returnFn,
-}: CalculatedPropertyActionProps) => {
-  const { getAccessToken } = useGroupingMappingApiConfig();
+  onSaveSuccess,
+  onClickCancel,
+}: CustomCalculationActionProps) => {
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>(
     customCalculation?.propertyName ?? "",
@@ -48,11 +90,46 @@ const CustomCalculationAction = ({
   const [formula, setFormula] = useState<string>(
     customCalculation?.formula ?? "",
   );
+  const {
+    groupProperties,
+    setGroupProperties,
+    calculatedProperties,
+    setCalculatedProperties,
+    customCalculationProperties,
+    setCustomCalculationProperties,
+  } = usePropertiesContext();
   const [quantityType, setQuantityType] = useState<QuantityType>(customCalculation?.quantityType ?? QuantityType.Undefined);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [formulaErrorMessage, setFormulaErrorMessage] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
+  const [properties, setProperties] = useState<PropertyMap>({});
   const { isValid, forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, properties, setFormulaErrorMessage);
+
+  const initialize = useCallback(async () => {
+    const groupProperties = await mappingClient.getGroupProperties((await getAccessToken()), iModelId, mappingId, groupId);
+    const calculatedProperties = await mappingClient.getCalculatedProperties((await getAccessToken()), iModelId, mappingId, groupId);
+    const customCalculationProperties = await mappingClient.getCustomCalculations((await getAccessToken()), iModelId, mappingId, groupId);
+    setGroupProperties(groupProperties);
+    setCalculatedProperties(calculatedProperties);
+    setCustomCalculationProperties(customCalculationProperties);
+  }, [getAccessToken, groupId, iModelId, mappingClient, mappingId, setCalculatedProperties, setCustomCalculationProperties, setGroupProperties]);
+
+  const fetchAllProperties = useCallback(async () => {
+    setIsLoading(true);
+    if (!groupProperties || !calculatedProperties || !customCalculationProperties) {
+      await initialize();
+    }
+    setIsLoading(false);
+  }, [calculatedProperties, customCalculationProperties, groupProperties, initialize]);
+
+  useEffect(() => {
+    const propertiesMap = convertToPropertyMap(groupProperties ?? [], calculatedProperties ?? [], customCalculationProperties ?? []);
+    setProperties(propertiesMap);
+  }, [calculatedProperties, customCalculationProperties, groupProperties]);
+
+  useEffect(() => {
+    void fetchAllProperties();
+  }, [fetchAllProperties]);
 
   const onSave = async () => {
     if (!validator.allValid()) {
@@ -89,7 +166,10 @@ const CustomCalculationAction = ({
             quantityType,
           }
         );
-      await returnFn(true);
+      onSaveSuccess();
+      setPropertyName("");
+      setFormula("");
+      setQuantityType(QuantityType.Undefined);
     } catch (error: any) {
       // error instanceof Response refuses to be true when it should be.
       if (error.status === 422) {
@@ -104,20 +184,13 @@ const CustomCalculationAction = ({
       } else {
         handleError(error.status);
       }
+    } finally {
       setIsLoading(false);
     }
   };
 
   return (
     <>
-      <WidgetHeader
-        title={
-          customCalculation
-            ? `${customCalculation.propertyName}`
-            : "Create Custom Calculation"
-        }
-        returnFn={async () => returnFn(false)}
-      />
       <div className='gmw-custom-calculation-action-container'>
         <Fieldset legend='Custom Calculation Details' className='gmw-details-form'>
           <Small className='gmw-field-legend'>
@@ -172,12 +245,10 @@ const CustomCalculationAction = ({
       </div>
       <ActionPanel
         onSave={onSave}
-        onCancel={async () => returnFn(false)}
+        onCancel={onClickCancel}
         isSavingDisabled={!(formula && propertyName && isValid)}
         isLoading={isLoading}
       />
     </>
   );
 };
-
-export default CustomCalculationAction;

@@ -7,6 +7,7 @@ import {
   SvgDelete,
   SvgEdit,
   SvgMore,
+  SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
@@ -17,43 +18,38 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
-import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import type { CustomCalculation } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import "./CustomCalculationTable.scss";
 
-export type ICustomCalculationTyped =
+type ICustomCalculationTyped =
   CreateTypeFromInterface<CustomCalculation>;
 
 interface CustomCalculationTableProps {
-  iModelId: string;
   mappingId: string;
   groupId: string;
-  setSelectedCustomCalculation: React.Dispatch<React.SetStateAction<ICustomCalculationTyped | undefined>>;
-  setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
-  onCustomCalculationModify: (value: CellProps<ICustomCalculationTyped>) => void;
+  onClickAddCustomCalculationProperty?: () => void;
+  onClickModifyCustomCalculation?: (value: CustomCalculation) => void;
   isLoadingCustomCalculations: boolean;
-  customCalculations: ICustomCalculationTyped[];
+  customCalculations: CustomCalculation[];
   refreshCustomCalculations: () => Promise<void>;
-  selectedCustomCalculation?: ICustomCalculationTyped;
 }
 
-const CustomCalculationTable = ({
-  iModelId,
+export const CustomCalculationTable = ({
   mappingId,
   groupId,
-  setSelectedCustomCalculation,
-  setGroupModifyView,
-  onCustomCalculationModify,
+  onClickAddCustomCalculationProperty,
+  onClickModifyCustomCalculation,
   isLoadingCustomCalculations,
   customCalculations,
   refreshCustomCalculations,
-  selectedCustomCalculation,
 }: CustomCalculationTableProps) => {
-  const { getAccessToken } = useGroupingMappingApiConfig();
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
+  const [selectedCustomCalculation, setSelectedCustomCalculation] = useState<CustomCalculation | undefined>(undefined);
   const [
     showCustomCalculationDeleteModal,
     setShowCustomCalculationDeleteModal,
@@ -68,13 +64,15 @@ const CustomCalculationTable = ({
             id: "propertyName",
             Header: "Custom Calculation",
             accessor: "propertyName",
-            Cell: (value: CellProps<ICustomCalculationTyped>) => (
-              <div
-                className='iui-anchor'
-                onClick={() => onCustomCalculationModify(value)}
-              >
-                {value.row.original.propertyName}
-              </div>
+            Cell: (value: CellProps<CustomCalculation>) => (
+              onClickModifyCustomCalculation ?
+                <div
+                  className='iui-anchor'
+                  onClick={() => onClickModifyCustomCalculation(value.row.original)}
+                >
+                  {value.row.original.propertyName}
+                </div> :
+                value.row.original.propertyName
             ),
           },
           {
@@ -86,29 +84,29 @@ const CustomCalculationTable = ({
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<ICustomCalculationTyped>) => {
+            Cell: (value: CellProps<CustomCalculation>) => {
               return (
                 <DropdownMenu
-                  menuItems={(close: () => void) => [
+                  menuItems={(close: () => void) => [onClickModifyCustomCalculation ? [
                     <MenuItem
                       key={0}
-                      onClick={() => onCustomCalculationModify(value)}
+                      onClick={() => onClickModifyCustomCalculation(value.row.original)}
                       icon={<SvgEdit />}
                     >
                       Modify
-                    </MenuItem>,
-                    <MenuItem
-                      key={1}
-                      onClick={() => {
-                        setSelectedCustomCalculation(value.row.original);
-                        setShowCustomCalculationDeleteModal(true);
-                        close();
-                      }}
-                      icon={<SvgDelete />}
-                    >
-                      Remove
-                    </MenuItem>,
-                  ]}
+                    </MenuItem>] : [],
+                  <MenuItem
+                    key={1}
+                    onClick={() => {
+                      setSelectedCustomCalculation(value.row.original);
+                      setShowCustomCalculationDeleteModal(true);
+                      close();
+                    }}
+                    icon={<SvgDelete />}
+                  >
+                    Remove
+                  </MenuItem>,
+                  ].flatMap((p) => p)}
                 >
                   <IconButton styleType='borderless'>
                     <SvgMore
@@ -125,20 +123,30 @@ const CustomCalculationTable = ({
         ],
       },
     ],
-    [onCustomCalculationModify, setSelectedCustomCalculation],
+    [onClickModifyCustomCalculation],
   );
 
   return (
     <>
-      <Button
-        startIcon={<SvgAdd />}
-        styleType='high-visibility'
-        onClick={() => {
-          setGroupModifyView(PropertyMenuView.ADD_CUSTOM_CALCULATION);
-        }}
-      >
-        Add Custom Calculation
-      </Button>
+      <div className="gmw-custom-calc-table-toolbar">
+        {onClickAddCustomCalculationProperty &&
+          <Button
+            startIcon={<SvgAdd />}
+            styleType='high-visibility'
+            onClick={onClickAddCustomCalculationProperty}
+          >
+            Add Calculated Property
+          </Button>
+        }
+        <IconButton
+          title="Refresh"
+          onClick={refreshCustomCalculations}
+          disabled={isLoadingCustomCalculations}
+          styleType='borderless'
+        >
+          <SvgRefresh />
+        </IconButton>
+      </div>
       <Table<ICustomCalculationTyped>
         data={customCalculations}
         density='extra-condensed'
@@ -147,7 +155,6 @@ const CustomCalculationTable = ({
         isSortable
         isLoading={isLoadingCustomCalculations}
       />
-
       <DeleteModal
         entityName={selectedCustomCalculation?.propertyName ?? ""}
         show={showCustomCalculationDeleteModal}
@@ -168,4 +175,3 @@ const CustomCalculationTable = ({
   );
 };
 
-export default CustomCalculationTable;

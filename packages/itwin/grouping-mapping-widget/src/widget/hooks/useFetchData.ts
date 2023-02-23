@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { handleError } from "../components/utils";
 
 const fetchData = async<T>(
-  setData: React.Dispatch<React.SetStateAction<T[]>>,
+  setData: (data: T[]) => void,
   fetchFunc: () => Promise<T[] | undefined>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ) => {
@@ -24,9 +24,9 @@ const fetchData = async<T>(
 
 export const useFetchData = <T>(
   fetchFunc: () => Promise<T[] | undefined>,
+  setData: (data: T[]) => void,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-): [T[], React.Dispatch<React.SetStateAction<T[]>>] => {
-  const [data, setData] = useState<T[]>([]);
+) => {
 
   useEffect(() => {
     void fetchData(
@@ -34,13 +34,11 @@ export const useFetchData = <T>(
       fetchFunc,
       setIsLoading,
     );
-  }, [fetchFunc, setIsLoading]);
-
-  return [data, setData];
+  }, [fetchFunc, setData, setIsLoading]);
 };
 
 export const useRefreshData = <T>(
-  setData: React.Dispatch<React.SetStateAction<T[]>>,
+  setData: (data: T[]) => void,
   fetchFunc: () => Promise<T[] | undefined>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ): () => Promise<void> => {
@@ -54,9 +52,9 @@ export const useRefreshData = <T>(
   }, [setData, fetchFunc, setIsLoading]);
 };
 
-export const useCombinedFetchRefresh = <T>(fetchFunc: () => Promise<T[] | undefined>) => {
+export const useCombinedFetchRefresh = <T>(fetchFunc: () => Promise<T[] | undefined>, setData: (data: T[]) => void) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [data, setData] = useFetchData(fetchFunc, setIsLoading);
+  useFetchData(fetchFunc, setData, setIsLoading);
   const refreshData = useRefreshData(setData, fetchFunc, setIsLoading);
-  return { isLoading, data, refreshData };
+  return { isLoading, refreshData };
 };

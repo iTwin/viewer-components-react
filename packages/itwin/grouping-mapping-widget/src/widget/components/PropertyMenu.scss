@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
+@import "~@itwin/itwinui-css/scss/variables";
 
 .gmw-loading-overlay {
   display: flex;
@@ -39,6 +39,10 @@
     flex-direction: column;
     overflow: auto;
     gap: $iui-baseline * 3;
+    .gmw-property-menu-toolbar {
+      display: flex;
+      justify-content: space-between;
+    }
     .gmw-property-table {
       display: flex;
       flex-direction: column;

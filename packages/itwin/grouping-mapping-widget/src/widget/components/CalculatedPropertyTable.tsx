@@ -7,6 +7,7 @@ import {
   SvgDelete,
   SvgEdit,
   SvgMore,
+  SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import {
   Button,
@@ -17,47 +18,42 @@ import {
 } from "@itwin/itwinui-react";
 import React, { useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
-import { PropertyMenuView } from "./PropertyMenu";
 import type { CellProps } from "react-table";
 import DeleteModal from "./DeleteModal";
 import type { CalculatedProperty } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import "./CalculatedPropertyTable.scss";
 
-export type ICalculatedPropertyTyped =
+type ICalculatedPropertyTyped =
   CreateTypeFromInterface<CalculatedProperty>;
 
 interface CalculatedPropertyTableProps {
-  iModelId: string;
   mappingId: string;
   groupId: string;
-  setSelectedCalculatedProperty: React.Dispatch<React.SetStateAction<ICalculatedPropertyTyped | undefined>>;
-  setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
-  onCalculatedPropertyModify: (value: CellProps<ICalculatedPropertyTyped>) => void;
+  onClickAddCalculatedProperty?: () => void;
+  onClickModifyCalculatedProperty?: (value: CalculatedProperty) => void;
   isLoadingCalculatedProperties: boolean;
-  calculatedProperties: ICalculatedPropertyTyped[];
+  calculatedProperties: CalculatedProperty[];
   refreshCalculatedProperties: () => Promise<void>;
-  selectedCalculatedProperty?: ICalculatedPropertyTyped;
 }
 
-const CalculatedPropertyTable = ({
-  iModelId,
+export const CalculatedPropertyTable = ({
   mappingId,
   groupId,
-  setSelectedCalculatedProperty,
-  setGroupModifyView,
-  onCalculatedPropertyModify,
-  isLoadingCalculatedProperties: isLoadingGroupProperties,
+  onClickAddCalculatedProperty,
+  onClickModifyCalculatedProperty,
+  isLoadingCalculatedProperties,
   calculatedProperties,
   refreshCalculatedProperties,
-  selectedCalculatedProperty,
 }: CalculatedPropertyTableProps) => {
-  const { getAccessToken } = useGroupingMappingApiConfig();
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [
     showCalculatedPropertyDeleteModal,
     setShowCalculatedPropertyDeleteModal,
   ] = useState<boolean>(false);
+  const [selectedCalculatedProperty, setSelectedCalculatedProperty] = useState<CalculatedProperty | undefined>(undefined);
 
   const calculatedPropertiesColumns = useMemo(
     () => [
@@ -68,30 +64,33 @@ const CalculatedPropertyTable = ({
             id: "propertyName",
             Header: "Calculated Property",
             accessor: "propertyName",
-            Cell: (value: CellProps<ICalculatedPropertyTyped>) => (
-              <div
-                className='iui-anchor'
-                onClick={() => onCalculatedPropertyModify(value)}
-              >
-                {value.row.original.propertyName}
-              </div>
+            Cell: (value: CellProps<CalculatedProperty>) => (
+              onClickModifyCalculatedProperty ?
+                <div
+                  className='iui-anchor'
+                  onClick={() => onClickModifyCalculatedProperty(value.row.original)}
+                >
+                  {value.row.original.propertyName}
+                </div> :
+                value.row.original.propertyName
             ),
           },
           {
             id: "dropdown",
             Header: "",
             width: 80,
-            Cell: (value: CellProps<ICalculatedPropertyTyped>) => {
+            Cell: (value: CellProps<CalculatedProperty>) => {
               return (
                 <DropdownMenu
                   menuItems={(close: () => void) => [
-                    <MenuItem
-                      key={0}
-                      onClick={() => onCalculatedPropertyModify(value)}
-                      icon={<SvgEdit />}
-                    >
-                      Modify
-                    </MenuItem>,
+                    onClickModifyCalculatedProperty ? [
+                      <MenuItem
+                        key={0}
+                        onClick={() => onClickModifyCalculatedProperty(value.row.original)}
+                        icon={<SvgEdit />}
+                      >
+                        Modify
+                      </MenuItem>] : [],
                     <MenuItem
                       key={1}
                       onClick={() => {
@@ -103,7 +102,7 @@ const CalculatedPropertyTable = ({
                     >
                       Remove
                     </MenuItem>,
-                  ]}
+                  ].flatMap((p) => p)}
                 >
                   <IconButton styleType='borderless'>
                     <SvgMore
@@ -120,29 +119,38 @@ const CalculatedPropertyTable = ({
         ],
       },
     ],
-    [onCalculatedPropertyModify, setSelectedCalculatedProperty],
+    [onClickModifyCalculatedProperty],
   );
 
   return (
     <>
-      <Button
-        startIcon={<SvgAdd />}
-        styleType='high-visibility'
-        onClick={() => {
-          setGroupModifyView(PropertyMenuView.ADD_CALCULATED_PROPERTY);
-        }}
-      >
-        Add Calculated Property
-      </Button>
+      <div className="gmw-calculated-table-toolbar">
+        {onClickAddCalculatedProperty &&
+          <Button
+            startIcon={<SvgAdd />}
+            styleType='high-visibility'
+            onClick={onClickAddCalculatedProperty}
+          >
+            Add Calculated Property
+          </Button>
+        }
+        <IconButton
+          title="Refresh"
+          onClick={refreshCalculatedProperties}
+          disabled={isLoadingCalculatedProperties}
+          styleType='borderless'
+        >
+          <SvgRefresh />
+        </IconButton>
+      </div>
       <Table<ICalculatedPropertyTyped>
         data={calculatedProperties}
         density='extra-condensed'
         columns={calculatedPropertiesColumns}
         emptyTableContent='No Calculated Properties'
         isSortable
-        isLoading={isLoadingGroupProperties}
+        isLoading={isLoadingCalculatedProperties}
       />
-
       <DeleteModal
         entityName={selectedCalculatedProperty?.propertyName ?? ""}
         show={showCalculatedPropertyDeleteModal}
@@ -163,4 +171,3 @@ const CalculatedPropertyTable = ({
   );
 };
 
-export default CalculatedPropertyTable;

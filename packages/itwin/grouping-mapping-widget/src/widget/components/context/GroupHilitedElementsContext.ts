@@ -5,9 +5,10 @@
 import * as React from "react";
 import type { MutableRefObject } from "react";
 import type { Group } from "@itwin/insights-client";
+import type { KeySet } from "@itwin/presentation-common";
 
 export interface GroupHilitedElements {
-  hilitedElementsQueryCache: MutableRefObject<Map<string, string[]>>;
+  hilitedElementsQueryCache: MutableRefObject<Map<string, { keySet: KeySet, ids: string[] }>>;
   hiddenGroupsIds: string[];
   showGroupColor: boolean;
   groups: Group[];

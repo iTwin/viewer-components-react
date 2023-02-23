@@ -6,6 +6,7 @@ import { FeatureOverrideType } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Group } from "@itwin/insights-client";
 import { toaster } from "@itwin/itwinui-react";
+import { KeySet } from "@itwin/presentation-common";
 import { clearEmphasizedOverriddenElements, emphasizeElements, getHiliteIds, hideElements, hideElementsByQuery, overrideElements, zoomToElements } from "./viewerUtils";
 
 const goldenAngle = 180 * (3 - Math.sqrt(5));
@@ -17,14 +18,14 @@ export const getGroupColor = function (index: number) {
 export const getHiliteIdsFromGroups = async (
   iModelConnection: IModelConnection,
   groups: Group[],
-  hilitedElementsQueryCache: React.MutableRefObject<Map<string, string[]>>
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, { keySet: KeySet, ids: string[] }>>
 ) => {
   let allIds: string[] = [];
   for (const group of groups) {
     const query = group.query;
     let currentIds: string[] = [];
     if (hilitedElementsQueryCache.current.has(query)) {
-      currentIds = hilitedElementsQueryCache.current.get(query) ?? [];
+      currentIds = hilitedElementsQueryCache.current.get(query)?.ids ?? [];
     } else {
       try {
         const queryRowCount = await iModelConnection.queryRowCount(query);
@@ -33,8 +34,9 @@ export const getHiliteIdsFromGroups = async (
             `${group.groupName}'s query is valid but produced no results.`
           );
         }
-        currentIds = await getHiliteIds(query, iModelConnection);
-        hilitedElementsQueryCache.current.set(query, currentIds);
+        const result = await getHiliteIds(query, iModelConnection);
+        hilitedElementsQueryCache.current.set(query, result);
+        currentIds = result.ids;
       } catch {
         toaster.negative(
           `Could not hide/show ${group.groupName}. Query could not be resolved.`
@@ -49,12 +51,12 @@ export const getHiliteIdsFromGroups = async (
 export const hideGroups = async (
   iModelConnection: IModelConnection,
   viewGroups: Group[],
-  hilitedElementsQueryCache: React.MutableRefObject<Map<string, string[]>>
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, { keySet: KeySet, ids: string[] }>>
 ) => {
   for (const viewGroup of viewGroups) {
     const query = viewGroup.query;
     if (hilitedElementsQueryCache.current.has(query)) {
-      const hilitedIds = hilitedElementsQueryCache.current.get(query) ?? [];
+      const hilitedIds = hilitedElementsQueryCache.current.get(query)?.ids ?? [];
       hideElements(hilitedIds);
     } else {
       try {
@@ -84,7 +86,7 @@ export const visualizeGroupColors = async (
   groups: Group[],
   viewGroups: Group[],
   hiddenGroupsIds: string[],
-  hilitedElementsQueryCache: React.MutableRefObject<Map<string, string[]>>,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, { keySet: KeySet, ids: string[] }>>,
   doEmphasizeElements: boolean = true
 ) => {
   clearEmphasizedOverriddenElements();
@@ -107,4 +109,32 @@ export const visualizeGroupColors = async (
   }
 
   await zoomToElements(allIds);
+};
+
+export const getHiliteIdsAndKeysetFromGroup = async (
+  iModelConnection: IModelConnection,
+  group: Group,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, { keySet: KeySet, ids: string[] }>>
+) => {
+  const query = group.query;
+  if (hilitedElementsQueryCache.current.has(query)) {
+    return hilitedElementsQueryCache.current.get(query) ?? ({ keySet: new KeySet(), ids: [] });
+  }
+  try {
+    const queryRowCount = await iModelConnection.queryRowCount(query);
+    if (queryRowCount === 0) {
+      toaster.warning(
+        `${group.groupName}'s query is valid but produced no results.`
+      );
+    }
+    const result = await getHiliteIds(query, iModelConnection);
+    hilitedElementsQueryCache.current.set(query, result);
+    return result;
+  } catch {
+    toaster.negative(
+      `Query could not be resolved.`
+    );
+    return ({ keySet: new KeySet(), ids: [] });
+  }
+
 };
