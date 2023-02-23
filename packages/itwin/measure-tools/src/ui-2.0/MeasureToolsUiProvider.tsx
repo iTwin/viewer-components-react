@@ -5,22 +5,23 @@
 
 import * as React from "react";
 import type {
-  AbstractWidgetProps, CommonToolbarItem, UiItemsProvider,
+  CommonToolbarItem,
 } from "@itwin/appui-abstract";
-import { WidgetState } from "@itwin/appui-abstract";
 import {
-  ConditionalBooleanValue, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
-  ToolbarOrientation, ToolbarUsage,
+  ConditionalBooleanValue,
 } from "@itwin/appui-abstract";
-import type { ToolItemDef } from "@itwin/appui-react";
-import { SyncUiEventId, ToolbarHelper } from "@itwin/appui-react";
+import type {
+  ToolItemDef,
+} from "@itwin/appui-react";
+import {
+  SyncUiEventId, ToolbarHelper, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
+  ToolbarOrientation, ToolbarUsage, CommonWidgetProps, UiItemsProvider, WidgetState
+} from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";
 import { MeasureToolDefinitions } from "../tools/MeasureToolDefinitions";
 import { MeasurementPropertyWidget, MeasurementPropertyWidgetId } from "./MeasurementPropertyWidget";
-import { AbstractZoneLocation } from "@itwin/appui-abstract";
-import { UiFramework } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
 
 // Note: measure tools cannot pick geometry when a sheet view is active to snap to and therefore must be hidden
@@ -33,8 +34,6 @@ export interface MeasureToolsUiProviderOptions {
   widgetPlacement?: {
     location: StagePanelLocation;
     section?: StagePanelSection;
-    // eslint-disable-next-line deprecation/deprecation
-    zoneLocation?: AbstractZoneLocation;
   };
 }
 
@@ -76,7 +75,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
 
       if (toolbarOrientation === ToolbarOrientation.Vertical) {
         return [
-          ToolbarItemUtilities.createGroupButton(
+          ToolbarItemUtilities.createGroupItem(
             "measure-tools-toolbar",
             this._props?.itemPriority ?? 20,
             "icon-measure",
@@ -121,29 +120,18 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
   public provideWidgets(
     _stageId: string,
     stageUsage: string,
-    location: StagePanelLocation,
+    _location: StagePanelLocation,
     section?: StagePanelSection | undefined,
-    // eslint-disable-next-line deprecation/deprecation
-    zoneLocation?: AbstractZoneLocation
-  ): ReadonlyArray<AbstractWidgetProps> {
-    const widgets: AbstractWidgetProps[] = [];
+  ): ReadonlyArray<CommonWidgetProps> {
+    const widgets: CommonWidgetProps[] = [];
 
     const preferredLocation = this._props?.widgetPlacement?.location ?? StagePanelLocation.Right;
     const preferredSection = this._props?.widgetPlacement?.section ?? StagePanelSection.Start;
-    // eslint-disable-next-line deprecation/deprecation
-    const preferredZoneLocation = this._props?.widgetPlacement?.zoneLocation ?? AbstractZoneLocation.CenterRight;
 
     if (
       (
-        stageUsage === StageUsage.General &&
-        location === preferredLocation &&
-        section === preferredSection &&
-        UiFramework.uiVersion !== "1"
-      ) ||
-      (
         !section &&
-        stageUsage === StageUsage.General &&
-        zoneLocation === preferredZoneLocation
+        stageUsage === StageUsage.General
       )
     ) {
       widgets.push({

@@ -59,7 +59,7 @@ export class MeasureToolDefinitions {
     return new ToolItemDef({
       toolId: ClearMeasurementsTool.toolId,
       iconSpec: ClearMeasurementsTool.iconSpec,
-      isVisible: MeasurementUIEvents.isClearMeasurementButtonVisible,
+      isHidden: MeasurementUIEvents.isClearMeasurementButtonVisible,
       label: () => ClearMeasurementsTool.flyover,
       tooltip: () => ClearMeasurementsTool.description,
       execute: () => {
@@ -72,7 +72,7 @@ export class MeasureToolDefinitions {
     return new ToolItemDef({
       toolId: ToggleDisplayMeasurementAxesTool.toolId,
       iconSpec: ToggleDisplayMeasurementAxesTool.iconSpec,
-      isVisible: MeasurementUIEvents.isToggleMeasurementAxesButtonVisible,
+      isHidden: MeasurementUIEvents.isToggleMeasurementAxesButtonVisible,
       label: () =>
         MeasurementPreferences.current.displayMeasurementAxes
           ? MeasureTools.localization.getLocalizedString(

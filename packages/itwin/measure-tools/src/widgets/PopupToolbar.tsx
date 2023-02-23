@@ -5,11 +5,12 @@
 /* eslint-disable deprecation/deprecation */
 
 import * as React from "react";
-import type { ToolbarProps } from "@itwin/appui-layout-react";
-import { Toolbar } from "@itwin/appui-layout-react";
+import { CommonToolbarItem, ToolbarComposer } from "@itwin/appui-react";
+import { ExtensibleToolbarProps } from "@itwin/appui-react";
+import { ToolbarWithOverflow } from "@itwin/components-react";
 
 /** Popup toolbar properties. */
-export interface PopupToolbarProps extends ToolbarProps {
+export interface PopupToolbarProps extends ExtensibleToolbarProps {
   onClose?: () => void;
 }
 
@@ -18,14 +19,13 @@ export interface PopupToolbarProps extends ToolbarProps {
  * handler.
  */
 export class PopupToolbar extends React.PureComponent<PopupToolbarProps> {
-  private _toolbar: Toolbar;
+  private _toolbar: JSX.Element;
   private _wrapperRef?: any;
   private _isClosing: boolean;
 
   constructor(popUpProps: PopupToolbarProps) {
     super(popUpProps);
-
-    this._toolbar = new Toolbar(popUpProps);
+    this._toolbar = ToolbarComposer(popUpProps);
     this._isClosing = false;
 
     this.handleMouseDown = this.handleMouseDown.bind(this);
@@ -64,7 +64,7 @@ export class PopupToolbar extends React.PureComponent<PopupToolbarProps> {
 
   public override render() {
     return (<div ref={this.setWrapperRef}>
-      {this._toolbar.render()}
+      {this._toolbar}
     </div>);
   }
 }
