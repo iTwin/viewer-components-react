@@ -26,7 +26,7 @@ import { mockPresentationManager, TestUtils } from "../../TestUtils";
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, ScreenViewport, SpatialViewState, SubCategoriesCache, ViewManager, Viewport } from "@itwin/core-frontend";
-import type { TreeDataChangesListener, TreeNodeItem } from "@itwin/components-react";
+import type { TreeNodeItem } from "@itwin/components-react";
 import type { ECInstancesNodeKey, Node, NodePathElement } from "@itwin/presentation-common";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { PresentationManager, RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
@@ -456,7 +456,6 @@ describe("CategoryTree", () => {
           dataProvider = {
             imodel: imodelMock.object,
             rulesetId: "",
-            onTreeNodeChanged: new BeEvent<TreeDataChangesListener>(),
             dispose: () => { },
             getFilteredNodePaths: async () => [],
             getNodeKey: (node: TreeNodeItem) => (node as any).__key,

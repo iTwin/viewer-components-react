@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { StagePanelLocation, StagePanelSection } from "@itwin/appui-abstract";
-import type { SpatialContainmentTreeProps } from "@itwin/appui-react";
+import type { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
+// import type { SpatialContainmentTreeProps } from "@itwin/breakdown-trees-react";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { CategoryTreeProps } from "./components/trees/category-tree/CategoriesTree";
@@ -15,35 +15,32 @@ export interface IModelContentTreeProps
 }
 
 export type ModelTreeProps = Omit<
-ModelsTreeProps,
-| "iModel"
-| "activeView"
-| "width"
-| "height"
-| "filterInfo"
-| "onFilterApplied"
+  ModelsTreeProps,
+  | "iModel"
+  | "activeView"
+  | "width"
+  | "height"
+  | "filterInfo"
+  | "onFilterApplied"
 >;
 
 export type CategoriesTreeProps = Omit<
-CategoryTreeProps,
-| "iModel"
-| "activeView"
-| "width"
-| "height"
-| "filterInfo"
-| "onFilterApplied"
+  CategoryTreeProps,
+  | "iModel"
+  | "activeView"
+  | "width"
+  | "height"
+  | "filterInfo"
+  | "onFilterApplied"
 >;
 
-export type SpatialTreeProps = Omit<
-SpatialContainmentTreeProps,
-"iModel" | "width" | "height"
->;
+// export type SpatialTreeProps = SpatialContainmentTreeProps;
 
 export const ModelsTreeId = "models-tree";
 
 export const CategoriesTreeId = "categories-tree";
 
-export const SpatialContainmentTreeId = "spatial-containment-tree";
+// export const SpatialContainmentTreeId = "spatial-containment-tree";
 
 export interface TreeWidgetOptions {
   defaultPanelLocation?: StagePanelLocation;
@@ -53,11 +50,11 @@ export interface TreeWidgetOptions {
   additionalTrees?: SelectableContentDefinition[];
   modelsTreeProps?: ModelTreeProps;
   categoriesTreeProps?: CategoriesTreeProps;
-  spatialTreeProps?: SpatialTreeProps;
+  // spatialTreeProps?: SpatialTreeProps;
   defaultTreeId?: string;
   hideTrees?: {
     modelsTree?: boolean;
     categoriesTree?: boolean;
-    spatialTree?: boolean;
+    // spatialTree?: boolean;
   };
 }
