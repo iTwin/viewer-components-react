@@ -1,23 +1,21 @@
-/*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import { SpatialContainmentTree, useActiveIModelConnection } from "@itwin/appui-react";
-import React from "react";
-import type { SpatialTreeProps } from "../../../types";
-import { AutoSizer } from "../../utils/AutoSizer";
+// /*---------------------------------------------------------------------------------------------
+// * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+// * See LICENSE.md in the project root for license terms and full copyright notice.
+// *--------------------------------------------------------------------------------------------*/
+// import { useActiveIModelConnection } from "@itwin/appui-react";
+// import { SpatialContainmentTree, SpatialContainmentTreeProps } from "@itwin/breakdown-trees-react";
+// import React from "react";
+// import { AutoSizer } from "../../utils/AutoSizer";
 
-export const SpatialTreeComponent = (
-  props: SpatialTreeProps) => {
-  const iModel = useActiveIModelConnection();
+// export const SpatialTreeComponent = (
+//   props: SpatialContainmentTreeProps) => {
+//   const iModel = useActiveIModelConnection();
 
-  return (
-    <>
-      {iModel &&
-        <AutoSizer>
-          {({ width, height }) => <SpatialContainmentTree {...props} width={width} height={height} iModel={iModel} />}
-        </AutoSizer>
-      }
-    </>
-  );
-};
+//   return (
+//     <>
+//       {iModel &&
+//         <SpatialContainmentTree {...props} iModel={iModel} />
+//       }
+//     </>
+//   );
+// };
