@@ -20,7 +20,6 @@ import {
   InformationPanelHeader,
   InformationPanelWrapper,
   LabeledTextarea,
-  ProgressRadial,
   Text,
   ToggleSwitch,
 } from "@itwin/itwinui-react";
@@ -39,6 +38,7 @@ import { SvgProperties } from "@itwin/itwinui-icons-react";
 export interface PropertyMenuProps {
   mapping: Mapping;
   group: Group;
+  color: string;
   onClickAddGroupProperty?: () => void;
   onClickModifyGroupProperty?: (groupProperty: GroupProperty) => void;
   onClickAddCalculatedProperty?: () => void;
@@ -53,6 +53,7 @@ export interface PropertyMenuProps {
 export const PropertyMenu = ({
   mapping,
   group,
+  color,
   onClickAddGroupProperty,
   onClickModifyGroupProperty,
   onClickAddCalculatedProperty,
@@ -120,23 +121,13 @@ export const PropertyMenu = ({
           "GroupingMappingWidget",
           iModelConnection,
         );
-        visualizeElements(result.ids, "red");
+        visualizeElements(result.ids, color);
         await zoomToElements(result.ids);
       }
       setIsLoading(false);
     };
     void initialize();
-  }, [iModelConnection, group.query, group.groupName, group, hilitedElementsQueryCache, showGroupColor]);
-
-  if (isLoading) {
-    return (
-      <div className='gmw-loading-overlay'>
-        <Text>Loading Group</Text>
-        <ProgressRadial indeterminate />
-        <Text>Please wait...</Text>
-      </div>
-    );
-  }
+  }, [iModelConnection, group.query, group.groupName, group, hilitedElementsQueryCache, showGroupColor, color]);
 
   return (
     <InformationPanelWrapper className='gmw-property-menu-wrapper'>

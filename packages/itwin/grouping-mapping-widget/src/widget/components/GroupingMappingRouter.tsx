@@ -117,6 +117,7 @@ export const GroupingMappingRouter = ({
           <PropertyMenu
             mapping={mapping}
             group={group}
+            color="red"
             onClickAddGroupProperty={() =>
               navigateTo((prev) => ({ step: RouteStep.PropertyAction, title: "Add Property", groupingRouteFields: { ...prev?.groupingRouteFields } }))
             }
