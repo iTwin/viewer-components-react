@@ -7,14 +7,12 @@ import type {
   SelectOption,
 } from "@itwin/itwinui-react";
 import {
-  ToggleSwitch,
-} from "@itwin/itwinui-react";
-import {
   Fieldset,
   LabeledInput,
   LabeledSelect,
   MenuItem,
   Small,
+  ToggleSwitch,
 } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
 import ActionPanel from "./ActionPanel";
