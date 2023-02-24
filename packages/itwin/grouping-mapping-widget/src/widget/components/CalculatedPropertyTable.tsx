@@ -3,14 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import {
-  SvgAdd,
   SvgDelete,
   SvgEdit,
   SvgMore,
-  SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import {
-  Button,
   DropdownMenu,
   IconButton,
   MenuItem,
@@ -24,6 +21,8 @@ import type { CalculatedProperty } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import "./CalculatedPropertyTable.scss";
+import { PropertyTableToolbar } from "./PropertyTableToolbar";
+import { PropertyNameCell } from "./PropertyNameCell";
 
 type ICalculatedPropertyTyped =
   CreateTypeFromInterface<CalculatedProperty>;
@@ -65,14 +64,11 @@ export const CalculatedPropertyTable = ({
             Header: "Calculated Property",
             accessor: "propertyName",
             Cell: (value: CellProps<CalculatedProperty>) => (
-              onClickModifyCalculatedProperty ?
-                <div
-                  className='iui-anchor'
-                  onClick={() => onClickModifyCalculatedProperty(value.row.original)}
-                >
-                  {value.row.original.propertyName}
-                </div> :
-                value.row.original.propertyName
+              <PropertyNameCell
+                propertyName={value.row.original.propertyName}
+                property={value.row.original}
+                onClickModify={onClickModifyCalculatedProperty}
+              />
             ),
           },
           {
@@ -124,25 +120,12 @@ export const CalculatedPropertyTable = ({
 
   return (
     <>
-      <div className="gmw-calculated-table-toolbar">
-        {onClickAddCalculatedProperty &&
-          <Button
-            startIcon={<SvgAdd />}
-            styleType='high-visibility'
-            onClick={onClickAddCalculatedProperty}
-          >
-            Add Calculated Property
-          </Button>
-        }
-        <IconButton
-          title="Refresh"
-          onClick={refreshCalculatedProperties}
-          disabled={isLoadingCalculatedProperties}
-          styleType='borderless'
-        >
-          <SvgRefresh />
-        </IconButton>
-      </div>
+      <PropertyTableToolbar
+        propertyType="Calculated"
+        onClickAddProperty={onClickAddCalculatedProperty}
+        refreshProperties={refreshCalculatedProperties}
+        isLoadingProperties={isLoadingCalculatedProperties}
+      />
       <Table<ICalculatedPropertyTyped>
         data={calculatedProperties}
         density='extra-condensed'

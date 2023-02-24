@@ -76,30 +76,6 @@ export const clearIsolatedElements = () => {
   emph.clearIsolatedElements(vp);
 };
 
-export const hideElementsByQuery = async (
-  query: string,
-  iModelConnection: IModelConnection,
-  replace = false,
-) => {
-  if (!IModelApp.viewManager.selectedView) {
-    return ({ keySet: new KeySet(), ids: [] });
-  }
-
-  const vp = IModelApp.viewManager.selectedView;
-
-  const keySet = await manufactureKeys(query, iModelConnection);
-  const hiliteProvider: HiliteSetProvider = HiliteSetProvider.create({
-    imodel: vp.iModel,
-  });
-  const set = await hiliteProvider.getHiliteSet(keySet);
-  if (set.elements) {
-    const ids = [...set.elements];
-    hideElements(ids, replace);
-    return { keySet, ids };
-  }
-  return ({ keySet: new KeySet(), ids: [] });
-};
-
 export const hideElements = (hilitedIds: string[], replace = false) => {
   if (!IModelApp.viewManager.selectedView) {
     return;

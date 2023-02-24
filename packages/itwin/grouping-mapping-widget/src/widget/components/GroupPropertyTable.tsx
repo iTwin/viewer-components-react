@@ -3,14 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import {
-  SvgAdd,
   SvgDelete,
   SvgEdit,
   SvgMore,
-  SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import {
-  Button,
   DropdownMenu,
   IconButton,
   MenuItem,
@@ -23,7 +20,8 @@ import DeleteModal from "./DeleteModal";
 import type { GroupProperty } from "@itwin/insights-client";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
-import "./GroupPropertyTable.scss";
+import { PropertyTableToolbar } from "./PropertyTableToolbar";
+import { PropertyNameCell } from "./PropertyNameCell";
 
 type IGroupPropertyTyped = CreateTypeFromInterface<GroupProperty>;
 
@@ -63,14 +61,11 @@ export const GroupPropertyTable = ({
             Header: "Property",
             accessor: "propertyName",
             Cell: (value: CellProps<GroupProperty>) => (
-              onClickModifyGroupProperty ?
-                <div
-                  className='iui-anchor'
-                  onClick={() => onClickModifyGroupProperty(value.row.original)}
-                >
-                  {value.row.original.propertyName}
-                </div> :
-                value.row.original.propertyName
+              <PropertyNameCell
+                propertyName={value.row.original.propertyName}
+                property={value.row.original}
+                onClickModify={onClickModifyGroupProperty}
+              />
             ),
           },
           {
@@ -122,23 +117,12 @@ export const GroupPropertyTable = ({
   return (
     <>
       <div className="gmw-properties-table-toolbar">
-        {onClickAddGroupProperty &&
-          <Button
-            startIcon={<SvgAdd />}
-            styleType='high-visibility'
-            onClick={onClickAddGroupProperty}
-          >
-            Add Property
-          </Button>
-        }
-        <IconButton
-          title="Refresh"
-          onClick={refreshGroupProperties}
-          disabled={isLoadingGroupProperties}
-          styleType='borderless'
-        >
-          <SvgRefresh />
-        </IconButton>
+        <PropertyTableToolbar
+          propertyType="Group"
+          onClickAddProperty={onClickAddGroupProperty}
+          refreshProperties={refreshGroupProperties}
+          isLoadingProperties={isLoadingGroupProperties}
+        />
       </div>
       <Table
         data={groupProperties}

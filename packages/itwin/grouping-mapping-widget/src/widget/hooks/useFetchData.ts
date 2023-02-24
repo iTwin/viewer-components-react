@@ -2,14 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { handleError } from "../components/utils";
 
 const fetchData = async<T>(
   setData: (data: T[]) => void,
   fetchFunc: () => Promise<T[] | undefined>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsLoading: (isLoading: boolean) => void,
 ) => {
   try {
     setIsLoading(true);
@@ -25,7 +24,7 @@ const fetchData = async<T>(
 export const useFetchData = <T>(
   fetchFunc: () => Promise<T[] | undefined>,
   setData: (data: T[]) => void,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsLoading: (isLoading: boolean) => void,
 ) => {
 
   useEffect(() => {
@@ -40,7 +39,7 @@ export const useFetchData = <T>(
 export const useRefreshData = <T>(
   setData: (data: T[]) => void,
   fetchFunc: () => Promise<T[] | undefined>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsLoading: (isLoading: boolean) => void,
 ): () => Promise<void> => {
   return useCallback(async () => {
     setData([]);

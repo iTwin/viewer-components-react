@@ -3,14 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import {
-  SvgAdd,
   SvgDelete,
   SvgEdit,
   SvgMore,
-  SvgRefresh,
 } from "@itwin/itwinui-icons-react";
 import {
-  Button,
   DropdownMenu,
   IconButton,
   MenuItem,
@@ -23,7 +20,8 @@ import DeleteModal from "./DeleteModal";
 import type { CustomCalculation } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import "./CustomCalculationTable.scss";
+import { PropertyTableToolbar } from "./PropertyTableToolbar";
+import { PropertyNameCell } from "./PropertyNameCell";
 
 type ICustomCalculationTyped =
   CreateTypeFromInterface<CustomCalculation>;
@@ -65,14 +63,11 @@ export const CustomCalculationTable = ({
             Header: "Custom Calculation",
             accessor: "propertyName",
             Cell: (value: CellProps<CustomCalculation>) => (
-              onClickModifyCustomCalculation ?
-                <div
-                  className='iui-anchor'
-                  onClick={() => onClickModifyCustomCalculation(value.row.original)}
-                >
-                  {value.row.original.propertyName}
-                </div> :
-                value.row.original.propertyName
+              <PropertyNameCell
+                propertyName={value.row.original.propertyName}
+                property={value.row.original}
+                onClickModify={onClickModifyCustomCalculation}
+              />
             ),
           },
           {
@@ -128,25 +123,12 @@ export const CustomCalculationTable = ({
 
   return (
     <>
-      <div className="gmw-custom-calc-table-toolbar">
-        {onClickAddCustomCalculationProperty &&
-          <Button
-            startIcon={<SvgAdd />}
-            styleType='high-visibility'
-            onClick={onClickAddCustomCalculationProperty}
-          >
-            Add Calculated Property
-          </Button>
-        }
-        <IconButton
-          title="Refresh"
-          onClick={refreshCustomCalculations}
-          disabled={isLoadingCustomCalculations}
-          styleType='borderless'
-        >
-          <SvgRefresh />
-        </IconButton>
-      </div>
+      <PropertyTableToolbar
+        propertyType="Custom Calculation"
+        onClickAddProperty={onClickAddCustomCalculationProperty}
+        refreshProperties={refreshCustomCalculations}
+        isLoadingProperties={isLoadingCustomCalculations}
+      />
       <Table<ICustomCalculationTyped>
         data={customCalculations}
         density='extra-condensed'
