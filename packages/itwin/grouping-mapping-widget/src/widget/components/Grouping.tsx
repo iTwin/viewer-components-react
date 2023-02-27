@@ -207,7 +207,6 @@ export const Groupings = ({
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
     }
-
   };
 
   const refresh = useCallback(async () => {
@@ -242,19 +241,6 @@ export const Groupings = ({
     const allIds = await getHiliteIdsFromGroupsWrapper(groups);
     await zoomToElements(allIds);
   }, [setHiddenGroupsIds, groups, hideGroupsWrapper, getHiliteIdsFromGroupsWrapper]);
-
-  const toggleGroupColor = useCallback(
-    async (e: any) => {
-      if (e.target.checked) {
-        await visualizeGroupColorsWrapper(groups);
-        setShowGroupColor(true);
-      } else {
-        clearEmphasizedOverriddenElements();
-        setShowGroupColor(false);
-      }
-    },
-    [groups, visualizeGroupColorsWrapper, setShowGroupColor],
-  );
 
   return (
     <>
@@ -302,7 +288,7 @@ export const Groupings = ({
                 className='gmw-toggle'
                 disabled={isLoadingQuery}
                 checked={showGroupColor}
-                onChange={toggleGroupColor}
+                onChange={() => setShowGroupColor((b) => !b)}
               ></ToggleSwitch>
               <IconButton
                 title='Show All'

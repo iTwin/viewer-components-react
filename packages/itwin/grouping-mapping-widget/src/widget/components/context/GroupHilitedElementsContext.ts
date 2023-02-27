@@ -14,7 +14,7 @@ export interface GroupHilitedElements {
   groups: Group[];
   setGroups: (groups: Group[]) => void;
   setHiddenGroupsIds: (hiddenGroupIds: string[]) => void;
-  setShowGroupColor: (showGroupColor: boolean) => void;
+  setShowGroupColor: (showGroupColor: boolean | ((showGroupColor: boolean) => boolean)) => void;
 }
 
 export const GroupHilitedElementsContext = React.createContext<GroupHilitedElements>({
