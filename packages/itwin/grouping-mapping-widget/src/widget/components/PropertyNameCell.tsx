@@ -5,7 +5,7 @@
 import React from "react";
 import { Text } from "@itwin/itwinui-react";
 
-interface PropertyNameCellProps<T extends { propertyName: string }> {
+export interface PropertyNameCellProps<T extends { propertyName: string }> {
   property: T;
   onClickModify?: (value: T) => void;
 }

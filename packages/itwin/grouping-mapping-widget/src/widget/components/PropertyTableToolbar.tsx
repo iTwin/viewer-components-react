@@ -20,21 +20,21 @@ export const PropertyTableToolbar = ({
   refreshProperties,
   isLoading,
 }: PropertyTableToolbarProps) => (
-  <div className={`gmw-property-table-toolbar`}>
-    {onClickAddProperty &&
+  <div className="gmw-property-table-toolbar">
+    {onClickAddProperty && (
       <Button
         startIcon={<SvgAdd />}
-        styleType='high-visibility'
+        styleType="high-visibility"
         onClick={onClickAddProperty}
       >
         Add {propertyType} Property
       </Button>
-    }
+    )}
     <IconButton
       title="Refresh"
       onClick={refreshProperties}
       disabled={isLoading}
-      styleType='borderless'
+      styleType="borderless"
     >
       <SvgRefresh />
     </IconButton>
