@@ -18,8 +18,8 @@ import {
 import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, IMappingsClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
+import type { QueryCacheItem } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
-import type { KeySet } from "@itwin/presentation-common";
 import { PropertiesContext } from "./context/PropertiesContext";
 
 export interface GroupingMappingContextProps {
@@ -61,7 +61,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     iModelId: props.iModelId,
     prefix: props.prefix,
   });
-  const hilitedElementsQueryCache = useRef<Map<string, { keySet: KeySet, ids: string[] }>>(new Map());
+  const hilitedElementsQueryCache = useRef<Map<string, QueryCacheItem>>(new Map());
   const [hiddenGroupsIds, setHiddenGroupsIds] = useState<string[]>([]);
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
   const [groups, setGroups] = useState<Group[]>([]);

@@ -1,12 +1,8 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
-import {
-  SvgDelete,
-  SvgEdit,
-  SvgMore,
-} from "@itwin/itwinui-icons-react";
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+import { SvgDelete, SvgEdit, SvgMore } from "@itwin/itwinui-icons-react";
 import {
   DropdownMenu,
   IconButton,
@@ -24,8 +20,7 @@ import "./CalculatedPropertyTable.scss";
 import { PropertyTableToolbar } from "./PropertyTableToolbar";
 import { PropertyNameCell } from "./PropertyNameCell";
 
-type ICalculatedPropertyTyped =
-  CreateTypeFromInterface<CalculatedProperty>;
+type ICalculatedPropertyTyped = CreateTypeFromInterface<CalculatedProperty>;
 
 interface CalculatedPropertyTableProps {
   mappingId: string;
@@ -48,11 +43,7 @@ export const CalculatedPropertyTable = ({
 }: CalculatedPropertyTableProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const [
-    showCalculatedPropertyDeleteModal,
-    setShowCalculatedPropertyDeleteModal,
-  ] = useState<boolean>(false);
-  const [selectedCalculatedProperty, setSelectedCalculatedProperty] = useState<CalculatedProperty | undefined>(undefined);
+  const [showDeleteModal, setShowDeleteModal] = useState<CalculatedProperty | undefined>(undefined);
 
   const calculatedPropertiesColumns = useMemo(
     () => [
@@ -65,7 +56,6 @@ export const CalculatedPropertyTable = ({
             accessor: "propertyName",
             Cell: (value: CellProps<CalculatedProperty>) => (
               <PropertyNameCell
-                propertyName={value.row.original.propertyName}
                 property={value.row.original}
                 onClickModify={onClickModifyCalculatedProperty}
               />
@@ -78,29 +68,37 @@ export const CalculatedPropertyTable = ({
             Cell: (value: CellProps<CalculatedProperty>) => {
               return (
                 <DropdownMenu
-                  menuItems={(close: () => void) => [
-                    onClickModifyCalculatedProperty ? [
+                  menuItems={(close: () => void) =>
+                    [
+                      onClickModifyCalculatedProperty
+                        ? [
+                          <MenuItem
+                            key={0}
+                            onClick={() =>
+                              onClickModifyCalculatedProperty(
+                                value.row.original
+                              )
+                            }
+                            icon={<SvgEdit />}
+                          >
+                            Modify
+                          </MenuItem>,
+                        ]
+                        : [],
                       <MenuItem
-                        key={0}
-                        onClick={() => onClickModifyCalculatedProperty(value.row.original)}
-                        icon={<SvgEdit />}
+                        key={1}
+                        onClick={() => {
+                          setShowDeleteModal(value.row.original);
+                          close();
+                        }}
+                        icon={<SvgDelete />}
                       >
-                        Modify
-                      </MenuItem>] : [],
-                    <MenuItem
-                      key={1}
-                      onClick={() => {
-                        setSelectedCalculatedProperty(value.row.original);
-                        setShowCalculatedPropertyDeleteModal(true);
-                        close();
-                      }}
-                      icon={<SvgDelete />}
-                    >
-                      Remove
-                    </MenuItem>,
-                  ].flatMap((p) => p)}
+                        Remove
+                      </MenuItem>,
+                    ].flatMap((p) => p)
+                  }
                 >
-                  <IconButton styleType='borderless'>
+                  <IconButton styleType="borderless">
                     <SvgMore
                       style={{
                         width: "16px",
@@ -115,7 +113,7 @@ export const CalculatedPropertyTable = ({
         ],
       },
     ],
-    [onClickModifyCalculatedProperty],
+    [onClickModifyCalculatedProperty]
   );
 
   return (
@@ -124,20 +122,19 @@ export const CalculatedPropertyTable = ({
         propertyType="Calculated"
         onClickAddProperty={onClickAddCalculatedProperty}
         refreshProperties={refreshCalculatedProperties}
-        isLoadingProperties={isLoadingCalculatedProperties}
+        isLoading={isLoadingCalculatedProperties}
       />
       <Table<ICalculatedPropertyTyped>
         data={calculatedProperties}
-        density='extra-condensed'
+        density="extra-condensed"
         columns={calculatedPropertiesColumns}
-        emptyTableContent='No Calculated Properties'
+        emptyTableContent="No Calculated Properties"
         isSortable
         isLoading={isLoadingCalculatedProperties}
       />
       <DeleteModal
-        entityName={selectedCalculatedProperty?.propertyName ?? ""}
-        show={showCalculatedPropertyDeleteModal}
-        setShow={setShowCalculatedPropertyDeleteModal}
+        entityName={showDeleteModal?.propertyName}
+        onClose={() => setShowDeleteModal(undefined)}
         onDelete={async () => {
           const accessToken = await getAccessToken();
           await mappingClient.deleteCalculatedProperty(
@@ -145,7 +142,7 @@ export const CalculatedPropertyTable = ({
             iModelId,
             mappingId,
             groupId,
-            selectedCalculatedProperty?.id ?? "",
+            showDeleteModal?.id ?? ""
           );
         }}
         refresh={refreshCalculatedProperties}
@@ -153,4 +150,3 @@ export const CalculatedPropertyTable = ({
     </>
   );
 };
-

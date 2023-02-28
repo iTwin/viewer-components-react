@@ -5,19 +5,19 @@
 import React from "react";
 import { Text } from "@itwin/itwinui-react";
 
-export const PropertyNameCell = <T,>({
-  propertyName,
-  property,
-  onClickModify,
-}: {
-  propertyName: string;
+interface PropertyNameCellProps<T extends { propertyName: string }> {
   property: T;
   onClickModify?: (value: T) => void;
-}) =>
+}
+
+export const PropertyNameCell = <T extends { propertyName: string },>({
+  property,
+  onClickModify,
+}: PropertyNameCellProps<T>) =>
   onClickModify ? (
     <div className="iui-anchor" onClick={() => onClickModify(property)}>
-      {propertyName}
+      {property.propertyName}
     </div>
   ) : (
-    <Text>{propertyName}</Text>
+    <Text>{property.propertyName}</Text>
   );

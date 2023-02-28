@@ -9,17 +9,6 @@
   flex-direction: column;
   height: 100%;
 
-  .gmw-information-panel {
-    max-width: 100%;
-    width: 100%;
-
-    .gmw-information-body {
-      textarea {
-        resize: vertical;
-      }
-    }
-  }
-
   .gmw-property-header {
     display: flex;
     justify-content: space-between;

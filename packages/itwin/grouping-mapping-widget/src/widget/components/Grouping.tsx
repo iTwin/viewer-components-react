@@ -100,12 +100,8 @@ export const Groupings = ({
     .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];
   const contextUIs: ContextCustomUI[] = useGroupingMappingCustomUI().customUIs
     .filter((p) => p.type === GroupingMappingCustomUIType.Context) as ContextCustomUI[];
-
-  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<Group | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [selectedGroup, setSelectedGroup] = useState<Group | undefined>(
-    undefined,
-  );
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
 
   const getHiliteIdsFromGroupsWrapper = useCallback(
@@ -210,7 +206,6 @@ export const Groupings = ({
   };
 
   const refresh = useCallback(async () => {
-    setSelectedGroup(undefined);
     setGroups([]);
     await fetchGroups(
       setGroups,
@@ -428,8 +423,7 @@ export const Groupings = ({
                           <MenuItem
                             key={2}
                             onClick={() => {
-                              setSelectedGroup(g);
-                              setShowDeleteModal(true);
+                              setShowDeleteModal(g);
                               close();
                             }}
                             icon={<SvgDelete />}
@@ -463,16 +457,15 @@ export const Groupings = ({
         )}
       </Surface>
       <DeleteModal
-        entityName={selectedGroup?.groupName ?? ""}
-        show={showDeleteModal}
-        setShow={setShowDeleteModal}
+        entityName={showDeleteModal?.groupName}
+        onClose={() => setShowDeleteModal(undefined)}
         onDelete={async () => {
           const accessToken = await getAccessToken();
           await mappingClient.deleteGroup(
             accessToken,
             iModelId,
             mapping.id,
-            selectedGroup?.id ?? "",
+            showDeleteModal?.id ?? "",
           );
         }}
         refresh={refresh}

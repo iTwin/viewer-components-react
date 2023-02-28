@@ -32,7 +32,7 @@ interface GroupPropertyTableProps {
   onClickAddGroupProperty?: () => void;
   onClickModifyGroupProperty?: (value: GroupProperty) => void;
   isLoadingGroupProperties: boolean;
-  groupProperties: IGroupPropertyTyped[];
+  groupProperties: GroupProperty[];
   refreshGroupProperties: () => Promise<void>;
 }
 
@@ -47,9 +47,7 @@ export const GroupPropertyTable = ({
 }: GroupPropertyTableProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const [showGroupPropertyDeleteModal, setShowGroupPropertyDeleteModal] =
-    useState<boolean>(false);
-  const [selectedGroupProperty, setSelectedGroupProperty] = useState<GroupProperty | undefined>(undefined);
+  const [showDeleteModal, setShowDeleteModal] = useState<GroupProperty | undefined>(undefined);
 
   const groupPropertiesColumns = useMemo(
     () => [
@@ -62,7 +60,6 @@ export const GroupPropertyTable = ({
             accessor: "propertyName",
             Cell: (value: CellProps<GroupProperty>) => (
               <PropertyNameCell
-                propertyName={value.row.original.propertyName}
                 property={value.row.original}
                 onClickModify={onClickModifyGroupProperty}
               />
@@ -86,8 +83,7 @@ export const GroupPropertyTable = ({
                   <MenuItem
                     key={1}
                     onClick={() => {
-                      setSelectedGroupProperty(value.row.original);
-                      setShowGroupPropertyDeleteModal(true);
+                      setShowDeleteModal(value.row.original);
                       close();
                     }}
                     icon={<SvgDelete />}
@@ -111,7 +107,7 @@ export const GroupPropertyTable = ({
         ],
       },
     ],
-    [onClickModifyGroupProperty, setSelectedGroupProperty],
+    [onClickModifyGroupProperty],
   );
 
   return (
@@ -121,10 +117,10 @@ export const GroupPropertyTable = ({
           propertyType="Group"
           onClickAddProperty={onClickAddGroupProperty}
           refreshProperties={refreshGroupProperties}
-          isLoadingProperties={isLoadingGroupProperties}
+          isLoading={isLoadingGroupProperties}
         />
       </div>
-      <Table
+      <Table<IGroupPropertyTyped>
         data={groupProperties}
         density='extra-condensed'
         columns={groupPropertiesColumns}
@@ -133,9 +129,8 @@ export const GroupPropertyTable = ({
         isLoading={isLoadingGroupProperties}
       />
       <DeleteModal
-        entityName={selectedGroupProperty?.propertyName ?? ""}
-        show={showGroupPropertyDeleteModal}
-        setShow={setShowGroupPropertyDeleteModal}
+        entityName={showDeleteModal?.propertyName}
+        onClose={() => setShowDeleteModal(undefined)}
         onDelete={async () => {
           const accessToken = await getAccessToken();
           await mappingClient.deleteGroupProperty(
@@ -143,7 +138,7 @@ export const GroupPropertyTable = ({
             iModelId,
             mappingId,
             groupId,
-            selectedGroupProperty?.id ?? "",
+            showDeleteModal?.id ?? "",
           );
         }}
         refresh={refreshGroupProperties}

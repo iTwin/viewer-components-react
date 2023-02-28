@@ -87,13 +87,10 @@ export const Mappings = ({
 }: MappingsProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<Mapping | undefined>(undefined);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
   const [showBlockingOverlay, setShowBlockingOverlay] =
     useState<boolean>(false);
-  const [selectedMapping, setSelectedMapping] = useState<Mapping | undefined>(
-    undefined
-  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
 
@@ -109,7 +106,6 @@ export const Mappings = ({
 
   const refresh = useCallback(async () => {
     clearAll();
-    setSelectedMapping(undefined);
     setMappings([]);
     await fetchMappings(
       setMappings,
@@ -188,7 +184,6 @@ export const Mappings = ({
                         <MenuItem
                           key={1}
                           onClick={async () => {
-                            setSelectedMapping(mapping);
                             setShowBlockingOverlay(true);
                             close();
                             await toggleExtraction(
@@ -209,8 +204,7 @@ export const Mappings = ({
                         <MenuItem
                           key={2}
                           onClick={() => {
-                            setSelectedMapping(mapping);
-                            setShowDeleteModal(true);
+                            setShowDeleteModal(mapping);
                             close();
                           }}
                           icon={<SvgDelete />}
@@ -235,15 +229,14 @@ export const Mappings = ({
         )}
       </Surface>
       <DeleteModal
-        entityName={selectedMapping?.mappingName ?? ""}
-        show={showDeleteModal}
-        setShow={setShowDeleteModal}
+        entityName={showDeleteModal?.mappingName}
+        onClose={() => setShowDeleteModal(undefined)}
         onDelete={async () => {
           const accessToken = await getAccessToken();
           await mappingClient.deleteMapping(
             accessToken,
             iModelId,
-            selectedMapping?.id ?? ""
+            showDeleteModal?.id ?? ""
           );
         }}
         refresh={refresh}

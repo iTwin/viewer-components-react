@@ -47,11 +47,7 @@ export const CustomCalculationTable = ({
 }: CustomCalculationTableProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const [selectedCustomCalculation, setSelectedCustomCalculation] = useState<CustomCalculation | undefined>(undefined);
-  const [
-    showCustomCalculationDeleteModal,
-    setShowCustomCalculationDeleteModal,
-  ] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<CustomCalculation | undefined>(undefined);
 
   const CustomCalculationsColumns = useMemo(
     () => [
@@ -64,7 +60,6 @@ export const CustomCalculationTable = ({
             accessor: "propertyName",
             Cell: (value: CellProps<CustomCalculation>) => (
               <PropertyNameCell
-                propertyName={value.row.original.propertyName}
                 property={value.row.original}
                 onClickModify={onClickModifyCustomCalculation}
               />
@@ -93,8 +88,7 @@ export const CustomCalculationTable = ({
                   <MenuItem
                     key={1}
                     onClick={() => {
-                      setSelectedCustomCalculation(value.row.original);
-                      setShowCustomCalculationDeleteModal(true);
+                      setShowDeleteModal(value.row.original);
                       close();
                     }}
                     icon={<SvgDelete />}
@@ -127,7 +121,7 @@ export const CustomCalculationTable = ({
         propertyType="Custom Calculation"
         onClickAddProperty={onClickAddCustomCalculationProperty}
         refreshProperties={refreshCustomCalculations}
-        isLoadingProperties={isLoadingCustomCalculations}
+        isLoading={isLoadingCustomCalculations}
       />
       <Table<ICustomCalculationTyped>
         data={customCalculations}
@@ -138,9 +132,8 @@ export const CustomCalculationTable = ({
         isLoading={isLoadingCustomCalculations}
       />
       <DeleteModal
-        entityName={selectedCustomCalculation?.propertyName ?? ""}
-        show={showCustomCalculationDeleteModal}
-        setShow={setShowCustomCalculationDeleteModal}
+        entityName={showDeleteModal?.propertyName}
+        onClose={() => setShowDeleteModal(undefined)}
         onDelete={async () => {
           const accessToken = await getAccessToken();
           await mappingClient.deleteCustomCalculation(
@@ -148,7 +141,7 @@ export const CustomCalculationTable = ({
             iModelId,
             mappingId,
             groupId,
-            selectedCustomCalculation?.id ?? "",
+            showDeleteModal?.id ?? "",
           );
         }}
         refresh={refreshCustomCalculations}

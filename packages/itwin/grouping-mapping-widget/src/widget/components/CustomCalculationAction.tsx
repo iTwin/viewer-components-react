@@ -33,10 +33,7 @@ export interface CustomCalculationActionProps {
 }
 
 const stringToPossibleDataType = (str?: string): PossibleDataType => {
-  if (!str)
-    return "Undefined";
-
-  switch (str.toLowerCase()) {
+  switch (str?.toLowerCase()) {
     case "double":
     case "number": return "Number";
     case "string": return "String";
@@ -106,20 +103,28 @@ export const CustomCalculationAction = ({
   const { isValid, forceValidation } = useFormulaValidation(propertyName.toLowerCase(), formula, properties, setFormulaErrorMessage);
 
   const initialize = useCallback(async () => {
-    const groupProperties = await mappingClient.getGroupProperties((await getAccessToken()), iModelId, mappingId, groupId);
-    const calculatedProperties = await mappingClient.getCalculatedProperties((await getAccessToken()), iModelId, mappingId, groupId);
-    const customCalculationProperties = await mappingClient.getCustomCalculations((await getAccessToken()), iModelId, mappingId, groupId);
-    setGroupProperties(groupProperties);
-    setCalculatedProperties(calculatedProperties);
-    setCustomCalculationProperties(customCalculationProperties);
+    const accessToken = await getAccessToken();
+    const [groupProps, calcProps, customCalcProps] = await Promise.all([
+      mappingClient.getGroupProperties(accessToken, iModelId, mappingId, groupId),
+      mappingClient.getCalculatedProperties(accessToken, iModelId, mappingId, groupId),
+      mappingClient.getCustomCalculations(accessToken, iModelId, mappingId, groupId),
+    ]);
+    setGroupProperties(groupProps);
+    setCalculatedProperties(calcProps);
+    setCustomCalculationProperties(customCalcProps);
   }, [getAccessToken, groupId, iModelId, mappingClient, mappingId, setCalculatedProperties, setCustomCalculationProperties, setGroupProperties]);
 
   const fetchAllProperties = useCallback(async () => {
     setIsLoading(true);
-    if (!groupProperties || !calculatedProperties || !customCalculationProperties) {
-      await initialize();
+    try {
+      if (!groupProperties || !calculatedProperties || !customCalculationProperties) {
+        await initialize();
+      }
+    } catch (error: any) {
+      handleError(error.status);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, [calculatedProperties, customCalculationProperties, groupProperties, initialize]);
 
   useEffect(() => {

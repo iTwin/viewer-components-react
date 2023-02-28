@@ -7,17 +7,19 @@ import { SvgAdd, SvgRefresh } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import "./PropertyTableToolbar.scss";
 
+export interface PropertyTableToolbarProps {
+  propertyType: string;
+  onClickAddProperty?: () => void;
+  refreshProperties: () => void;
+  isLoading: boolean;
+}
+
 export const PropertyTableToolbar = ({
   propertyType,
   onClickAddProperty,
   refreshProperties,
-  isLoadingProperties,
-}: {
-  propertyType: string;
-  onClickAddProperty?: () => void;
-  refreshProperties: () => void;
-  isLoadingProperties: boolean;
-}) => (
+  isLoading,
+}: PropertyTableToolbarProps) => (
   <div className={`gmw-property-table-toolbar`}>
     {onClickAddProperty &&
       <Button
@@ -31,7 +33,7 @@ export const PropertyTableToolbar = ({
     <IconButton
       title="Refresh"
       onClick={refreshProperties}
-      disabled={isLoadingProperties}
+      disabled={isLoading}
       styleType='borderless'
     >
       <SvgRefresh />

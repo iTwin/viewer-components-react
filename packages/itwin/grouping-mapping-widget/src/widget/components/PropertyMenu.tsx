@@ -15,15 +15,10 @@ import "./PropertyMenu.scss";
 import { GroupPropertyTable } from "./GroupPropertyTable";
 import {
   IconButton,
-  InformationPanel,
-  InformationPanelBody,
-  InformationPanelHeader,
   InformationPanelWrapper,
-  LabeledTextarea,
-  Text,
+  toaster,
   ToggleSwitch,
 } from "@itwin/itwinui-react";
-
 import { useCombinedFetchRefresh } from "../hooks/useFetchData";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
@@ -34,6 +29,7 @@ import { usePropertiesContext } from "./context/PropertiesContext";
 import { CalculatedPropertyTable } from "./CalculatedPropertyTable";
 import { CustomCalculationTable } from "./CustomCalculationTable";
 import { SvgProperties } from "@itwin/itwinui-icons-react";
+import { GroupInformationPanel } from "./GroupInformationPanel";
 
 export interface PropertyMenuProps {
   mapping: Mapping;
@@ -85,7 +81,7 @@ export const PropertyMenu = ({
 
   const fetchGroupProperties = useMemo(
     () => {
-      return async () => mappingClient.getGroupProperties((await getAccessToken()), iModelId, mappingId, groupId);
+      return async () => mappingClient.getGroupProperties(await getAccessToken(), iModelId, mappingId, groupId);
     },
     [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
@@ -94,7 +90,7 @@ export const PropertyMenu = ({
 
   const fetchCalculatedProperties = useMemo(
     () => {
-      return async () => mappingClient.getCalculatedProperties((await getAccessToken()), iModelId, mappingId, groupId);
+      return async () => mappingClient.getCalculatedProperties(await getAccessToken(), iModelId, mappingId, groupId);
     },
     [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
@@ -103,7 +99,7 @@ export const PropertyMenu = ({
 
   const fetchCustomCalculations = useMemo(
     () => {
-      return async () => mappingClient.getCustomCalculations((await getAccessToken()), iModelId, mappingId, groupId);
+      return async () => mappingClient.getCustomCalculations(await getAccessToken(), iModelId, mappingId, groupId);
     },
     [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
@@ -113,18 +109,25 @@ export const PropertyMenu = ({
   useEffect(() => {
     const initialize = async () => {
       if (!iModelConnection) return;
-      setIsLoading(true);
-      clearEmphasizedOverriddenElements();
-      if (showGroupColor) {
-        const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
-        Presentation.selection.clearSelection(
-          "GroupingMappingWidget",
-          iModelConnection,
-        );
-        visualizeElements(result.ids, color);
-        await zoomToElements(result.ids);
+      try {
+        setIsLoading(true);
+        clearEmphasizedOverriddenElements();
+        if (showGroupColor) {
+          const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
+          Presentation.selection.clearSelection(
+            "GroupingMappingWidget",
+            iModelConnection,
+          );
+          visualizeElements(result.ids, color);
+          await zoomToElements(result.ids);
+        }
+      } catch (error) {
+        toaster.negative("There was an error visualizing group.");
+        /* eslint-disable no-console */
+        console.error(error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     void initialize();
   }, [iModelConnection, group.query, group.groupName, group, hilitedElementsQueryCache, showGroupColor, color]);
@@ -188,26 +191,12 @@ export const PropertyMenu = ({
           </div>
         )}
       </div>
-      <InformationPanel
-        className='gmw-information-panel'
+      <GroupInformationPanel
         isOpen={isInformationPanelOpen}
-      >
-        <InformationPanelHeader
-          onClose={() => setIsInformationPanelOpen(false)}
-        >
-          <Text variant='subheading'>{`${group.groupName} Information`}</Text>
-        </InformationPanelHeader>
-        <InformationPanelBody>
-          <div className='gmw-information-body'>
-            <LabeledTextarea
-              label='Query'
-              rows={15}
-              readOnly
-              defaultValue={group.query}
-            />
-          </div>
-        </InformationPanelBody>
-      </InformationPanel>
+        onClose={() => setIsInformationPanelOpen(false)}
+        query={group.query}
+        groupName={group.groupName}
+      />
     </InformationPanelWrapper>
   );
 };
