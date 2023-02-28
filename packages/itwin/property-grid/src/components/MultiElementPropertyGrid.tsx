@@ -9,7 +9,6 @@ import type { InstanceKey, KeySet } from "@itwin/presentation-common";
 import type { SelectionChangeEventArgs } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
-  FrontstageManager,
   UiFramework,
   useActiveFrontstageDef,
   useActiveIModelConnection,
@@ -25,7 +24,7 @@ import { ElementList } from "./ElementList";
 import { PropertyGrid } from "./PropertyGrid";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import classnames from "classnames";
-import { WidgetState } from "@itwin/appui-abstract";
+import { WidgetState } from "@itwin/appui-react";
 import { Id64, Logger } from "@itwin/core-bentley";
 import { IconButton } from "@itwin/itwinui-react";
 import { PropertyGridManager } from "../PropertyGridManager";
@@ -97,7 +96,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
 
     const removePresentationListener = Presentation.selection.selectionChange.addListener(onSelectionChange);
     // if the frontstage changes and a selection set is already active we need to resync this widget's state with that selection
-    const removeFrontstageReadyListener = FrontstageManager.onFrontstageReadyEvent.addListener(onFrontstageReady);
+    const removeFrontstageReadyListener = UiFramework.frontstages.onFrontstageReadyEvent.addListener(onFrontstageReady);
     return () => {
       removePresentationListener();
       removeFrontstageReadyListener();
@@ -286,12 +285,10 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   );
 
   useEffect(() => {
-    if (UiFramework.uiVersion !== "1") {
-      if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
-        widgetDef?.setWidgetState(WidgetState.Open);
-      } else {
-        widgetDef?.setWidgetState(WidgetState.Hidden);
-      }
+    if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
+      widgetDef?.setWidgetState(WidgetState.Open);
+    } else {
+      widgetDef?.setWidgetState(WidgetState.Hidden);
     }
   }, [widgetDef, instanceKeys]);
 
