@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import {
   Button,
@@ -13,98 +13,61 @@ import {
   MenuItem,
   ProgressRadial,
   Surface,
-  toaster,
   ToggleSwitch,
 } from "@itwin/itwinui-react";
 import {
   SvgAdd,
-  SvgCursor,
   SvgDelete,
-  SvgDraw,
   SvgEdit,
-  SvgList,
   SvgMore,
-  SvgSearch,
+  SvgRefresh,
   SvgVisibilityHide,
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
 import DeleteModal from "./DeleteModal";
 import "./Grouping.scss";
-import type { IModelConnection } from "@itwin/core-frontend";
-import { PropertyMenu } from "./PropertyMenu";
 import {
   clearEmphasizedElements,
   clearEmphasizedOverriddenElements,
   clearHiddenElements,
-  clearOverriddenElements,
-  emphasizeElements,
-  getHiliteIds,
   hideElements,
-  hideElementsByQuery,
-  overrideElements,
   zoomToElements,
 } from "./viewerUtils";
 import {
   EmptyMessage,
   handleError,
   LoadingOverlay,
-  WidgetHeader,
 } from "./utils";
-import GroupAction from "./GroupAction";
 import type { Group, IMappingsClient, Mapping } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
-import { FeatureOverrideType } from "@itwin/core-common";
 import { HorizontalTile } from "./HorizontalTile";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
 import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
 import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
-import { Presentation } from "@itwin/presentation-frontend";
+import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
+import { getGroupColor, getHiliteIdsFromGroups, hideGroups, visualizeGroupColors } from "./groupsHelpers";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
-export const defaultUIMetadata = [
-  {
-    name: "Selection",
-    displayLabel: "Selection",
-    icon: <SvgCursor />,
-  },
-  {
-    name: "Search",
-    displayLabel: "Query Keywords",
-    icon: <SvgSearch />,
-  },
-  {
-    name: "Manual",
-    displayLabel: "Manual Query",
-    icon: <SvgDraw />,
-  },
-];
-
-enum GroupsView {
-  Add,          // Add group view
-  Groups,       // Group list page
-  CustomUI,     // Context custom UI view
-  Modifying,    // Modify group view
-  Properties,   // Group properties view
-}
-
-interface GroupsTreeProps {
+export interface GroupingProps {
   mapping: Mapping;
-  goBack: () => Promise<void>;
+  onClickAddGroup?: (queryGenerationType: string) => void;
+  onClickGroupTitle?: (group: Group) => void;
+  onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
+  onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: Group) => void;
+  emphasizeElements?: boolean;
 }
-
-const goldenAngle = 180 * (3 - Math.sqrt(5));
 
 const fetchGroups = async (
-  setGroups: React.Dispatch<React.SetStateAction<IGroupTyped[]>>,
+  setGroups: (groups: Group[]) => void,
   iModelId: string,
   mappingId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   getAccessToken: GetAccessTokenFn,
   mappingsClient: IMappingsClient,
-): Promise<Group[] | undefined> => {
+): Promise<void> => {
   try {
     setIsLoading(true);
     const accessToken = await getAccessToken();
@@ -114,147 +77,93 @@ const fetchGroups = async (
       mappingId,
     );
     setGroups(groups);
-    return groups;
   } catch (error: any) {
     handleError(error.status);
   } finally {
     setIsLoading(false);
   }
-  return undefined;
 };
 
-export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
-  const iModelConnection = useActiveIModelConnection() as IModelConnection;
-  const { getAccessToken } = useGroupingMappingApiConfig();
+export const Groupings = ({
+  mapping,
+  onClickAddGroup,
+  onClickGroupTitle,
+  onClickGroupModify,
+  onClickRenderContextCustomUI,
+  emphasizeElements = true,
+}: GroupingProps) => {
+  const iModelConnection = useActiveIModelConnection();
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
+  const { showGroupColor, setShowGroupColor, hiddenGroupsIds, setHiddenGroupsIds, hilitedElementsQueryCache, groups, setGroups } = useGroupHilitedElementsContext();
   const mappingClient = useMappingClient();
-  const iModelId = useActiveIModelConnection()?.iModelId as string;
-  const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI()
+  const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs
     .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];
-  const contextUIs: ContextCustomUI[] = useGroupingMappingCustomUI()
+  const contextUIs: ContextCustomUI[] = useGroupingMappingCustomUI().customUIs
     .filter((p) => p.type === GroupingMappingCustomUIType.Context) as ContextCustomUI[];
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [groupsView, setGroupsView] = useState<GroupsView>(GroupsView.Groups);
-  const [selectedGroup, setSelectedGroup] = useState<IGroupTyped | undefined>(
+  const [selectedGroup, setSelectedGroup] = useState<Group | undefined>(
     undefined,
   );
-  const hilitedElements = useRef<Map<string, string[]>>(new Map());
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [hiddenGroupsIds, setHiddenGroupsIds] = useState<string[]>([]);
-  const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
 
-  const [queryGenerationType, setQueryGenerationType] =
-    useState<string>("Selection");
-  const [selectedContextCustomUI, setSelectedContextCustomUI] = useState<ContextCustomUI | undefined>(undefined);
+  const getHiliteIdsFromGroupsWrapper = useCallback(
+    async (groups: Group[]): Promise<string[]> =>
+      iModelConnection
+        ? getHiliteIdsFromGroups(
+          iModelConnection,
+          groups,
+          hilitedElementsQueryCache
+        )
+        : [],
+    [iModelConnection, hilitedElementsQueryCache]
+  );
+
+  const visualizeGroupColorsWrapper = useCallback(
+    async (viewGroups: Group[]) => {
+      if (!iModelConnection) return;
+      setLoadingQuery(true);
+      await visualizeGroupColors(iModelConnection, groups, viewGroups, hiddenGroupsIds, hilitedElementsQueryCache, emphasizeElements);
+      setLoadingQuery(false);
+    },
+    [iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache, emphasizeElements],
+  );
 
   useEffect(() => {
-    void fetchGroups(
-      setGroups,
-      iModelId,
-      mapping.id,
-      setIsLoading,
-      getAccessToken,
-      mappingClient,
-    );
-  }, [getAccessToken, mappingClient, iModelId, mapping.id]);
+    const initialize = async () => {
+      await fetchGroups(
+        setGroups,
+        iModelId,
+        mapping.id,
+        setIsLoading,
+        getAccessToken,
+        mappingClient,
+      );
+    };
+    void initialize();
+  }, [getAccessToken, mappingClient, iModelId, mapping.id, setGroups]);
 
-  const getGroupColor = function (index: number) {
-    return `hsl(${index * goldenAngle + 60}, 100%, 50%)`;
-  };
-
-  const getHiliteIdsFromGroups = useCallback(
-    async (groups: Group[]) => {
-      let allIds: string[] = [];
-      for (const group of groups) {
-        const query = group.query;
-        let currentIds: string[] = [];
-        if (hilitedElements.current.has(query)) {
-          currentIds = hilitedElements.current.get(query) ?? [];
-        } else {
-          try {
-            const queryRowCount = await iModelConnection.queryRowCount(query);
-            if (queryRowCount === 0) {
-              toaster.warning(
-                `${group.groupName}'s query is valid but produced no results.`,
-              );
-            }
-            currentIds = await getHiliteIds(query, iModelConnection);
-            hilitedElements.current.set(query, currentIds);
-          } catch {
-            toaster.negative(
-              `Could not hide/show ${group.groupName}. Query could not be resolved.`,
-            );
-          }
-        }
-        allIds = allIds.concat(currentIds);
+  useEffect(() => {
+    if (isLoading) return;
+    const visualize = async () => {
+      if (groups.length > 0 && showGroupColor) {
+        await visualizeGroupColorsWrapper(groups);
+      } else {
+        clearEmphasizedOverriddenElements();
       }
-      return allIds;
-    },
-    [iModelConnection, hilitedElements],
-  );
+    };
+    void visualize();
+  }, [groups, isLoading, showGroupColor, visualizeGroupColorsWrapper]);
 
-  const visualizeGroupColors = useCallback(
+  const hideGroupsWrapper = useCallback(
     async (viewGroups: Group[]) => {
+      if (!iModelConnection) return;
       setLoadingQuery(true);
-      clearEmphasizedOverriddenElements();
-      let allIds: string[] = [];
-      for (const group of viewGroups) {
-        const index =
-          viewGroups.length > groups.length
-            ? viewGroups.findIndex((g) => g.id === group.id)
-            : groups.findIndex((g) => g.id === group.id);
-        const hilitedIds = await getHiliteIdsFromGroups([group]);
-        overrideElements(
-          hilitedIds,
-          getGroupColor(index),
-          FeatureOverrideType.ColorAndAlpha,
-        );
-        emphasizeElements(hilitedIds, undefined);
-        if (!hiddenGroupsIds.includes(group.id)) {
-          allIds = allIds.concat(hilitedIds);
-        }
-      }
-
-      await zoomToElements(allIds);
+      await hideGroups(iModelConnection, viewGroups, hilitedElementsQueryCache);
       setLoadingQuery(false);
     },
-    [groups, hiddenGroupsIds, getHiliteIdsFromGroups],
-  );
-
-  const hideGroups = useCallback(
-    async (viewGroups: Group[]) => {
-      setLoadingQuery(true);
-      for (const viewGroup of viewGroups) {
-        const query = viewGroup.query;
-        if (hilitedElements.current.has(query)) {
-          const hilitedIds = hilitedElements.current.get(query) ?? [];
-          hideElements(hilitedIds);
-        } else {
-          try {
-            const queryRowCount = await iModelConnection.queryRowCount(query);
-            if (queryRowCount === 0) {
-              toaster.warning(
-                `${viewGroup.groupName}'s query is valid but produced no results.`,
-              );
-            }
-            const hiliteIds = await hideElementsByQuery(
-              query,
-              iModelConnection,
-              false,
-            );
-            hilitedElements.current.set(query, hiliteIds);
-          } catch {
-            toaster.negative(
-              `Could not hide/show ${viewGroup.groupName}. Query could not be resolved.`,
-            );
-          }
-        }
-      }
-      setLoadingQuery(false);
-    },
-    [iModelConnection],
+    [hilitedElementsQueryCache, iModelConnection],
   );
 
   const showGroup = useCallback(
@@ -267,48 +176,43 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
         .filter((g): g is Group => !!g && g.id !== viewGroup.id);
 
       // view group Ids filter
-      const viewIds = await getHiliteIdsFromGroups(
+      const viewIds = await getHiliteIdsFromGroupsWrapper(
         groups.filter((g) => !newHiddenGroups.find((hg) => hg.id === g.id)),
       );
-      let hiddenIds = await getHiliteIdsFromGroups(newHiddenGroups);
+      let hiddenIds = await getHiliteIdsFromGroupsWrapper(newHiddenGroups);
       hiddenIds = hiddenIds.filter((id) => !viewIds.includes(id));
       hideElements(hiddenIds);
     },
-    [groups, hiddenGroupsIds, getHiliteIdsFromGroups],
+    [groups, hiddenGroupsIds, getHiliteIdsFromGroupsWrapper],
   );
 
   const addGroup = (type: string) => {
-    setQueryGenerationType(type);
+    if (!onClickAddGroup) return;
+    onClickAddGroup(type);
     clearEmphasizedElements();
-    setGroupsView(GroupsView.Add);
   };
 
   const onModify = async (group: Group, type: string) => {
-    setQueryGenerationType(type);
-    setSelectedGroup(group);
-    setGroupsView(GroupsView.Modifying);
+    if (!onClickGroupModify) return;
     if (group.id && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
     }
     clearEmphasizedElements();
+    onClickGroupModify(group, type);
   };
 
-  const openProperties = async (group: Group) => {
-    setSelectedGroup(group);
-    setGroupsView(GroupsView.Properties);
-    if (group.id && hiddenGroupsIds.includes(group.id)) {
+  const colorGroup = async (group: Group) => {
+    if (showGroupColor && hiddenGroupsIds.includes(group.id)) {
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
     }
   };
 
   const refresh = useCallback(async () => {
-    setGroupsView(GroupsView.Groups);
     setSelectedGroup(undefined);
-    setSelectedContextCustomUI(undefined);
     setGroups([]);
-    const groups = await fetchGroups(
+    await fetchGroups(
       setGroups,
       iModelId,
       mapping.id,
@@ -316,383 +220,263 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       getAccessToken,
       mappingClient,
     );
-    if (groups) {
-      if (showGroupColor) {
-        await visualizeGroupColors(groups);
-      } else {
-        clearEmphasizedOverriddenElements();
-      }
-    }
-  }, [
-    getAccessToken,
-    mappingClient,
-    iModelId,
-    mapping.id,
-    setGroups,
-    showGroupColor,
-    visualizeGroupColors,
-  ]);
-
-  const resetView = async () => {
-    if (groups) {
-      if (showGroupColor) {
-        await visualizeGroupColors(groups);
-      } else {
-        clearOverriddenElements();
-      }
-      clearEmphasizedElements();
-    }
-  };
+  }, [getAccessToken, mappingClient, iModelId, mapping.id, setGroups]);
 
   const showAll = async () => {
     setLoadingQuery(true);
 
     clearHiddenElements();
     setHiddenGroupsIds([]);
-    const allIds = await getHiliteIdsFromGroups(groups);
+    const allIds = await getHiliteIdsFromGroupsWrapper(groups);
     await zoomToElements(allIds);
 
     setLoadingQuery(false);
   };
 
   const hideAll = useCallback(async () => {
-    await hideGroups(groups);
+    await hideGroupsWrapper(groups);
     setHiddenGroupsIds(
       groups.map((g) => g.id).filter((id): id is string => !!id),
     );
-    const allIds = await getHiliteIdsFromGroups(groups);
+    const allIds = await getHiliteIdsFromGroupsWrapper(groups);
     await zoomToElements(allIds);
-  }, [setHiddenGroupsIds, groups, hideGroups, getHiliteIdsFromGroups]);
+  }, [setHiddenGroupsIds, groups, hideGroupsWrapper, getHiliteIdsFromGroupsWrapper]);
 
-  const toggleGroupColor = useCallback(
-    async (e: any) => {
-      if (e.target.checked) {
-        await visualizeGroupColors(groups);
-        setShowGroupColor(true);
-      } else {
-        clearEmphasizedOverriddenElements();
-        setShowGroupColor(false);
-      }
-    },
-    [groups, visualizeGroupColors, setShowGroupColor],
-  );
-
-  const propertyMenuGoBack = useCallback(async () => {
-    setGroupsView(GroupsView.Groups);
-    await refresh();
-  }, [refresh]);
-
-  switch (groupsView) {
-    case GroupsView.Add:
-      return (
-        <GroupAction
-          iModelId={iModelId}
-          mappingId={mapping.id}
-          queryGenerationType={queryGenerationType}
-          goBack={async () => {
-            setGroupsView(GroupsView.Groups);
-            await refresh();
-          }}
-          resetView={resetView}
-        />
-      );
-    case GroupsView.Modifying:
-      return selectedGroup ? (
-        <GroupAction
-          iModelId={iModelId}
-          mappingId={mapping.id}
-          group={selectedGroup}
-          queryGenerationType={queryGenerationType}
-          goBack={async () => {
-            setGroupsView(GroupsView.Groups);
-            await refresh();
-          }}
-          resetView={resetView}
-        />
-      ) : null;
-    case GroupsView.Properties:
-      return selectedGroup ? (
-        <PropertyMenu
-          iModelId={iModelId}
-          mappingId={mapping.id}
-          group={selectedGroup}
-          goBack={propertyMenuGoBack}
-        />
-      ) : null;
-    case GroupsView.Groups:
-      return (
-        <>
-          <WidgetHeader
-            title={mapping.mappingName}
-            disabled={isLoading || isLoadingQuery}
-            returnFn={async () => {
-              clearEmphasizedOverriddenElements();
-              await goBack();
-            }}
-          />
-
-          <Surface className='gmw-groups-container'>
-            <div className='gmw-toolbar'>
-              <DropdownMenu
-                className='gmw-custom-ui-dropdown'
-                disabled={isLoadingQuery}
-                menuItems={() =>
-                  (groupUIs.length > 0
-                    ? groupUIs
-                    : defaultUIMetadata)
-                    .map((p, index) => (
-                      <MenuItem
-                        key={index}
-                        onClick={() => addGroup(p.name)}
-                        icon={p.icon}
-                        className='gmw-menu-item'
-                        data-testid={`gmw-add-${index}`}
-                      >
-                        {p.displayLabel}
-                      </MenuItem>
-                    ))
-                }
-              >
-                <Button
-                  data-testid="gmw-add-group-button"
-                  className='add-load-button'
-                  startIcon={
-                    isLoadingQuery ? (
-                      <ProgressRadial size='small' indeterminate />
-                    ) : (
-                      <SvgAdd />
-                    )
-                  }
-                  styleType='high-visibility'
-                  disabled={isLoadingQuery}
-                >
-                  {isLoadingQuery ? "Loading" : "Add Group"}
-                </Button>
-              </DropdownMenu>
-              <ButtonGroup className='gmw-toolbar-buttons'>
-                <ToggleSwitch
-                  label='Color by Group'
-                  labelPosition='left'
-                  className='gmw-toggle'
-                  disabled={isLoadingQuery}
-                  checked={showGroupColor}
-                  onChange={toggleGroupColor}
-                ></ToggleSwitch>
-                <IconButton
-                  title='Show All'
-                  onClick={showAll}
-                  disabled={isLoadingQuery}
-                  styleType='borderless'
-                  className='gmw-group-view-icon'
-                >
-                  <SvgVisibilityShow />
-                </IconButton>
-                <IconButton
-                  title='Hide All'
-                  onClick={hideAll}
-                  disabled={isLoadingQuery}
-                  styleType='borderless'
-                  className='gmw-group-view-icon'
-                >
-                  <SvgVisibilityHide />
-                </IconButton>
-              </ButtonGroup>
-            </div>
-            {isLoading ? (
-              <LoadingOverlay />
-            ) : groups.length === 0 ? (
-              <EmptyMessage message='No Groups available.' />
-            ) : (
-              <div className='gmw-group-list'>
-                {groups
-                  .sort(
-                    (a, b) =>
-                      a.groupName?.localeCompare(b.groupName ?? "") ?? 1,
+  return (
+    <>
+      <Surface className='gmw-groups-container'>
+        <div className='gmw-toolbar'>
+          {onClickAddGroup && groupUIs.length > 0 &&
+            <DropdownMenu
+              className='gmw-custom-ui-dropdown'
+              disabled={isLoadingQuery}
+              menuItems={() =>
+                groupUIs.map((p, index) => (
+                  <MenuItem
+                    key={index}
+                    onClick={() => addGroup(p.name)}
+                    icon={p.icon}
+                    className='gmw-menu-item'
+                    data-testid={`gmw-add-${index}`}
+                  >
+                    {p.displayLabel}
+                  </MenuItem>
+                ))
+              }
+            >
+              <Button
+                data-testid="gmw-add-group-button"
+                className='add-load-button'
+                startIcon={
+                  isLoadingQuery ? (
+                    <ProgressRadial size='small' indeterminate />
+                  ) : (
+                    <SvgAdd />
                   )
-                  .map((g) => (
-                    <HorizontalTile
-                      key={g.id}
-                      title={g.groupName ? g.groupName : "Untitled"}
-                      subText={g.description}
-                      actionGroup={
-                        <div className='gmw-actions'>
-                          {showGroupColor && (
-                            <IconButton
-                              styleType='borderless'
-                              className='gmw-group-view-icon'
-                            >
-                              <div
-                                className="gmw-color-legend"
-                                style={{
-                                  backgroundColor: getGroupColor(groups.findIndex((group) => g.id === group.id)),
-                                }}
-                              />
-                            </IconButton>
-                          )}
-                          {g.id && hiddenGroupsIds.includes(g.id) ? (
-                            <IconButton
-                              disabled={isLoadingQuery}
-                              styleType='borderless'
-                              className='gmw-group-view-icon'
-                              onClick={async () => {
-                                await showGroup(g);
-                                setHiddenGroupsIds(
-                                  hiddenGroupsIds.filter((id) => g.id !== id),
-                                );
+                }
+                styleType='high-visibility'
+                disabled={isLoadingQuery}
+              >
+                {isLoadingQuery ? "Loading" : "Add Group"}
+              </Button>
+            </DropdownMenu>}
+          {iModelConnection &&
+            <ButtonGroup className='gmw-toolbar-buttons'>
+              <ToggleSwitch
+                label='Color by Group'
+                labelPosition='left'
+                className='gmw-toggle'
+                disabled={isLoadingQuery}
+                checked={showGroupColor}
+                onChange={() => setShowGroupColor((b) => !b)}
+              ></ToggleSwitch>
+              <IconButton
+                title='Show All'
+                onClick={showAll}
+                disabled={isLoadingQuery}
+                styleType='borderless'
+                className='gmw-group-view-icon'
+              >
+                <SvgVisibilityShow />
+              </IconButton>
+              <IconButton
+                title='Hide All'
+                onClick={hideAll}
+                disabled={isLoadingQuery}
+                styleType='borderless'
+                className='gmw-group-view-icon'
+              >
+                <SvgVisibilityHide />
+              </IconButton>
+              <IconButton
+                title="Refresh"
+                onClick={refresh}
+                disabled={isLoading || isLoadingQuery}
+                styleType='borderless'
+              >
+                <SvgRefresh />
+              </IconButton>
+            </ButtonGroup>}
+        </div>
+        {isLoading ? (
+          <LoadingOverlay />
+        ) : groups.length === 0 ? (
+          <EmptyMessage message='No Groups available.' />
+        ) : (
+          <div className='gmw-group-list'>
+            {groups
+              .sort(
+                (a, b) =>
+                  a.groupName?.localeCompare(b.groupName ?? "") ?? 1,
+              )
+              .map((g) => (
+                <HorizontalTile
+                  key={g.id}
+                  title={g.groupName ? g.groupName : "Untitled"}
+                  subText={g.description}
+                  actionGroup={
+                    <div className='gmw-actions'>
+                      {iModelConnection && <>
+                        {showGroupColor && (
+                          <IconButton
+                            styleType='borderless'
+                            className='gmw-group-view-icon'
+                          >
+                            <div
+                              className="gmw-color-legend"
+                              style={{
+                                backgroundColor: getGroupColor(groups.findIndex((group) => g.id === group.id)),
                               }}
-                            >
-                              <SvgVisibilityHide />
-                            </IconButton>
-                          ) : (
-                            <IconButton
-                              disabled={isLoadingQuery}
-                              styleType='borderless'
-                              className='gmw-group-view-icon'
-                              onClick={async () => {
-                                await hideGroups([g]);
-                                setHiddenGroupsIds(
-                                  hiddenGroupsIds.concat(g.id ? [g.id] : []),
-                                );
-                              }}
-                            >
-                              <SvgVisibilityShow />
-                            </IconButton>
-                          )}
-                          <DropdownMenu
-                            className='gmw-custom-ui-dropdown'
+                            />
+                          </IconButton>
+                        )}
+                        {g.id && hiddenGroupsIds.includes(g.id) ? (
+                          <IconButton
                             disabled={isLoadingQuery}
-                            menuItems={(close: () => void) =>
-                              [
-                                <MenuItem
-                                  key={0}
-                                  icon={<SvgEdit />}
-                                  disabled={isLoadingQuery}
-                                  data-testid="gmw-context-menu-item"
-                                  subMenuItems={
-                                    (groupUIs.length > 0
-                                      ? groupUIs
-                                      : defaultUIMetadata)
-                                      .map((p, index) => (
-                                        <MenuItem
-                                          key={index}
-                                          className='gmw-menu-item'
-                                          data-testid={`gmw-edit-${index}`}
-                                          onClick={async () => onModify(g, p.name)}
-                                          icon={p.icon}
-                                        >
-                                          {p.displayLabel}
-                                        </MenuItem>
-                                      ))
-                                  }
-                                >
-                                  Edit
-                                </MenuItem>,
-                                <MenuItem
-                                  key={1}
-                                  onClick={async () => openProperties(g)}
-                                  icon={<SvgList />}
-                                  data-testid="gmw-context-menu-item"
-                                >
-                                  Properties
-                                </MenuItem>,
-                                <MenuItem
-                                  key={2}
-                                  onClick={() => {
-                                    setSelectedGroup(g);
-                                    setShowDeleteModal(true);
-                                    close();
-                                  }}
-                                  icon={<SvgDelete />}
-                                  data-testid="gmw-context-menu-item"
-                                >
-                                  Remove
-                                </MenuItem>,
-                              ].concat(
-                                contextUIs.map((p) => {
-                                  return <MenuItem
-                                    key={p.name}
-                                    onClick={() => {
-                                      if (p.uiComponent) {
-                                        setSelectedGroup(g);
-                                        setSelectedContextCustomUI(p);
-                                        setGroupsView(GroupsView.CustomUI);
-                                      }
-                                      if (p.onClick) {
-                                        p.onClick(g.id, mapping.id, iModelId);
-                                      }
-                                      close();
-                                    }}
+                            styleType='borderless'
+                            className='gmw-group-view-icon'
+                            onClick={async () => {
+                              await showGroup(g);
+                              setHiddenGroupsIds(
+                                hiddenGroupsIds.filter((id) => g.id !== id),
+                              );
+                            }}
+                          >
+                            <SvgVisibilityHide />
+                          </IconButton>
+                        ) : (
+                          <IconButton
+                            disabled={isLoadingQuery}
+                            styleType='borderless'
+                            className='gmw-group-view-icon'
+                            onClick={async () => {
+                              await hideGroupsWrapper([g]);
+                              setHiddenGroupsIds(
+                                hiddenGroupsIds.concat(g.id ? [g.id] : []),
+                              );
+                            }}
+                          >
+                            <SvgVisibilityShow />
+                          </IconButton>
+                        )}
+                      </>}
+                      <DropdownMenu
+                        className='gmw-custom-ui-dropdown'
+                        disabled={isLoadingQuery}
+                        menuItems={(close: () => void) =>
+                          [...(groupUIs.length > 0 && onClickGroupModify ?
+                            [<MenuItem
+                              key={0}
+                              icon={<SvgEdit />}
+                              disabled={isLoadingQuery}
+                              data-testid="gmw-context-menu-item"
+                              subMenuItems={
+                                groupUIs.map((p, index) => (
+                                  <MenuItem
+                                    key={index}
+                                    className='gmw-menu-item'
+                                    data-testid={`gmw-edit-${index}`}
+                                    onClick={async () => onModify(g, p.name)}
                                     icon={p.icon}
-                                    data-testid="gmw-context-menu-item"
                                   >
                                     {p.displayLabel}
-                                  </MenuItem>;
-                                })
-                              )
-                            }
-                          >
-                            <IconButton
-                              disabled={isLoadingQuery}
-                              styleType='borderless'
-                              data-testid="gmw-more-button"
+                                  </MenuItem>
+                                ))
+                              }
                             >
-                              <SvgMore />
-                            </IconButton>
-                          </DropdownMenu>
-                        </div>
-                      }
-                      onClickTitle={
-                        isLoadingQuery
-                          ? undefined
-                          : async () => openProperties(g)
-                      }
-                    />
-                  ))}
-              </div>
-            )}
-          </Surface>
-          <DeleteModal
-            entityName={selectedGroup?.groupName ?? ""}
-            show={showDeleteModal}
-            setShow={setShowDeleteModal}
-            onDelete={async () => {
-              const accessToken = await getAccessToken();
-              await mappingClient.deleteGroup(
-                accessToken,
-                iModelId,
-                mapping.id,
-                selectedGroup?.id ?? "",
-              );
-            }}
-            refresh={refresh}
-          />
-        </>
-      );
-    case GroupsView.CustomUI:
-      return selectedContextCustomUI && selectedContextCustomUI.uiComponent && selectedGroup
-        ? (
-          <>
-            <WidgetHeader
-              title={selectedContextCustomUI.displayLabel}
-              returnFn={async () => {
-                Presentation.selection.clearSelection(
-                  "GroupingMappingWidget",
-                  iModelConnection,
-                );
-                await refresh();
-              }}
-            />
-            {React.createElement(selectedContextCustomUI.uiComponent, {
-              iModelId,
-              mappingId: mapping.id,
-              groupId: selectedGroup.id,
-            })}
-          </>
-        )
-        : null;
-    default:
-      return (
-        <EmptyMessage message="No given group view" />
-      );
-  }
+                              Edit
+                            </MenuItem>] : []),
+                          ...contextUIs.map((p) => {
+                            return <MenuItem
+                              key={p.name}
+                              onClick={async () => {
+                                showGroupColor && await showGroup(g);
+                                if (p.uiComponent && onClickRenderContextCustomUI) {
+                                  onClickRenderContextCustomUI(p.uiComponent, g);
+                                }
+                                if (p.onClick) {
+                                  p.onClick(g, mapping, iModelId);
+                                }
+                                close();
+                              }}
+                              icon={p.icon}
+                              data-testid="gmw-context-menu-item"
+                            >
+                              {p.displayLabel}
+                            </MenuItem>;
+                          }),
+                          <MenuItem
+                            key={2}
+                            onClick={() => {
+                              setSelectedGroup(g);
+                              setShowDeleteModal(true);
+                              close();
+                            }}
+                            icon={<SvgDelete />}
+                            data-testid="gmw-context-menu-item"
+                          >
+                            Remove
+                          </MenuItem>,
+                          ]
+                        }
+                      >
+                        <IconButton
+                          disabled={isLoadingQuery}
+                          styleType='borderless'
+                          data-testid="gmw-more-button"
+                        >
+                          <SvgMore />
+                        </IconButton>
+                      </DropdownMenu>
+                    </div>
+                  }
+                  onClickTitle={
+                    onClickGroupTitle && !isLoadingQuery ?
+                      async () => {
+                        await colorGroup(g);
+                        onClickGroupTitle(g);
+                      } : undefined
+                  }
+                />
+              ))}
+          </div>
+        )}
+      </Surface>
+      <DeleteModal
+        entityName={selectedGroup?.groupName ?? ""}
+        show={showDeleteModal}
+        setShow={setShowDeleteModal}
+        onDelete={async () => {
+          const accessToken = await getAccessToken();
+          await mappingClient.deleteGroup(
+            accessToken,
+            iModelId,
+            mapping.id,
+            selectedGroup?.id ?? "",
+          );
+        }}
+        refresh={refresh}
+      />
+    </>
+  );
 };

@@ -5,7 +5,7 @@
 import * as React from "react";
 import { DEFAULT_PROPERTY_GRID_RULESET, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { PropertyGrid } from "./PropertyGrid";
-import "../GroupQueryBuilder.scss";
+import "../customUI/GroupQueryBuilderCustomUI.scss";
 import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
 import { QueryBuilder } from "../QueryBuilder";
 import type { KeySet } from "@itwin/presentation-common";

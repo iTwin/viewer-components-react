@@ -67,7 +67,7 @@ import {
   findProperties,
 } from "./GroupPropertyUtils";
 
-interface GroupPropertyActionProps {
+export interface GroupPropertyActionProps {
   iModelId: string;
   mappingId: string;
   groupId: string;

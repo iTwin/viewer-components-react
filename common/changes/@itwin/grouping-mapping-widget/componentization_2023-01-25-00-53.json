@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "The view of the widget is now handled by a routing component that displays different views based on the \"step\" of the current route.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}

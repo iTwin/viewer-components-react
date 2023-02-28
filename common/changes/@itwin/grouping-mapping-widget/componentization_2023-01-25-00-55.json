@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "Added \"GroupingMappingContext\" component to provide a context for all Grouping and Mapping components, including properties such as custom callback to retrieve access token, iModelId, client prefix, custom implementation of MappingClient, and custom UI's for adding and updating groups and providing additional group context capabilities.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}
