@@ -48,7 +48,6 @@ export const hideGroups = async (
       promises.push(hideGroup(iModelConnection, viewGroup, hilitedElementsQueryCache));
     }
   }
-
   await Promise.all(promises);
 };
 
