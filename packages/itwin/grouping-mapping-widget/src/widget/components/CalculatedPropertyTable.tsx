@@ -22,12 +22,12 @@ import { PropertyNameCell } from "./PropertyNameCell";
 
 type ICalculatedPropertyTyped = CreateTypeFromInterface<CalculatedProperty>;
 
-interface CalculatedPropertyTableProps {
+export interface CalculatedPropertyTableProps {
   mappingId: string;
   groupId: string;
-  onClickAddCalculatedProperty?: () => void;
-  onClickModifyCalculatedProperty?: (value: CalculatedProperty) => void;
-  isLoadingCalculatedProperties: boolean;
+  onClickAdd?: () => void;
+  onClickModify?: (value: CalculatedProperty) => void;
+  isLoading: boolean;
   calculatedProperties: CalculatedProperty[];
   refreshCalculatedProperties: () => Promise<void>;
 }
@@ -35,9 +35,9 @@ interface CalculatedPropertyTableProps {
 export const CalculatedPropertyTable = ({
   mappingId,
   groupId,
-  onClickAddCalculatedProperty,
-  onClickModifyCalculatedProperty,
-  isLoadingCalculatedProperties,
+  onClickAdd,
+  onClickModify,
+  isLoading,
   calculatedProperties,
   refreshCalculatedProperties,
 }: CalculatedPropertyTableProps) => {
@@ -57,7 +57,7 @@ export const CalculatedPropertyTable = ({
             Cell: (value: CellProps<CalculatedProperty>) => (
               <PropertyNameCell
                 property={value.row.original}
-                onClickModify={onClickModifyCalculatedProperty}
+                onClickModify={onClickModify}
               />
             ),
           },
@@ -70,12 +70,12 @@ export const CalculatedPropertyTable = ({
                 <DropdownMenu
                   menuItems={(close: () => void) =>
                     [
-                      onClickModifyCalculatedProperty
+                      onClickModify
                         ? [
                           <MenuItem
                             key={0}
                             onClick={() =>
-                              onClickModifyCalculatedProperty(
+                              onClickModify(
                                 value.row.original
                               )
                             }
@@ -113,16 +113,16 @@ export const CalculatedPropertyTable = ({
         ],
       },
     ],
-    [onClickModifyCalculatedProperty]
+    [onClickModify]
   );
 
   return (
     <>
       <PropertyTableToolbar
         propertyType="Calculated"
-        onClickAddProperty={onClickAddCalculatedProperty}
+        onClickAddProperty={onClickAdd}
         refreshProperties={refreshCalculatedProperties}
-        isLoading={isLoadingCalculatedProperties}
+        isLoading={isLoading}
       />
       <Table<ICalculatedPropertyTyped>
         data={calculatedProperties}
@@ -130,7 +130,7 @@ export const CalculatedPropertyTable = ({
         columns={calculatedPropertiesColumns}
         emptyTableContent="No Calculated Properties"
         isSortable
-        isLoading={isLoadingCalculatedProperties}
+        isLoading={isLoading}
       />
       <DeleteModal
         entityName={showDeleteModal?.propertyName}

@@ -25,25 +25,25 @@ import { PropertyNameCell } from "./PropertyNameCell";
 
 type IGroupPropertyTyped = CreateTypeFromInterface<GroupProperty>;
 
-interface GroupPropertyTableProps {
+export interface GroupPropertyTableProps {
   iModelId: string;
   mappingId: string;
   groupId: string;
-  onClickAddGroupProperty?: () => void;
-  onClickModifyGroupProperty?: (value: GroupProperty) => void;
-  isLoadingGroupProperties: boolean;
+  onClickAdd?: () => void;
+  onClickModify?: (value: GroupProperty) => void;
+  isLoading: boolean;
   groupProperties: GroupProperty[];
-  refreshGroupProperties: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 export const GroupPropertyTable = ({
   mappingId,
   groupId,
-  onClickAddGroupProperty,
-  onClickModifyGroupProperty,
-  isLoadingGroupProperties,
+  onClickAdd,
+  onClickModify,
+  isLoading,
   groupProperties,
-  refreshGroupProperties,
+  refresh,
 }: GroupPropertyTableProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -61,7 +61,7 @@ export const GroupPropertyTable = ({
             Cell: (value: CellProps<GroupProperty>) => (
               <PropertyNameCell
                 property={value.row.original}
-                onClickModify={onClickModifyGroupProperty}
+                onClickModify={onClickModify}
               />
             ),
           },
@@ -72,10 +72,10 @@ export const GroupPropertyTable = ({
             Cell: (value: CellProps<GroupProperty>) => {
               return (
                 <DropdownMenu
-                  menuItems={(close: () => void) => [onClickModifyGroupProperty ? [
+                  menuItems={(close: () => void) => [onClickModify ? [
                     <MenuItem
                       key={0}
-                      onClick={() => onClickModifyGroupProperty(value.row.original)}
+                      onClick={() => onClickModify(value.row.original)}
                       icon={<SvgEdit />}
                     >
                       Modify
@@ -107,7 +107,7 @@ export const GroupPropertyTable = ({
         ],
       },
     ],
-    [onClickModifyGroupProperty],
+    [onClickModify],
   );
 
   return (
@@ -115,18 +115,18 @@ export const GroupPropertyTable = ({
       <div className="gmw-properties-table-toolbar">
         <PropertyTableToolbar
           propertyType="Group"
-          onClickAddProperty={onClickAddGroupProperty}
-          refreshProperties={refreshGroupProperties}
-          isLoading={isLoadingGroupProperties}
+          onClickAddProperty={onClickAdd}
+          refreshProperties={refresh}
+          isLoading={isLoading}
         />
       </div>
       <Table<IGroupPropertyTyped>
-        data={groupProperties}
+        data={isLoading ? [] : groupProperties}
         density='extra-condensed'
         columns={groupPropertiesColumns}
         emptyTableContent='No Group Properties'
         isSortable
-        isLoading={isLoadingGroupProperties}
+        isLoading={isLoading}
       />
       <DeleteModal
         entityName={showDeleteModal?.propertyName}
@@ -141,7 +141,7 @@ export const GroupPropertyTable = ({
             showDeleteModal?.id ?? "",
           );
         }}
-        refresh={refreshGroupProperties}
+        refresh={refresh}
       />
     </>
   );

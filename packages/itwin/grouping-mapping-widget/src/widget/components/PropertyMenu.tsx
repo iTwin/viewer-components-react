@@ -156,11 +156,11 @@ export const PropertyMenu = ({
               iModelId={iModelId}
               mappingId={mappingId}
               groupId={groupId}
-              onClickAddGroupProperty={onClickAddGroupProperty}
-              onClickModifyGroupProperty={onClickModifyGroupProperty}
-              isLoadingGroupProperties={isLoadingGroupProperties}
+              onClickAdd={onClickAddGroupProperty}
+              onClickModify={onClickModifyGroupProperty}
+              isLoading={isLoadingGroupProperties}
               groupProperties={groupProperties ?? []}
-              refreshGroupProperties={refreshGroupProperties}
+              refresh={refreshGroupProperties}
             />
           </div>
         )}
@@ -169,9 +169,9 @@ export const PropertyMenu = ({
             <CalculatedPropertyTable
               mappingId={mappingId}
               groupId={groupId}
-              onClickAddCalculatedProperty={onClickAddCalculatedProperty}
-              onClickModifyCalculatedProperty={onClickModifyCalculatedProperty}
-              isLoadingCalculatedProperties={isLoadingCalculatedProperties}
+              onClickAdd={onClickAddCalculatedProperty}
+              onClickModify={onClickModifyCalculatedProperty}
+              isLoading={isLoadingCalculatedProperties}
               calculatedProperties={calculatedProperties ?? []}
               refreshCalculatedProperties={refreshCalculatedProperties}
             />
@@ -182,11 +182,11 @@ export const PropertyMenu = ({
             <CustomCalculationTable
               mappingId={mappingId}
               groupId={groupId}
-              onClickAddCustomCalculationProperty={onClickAddCustomCalculationProperty}
-              onClickModifyCustomCalculation={onClickModifyCustomCalculation}
-              isLoadingCustomCalculations={isLoadingCustomCalculations}
+              onClickAdd={onClickAddCustomCalculationProperty}
+              onClickModify={onClickModifyCustomCalculation}
+              isLoading={isLoadingCustomCalculations}
               customCalculations={customCalculationProperties ?? []}
-              refreshCustomCalculations={refreshCustomCalculations}
+              refresh={refreshCustomCalculations}
             />
           </div>
         )}

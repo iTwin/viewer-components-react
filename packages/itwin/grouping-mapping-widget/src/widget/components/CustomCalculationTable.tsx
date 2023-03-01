@@ -26,24 +26,24 @@ import { PropertyNameCell } from "./PropertyNameCell";
 type ICustomCalculationTyped =
   CreateTypeFromInterface<CustomCalculation>;
 
-interface CustomCalculationTableProps {
+export interface CustomCalculationTableProps {
   mappingId: string;
   groupId: string;
-  onClickAddCustomCalculationProperty?: () => void;
-  onClickModifyCustomCalculation?: (value: CustomCalculation) => void;
-  isLoadingCustomCalculations: boolean;
+  onClickAdd?: () => void;
+  onClickModify?: (value: CustomCalculation) => void;
+  isLoading: boolean;
   customCalculations: CustomCalculation[];
-  refreshCustomCalculations: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 export const CustomCalculationTable = ({
   mappingId,
   groupId,
-  onClickAddCustomCalculationProperty,
-  onClickModifyCustomCalculation,
-  isLoadingCustomCalculations,
+  onClickAdd,
+  onClickModify,
+  isLoading,
   customCalculations,
-  refreshCustomCalculations,
+  refresh,
 }: CustomCalculationTableProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -61,7 +61,7 @@ export const CustomCalculationTable = ({
             Cell: (value: CellProps<CustomCalculation>) => (
               <PropertyNameCell
                 property={value.row.original}
-                onClickModify={onClickModifyCustomCalculation}
+                onClickModify={onClickModify}
               />
             ),
           },
@@ -77,10 +77,10 @@ export const CustomCalculationTable = ({
             Cell: (value: CellProps<CustomCalculation>) => {
               return (
                 <DropdownMenu
-                  menuItems={(close: () => void) => [onClickModifyCustomCalculation ? [
+                  menuItems={(close: () => void) => [onClickModify ? [
                     <MenuItem
                       key={0}
-                      onClick={() => onClickModifyCustomCalculation(value.row.original)}
+                      onClick={() => onClickModify(value.row.original)}
                       icon={<SvgEdit />}
                     >
                       Modify
@@ -112,16 +112,16 @@ export const CustomCalculationTable = ({
         ],
       },
     ],
-    [onClickModifyCustomCalculation],
+    [onClickModify],
   );
 
   return (
     <>
       <PropertyTableToolbar
         propertyType="Custom Calculation"
-        onClickAddProperty={onClickAddCustomCalculationProperty}
-        refreshProperties={refreshCustomCalculations}
-        isLoading={isLoadingCustomCalculations}
+        onClickAddProperty={onClickAdd}
+        refreshProperties={refresh}
+        isLoading={isLoading}
       />
       <Table<ICustomCalculationTyped>
         data={customCalculations}
@@ -129,7 +129,7 @@ export const CustomCalculationTable = ({
         columns={CustomCalculationsColumns}
         emptyTableContent='No Custom Calculations'
         isSortable
-        isLoading={isLoadingCustomCalculations}
+        isLoading={isLoading}
       />
       <DeleteModal
         entityName={showDeleteModal?.propertyName}
@@ -144,7 +144,7 @@ export const CustomCalculationTable = ({
             showDeleteModal?.id ?? "",
           );
         }}
-        refresh={refreshCustomCalculations}
+        refresh={refresh}
       />
     </>
   );
