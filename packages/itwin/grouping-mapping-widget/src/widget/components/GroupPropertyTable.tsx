@@ -18,6 +18,7 @@ import type { GroupProperty } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { PropertyNameCell } from "./PropertyNameCell";
 import { PropertyTable } from "./PropertyTable";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export interface GroupPropertyTableProps {
   iModelId: string;
@@ -40,8 +41,9 @@ export const GroupPropertyTable = ({
   refresh,
 }: GroupPropertyTableProps) => {
   const mappingClient = useMappingClient();
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
 
-  const columns = useCallback(
+  const columnsFactory = useCallback(
     (handleShowDeleteModal: (value: GroupProperty) => void) => [
       {
         Header: "Table",
@@ -104,7 +106,8 @@ export const GroupPropertyTable = ({
     [onClickModify]
   );
 
-  const deleteProperty = useCallback(async (iModelId: string, accessToken: string, propertyId: string) => {
+  const deleteProperty = useCallback(async (propertyId: string) => {
+    const accessToken = await getAccessToken();
     await mappingClient.deleteGroupProperty(
       accessToken,
       iModelId,
@@ -112,12 +115,12 @@ export const GroupPropertyTable = ({
       groupId,
       propertyId,
     );
-  }, [groupId, mappingClient, mappingId]);
+  }, [getAccessToken, groupId, iModelId, mappingClient, mappingId]);
 
   return (
     <PropertyTable
       propertyType="Group"
-      columns={columns}
+      columnsFactory={columnsFactory}
       data={groupProperties}
       isLoading={isLoading}
       onClickAdd={onClickAdd}

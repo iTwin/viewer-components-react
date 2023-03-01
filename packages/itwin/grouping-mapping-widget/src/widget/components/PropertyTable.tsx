@@ -3,10 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Table } from "@itwin/itwinui-react";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import type { Column } from "react-table";
 import type { CreateTypeFromInterface } from "../utils";
-import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import DeleteModal from "./DeleteModal";
 import { PropertyTableToolbar } from "./PropertyTableToolbar";
 
@@ -17,39 +16,41 @@ export interface PropertyTableItem {
 
 export interface PropertyTableProps<T extends PropertyTableItem> {
   propertyType: string;
-  columns: (handleShowDeleteModal: (value: T) => void) => ReadonlyArray<Column<T>>;
+  columnsFactory: (handleShowDeleteModal: (value: T) => void) => ReadonlyArray<Column<T>>;
   data: T[];
   isLoading: boolean;
   onClickAdd?: () => void;
   refreshProperties: () => Promise<void>;
-  deleteProperty: (iModelId: string, accessToken: string, propertyId: string) => Promise<void>;
+  deleteProperty: (propertyId: string) => Promise<void>;
 
 }
 
 export const PropertyTable = <T extends PropertyTableItem>({
   propertyType,
-  columns,
+  columnsFactory,
   data,
   isLoading,
   onClickAdd,
   refreshProperties,
   deleteProperty,
 }: PropertyTableProps<T>) => {
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
+
   const [showDeleteModal, setShowDeleteModal] = useState<T | undefined>(undefined);
 
-  const handleDeleteProperty = async () => {
-    const accessToken = await getAccessToken();
-    await deleteProperty(iModelId, accessToken, showDeleteModal?.id ?? "");
-  };
+  const handleDeleteProperty = useCallback(async () => {
+    await deleteProperty(showDeleteModal?.id ?? "");
+  }, [deleteProperty, showDeleteModal?.id]);
 
-  const handleShowDeleteModal = (property: T) => {
+  const handleShowDeleteModal = useCallback((property: T) => {
     setShowDeleteModal(property);
-  };
+  }, []);
 
   const handleCloseDeleteModal = () => {
     setShowDeleteModal(undefined);
   };
+
+  const columnsFactoryMemo = useMemo(() =>
+    columnsFactory(handleShowDeleteModal), [columnsFactory, handleShowDeleteModal]);
 
   return (
     <>
@@ -64,7 +65,7 @@ export const PropertyTable = <T extends PropertyTableItem>({
       <Table<CreateTypeFromInterface<T>>
         data={isLoading ? [] : data}
         density='extra-condensed'
-        columns={columns(handleShowDeleteModal)}
+        columns={columnsFactoryMemo}
         emptyTableContent={`No ${propertyType} Properties`}
         isSortable
         isLoading={isLoading}

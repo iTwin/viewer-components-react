@@ -15,6 +15,7 @@ import { useMappingClient } from "./context/MappingClientContext";
 import "./CalculatedPropertyTable.scss";
 import { PropertyNameCell } from "./PropertyNameCell";
 import { PropertyTable } from "./PropertyTable";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export interface CalculatedPropertyTableProps {
   mappingId: string;
@@ -36,8 +37,9 @@ export const CalculatedPropertyTable = ({
   refresh,
 }: CalculatedPropertyTableProps) => {
   const mappingClient = useMappingClient();
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
 
-  const columns = useCallback(
+  const columnsFactory = useCallback(
     (handleShowDeleteModal: (value: CalculatedProperty) => void) => [
       {
         Header: "Table",
@@ -108,7 +110,8 @@ export const CalculatedPropertyTable = ({
     [onClickModify]
   );
 
-  const deleteProperty = useCallback(async (iModelId: string, accessToken: string, propertyId: string) => {
+  const deleteProperty = useCallback(async (propertyId: string) => {
+    const accessToken = await getAccessToken();
     await mappingClient.deleteCalculatedProperty(
       accessToken,
       iModelId,
@@ -116,12 +119,12 @@ export const CalculatedPropertyTable = ({
       groupId,
       propertyId,
     );
-  }, [groupId, mappingClient, mappingId]);
+  }, [getAccessToken, groupId, iModelId, mappingClient, mappingId]);
 
   return (
     <PropertyTable
       propertyType="Calculated"
-      columns={columns}
+      columnsFactory={columnsFactory}
       data={calculatedProperties}
       isLoading={isLoading}
       onClickAdd={onClickAdd}

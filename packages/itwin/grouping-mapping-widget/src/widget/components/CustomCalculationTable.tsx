@@ -18,6 +18,7 @@ import type { CustomCalculation } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
 import { PropertyNameCell } from "./PropertyNameCell";
 import { PropertyTable } from "./PropertyTable";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export interface CustomCalculationTableProps {
   mappingId: string;
@@ -39,8 +40,9 @@ export const CustomCalculationTable = ({
   refresh,
 }: CustomCalculationTableProps) => {
   const mappingClient = useMappingClient();
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
 
-  const columns = useCallback(
+  const columnsFactory = useCallback(
     (handleShowDeleteModal: (value: CustomCalculation) => void) => [
       {
         Header: "Table",
@@ -106,7 +108,8 @@ export const CustomCalculationTable = ({
     [onClickModify],
   );
 
-  const deleteProperty = useCallback(async (iModelId: string, accessToken: string, propertyId: string) => {
+  const deleteProperty = useCallback(async (propertyId: string) => {
+    const accessToken = await getAccessToken();
     await mappingClient.deleteCustomCalculation(
       accessToken,
       iModelId,
@@ -114,12 +117,12 @@ export const CustomCalculationTable = ({
       groupId,
       propertyId,
     );
-  }, [groupId, mappingClient, mappingId]);
+  }, [getAccessToken, groupId, iModelId, mappingClient, mappingId]);
 
   return (
     <PropertyTable
       propertyType="Custom Calculation"
-      columns={columns}
+      columnsFactory={columnsFactory}
       data={customCalculations}
       isLoading={isLoading}
       onClickAdd={onClickAdd}
