@@ -11,19 +11,13 @@ import {
   DropdownMenu,
   IconButton,
   MenuItem,
-  Table,
 } from "@itwin/itwinui-react";
-import React, { useMemo, useState } from "react";
-import type { CreateTypeFromInterface } from "../utils";
+import React, { useCallback } from "react";
 import type { CellProps } from "react-table";
-import DeleteModal from "./DeleteModal";
 import type { GroupProperty } from "@itwin/insights-client";
-import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
-import { PropertyTableToolbar } from "./PropertyTableToolbar";
 import { PropertyNameCell } from "./PropertyNameCell";
-
-type IGroupPropertyTyped = CreateTypeFromInterface<GroupProperty>;
+import { PropertyTable } from "./PropertyTable";
 
 export interface GroupPropertyTableProps {
   iModelId: string;
@@ -45,12 +39,10 @@ export const GroupPropertyTable = ({
   groupProperties,
   refresh,
 }: GroupPropertyTableProps) => {
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const [showDeleteModal, setShowDeleteModal] = useState<GroupProperty | undefined>(undefined);
 
-  const groupPropertiesColumns = useMemo(
-    () => [
+  const columns = useCallback(
+    (handleShowDeleteModal: (value: GroupProperty) => void) => [
       {
         Header: "Table",
         columns: [
@@ -72,24 +64,26 @@ export const GroupPropertyTable = ({
             Cell: (value: CellProps<GroupProperty>) => {
               return (
                 <DropdownMenu
-                  menuItems={(close: () => void) => [onClickModify ? [
+                  menuItems={(close: () => void) => [
+                    onClickModify ? [
+                      <MenuItem
+                        key={0}
+                        onClick={() => onClickModify(value.row.original)}
+                        icon={<SvgEdit />}
+                      >
+                        Modify
+                      </MenuItem>,
+                    ] : [],
                     <MenuItem
-                      key={0}
-                      onClick={() => onClickModify(value.row.original)}
-                      icon={<SvgEdit />}
+                      key={1}
+                      onClick={() => {
+                        handleShowDeleteModal(value.row.original);
+                        close();
+                      }}
+                      icon={<SvgDelete />}
                     >
-                      Modify
-                    </MenuItem>] : [],
-                  <MenuItem
-                    key={1}
-                    onClick={() => {
-                      setShowDeleteModal(value.row.original);
-                      close();
-                    }}
-                    icon={<SvgDelete />}
-                  >
-                    Remove
-                  </MenuItem>,
+                      Remove
+                    </MenuItem>,
                   ].flatMap((p) => p)}
                 >
                   <IconButton styleType='borderless'>
@@ -107,42 +101,28 @@ export const GroupPropertyTable = ({
         ],
       },
     ],
-    [onClickModify],
+    [onClickModify]
   );
 
+  const deleteProperty = useCallback(async (iModelId: string, accessToken: string, propertyId: string) => {
+    await mappingClient.deleteGroupProperty(
+      accessToken,
+      iModelId,
+      mappingId,
+      groupId,
+      propertyId,
+    );
+  }, [groupId, mappingClient, mappingId]);
+
   return (
-    <>
-      <div className="gmw-properties-table-toolbar">
-        <PropertyTableToolbar
-          propertyType="Group"
-          onClickAddProperty={onClickAdd}
-          refreshProperties={refresh}
-          isLoading={isLoading}
-        />
-      </div>
-      <Table<IGroupPropertyTyped>
-        data={isLoading ? [] : groupProperties}
-        density='extra-condensed'
-        columns={groupPropertiesColumns}
-        emptyTableContent='No Group Properties'
-        isSortable
-        isLoading={isLoading}
-      />
-      <DeleteModal
-        entityName={showDeleteModal?.propertyName}
-        onClose={() => setShowDeleteModal(undefined)}
-        onDelete={async () => {
-          const accessToken = await getAccessToken();
-          await mappingClient.deleteGroupProperty(
-            accessToken,
-            iModelId,
-            mappingId,
-            groupId,
-            showDeleteModal?.id ?? "",
-          );
-        }}
-        refresh={refresh}
-      />
-    </>
+    <PropertyTable
+      propertyType="Group"
+      columns={columns}
+      data={groupProperties}
+      isLoading={isLoading}
+      onClickAdd={onClickAdd}
+      refreshProperties={refresh}
+      deleteProperty={deleteProperty}
+    />
   );
 };

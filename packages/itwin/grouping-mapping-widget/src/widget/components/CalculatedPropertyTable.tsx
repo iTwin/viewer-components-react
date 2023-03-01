@@ -7,20 +7,14 @@ import {
   DropdownMenu,
   IconButton,
   MenuItem,
-  Table,
 } from "@itwin/itwinui-react";
-import React, { useMemo, useState } from "react";
-import type { CreateTypeFromInterface } from "../utils";
+import React, { useCallback } from "react";
 import type { CellProps } from "react-table";
-import DeleteModal from "./DeleteModal";
 import type { CalculatedProperty } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
-import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import "./CalculatedPropertyTable.scss";
-import { PropertyTableToolbar } from "./PropertyTableToolbar";
 import { PropertyNameCell } from "./PropertyNameCell";
-
-type ICalculatedPropertyTyped = CreateTypeFromInterface<CalculatedProperty>;
+import { PropertyTable } from "./PropertyTable";
 
 export interface CalculatedPropertyTableProps {
   mappingId: string;
@@ -29,7 +23,7 @@ export interface CalculatedPropertyTableProps {
   onClickModify?: (value: CalculatedProperty) => void;
   isLoading: boolean;
   calculatedProperties: CalculatedProperty[];
-  refreshCalculatedProperties: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 export const CalculatedPropertyTable = ({
@@ -39,14 +33,12 @@ export const CalculatedPropertyTable = ({
   onClickModify,
   isLoading,
   calculatedProperties,
-  refreshCalculatedProperties,
+  refresh,
 }: CalculatedPropertyTableProps) => {
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const [showDeleteModal, setShowDeleteModal] = useState<CalculatedProperty | undefined>(undefined);
 
-  const calculatedPropertiesColumns = useMemo(
-    () => [
+  const columns = useCallback(
+    (handleShowDeleteModal: (value: CalculatedProperty) => void) => [
       {
         Header: "Table",
         columns: [
@@ -88,7 +80,7 @@ export const CalculatedPropertyTable = ({
                       <MenuItem
                         key={1}
                         onClick={() => {
-                          setShowDeleteModal(value.row.original);
+                          handleShowDeleteModal(value.row.original);
                           close();
                         }}
                         icon={<SvgDelete />}
@@ -116,37 +108,25 @@ export const CalculatedPropertyTable = ({
     [onClickModify]
   );
 
+  const deleteProperty = useCallback(async (iModelId: string, accessToken: string, propertyId: string) => {
+    await mappingClient.deleteCalculatedProperty(
+      accessToken,
+      iModelId,
+      mappingId,
+      groupId,
+      propertyId,
+    );
+  }, [groupId, mappingClient, mappingId]);
+
   return (
-    <>
-      <PropertyTableToolbar
-        propertyType="Calculated"
-        onClickAddProperty={onClickAdd}
-        refreshProperties={refreshCalculatedProperties}
-        isLoading={isLoading}
-      />
-      <Table<ICalculatedPropertyTyped>
-        data={calculatedProperties}
-        density="extra-condensed"
-        columns={calculatedPropertiesColumns}
-        emptyTableContent="No Calculated Properties"
-        isSortable
-        isLoading={isLoading}
-      />
-      <DeleteModal
-        entityName={showDeleteModal?.propertyName}
-        onClose={() => setShowDeleteModal(undefined)}
-        onDelete={async () => {
-          const accessToken = await getAccessToken();
-          await mappingClient.deleteCalculatedProperty(
-            accessToken,
-            iModelId,
-            mappingId,
-            groupId,
-            showDeleteModal?.id ?? ""
-          );
-        }}
-        refresh={refreshCalculatedProperties}
-      />
-    </>
+    <PropertyTable
+      propertyType="Calculated"
+      columns={columns}
+      data={calculatedProperties}
+      isLoading={isLoading}
+      onClickAdd={onClickAdd}
+      refreshProperties={refresh}
+      deleteProperty={deleteProperty}
+    />
   );
 };

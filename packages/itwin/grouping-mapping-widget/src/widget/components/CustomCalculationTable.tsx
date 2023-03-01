@@ -11,20 +11,13 @@ import {
   DropdownMenu,
   IconButton,
   MenuItem,
-  Table,
 } from "@itwin/itwinui-react";
-import React, { useMemo, useState } from "react";
-import type { CreateTypeFromInterface } from "../utils";
+import React, { useCallback } from "react";
 import type { CellProps } from "react-table";
-import DeleteModal from "./DeleteModal";
 import type { CustomCalculation } from "@itwin/insights-client";
 import { useMappingClient } from "./context/MappingClientContext";
-import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import { PropertyTableToolbar } from "./PropertyTableToolbar";
 import { PropertyNameCell } from "./PropertyNameCell";
-
-type ICustomCalculationTyped =
-  CreateTypeFromInterface<CustomCalculation>;
+import { PropertyTable } from "./PropertyTable";
 
 export interface CustomCalculationTableProps {
   mappingId: string;
@@ -45,12 +38,10 @@ export const CustomCalculationTable = ({
   customCalculations,
   refresh,
 }: CustomCalculationTableProps) => {
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const [showDeleteModal, setShowDeleteModal] = useState<CustomCalculation | undefined>(undefined);
 
-  const CustomCalculationsColumns = useMemo(
-    () => [
+  const columns = useCallback(
+    (handleShowDeleteModal: (value: CustomCalculation) => void) => [
       {
         Header: "Table",
         columns: [
@@ -88,7 +79,7 @@ export const CustomCalculationTable = ({
                   <MenuItem
                     key={1}
                     onClick={() => {
-                      setShowDeleteModal(value.row.original);
+                      handleShowDeleteModal(value.row.original);
                       close();
                     }}
                     icon={<SvgDelete />}
@@ -115,38 +106,26 @@ export const CustomCalculationTable = ({
     [onClickModify],
   );
 
+  const deleteProperty = useCallback(async (iModelId: string, accessToken: string, propertyId: string) => {
+    await mappingClient.deleteCustomCalculation(
+      accessToken,
+      iModelId,
+      mappingId,
+      groupId,
+      propertyId,
+    );
+  }, [groupId, mappingClient, mappingId]);
+
   return (
-    <>
-      <PropertyTableToolbar
-        propertyType="Custom Calculation"
-        onClickAddProperty={onClickAdd}
-        refreshProperties={refresh}
-        isLoading={isLoading}
-      />
-      <Table<ICustomCalculationTyped>
-        data={customCalculations}
-        density='extra-condensed'
-        columns={CustomCalculationsColumns}
-        emptyTableContent='No Custom Calculations'
-        isSortable
-        isLoading={isLoading}
-      />
-      <DeleteModal
-        entityName={showDeleteModal?.propertyName}
-        onClose={() => setShowDeleteModal(undefined)}
-        onDelete={async () => {
-          const accessToken = await getAccessToken();
-          await mappingClient.deleteCustomCalculation(
-            accessToken,
-            iModelId,
-            mappingId,
-            groupId,
-            showDeleteModal?.id ?? "",
-          );
-        }}
-        refresh={refresh}
-      />
-    </>
+    <PropertyTable
+      propertyType="Custom Calculation"
+      columns={columns}
+      data={customCalculations}
+      isLoading={isLoading}
+      onClickAdd={onClickAdd}
+      refreshProperties={refresh}
+      deleteProperty={deleteProperty}
+    />
   );
 };
 

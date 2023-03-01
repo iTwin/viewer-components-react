@@ -173,7 +173,7 @@ export const PropertyMenu = ({
               onClickModify={onClickModifyCalculatedProperty}
               isLoading={isLoadingCalculatedProperties}
               calculatedProperties={calculatedProperties ?? []}
-              refreshCalculatedProperties={refreshCalculatedProperties}
+              refresh={refreshCalculatedProperties}
             />
           </div>
         )}
