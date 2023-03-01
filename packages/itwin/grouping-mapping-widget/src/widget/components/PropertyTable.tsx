@@ -48,7 +48,7 @@ export const PropertyTable = <T extends PropertyTableItem>({
     setShowDeleteModal(undefined);
   };
 
-  const columnsFactoryMemo = useMemo(() =>
+  const memoizedColumns = useMemo(() =>
     columnsFactory(handleShowDeleteModal), [columnsFactory, handleShowDeleteModal]);
 
   return (
@@ -62,7 +62,7 @@ export const PropertyTable = <T extends PropertyTableItem>({
       <Table<CreateTypeFromInterface<T>>
         data={isLoading ? [] : data}
         density='extra-condensed'
-        columns={columnsFactoryMemo}
+        columns={memoizedColumns}
         emptyTableContent={`No ${propertyType} Properties`}
         isSortable
         isLoading={isLoading}
