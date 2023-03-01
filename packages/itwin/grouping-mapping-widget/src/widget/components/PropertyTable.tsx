@@ -22,7 +22,6 @@ export interface PropertyTableProps<T extends PropertyTableItem> {
   onClickAdd?: () => void;
   refreshProperties: () => Promise<void>;
   deleteProperty: (propertyId: string) => Promise<void>;
-
 }
 
 export const PropertyTable = <T extends PropertyTableItem>({
