@@ -53,14 +53,12 @@ export const PropertyTable = <T extends PropertyTableItem>({
 
   return (
     <>
-      <div>
-        <PropertyTableToolbar
-          propertyType={propertyType}
-          onClickAddProperty={onClickAdd}
-          refreshProperties={refreshProperties}
-          isLoading={isLoading}
-        />
-      </div>
+      <PropertyTableToolbar
+        propertyType={propertyType}
+        onClickAddProperty={onClickAdd}
+        refreshProperties={refreshProperties}
+        isLoading={isLoading}
+      />
       <Table<CreateTypeFromInterface<T>>
         data={isLoading ? [] : data}
         density='extra-condensed'
