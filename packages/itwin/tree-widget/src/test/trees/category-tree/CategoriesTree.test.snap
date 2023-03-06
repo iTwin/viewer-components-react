@@ -3,9 +3,6 @@
 exports[`CategoryTree #integration does not show private 2d categories with RULESET_CATEGORIES 1`] = `
 Array [
   Object {
-    "filtering": Object {
-      "descriptor": [Function],
-    },
     "label": PropertyRecord {
       "property": Object {
         "displayLabel": "Label",
@@ -27,9 +24,6 @@ Array [
   Object {
     "children": Array [
       Object {
-        "filtering": Object {
-          "descriptor": [Function],
-        },
         "label": PropertyRecord {
           "property": Object {
             "displayLabel": "Label",
@@ -44,9 +38,6 @@ Array [
         },
       },
       Object {
-        "filtering": Object {
-          "descriptor": [Function],
-        },
         "label": PropertyRecord {
           "property": Object {
             "displayLabel": "Label",
@@ -61,9 +52,6 @@ Array [
         },
       },
     ],
-    "filtering": Object {
-      "descriptor": [Function],
-    },
     "hasChildren": true,
     "label": PropertyRecord {
       "property": Object {
@@ -84,9 +72,6 @@ Array [
 exports[`CategoryTree #integration does not show private 3d categories with RULESET_CATEGORIES 1`] = `
 Array [
   Object {
-    "filtering": Object {
-      "descriptor": [Function],
-    },
     "label": PropertyRecord {
       "property": Object {
         "displayLabel": "Label",
@@ -108,9 +93,6 @@ Array [
   Object {
     "children": Array [
       Object {
-        "filtering": Object {
-          "descriptor": [Function],
-        },
         "label": PropertyRecord {
           "property": Object {
             "displayLabel": "Label",
@@ -125,9 +107,6 @@ Array [
         },
       },
       Object {
-        "filtering": Object {
-          "descriptor": [Function],
-        },
         "label": PropertyRecord {
           "property": Object {
             "displayLabel": "Label",
@@ -142,9 +121,6 @@ Array [
         },
       },
     ],
-    "filtering": Object {
-      "descriptor": [Function],
-    },
     "hasChildren": true,
     "label": PropertyRecord {
       "property": Object {
