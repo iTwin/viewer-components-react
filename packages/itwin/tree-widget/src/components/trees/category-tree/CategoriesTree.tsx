@@ -13,7 +13,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { useVisibilityTreeFiltering, useVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
-import { CategoryVisibilityHandler, loadCategoriesFromViewport, useCategories } from "./CategoryVisibilityHandler";
+import { CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
