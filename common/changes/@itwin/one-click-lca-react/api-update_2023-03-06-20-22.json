@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/one-click-lca-react",
+      "comment": "Insights Client version bump. Removed url dependency.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/one-click-lca-react"
+}
