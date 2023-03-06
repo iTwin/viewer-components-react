@@ -5,6 +5,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import type { Viewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import "./ModelsTree.scss";
@@ -16,6 +17,7 @@ import { TreeHeaderComponent } from "../../header/TreeHeader";
 import type { ModelTreeProps } from "../../../types";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { ModelsTree } from "./ModelsTree";
+import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 
 interface TreeViewModelInfo {
   id: string;
@@ -84,13 +86,35 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     viewport?.invalidateScene();
   }, [viewport, availableModels]);
 
-  const hideAll = useCallback(() => {
+  const hideAll = useCallback(async () => {
     viewport?.changeModelDisplay(availableModels, false);
+    viewport?.clearAlwaysDrawn();
+    if (iModel) {
+      await toggleAllCategories(
+        IModelApp.viewManager,
+        iModel,
+        false,
+        undefined,
+        true,
+        undefined
+      );
+    }
     viewport?.invalidateScene();
   }, [viewport, availableModels]);
 
   const showAll = useCallback(async () => {
     await viewport?.addViewedModels(availableModels);
+    viewport?.clearNeverDrawn();
+    if (iModel) {
+      await toggleAllCategories(
+        IModelApp.viewManager,
+        iModel,
+        true,
+        undefined,
+        true,
+        undefined
+      );
+    }
     viewport?.invalidateScene();
   }, [viewport, availableModels]);
 
