@@ -84,7 +84,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     await viewport?.addViewedModels(notViewedModels);
     viewport?.changeModelDisplay(models, false);
     viewport?.invalidateScene();
-  }, [viewport, availableModels, iModel]);
+  }, [viewport, availableModels]);
 
   const hideAll = useCallback(async () => {
     viewport?.changeModelDisplay(availableModels, false);
@@ -116,7 +116,7 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
       );
     }
     viewport?.invalidateScene();
-  }, [viewport, availableModels]);
+  }, [viewport, availableModels, iModel]);
 
   const viewToggle2D = useCallback(async () => {
     if (is2dToggleActive) {
