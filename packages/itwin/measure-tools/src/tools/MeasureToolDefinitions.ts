@@ -68,6 +68,7 @@ export class MeasureToolDefinitions {
     });
   }
 
+
   public static get toggleDisplayMeasurementAxesToolCommand() {
     return new ToolItemDef({
       toolId: ToggleDisplayMeasurementAxesTool.toolId,
