@@ -64,10 +64,11 @@ export const PropertyMenu = ({
   const mappingId = mapping.id;
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const { hilitedElementsQueryCache } = useGroupHilitedElementsContext();
-  const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
   const mappingClient = useMappingClient();
   const iModelConnection = useActiveIModelConnection();
   const {
+    showGroupColor,
+    setShowGroupColor,
     groupProperties,
     setGroupProperties,
     calculatedProperties,

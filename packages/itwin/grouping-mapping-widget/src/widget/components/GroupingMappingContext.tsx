@@ -64,6 +64,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
   const hilitedElementsQueryCache = useRef<Map<string, QueryCacheItem>>(new Map());
   const [hiddenGroupsIds, setHiddenGroupsIds] = useState<string[]>([]);
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
+  const [propertiesShowGroup, setPropertiesShowGroup] = useState<boolean>(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupProperties, setGroupProperties] = useState<GroupProperty[]>([]);
   const [calculatedProperties, setCalculatedProperties] = useState<CalculatedProperty[]>([]);
@@ -100,6 +101,8 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
 
   const propertiesContextValue = useMemo(
     () => ({
+      showGroupColor: propertiesShowGroup,
+      setShowGroupColor: setPropertiesShowGroup,
       groupProperties,
       setGroupProperties,
       calculatedProperties,
@@ -107,7 +110,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       customCalculationProperties,
       setCustomCalculationProperties,
     }),
-    [calculatedProperties, customCalculationProperties, groupProperties]
+    [calculatedProperties, customCalculationProperties, groupProperties, propertiesShowGroup]
   );
 
   const customUIContextValue = useMemo(() => ({

@@ -4,9 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 import React, { useEffect } from "react";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
+import { usePropertiesContext } from "./context/PropertiesContext";
 import type { Route } from "./GroupingMapping";
 import { GroupingMappingRouter } from "./GroupingMappingRouter";
-import { clearEmphasizedElements, clearHiddenElements, clearOverriddenElements } from "./viewerUtils";
+import { clearAll } from "./viewerUtils";
 
 export const GroupingMappingContent = ({
   routingHistory,
@@ -18,6 +19,7 @@ export const GroupingMappingContent = ({
   goBack: () => void;
 }) => {
   const { setShowGroupColor, setHiddenGroupsIds } = useGroupHilitedElementsContext();
+  const { setShowGroupColor: setPropertiesShowGroup } = usePropertiesContext();
   const currentRoute = routingHistory[routingHistory.length - 1];
 
   // Clean up group visualization when in mappings
@@ -25,11 +27,12 @@ export const GroupingMappingContent = ({
     if (routingHistory.length === 1) {
       setShowGroupColor(false);
       setHiddenGroupsIds([]);
-      clearOverriddenElements();
-      clearEmphasizedElements();
-      clearHiddenElements();
+      clearAll();
+      // Turn off visualiztion in properties menu
+    } else if (routingHistory.length === 2) {
+      setPropertiesShowGroup(false);
     }
-  }, [routingHistory, setHiddenGroupsIds, setShowGroupColor]);
+  }, [routingHistory, setHiddenGroupsIds, setPropertiesShowGroup, setShowGroupColor]);
 
   return (
     <GroupingMappingRouter
