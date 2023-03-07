@@ -1,6 +1,6 @@
 {
   "name": "@itwin/measure-tools-react",
-  "version": "0.10.6",
+  "version": "0.10.7",
   "license": "MIT",
   "description": "Frontend framework and tools for measurements",
   "repository": {
@@ -47,16 +47,16 @@
     "!lib/**/test/**/*"
   ],
   "peerDependencies": {
-    "@itwin/appui-abstract": "4.0.0.dev-22",
-    "@itwin/appui-layout-react": "4.0.0.dev-22",
-    "@itwin/appui-react": "4.0.0.dev-22",
-    "@itwin/components-react": "4.0.0.dev-22",
-    "@itwin/core-bentley": "4.0.0.dev-22",
-    "@itwin/core-common": "4.0.0.dev-22",
-    "@itwin/core-frontend": "4.0.0.dev-22",
-    "@itwin/core-geometry": "4.0.0.dev-22",
-    "@itwin/core-react": "4.0.0.dev-22",
-    "@itwin/core-telemetry": "4.0.0.dev-22",
+    "@itwin/appui-abstract": "^4.0.0.dev-22",
+    "@itwin/appui-layout-react": "^4.0.0.dev-22",
+    "@itwin/appui-react": "^4.0.0.dev-22",
+    "@itwin/components-react": "^4.0.0.dev-22",
+    "@itwin/core-bentley": "^4.0.0.dev-22",
+    "@itwin/core-common": "^4.0.0.dev-22",
+    "@itwin/core-frontend": "^4.0.0.dev-22",
+    "@itwin/core-geometry": "^4.0.0.dev-22",
+    "@itwin/core-react": "^4.0.0.dev-22",
+    "@itwin/core-telemetry": "^4.0.0.dev-22",
     "react": "^17.0.0",
     "react-dom": "^17.0.0"
   },
