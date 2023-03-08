@@ -7,8 +7,8 @@ import * as React from "react";
 import type { XAndY } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import { RelativePosition, ActionButton, ToolbarItemUtilities } from "@itwin/appui-abstract";
-import type { CommonToolbarItem, ItemProps } from "@itwin/appui-react";
-import { ActionButtonItemDef, CursorInformation, CursorPopupManager } from "@itwin/appui-react";
+import { CommonToolbarItem, ItemProps, ToolbarOrientation } from "@itwin/appui-react";
+import { ActionButtonItemDef, CursorInformation, CursorPopupManager, ToolbarUsage } from "@itwin/appui-react";
 import { Direction } from "@itwin/components-react";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import type { Measurement, MeasurementPickContext } from "../api/Measurement";
@@ -335,7 +335,7 @@ export class MeasurementActionToolbar {
     // Show toolbar
     const realOffset = (offset !== undefined) ? offset : Point2d.createZero();
     const realRelPosition = (relativePosition !== undefined) ? relativePosition : RelativePosition.Top;
-    CursorPopupManager.open(this._lastPopupId, this.buildToolbar(measurements, itemList), screenPoint, realOffset, realRelPosition);
+    CursorPopupManager.open(this._lastPopupId, this.buildToolbar(/* measurements,  */itemList), screenPoint, realOffset, realRelPosition);
 
     FeatureTracking.notifyFeature(MeasureToolsFeatures.MeasurementActionsToolbar_Open);
 
@@ -434,20 +434,25 @@ export class MeasurementActionToolbar {
     return itemList;
   }
 
-  private static buildToolbar(measurements: Measurement[], actionItemList: MeasurementActionItemDef[]): React.ReactNode {
+  private static buildToolbar(/* measurements: Measurement[],  */actionItemList: MeasurementActionItemDef[]): React.ReactNode {
+    const toolItems: ActionButton[] = actionItemList.map((itemDef: MeasurementActionItemDef) => {
+      return ToolbarItemUtilities.createActionButton(itemDef.id, 1, "", itemDef.label, itemDef.execute);
+    })
     return <PopupToolbar
-      expandsTo={Direction.Bottom}
-      onClose={() => MeasurementActionToolbar.closeToolbar(true)}
-      items={
-        <>
-          {
-            actionItemList.map((itemDef: MeasurementActionItemDef) => {
-              itemDef.measurements = measurements;
-              // return <ActionButton key={itemDef.id} actionItem={itemDef} />;
-              return ToolbarItemUtilities.createActionButton(itemDef.id, 1, , itemDef.label, itemDef.execute);
-            })
-          }
-        </>}
+      items={toolItems}
+      usage={ToolbarUsage.ContentManipulation}
+      orientation={ToolbarOrientation.Horizontal}
+    // onClose={() => MeasurementActionToolbar.closeToolbar(true)}
+    // items={
+    //   <>
+    //     {
+    //       actionItemList.map((itemDef: MeasurementActionItemDef) => {
+    //         itemDef.measurements = measurements;
+    //         // return <ActionButton key={itemDef.id} actionItem={itemDef} />;
+    //         return ToolbarItemUtilities.createActionButton(itemDef.id, 1, , itemDef.label, itemDef.execute);
+    //       })
+    //     }
+    //   </>}
     />;
 
   }
