@@ -24,6 +24,7 @@ import { ModelsTree, RULESET_MODELS, RULESET_MODELS_GROUPED_BY_CLASS } from "../
 import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { deepEquals, mockPresentationManager, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
+
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
@@ -346,12 +347,6 @@ describe("ModelsTree", () => {
           await result.findByText("filtered-node");
 
           expect(spy).to.be.calledOnce;
-        });
-
-        it("filters nodes by element IDs", async () => {
-          const elementIds = ["0x123", "0x456"];
-          render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock.object} filteredElementIds={elementIds} />);
-          rulesetVariablesManagerMock.verify(async (x) => x.setId64s("filtered-element-ids", elementIds), moq.Times.once());
         });
       });
     });

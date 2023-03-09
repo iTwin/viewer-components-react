@@ -266,7 +266,7 @@
               }
             }
           ],
-          "instanceFilter": "this.Model.Id = parent.parent.ECInstanceId ANDALSO this.Parent = NULL ANDALSO (NOT HasVariable(\"filtered-element-ids\") OR GetVariableIntValues(\"filtered-element-ids\").AnyMatch(id => id = this.ECInstanceId))",
+          "instanceFilter": "this.Model.Id = parent.parent.ECInstanceId ANDALSO this.Parent = NULL",
           "groupByClass": true,
           "groupByLabel": false
         }
@@ -300,7 +300,6 @@
               }
             }
           ],
-          "instanceFilter": "NOT HasVariable(\"filtered-element-ids\") OR GetVariableIntValues(\"filtered-element-ids\").AnyMatch(id => id = this.ECInstanceId)",
           "groupByClass": true,
           "groupByLabel": false
         }
