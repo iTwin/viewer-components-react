@@ -94,8 +94,8 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
         IModelApp.viewManager,
         iModel,
         false,
-        undefined,
-        true,
+        viewport,
+        false,
         undefined
       );
     }
@@ -110,8 +110,8 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
         IModelApp.viewManager,
         iModel,
         true,
-        undefined,
-        true,
+        viewport,
+        false,
         undefined
       );
     }

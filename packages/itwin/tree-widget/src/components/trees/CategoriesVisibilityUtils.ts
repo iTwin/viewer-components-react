@@ -30,7 +30,7 @@ export async function toggleAllCategories(viewManager: ViewManager, imodel: IMod
 }
 
 /**
- * Gets ids of all categories or categories from filtered data provider.
+ * Gets ids of all categories from specified imodel and viewport.
  * @alpha
  */
 export async function getCategories(imodel: IModelConnection, viewport?: Viewport) {
