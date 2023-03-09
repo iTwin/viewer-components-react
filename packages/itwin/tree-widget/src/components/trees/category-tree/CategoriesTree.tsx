@@ -13,7 +13,7 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { useVisibilityTreeFiltering, useVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
-import { CategoryVisibilityHandler, loadCategoriesFromViewport, useCategories } from "./CategoryVisibilityHandler";
+import { CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
@@ -142,33 +142,4 @@ async function setViewType(activeView?: Viewport) {
   const view = activeView.view as SpatialViewState;
   const viewType = view.is3d() ? "3d" : "2d";
   await Presentation.presentation.vars(RULESET_CATEGORIES.id).setString("ViewType", viewType);
-}
-
-/**
- * Toggles visibility of categories to show or hide.
- * @alpha
- */
-export async function toggleAllCategories(viewManager: ViewManager, imodel: IModelConnection, display: boolean, viewport?: Viewport, forAllViewports?: boolean, filteredProvider?: IPresentationTreeDataProvider) {
-  // istanbul ignore next
-  const activeView = viewport ?? viewManager.getFirstOpenView();
-  const ids = await getCategories(imodel, activeView, filteredProvider);
-
-  // istanbul ignore else
-  if (ids.length > 0) {
-    CategoryVisibilityHandler.enableCategory(viewManager, imodel, ids, display, forAllViewports ?? false);
-  }
-}
-
-/**
- * Gets ids of all categories or categories from filtered data provider.
- * @alpha
- */
-export async function getCategories(imodel: IModelConnection, viewport?: Viewport, filteredProvider?: IPresentationTreeDataProvider) {
-  if (filteredProvider) {
-    const nodes = await filteredProvider.getNodes();
-    return nodes.map((node) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredProvider.getNodeKey(node)));
-  }
-
-  const categories = await loadCategoriesFromViewport(imodel, viewport);
-  return categories.map((category) => category.key);
 }

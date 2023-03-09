@@ -19,16 +19,15 @@ import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { CategoryTree, RULESET_CATEGORIES, toggleAllCategories } from "../../../components/trees/category-tree/CategoriesTree";
-import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
+import type { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import { mockPresentationManager, TestUtils } from "../../TestUtils";
 
 import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 import type { Id64String } from "@itwin/core-bentley";
-import type { IModelConnection, ScreenViewport, SpatialViewState, SubCategoriesCache, ViewManager, Viewport } from "@itwin/core-frontend";
-import type { TreeDataChangesListener, TreeNodeItem } from "@itwin/components-react";
+import type { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
+import type { TreeNodeItem } from "@itwin/components-react";
 import type { ECInstancesNodeKey, Node, NodePathElement } from "@itwin/presentation-common";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { PresentationManager, RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { CategoryProps, ElementProps, ModelProps, PhysicalElementProps, RelatedElementProps, SubCategoryProps } from "@itwin/core-common";
@@ -415,64 +414,6 @@ describe("CategoryTree", () => {
           />);
 
           await waitFor(() => result.getByText("categoriesTree.noCategoryFound"));
-        });
-      });
-
-    });
-
-    describe("toggleAllCategories", () => {
-      const subcategoriesCacheMock = moq.Mock.ofType<SubCategoriesCache>();
-      let enableAllStub: sinon.SinonStub<[ViewManager, IModelConnection, string[], boolean, boolean, (boolean | undefined)?], void>;
-
-      beforeEach(() => {
-        enableAllStub = sinon.stub(CategoryVisibilityHandler, "enableCategory");
-        subcategoriesCacheMock.reset();
-        imodelMock.reset();
-        async function* generator() {
-          yield { id: "CategoryId" };
-          return;
-        }
-
-        imodelMock.setup((x) => x.query(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => generator());
-        imodelMock.setup((x) => x.subcategories).returns(() => subcategoriesCacheMock.object);
-      });
-
-      it("enables all categories", async () => {
-        await toggleAllCategories(viewManagerMock.object, imodelMock.object, true, viewportMock.object);
-        expect(enableAllStub).to.be.calledWith(viewManagerMock.object, imodelMock.object, ["CategoryId"], true);
-      });
-
-      it("disables all categories", async () => {
-        await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object);
-        expect(enableAllStub).to.be.calledWith(viewManagerMock.object, imodelMock.object, ["CategoryId"], false);
-      });
-
-      describe("with filtered dataProvider", () => {
-        let dataProvider: IPresentationTreeDataProvider;
-        let testNode: TreeNodeItem;
-
-        beforeEach(() => {
-          testNode = { id: "filteredNodeId", label: PropertyRecord.fromString("test-node") };
-          dataProvider = {
-            imodel: imodelMock.object,
-            rulesetId: "",
-            onTreeNodeChanged: new BeEvent<TreeDataChangesListener>(),
-            dispose: () => { },
-            getFilteredNodePaths: async () => [],
-            getNodeKey: (node: TreeNodeItem) => (node as any).__key,
-            getNodesCount: async () => 1,
-            getNodes: async () => [{ ...testNode, __key: createKey(testNode.id) }],
-          };
-        });
-
-        it("enables all categories", async () => {
-          await toggleAllCategories(viewManagerMock.object, imodelMock.object, true, viewportMock.object, true, dataProvider);
-          expect(enableAllStub).to.be.calledWith(viewManagerMock.object, imodelMock.object, [testNode.id], true);
-        });
-
-        it("disables all categories", async () => {
-          await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object, true, dataProvider);
-          expect(enableAllStub).to.be.calledWith(viewManagerMock.object, imodelMock.object, [testNode.id], false);
         });
       });
     });
