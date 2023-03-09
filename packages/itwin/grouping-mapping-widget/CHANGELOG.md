@@ -1,6 +1,21 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 19 Jan 2023 10:29:18 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Mar 2023 15:47:41 GMT and should not be manually modified.
+
+## 0.10.0
+Tue, 07 Mar 2023 15:47:41 GMT
+
+### Minor changes
+
+- Improved modularity to Mapping, MappingAction, Grouping, GroupAction components.
+- The view of the widget is now handled by a routing component that displays different views based on the "step" of the current route.
+- Added "GroupingMappingContext" component to provide a context for all Grouping and Mapping components, including properties such as custom callback to retrieve access token, iModelId, client prefix, custom implementation of MappingClient, and custom UI's for adding and updating groups and providing additional group context capabilities.
+
+### Patches
+
+- Insights Client version bump. Removed url dependency.
+- Added property override to Presentation within Properties selection to display all hidden properties.
+- Change itwinui-react dependency version control to caret.
 
 ## 0.9.3
 Thu, 19 Jan 2023 10:29:18 GMT
