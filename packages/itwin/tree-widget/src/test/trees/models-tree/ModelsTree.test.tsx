@@ -28,7 +28,7 @@ import { createCategoryNode, createElementClassGroupingNode, createElementNode, 
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
-import type { PresentationManager, RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
+import type { PresentationManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { TestIModelBuilder } from "@itwin/presentation-testing";
 import type { CategoryProps, ElementProps, ModelProps, PhysicalElementProps, RelatedElementProps } from "@itwin/core-common";
 import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
