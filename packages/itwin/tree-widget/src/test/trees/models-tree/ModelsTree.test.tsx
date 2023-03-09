@@ -56,7 +56,6 @@ describe("ModelsTree", () => {
     const imodelMock = moq.Mock.ofType<IModelConnection>();
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
     let presentationManagerMock: moq.IMock<PresentationManager>;
-    let rulesetVariablesManagerMock: moq.IMock<RulesetVariablesManager>;
 
     after(() => {
       Presentation.terminate();
@@ -81,7 +80,6 @@ describe("ModelsTree", () => {
 
       const mocks = mockPresentationManager();
       presentationManagerMock = mocks.presentationManager;
-      rulesetVariablesManagerMock = mocks.rulesetVariablesManager;
       Presentation.setPresentationManager(presentationManagerMock.object);
     });
 
