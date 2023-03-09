@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "models-tree: ensure that the \"show all\" and \"hide all\" buttons affect all iModel content",
+      "comment": "`ModelsTreeComponent`: ensure that the \"show all\" and \"hide all\" buttons affect all iModel content",
       "type": "patch"
     }
   ],
