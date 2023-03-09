@@ -1,6 +1,14 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 19 Jan 2023 10:29:18 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Mar 2023 20:08:53 GMT and should not be manually modified.
+
+## 0.6.2
+Thu, 09 Mar 2023 20:08:53 GMT
+
+### Patches
+
+- `ModelsTreeComponent`: ensure that the "show all" and "hide all" buttons affect all iModel content
+- Models Tree: Remove unused feature of filtering the tree by element ids
 
 ## 0.6.1
 Thu, 19 Jan 2023 10:29:18 GMT
