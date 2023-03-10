@@ -126,6 +126,103 @@ importers:
       typescript: 4.6.3
       xmlhttprequest: 1.8.0
 
+  ../../packages/itwin/ec3-widget:
+    specifiers:
+      '@faker-js/faker': ^6.3.1
+      '@itwin/appui-abstract': ^3.2.0
+      '@itwin/appui-layout-react': ^3.2.0
+      '@itwin/appui-react': ^3.2.0
+      '@itwin/build-tools': ^3.2.0
+      '@itwin/components-react': ^3.2.0
+      '@itwin/core-bentley': ^3.2.0
+      '@itwin/core-common': ^3.2.0
+      '@itwin/core-frontend': ^3.2.0
+      '@itwin/core-geometry': ^3.2.0
+      '@itwin/core-markup': ^3.2.0
+      '@itwin/core-orbitgt': ^3.2.0
+      '@itwin/core-quantity': ^3.2.0
+      '@itwin/core-react': ^3.2.0
+      '@itwin/eslint-plugin': ^3.2.0
+      '@itwin/imodel-components-react': ^3.2.0
+      '@itwin/insights-client': ^0.3.4
+      '@itwin/itwinui-icons-react': ^1.7.0
+      '@itwin/itwinui-react': ^1.42.0
+      '@itwin/presentation-common': ^3.2.0
+      '@itwin/presentation-frontend': ^3.2.0
+      '@itwin/webgl-compatibility': ^3.2.0
+      '@testing-library/dom': ^8.12.0
+      '@testing-library/jest-dom': ^5.16.3
+      '@testing-library/react': ^12.1.4
+      '@testing-library/user-event': ^14.1.1
+      '@types/jest': ^27.5.2
+      '@types/node': ^14.14.20
+      '@types/react': ^17.0.38
+      '@types/testing-library__jest-dom': ^5.14.3
+      classnames: ^2.3.1
+      cpx2: ^3.0.0
+      eslint: ^7.32.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      jest-transform-stub: ^2.0.0
+      msw: ^0.39.2
+      react: ^17.0.0
+      react-dom: ^17.0.0
+      react-redux: ^7.2.2
+      redux: ^4.0.4
+      rimraf: ^3.0.2
+      simple-react-validator: ^1.6.1
+      ts-jest: ^27.1.3
+      typemoq: ^2.1.0
+      typescript: ~4.3.0
+    dependencies:
+      '@itwin/insights-client': 0.3.4
+      '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 1.46.0_react-dom@17.0.2+react@17.0.2
+      classnames: 2.3.1
+      simple-react-validator: 1.6.1
+    devDependencies:
+      '@faker-js/faker': 6.3.1
+      '@itwin/appui-abstract': 3.6.1_@itwin+core-bentley@3.6.1
+      '@itwin/appui-layout-react': 3.6.1_afffdd609c476b4dd3258a07a059ca5c
+      '@itwin/appui-react': 3.6.1_43a32ea817f2a6f22e3dc10550d30574
+      '@itwin/build-tools': 3.6.1
+      '@itwin/components-react': 3.6.1_afffdd609c476b4dd3258a07a059ca5c
+      '@itwin/core-bentley': 3.6.1
+      '@itwin/core-common': 3.6.1_96dadefc18117534d9bc422af3cf0502
+      '@itwin/core-frontend': 3.6.1_1104bd33d6e78ab937c8649f6a7d6f19
+      '@itwin/core-geometry': 3.6.1
+      '@itwin/core-markup': 3.6.1_11876714de91e4f7968acb6098f22c16
+      '@itwin/core-orbitgt': 3.6.1
+      '@itwin/core-quantity': 3.6.1_@itwin+core-bentley@3.6.1
+      '@itwin/core-react': 3.6.1_c1200f78e7794c610fc6d7a00f23b599
+      '@itwin/eslint-plugin': 3.6.1_eslint@7.32.0+typescript@4.3.5
+      '@itwin/imodel-components-react': 3.6.1_c4d89ce21e4101355356fa6502cf443d
+      '@itwin/presentation-common': 3.6.1_9c79d62e02daad891eb3d5514837e4b9
+      '@itwin/presentation-frontend': 3.6.1_0c0acd4fe7e30ef67a491ed12173564d
+      '@itwin/webgl-compatibility': 3.6.1
+      '@testing-library/dom': 8.13.0
+      '@testing-library/jest-dom': 5.16.4
+      '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
+      '@testing-library/user-event': 14.1.1_@testing-library+dom@8.13.0
+      '@types/jest': 27.5.2
+      '@types/node': 14.18.12
+      '@types/react': 17.0.44
+      '@types/testing-library__jest-dom': 5.14.3
+      cpx2: 3.0.2
+      eslint: 7.32.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      jest-transform-stub: 2.0.0
+      msw: 0.39.2
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
+      redux: 4.1.2
+      rimraf: 3.0.2
+      ts-jest: 27.1.4_9c2bb0de79d00985140535e369b1df3e
+      typemoq: 2.1.0
+      typescript: 4.3.5
+
   ../../packages/itwin/geo-tools:
     specifiers:
       '@itwin/appui-abstract': ^3.0.0
@@ -1748,6 +1845,11 @@ packages:
     engines: {node: '>=14.0.0', npm: '>=6.0.0'}
     dev: true
 
+  /@faker-js/faker/6.3.1:
+    resolution: {integrity: sha512-8YXBE2ZcU/pImVOHX7MWrSR/X5up7t6rPWZlk34RwZEcdr3ua6X+32pSd6XuOQRN+vbuvYNfA6iey8NbrjuMFQ==}
+    engines: {node: '>=14.0.0', npm: '>=6.0.0'}
+    dev: true
+
   /@faker-js/faker/7.5.0:
     resolution: {integrity: sha512-8wNUCCUHvfvI0gQpDUho/3gPzABffnCn5um65F8dzQ86zz6dlt4+nmAA7PQUc8L+eH+9RgR/qzy5N/8kN0Ozdw==}
     engines: {node: '>=14.0.0', npm: '>=6.0.0'}
@@ -1928,7 +2030,7 @@ packages:
       '@itwin/appui-abstract': 3.6.1_@itwin+core-bentley@3.6.1
       '@itwin/core-bentley': 3.6.1
       '@itwin/core-react': 3.6.1_c1200f78e7794c610fc6d7a00f23b599
-      '@itwin/itwinui-css': 0.61.0
+      '@itwin/itwinui-css': 0.63.2
       '@itwin/itwinui-react': 1.46.0_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
       immer: 9.0.6
@@ -2283,7 +2385,7 @@ packages:
       '@itwin/core-react': 3.6.1_c1200f78e7794c610fc6d7a00f23b599
       '@itwin/core-telemetry': 3.6.1_@itwin+core-geometry@3.6.1
       '@itwin/imodel-components-react': 3.6.1_c4d89ce21e4101355356fa6502cf443d
-      '@itwin/itwinui-css': 0.61.0
+      '@itwin/itwinui-css': 0.63.2
       '@itwin/itwinui-icons': 1.16.0
       '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.46.0_react-dom@17.0.2+react@17.0.2
@@ -2617,7 +2719,7 @@ packages:
       '@itwin/appui-abstract': 3.6.1_@itwin+core-bentley@3.6.1
       '@itwin/core-bentley': 3.6.1
       '@itwin/core-react': 3.6.1_c1200f78e7794c610fc6d7a00f23b599
-      '@itwin/itwinui-css': 0.61.0
+      '@itwin/itwinui-css': 0.63.2
       '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 1.46.0_react-dom@17.0.2+react@17.0.2
       '@types/shortid': 0.0.29
@@ -3287,7 +3389,7 @@ packages:
       '@bentley/icons-generic-webfont': 1.0.34
       '@itwin/appui-abstract': 3.6.1_@itwin+core-bentley@3.6.1
       '@itwin/core-bentley': 3.6.1
-      '@itwin/itwinui-css': 0.61.0
+      '@itwin/itwinui-css': 0.63.2
       '@itwin/itwinui-react': 1.46.0_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
       dompurify: 2.3.6
@@ -3486,6 +3588,32 @@ packages:
       eslint: 7.32.0
       eslint-import-resolver-node: 0.3.4
       eslint-import-resolver-typescript: 2.4.0_ee2ddb12623c985c36290f985ad5559c
+      eslint-plugin-deprecation: 1.2.1_eslint@7.32.0+typescript@4.3.5
+      eslint-plugin-import: 2.23.4_eslint@7.32.0
+      eslint-plugin-jam3: 0.2.3
+      eslint-plugin-jsdoc: 35.1.3_eslint@7.32.0
+      eslint-plugin-jsx-a11y: 6.4.1_eslint@7.32.0
+      eslint-plugin-prefer-arrow: 1.2.3_eslint@7.32.0
+      eslint-plugin-react: 7.24.0_eslint@7.32.0
+      eslint-plugin-react-hooks: 4.2.0_eslint@7.32.0
+      require-dir: 1.2.0
+      typescript: 4.3.5
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@itwin/eslint-plugin/3.6.1_eslint@7.32.0+typescript@4.3.5:
+    resolution: {integrity: sha512-kqsjp318uc9CgB1XgZWAigTKFIVJhgQ72WnR4YsveZ0gfRFWfXz5/n8SslQOaQhRiy13AW13pKURM/q6/PQMWA==}
+    hasBin: true
+    peerDependencies:
+      eslint: ^7.0.0
+      typescript: ^3.7.0 || ^4.0.0
+    dependencies:
+      '@typescript-eslint/eslint-plugin': 4.31.2_1ff229bad5b3f782209b865beb048324
+      '@typescript-eslint/parser': 4.31.2_eslint@7.32.0+typescript@4.3.5
+      eslint: 7.32.0
+      eslint-import-resolver-node: 0.3.4
+      eslint-import-resolver-typescript: 2.7.1_ee2ddb12623c985c36290f985ad5559c
       eslint-plugin-deprecation: 1.2.1_eslint@7.32.0+typescript@4.3.5
       eslint-plugin-import: 2.23.4_eslint@7.32.0
       eslint-plugin-jam3: 0.2.3
@@ -3703,7 +3831,7 @@ packages:
       '@itwin/core-geometry': 3.6.1
       '@itwin/core-quantity': 3.6.1_@itwin+core-bentley@3.6.1
       '@itwin/core-react': 3.6.1_c1200f78e7794c610fc6d7a00f23b599
-      '@itwin/itwinui-css': 0.61.0
+      '@itwin/itwinui-css': 0.63.2
       '@itwin/itwinui-react': 1.46.0_react-dom@17.0.2+react@17.0.2
       callable-instance2: 1.0.0
       classnames: 2.3.1
@@ -3736,6 +3864,15 @@ packages:
       axios: 0.21.4
     transitivePeerDependencies:
       - debug
+    dev: false
+
+  /@itwin/insights-client/0.3.4:
+    resolution: {integrity: sha512-xMNKiuHHh4q9cGIsgWiOdW6OMRSIMVitA9ABo4i6+7mIdQcwVpKUCk90hXaSCMBXAyVxusDNUDmvXoYLv05uAA==}
+    dependencies:
+      cross-fetch: 3.1.5
+      fast-xml-parser: 4.0.9
+    transitivePeerDependencies:
+      - encoding
     dev: false
 
   /@itwin/insights-client/0.4.0:
@@ -3774,7 +3911,6 @@ packages:
 
   /@itwin/itwinui-css/0.63.2:
     resolution: {integrity: sha512-rsqk2U4FehGRv3XXdHnvahmnR7ujuyNok1n0Ph+HiX0TnxUKbGb14mssBStGhyg2xfOzydwU4h07K6TDTMgGSA==}
-    dev: true
 
   /@itwin/itwinui-icons-color-react/1.0.2_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-jsYwrecYVnve9qM4l6NegliJBI5jEupJ4aIvHlVTJMZEwtqLDYOzQKB/SfdE79aoKJ7qBVZDUqozRRbReFhQ8Q==}
@@ -3939,7 +4075,6 @@ packages:
       react-dom: 17.0.2_react@17.0.2
       react-table: 7.7.0_react@17.0.2
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
-    dev: true
 
   /@itwin/object-storage-azure/1.4.0:
     resolution: {integrity: sha512-/vREtCo/h+Np5RlmLP8AHZ2Yb7rc77ywKj8jNCwoV/uyg9ea3r+OaoBJX/0w9epQwjGRsLEXwFFywXB5IUQJ7A==}
@@ -5543,6 +5678,13 @@ packages:
 
   /@types/jest/27.4.1:
     resolution: {integrity: sha512-23iPJADSmicDVrWk+HT58LMJtzLAnB2AgIzplQuq/bSrGaxCrlvRFjGbXmamnnk/mAmCdLStiGqggu28ocUyiw==}
+    dependencies:
+      jest-matcher-utils: 27.5.1
+      pretty-format: 27.5.1
+    dev: true
+
+  /@types/jest/27.5.2:
+    resolution: {integrity: sha512-mpT8LJJ4CMeeahobofYWIjFo0xonRS/HfxnVEPMPFSQdGUt1uHCnoPT7Zhb+sjDU2wz0oKV0OLUR0WzrHNgfeA==}
     dependencies:
       jest-matcher-utils: 27.5.1
       pretty-format: 27.5.1
@@ -7849,7 +7991,7 @@ packages:
     dev: true
 
   /charenc/0.0.2:
-    resolution: {integrity: sha512-yrLQ/yVUFXkzg7EDQsPieE/53+0RlaWTs+wBrvW36cyilJ2SaDWfl4Yj7MtLTXleV9uEKefbAGUPv2/iWSooRA==}
+    resolution: {integrity: sha1-wKHS86cJLgN3S/qD8UwPxXkKhmc=}
     dev: true
 
   /check-error/1.0.2:
@@ -8306,7 +8448,7 @@ packages:
     dev: true
 
   /crypt/0.0.2:
-    resolution: {integrity: sha512-mCxBlsHFYh9C+HVpiEacem8FEBnMXgU9gy4zmNC+SXAZNB/1idgp/aulFJ4FgCi7GPEVbfyng092GqL2k2rmow==}
+    resolution: {integrity: sha1-iNf/fsDfuG9xPch7u0LQRNPmxBs=}
     dev: true
 
   /crypto-browserify/3.12.0:
@@ -16511,6 +16653,40 @@ packages:
       mkdirp: 1.0.4
       semver: 7.3.7
       typescript: 4.4.4
+      yargs-parser: 20.2.9
+    dev: true
+
+  /ts-jest/27.1.4_9c2bb0de79d00985140535e369b1df3e:
+    resolution: {integrity: sha512-qjkZlVPWVctAezwsOD1OPzbZ+k7zA5z3oxII4dGdZo5ggX/PL7kvwTM0pXTr10fAtbiVpJaL3bWd502zAhpgSQ==}
+    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
+    hasBin: true
+    peerDependencies:
+      '@babel/core': '>=7.0.0-beta.0 <8'
+      '@types/jest': ^27.0.0
+      babel-jest: '>=27.0.0 <28'
+      esbuild: '*'
+      jest: ^27.0.0
+      typescript: '>=3.8 <5.0'
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      '@types/jest':
+        optional: true
+      babel-jest:
+        optional: true
+      esbuild:
+        optional: true
+    dependencies:
+      '@types/jest': 27.5.2
+      bs-logger: 0.2.6
+      fast-json-stable-stringify: 2.1.0
+      jest: 27.5.1
+      jest-util: 27.5.1
+      json5: 2.2.1
+      lodash.memoize: 4.1.2
+      make-error: 1.3.6
+      semver: 7.3.7
+      typescript: 4.3.5
       yargs-parser: 20.2.9
     dev: true
 
