@@ -7,22 +7,18 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { BeEvent, using } from "@itwin/core-bentley";
+import { BeEvent, Id64String, using } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
-import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
+import {
+  IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility, SpatialViewState, Viewport, ViewState, ViewState3d,
+} from "@itwin/core-frontend";
 import { isPromiseLike } from "@itwin/core-react";
-import { Presentation } from "@itwin/presentation-frontend";
-import { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { FilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { IModelHierarchyChangeEventArgs, Presentation, PresentationManager } from "@itwin/presentation-frontend";
+import { ModelsVisibilityHandler, ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { CachingElementIdsContainer } from "../../../components/trees/models-tree/Utils";
 import { TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
-import type { Id64String } from "@itwin/core-bentley";
-import type {
-  IModelConnection, SpatialViewState, Viewport, ViewState, ViewState3d,
-} from "@itwin/core-frontend";
-import type { FilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
-import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
 
 describe("ModelsVisibilityHandler", () => {
 

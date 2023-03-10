@@ -3,34 +3,30 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import * as React from "react";
 import { expect } from "chai";
 import { join } from "path";
-import * as React from "react";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { BeEvent } from "@itwin/core-bentley";
-import { BisCodeSpec, Code, IModel, RelatedElement } from "@itwin/core-common";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { KeySet, LabelDefinition, StandardNodeTypes } from "@itwin/presentation-common";
+import { TreeNodeItem } from "@itwin/components-react";
+import { BeEvent, Id64String } from "@itwin/core-bentley";
+import {
+  BisCodeSpec, CategoryProps, Code, ElementProps, IModel, ModelProps, PhysicalElementProps, RelatedElement, RelatedElementProps, SubCategoryProps,
+} from "@itwin/core-common";
+import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
+import { ECInstancesNodeKey, KeySet, LabelDefinition, Node, NodePathElement, StandardNodeTypes } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
+import { Presentation, PresentationManager, RulesetVariablesManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  TestIModelBuilder,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
-import type { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 import { mockPresentationManager, TestUtils } from "../../TestUtils";
-
-import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-import type { Id64String } from "@itwin/core-bentley";
-import type { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
-import type { TreeNodeItem } from "@itwin/components-react";
-import type { ECInstancesNodeKey, Node, NodePathElement } from "@itwin/presentation-common";
-import type { PresentationManager, RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
-import type { TestIModelBuilder } from "@itwin/presentation-testing";
-import type { CategoryProps, ElementProps, ModelProps, PhysicalElementProps, RelatedElementProps, SubCategoryProps } from "@itwin/core-common";
 
 describe("CategoryTree", () => {
 

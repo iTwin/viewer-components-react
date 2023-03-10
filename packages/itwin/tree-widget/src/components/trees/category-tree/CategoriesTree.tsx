@@ -6,19 +6,16 @@
 import "./CategoriesTree.scss";
 import * as React from "react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
-import { IModelApp } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import { useDisposable } from "@itwin/core-react";
-import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+import { Ruleset } from "@itwin/presentation-common";
+import { IPresentationTreeDataProvider, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
+import { VisibilityTreeFilterInfo } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { useVisibilityTreeFiltering, useVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
-import { CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
-import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
-import type { Ruleset } from "@itwin/presentation-common";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { VisibilityTreeFilterInfo } from "../Common";
-import type { Category } from "./CategoryVisibilityHandler";
+import { Category, CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
 
 const PAGING_SIZE = 20;
 

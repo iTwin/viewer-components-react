@@ -1,0 +1,26 @@
+{
+  "plugins": [
+    "@itwin"
+  ],
+  "extends": [
+    "plugin:@itwin/ui"
+  ],
+  "rules": {
+    "@typescript-eslint/object-curly-spacing": [
+      "error",
+      "always"
+    ],
+    "object-curly-spacing": [
+      "error",
+      "always"
+    ],
+    "@itwin/no-internal": [
+      "off",
+      {
+        "tag": [
+          "internal"
+        ]
+      }
+    ]
+  }
+}

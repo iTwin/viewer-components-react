@@ -2,17 +2,18 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import * as sinon from "sinon";
 import * as moq from "typemoq";
-import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
-import type { ScreenViewport, ViewState } from "@itwin/core-frontend";
+import {
+  IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility, ScreenViewport, SpatialViewState, SubCategoriesCache, ViewManager, Viewport,
+  ViewState,
+} from "@itwin/core-frontend";
 import { KeySet } from "@itwin/presentation-common";
-import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
+import { Presentation, PresentationManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
 import { enableCategory, enableSubCategory, toggleAllCategories } from "../../components/trees/CategoriesVisibilityUtils";
+import { Category } from "../../components/trees/category-tree/CategoryVisibilityHandler";
 import { mockPresentationManager, TestUtils } from "../TestUtils";
-import type { IModelConnection, SpatialViewState, SubCategoriesCache, ViewManager, Viewport } from "@itwin/core-frontend";
-import type { PresentationManager, SelectionManager } from "@itwin/presentation-frontend";
-import type { Category } from "../../components/trees/category-tree/CategoryVisibilityHandler";
 
 describe("CategoryVisibilityUtils", () => {
   before(async () => {
