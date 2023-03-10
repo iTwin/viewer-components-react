@@ -16,6 +16,7 @@ import { EC3 } from "../components/EC3";
 import type { EC3ConfigProps } from "../components/EC3/EC3Config";
 import { EC3Config } from "../components/EC3/EC3Config";
 
+/* eslint-disable deprecation/deprecation */
 export class EC3Provider implements UiItemsProvider {
   public readonly id = "EC3Provider";
   public config: EC3Config;
