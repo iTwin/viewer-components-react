@@ -15,7 +15,7 @@
       "always"
     ],
     "@itwin/no-internal": [
-      "warn",
+      "off",
       {
         "tag": [
           "internal"
