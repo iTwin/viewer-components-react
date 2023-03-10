@@ -65,7 +65,7 @@
     "@itwin/appui-layout-react": "^3.0.0",
     "@itwin/appui-react": "^3.0.0",
     "@itwin/build-tools": "^3.0.0",
-    "@itwin/certa": "^3.0.0",
+    "@itwin/certa": "^3.6.1",
     "@itwin/components-react": "^3.0.0",
     "@itwin/core-bentley": "^3.0.0",
     "@itwin/core-common": "^3.0.0",
