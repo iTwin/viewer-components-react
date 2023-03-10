@@ -2,11 +2,11 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
-import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
-import type { Category } from "./category-tree/CategoryVisibilityHandler";
-import type { Id64String } from "@itwin/core-bentley";
+
+import { Id64String } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
+import { IModelConnection, PerModelCategoryVisibility, ViewManager, Viewport } from "@itwin/core-frontend";
+import { Category } from "./category-tree/CategoryVisibilityHandler";
 
 const EMPTY_CATEGORIES_ARRAY: Category[] = [];
 
