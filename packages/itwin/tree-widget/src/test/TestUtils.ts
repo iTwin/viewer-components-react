@@ -18,6 +18,7 @@ export class TestUtils {
     if (TestUtils._initialized)
       return;
 
+    // eslint-disable-next-line deprecation/deprecation
     await UiFramework.initialize(undefined);
     await TreeWidget.initialize();
     TestUtils._initialized = true;

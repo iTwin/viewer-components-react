@@ -154,6 +154,7 @@ describe("VisibilityTreeEventHandler", () => {
       changeVisibility.returns(errorSubject);
       await using(eventHandler, async (_) => {
         eventHandler.onCheckboxStateChanged({
+          // eslint-disable-next-line deprecation/deprecation
           stateChanges: from([changes]),
         });
         onVisibilityChange.raiseEvent(["testId1"]);

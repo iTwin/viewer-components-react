@@ -136,10 +136,13 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     if (!this._visibilityHandler)
       return undefined;
 
+    // eslint-disable-next-line deprecation/deprecation
     from(event.stateChanges)
       .pipe(
+        // eslint-disable-next-line deprecation/deprecation
         mergeMap((changes) => this.changeVisibility(changes)),
       )
+      // eslint-disable-next-line deprecation/deprecation
       .subscribe({
         complete: handleStateChanged,
         error: handleStateChanged,
@@ -148,13 +151,16 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   private changeVisibility(changes: CheckboxStateChange[]) {
+    // eslint-disable-next-line deprecation/deprecation
     return from(changes)
       .pipe(
+        // eslint-disable-next-line deprecation/deprecation
         mergeMap(({ nodeItem, newState }) => {
           // istanbul ignore if
           if (!this._visibilityHandler)
             return EMPTY;
           this._isChangingVisibility = true;
+          // eslint-disable-next-line deprecation/deprecation
           return from(this._visibilityHandler.changeVisibility(nodeItem, this.getNodeKey(nodeItem), newState === CheckBoxState.On));
         }, 1),
       );
