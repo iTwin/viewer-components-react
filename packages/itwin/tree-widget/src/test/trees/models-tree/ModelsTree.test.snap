@@ -14,6 +14,9 @@ Array [
                   "categoryId": "0x13",
                   "modelId": "0x11",
                 },
+                "filtering": Object {
+                  "descriptor": [Function],
+                },
                 "icon": "icon-item",
                 "label": PropertyRecord {
                   "property": Object {
@@ -51,6 +54,9 @@ Array [
         ],
         "extendedData": Object {
           "isModel": true,
+        },
+        "filtering": Object {
+          "descriptor": [Function],
         },
         "hasChildren": true,
         "icon": "icon-model",
@@ -104,6 +110,9 @@ Array [
                     "extendedData": Object {
                       "categoryId": "0x13",
                       "modelId": "0x11",
+                    },
+                    "filtering": Object {
+                      "descriptor": [Function],
                     },
                     "icon": "icon-item",
                     "label": PropertyRecord {
@@ -159,6 +168,9 @@ Array [
         ],
         "extendedData": Object {
           "isModel": true,
+        },
+        "filtering": Object {
+          "descriptor": [Function],
         },
         "hasChildren": true,
         "icon": "icon-model",

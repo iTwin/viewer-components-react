@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { StagePanelLocation, StagePanelSection } from "@itwin/appui-abstract";
-import type { SpatialContainmentTreeProps } from "@itwin/appui-react";
+
+import type { SpatialContainmentTreeProps, StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { CategoryTreeProps } from "./components/trees/category-tree/CategoriesTree";
@@ -35,6 +35,7 @@ CategoryTreeProps,
 >;
 
 export type SpatialTreeProps = Omit<
+// eslint-disable-next-line deprecation/deprecation
 SpatialContainmentTreeProps,
 "iModel" | "width" | "height"
 >;

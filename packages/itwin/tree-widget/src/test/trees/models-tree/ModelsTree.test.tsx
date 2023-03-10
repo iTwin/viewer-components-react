@@ -9,29 +9,25 @@ import * as React from "react";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { SelectionMode } from "@itwin/components-react";
+import { SelectionMode, TreeNodeItem } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { BisCodeSpec, Code, IModel, RelatedElement } from "@itwin/core-common";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { KeySet, LabelDefinition } from "@itwin/presentation-common";
+import {
+  BisCodeSpec, CategoryProps, Code, ElementProps, IModel, ModelProps, PhysicalElementProps, RelatedElement, RelatedElementProps,
+} from "@itwin/core-common";
+import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
+import { KeySet, LabelDefinition, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
+import { Presentation, PresentationManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  TestIModelBuilder,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { ModelsTree, RULESET_MODELS, RULESET_MODELS_GROUPED_BY_CLASS } from "../../../components/trees/models-tree/ModelsTree";
-import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { ModelsTreeNodeType, ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 import { deepEquals, mockPresentationManager, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
-import type { TreeNodeItem } from "@itwin/components-react";
-import type { IModelConnection } from "@itwin/core-frontend";
-import type { Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
-import type { PresentationManager, RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
-import type { TestIModelBuilder } from "@itwin/presentation-testing";
-import type { CategoryProps, ElementProps, ModelProps, PhysicalElementProps, RelatedElementProps } from "@itwin/core-common";
-import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
-import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 
 describe("ModelsTree", () => {
 
@@ -55,7 +51,6 @@ describe("ModelsTree", () => {
     const imodelMock = moq.Mock.ofType<IModelConnection>();
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
     let presentationManagerMock: moq.IMock<PresentationManager>;
-    let rulesetVariablesManagerMock: moq.IMock<RulesetVariablesManager>;
 
     after(() => {
       Presentation.terminate();
@@ -80,7 +75,6 @@ describe("ModelsTree", () => {
 
       const mocks = mockPresentationManager();
       presentationManagerMock = mocks.presentationManager;
-      rulesetVariablesManagerMock = mocks.rulesetVariablesManager;
       Presentation.setPresentationManager(presentationManagerMock.object);
     });
 
@@ -346,12 +340,6 @@ describe("ModelsTree", () => {
           await result.findByText("filtered-node");
 
           expect(spy).to.be.calledOnce;
-        });
-
-        it("filters nodes by element IDs", async () => {
-          const elementIds = ["0x123", "0x456"];
-          render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock.object} filteredElementIds={elementIds} />);
-          rulesetVariablesManagerMock.verify(async (x) => x.setId64s("filtered-element-ids", elementIds), moq.Times.once());
         });
       });
     });
