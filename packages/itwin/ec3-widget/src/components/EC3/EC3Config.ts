@@ -6,6 +6,43 @@ import { IModelApp } from "@itwin/core-frontend";
 import { CARBON_CALCULATION_BASE_PATH, REPORTING_BASE_PATH } from "@itwin/insights-client";
 import type { GetAccessTokenFn } from "../api/APIContext";
 
+
+/**
+ * Configuration properties for the EC3Config class.
+ */
+export interface EC3ConfigProps {
+  /**
+   * The OAuth client ID used to authenticate with the EC3 API.
+   */
+  clientId: string;
+
+  /**
+   * The OAuth redirect URI used to authenticate with the EC3 API.
+   */
+  redirectUri: string;
+
+  /**
+   * The URI of the EC3 API. If not specified, it defaults to "https://buildingtransparency.org/".
+   */
+  ec3Uri?: string;
+
+  /**
+   * The base path for the Reporting API endpoints. If not specified, it defaults to {@link REPORTING_BASE_PATH}.
+   */
+  reportingBasePath?: string;
+
+  /**
+   * The base path for the Carbon Calculation API endpoints. If not specified, it defaults to {@link CARBON_CALCULATION_BASE_PATH}.
+   */
+  carbonCalculationBasePath?: string;
+
+  /**
+   * A callback function that returns an access token for authenticating API requests.
+   * If not specified, it defaults to the authorizationClient of the {@link IModelApp}.
+   */
+  getAccessToken?: GetAccessTokenFn;
+}
+
 export class EC3Config {
   public readonly clientId: string;
   public readonly scope = "read%20write";
@@ -34,13 +71,4 @@ export class EC3Config {
         : ""
     );
   }
-}
-
-export interface EC3ConfigProps {
-  clientId: string;
-  redirectUri: string;
-  ec3Uri?: string;
-  reportingBasePath?: string;
-  carbonCalculationBasePath?: string;
-  getAccessToken?: GetAccessTokenFn;
 }
