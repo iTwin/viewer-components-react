@@ -2,6 +2,21 @@
   "name": "@itwin/reports-config-widget-react",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@itwin/reports-config-widget-react_v0.2.1",
+      "date": "Tue, 07 Mar 2023 15:47:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Insights Client version bump. Removed url dependency."
+          },
+          {
+            "comment": "Change itwinui-react dependency version control to caret."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@itwin/reports-config-widget-react_v0.2.0",
       "date": "Thu, 19 Jan 2023 10:29:18 GMT",

@@ -1,6 +1,14 @@
 # Change Log - @itwin/reports-config-widget-react
 
-This log was last generated on Thu, 19 Jan 2023 10:29:18 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Mar 2023 15:47:41 GMT and should not be manually modified.
+
+## 0.2.1
+Tue, 07 Mar 2023 15:47:41 GMT
+
+### Patches
+
+- Insights Client version bump. Removed url dependency.
+- Change itwinui-react dependency version control to caret.
 
 ## 0.2.0
 Thu, 19 Jan 2023 10:29:18 GMT

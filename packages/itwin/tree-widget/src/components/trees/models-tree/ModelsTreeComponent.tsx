@@ -3,18 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import React, { useCallback, useEffect, useState } from "react";
-import type { Viewport } from "@itwin/core-frontend";
-import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
-import { useTreeFilteringState } from "../../TreeFilteringState";
 import "./ModelsTree.scss";
-import type {
-  GeometricModel3dProps,
-  ModelQueryParams,
-} from "@itwin/core-common";
+import React, { useCallback, useEffect, useState } from "react";
+import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
+import { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
+import { IModelApp, Viewport } from "@itwin/core-frontend";
+import { ModelTreeProps } from "../../../types";
 import { TreeHeaderComponent } from "../../header/TreeHeader";
-import type { ModelTreeProps } from "../../../types";
+import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
+import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 import { ModelsTree } from "./ModelsTree";
 
 interface TreeViewModelInfo {
@@ -84,15 +82,37 @@ export const ModelsTreeComponent = (props: ModelTreeProps) => {
     viewport?.invalidateScene();
   }, [viewport, availableModels]);
 
-  const hideAll = useCallback(() => {
+  const hideAll = useCallback(async () => {
     viewport?.changeModelDisplay(availableModels, false);
+    viewport?.clearAlwaysDrawn();
+    if (iModel) {
+      await toggleAllCategories(
+        IModelApp.viewManager,
+        iModel,
+        false,
+        viewport,
+        false,
+        undefined
+      );
+    }
     viewport?.invalidateScene();
-  }, [viewport, availableModels]);
+  }, [viewport, availableModels, iModel]);
 
   const showAll = useCallback(async () => {
     await viewport?.addViewedModels(availableModels);
+    viewport?.clearNeverDrawn();
+    if (iModel) {
+      await toggleAllCategories(
+        IModelApp.viewManager,
+        iModel,
+        true,
+        viewport,
+        false,
+        undefined
+      );
+    }
     viewport?.invalidateScene();
-  }, [viewport, availableModels]);
+  }, [viewport, availableModels, iModel]);
 
   const viewToggle2D = useCallback(async () => {
     if (is2dToggleActive) {
