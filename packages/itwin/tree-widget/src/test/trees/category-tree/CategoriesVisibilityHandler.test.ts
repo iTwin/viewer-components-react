@@ -8,17 +8,15 @@ import * as sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import * as UiComponents from "@itwin/components-react";
-import { BeEvent, using } from "@itwin/core-bentley";
-import type { PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { StandardNodeTypes } from "@itwin/presentation-common";
-import { renderHook } from "@testing-library/react-hooks";
-import { CategoryVisibilityHandler, useCategories } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
-import type { Id64String } from "@itwin/core-bentley";
-import type {
-  IModelConnection, ScreenViewport, SubCategoriesCache, ViewManager, Viewport, ViewState,
+import { BeEvent, Id64String, using } from "@itwin/core-bentley";
+import {
+  IModelConnection, PerModelCategoryVisibility, ScreenViewport, SubCategoriesCache, ViewManager, Viewport, ViewState,
 } from "@itwin/core-frontend";
-import type { ECInstancesNodeKey } from "@itwin/presentation-common";
-import type { Category, CategoryVisibilityHandlerParams } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import { ECInstancesNodeKey, StandardNodeTypes } from "@itwin/presentation-common";
+import { renderHook } from "@testing-library/react-hooks";
+import {
+  Category, CategoryVisibilityHandler, CategoryVisibilityHandlerParams, useCategories,
+} from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 
 const createKey = (id: Id64String): ECInstancesNodeKey => {
   return {

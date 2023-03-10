@@ -2,8 +2,13 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "",
-      "type": "none"
+      "comment": "Upgrade `itwinjs-core` dependencies to `^3.6.0`",
+      "type": "minor"
+    },
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "Upgrade `typescript` to `~4.4.0`",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

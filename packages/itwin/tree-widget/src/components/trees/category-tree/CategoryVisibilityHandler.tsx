@@ -4,13 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import { useAsyncValue } from "@itwin/components-react";
+import { TreeNodeItem, useAsyncValue } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
+import { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
-import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
-import type { TreeNodeItem } from "@itwin/components-react";
-import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport } from "../CategoriesVisibilityUtils";
+import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
 const EMPTY_CATEGORIES_ARRAY: Category[] = [];
 
