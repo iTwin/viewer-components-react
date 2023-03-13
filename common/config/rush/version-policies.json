@@ -53,5 +53,11 @@
     "policyName": "reports-config-widget",
     "definitionName": "individualVersion",
     "lockedMajor": 0
+  },
+  {
+    "policyName": "itwin-map-layers",
+    "definitionName": "lockStepVersion",
+    "version": "4.0.0-dev.44",
+    "nextBump": "prerelease"
   }
 ]
