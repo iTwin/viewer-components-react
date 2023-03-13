@@ -2,10 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { BeEvent, compareStringsOrUndefined } from "@itwin/core-bentley";
+import { compareStringsOrUndefined } from "@itwin/core-bentley";
 import { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { DelayLoadedTreeNodeItem, ITreeDataProvider, TreeDataChangesListener, TreeNodeItem } from "@itwin/components-react";
+import { DelayLoadedTreeNodeItem, ITreeDataProvider, TreeNodeItem } from "@itwin/components-react";
 import { CheckBoxState } from "@itwin/core-react";
 import { StyleMapLayerSettings } from "../Interfaces";
 
@@ -74,7 +74,7 @@ export class SubLayersDataProvider implements ITreeDataProvider {
     }
   }
 
-  public onTreeNodeChanged = new BeEvent<TreeDataChangesListener>();
+  // public onTreeNodeChanged = new BeEvent<TreeDataChangesListener>();
 
   public async getNodesCount(parent?: TreeNodeItem) {
     const nodeArray: TreeNodeItem[] | undefined = parent ? this._nodeMap.get(parent.id) : this._nodeMap.get("");
