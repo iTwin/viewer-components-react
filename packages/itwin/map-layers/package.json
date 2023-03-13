@@ -7,8 +7,7 @@
   "typings": "lib/cjs/map-layers",
   "license": "MIT",
   "scripts": {
-    "build": "npm run -s copy:locale && npm run -s build:cjs",
-    "build:ci": "npm run -s build && npm run -s build:esm",
+    "build": "npm run -s copy:locale && npm run -s build:cjs && npm run -s build:esm",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs && npm run -s copy:cjs",
     "build:esm": "tsc 1>&2 --module ES2020 --outDir lib/esm && npm run -s copy:esm",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
@@ -36,9 +35,13 @@
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
+  "dependencies": {
+    "@itwin/itwinui-icons-color-react": "~1.0.3",
+    "classnames": "^2.3.1",
+    "react-beautiful-dnd": "^13.0.0"
+  },
   "devDependencies": {
     "@itwin/appui-abstract": "^4.0.0-dev.44",
-    "@itwin/appui-layout-react": "^4.0.0-dev.12",
     "@itwin/appui-react": "^4.0.0-dev.12",
     "@itwin/build-tools": "^4.0.0-dev.44",
     "@itwin/components-react": "^4.0.0-dev.12",
@@ -46,7 +49,6 @@
     "@itwin/core-common": "^4.0.0-dev.44",
     "@itwin/core-frontend": "^4.0.0-dev.44",
     "@itwin/core-geometry": "^4.0.0-dev.44",
-    "@itwin/core-quantity": "^4.0.0-dev.44",
     "@itwin/core-react": "^4.0.0-dev.12",
     "@itwin/eslint-plugin": "^4.0.0-dev.30",
     "@itwin/imodel-components-react": "^4.0.0-dev.12",
@@ -84,23 +86,15 @@
     "typemoq": "^2.1.0",
     "typescript": "~4.4.0"
   },
-  "dependencies": {
-    "@itwin/itwinui-icons-color-react": "~1.0.3",
-    "classnames": "^2.3.1",
-    "react-beautiful-dnd": "^13.0.0"
-  },
   "peerDependencies": {
+    "@itwin/appui-abstract": "^4.0.0-dev.44",
+    "@itwin/appui-react": "^4.0.0-dev.12",
+    "@itwin/components-react": "^4.0.0-dev.12",
     "@itwin/core-bentley": "^4.0.0-dev.44",
-    "@itwin/core-geometry": "^4.0.0-dev.44",
     "@itwin/core-common": "^4.0.0-dev.44",
     "@itwin/core-frontend": "^4.0.0-dev.44",
-    "@itwin/core-quantity": "^4.0.0-dev.44",
-    "@itwin/appui-abstract": "^4.0.0-dev.44",
-    "@itwin/components-react": "^4.0.0-dev.12",
     "@itwin/core-react": "^4.0.0-dev.12",
-    "@itwin/appui-react": "^4.0.0-dev.12",
     "@itwin/imodel-components-react": "^4.0.0-dev.12",
-    "@itwin/appui-layout-react": "^4.0.0-dev.12",
     "react": "^17.0.0",
     "react-dom": "^17.0.0"
   },
