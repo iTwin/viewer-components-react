@@ -21,14 +21,14 @@ jobs:
     condition: succeeded()
     strategy:
       matrix:
-        "Windows - Node 18":
-          NodeVersion: 18
+        "Windows - Node 16":
+          NodeVersion: 16.x
           OS: windows-latest
-        "Linux - Node 18":
-          NodeVersion: 18
+        "Linux - Node 16":
+          NodeVersion: 16.x
           OS: ubuntu-latest
-        "Mac - Node 18":
-          NodeVersion: 18
+        "Mac - Node 16":
+          NodeVersion: 16.x
           OS: macOS-latest
 
     workspace:
