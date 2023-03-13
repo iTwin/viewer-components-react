@@ -8,7 +8,7 @@ import { LoadingSpinner } from "../utils";
 import "./ManualGroupingCustomUI.scss";
 import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
 
-const ManualGroupingCustomUI = ({
+export const ManualGroupingCustomUI = ({
   updateQuery,
   isUpdating,
   resetView,
@@ -49,5 +49,3 @@ const ManualGroupingCustomUI = ({
     </div>
   );
 };
-
-export default ManualGroupingCustomUI;

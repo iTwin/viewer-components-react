@@ -6,44 +6,13 @@ import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
 import { ProgressRadial, Text, toaster } from "@itwin/itwinui-react";
 import "./utils.scss";
 import React from "react";
-import type {
-  ISelectionProvider,
-  SelectionChangeEventArgs,
-} from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { QueryRowFormat } from "@itwin/core-common";
-
-export const onSelectionChanged = (
-  evt: SelectionChangeEventArgs,
-  selectionProvider: ISelectionProvider,
-) => {
-  /* eslint-disable no-console */
-  const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-  if (selection.isEmpty) {
-    console.log("========== Selection cleared ==========");
-  } else {
-    console.log("========== Selection change ===========");
-    if (selection.instanceKeys.size !== 0) {
-      // log all selected ECInstance ids grouped by ECClass name
-      console.log("ECInstances:");
-      selection.instanceKeys.forEach((ids, ecclass) => {
-        console.log(`${ecclass}: [${[...ids].join(",")}]`);
-      });
-    }
-    if (selection.nodeKeys.size !== 0) {
-      // log all selected node keys
-      console.log("Nodes:");
-      selection.nodeKeys.forEach((key) => console.log(JSON.stringify(key)));
-    }
-    console.log("=======================================");
-  }
-  /* eslint-enable no-console */
-};
 
 export interface WidgetHeaderProps {
   title: string;
   disabled?: boolean;
-  returnFn?: () => Promise<void>;
+  returnFn?: () => void;
 }
 
 export const WidgetHeader = ({

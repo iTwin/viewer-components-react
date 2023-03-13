@@ -9,7 +9,7 @@ import { LoadingSpinner } from "./utils";
 
 export interface ActionPanelProps {
   onSave: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
   isCancelDisabled?: boolean;
   isSavingDisabled?: boolean;
   isLoading?: boolean;
@@ -36,7 +36,7 @@ const ActionPanel = ({
         >
           Save
         </Button>
-        <Button
+        {onCancel && <Button
           styleType='default'
           type='button'
           id='cancel'
@@ -44,7 +44,7 @@ const ActionPanel = ({
           disabled={isCancelDisabled || isLoading}
         >
           Cancel
-        </Button>
+        </Button>}
       </div>
     </div>
   );

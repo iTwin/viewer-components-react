@@ -8,7 +8,7 @@ import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
 import { LoadingSpinner } from "../utils";
 import "./SearchGroupingCustomUI.scss";
 
-const SearchGroupingCustomUI = ({
+export const SearchGroupingCustomUI = ({
   updateQuery,
   isUpdating,
   resetView,
@@ -168,4 +168,3 @@ const SearchGroupingCustomUI = ({
   );
 };
 
-export default SearchGroupingCustomUI;

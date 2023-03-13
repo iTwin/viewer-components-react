@@ -1,11 +1,11 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
-  "rushVersion": "5.58.0",
-  "pnpmVersion": "6.24.4",
+  "rushVersion": "5.83.1",
+  "pnpmVersion": "6.35.1",
+  "nodeSupportedVersionRange": ">=12.17.0 <19.0.0",
   "pnpmOptions": {
     "useWorkspaces": true
   },
-  "nodeSupportedVersionRange": ">=14.9.0 <17.0.0",
   "projectFolderMinDepth": 2,
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
@@ -14,7 +14,8 @@
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
   "repository": {
-    "url": "https://github.com/iTwin/viewer-components-react"
+    "url": "https://github.com/iTwin/viewer-components-react",
+    "defaultBranch": "master"
   },
   "projects": [
     {

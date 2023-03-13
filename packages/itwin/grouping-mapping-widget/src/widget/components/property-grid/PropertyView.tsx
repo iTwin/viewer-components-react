@@ -2,15 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import { ElementSeparator, Orientation } from "@itwin/core-react";
 import { ActionButtonList } from "@itwin/components-react";
 import "./PropertyView.scss";
 import type { SharedRendererProps } from "./PropertyRender";
-import { useCallback } from "react";
 import { PropertyGridColumnStyleProvider } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
 import { Checkbox } from "@itwin/itwinui-react";
 import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";

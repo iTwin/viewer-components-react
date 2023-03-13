@@ -4,16 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import "@testing-library/jest-dom";
-import { screen, waitForElementToBeRemoved, within } from "./test-utils";
 import { faker } from "@faker-js/faker";
-import { Groupings } from "../grouping-mapping-widget";
+import { GroupingMappingCustomUIType, Groupings } from "../grouping-mapping-widget";
 import type { GroupCollection, IMappingsClient, Mapping } from "@itwin/insights-client";
 import * as moq from "typemoq";
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection, ViewManager } from "@itwin/core-frontend";
 import type { ContextCustomUIProps, GroupingCustomUIProps, GroupingMappingCustomUI } from "../grouping-mapping-widget";
-import { GroupingMappingCustomUIType } from "../grouping-mapping-widget";
 import userEvent from "@testing-library/user-event";
-import { render } from "@testing-library/react";
+import { render, screen, waitForElementToBeRemoved, within } from "../test/test-utils";
 
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
@@ -61,7 +59,7 @@ const groupsFactory = (): GroupCollection => ({
 });
 
 const connectionMock = moq.Mock.ofType<IModelConnection>();
-let groupingMappingCustomUIMock: GroupingMappingCustomUI[] = [];
+const viewManagerMock = moq.Mock.ofType<ViewManager>();
 const mappingClientMock = moq.Mock.ofType<IMappingsClient>();
 
 jest.mock("@itwin/appui-react", () => ({
@@ -69,18 +67,11 @@ jest.mock("@itwin/appui-react", () => ({
   useActiveIModelConnection: () => connectionMock.object,
 }));
 
-const mockAccessToken = jest.fn().mockResolvedValue("Bearer eyJhbGci");
-
-jest.mock("../widget/components/context/GroupingApiConfigContext", () => ({
-  ...jest.requireActual("../widget/components/context/GroupingApiConfigContext"),
-  useGroupingMappingApiConfig: () => ({
-    getAccessToken: mockAccessToken,
-  }),
-}));
-
-jest.mock("../widget/components/context/GroupingMappingCustomUIContext", () => ({
-  ...jest.requireActual("../widget/components/context/GroupingMappingCustomUIContext"),
-  useGroupingMappingCustomUI: () => groupingMappingCustomUIMock,
+jest.mock("@itwin/core-frontend", () => ({
+  ...jest.requireActual("@itwin/core-frontend"),
+  IModelApp: {
+    viewManager: {},
+  },
 }));
 
 jest.mock("../widget/components/context/MappingClientContext", () => ({
@@ -90,48 +81,42 @@ jest.mock("../widget/components/context/MappingClientContext", () => ({
 
 const mockGroups = groupsFactory();
 
-describe("Groupings View with default UIs", () => {
+describe("Groupings View", () => {
   beforeEach(async () => {
     connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId);
     connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
 
-    const mockedAccessToken = await mockAccessToken();
     mappingClientMock
-      .setup(async (x) => x.getGroups(mockedAccessToken, mockIModelId, mockMappingId))
+      .setup(async (x) => x.getGroups(moq.It.isAny(), moq.It.isAny(), moq.It.isAny()))
       .returns(async () => Promise.resolve(mockGroups.groups));
   });
 
   afterEach(() => {
     connectionMock.reset();
     mappingClientMock.reset();
-    groupingMappingCustomUIMock = [];
+    viewManagerMock.reset();
   });
 
-  it("List all groups and click on add group and edit group buttons", async () => {
+  it("List all groups", async () => {
     // Arange
 
     // Act
     const user = userEvent.setup();
-    render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
+    render(
+      <Groupings
+        mapping={mockMapping}
+        onClickAddGroup={jest.fn()}
+        onClickGroupModify={jest.fn()}
+        onClickGroupTitle={jest.fn}
+        onClickRenderContextCustomUI={jest.fn()}
+      />
+    );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
     // Assert
-    const addButton = screen.getAllByTestId("gmw-add-group-button");
-    expect(addButton).toHaveLength(1);
 
-    // Click on 'Add Group' button
-    await user.click(addButton[0]);
-
-    // Should have three menu items
-    const addSelection = screen.getAllByTestId("gmw-add-0");
-    expect(addSelection).toHaveLength(1);
-    const addSearch = screen.getAllByTestId("gmw-add-1");
-    expect(addSearch).toHaveLength(1);
-    const addManual = screen.getAllByTestId("gmw-add-2");
-    expect(addManual).toHaveLength(1);
-
-    // Should have the right group number
+    // Should have the correct random mockGroups.groups count listed
     const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
     expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
 
@@ -155,26 +140,13 @@ describe("Groupings View with default UIs", () => {
 
     await user.click(moreButton[0]);
 
-    // Should have 3 context menu items
+    // Should only have the permanent delete context item.
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
-    expect(contextMenuItems).toHaveLength(3);
-    expect(contextMenuItems[0]).toHaveTextContent("Edit");
-    expect(contextMenuItems[1]).toHaveTextContent("Properties");
-    expect(contextMenuItems[2]).toHaveTextContent("Remove");
-
-    // Hover on 'Edit'
-    await user.hover(contextMenuItems[0]);
-
-    // Should have 3 sub menu items
-    const editSelection = screen.getAllByTestId(`gmw-edit-0`);
-    expect(editSelection).toHaveLength(1);
-    const editSearch = screen.getAllByTestId(`gmw-edit-1`);
-    expect(editSearch).toHaveLength(1);
-    const editManual = screen.getAllByTestId(`gmw-edit-2`);
-    expect(editManual).toHaveLength(1);
+    expect(contextMenuItems).toHaveLength(1);
+    expect(contextMenuItems[0]).toHaveTextContent("Remove");
   });
 
-  it("Set up grouping custom UI - should replace default grouping methods", async () => {
+  it("Set up grouping custom UI", async () => {
     // Arange
     const mockedUIComponent = (_props: GroupingCustomUIProps) => React.createElement("div");
     const mockGroupingUI: GroupingMappingCustomUI = {
@@ -184,11 +156,19 @@ describe("Groupings View with default UIs", () => {
       uiComponent: mockedUIComponent,
     };
 
-    groupingMappingCustomUIMock = [mockGroupingUI];
+    const groupingMappingCustomUIMock = [mockGroupingUI];
 
     // Act
-    const user = userEvent.setup();
-    render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
+    const { user } = render(
+      <Groupings
+        mapping={mockMapping}
+        onClickAddGroup={jest.fn()}
+        onClickGroupModify={jest.fn()}
+        onClickGroupTitle={jest.fn}
+        onClickRenderContextCustomUI={jest.fn()}
+      />,
+      groupingMappingCustomUIMock
+    );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -212,9 +192,9 @@ describe("Groupings View with default UIs", () => {
     // Click on first more icon
     await user.click(moreButton[0]);
 
-    // Should have 3 context menu items without context configuration
+    // Should have 2 context menu items
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
-    expect(contextMenuItems).toHaveLength(3);
+    expect(contextMenuItems).toHaveLength(2);
     expect(contextMenuItems[0]).toHaveTextContent("Edit");
 
     // Hover on 'Edit'
@@ -232,7 +212,7 @@ describe("Groupings View with default UIs", () => {
     expect(groupName).toHaveLength(1);
   });
 
-  it("Set up context custom UI - should have default grouping methods and add context menu", async () => {
+  it("Set up context custom UI - should have add context menu", async () => {
     // Arange
     const mockedUIComponent = (_props: ContextCustomUIProps) => React.createElement("div");
     const mockContextUI: GroupingMappingCustomUI = {
@@ -242,28 +222,24 @@ describe("Groupings View with default UIs", () => {
       uiComponent: mockedUIComponent,
     };
 
-    groupingMappingCustomUIMock = [mockContextUI];
+    const groupingMappingCustomUIMock = [mockContextUI];
+    const onClickRenderContextCustomUIMock = jest.fn();
 
     // Act
-    const user = userEvent.setup();
-    render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
+    const { user } = render(
+      <Groupings
+        mapping={mockMapping}
+        onClickAddGroup={jest.fn()}
+        onClickGroupModify={jest.fn()}
+        onClickGroupTitle={jest.fn}
+        onClickRenderContextCustomUI={onClickRenderContextCustomUIMock}
+      />,
+      groupingMappingCustomUIMock
+    );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
     // Assert
-    const addButton = screen.getAllByTestId("gmw-add-group-button");
-    expect(addButton).toHaveLength(1);
-
-    // Click on 'Add Group' button
-    await user.click(addButton[0]);
-
-    // Should have three menu items
-    const addSelection = screen.getAllByTestId("gmw-add-0");
-    expect(addSelection).toHaveLength(1);
-    const addSearch = screen.getAllByTestId("gmw-add-1");
-    expect(addSearch).toHaveLength(1);
-    const addManual = screen.getAllByTestId("gmw-add-2");
-    expect(addManual).toHaveLength(1);
 
     // Should have the right group number
     const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
@@ -275,16 +251,17 @@ describe("Groupings View with default UIs", () => {
 
     await user.click(moreButton[0]);
 
-    // Should have 4 context menu items
+    // Should have 2 context menu items
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
-    expect(contextMenuItems).toHaveLength(4);
-    expect(contextMenuItems[0]).toHaveTextContent("Edit");
-    expect(contextMenuItems[1]).toHaveTextContent("Properties");
-    expect(contextMenuItems[2]).toHaveTextContent("Remove");
-    expect(contextMenuItems[3]).toHaveTextContent(mockContextUI.displayLabel);
+    expect(contextMenuItems).toHaveLength(2);
+    expect(contextMenuItems[0]).toHaveTextContent(mockContextUI.displayLabel);
+    expect(contextMenuItems[1]).toHaveTextContent("Remove");
 
     // Click on the context ui
-    await user.click(contextMenuItems[3]);
+    await user.click(contextMenuItems[0]);
+
+    // Callback should have been called with correct parameters
+    expect(onClickRenderContextCustomUIMock).toBeCalledWith(mockedUIComponent, mockGroups.groups[0]);
   });
 
   it("Set up both grouping and context custom UI", async () => {
@@ -304,11 +281,21 @@ describe("Groupings View with default UIs", () => {
       uiComponent: mockedContextUIComponent,
     };
 
-    groupingMappingCustomUIMock = [mockContextUI, mockGroupingUI];
+    const groupingMappingCustomUIMock = [mockContextUI, mockGroupingUI];
+    const onClickAddGroup = jest.fn();
+    const onClickRenderContextCustomUIMock = jest.fn();
 
     // Act
-    const user = userEvent.setup();
-    render(<Groupings mapping={mockMapping} goBack={jest.fn()} />);
+    const { user } = render(
+      <Groupings
+        mapping={mockMapping}
+        onClickAddGroup={onClickAddGroup}
+        onClickGroupModify={jest.fn()}
+        onClickGroupTitle={jest.fn}
+        onClickRenderContextCustomUI={onClickRenderContextCustomUIMock}
+      />,
+      groupingMappingCustomUIMock
+    );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -324,6 +311,11 @@ describe("Groupings View with default UIs", () => {
     expect(addCustom).toHaveLength(1);
     expect(addCustom[0]).toHaveTextContent(mockGroupingUI.displayLabel);
 
+    await user.click(addCustom[0]);
+
+    // Callback should have been called with correct parameters
+    expect(onClickAddGroup).toBeCalledWith(mockGroupingUI.name);
+
     // Check the group tile number
     const horizontalTiles = screen.getAllByTestId("gmw-horizontal-tile");
     expect(horizontalTiles).toHaveLength(mockGroups.groups.length);
@@ -334,15 +326,18 @@ describe("Groupings View with default UIs", () => {
 
     await user.click(moreButton[0]);
 
-    // Should have 4 context menu items
+    // Should have 3 context menu items
     const contextMenuItems = screen.getAllByTestId("gmw-context-menu-item");
-    expect(contextMenuItems).toHaveLength(4);
+
+    expect(contextMenuItems).toHaveLength(3);
     expect(contextMenuItems[0]).toHaveTextContent("Edit");
-    expect(contextMenuItems[1]).toHaveTextContent("Properties");
+    expect(contextMenuItems[1]).toHaveTextContent(mockContextUI.displayLabel);
     expect(contextMenuItems[2]).toHaveTextContent("Remove");
-    expect(contextMenuItems[3]).toHaveTextContent(mockContextUI.displayLabel);
 
     // Click on the context ui
-    await user.click(contextMenuItems[3]);
+    await user.click(contextMenuItems[1]);
+
+    // Callback should have been called with correct parameters
+    expect(onClickRenderContextCustomUIMock).toBeCalledWith(mockedContextUIComponent, mockGroups.groups[0]);
   });
 });

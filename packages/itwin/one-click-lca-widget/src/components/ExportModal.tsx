@@ -25,8 +25,8 @@ import {
   SvgVisibilityHide,
   SvgVisibilityShow,
 } from "@itwin/itwinui-icons-react";
-import type { JobCreation, Link } from "@itwin/insights-client";
-import { JobStatus, OneClickLCAClient } from "@itwin/insights-client";
+import type { Link, OCLCAJob } from "@itwin/insights-client";
+import { CarbonUploadState, OCLCAJobsClient } from "@itwin/insights-client";
 import logo from "../../public/logo/oneClickLCALogo.png";
 
 interface ExportProps {
@@ -43,7 +43,7 @@ interface OclcaTokenCache {
 const ExportModal = (props: ExportProps) => {
   const MILI_SECONDS = 1000;
   const PIN_INTERVAL = 1000;
-  const oneClickLCAClientApi = useMemo(() => new OneClickLCAClient(), []);
+  const oneClickLCAClientApi = useMemo(() => new OCLCAJobsClient(), []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,7 +52,7 @@ const ExportModal = (props: ExportProps) => {
   const [emailError, setEmailError] = useState(false);
   const [cache, cacheToken] = useState<OclcaTokenCache>();
 
-  const [jobStatus, setJobStatus] = useState<JobStatus.StatusEnum>();
+  const [jobStatus, setJobStatus] = useState<CarbonUploadState>();
   const [jobLink, setJobLink] = useState<Link | undefined>();
 
   const isValidEmail = useCallback(() => {
@@ -83,22 +83,22 @@ const ExportModal = (props: ExportProps) => {
   }, [setEmail, setPassword, showPassword, showSigninError]);
 
   const pinStatus = useCallback(
-    (job: JobCreation) => {
+    (job: OCLCAJob) => {
       const intervalId = window.setInterval(async () => {
         const token =
           (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
         if (job.id && token) {
           const currentJobStatus =
-            await oneClickLCAClientApi.getOneclicklcaJobStatus(token, job?.id);
-          if (currentJobStatus.job?.status) {
+            await oneClickLCAClientApi.getOCLCAJobStatus(token, job?.id);
+          if (currentJobStatus.status) {
             if (
-              currentJobStatus.job?.status === JobStatus.StatusEnum.Succeeded
+              currentJobStatus.status === CarbonUploadState.Succeeded
             ) {
-              setJobLink(!!currentJobStatus?.job._links?.oneclicklca?.href ? {href: currentJobStatus.job._links.oneclicklca.href} : undefined);
+              setJobLink(!!currentJobStatus?._links?.oneclicklca?.href ? { href: currentJobStatus._links.oneclicklca.href } : undefined);
             }
-            setJobStatus(currentJobStatus.job?.status);
+            setJobStatus(currentJobStatus.status);
           } else {
-            setJobStatus(JobStatus.StatusEnum.Failed);
+            setJobStatus(CarbonUploadState.Failed);
             toaster.negative("Failed to get job status. 😔");
           }
         }
@@ -114,27 +114,27 @@ const ExportModal = (props: ExportProps) => {
         (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
       if (props.reportId && token) {
         try {
-          const jobCreated = await oneClickLCAClientApi.createOneclicklcaJob(
+          const jobCreated = await oneClickLCAClientApi.createJob(
             accessToken,
             {
               reportId: props.reportId,
               token,
             }
           );
-          if (jobCreated?.job?.id) {
-            pinStatus(jobCreated?.job);
+          if (jobCreated.id) {
+            pinStatus(jobCreated);
           } else {
-            setJobStatus(JobStatus.StatusEnum.Failed);
+            setJobStatus(CarbonUploadState.Failed);
             toaster.negative("Failed to create one click lca job. 😔");
           }
         } catch (e) {
-          setJobStatus(JobStatus.StatusEnum.Failed);
+          setJobStatus(CarbonUploadState.Failed);
           toaster.negative("You do not have the required permissions. Please contact the project administrator.");
           /* eslint-disable no-console */
           console.error(e);
         }
       } else {
-        setJobStatus(JobStatus.StatusEnum.Failed);
+        setJobStatus(CarbonUploadState.Failed);
         toaster.negative("Invalid reportId.");
       }
     },
@@ -146,7 +146,7 @@ const ExportModal = (props: ExportProps) => {
       e.preventDefault();
       startSigningIn(true);
       try {
-        const result = await oneClickLCAClientApi.getOneclicklcaAccessToken(
+        const result = await oneClickLCAClientApi.getOCLCAAccessToken(
           email,
           password
         );
@@ -188,9 +188,9 @@ const ExportModal = (props: ExportProps) => {
   }, [props, resetSignin]);
 
   const getStatusComponent = useCallback(
-    (status: JobStatus.StatusEnum, link: string | undefined) => {
+    (status: CarbonUploadState, link: string | undefined) => {
       switch (status) {
-        case JobStatus.StatusEnum.Queued:
+        case CarbonUploadState.Queued:
           return (
             <div className="oclca-progress-radial-container">
               <ProgressRadial indeterminate size="small" value={50} />
@@ -199,7 +199,7 @@ const ExportModal = (props: ExportProps) => {
               </Text>
             </div>
           );
-        case JobStatus.StatusEnum.Running:
+        case CarbonUploadState.Running:
           return (
             <div className="oclca-progress-linear-container">
               <ProgressLinear indeterminate />
@@ -208,7 +208,7 @@ const ExportModal = (props: ExportProps) => {
               </Text>
             </div>
           );
-        case JobStatus.StatusEnum.Succeeded:
+        case CarbonUploadState.Succeeded:
           return (
             link && (
               <div className="oclca-progress-radial-container">
@@ -224,7 +224,7 @@ const ExportModal = (props: ExportProps) => {
               </div>
             )
           );
-        case JobStatus.StatusEnum.Failed:
+        case CarbonUploadState.Failed:
           return (
             <div className="oclca-progress-radial-container">
               <ProgressRadial status="negative" size="small" value={100} />
@@ -247,7 +247,7 @@ const ExportModal = (props: ExportProps) => {
   useEffect(() => {
     if (props.isOpen && isSignedIn && cache?.token) {
       runJob(cache.token).catch((err) => {
-        setJobStatus(JobStatus.StatusEnum.Failed);
+        setJobStatus(CarbonUploadState.Failed);
         toaster.negative("Error occurs while running the job. 😔");
         /* eslint-disable no-console */
         console.error(err);
@@ -257,8 +257,8 @@ const ExportModal = (props: ExportProps) => {
 
   useEffect(() => {
     if (
-      jobStatus === JobStatus.StatusEnum.Succeeded ||
-      jobStatus === JobStatus.StatusEnum.Failed
+      jobStatus === CarbonUploadState.Succeeded ||
+      jobStatus === CarbonUploadState.Failed
     ) {
       if (intervalRef.current) {
         window.clearInterval(intervalRef.current);

@@ -2,10 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import * as React from "react";
+
 import "./TreeWidgetComponent.scss";
-import type { SelectableContentDefinition } from "@itwin/components-react";
-import { SelectableContent } from "@itwin/components-react";
+import * as React from "react";
+import { SelectableContent, SelectableContentDefinition } from "@itwin/components-react";
 
 interface TreeWidgetComponentProps {
   trees?: SelectableContentDefinition[];

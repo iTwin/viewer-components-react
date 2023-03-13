@@ -6,12 +6,14 @@ import "./CategoriesTree.scss";
 import React, { useCallback } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp } from "@itwin/core-frontend";
-import { CategoryTree, getCategories, toggleAllCategories } from "./CategoriesTree";
+import { CategoryTree } from "./CategoriesTree";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
+import { enableCategory, getCategories, toggleAllCategories } from "../CategoriesVisibilityUtils";
 import { TreeHeaderComponent } from "../../header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
 import type { CategoriesTreeProps } from "../../../types";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 export function CategoriesTreeComponent(props: CategoriesTreeProps) {
   const iModel = useActiveIModelConnection();
@@ -34,7 +36,7 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
       true,
       undefined,
       true,
-      filteredProvider
+      filteredProvider ? await getFilteredCategories(filteredProvider) : undefined,
     );
   }, [iModel, filteredProvider]);
 
@@ -46,14 +48,13 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
       false,
       undefined,
       true,
-      filteredProvider
+      filteredProvider ? await getFilteredCategories(filteredProvider) : undefined,
     );
   }, [iModel, filteredProvider]);
 
   const invert = useCallback(async () => {
     if (!iModel || !viewport) return;
-
-    const ids = await getCategories(iModel, viewport, filteredProvider);
+    const ids = filteredProvider ? await getFilteredCategories(filteredProvider) : await getCategories(iModel, viewport);
     const enabled: string[] = [];
     const disabled: string[] = [];
     for (const id of ids) {
@@ -64,7 +65,7 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
       }
     }
     // Disable enabled
-    CategoryVisibilityHandler.enableCategory(
+    enableCategory(
       IModelApp.viewManager,
       iModel,
       enabled,
@@ -72,7 +73,7 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
       true
     );
     // Enable disabled
-    CategoryVisibilityHandler.enableCategory(
+    enableCategory(
       IModelApp.viewManager,
       iModel,
       disabled,
@@ -107,4 +108,9 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
       }
     </>
   );
+}
+
+async function getFilteredCategories(filteredProvider: IPresentationTreeDataProvider) {
+  const nodes = await filteredProvider.getNodes();
+  return nodes.map((node) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredProvider.getNodeKey(node)));
 }
