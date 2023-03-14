@@ -8,6 +8,12 @@ Each one has it's own folder and README describing the package.
 
 ## List of actively maintained packages within this repository
 
+### iTwin.js@^4 Compatible
+
+| Name                            | Folder                                                              | Changelog                                                          | Version                                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| @itwin/map-layers        | [map-layers](./packages/itwin/map-layers/)                        | [changelog](./packages/itwin/map-layers/CHANGELOG.md)             | [![npm version](https://badge.fury.io/js/%40itwin%2Fmap-layers.svg)](https://badge.fury.io/js/%40itwin%2Fmap-layers)               |
+
 ### iTwin.js@^3 Compatible
 
 | Name                            | Folder                                                              | Changelog                                                          | Version                                                                                                                                          |
