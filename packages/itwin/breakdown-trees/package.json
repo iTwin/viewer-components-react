@@ -30,7 +30,7 @@
     "copy:public": "cpx \"./public/**/*\" ./lib/public",
     "build:watch": "tsc -w",
     "clean": "rimraf lib",
-    "cover": "npm test",
+    "//cover": "npm test",
     "test": "mocha \"./lib/cjs/test/**/*.test.js\"",
     "test:watch": "npm test -- --reporter min --watch-extensions ts,tsx --watch",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",

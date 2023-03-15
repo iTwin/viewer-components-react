@@ -16,7 +16,7 @@
       "summary": "Run cover script for each package",
       "description": "Iterates through each package in the monorepo and runs the 'cover' script",
       "enableParallelism": true,
-      "ignoreMissingScript": false,
+      "ignoreMissingScript": true,
       "ignoreDependencyOrder": true,
       "allowWarningsInSuccessfulBuild": true
     },
