@@ -58,5 +58,11 @@
     "policyName": "ec3-widget",
     "definitionName": "individualVersion",
     "lockedMajor": 0
+  },
+  {
+    "policyName": "itwin-map-layers",
+    "definitionName": "lockStepVersion",
+    "version": "4.0.0-dev.45",
+    "nextBump": "prerelease"
   }
 ]

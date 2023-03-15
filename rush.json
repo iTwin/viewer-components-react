@@ -74,6 +74,11 @@
       "packageName": "@itwin/ec3-widget-react",
       "projectFolder": "packages/itwin/ec3-widget",
       "versionPolicyName": "ec3-widget"
+    },
+    {
+      "packageName": "@itwin/map-layers",
+      "projectFolder": "packages/itwin/map-layers",
+      "versionPolicyName": "itwin-map-layers"
     }
   ]
 }
