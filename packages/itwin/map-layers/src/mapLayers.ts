@@ -5,9 +5,11 @@
 import { Localization } from "@itwin/core-common";
 import { IModelApp, UserPreferencesAccess } from "@itwin/core-frontend";
 // import { MapLayersUiItemsProvider } from "./ui/MapLayersUiItemsProvider";
-import { UiItemProviderOverrides, UiItemsManager } from "@itwin/appui-abstract";
 // import { FeatureInfoUiItemsProvider } from "./ui/FeatureInfoUiItemsProvider";
 import { MapFeatureInfoOptions, MapLayerOptions } from "./ui/Interfaces";
+import { FeatureInfoUiItemsProvider } from "./ui/FeatureInfoUiItemsProvider";
+import { UiItemsManager, UiItemsProviderOverrides } from "@itwin/appui-react";
+import { MapLayersUiItemsProvider } from "./ui/MapLayersUiItemsProvider";
 
 export interface MapLayersConfig {
   localization?: Localization;
@@ -19,8 +21,8 @@ export interface MapLayersConfig {
 }
 /** Configuration for registering UiItemsProviders for the MapLayers package */
 export interface MapLayersUiProviderConfig {
-  mapLayerProviderOverrides?: UiItemProviderOverrides; // eslint-disable-line deprecation/deprecation
-  featureInfoProviderOverrides?: UiItemProviderOverrides; // eslint-disable-line deprecation/deprecation
+  mapLayerProviderOverrides?: UiItemsProviderOverrides;
+  featureInfoProviderOverrides?: UiItemsProviderOverrides;
 }
 
 /** MapLayersUI is use when the package is used as a dependency to another app.
@@ -62,19 +64,19 @@ export class MapLayersUI {
    * may limit the MapLayers widgets to a specific workflow
    * @beta
    */
-  public static registerUiItemsProviders(_config?: MapLayersUiProviderConfig) {
-    // const mlProvider = new MapLayersUiItemsProvider({ ...MapLayersUI._mapLayerOptions });
-    // const mlProviderId = config?.mapLayerProviderOverrides?.providerId ?? mlProvider.id;
-    // MapLayersUI._uiItemsProvidersId.push(mlProviderId);
-    // UiItemsManager.register(mlProvider, config?.mapLayerProviderOverrides); // eslint-disable-line deprecation/deprecation
+  public static registerUiItemsProviders(config?: MapLayersUiProviderConfig) {
+    const mlProvider = new MapLayersUiItemsProvider({ ...MapLayersUI._mapLayerOptions });
+    const mlProviderId = config?.mapLayerProviderOverrides?.providerId ?? mlProvider.id;
+    MapLayersUI._uiItemsProvidersId.push(mlProviderId);
+    UiItemsManager.register(mlProvider, config?.mapLayerProviderOverrides);
 
-    // // Register the FeatureInfo widget only if MapHit was provided.
-    // if (MapLayersUI._featureInfoOpts?.onMapHit) {
-    //   const fiProvider = new FeatureInfoUiItemsProvider({ ...MapLayersUI._featureInfoOpts });
-    //   const fiProviderId = config?.featureInfoProviderOverrides?.providerId ?? fiProvider.id;
-    //   MapLayersUI._uiItemsProvidersId.push(fiProviderId);
-    //   UiItemsManager.register(fiProvider,  config?.featureInfoProviderOverrides); // eslint-disable-line deprecation/deprecation
-    // }
+    // Register the FeatureInfo widget only if MapHit was provided.
+    if (MapLayersUI._featureInfoOpts?.onMapHit) {
+      const fiProvider = new FeatureInfoUiItemsProvider({ ...MapLayersUI._featureInfoOpts });
+      const fiProviderId = config?.featureInfoProviderOverrides?.providerId ?? fiProvider.id;
+      MapLayersUI._uiItemsProvidersId.push(fiProviderId);
+      UiItemsManager.register(fiProvider,  config?.featureInfoProviderOverrides);
+    }
   }
 
   /** Unregisters internationalization service namespace and UiItemManager  */
@@ -82,7 +84,7 @@ export class MapLayersUI {
     IModelApp.localization.unregisterNamespace(MapLayersUI.localizationNamespace);
 
     MapLayersUI._uiItemsProvidersId.forEach((uiProviderId) => {
-      UiItemsManager.unregister(uiProviderId); // eslint-disable-line deprecation/deprecation
+      UiItemsManager.unregister(uiProviderId);
     });
   }
 
