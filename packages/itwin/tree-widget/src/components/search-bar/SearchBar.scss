@@ -28,6 +28,7 @@
   .search-bar-button-container {
     display: flex;
     align-items: center;
+    width: calc(100% - 26px);
 
     &.right {
       justify-content: flex-end;

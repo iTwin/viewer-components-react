@@ -5,34 +5,46 @@
 
 import type { SpatialContainmentTreeProps, StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import type { SelectableContentDefinition } from "@itwin/components-react";
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { CategoryTreeProps } from "./components/trees/category-tree/CategoriesTree";
 import type { ModelsTreeProps } from "./components/trees/models-tree/ModelsTree";
+
+export interface TreeHeaderButtonProps {
+  viewport?: ScreenViewport;
+  iModel?: IModelConnection;
+}
+
+export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
+  availableModels?: string[];
+}
+
+export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
+  filteredProvider?: IPresentationTreeDataProvider;
+}
 
 export interface IModelContentTreeProps
   extends Omit<React.AllHTMLAttributes<HTMLDivElement>, "children"> {
   iModel: IModelConnection;
 }
 
-export type ModelTreeProps = Omit<
-ModelsTreeProps,
+export interface ModelTreeProps extends Omit<ModelsTreeProps,
 | "iModel"
 | "activeView"
 | "width"
 | "height"
 | "filterInfo"
 | "onFilterApplied"
->;
+> { TreeHeaderButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode> }
 
-export type CategoriesTreeProps = Omit<
-CategoryTreeProps,
+export interface CategoriesTreeProps extends Omit<CategoryTreeProps,
 | "iModel"
 | "activeView"
 | "width"
 | "height"
 | "filterInfo"
 | "onFilterApplied"
->;
+> { TreeHeaderButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode> }
 
 export type SpatialTreeProps = Omit<
 // eslint-disable-next-line deprecation/deprecation

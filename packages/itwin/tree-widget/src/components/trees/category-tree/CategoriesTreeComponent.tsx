@@ -12,8 +12,10 @@ import { enableCategory, getCategories, toggleAllCategories } from "../Categorie
 import { TreeHeaderComponent } from "../../header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
-import type { CategoriesTreeProps } from "../../../types";
+import type { CategoriesTreeHeaderButtonProps, CategoriesTreeProps } from "../../../types";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { IconButton } from "../../IconButton";
+import { TreeWidget } from "../../../TreeWidget";
 
 export function CategoriesTreeComponent(props: CategoriesTreeProps) {
   const iModel = useActiveIModelConnection();
@@ -27,70 +29,20 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
     filteredProvider,
   } = useTreeFilteringState();
 
-  const showAll = useCallback(async () => {
-    if (!iModel) return;
-
-    return toggleAllCategories(
-      IModelApp.viewManager,
-      iModel,
-      true,
-      undefined,
-      true,
-      filteredProvider ? await getFilteredCategories(filteredProvider) : undefined,
-    );
-  }, [iModel, filteredProvider]);
-
-  const hideAll = useCallback(async () => {
-    if (!iModel) return;
-    return toggleAllCategories(
-      IModelApp.viewManager,
-      iModel,
-      false,
-      undefined,
-      true,
-      filteredProvider ? await getFilteredCategories(filteredProvider) : undefined,
-    );
-  }, [iModel, filteredProvider]);
-
-  const invert = useCallback(async () => {
-    if (!iModel || !viewport) return;
-    const ids = filteredProvider ? await getFilteredCategories(filteredProvider) : await getCategories(iModel, viewport);
-    const enabled: string[] = [];
-    const disabled: string[] = [];
-    for (const id of ids) {
-      if (viewport.view.viewsCategory(id)) {
-        enabled.push(id);
-      } else {
-        disabled.push(id);
-      }
-    }
-    // Disable enabled
-    enableCategory(
-      IModelApp.viewManager,
-      iModel,
-      enabled,
-      false,
-      true
-    );
-    // Enable disabled
-    enableCategory(
-      IModelApp.viewManager,
-      iModel,
-      disabled,
-      true,
-      true
-    );
-  }, [iModel, viewport, filteredProvider]);
-
   return (
     <>
       {iModel && viewport &&
         <>
           <TreeHeaderComponent
             searchOptions={searchOptions}
-            showAll={showAll}
-            hideAll={hideAll}
-            invert={invert}
+            treeHeaderButtons={props.TreeHeaderButtons
+              ? props.TreeHeaderButtons.map((btn) => btn({ iModel, viewport, filteredProvider }))
+              : [
+                <ShowAllButtonCategoriesTree iModel={iModel} filteredProvider={filteredProvider} key="show-all-btn" />,
+                <HideAllButtonCategoriesTree iModel={iModel} filteredProvider={filteredProvider} key="hide-all-btn" />,
+                <InvertButtonCategoriesTree iModel={iModel} viewport={viewport} filteredProvider={filteredProvider} key="invert-all-btn" />,
+              ]
+            }
           />
           <AutoSizer>
             {({ width, height }) => (
@@ -113,4 +65,93 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
 async function getFilteredCategories(filteredProvider: IPresentationTreeDataProvider) {
   const nodes = await filteredProvider.getNodes();
   return nodes.map((node) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredProvider.getNodeKey(node)));
+}
+
+export function ShowAllButtonCategoriesTree(props: CategoriesTreeHeaderButtonProps) {
+  const showAll = useCallback(async () => {
+    if (!props.iModel) return;
+
+    return toggleAllCategories(
+      IModelApp.viewManager,
+      props.iModel,
+      true,
+      undefined,
+      true,
+      props.filteredProvider ? await getFilteredCategories(props.filteredProvider) : undefined,
+    );
+  }, [props.iModel, props.filteredProvider]);
+
+  return (
+    <IconButton
+      className="tree-widget-header-tree-toolbar-icon"
+      icon="icon-visibility"
+      title={TreeWidget.translate("showAll")}
+      onClick={showAll}
+    />
+  );
+}
+
+export function HideAllButtonCategoriesTree(props: CategoriesTreeHeaderButtonProps) {
+  const hideAll = useCallback(async () => {
+    if (!props.iModel) return;
+    return toggleAllCategories(
+      IModelApp.viewManager,
+      props.iModel,
+      false,
+      undefined,
+      true,
+      props.filteredProvider ? await getFilteredCategories(props.filteredProvider) : undefined,
+    );
+  }, [props.iModel, props.filteredProvider]);
+
+  return (
+    <IconButton
+      className="tree-widget-header-tree-toolbar-icon"
+      icon="icon-visibility-hide-2"
+      title={TreeWidget.translate("hideAll")}
+      onClick={hideAll}
+    />
+  );
+}
+
+export function InvertButtonCategoriesTree(props: CategoriesTreeHeaderButtonProps) {
+  const invert = useCallback(async () => {
+    if (!props.iModel || !props.viewport) return;
+    const ids = props.filteredProvider ? await getFilteredCategories(props.filteredProvider) : await getCategories(props.iModel, props.viewport);
+    const enabled: string[] = [];
+    const disabled: string[] = [];
+    for (const id of ids) {
+      if (props.viewport.view.viewsCategory(id)) {
+        enabled.push(id);
+      } else {
+        disabled.push(id);
+      }
+    }
+    // Disable enabled
+    enableCategory(
+      IModelApp.viewManager,
+      props.iModel,
+      enabled,
+      false,
+      true
+    );
+
+    // Enable disabled
+    enableCategory(
+      IModelApp.viewManager,
+      props.iModel,
+      disabled,
+      true,
+      true
+    );
+  }, [props.iModel, props.viewport, props.filteredProvider]);
+
+  return (
+    <IconButton
+      className="tree-widget-header-tree-toolbar-icon"
+      title={TreeWidget.translate("invert")}
+      icon="icon-visibility-invert"
+      onClick={invert}
+    />
+  );
 }

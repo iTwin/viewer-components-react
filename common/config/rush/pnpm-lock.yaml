@@ -955,6 +955,8 @@ importers:
       '@itwin/core-react': ~3.6.0
       '@itwin/eslint-plugin': ~3.6.0
       '@itwin/imodel-components-react': ~3.6.0
+      '@itwin/itwinui-icons-react': ^1.8.0
+      '@itwin/itwinui-react': ^1.40.1
       '@itwin/presentation-common': ~3.6.0
       '@itwin/presentation-components': ~3.6.0
       '@itwin/presentation-frontend': ~3.6.0
@@ -997,6 +999,8 @@ importers:
       typescript: ~4.4.0
       xmlhttprequest: ^1.8.0
     dependencies:
+      '@itwin/itwinui-icons-react': 1.15.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 1.46.0_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
       i18next: 10.6.0
       react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
@@ -3783,7 +3787,6 @@ packages:
 
   /@itwin/itwinui-css/0.63.2:
     resolution: {integrity: sha512-rsqk2U4FehGRv3XXdHnvahmnR7ujuyNok1n0Ph+HiX0TnxUKbGb14mssBStGhyg2xfOzydwU4h07K6TDTMgGSA==}
-    dev: true
 
   /@itwin/itwinui-icons-color-react/1.0.2_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-jsYwrecYVnve9qM4l6NegliJBI5jEupJ4aIvHlVTJMZEwtqLDYOzQKB/SfdE79aoKJ7qBVZDUqozRRbReFhQ8Q==}
@@ -3948,7 +3951,6 @@ packages:
       react-dom: 17.0.2_react@17.0.2
       react-table: 7.7.0_react@17.0.2
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
-    dev: true
 
   /@itwin/object-storage-azure/1.4.0:
     resolution: {integrity: sha512-/vREtCo/h+Np5RlmLP8AHZ2Yb7rc77ywKj8jNCwoV/uyg9ea3r+OaoBJX/0w9epQwjGRsLEXwFFywXB5IUQJ7A==}

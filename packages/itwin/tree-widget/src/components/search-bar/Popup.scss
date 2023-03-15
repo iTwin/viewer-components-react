@@ -166,13 +166,14 @@
 }
 
 .tree-widget-search-popup-bottom-left {
-  top: calc(100% + 0px);
+  top: calc(100% + 4px);
   left: 0;
   transform-origin: left top 0;
 }
 
 .tree-widget-search-popup.tree-widget-search-popup-bottom-left.visible {
   animation-name: dr-animate-bottom-corner;
+  width: 100%
 }
 
 .tree-widget-search-popup-bottom {
