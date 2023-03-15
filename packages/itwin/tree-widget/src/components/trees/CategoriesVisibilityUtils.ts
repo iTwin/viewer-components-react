@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@itwin/core-bentley";
 import { QueryRowFormat } from "@itwin/core-common";
 import { IModelConnection, PerModelCategoryVisibility, ViewManager, Viewport } from "@itwin/core-frontend";
 import { Category } from "./category-tree/CategoryVisibilityHandler";
@@ -14,11 +13,7 @@ const EMPTY_CATEGORIES_ARRAY: Category[] = [];
  * Toggles visibility of categories to show or hide.
  * @alpha
  */
-export async function toggleAllCategories(viewManager: ViewManager, imodel: IModelConnection, display: boolean, viewport?: Viewport, forAllViewports?: boolean, categoryIds?: Id64String[]) {
-  if (categoryIds) {
-    enableCategory(viewManager, imodel, categoryIds, display, forAllViewports ?? false);
-  }
-
+export async function toggleAllCategories(viewManager: ViewManager, imodel: IModelConnection, display: boolean, viewport?: Viewport, forAllViewports?: boolean) {
   // istanbul ignore next
   const activeView = viewport ?? viewManager.getFirstOpenView();
   const ids = await getCategories(imodel, activeView);

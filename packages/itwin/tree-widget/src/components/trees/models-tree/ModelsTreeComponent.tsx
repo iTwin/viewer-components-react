@@ -116,8 +116,7 @@ export function ShowAllButtonModelsTree(props: ModelsTreeHeaderButtonProps) {
         props.iModel,
         true,
         props.viewport,
-        false,
-        undefined
+        false
       );
     }
     props.viewport?.invalidateScene();
@@ -146,8 +145,7 @@ export function HideAllButtonModelsTree(props: ModelsTreeHeaderButtonProps) {
         props.iModel,
         false,
         props.viewport,
-        false,
-        undefined
+        false
       );
     }
     props.viewport?.invalidateScene();

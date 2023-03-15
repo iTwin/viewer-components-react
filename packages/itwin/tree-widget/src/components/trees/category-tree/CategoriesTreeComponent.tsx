@@ -71,13 +71,25 @@ export function ShowAllButtonCategoriesTree(props: CategoriesTreeHeaderButtonPro
   const showAll = useCallback(async () => {
     if (!props.iModel) return;
 
-    return toggleAllCategories(
+    if (props.filteredProvider) {
+      const filteredCategories = await getFilteredCategories(props.filteredProvider);
+      enableCategory(
+        IModelApp.viewManager,
+        props.iModel,
+        filteredCategories,
+        true,
+        true,
+      );
+
+      return;
+    }
+
+    await toggleAllCategories(
       IModelApp.viewManager,
       props.iModel,
       true,
       undefined,
       true,
-      props.filteredProvider ? await getFilteredCategories(props.filteredProvider) : undefined,
     );
   }, [props.iModel, props.filteredProvider]);
 
@@ -94,13 +106,26 @@ export function ShowAllButtonCategoriesTree(props: CategoriesTreeHeaderButtonPro
 export function HideAllButtonCategoriesTree(props: CategoriesTreeHeaderButtonProps) {
   const hideAll = useCallback(async () => {
     if (!props.iModel) return;
+
+    if (props.filteredProvider) {
+      const filteredCategories = await getFilteredCategories(props.filteredProvider);
+      enableCategory(
+        IModelApp.viewManager,
+        props.iModel,
+        filteredCategories,
+        false,
+        true,
+      );
+
+      return;
+    }
+
     return toggleAllCategories(
       IModelApp.viewManager,
       props.iModel,
       false,
       undefined,
       true,
-      props.filteredProvider ? await getFilteredCategories(props.filteredProvider) : undefined,
     );
   }, [props.iModel, props.filteredProvider]);
 
