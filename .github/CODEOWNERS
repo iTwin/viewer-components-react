@@ -40,5 +40,8 @@
 /packages/itwin/infrastructure-iot  @itwin/viewer-components-reviewers @AntonAI @jpferrara @adamjhickey
 /common/changes/@itwin/infrastructure-iot-react  @itwin/viewer-components-reviewers @AntonAI @jpferrara @adamjhickey
 
+/packages/itwin/ec3-widget  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
+/common/changes/@itwin/ec3-widget-react  @itwin/viewer-components-reviewers @arnobmallickbsw @bingjiez @Guillar1 @MindaugasButkus
+
 /packages/itwin/map-layers  @itwin/viewer-components-reviewers @mdastous-bentley @eringram
 /common/changes/@itwin/map-layers  @itwin/viewer-components-reviewers @mdastous-bentley @eringram
