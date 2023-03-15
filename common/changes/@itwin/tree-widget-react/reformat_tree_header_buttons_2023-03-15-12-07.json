@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "TreeHeader: make option to control what buttons are available in tree toolbars",
+      "comment": "Add an option to control what buttons are available in tree toolbars",
       "type": "minor"
     }
   ],
