@@ -112,16 +112,6 @@ describe("CategoryVisibilityUtils", () => {
       await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object, false);
       selectedViewMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, moq.It.isAny()), moq.Times.once());
     });
-
-    it("enables provided categories", async () => {
-      await toggleAllCategories(viewManagerMock.object, imodelMock.object, true, viewportMock.object, false, ["ProvidedId"]);
-      selectedViewMock.verify((x) => x.changeCategoryDisplay(["ProvidedId"], true, moq.It.isAny()), moq.Times.once());
-    });
-
-    it("disables provided categories", async () => {
-      await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object, false, ["ProvidedId"]);
-      selectedViewMock.verify((x) => x.changeCategoryDisplay(["ProvidedId"], false, moq.It.isAny()), moq.Times.once());
-    });
   });
 
   describe("enableCategory", () => {

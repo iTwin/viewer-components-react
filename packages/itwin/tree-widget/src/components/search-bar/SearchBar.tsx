@@ -7,7 +7,12 @@ import classnames from "classnames";
 import type { CommonProps } from "@itwin/core-react";
 import { SearchBox } from "./SearchBox";
 import "./SearchBar.scss";
-import { ButtonGroup, DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
+import {
+  ButtonGroup,
+  DropdownMenu,
+  IconButton,
+  MenuItem,
+} from "@itwin/itwinui-react";
 import { SvgMore, SvgSearch } from "@itwin/itwinui-icons-react";
 
 export enum Alignment {
@@ -106,36 +111,24 @@ SearchBarState
     );
     const contentClassName = classnames(
       "search-bar-button-container",
-      showSearch && "hide",
+      showSearch && "contracted",
       alignment === Alignment.Right && "right"
     );
     const searchBarContainerClassName = classnames(
       "search-bar-search-container",
-      enableGrouping && "search-bar-grouping-enabled",
+      enableGrouping && "search-bar-grouping-enabled"
     );
 
-    const buttonGroup = <SearchBarButtonGroup orientation={showSearch ? "vertical" : "horizontal"}>
-      {this.props.children}
-    </SearchBarButtonGroup>;
+    const buttonGroup = (
+      <SearchBarButtonGroup>{this.props.children}</SearchBarButtonGroup>
+    );
     return (
       <div className={classes}>
-        {showSearch &&
-          <DropdownMenu menuItems={() =>
-            React.Children.toArray(this.props.children).map((btn, index) => (
-              <MenuItem key={index}>{btn}</MenuItem>
-            ))}
-          style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-          >
-            <IconButton styleType="borderless" size="small" >
-              <SvgMore />
-            </IconButton>
-          </DropdownMenu>
-        }
         <div className={contentClassName}>
           {buttonGroup}
         </div>
-        {showSearch
-          ? <div className={searchBarContainerClassName}>
+        {showSearch ? (
+          <div className={searchBarContainerClassName}>
             <SearchBox
               ref={this._searchBox}
               className={searchBoxClassName}
@@ -150,7 +143,8 @@ SearchBarState
               onSelectedChanged={this.props.onSelectedChanged}
             />
           </div>
-          : <IconButton
+        ) : (
+          <IconButton
             className={searchIconClassName}
             onClick={this._onToggleSearch}
             title={title}
@@ -159,30 +153,33 @@ SearchBarState
           >
             <SvgSearch />
           </IconButton>
-        }
+        )}
       </div>
     );
   }
 }
 
 interface SearchBarButtonGroupProps {
-  orientation: "vertical" | "horizontal";
   children: React.ReactNode;
 }
 
 const SearchBarButtonGroup = (props: SearchBarButtonGroupProps) => {
   return (
     <ButtonGroup
-      overflowButton={(overflowStart) => <DropdownMenu menuItems={() =>
-        React.Children.toArray(props.children).slice(overflowStart - 1).map((btn, index) => (
-          <MenuItem key={index}>{btn}</MenuItem>
-        ))}
-      >
-        <IconButton styleType="borderless" size="small" >
-          <SvgMore />
-        </IconButton>
-      </DropdownMenu>}
-      orientation={props.orientation}
+      overflowButton={(overflowStart) => (
+        <DropdownMenu
+          menuItems={() =>
+            React.Children.toArray(props.children)
+              .slice(overflowStart === 0 ? 0 : overflowStart - 1)
+              .map((btn, index) => <MenuItem key={index}>{btn}</MenuItem>)
+          }
+          style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+        >
+          <IconButton styleType="borderless" size="small">
+            <SvgMore />
+          </IconButton>
+        </DropdownMenu>
+      )}
     >
       {props.children}
     </ButtonGroup>

@@ -34,8 +34,9 @@
       justify-content: flex-end;
     }
 
-    &.hide {
-      display: none;
+    &.contracted {
+      width: 32px;
+
     }
   }
 
@@ -48,11 +49,12 @@
 
   // override of the search box styling
   .search-bar-search-icon {
-    position: absolute;
     right: 0;
     opacity: 0;
     transition: all 0.2s ease;
     color: $buic-icon-color;
+    height: 32px;
+
     &.show {
       opacity: 1;
     }
@@ -62,7 +64,6 @@
   .search-bar-search-container {
     flex: 1;
     height: 100%;
-    position: absolute;
     left: 0;
     right: 0;
 

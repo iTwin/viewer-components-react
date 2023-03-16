@@ -10,17 +10,16 @@ import "./TreeHeader.scss";
 
 export interface TreeHeaderComponentProps {
   searchOptions: SearchOptions;
-  treeHeaderButtons: React.ReactNode[];
+  children: React.ReactNode;
 }
 
 export function TreeHeaderComponent({
   searchOptions,
-  treeHeaderButtons,
+  children,
 }: TreeHeaderComponentProps) {
   return (
     <SearchBar
       value=""
-      className="tree-widget-header-tree-search-bar"
       valueChangedDelay={500}
       placeholder={TreeWidget.translate("search")}
       title={TreeWidget.translate("searchForSomething")}
@@ -31,7 +30,7 @@ export function TreeHeaderComponent({
       onSelectedChanged={searchOptions.onResultSelectedChanged}
       resultCount={searchOptions.matchedResultCount ?? 0}
     >
-      {treeHeaderButtons}
+      {children}
     </SearchBar>
   );
 }

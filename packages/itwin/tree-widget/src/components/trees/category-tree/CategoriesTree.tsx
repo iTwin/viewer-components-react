@@ -61,6 +61,12 @@ export interface CategoryTreeProps {
    * @internal
    */
   viewManager?: ViewManager;
+
+  /**
+   * Available iModel categories
+   * @internal
+   */
+  categories?: Category[];
 }
 
 /**
@@ -79,7 +85,7 @@ export function CategoryTree(props: CategoryTreeProps) {
   const viewManager = props.viewManager ?? IModelApp.viewManager;
   const { activeView, allViewports, categoryVisibilityHandler } = props;
   const currentActiveView = activeView ?? viewManager.getFirstOpenView();
-  const categories = useCategories(viewManager, props.iModel, currentActiveView);
+  const categories = props.categories ?? useCategories(viewManager, props.iModel, currentActiveView);
   const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, categories, currentActiveView, allViewports, categoryVisibilityHandler);
 
   React.useEffect(() => {
