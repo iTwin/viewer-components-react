@@ -49,9 +49,8 @@ const useResizeObserver = <T extends HTMLElement>(
   return [elementRef, resizeObserver.current] as const;
 };
 
-/**
- Mimic processing of `react-resize-detector` to return width and height.
-* @internal
+/** Mimic processing of `react-resize-detector` to return width and height.
+ * @internal
  */
 function useResizeDetector(): { width: number | undefined, height: number | undefined, ref: React.Ref<HTMLDivElement> } {
   const [width, setWidth] = React.useState<number>();
@@ -111,7 +110,8 @@ function getStyleMapLayerSettings(settings: ImageMapLayerSettings, isOverlay: bo
     showSubLayers: true,
     isOverlay,
     layerIndex,
-    provider: IModelApp.mapLayerFormatRegistry.createImageryProvider(settings),
+    // provider: IModelApp.mapLayerFormatRegistry.createImageryProvider(settings),
+    provider: IModelApp.viewManager.selectedView?.getMapLayerImageryProvider(layerIndex, isOverlay),
     treeVisibility,
   };
 }
@@ -154,7 +154,6 @@ export function SubLayersTree(props: { mapLayer: StyleMapLayerSettings }) {
     if (displayStyle && vp) {
       const indexInDisplayStyle = displayStyle ? displayStyle.findMapLayerIndexByNameAndSource(mapLayer.name, mapLayer.source, mapLayer.isOverlay) : -1;
       displayStyle.changeMapSubLayerProps({ visible: true }, -1, indexInDisplayStyle, mapLayer.isOverlay);
-      vp.invalidateRenderPlan();
       const updatedMapLayer = displayStyle.mapLayerAtIndex(indexInDisplayStyle, mapLayer.isOverlay);
       if (updatedMapLayer) {
         if (updatedMapLayer instanceof ImageMapLayerSettings) {
@@ -177,7 +176,6 @@ export function SubLayersTree(props: { mapLayer: StyleMapLayerSettings }) {
         const treeVisibility = vp.getMapLayerScaleRangeVisibility(indexInDisplayStyle, mapLayer.isOverlay);
         setMapLayer(getStyleMapLayerSettings(updatedMapLayer, mapLayer.isOverlay, indexInDisplayStyle, treeVisibility));
       }
-      vp.invalidateRenderPlan();
     }
   }, [mapLayer]);
 
@@ -370,9 +368,6 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
             this.cascadeStateToAllChildren(model, change.nodeItem.id);
           });
         });
-
-        if (vp)
-          vp.invalidateRenderPlan();
       },
     });
     // stop handling selection when checkboxes handling is stopped

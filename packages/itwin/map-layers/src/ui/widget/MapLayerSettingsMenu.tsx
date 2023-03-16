@@ -31,7 +31,7 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
       let hasRange = false;
       const indexInDisplayStyle = activeViewport?.displayStyle.findMapLayerIndexByNameAndSource(mapLayerSettings.name, mapLayerSettings.source, mapLayerSettings.isOverlay);
       if (undefined !== indexInDisplayStyle) {
-        hasRange = (undefined !== await activeViewport.displayStyle.getMapLayerRange(indexInDisplayStyle, mapLayerSettings.isOverlay));
+        hasRange = (undefined !== await activeViewport.getMapLayerRange(indexInDisplayStyle, mapLayerSettings.isOverlay));
       }
       setHasRangeData(hasRange);
     }
@@ -67,10 +67,6 @@ export function MapLayerSettingsMenu({ mapLayerSettings, onMenuItemSelection, ac
         if (Math.abs(styleTransparencyValue - newTransparency) > 0.01) {
           // update the display style
           displayStyle.changeMapLayerProps({ transparency: newTransparency }, indexInDisplayStyle, mapLayerSettings.isOverlay);
-          activeViewport.invalidateRenderPlan();
-
-          // force UI to update
-          // loadMapLayerSettingsFromStyle(activeViewport.displayStyle);
         }
       }
     }
