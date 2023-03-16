@@ -129,6 +129,7 @@ describe("CategoryTree", () => {
         const result = render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}

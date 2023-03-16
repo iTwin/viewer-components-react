@@ -15,7 +15,7 @@ import { TreeWidget } from "../../../TreeWidget";
 import { VisibilityTreeFilterInfo } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { useVisibilityTreeFiltering, useVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
-import { Category, CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
+import { Category, CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
 const PAGING_SIZE = 20;
 
@@ -85,8 +85,7 @@ export function CategoryTree(props: CategoryTreeProps) {
   const viewManager = props.viewManager ?? IModelApp.viewManager;
   const { activeView, allViewports, categoryVisibilityHandler } = props;
   const currentActiveView = activeView ?? viewManager.getFirstOpenView();
-  const categories = props.categories ?? useCategories(viewManager, props.iModel, currentActiveView);
-  const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, categories, currentActiveView, allViewports, categoryVisibilityHandler);
+  const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories ?? [], currentActiveView, allViewports, categoryVisibilityHandler);
 
   React.useEffect(() => {
     setViewType(currentActiveView); // eslint-disable-line @typescript-eslint/no-floating-promises
