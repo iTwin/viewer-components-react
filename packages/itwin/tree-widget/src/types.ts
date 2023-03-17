@@ -44,6 +44,7 @@ export interface CategoriesTreeProps extends Omit<CategoryTreeProps,
 | "height"
 | "filterInfo"
 | "onFilterApplied"
+| "categories"
 > { headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode> }
 
 export type SpatialTreeProps = Omit<

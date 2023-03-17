@@ -65,7 +65,7 @@ export interface CategoryTreeProps {
   /**
    * Available iModel categories
    */
-  categories?: Category[];
+  categories: Category[];
 }
 
 /**
@@ -84,7 +84,7 @@ export function CategoryTree(props: CategoryTreeProps) {
   const viewManager = props.viewManager ?? IModelApp.viewManager;
   const { activeView, allViewports, categoryVisibilityHandler } = props;
   const currentActiveView = activeView ?? viewManager.getFirstOpenView();
-  const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories ?? [], currentActiveView, allViewports, categoryVisibilityHandler);
+  const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories, currentActiveView, allViewports, categoryVisibilityHandler);
 
   React.useEffect(() => {
     setViewType(currentActiveView); // eslint-disable-line @typescript-eslint/no-floating-promises

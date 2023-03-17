@@ -273,4 +273,4 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
 
 function areAllModelsVisible(viewport: Viewport, models?: string[]): boolean {
   return (models && models.length !== 0) ? models.every((id) => viewport.viewsModel(id)) : false;
-};
+}

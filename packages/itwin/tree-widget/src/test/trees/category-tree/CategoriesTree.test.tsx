@@ -150,6 +150,7 @@ describe("CategoryTree", () => {
         const result = render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
@@ -165,6 +166,7 @@ describe("CategoryTree", () => {
         render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
@@ -179,6 +181,7 @@ describe("CategoryTree", () => {
         render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
@@ -194,6 +197,7 @@ describe("CategoryTree", () => {
         render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
@@ -210,6 +214,7 @@ describe("CategoryTree", () => {
         const result = render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
@@ -230,6 +235,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -250,6 +256,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -294,6 +301,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -312,6 +320,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -331,6 +340,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -367,6 +377,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
@@ -389,6 +400,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
@@ -404,6 +416,7 @@ describe("CategoryTree", () => {
         it("renders VisibilityTreeNoFilteredData", async () => {
           const result = render(<CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
