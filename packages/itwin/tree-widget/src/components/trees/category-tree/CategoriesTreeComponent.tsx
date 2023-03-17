@@ -46,7 +46,7 @@ export namespace CategoriesTreeComponentNamespace{
     useEffect(() => {
       (async () => {
         if (filteredProvider)
-          setFilteredCategories((await getFilteredCategories(filteredProvider)).map((category) => { return { key: category }; }));
+          setFilteredCategories((await getFilteredCategories(filteredProvider)).map((category) => ({ key: category })));
         else
           setFilteredCategories(undefined);
       })();
