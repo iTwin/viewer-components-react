@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { CategoryTree } from "./CategoriesTree";
-import { Category, CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
+import { CategoryInfo, CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
 import { enableCategory } from "../CategoriesVisibilityUtils";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
@@ -36,7 +36,7 @@ CategoriesTreeComponent.InvertButton = InvertButton;
 
 function CategoriesTreeComponentImpl(props: CategoriesTreeProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
   const categories = useCategories(IModelApp.viewManager, props.iModel, props.viewport);
-  const [filteredCategories, setFilteredCategories] = useState<Category[]>();
+  const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[]>();
   const {
     searchOptions,
     filterString,
@@ -48,7 +48,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeProps & { iModel: IMod
   useEffect(() => {
     (async () => {
       if (filteredProvider)
-        setFilteredCategories((await getFilteredCategories(filteredProvider)).map((category) => ({ key: category })));
+        setFilteredCategories((await getFilteredCategories(filteredProvider)).map((category) => ({ categoryId: category })));
       else
         setFilteredCategories(undefined);
     })();
@@ -106,7 +106,7 @@ function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
     enableCategory(
       IModelApp.viewManager,
       props.viewport.iModel,
-      (props.filteredCategories ?? props.categories).map((category) => category.key),
+      (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
       true,
       true,
     );
@@ -127,7 +127,7 @@ function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
     enableCategory(
       IModelApp.viewManager,
       props.viewport.iModel,
-      (props.filteredCategories ?? props.categories).map((category) => category.key),
+      (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
       false,
       true,
     );
@@ -145,7 +145,7 @@ function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 
 function InvertButton(props: CategoriesTreeHeaderButtonProps) {
   const invert = () => {
-    const ids = (props.filteredCategories ?? props.categories).map((category) => category.key);
+    const ids = (props.filteredCategories ?? props.categories).map((category) => category.categoryId);
 
     const enabled: string[] = [];
     const disabled: string[] = [];

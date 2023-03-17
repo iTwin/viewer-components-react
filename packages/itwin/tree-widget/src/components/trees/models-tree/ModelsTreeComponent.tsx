@@ -120,7 +120,7 @@ function ModelsTreeComponentImpl(props: ModelTreeProps & { iModel: IModelConnect
 
 function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   const showAll = async () => {
-    if (!props.models || !props.viewport)
+    if (!props.viewport)
       return;
 
     await props.viewport.addViewedModels(props.models.map((model) => model.id));
@@ -149,9 +149,6 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 
 function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   const hideAll = async () => {
-    if (!props.models)
-      return;
-
     props.viewport.changeModelDisplay(props.models.map((model) => model.id), false);
     props.viewport.clearAlwaysDrawn();
     if (props.viewport.iModel) {
@@ -178,9 +175,6 @@ function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 
 function InvertButton(props: ModelsTreeHeaderButtonProps) {
   const invert = async () => {
-    if (!props.models)
-      return;
-
     const notViewedModels: string[] = [];
     const models: string[] = [];
     props.models.forEach((model) => {
@@ -204,7 +198,7 @@ function InvertButton(props: ModelsTreeHeaderButtonProps) {
 
 function View2DButton(props: ModelsTreeHeaderButtonProps) {
   const models2d = useMemo(() => {
-    return props.models?.filter((model) => model.isPlanProjection).map((model) => model.id);
+    return props.models.filter((model) => model.isPlanProjection).map((model) => model.id);
   }, [props.models]);
 
   const [is2dToggleActive, setIs2dToggleActive] = useState(() => areAllModelsVisible(props.viewport, models2d));
@@ -231,14 +225,14 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
       title={TreeWidget.translate("toggle2DViews")}
       onClick={viewToggle2D}
       label={TreeWidget.translate("label2D")}
-      disabled={models2d?.length === 0}
+      disabled={models2d.length === 0}
     />
   );
 }
 
 function View3DButton(props: ModelsTreeHeaderButtonProps) {
   const models3d = useMemo(() => {
-    return props.models?.filter((model) => !model.isPlanProjection).map((model) => model.id);
+    return props.models.filter((model) => !model.isPlanProjection).map((model) => model.id);
   }, [props.models]);
 
   const [is3dToggleActive, setIs3dToggleActive] = useState(() => areAllModelsVisible(props.viewport, models3d));
@@ -266,11 +260,11 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
       title={TreeWidget.translate("toggle3DViews")}
       onClick={viewToggle3D}
       label={TreeWidget.translate("label3D")}
-      disabled={models3d?.length === 0}
+      disabled={models3d.length === 0}
     />
   );
 }
 
-function areAllModelsVisible(viewport: Viewport, models?: string[]): boolean {
-  return (models && models.length !== 0) ? models.every((id) => viewport.viewsModel(id)) : false;
+function areAllModelsVisible(viewport: Viewport, models: string[]): boolean {
+  return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
 }

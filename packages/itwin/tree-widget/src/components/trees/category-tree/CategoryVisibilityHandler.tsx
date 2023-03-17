@@ -11,7 +11,7 @@ import { NodeKey } from "@itwin/presentation-common";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport } from "../CategoriesVisibilityUtils";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
-const EMPTY_CATEGORIES_ARRAY: Category[] = [];
+const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
 /**
  * Loads categories from viewport or uses provided list of categories.
@@ -27,16 +27,16 @@ export function useCategories(viewManager: ViewManager, imodel: IModelConnection
  * Data structure that describes category.
  * @alpha
  */
-export interface Category {
-  key: string;
-  children?: string[];
+export interface CategoryInfo {
+  categoryId: string;
+  subCategoryIds?: string[];
 }
 
 /** @alpha */
 export interface CategoryVisibilityHandlerParams {
   viewManager: ViewManager;
   imodel: IModelConnection;
-  categories: Category[];
+  categories: CategoryInfo[];
   activeView?: Viewport;
   allViewports?: boolean;
 }
@@ -48,7 +48,7 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
   private _pendingVisibilityChange: any | undefined;
   private _activeView?: Viewport;
   private _useAllViewports: boolean;
-  private _categories: Category[];
+  private _categories: CategoryInfo[];
 
   constructor(params: CategoryVisibilityHandlerParams) {
     this._viewManager = params.viewManager;
@@ -83,7 +83,7 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     if (node.parentId) {
       const childId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
       // istanbul ignore next
-      const parentId = this.getParent(childId)?.key;
+      const parentId = this.getParent(childId)?.categoryId;
 
       // make sure parent category is enabled
       if (shouldDisplay && parentId)
@@ -102,7 +102,7 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     if (!parentItem || !this._activeView)
       return "hidden";
 
-    const isVisible = this._activeView.view.viewsCategory(parentItem.key) && this._activeView.isSubCategoryVisible(id);
+    const isVisible = this._activeView.view.viewsCategory(parentItem.categoryId) && this._activeView.isSubCategoryVisible(id);
     return isVisible ? "visible" : "hidden";
   }
 
@@ -112,11 +112,11 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     return this._activeView.view.viewsCategory(id) ? "visible" : "hidden";
   }
 
-  public getParent(key: string): Category | undefined {
+  public getParent(key: string): CategoryInfo | undefined {
     for (const category of this._categories) {
       // istanbul ignore else
-      if (category.children) {
-        if (category.children.indexOf(key) !== -1)
+      if (category.subCategoryIds) {
+        if (category.subCategoryIds.indexOf(key) !== -1)
           return category;
       }
     }

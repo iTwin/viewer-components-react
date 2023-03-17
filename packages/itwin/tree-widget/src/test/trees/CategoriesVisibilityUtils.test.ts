@@ -12,7 +12,7 @@ import {
 import { KeySet } from "@itwin/presentation-common";
 import { Presentation, PresentationManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
 import { enableCategory, enableSubCategory, toggleAllCategories } from "../../components/trees/CategoriesVisibilityUtils";
-import { Category } from "../../components/trees/category-tree/CategoryVisibilityHandler";
+import { CategoryInfo } from "../../components/trees/category-tree/CategoryVisibilityHandler";
 import { mockPresentationManager, TestUtils } from "../TestUtils";
 
 describe("CategoryVisibilityUtils", () => {
@@ -51,10 +51,10 @@ describe("CategoryVisibilityUtils", () => {
       .verifiable(times);
   };
 
-  const categories: Category[] = [
+  const categories: CategoryInfo[] = [
     {
-      key: "CategoryId",
-      children: ["SubCategoryId"],
+      categoryId: "CategoryId",
+      subCategoryIds: ["SubCategoryId"],
     },
   ];
 
@@ -125,7 +125,7 @@ describe("CategoryVisibilityUtils", () => {
       selectedViewMock.setup((x) => x.view).returns(() => selectedViewStateMock.object);
       selectedViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
       imodelMock.setup((x) => x.subcategories).returns(() => subCategoriesCacheMock.object);
-      subCategoriesCacheMock.setup((x) => x.getSubCategories("CategoryId")).returns(() => new Set(categories[0].children));
+      subCategoriesCacheMock.setup((x) => x.getSubCategories("CategoryId")).returns(() => new Set(categories[0].subCategoryIds));
       perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => [][Symbol.iterator]());
     });
 

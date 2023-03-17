@@ -5,9 +5,9 @@
 
 import { QueryRowFormat } from "@itwin/core-common";
 import { IModelConnection, PerModelCategoryVisibility, ViewManager, Viewport } from "@itwin/core-frontend";
-import { Category } from "./category-tree/CategoryVisibilityHandler";
+import { CategoryInfo  } from "./category-tree/CategoryVisibilityHandler";
 
-const EMPTY_CATEGORIES_ARRAY: Category[] = [];
+const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
 /**
  * Toggles visibility of categories to show or hide.
@@ -30,7 +30,7 @@ export async function toggleAllCategories(viewManager: ViewManager, imodel: IMod
  */
 export async function getCategories(imodel: IModelConnection, viewport?: Viewport) {
   const categories = await loadCategoriesFromViewport(imodel, viewport);
-  return categories.map((category) => category.key);
+  return categories.map((category) => category.categoryId);
 }
 
 /** Changes category display in the viewport */
@@ -110,7 +110,7 @@ export async function loadCategoriesFromViewport(iModel?: IModelConnection, vp?:
   const ecsql = vp.view.is3d() ? selectUsedSpatialCategoryIds : selectUsedDrawingCategoryIds;
   const ecsql2 = `SELECT ECInstanceId as id, UserLabel as label, CodeValue as code FROM ${vp.view.is3d() ? "BisCore.SpatialCategory" : "BisCore.DrawingCategory"} WHERE ECInstanceId IN (${ecsql})`;
 
-  const categories: Category[] = [];
+  const categories: CategoryInfo [] = [];
 
   // istanbul ignore else
   if (iModel) {
@@ -118,7 +118,7 @@ export async function loadCategoriesFromViewport(iModel?: IModelConnection, vp?:
     // istanbul ignore next
     for await (const row of rowIterator) {
       const subCategoryIds = iModel.subcategories.getSubCategories(row.id);
-      categories.push({ key: row.id, children: (subCategoryIds) ? [...subCategoryIds] : undefined });
+      categories.push({ categoryId: row.id, subCategoryIds: (subCategoryIds) ? [...subCategoryIds] : undefined });
     }
   }
 

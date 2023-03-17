@@ -67,11 +67,7 @@
       &.show {
         visibility: visible;
         opacity: 1;
-        width: calc(100% + 32px);
-      }
-
-      &.search-bar-grouping-enabled {
-        width: 100%;
+        width: 100%
       }
     }
   }

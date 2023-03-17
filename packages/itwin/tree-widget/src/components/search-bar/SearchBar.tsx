@@ -62,7 +62,7 @@ SearchBarState
   private _searchBox = React.createRef<SearchBox>();
 
   public static defaultProps: Partial<SearchBarProps> = {
-    alignment: Alignment.Left,
+    alignment: Alignment.Right,
     enableGrouping: true,
   };
 
@@ -103,8 +103,7 @@ SearchBarState
     const classes = classnames("tree-widget-search-bar", this.props.className);
     const searchBoxClassName = classnames(
       "search-bar-search-box",
-      showSearch && "show",
-      enableGrouping && "search-bar-grouping-enabled"
+      showSearch && "show"
     );
     const searchIconClassName = classnames(
       "search-bar-search-icon",
@@ -118,7 +117,7 @@ SearchBarState
 
     return (
       <div className={classes}>
-        <div className={contentClassName}>
+        {enableGrouping && <div className={contentClassName}>
           <ButtonGroup
             overflowButton={(overflowStart) => (
               <DropdownMenu
@@ -137,7 +136,7 @@ SearchBarState
           >
             {this.props.children}
           </ButtonGroup>
-        </div>
+        </div>}
         {showSearch ? (
           <div className="search-bar-search-container">
             <SearchBox
