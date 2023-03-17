@@ -8,14 +8,14 @@ import type { SelectableContentDefinition } from "@itwin/components-react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { CategoryTreeProps } from "./components/trees/category-tree/CategoriesTree";
 import type { ModelsTreeProps } from "./components/trees/models-tree/ModelsTree";
-import type { Category, ModelsTreeComponentNamespace } from "./tree-widget-react";
+import type { Category, ModelInfo } from "./tree-widget-react";
 
 export interface TreeHeaderButtonProps {
   viewport: ScreenViewport;
 }
 
 export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
-  models?: ModelsTreeComponentNamespace.TreeViewModelInfo[];
+  models?: ModelInfo[];
 }
 
 export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
@@ -35,7 +35,7 @@ export interface ModelTreeProps extends Omit<ModelsTreeProps,
 | "height"
 | "filterInfo"
 | "onFilterApplied"
-> { treeHeaderButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode> }
+> { headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode> }
 
 export interface CategoriesTreeProps extends Omit<CategoryTreeProps,
 | "iModel"
@@ -44,7 +44,7 @@ export interface CategoriesTreeProps extends Omit<CategoryTreeProps,
 | "height"
 | "filterInfo"
 | "onFilterApplied"
-> { treeHeaderButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode> }
+> { headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode> }
 
 export type SpatialTreeProps = Omit<
 // eslint-disable-next-line deprecation/deprecation

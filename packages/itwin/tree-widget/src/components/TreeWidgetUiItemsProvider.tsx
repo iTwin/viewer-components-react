@@ -10,9 +10,9 @@ import { CommonWidgetProps, StagePanelLocation, StagePanelSection, StageUsage, U
 import { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
 import { CategoriesTreeId, ModelsTreeId, SpatialContainmentTreeId, TreeWidgetOptions } from "../types";
-import { CategoriesTreeComponentNamespace } from "./trees/category-tree/CategoriesTreeComponent";
+import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
 import { ClassGroupingOption } from "./trees/Common";
-import { ModelsTreeComponentNamespace } from "./trees/models-tree/ModelsTreeComponent";
+import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
 import { SpatialTreeComponent } from "./trees/spatial-tree/SpatialTreeComponent";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
 
@@ -46,7 +46,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
           label: TreeWidget.translate("models"),
           id: ModelsTreeId,
           render: () => (
-            <ModelsTreeComponentNamespace.ModelsTreeComponent
+            <ModelsTreeComponent
               enableElementsClassGrouping={
                 this._treeWidgetOptions?.enableElementsClassGrouping
                   ? ClassGroupingOption.YesWithCounts
@@ -63,7 +63,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
           label: TreeWidget.translate("categories"),
           id: CategoriesTreeId,
           render: () => (
-            <CategoriesTreeComponentNamespace.CategoriesTreeComponent {...this._treeWidgetOptions?.categoriesTreeProps} />
+            <CategoriesTreeComponent {...this._treeWidgetOptions?.categoriesTreeProps} />
           ),
         });
       }

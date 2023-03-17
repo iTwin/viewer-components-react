@@ -64,7 +64,6 @@ export interface CategoryTreeProps {
 
   /**
    * Available iModel categories
-   * @internal
    */
   categories?: Category[];
 }

@@ -103,7 +103,8 @@ SearchBarState
     const classes = classnames("tree-widget-search-bar", this.props.className);
     const searchBoxClassName = classnames(
       "search-bar-search-box",
-      showSearch && "show"
+      showSearch && "show",
+      enableGrouping && "search-bar-grouping-enabled"
     );
     const searchIconClassName = classnames(
       "search-bar-search-icon",
@@ -114,21 +115,31 @@ SearchBarState
       showSearch && "contracted",
       alignment === Alignment.Right && "right"
     );
-    const searchBarContainerClassName = classnames(
-      "search-bar-search-container",
-      enableGrouping && "search-bar-grouping-enabled"
-    );
 
-    const buttonGroup = (
-      <SearchBarButtonGroup>{this.props.children}</SearchBarButtonGroup>
-    );
     return (
       <div className={classes}>
         <div className={contentClassName}>
-          {buttonGroup}
+          <ButtonGroup
+            overflowButton={(overflowStart) => (
+              <DropdownMenu
+                menuItems={() =>
+                  React.Children.toArray(this.props.children)
+                    .slice(overflowStart === 0 ? 0 : overflowStart - 1)
+                    .map((btn, index) => <MenuItem key={index}>{btn}</MenuItem>)
+                }
+                className="search-bar-dropdown-container"
+              >
+                <IconButton styleType="borderless" size="small">
+                  <SvgMore />
+                </IconButton>
+              </DropdownMenu>
+            )}
+          >
+            {this.props.children}
+          </ButtonGroup>
         </div>
         {showSearch ? (
-          <div className={searchBarContainerClassName}>
+          <div className="search-bar-search-container">
             <SearchBox
               ref={this._searchBox}
               className={searchBoxClassName}
@@ -158,30 +169,3 @@ SearchBarState
     );
   }
 }
-
-interface SearchBarButtonGroupProps {
-  children: React.ReactNode;
-}
-
-const SearchBarButtonGroup = (props: SearchBarButtonGroupProps) => {
-  return (
-    <ButtonGroup
-      overflowButton={(overflowStart) => (
-        <DropdownMenu
-          menuItems={() =>
-            React.Children.toArray(props.children)
-              .slice(overflowStart === 0 ? 0 : overflowStart - 1)
-              .map((btn, index) => <MenuItem key={index}>{btn}</MenuItem>)
-          }
-          style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-        >
-          <IconButton styleType="borderless" size="small">
-            <SvgMore />
-          </IconButton>
-        </DropdownMenu>
-      )}
-    >
-      {props.children}
-    </ButtonGroup>
-  );
-};
