@@ -15,7 +15,7 @@ import {
 import { ECInstancesNodeKey, StandardNodeTypes } from "@itwin/presentation-common";
 import { renderHook } from "@testing-library/react-hooks";
 import {
-  Category, CategoryVisibilityHandler, CategoryVisibilityHandlerParams, useCategories,
+  CategoryInfo, CategoryVisibilityHandler, CategoryVisibilityHandlerParams, useCategories,
 } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 
 const createKey = (id: Id64String): ECInstancesNodeKey => {
@@ -44,10 +44,10 @@ describe("CategoryVisibilityHandler", () => {
   (categoryNode as any).__key = categoryKey = createKey(categoryNode.id);
   (subcategoryNode as any).__key = subcategoryKey = createKey(subcategoryNode.id);
 
-  const categories: Category[] = [
+  const categories: CategoryInfo[] = [
     {
-      key: "CategoryId",
-      children: ["SubCategoryId"],
+      categoryId: "CategoryId",
+      subCategoryIds: ["SubCategoryId"],
     },
   ];
 
@@ -60,7 +60,7 @@ describe("CategoryVisibilityHandler", () => {
     perModelCategoryVisibilityMock.reset();
 
     imodelMock.setup((x) => x.subcategories).returns(() => subCategoriesCacheMock.object);
-    subCategoriesCacheMock.setup((x) => x.getSubCategories("CategoryId")).returns(() => new Set(categories[0].children));
+    subCategoriesCacheMock.setup((x) => x.getSubCategories("CategoryId")).returns(() => new Set(categories[0].subCategoryIds));
     viewManagerMock.setup((x) => x.selectedView).returns(() => selectedViewMock.object);
     selectedViewMock.setup((x) => x.view).returns(() => selectedViewStateMock.object);
     selectedViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
