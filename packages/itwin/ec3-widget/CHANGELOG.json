@@ -1,0 +1,17 @@
+{
+  "name": "@itwin/ec3-widget-react",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@itwin/ec3-widget-react_v0.1.0",
+      "date": "Mon, 20 Mar 2023 14:48:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial commit"
+          }
+        ]
+      }
+    }
+  ]
+}
