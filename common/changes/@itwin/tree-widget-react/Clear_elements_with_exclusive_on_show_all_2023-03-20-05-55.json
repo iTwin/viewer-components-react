@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "ModelsTree: ensure that the \"Show all\" button is going to show all models when there are models with an \"exclusive\" flag",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/tree-widget-react"
+}
