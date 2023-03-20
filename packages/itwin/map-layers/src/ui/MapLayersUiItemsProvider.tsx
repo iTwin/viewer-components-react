@@ -23,8 +23,8 @@ export class MapLayersUiItemsProvider implements UiItemsProvider {
 
   public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection) {
     const widgets: Widget[] = [];
-    if ((undefined === section && stageUsage === StageUsage.General && location === StagePanelLocation.Right) ||
-      (stageUsage === StageUsage.General && location === StagePanelLocation.Right && section === StagePanelSection.Start)) {
+    const tmpSection = section ?? StagePanelSection.Start;
+    if (stageUsage === StageUsage.General && location === StagePanelLocation.Right && tmpSection === StagePanelSection.Start) {
       widgets.push({
         id: "map-layers:mapLayersWidget",
         label: MapLayersUI.localization.getLocalizedString("mapLayers:Widget.Label"),

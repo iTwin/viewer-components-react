@@ -40,8 +40,8 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
   public provideWidgets(_stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection) {
     const widgets = [];
 
-    if ((undefined === section && stageUsage === StageUsage.General && location === StagePanelLocation.Right ) ||
-      (stageUsage === StageUsage.General && location === StagePanelLocation.Right && section === StagePanelSection.End )) {
+    const tmpSection = section ?? StagePanelSection.End;
+    if (tmpSection === StagePanelSection.End  && stageUsage === StageUsage.General && location === StagePanelLocation.Right )  {
       widgets.push({
         id: FeatureInfoUiItemsProvider.widgetId,
         label: MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.Label"),
