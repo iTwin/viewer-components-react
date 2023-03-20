@@ -52,7 +52,7 @@
     "@itwin/core-react": "^4.0.0-dev.12",
     "@itwin/eslint-plugin": "^4.0.0-dev.30",
     "@itwin/imodel-components-react": "^4.0.0-dev.12",
-    "@itwin/itwinui-variables": "^1.7.0",
+    "@itwin/itwinui-variables": "^2.0.0",
     "@itwin/itwinui-react": "^2.0.0",
     "@itwin/presentation-common": "^4.0.0-dev.44",
     "@testing-library/react": "^12.0.0",
