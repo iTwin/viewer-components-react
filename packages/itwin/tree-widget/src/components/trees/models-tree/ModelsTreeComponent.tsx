@@ -125,6 +125,7 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 
     await props.viewport.addViewedModels(props.models.map((model) => model.id));
     props.viewport.clearNeverDrawn();
+    props.viewport.clearAlwaysDrawn();
     if (props.viewport.iModel) {
       await toggleAllCategories(
         IModelApp.viewManager,
@@ -150,6 +151,7 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   const hideAll = async () => {
     props.viewport.changeModelDisplay(props.models.map((model) => model.id), false);
+    props.viewport.clearNeverDrawn();
     props.viewport.clearAlwaysDrawn();
     if (props.viewport.iModel) {
       await toggleAllCategories(
