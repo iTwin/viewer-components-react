@@ -6,4 +6,7 @@
 .gmw-property-table-toolbar {
   display: flex;
   justify-content: space-between;
+  .gmw-property-table-refresh-button {
+    margin-left: auto;
+  }
 }

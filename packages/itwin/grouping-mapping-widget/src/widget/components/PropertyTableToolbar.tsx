@@ -32,6 +32,7 @@ export const PropertyTableToolbar = ({
     )}
     <IconButton
       title="Refresh"
+      className="gmw-property-table-refresh-button"
       onClick={refreshProperties}
       disabled={isLoading}
       styleType="borderless"

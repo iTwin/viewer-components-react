@@ -178,7 +178,7 @@ export const CalculatedPropertyAction = ({
             </Small>
             <ToggleSwitch
               label='Visualize Dimensions'
-              labelPosition='right'
+              labelPosition='left'
               disabled={isLoading}
               checked={colorProperty}
               onChange={() => setColorProperty((b) => !b)}

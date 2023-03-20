@@ -237,11 +237,20 @@ export const Groupings = ({
     await zoomToElements(allIds);
   }, [setHiddenGroupsIds, groups, hideGroupsWrapper, getHiliteIdsFromGroupsWrapper]);
 
+  const ToggleGroupVis = () => <ToggleSwitch
+    label='Color by Group'
+    labelPosition='left'
+    className='gmw-toggle'
+    disabled={isLoadingQuery}
+    checked={showGroupColor}
+    onChange={() => setShowGroupColor((b) => !b)}
+  ></ToggleSwitch>;
+
   return (
     <>
       <Surface className='gmw-groups-container'>
         <div className='gmw-toolbar'>
-          {onClickAddGroup && groupUIs.length > 0 &&
+          {onClickAddGroup && groupUIs.length > 0 ?
             <DropdownMenu
               className='gmw-custom-ui-dropdown'
               disabled={isLoadingQuery}
@@ -274,17 +283,12 @@ export const Groupings = ({
               >
                 {isLoadingQuery ? "Loading" : "Add Group"}
               </Button>
-            </DropdownMenu>}
+
+            </DropdownMenu> :
+            <ToggleGroupVis />}
           {iModelConnection &&
             <ButtonGroup className='gmw-toolbar-buttons'>
-              <ToggleSwitch
-                label='Color by Group'
-                labelPosition='left'
-                className='gmw-toggle'
-                disabled={isLoadingQuery}
-                checked={showGroupColor}
-                onChange={() => setShowGroupColor((b) => !b)}
-              ></ToggleSwitch>
+              {onClickAddGroup && groupUIs.length > 0 && <ToggleGroupVis />}
               <IconButton
                 title='Show All'
                 onClick={showAll}

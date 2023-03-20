@@ -11,7 +11,7 @@
   padding: $iui-baseline $iui-m;
   min-height: 0;
 
-  .gmw-toolbar:not(:empty) {
+  .gmw-toolbar {
     display: flex;
     justify-content: space-between;
     gap: $iui-s;
@@ -21,8 +21,8 @@
 
     .gmw-toolbar-buttons {
       margin-right: $iui-sm;
+      margin-left: auto;
       flex-wrap: wrap;
-
       .gmw-toggle {
         margin-right: $iui-xs;
       }

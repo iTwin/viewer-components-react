@@ -52,7 +52,7 @@ export const PropertyTable = <T extends PropertyTableItem>({
     columnsFactory(handleShowDeleteModal), [columnsFactory, handleShowDeleteModal]);
 
   return (
-    <>
+    <div>
       <PropertyTableToolbar
         propertyType={propertyType}
         onClickAddProperty={onClickAdd}
@@ -73,6 +73,6 @@ export const PropertyTable = <T extends PropertyTableItem>({
         onDelete={handleDeleteProperty}
         refresh={refreshProperties}
       />
-    </>
+    </div>
   );
 };

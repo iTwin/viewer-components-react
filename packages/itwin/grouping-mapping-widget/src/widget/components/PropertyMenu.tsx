@@ -139,7 +139,7 @@ export const PropertyMenu = ({
         <div className="gmw-property-menu-toolbar">
           <ToggleSwitch
             label='Color Group'
-            labelPosition='right'
+            labelPosition='left'
             disabled={isLoading}
             checked={showGroupColor}
             onChange={() => setShowGroupColor((b) => !b)}
@@ -152,44 +152,38 @@ export const PropertyMenu = ({
           </IconButton>
         </div>
         {!hideGroupProps && (
-          <div className='gmw-property-table'>
-            <GroupPropertyTable
-              iModelId={iModelId}
-              mappingId={mappingId}
-              groupId={groupId}
-              onClickAdd={onClickAddGroupProperty}
-              onClickModify={onClickModifyGroupProperty}
-              isLoading={isLoadingGroupProperties}
-              groupProperties={groupProperties ?? []}
-              refresh={refreshGroupProperties}
-            />
-          </div>
+          <GroupPropertyTable
+            iModelId={iModelId}
+            mappingId={mappingId}
+            groupId={groupId}
+            onClickAdd={onClickAddGroupProperty}
+            onClickModify={onClickModifyGroupProperty}
+            isLoading={isLoadingGroupProperties}
+            groupProperties={groupProperties ?? []}
+            refresh={refreshGroupProperties}
+          />
         )}
         {!hideCalculatedProps && (
-          <div className='gmw-property-table'>
-            <CalculatedPropertyTable
-              mappingId={mappingId}
-              groupId={groupId}
-              onClickAdd={onClickAddCalculatedProperty}
-              onClickModify={onClickModifyCalculatedProperty}
-              isLoading={isLoadingCalculatedProperties}
-              calculatedProperties={calculatedProperties ?? []}
-              refresh={refreshCalculatedProperties}
-            />
-          </div>
+          <CalculatedPropertyTable
+            mappingId={mappingId}
+            groupId={groupId}
+            onClickAdd={onClickAddCalculatedProperty}
+            onClickModify={onClickModifyCalculatedProperty}
+            isLoading={isLoadingCalculatedProperties}
+            calculatedProperties={calculatedProperties ?? []}
+            refresh={refreshCalculatedProperties}
+          />
         )}
         {!hideCustomCalculationProps && (
-          <div className='gmw-property-table'>
-            <CustomCalculationTable
-              mappingId={mappingId}
-              groupId={groupId}
-              onClickAdd={onClickAddCustomCalculationProperty}
-              onClickModify={onClickModifyCustomCalculation}
-              isLoading={isLoadingCustomCalculations}
-              customCalculations={customCalculationProperties ?? []}
-              refresh={refreshCustomCalculations}
-            />
-          </div>
+          <CustomCalculationTable
+            mappingId={mappingId}
+            groupId={groupId}
+            onClickAdd={onClickAddCustomCalculationProperty}
+            onClickModify={onClickModifyCustomCalculation}
+            isLoading={isLoadingCustomCalculations}
+            customCalculations={customCalculationProperties ?? []}
+            refresh={refreshCustomCalculations}
+          />
         )}
       </div>
       <GroupInformationPanel
