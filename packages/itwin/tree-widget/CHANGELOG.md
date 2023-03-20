@@ -1,6 +1,20 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 09 Mar 2023 20:08:53 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Mar 2023 14:48:35 GMT and should not be manually modified.
+
+## 0.7.0
+Mon, 20 Mar 2023 14:48:35 GMT
+
+### Minor changes
+
+- Add an option to control what buttons are available in tree toolbars.
+- Upgrade `itwinjs-core` dependencies to `^3.6.0`
+- Upgrade `typescript` to `~4.4.0`
+
+### Patches
+
+- ModelsTree: ensure that the "Show all" button is going to show all elements when there are elements with an "exclusive" flag
+- '2d' and '3d' buttons react to visibility changes in the viewport. The '2d' button will be disabled if no models with the PlanProjection flag are present in the model.
 
 ## 0.6.2
 Thu, 09 Mar 2023 20:08:53 GMT
