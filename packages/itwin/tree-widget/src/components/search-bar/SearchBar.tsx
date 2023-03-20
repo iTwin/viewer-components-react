@@ -5,11 +5,15 @@
 import * as React from "react";
 import classnames from "classnames";
 import type { CommonProps } from "@itwin/core-react";
-import { RelativePosition } from "@itwin/appui-abstract";
-import { Popup } from "./Popup";
 import { SearchBox } from "./SearchBox";
-import { IconButton } from "../IconButton";
 import "./SearchBar.scss";
+import {
+  ButtonGroup,
+  DropdownMenu,
+  IconButton,
+  MenuItem,
+} from "@itwin/itwinui-react";
+import { SvgMore, SvgSearch } from "@itwin/itwinui-icons-react";
 
 export enum Alignment {
   Left = 0,
@@ -55,11 +59,10 @@ export class SearchBar extends React.PureComponent<
 SearchBarProps,
 SearchBarState
 > {
-  private _target: HTMLElement | null = null;
   private _searchBox = React.createRef<SearchBox>();
 
   public static defaultProps: Partial<SearchBarProps> = {
-    alignment: Alignment.Left,
+    alignment: Alignment.Right,
     enableGrouping: true,
   };
 
@@ -86,14 +89,6 @@ SearchBarState
     });
   };
 
-  private _onCloseDropdown = () => {
-    this.setState({ showDropdown: false });
-  };
-
-  private _onToggleDropdown = () => {
-    this.setState((prevState) => ({ showDropdown: !prevState.showDropdown }));
-  };
-
   public render() {
     const {
       value,
@@ -103,7 +98,7 @@ SearchBarState
       enableGrouping,
       title,
     } = this.props;
-    const { showSearch, showDropdown } = this.state;
+    const { showSearch } = this.state;
 
     const classes = classnames("tree-widget-search-bar", this.props.className);
     const searchBoxClassName = classnames(
@@ -114,63 +109,60 @@ SearchBarState
       "search-bar-search-icon",
       showSearch ? "hide" : "show"
     );
-    const groupButtonClassName = classnames(
-      "search-bar-group-button2",
-      showSearch && enableGrouping && "show"
-    );
     const contentClassName = classnames(
       "search-bar-button-container",
-      showSearch && "hide",
+      showSearch && "contracted",
       alignment === Alignment.Right && "right"
-    );
-    const searchBarContainerClassName = classnames(
-      "search-bar-search-container",
-      enableGrouping && "search-bar-grouping-enabled",
     );
 
     return (
       <div className={classes}>
-        <div
-          className={groupButtonClassName}
-          ref={(element) => {
-            this._target = element;
-          }}
-        >
-          <IconButton icon="icon-more-2" onClick={this._onToggleDropdown} />
-        </div>
-        <div className={contentClassName}>{this.props.children}</div>
-        <div className={searchBarContainerClassName}>
-          <SearchBox
-            ref={this._searchBox}
-            className={searchBoxClassName}
-            searchText={value}
-            valueChangedDelay={valueChangedDelay}
-            placeholder={placeholder}
-            onFilterCancel={this.props.onFilterCancel}
-            onFilterClear={this.props.onFilterClear}
-            onFilterStart={this.props.onFilterStart}
-            resultCount={this.props.resultCount}
-            onIconClick={this._onToggleSearch}
-            onSelectedChanged={this.props.onSelectedChanged}
-          />
-        </div>
-        <IconButton
-          className={searchIconClassName}
-          icon="icon-search"
-          onClick={this._onToggleSearch}
-          title={title}
-        />
-        {showSearch && (
-          <Popup
-            isShown={showDropdown}
-            position={RelativePosition.BottomLeft}
-            onClose={this._onCloseDropdown}
-            context={this._target}
+        {enableGrouping && <div className={contentClassName}>
+          <ButtonGroup
+            overflowButton={(overflowStart) => (
+              <DropdownMenu
+                menuItems={() =>
+                  React.Children.toArray(this.props.children)
+                    .slice(overflowStart === 0 ? 0 : overflowStart - 1)
+                    .map((btn, index) => <MenuItem key={index}>{btn}</MenuItem>)
+                }
+                className="search-bar-dropdown-container"
+              >
+                <IconButton styleType="borderless" size="small">
+                  <SvgMore />
+                </IconButton>
+              </DropdownMenu>
+            )}
           >
-            <div className="search-bar-dropdown-container">
-              {this.props.children}
-            </div>
-          </Popup>
+            {this.props.children}
+          </ButtonGroup>
+        </div>}
+        {showSearch ? (
+          <div className="search-bar-search-container">
+            <SearchBox
+              ref={this._searchBox}
+              className={searchBoxClassName}
+              searchText={value}
+              valueChangedDelay={valueChangedDelay}
+              placeholder={placeholder}
+              onFilterCancel={this.props.onFilterCancel}
+              onFilterClear={this.props.onFilterClear}
+              onFilterStart={this.props.onFilterStart}
+              resultCount={this.props.resultCount}
+              onIconClick={this._onToggleSearch}
+              onSelectedChanged={this.props.onSelectedChanged}
+            />
+          </div>
+        ) : (
+          <IconButton
+            className={searchIconClassName}
+            onClick={this._onToggleSearch}
+            title={title}
+            styleType="borderless"
+            size="small"
+          >
+            <SvgSearch />
+          </IconButton>
         )}
       </div>
     );

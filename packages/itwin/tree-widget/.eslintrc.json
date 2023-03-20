@@ -21,6 +21,13 @@
           "internal"
         ]
       }
+    ],
+    "@typescript-eslint/no-floating-promises": [
+      2,
+      {
+        // typescript-eslint reports async IIFE as a floating promise, so we should enable this option
+        "ignoreIIFE": true
+      }
     ]
   }
 }
