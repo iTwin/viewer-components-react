@@ -8,6 +8,7 @@ import type { Column } from "react-table";
 import type { CreateTypeFromInterface } from "../utils";
 import DeleteModal from "./DeleteModal";
 import { PropertyTableToolbar } from "./PropertyTableToolbar";
+import "./PropertyTable.scss";
 
 export interface PropertyTableItem {
   propertyName: string;
@@ -52,7 +53,7 @@ export const PropertyTable = <T extends PropertyTableItem>({
     columnsFactory(handleShowDeleteModal), [columnsFactory, handleShowDeleteModal]);
 
   return (
-    <div>
+    <div className="gmw-property-table-container">
       <PropertyTableToolbar
         propertyType={propertyType}
         onClickAddProperty={onClickAdd}
