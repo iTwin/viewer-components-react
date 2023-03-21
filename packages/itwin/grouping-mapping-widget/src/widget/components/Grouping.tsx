@@ -55,6 +55,7 @@ export interface GroupingProps {
   onClickGroupTitle?: (group: Group) => void;
   onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
   onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: Group) => void;
+  isNonEmphasizedSelectable?: boolean;
   emphasizeElements?: boolean;
 }
 
@@ -89,6 +90,7 @@ export const Groupings = ({
   onClickGroupModify,
   onClickRenderContextCustomUI,
   emphasizeElements = true,
+  isNonEmphasizedSelectable = false,
 }: GroupingProps) => {
   const iModelConnection = useActiveIModelConnection();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
@@ -119,9 +121,10 @@ export const Groupings = ({
       if (!iModelConnection) return;
       setLoadingQuery(true);
       await visualizeGroupColors(iModelConnection, groups, viewGroups, hiddenGroupsIds, hilitedElementsQueryCache, emphasizeElements);
+      isNonEmphasizedSelectable && clearEmphasizedElements();
       setLoadingQuery(false);
     },
-    [iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache, emphasizeElements],
+    [iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache, emphasizeElements, isNonEmphasizedSelectable],
   );
 
   useEffect(() => {
