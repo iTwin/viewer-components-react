@@ -90,7 +90,7 @@ const SelectMappings = ({
         ],
       },
     ],
-    []
+    [displayStrings.mappings]
   );
 
   const pageSizeList = useMemo(() => [10, 25, 50], []);
