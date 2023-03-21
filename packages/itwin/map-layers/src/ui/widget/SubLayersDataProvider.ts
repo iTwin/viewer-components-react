@@ -74,8 +74,6 @@ export class SubLayersDataProvider implements ITreeDataProvider {
     }
   }
 
-  // public onTreeNodeChanged = new BeEvent<TreeDataChangesListener>();
-
   public async getNodesCount(parent?: TreeNodeItem) {
     const nodeArray: TreeNodeItem[] | undefined = parent ? this._nodeMap.get(parent.id) : this._nodeMap.get("");
     if (nodeArray)
