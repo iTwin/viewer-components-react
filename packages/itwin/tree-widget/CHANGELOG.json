@@ -2,6 +2,32 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@itwin/tree-widget-react_v0.7.0",
+      "date": "Mon, 20 Mar 2023 14:48:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "ModelsTree: ensure that the \"Show all\" button is going to show all elements when there are elements with an \"exclusive\" flag"
+          },
+          {
+            "comment": "'2d' and '3d' buttons react to visibility changes in the viewport. The '2d' button will be disabled if no models with the PlanProjection flag are present in the model."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add an option to control what buttons are available in tree toolbars."
+          },
+          {
+            "comment": "Upgrade `itwinjs-core` dependencies to `^3.6.0`"
+          },
+          {
+            "comment": "Upgrade `typescript` to `~4.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.2",
       "tag": "@itwin/tree-widget-react_v0.6.2",
       "date": "Thu, 09 Mar 2023 20:08:53 GMT",

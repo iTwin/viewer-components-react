@@ -4,54 +4,45 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/core-react/lib/cjs/core-react/index";
 
+// Buttons dropdown container
+.search-bar-dropdown-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.tree-widget-header-tree-toolbar-icon {
+  color: $buic-icon-color;
+}
+
 .tree-widget-search-bar {
   display: flex;
   align-items: center;
   position: relative;
 
-  // "..." group button
-  .search-bar-group-button2 {
-    opacity: 0;
-    display: none;
-    animation: hide ease-in 0.1s;
-    animation-fill-mode: forwards;
-
-    &.search-bar-group-button2.show {
-      animation: show ease-in 0.25s;
-      animation-delay: 0.1s;
-      animation-fill-mode: forwards;
-      display: block;
-    }
-  }
-
   // button container
   .search-bar-button-container {
     display: flex;
     align-items: center;
+    width: calc(100% - 26px);
 
     &.right {
       justify-content: flex-end;
     }
 
-    &.hide {
-      display: none;
+    &.contracted {
+      width: 32px;
     }
-  }
-
-  // dropdown container
-  .search-bar-dropdown-container {
-    display: flex;
-    align-items: center;
-    padding: 0 $uicore-s;
   }
 
   // override of the search box styling
   .search-bar-search-icon {
-    position: absolute;
-    right: 0;
     opacity: 0;
     transition: all 0.2s ease;
     color: $buic-icon-color;
+    height: 32px;
+
     &.show {
       opacity: 1;
     }
@@ -61,9 +52,6 @@
   .search-bar-search-container {
     flex: 1;
     height: 100%;
-    position: absolute;
-    left: 0;
-    right: 0;
 
     .search-bar-search-box {
       height: 32px;
@@ -79,12 +67,8 @@
       &.show {
         visibility: visible;
         opacity: 1;
-        width: 100%;
+        width: 100%
       }
-    }
-
-    &.search-bar-grouping-enabled {
-      left: 32px;
     }
   }
 }
