@@ -6,17 +6,13 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import {
-  Button,
   ButtonGroup,
   DropdownMenu,
   IconButton,
   MenuItem,
-  ProgressRadial,
   Surface,
-  ToggleSwitch,
 } from "@itwin/itwinui-react";
 import {
-  SvgAdd,
   SvgDelete,
   SvgEdit,
   SvgMore,
@@ -48,6 +44,8 @@ import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI"
 import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { getGroupColor, getHiliteIdsFromGroups, hideGroups, visualizeGroupColors } from "./groupsHelpers";
+import { ToggleGroupVisibility } from "./ToggleGroupVisibility";
+import { GroupsAddButton } from "./GroupsAddButton";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
@@ -237,58 +235,32 @@ export const Groupings = ({
     await zoomToElements(allIds);
   }, [setHiddenGroupsIds, groups, hideGroupsWrapper, getHiliteIdsFromGroupsWrapper]);
 
-  const ToggleGroupVis = () => <ToggleSwitch
-    label='Color by Group'
-    labelPosition='left'
-    className='gmw-toggle'
-    disabled={isLoadingQuery}
-    checked={showGroupColor}
-    onChange={() => setShowGroupColor((b) => !b)}
-  ></ToggleSwitch>;
-
   return (
     <>
       <Surface className='gmw-groups-container'>
         <div className='gmw-toolbar'>
-          {onClickAddGroup && groupUIs.length > 0 ?
-            <DropdownMenu
-              className='gmw-custom-ui-dropdown'
-              disabled={isLoadingQuery}
-              menuItems={() =>
-                groupUIs.map((p, index) => (
-                  <MenuItem
-                    key={index}
-                    onClick={() => addGroup(p.name)}
-                    icon={p.icon}
-                    className='gmw-menu-item'
-                    data-testid={`gmw-add-${index}`}
-                  >
-                    {p.displayLabel}
-                  </MenuItem>
-                ))
-              }
-            >
-              <Button
-                data-testid="gmw-add-group-button"
-                className='add-load-button'
-                startIcon={
-                  isLoadingQuery ? (
-                    <ProgressRadial size='small' indeterminate />
-                  ) : (
-                    <SvgAdd />
-                  )
-                }
-                styleType='high-visibility'
-                disabled={isLoadingQuery}
-              >
-                {isLoadingQuery ? "Loading" : "Add Group"}
-              </Button>
-
-            </DropdownMenu> :
-            <ToggleGroupVis />}
+          {onClickAddGroup && groupUIs.length > 0 ? (
+            <GroupsAddButton
+              isLoadingQuery={isLoadingQuery}
+              groupUIs={groupUIs}
+              onClickAddGroup={addGroup}
+            />
+          ) : (
+            <ToggleGroupVisibility
+              isLoadingQuery={isLoadingQuery}
+              showGroupColor={showGroupColor}
+              setShowGroupColor={setShowGroupColor}
+            />
+          )}
           {iModelConnection &&
             <ButtonGroup className='gmw-toolbar-buttons'>
-              {onClickAddGroup && groupUIs.length > 0 && <ToggleGroupVis />}
+              {onClickAddGroup && groupUIs.length > 0 && (
+                <ToggleGroupVisibility
+                  isLoadingQuery={isLoadingQuery}
+                  showGroupColor={showGroupColor}
+                  setShowGroupColor={setShowGroupColor}
+                />
+              )}
               <IconButton
                 title='Show All'
                 onClick={showAll}
@@ -395,7 +367,7 @@ export const Groupings = ({
                                     key={index}
                                     className='gmw-menu-item'
                                     data-testid={`gmw-edit-${index}`}
-                                    onClick={async () => onModify(g, p.name)}
+                                    onClick={async () => {await onModify(g, p.name); close();}}
                                     icon={p.icon}
                                   >
                                     {p.displayLabel}
