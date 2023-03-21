@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/core-react/lib/cjs/core-react/index";
-@import "~@itwin/itwinui-css/scss/style/typography";
 
 $divider-color: $buic-background-toolbutton-stroke;
-$hovered-icon-color: $buic-foreground-primary;
+$hovered-icon-color: --iui-color-background-accent;
 $default-icon-height: 20px;
+$default-font-size: --iui-font-size-1;
 
 .map-manager-layer-host {
   margin: 0 6px;
@@ -33,7 +33,7 @@ $default-icon-height: 20px;
   border-bottom-width: 1px;
 
   .map-manager-header-label {
-    font-size: $iui-font-size;
+    font-size: $default-font-size;
     width: auto;
     white-space: nowrap;
     flex: 1 1 auto;
@@ -282,7 +282,7 @@ $default-icon-height: 20px;
   width: 400px;
   height: 400px;
   color: $buic-foreground-body;
-  font-size: $iui-font-size;
+  font-size: $default-font-size;
   padding: 4px;
   display: block;
   box-sizing: border-box;
@@ -305,7 +305,7 @@ $default-icon-height: 20px;
 
 .map-layer-settings-popup-panel {
   color: $buic-foreground-body;
-  font-size: $iui-font-size;
+  font-size: $default-font-size;
   display: grid;
   grid-row-gap: 4px;
   padding: 4px;

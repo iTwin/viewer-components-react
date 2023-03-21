@@ -643,9 +643,9 @@ importers:
       '@itwin/core-react': ^4.0.0-dev.12
       '@itwin/eslint-plugin': ^4.0.0-dev.30
       '@itwin/imodel-components-react': ^4.0.0-dev.12
-      '@itwin/itwinui-css': 0.x
       '@itwin/itwinui-icons-color-react': ~1.0.3
-      '@itwin/itwinui-react': ~1.46.0
+      '@itwin/itwinui-react': ^2.0.0
+      '@itwin/itwinui-variables': ^2.0.0
       '@itwin/presentation-common': ^4.0.0-dev.44
       '@testing-library/react': ^12.0.0
       '@testing-library/react-hooks': ^7.0.2
@@ -695,8 +695,8 @@ importers:
       '@itwin/core-react': 4.0.0-dev.12_0ad1e3ab40e3292199910d387bc00cfa
       '@itwin/eslint-plugin': 4.0.0-dev.30_eslint@7.32.0+typescript@4.4.4
       '@itwin/imodel-components-react': 4.0.0-dev.12_1d21a61f59d07ed11e2d3df5862b839b
-      '@itwin/itwinui-css': 0.63.2
-      '@itwin/itwinui-react': 1.46.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.6.1_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-variables': 2.0.0
       '@itwin/presentation-common': 4.0.0-dev.46_abb2d23be0ee3a87ee53c61ca4d591ad
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
       '@testing-library/react-hooks': 7.0.2_react-dom@17.0.2+react@17.0.2
