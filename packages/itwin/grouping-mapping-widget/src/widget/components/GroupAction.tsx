@@ -91,7 +91,6 @@ export const GroupAction = (props: GroupActionProps) => {
     if (groups.length > 0) {
       if (showGroupColor) {
         await visualizeGroupColors(iModelConnection, groups, groups, hiddenGroupsIds, hilitedElementsQueryCache);
-        return;
       } else {
         clearOverriddenElements();
       }
