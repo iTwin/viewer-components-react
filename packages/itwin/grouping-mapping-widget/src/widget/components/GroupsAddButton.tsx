@@ -7,7 +7,7 @@ import { Button, DropdownMenu, MenuItem, ProgressRadial } from "@itwin/itwinui-r
 import React from "react";
 import type { GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 
-interface GroupDropdownMenuProps {
+export interface GroupsDropdownMenuProps {
   isLoadingQuery: boolean;
   groupUIs: GroupingCustomUI[];
   onClickAddGroup: (type: string) => void;
@@ -17,7 +17,7 @@ export const GroupsAddButton = ({
   isLoadingQuery,
   groupUIs,
   onClickAddGroup,
-}: GroupDropdownMenuProps) => (
+}: GroupsDropdownMenuProps) => (
   <DropdownMenu
     className="gmw-custom-ui-dropdown"
     disabled={isLoadingQuery}
@@ -27,7 +27,6 @@ export const GroupsAddButton = ({
           key={index}
           onClick={() => onClickAddGroup(p.name)}
           icon={p.icon}
-          className="gmw-menu-item"
           data-testid={`gmw-add-${index}`}
         >
           {p.displayLabel}

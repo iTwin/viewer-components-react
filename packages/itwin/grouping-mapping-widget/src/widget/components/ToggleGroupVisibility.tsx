@@ -1,7 +1,12 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import { ToggleSwitch } from "@itwin/itwinui-react";
+import "./ToggleGroupVisibility.scss";
 import React from "react";
 
-interface ToggleGroupVisibilityProps {
+export interface ToggleGroupVisibilityProps {
   isLoadingQuery: boolean;
   showGroupColor: boolean;
   setShowGroupColor: (value: ((prevState: boolean) => boolean) | boolean) => void;

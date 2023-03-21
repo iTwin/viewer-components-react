@@ -23,9 +23,6 @@
       margin-right: $iui-sm;
       margin-left: auto;
       flex-wrap: wrap;
-      .gmw-toggle {
-        margin-right: $iui-xs;
-      }
     }
   }
 
@@ -63,8 +60,4 @@
   justify-content: flex-start;
   padding: 0 $iui-component-padding-horizontal;
   gap: $iui-s;
-}
-
-.gmw-custom-ui-dropdown {
-  width: $iui-3xl + $iui-xl;
 }
