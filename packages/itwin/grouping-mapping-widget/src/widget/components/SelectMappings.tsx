@@ -20,6 +20,10 @@ import { handleError } from "./utils";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
+const defaultDisplayStrings = {
+  mappings: "Mappings",
+};
+
 const fetchMappings = async (
   setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
   iModelId: string,
@@ -44,6 +48,7 @@ interface SelectMappingsProps {
   onSelect: (selectedMappings: IMappingTyped[]) => void;
   onCancel: () => void;
   backFn: () => void;
+  displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
 const SelectMappings = ({
@@ -51,6 +56,7 @@ const SelectMappings = ({
   onSelect,
   onCancel,
   backFn,
+  displayStrings: userDisplayStrings,
 }: SelectMappingsProps) => {
   const { getAccessToken } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -62,6 +68,8 @@ const SelectMappings = ({
     void fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient);
   }, [getAccessToken, mappingClient, iModelId, setIsLoading]);
 
+  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
+
   const mappingsColumns = useMemo(
     () => [
       {
@@ -69,7 +77,7 @@ const SelectMappings = ({
         columns: [
           {
             id: "mappingName",
-            Header: "Mapping Name",
+            Header: `${displayStrings.mappings}`,
             accessor: "mappingName",
             Filter: tableFilters.TextFilter(),
           },
@@ -99,7 +107,7 @@ const SelectMappings = ({
         data={mappings}
         columns={mappingsColumns}
         className='gmw-select-mapping-table'
-        emptyTableContent='No Mappings available.'
+        emptyTableContent={`No ${displayStrings.mappings} available.`}
         isSortable
         isSelectable
         isLoading={isLoading}

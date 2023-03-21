@@ -12,16 +12,21 @@ import SelectMappings from "./SelectMappings";
 import type { IMappingTyped } from "./Mapping";
 import ConfirmMappingImport from "./ConfirmMappingsImport";
 
+const defaultDisplayStrings = {
+  mappings: "Mappings",
+};
 interface MappingImportWizardModalProps {
   show: boolean;
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
   onFinish: () => Promise<void>;
+  displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
 export const MappingImportWizardModal = ({
   show,
   setShow,
   onFinish,
+  displayStrings: userDisplayStrings,
 }: MappingImportWizardModalProps) => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
@@ -29,18 +34,20 @@ export const MappingImportWizardModal = ({
   const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
   const [importing, setImporting] = useState<boolean>(false);
 
+  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
+
   const steps = useRef<StepProperties[]>([
     {
       name: "Select source project",
-      description: "Select the source project to bring your mappings from.",
+      description: `Select the source project to bring your ${displayStrings.mappings} from.`,
     },
     {
       name: "Select iModel",
       description: "Select an iModel within the project you have selected.",
     },
     {
-      name: "Select Mapping",
-      description: "Select one or more mappings to import.",
+      name: `Select ${displayStrings.mappings}`,
+      description: `Select one or more ${displayStrings.mappings} to import.`,
     },
     {
       name: "Rename & Confirm",
@@ -57,7 +64,7 @@ export const MappingImportWizardModal = ({
 
   return (
     <Modal
-      title='Import Mappings'
+      title={`Import ${displayStrings.mappings}`}
       modalRootId='grouping-mapping-widget'
       isOpen={show}
       closeOnEsc={false}
@@ -118,6 +125,7 @@ export const MappingImportWizardModal = ({
                       }}
                       onCancel={onClose}
                       backFn={() => setCurrentStep(currentStep - 1)}
+                      displayStrings={displayStrings}
                     />
                   </div>
                   {currentStep === 3 && (
@@ -133,6 +141,7 @@ export const MappingImportWizardModal = ({
                         await onClose();
                         setImporting(false);
                       }}
+                      displayStrings={displayStrings}
                     />
                   )}
                 </>
