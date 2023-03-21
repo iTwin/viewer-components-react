@@ -87,6 +87,8 @@ export const GroupAction = (props: GroupActionProps) => {
 
   const displayStrings = { ...defaultDisplayStrings, ...props.displayStrings };
 
+  useEffect(()=>setQueryGenerationType(props.queryGenerationType), [props.queryGenerationType]);
+
   const resetView = async () => {
     if (groups.length > 0) {
       if (showGroupColor) {
