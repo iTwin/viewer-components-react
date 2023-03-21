@@ -70,7 +70,10 @@ export const GroupPropertyTable = ({
                     onClickModify ? [
                       <MenuItem
                         key={0}
-                        onClick={() => onClickModify(value.row.original)}
+                        onClick={() => {
+                          onClickModify(value.row.original);
+                          close();
+                        }}
                         icon={<SvgEdit />}
                       >
                         Modify

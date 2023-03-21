@@ -68,10 +68,12 @@ export const CalculatedPropertyTable = ({
                         ? [
                           <MenuItem
                             key={0}
-                            onClick={() =>
+                            onClick={() => {
                               onClickModify(
                                 value.row.original
-                              )
+                              );
+                              close();
+                            }
                             }
                             icon={<SvgEdit />}
                           >

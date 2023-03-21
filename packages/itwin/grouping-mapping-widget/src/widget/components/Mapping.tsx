@@ -173,6 +173,7 @@ export const Mappings = ({
                             key={0}
                             onClick={() => {
                               onClickMappingModify(mapping);
+                              close();
                             }}
                             icon={<SvgEdit />}
                           >
