@@ -38,7 +38,7 @@ const createPropertyDataProvider = (
   dataProvider.isNestedPropertyCategoryGroupingEnabled = true;
   return dataProvider;
 };
-interface DivDimensions {
+interface ContainerDimensions {
   width: number;
   height: number;
 }
@@ -52,7 +52,7 @@ export const GroupQueryBuilderCustomUI = ({
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
-  const [size, setSize] = useState<DivDimensions>({ width: 0, height: 0 });
+  const [size, setSize] = useState<ContainerDimensions>({ width: 0, height: 0 });
   const [dataProvider, setDataProvider] =
     useState<PresentationPropertyDataProvider | undefined>(undefined);
   const [currentPropertyList, setCurrentPropertyList] = useState<PropertyRecord[]>([]);
