@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Added support to override Mappings title in Mappings component.",
+      "comment": "Added support to override Mappings name in Mappings component.",
       "type": "minor"
     }
   ],
