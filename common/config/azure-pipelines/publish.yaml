@@ -3,6 +3,6 @@ trigger: none
 pool:
   vmImage: "ubuntu-latest"
 variables:
-  NodeVersion: 14
+  NodeVersion: 16.x
 steps:
   - template: templates/build-publish.yaml

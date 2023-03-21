@@ -10,7 +10,9 @@
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
   "gitPolicy": {
-    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
+    "allowedEmailRegExps": [
+      "[^@]+@users\\.noreply\\.github\\.com"
+    ],
     "sampleEmail": "mrexample@users.noreply.github.com"
   },
   "repository": {
@@ -67,6 +69,16 @@
       "packageName": "@itwin/infrastructure-iot-react",
       "projectFolder": "packages/itwin/infrastructure-iot",
       "versionPolicyName": "infrastructure-iot"
+    },
+    {
+      "packageName": "@itwin/ec3-widget-react",
+      "projectFolder": "packages/itwin/ec3-widget",
+      "versionPolicyName": "ec3-widget"
+    },
+    {
+      "packageName": "@itwin/map-layers",
+      "projectFolder": "packages/itwin/map-layers",
+      "versionPolicyName": "itwin-map-layers"
     }
   ]
 }

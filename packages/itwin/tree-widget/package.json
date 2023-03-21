@@ -1,6 +1,6 @@
 {
   "name": "@itwin/tree-widget-react",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "Tree Widget React",
   "keywords": [
     "Bentley",
@@ -37,6 +37,8 @@
     "rebuild": "npm run clean && npm run build"
   },
   "dependencies": {
+    "@itwin/itwinui-icons-react": "^1.8.0",
+    "@itwin/itwinui-react": "^1.40.1",
     "classnames": "^2.3.1",
     "i18next": "^10.2.2",
     "react-redux": "^7.2.0",

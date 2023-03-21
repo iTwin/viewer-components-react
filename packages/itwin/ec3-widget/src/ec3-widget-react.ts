@@ -2,19 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
-
-.tree-widget-header-tree-search-bar {
-  margin-bottom: $uicore-s;
-}
-
-.tree-widget-header-tree-toolbar-icon {
-  color: $buic-icon-color;
-}
-
-.tree-widget-search-bar-button-container {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  z-index: 1;
-}
+/** UI Provider for iTwin Viewer Applications */
+export * from "./widget/EC3Widget";
+export { handleEC3AuthCallback } from "./components/EC3/EC3AuthCallback";
+export { EC3ConfigProps } from "./components/EC3/EC3Config";
+export { GetAccessTokenFn } from "./components/api/APIContext";
