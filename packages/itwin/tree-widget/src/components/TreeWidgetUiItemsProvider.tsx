@@ -5,15 +5,13 @@
 /* eslint-disable react/display-name */
 
 import React from "react";
-import { AbstractZoneLocation } from "@itwin/appui-abstract";
-import { CommonWidgetProps, StagePanelLocation, StagePanelSection, StageUsage, UiFramework, UiItemsProvider } from "@itwin/appui-react";
+import { Widget, StagePanelLocation, StagePanelSection, StageUsage, UiItemsProvider } from "@itwin/appui-react";
 import { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
-import { CategoriesTreeId, ModelsTreeId, SpatialContainmentTreeId, TreeWidgetOptions } from "../types";
+import { CategoriesTreeId, ModelsTreeId, TreeWidgetOptions } from "../types";
 import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
 import { ClassGroupingOption } from "./trees/Common";
 import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
-import { SpatialTreeComponent } from "./trees/spatial-tree/SpatialTreeComponent";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
 
 export const TreeWidgetId = "tree-widget-react:trees";
@@ -26,18 +24,13 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
     _stageId: string,
     stageUsage: string,
     location: StagePanelLocation,
-    section?: StagePanelSection,
-    // eslint-disable-next-line deprecation/deprecation
-    zoneLocation?: AbstractZoneLocation,
-  ): ReadonlyArray<CommonWidgetProps> {
-    const widgets: CommonWidgetProps[] = [];
-    const preferredLocation = this._treeWidgetOptions?.defaultPanelLocation ?? StagePanelLocation.Right;
-    const preferredPanelSection = this._treeWidgetOptions?.defaultPanelSection ?? StagePanelSection.Start;
+    section?: StagePanelSection
+  ): ReadonlyArray<Widget> {
+    const widgets: Widget[] = [];
     if (
-      // eslint-disable-next-line deprecation/deprecation
-      (!section && stageUsage === StageUsage.General && zoneLocation === AbstractZoneLocation.CenterRight) ||
-      // eslint-disable-next-line deprecation/deprecation
-      (stageUsage === StageUsage.General && location === preferredLocation && section === preferredPanelSection && UiFramework.uiVersion !== "1")
+      location === StagePanelLocation.Left &&
+      section === StagePanelSection.Start &&
+      stageUsage === StageUsage.General
     ) {
       const trees: SelectableContentDefinition[] = [];
 
@@ -68,23 +61,6 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
         });
       }
 
-      if (!this._treeWidgetOptions?.hideTrees?.spatialTree) {
-        trees.push({
-          label: TreeWidget.translate("containment"),
-          id: SpatialContainmentTreeId,
-          render: () => (
-            <SpatialTreeComponent
-              enableElementsClassGrouping={
-                this._treeWidgetOptions?.enableElementsClassGrouping
-                  ? ClassGroupingOption.YesWithCounts
-                  : ClassGroupingOption.No
-              }
-              {...this._treeWidgetOptions?.spatialTreeProps}
-            />
-          ),
-        });
-      }
-
       if (this._treeWidgetOptions?.additionalTrees) {
         trees.push(...this._treeWidgetOptions.additionalTrees);
       }
@@ -100,9 +76,8 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       widgets.push({
         id: TreeWidgetId,
         label: TreeWidget.translate("treeview"),
-        getWidgetContent: () => <TreeWidgetComponent trees={trees} />,
+        content: <TreeWidgetComponent trees={trees} />,
         icon: "icon-hierarchy-tree",
-        restoreTransientState: () => true,
         priority: this._treeWidgetOptions?.defaultTreeWidgetPriority,
       });
     }

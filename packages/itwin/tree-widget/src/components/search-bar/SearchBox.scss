@@ -5,25 +5,25 @@
 @import "~@itwin/core-react/lib/cjs/core-react/index";
 
 .tree-widget-searchbox {
-  @include uicore-font-family;
+  font-family: var(--iui-font-sans);
   display: flex;
   align-items: center;
   position: relative;
   //default values (height, width, font-size, color)
   height: 34px;
   width: 12em;
-  font-size: $uicore-font-size;
+  font-size: 14px;
   color: $buic-text-color-reverse;
   background: $buic-background-control;
   border: 1px solid $buic-inputs-border;
 
   input {
-    padding: 0 $uicore-s;
+    padding: 0 8px;
     height: 100%;
     width: 100%;
     flex: 1;
     background: $buic-background-control;
-    margin-right: $uicore-s;
+    margin-right: 8px;
     color: $buic-text-color;
     font-size: inherit;
     box-sizing: border-box;
@@ -56,7 +56,7 @@
     .searchbox-stepping-count {
       font-size: 12px;
       color: $buic-text-color;
-      margin-right: $uicore-xs;
+      margin-right: 4px;
       position: relative;
       word-wrap: none;
     }
@@ -64,7 +64,7 @@
     .searchbox-separator {
       height: 75%;
       width: 1px;
-      margin: 0 $uicore-s;
+      margin: 0 8px;
       background: $buic-inputs-border;
     }
   }
@@ -77,7 +77,7 @@
     justify-content: center;
     overflow: hidden;
     color: $buic-icon-color;
-    font-size: $uicore-font-size-small;
+    font-size: 12px;
     cursor: pointer;
 
     &:hover {
