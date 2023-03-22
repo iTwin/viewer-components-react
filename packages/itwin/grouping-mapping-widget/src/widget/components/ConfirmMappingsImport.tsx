@@ -18,6 +18,10 @@ import { handleError } from "./utils";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
+const defaultDisplayStrings = {
+  mappings: "Mappings",
+};
+
 interface ConfirmMappingImportProps {
   sourceiModelId: string;
   selectedMappings: IMappingTyped[];
@@ -27,6 +31,7 @@ interface ConfirmMappingImportProps {
   backFn: () => void;
   onCancel: () => void;
   onFinish: () => void;
+  displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
 const ConfirmMappingImport = ({
@@ -38,6 +43,7 @@ const ConfirmMappingImport = ({
   backFn,
   onCancel,
   onFinish,
+  displayStrings: userDisplayStrings,
 }: ConfirmMappingImportProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -46,6 +52,8 @@ const ConfirmMappingImport = ({
   const [currentlyImporting, setCurrentlyImporting] = useState<string>("");
   const [validator, showValidationMessage] = useValidator();
   const [errored, setErrored] = useState<boolean>(false);
+
+  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
 
   useEffect(() => {
     setSelectedMappings((selectedMappings) =>
@@ -105,17 +113,17 @@ const ConfirmMappingImport = ({
                 !errored ? importCount !== selectedMappings.length ? (
                   <>
                     <Text variant='title'>Importing</Text>
-                    <Text>We are currently importing the mappings.</Text>
+                    <Text>{`We are currently importing the ${displayStrings.mappings.toLocaleLowerCase()}.`}</Text>
                   </>
                 ) : (
                   <>
                     <Text variant='title'>Done!</Text>
-                    <Text>Your mapping(s) are ready.</Text>
+                    <Text>{`Your imported ${displayStrings.mappings.toLocaleLowerCase()} are ready.`}</Text>
                   </>
                 ) :
                   <>
                     <Text variant='title'>Error!</Text>
-                    <Text>Sorry, there was an error importing some or all mappings.</Text>
+                    <Text>{`Sorry, there was an error importing some or all ${displayStrings.mappings}.`}</Text>
                   </>}
             </div>
             <ProgressLinear
@@ -163,7 +171,7 @@ const ConfirmMappingImport = ({
           <div className='gmw-mapping-rename-container'>
             <div className='gmw-mapping-row-header-container'>
               <div className='gmw-mapping-row'>
-                <Text variant='leading'>Mapping </Text>
+                <Text variant='leading'>{displayStrings.mappings}</Text>
                 <Text variant='leading'>Description</Text>
               </div>
             </div>
