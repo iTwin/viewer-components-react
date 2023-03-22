@@ -16,8 +16,8 @@
   background-color: transparent;
   outline: none;
   box-shadow: none;
-  font-family: $uicore-font-family;
-  font-size: $uicore-font-size;
+  font-family: var(--iui-font-sans);
+  font-size: 14px;
   text-decoration: none;
   cursor: pointer;
   transition: color 0.25s;
@@ -58,8 +58,8 @@
   align-items: center;
   justify-content: center;
   height: 32px;
-  font-family: $uicore-font-family;
-  font-size: $uicore-font-size;
+  font-family: var(--iui-font-sans);
+  font-size: 14px;
   color: $buic-icon-color;
   margin-left: 5px;
 
