@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Tue, 07 Mar 2023 15:47:41 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Mar 2023 15:12:36 GMT and should not be manually modified.
+
+## 0.11.0
+Thu, 23 Mar 2023 15:12:36 GMT
+
+### Minor changes
+
+- Added support to override Mappings name in Mappings component.
 
 ## 0.10.0
 Tue, 07 Mar 2023 15:47:41 GMT

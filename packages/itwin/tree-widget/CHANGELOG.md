@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 20 Mar 2023 14:48:35 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Mar 2023 15:12:36 GMT and should not be manually modified.
+
+## 0.7.1
+Thu, 23 Mar 2023 15:12:36 GMT
+
+### Patches
+
+- 'ModelsTree': Restored 'HideAll' button behavior to hide only models
 
 ## 0.7.0
 Mon, 20 Mar 2023 14:48:35 GMT
