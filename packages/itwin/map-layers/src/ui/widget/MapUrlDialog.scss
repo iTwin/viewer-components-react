@@ -3,11 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/core-react/lib/cjs/core-react/index";
-@import "~@itwin/itwinui-css/scss/style/typography";
 
 $divider-color: $buic-background-toolbutton-stroke;
 $hovered-icon-color: $buic-foreground-primary-tone;
-
+$default-font-size: --iui-font-size-1;
 
 .map-layer-url-dialog {
   z-Index: 21000;
@@ -44,7 +43,7 @@ $hovered-icon-color: $buic-foreground-primary-tone;
   }
 
   .map-layer-source-label {
-    font-size: $iui-font-size;
+    font-size: $default-font-size;
     color: $buic-foreground-body;
     padding-right: 6px;
     flex: initial;
