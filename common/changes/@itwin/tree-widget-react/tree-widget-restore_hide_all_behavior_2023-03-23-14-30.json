@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "'ModelsTree': Restored 'HideAll' button behavior to hide only models",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/tree-widget-react"
+}
