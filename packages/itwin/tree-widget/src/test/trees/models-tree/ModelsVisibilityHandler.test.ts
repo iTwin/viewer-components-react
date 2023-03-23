@@ -8,7 +8,7 @@ import * as sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent, Id64String, using } from "@itwin/core-bentley";
-import { QueryRowFormat } from "@itwin/core-common";
+import { ECSqlReader, QueryRowFormat, QueryRowProxy } from "@itwin/core-common";
 import {
   IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility, SpatialViewState, Viewport, ViewState, ViewState3d,
 } from "@itwin/core-frontend";
@@ -94,21 +94,38 @@ describe("ModelsVisibilityHandler", () => {
     subjectModels: Map<Id64String, Array<{ id: Id64String, content?: string }>>;
   }
 
+  function setUpQueryReader(rows: QueryRowProxy[], reader: moq.IMock<ECSqlReader>) {
+    reader.reset();
+    for (const row of rows) {
+      reader.setup(async (x) => x.step()).returns(async () => true);
+      reader.setup((x) => x.current).returns(() => row);
+    }
+    reader.setup(async (x) => x.step()).returns(async () => false);
+  }
+
+  const subjectQueryReaderMock = moq.Mock.ofType<ECSqlReader>();
+  const elementQueryReaderMock = moq.Mock.ofType<ECSqlReader>();
+
   const mockSubjectModelIds = (props: SubjectModelIdsMockProps) => {
-    props.imodelMock.setup((x) => x.query(moq.It.is((q: string) => (-1 !== q.indexOf("FROM bis.Subject"))), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }))
-      .returns(async function* () {
-        const list = new Array<{ id: Id64String, parentId: Id64String }>();
-        props.subjectsHierarchy.forEach((ids, parentId) => ids.forEach((id) => list.push({ id, parentId })));
-        while (list.length)
-          yield list.shift();
-      });
-    props.imodelMock.setup((x) => x.query(moq.It.is((q: string) => (-1 !== q.indexOf("FROM bis.InformationPartitionElement"))), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }))
-      .returns(async function* () {
-        const list = new Array<{ id: Id64String, parentId: Id64String, content?: string }>();
-        props.subjectModels.forEach((modelInfos, subjectId) => modelInfos.forEach((modelInfo) => list.push({ id: modelInfo.id, parentId: subjectId, content: modelInfo.content })));
-        while (list.length)
-          yield list.shift();
-      });
+    props.imodelMock.setup((x) => x.createQueryReader(moq.It.is((q: string) => (-1 !== q.indexOf("FROM bis.Subject"))), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }))
+      .returns(() => subjectQueryReaderMock.object);
+
+    props.imodelMock.setup((x) => x.createQueryReader(moq.It.is((q: string) => (-1 !== q.indexOf("FROM bis.InformationPartitionElement"))), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }))
+      .returns(() => elementQueryReaderMock.object);
+
+    const subjectQueryRows: QueryRowProxy[] = [];
+    props.subjectsHierarchy.forEach((ids, parentId) => ids.forEach((id) => subjectQueryRows.push({ toRow: () => ({ id, parentId }), toArray: () => [], getMetaData: () => [] })));
+
+    setUpQueryReader(subjectQueryRows, subjectQueryReaderMock);
+
+    const elementQueryRows: QueryRowProxy[] = [];
+    props.subjectModels.forEach((modelInfos, subjectId) => modelInfos.forEach((modelInfo) => elementQueryRows.push({
+      toRow: () => ({ id: modelInfo.id, parentId: subjectId, content: modelInfo.content }),
+      toArray: () => [],
+      getMetaData: () => [],
+    })));
+
+    setUpQueryReader(elementQueryRows, elementQueryReaderMock);
   };
 
   describe("constructor", () => {
@@ -295,8 +312,8 @@ describe("ModelsVisibilityHandler", () => {
         const vpMock = mockViewport({ viewState: viewStateMock.object });
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           await Promise.all([handler.getVisibilityStatus(node, node.__key), handler.getVisibilityStatus(node, node.__key)]);
-          // expect the `query` to be called only twice (once for subjects and once for models)
-          imodelMock.verify((x) => x.query(moq.It.isAnyString(), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }), moq.Times.exactly(2));
+          // expect the `step` to be called only twice (once for subjects and once for models)
+          subjectQueryReaderMock.verify((x) => x.step(), moq.Times.exactly(2));
         });
       });
 

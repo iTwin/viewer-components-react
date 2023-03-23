@@ -417,21 +417,31 @@ export class SubjectModelIdsCache {
   }
 
   private async initSubjectModels() {
-    const querySubjects = (): AsyncIterableIterator<{ id: Id64String, parentId?: Id64String, targetPartitionId?: Id64String }> => {
+    const querySubjects = async () => {
       const subjectsQuery = `
         SELECT ECInstanceId id, Parent.Id parentId, json_extract(JsonProperties, '$.Subject.Model.TargetPartition') targetPartitionId
         FROM bis.Subject
       `;
-      return this._imodel.query(subjectsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
+      const reader = this._imodel.createQueryReader(subjectsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
+      const readerSubjects = [];
+      while (await reader.step()) {
+        readerSubjects.push(reader.current.toRow());
+      }
+      return readerSubjects;
     };
-    const queryModels = (): AsyncIterableIterator<{ id: Id64String, parentId: Id64String }> => {
+    const queryModels = async () => {
       const modelsQuery = `
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM bis.InformationPartitionElement p
         INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
         WHERE NOT m.IsPrivate
       `;
-      return this._imodel.query(modelsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
+      const reader = this._imodel.createQueryReader(modelsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
+      const readerModels = [];
+      while (await reader.step()) {
+        readerModels.push(reader.current.toRow());
+      }
+      return readerModels;
     };
 
     function pushToMap<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue) {
@@ -445,26 +455,34 @@ export class SubjectModelIdsCache {
 
     this._subjectsHierarchy = new Map();
     const targetPartitionSubjects = new Map<Id64String, Id64String[]>();
-    for await (const subject of querySubjects()) {
+    const subjects = await querySubjects();
+    for (const subject of subjects) {
       // istanbul ignore else
-      if (subject.parentId)
-        pushToMap(this._subjectsHierarchy, subject.parentId, subject.id);
-      // istanbul ignore if
-      if (subject.targetPartitionId)
-        pushToMap(targetPartitionSubjects, subject.targetPartitionId, subject.id);
+      if (subject.id) {
+        // istanbul ignore else
+        if (subject.parentId)
+          pushToMap(this._subjectsHierarchy, subject.parentId, subject.id);
+        // istanbul ignore if
+        if (subject.targetPartitionId)
+          pushToMap(targetPartitionSubjects, subject.targetPartitionId, subject.id);
+      }
     }
 
     this._subjectModels = new Map();
-    for await (const model of queryModels()) {
-      // istanbul ignore next
-      const subjectIds = targetPartitionSubjects.get(model.id) ?? [];
+    const models = await queryModels();
+    for (const model of models) {
       // istanbul ignore else
-      if (!subjectIds.includes(model.parentId))
-        subjectIds.push(model.parentId);
+      if (model.id) {
+        // istanbul ignore next
+        const subjectIds = targetPartitionSubjects.get(model.id) ?? [];
+        // istanbul ignore else
+        if (!subjectIds.includes(model.parentId))
+          subjectIds.push(model.parentId);
 
-      subjectIds.forEach((subjectId) => {
-        pushToMap(this._subjectModels!, subjectId, model.id);
-      });
+        subjectIds.forEach((subjectId) => {
+          pushToMap(this._subjectModels!, subjectId, model.id);
+        });
+      }
     }
   }
 
@@ -560,10 +578,11 @@ async function createGroupedElementsInfo(imodel: IModelConnection, rulesetId: st
 
   let modelId, categoryId;
   const query = `SELECT Model.Id AS modelId, Category.Id AS categoryId FROM bis.GeometricElement3d WHERE ECInstanceId = ? LIMIT 1`;
-  for await (const modelAndCategoryIds of imodel.query(query, QueryBinder.from([elementId.value]), { rowFormat: QueryRowFormat.UseJsPropertyNames })) {
-    modelId = modelAndCategoryIds.modelId;
-    categoryId = modelAndCategoryIds.categoryId;
-    break;
+  const reader = imodel.createQueryReader(query, QueryBinder.from([elementId.value]), { rowFormat: QueryRowFormat.UseJsPropertyNames });
+  if (await reader.step()) {
+    const row = reader.current.toRow();
+    modelId = row.modelId;
+    categoryId = row.categoryId;
   }
   return { modelId, categoryId, elementIds: groupedElementIdsContainer };
 }

@@ -5,7 +5,7 @@
 /* eslint-disable react/display-name */
 
 import React from "react";
-import { Widget, StagePanelLocation, StagePanelSection, StageUsage, UiItemsProvider } from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, StageUsage, UiItemsProvider, Widget } from "@itwin/appui-react";
 import { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
 import { CategoriesTreeId, ModelsTreeId, TreeWidgetOptions } from "../types";
