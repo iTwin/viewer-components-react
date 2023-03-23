@@ -137,7 +137,7 @@ export const GroupQueryBuilderCustomUI = ({
         <Button
           startIcon={<SvgWindowCollapse />}
           size="small"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => setIsExpanded((e) => !e)}
         >
           Close Properties
         </Button>
@@ -149,12 +149,12 @@ export const GroupQueryBuilderCustomUI = ({
           Reset
         </Button>
       </div>
-    </Surface>
+    </Surface >
   ) : (
     <div className="gmw-expand-selection">
       <Button
         endIcon={<SvgWindowPopout />}
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => setIsExpanded((e) => !e)}
       >
         Open Properties
       </Button>
