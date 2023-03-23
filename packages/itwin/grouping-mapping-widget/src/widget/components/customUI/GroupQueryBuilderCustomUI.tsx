@@ -24,7 +24,8 @@ import { ResizableContainerObserver } from "@itwin/core-react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
 import { PropertyAction } from "../PropertyAction";
-import { Button, Text } from "@itwin/itwinui-react";
+import { Button, Surface, Text } from "@itwin/itwinui-react";
+import { SvgWindowCollapse, SvgWindowPopout } from "@itwin/itwinui-icons-react";
 
 const createPropertyDataProvider = (
   keys: KeySet,
@@ -58,6 +59,7 @@ export const GroupQueryBuilderCustomUI = ({
   const [currentPropertyList, setCurrentPropertyList] = useState<PropertyRecord[]>([]);
   const [selectionKeySet, setSelectionKeyset] = useState<KeySet>(new KeySet());
   const [queryBuilder, setQueryBuilder] = useState<QueryBuilder | undefined>();
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     const onSelectionChanged = async (
@@ -110,13 +112,13 @@ export const GroupQueryBuilderCustomUI = ({
     []
   );
 
-  return (
-    <div className="gmw-select-query-generator-container">
+  return isExpanded ? (
+    <Surface className="gmw-select-query-generator-container">
       {!dataProvider || selectionKeySet.size === 0 ? (
         <div className="gmw-select-element-hint">
           <Text>No elements have been selected.</Text>
         </div>
-      ) :
+      ) : (
         <>
           <div className="gmw-select-property-grid">
             <ResizableContainerObserver onResize={resize} />
@@ -127,20 +129,35 @@ export const GroupQueryBuilderCustomUI = ({
                 height={size.height}
                 actionButtonRenderers={actionButtonRenderers}
               />
-
             </PropertyGridWrapperContext.Provider>
           </div>
-          <div className="gmw-select-reset-button">
-            <Button
-              styleType="default"
-              size="small"
-              onClick={onClickResetButton}
-            >
-              Reset
-            </Button>
-          </div>
         </>
-      }
+      )}
+      <div className="gmw-select-footer">
+        <Button
+          startIcon={<SvgWindowCollapse />}
+          size="small"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          Close Properties
+        </Button>
+        <Button
+          styleType="default"
+          size="small"
+          onClick={onClickResetButton}
+        >
+          Reset
+        </Button>
+      </div>
+    </Surface>
+  ) : (
+    <div className="gmw-expand-selection">
+      <Button
+        endIcon={<SvgWindowPopout />}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        Open Properties
+      </Button>
     </div>
   );
 };
