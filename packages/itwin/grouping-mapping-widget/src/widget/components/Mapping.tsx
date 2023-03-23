@@ -38,10 +38,14 @@ import type { CreateTypeFromInterface } from "../utils";
 
 export type IMappingTyped = CreateTypeFromInterface<Mapping>;
 
+const defaultDisplayStrings = {
+  mappings: "Mappings",
+};
 export interface MappingsProps {
   onClickAddMapping?: () => void;
   onClickMappingTitle?: (mapping: Mapping) => void;
   onClickMappingModify?: (mapping: Mapping) => void;
+  displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
 const fetchMappings = async (
@@ -84,6 +88,7 @@ export const Mappings = ({
   onClickAddMapping,
   onClickMappingTitle,
   onClickMappingModify,
+  displayStrings: userDisplayStrings,
 }: MappingsProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
@@ -96,6 +101,7 @@ export const Mappings = ({
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
+  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
 
   useEffect(() => {
     void fetchMappings(
@@ -136,7 +142,7 @@ export const Mappings = ({
               </Button>
             }
             <IconButton
-              title="Import Mappings"
+              title={`Import ${displayStrings.mappings}`}
               onClick={() => setShowImportModal(true)}
             >
               <SvgImport />
@@ -154,7 +160,7 @@ export const Mappings = ({
         {isLoading ? (
           <LoadingOverlay />
         ) : mappings.length === 0 ? (
-          <EmptyMessage message="No Mappings available." />
+          <EmptyMessage message={`No ${displayStrings.mappings} available.`} />
         ) : (
           <div className="gmw-mappings-list">
             {mappings
@@ -252,6 +258,7 @@ export const Mappings = ({
         show={showImportModal}
         setShow={setShowImportModal}
         onFinish={refresh}
+        displayStrings={displayStrings}
       />
     </>
   );

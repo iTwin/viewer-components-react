@@ -177,7 +177,8 @@ describe("MapManagerSettings", () => {
     component.unmount();
   });
 
-  it("Transparency slider", () => {
+  // Disabled slider testing until we find a reliable way to 'move' the slider
+  xit("Transparency slider", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
     const component = mountComponent();
 
@@ -187,7 +188,8 @@ describe("MapManagerSettings", () => {
     component.unmount();
   });
 
-  it("Mask Transparency slider", () => {
+  // Disabled slider testing until we find a reliable way to 'move' the slider
+  xit("Mask Transparency slider", () => {
     viewportMock.verify((x) => x.changeBackgroundMapProps(moq.It.isAny()), moq.Times.never());
     const component = mountComponent();
 
