@@ -103,12 +103,12 @@
     "xmlhttprequest": "^1.8.0"
   },
   "peerDependencies": {
-    "@itwin/appui-abstract": "4.0.0-dev.52",
-    "@itwin/appui-react": "4.0.0-dev.12",
-    "@itwin/components-react": "4.0.0-dev.12",
-    "@itwin/core-frontend": "4.0.0-dev.52",
-    "@itwin/core-react": "4.0.0-dev.12",
-    "@itwin/presentation-components": "4.0.0-dev.24",
+    "@itwin/appui-abstract": "^4.0.0-dev.52",
+    "@itwin/appui-react": "^4.0.0-dev.12",
+    "@itwin/components-react": "^4.0.0-dev.12",
+    "@itwin/core-frontend": "^4.0.0-dev.52",
+    "@itwin/core-react": "^4.0.0-dev.12",
+    "@itwin/presentation-components": "^4.0.0-dev.24",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   }

@@ -28,7 +28,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   ): ReadonlyArray<Widget> {
     const widgets: Widget[] = [];
     if (
-      location === StagePanelLocation.Left &&
+      location === StagePanelLocation.Right &&
       section === StagePanelSection.Start &&
       stageUsage === StageUsage.General
     ) {
