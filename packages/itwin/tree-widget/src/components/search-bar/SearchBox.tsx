@@ -28,10 +28,6 @@ export interface SearchBoxProps extends CommonProps {
   onIconClick?: () => void;
   /** Filtering is cleared after everything's loaded */
   onFilterStart: (newFilter: string) => void;
-  /** Filtering is cleared after everything's loaded */
-  onFilterClear?: () => void;
-  /** Filtering is cleared after everything's loaded */
-  onFilterCancel?: () => void;
   /** Tells the component if parent component is still handling the filtering */
   filteringInProgress?: boolean;
   /** Total number of results/entries */
