@@ -128,7 +128,6 @@ export const GroupQueryBuilderCustomUI = ({
                   height={size.height}
                   actionButtonRenderers={actionButtonRenderers}
                 />
-
               </PropertyGridWrapperContext.Provider>
             </div>
           </div>
