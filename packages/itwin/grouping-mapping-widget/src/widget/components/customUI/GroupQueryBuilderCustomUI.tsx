@@ -110,7 +110,6 @@ export const GroupQueryBuilderCustomUI = ({
     []
   );
 
-  console.log(size.width, size.height);
   return (
     <div className="gmw-select-query-generator-container">
       {!dataProvider || selectionKeySet.size === 0 ? (
