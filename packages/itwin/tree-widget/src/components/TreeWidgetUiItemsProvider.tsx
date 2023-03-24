@@ -27,9 +27,11 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
     section?: StagePanelSection
   ): ReadonlyArray<Widget> {
     const widgets: Widget[] = [];
+    const preferredLocation = this._treeWidgetOptions?.defaultPanelLocation ?? StagePanelLocation.Right;
+    const preferredPanelSection = this._treeWidgetOptions?.defaultPanelSection ?? StagePanelSection.Start;
     if (
-      location === StagePanelLocation.Right &&
-      section === StagePanelSection.Start &&
+      location === preferredLocation &&
+      section === preferredPanelSection &&
       stageUsage === StageUsage.General
     ) {
       const trees: SelectableContentDefinition[] = [];

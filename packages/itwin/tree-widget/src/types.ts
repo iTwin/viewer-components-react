@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { CategoryTreeProps } from "./components/trees/category-tree/CategoriesTree";
@@ -53,6 +54,8 @@ export const CategoriesTreeId = "categories-tree";
 export const SpatialContainmentTreeId = "spatial-containment-tree";
 
 export interface TreeWidgetOptions {
+  defaultPanelLocation?: StagePanelLocation;
+  defaultPanelSection?: StagePanelSection;
   defaultTreeWidgetPriority?: number;
   enableElementsClassGrouping?: boolean;
   additionalTrees?: SelectableContentDefinition[];

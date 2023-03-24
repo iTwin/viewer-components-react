@@ -445,8 +445,7 @@ export class SubjectModelIdsCache {
 
     this._subjectsHierarchy = new Map();
     const targetPartitionSubjects = new Map<Id64String, Id64String[]>();
-    const subjects = await querySubjects();
-    for (const subject of subjects) {
+    for (const subject of await querySubjects()) {
       // istanbul ignore else
       if (subject.parentId)
         pushToMap(this._subjectsHierarchy, subject.parentId, subject.id);
@@ -456,8 +455,7 @@ export class SubjectModelIdsCache {
     }
 
     this._subjectModels = new Map();
-    const models = await queryModels();
-    for (const model of models) {
+    for (const model of await queryModels()) {
       // istanbul ignore next
       const subjectIds = targetPartitionSubjects.get(model.id) ?? [];
       // istanbul ignore else

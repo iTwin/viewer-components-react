@@ -43,6 +43,7 @@ describe("CategoryVisibilityUtils", () => {
   const perModelCategoryVisibilityMock = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>();
   const subCategoriesCacheMock = moq.Mock.ofType<SubCategoriesCache>();
   const queryReaderMock = moq.Mock.ofType<ECSqlReader>();
+  const queryRowProxyMock = moq.Mock.ofType<QueryRowProxy>();
 
   const mockViewManagerForEachViewport = (viewport: Viewport, times = moq.Times.once()) => {
     viewManagerMock.reset();
@@ -94,12 +95,13 @@ describe("CategoryVisibilityUtils", () => {
     beforeEach(() => {
       imodelMock.reset();
       queryReaderMock.reset();
+      queryRowProxyMock.reset();
 
-      const row: QueryRowProxy = { toRow: () => ({ id: "CategoryId" }), toArray: () => [], getMetaData: () => [] };
       imodelMock.setup((x) => x.createQueryReader(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => queryReaderMock.object);
       queryReaderMock.setup(async (x) => x.step()).returns(async () => true);
       queryReaderMock.setup(async (x) => x.step()).returns(async () => false);
-      queryReaderMock.setup((x) => x.current).returns(() => row);
+      queryReaderMock.setup((x) => x.current).returns(() => queryRowProxyMock.object);
+      queryRowProxyMock.setup((x) => x.id).returns(() => "CategoryId");
       imodelMock.setup((x) => x.subcategories).returns(() => subCategoriesCacheMock.object);
     });
 
