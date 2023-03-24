@@ -38,6 +38,7 @@ const createPropertyDataProvider = (
   dataProvider.isNestedPropertyCategoryGroupingEnabled = true;
   return dataProvider;
 };
+
 interface ContainerDimensions {
   width: number;
   height: number;
