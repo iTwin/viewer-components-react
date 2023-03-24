@@ -62,7 +62,6 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeProps & { iModel: IMod
         placeholder={TreeWidget.translate("search")}
         title={TreeWidget.translate("searchForSomething")}
         filteringInProgress={searchOptions.isFiltering}
-        onFilterCancel={searchOptions.onFilterCancel}
         onFilterClear={searchOptions.onFilterCancel}
         onFilterStart={searchOptions.onFilterStart}
         onSelectedChanged={searchOptions.onResultSelectedChanged}

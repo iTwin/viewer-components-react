@@ -81,7 +81,6 @@ function ModelsTreeComponentImpl(props: ModelTreeProps & { iModel: IModelConnect
         placeholder={TreeWidget.translate("search")}
         title={TreeWidget.translate("searchForSomething")}
         filteringInProgress={searchOptions.isFiltering}
-        onFilterCancel={searchOptions.onFilterCancel}
         onFilterClear={searchOptions.onFilterCancel}
         onFilterStart={searchOptions.onFilterStart}
         onSelectedChanged={searchOptions.onResultSelectedChanged}
