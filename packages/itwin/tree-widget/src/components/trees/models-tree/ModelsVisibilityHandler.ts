@@ -417,31 +417,21 @@ export class SubjectModelIdsCache {
   }
 
   private async initSubjectModels() {
-    const querySubjects = async () => {
+    const querySubjects = async (): Promise<Array<{ id: Id64String, parentId?: Id64String, targetPartitionId?: Id64String }>> => {
       const subjectsQuery = `
         SELECT ECInstanceId id, Parent.Id parentId, json_extract(JsonProperties, '$.Subject.Model.TargetPartition') targetPartitionId
         FROM bis.Subject
       `;
-      const reader = this._imodel.createQueryReader(subjectsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
-      const readerSubjects = [];
-      while (await reader.step()) {
-        readerSubjects.push(reader.current.toRow());
-      }
-      return readerSubjects;
+      return this._imodel.createQueryReader(subjectsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
     };
-    const queryModels = async () => {
+    const queryModels = async (): Promise<Array<{ id: Id64String, parentId: Id64String }>> => {
       const modelsQuery = `
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM bis.InformationPartitionElement p
         INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
         WHERE NOT m.IsPrivate
       `;
-      const reader = this._imodel.createQueryReader(modelsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
-      const readerModels = [];
-      while (await reader.step()) {
-        readerModels.push(reader.current.toRow());
-      }
-      return readerModels;
+      return this._imodel.createQueryReader(modelsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
     };
 
     function pushToMap<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue) {
@@ -458,31 +448,25 @@ export class SubjectModelIdsCache {
     const subjects = await querySubjects();
     for (const subject of subjects) {
       // istanbul ignore else
-      if (subject.id) {
-        // istanbul ignore else
-        if (subject.parentId)
-          pushToMap(this._subjectsHierarchy, subject.parentId, subject.id);
-        // istanbul ignore if
-        if (subject.targetPartitionId)
-          pushToMap(targetPartitionSubjects, subject.targetPartitionId, subject.id);
-      }
+      if (subject.parentId)
+        pushToMap(this._subjectsHierarchy, subject.parentId, subject.id);
+      // istanbul ignore if
+      if (subject.targetPartitionId)
+        pushToMap(targetPartitionSubjects, subject.targetPartitionId, subject.id);
     }
 
     this._subjectModels = new Map();
     const models = await queryModels();
     for (const model of models) {
+      // istanbul ignore next
+      const subjectIds = targetPartitionSubjects.get(model.id) ?? [];
       // istanbul ignore else
-      if (model.id) {
-        // istanbul ignore next
-        const subjectIds = targetPartitionSubjects.get(model.id) ?? [];
-        // istanbul ignore else
-        if (!subjectIds.includes(model.parentId))
-          subjectIds.push(model.parentId);
+      if (!subjectIds.includes(model.parentId))
+        subjectIds.push(model.parentId);
 
-        subjectIds.forEach((subjectId) => {
-          pushToMap(this._subjectModels!, subjectId, model.id);
-        });
-      }
+      subjectIds.forEach((subjectId) => {
+        pushToMap(this._subjectModels!, subjectId, model.id);
+      });
     }
   }
 
@@ -580,9 +564,8 @@ async function createGroupedElementsInfo(imodel: IModelConnection, rulesetId: st
   const query = `SELECT Model.Id AS modelId, Category.Id AS categoryId FROM bis.GeometricElement3d WHERE ECInstanceId = ? LIMIT 1`;
   const reader = imodel.createQueryReader(query, QueryBinder.from([elementId.value]), { rowFormat: QueryRowFormat.UseJsPropertyNames });
   if (await reader.step()) {
-    const row = reader.current.toRow();
-    modelId = row.modelId;
-    categoryId = row.categoryId;
+    modelId = reader.current.modelId;
+    categoryId = reader.current.categoryId;
   }
   return { modelId, categoryId, elementIds: groupedElementIdsContainer };
 }

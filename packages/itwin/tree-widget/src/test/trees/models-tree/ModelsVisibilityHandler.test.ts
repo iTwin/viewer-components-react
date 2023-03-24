@@ -103,10 +103,10 @@ describe("ModelsVisibilityHandler", () => {
     reader.setup(async (x) => x.step()).returns(async () => false);
   }
 
-  const subjectQueryReaderMock = moq.Mock.ofType<ECSqlReader>();
-  const elementQueryReaderMock = moq.Mock.ofType<ECSqlReader>();
-
   const mockSubjectModelIds = (props: SubjectModelIdsMockProps) => {
+    const subjectQueryReaderMock = moq.Mock.ofType<ECSqlReader>();
+    const elementQueryReaderMock = moq.Mock.ofType<ECSqlReader>();
+
     props.imodelMock.setup((x) => x.createQueryReader(moq.It.is((q: string) => (-1 !== q.indexOf("FROM bis.Subject"))), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }))
       .returns(() => subjectQueryReaderMock.object);
 
@@ -312,8 +312,8 @@ describe("ModelsVisibilityHandler", () => {
         const vpMock = mockViewport({ viewState: viewStateMock.object });
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           await Promise.all([handler.getVisibilityStatus(node, node.__key), handler.getVisibilityStatus(node, node.__key)]);
-          // expect the `step` to be called only twice (once for subjects and once for models)
-          subjectQueryReaderMock.verify((x) => x.step(), moq.Times.exactly(2));
+          // expect the `createQueryReader` to be called only twice (once for subjects and once for models)
+          imodelMock.verify((x) => x.createQueryReader(moq.It.isAny()), moq.Times.exactly(2));
         });
       });
 

@@ -117,9 +117,8 @@ export async function loadCategoriesFromViewport(iModel?: IModelConnection, vp?:
     const reader = iModel.createQueryReader(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
     // istanbul ignore next
     while (await reader.step()) {
-      const row = reader.current.toRow();
-      const subCategoryIds = iModel.subcategories.getSubCategories(row.id);
-      categories.push({ categoryId: row.id, subCategoryIds: (subCategoryIds) ? [...subCategoryIds] : undefined });
+      const subCategoryIds = iModel.subcategories.getSubCategories(reader.current.id);
+      categories.push({ categoryId: reader.current.id, subCategoryIds: (subCategoryIds) ? [...subCategoryIds] : undefined });
     }
   }
 
