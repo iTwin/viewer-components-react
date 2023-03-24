@@ -24,8 +24,7 @@ import { ResizableContainerObserver } from "@itwin/core-react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
 import { PropertyAction } from "../PropertyAction";
-import { Button, Surface, Text } from "@itwin/itwinui-react";
-import { SvgWindowCollapse, SvgWindowPopout } from "@itwin/itwinui-icons-react";
+import { Button, Text } from "@itwin/itwinui-react";
 
 const createPropertyDataProvider = (
   keys: KeySet,
@@ -59,7 +58,6 @@ export const GroupQueryBuilderCustomUI = ({
   const [currentPropertyList, setCurrentPropertyList] = useState<PropertyRecord[]>([]);
   const [selectionKeySet, setSelectionKeyset] = useState<KeySet>(new KeySet());
   const [queryBuilder, setQueryBuilder] = useState<QueryBuilder | undefined>();
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     const onSelectionChanged = async (
@@ -112,52 +110,40 @@ export const GroupQueryBuilderCustomUI = ({
     []
   );
 
-  return isExpanded ? (
-    <Surface className="gmw-select-query-generator-container">
+  console.log(size.width, size.height);
+  return (
+    <div className="gmw-select-query-generator-container">
       {!dataProvider || selectionKeySet.size === 0 ? (
         <div className="gmw-select-element-hint">
           <Text>No elements have been selected.</Text>
         </div>
-      ) : (
+      ) :
         <>
-          <div className="gmw-select-property-grid">
-            <ResizableContainerObserver onResize={resize} />
-            <PropertyGridWrapperContext.Provider value={propertyContextValues}>
-              <VirtualizedPropertyGridWithDataProvider
-                dataProvider={dataProvider}
-                width={size.width}
-                height={size.height}
-                actionButtonRenderers={actionButtonRenderers}
-              />
-            </PropertyGridWrapperContext.Provider>
+          <div className="gmw-select-property-grid-container">
+            <div className="gmw-select-property-grid">
+              <ResizableContainerObserver onResize={resize} />
+              <PropertyGridWrapperContext.Provider value={propertyContextValues}>
+                <VirtualizedPropertyGridWithDataProvider
+                  dataProvider={dataProvider}
+                  width={size.width}
+                  height={size.height}
+                  actionButtonRenderers={actionButtonRenderers}
+                />
+
+              </PropertyGridWrapperContext.Provider>
+            </div>
+          </div>
+          <div className="gmw-select-reset-button">
+            <Button
+              styleType="default"
+              size="small"
+              onClick={onClickResetButton}
+            >
+              Reset
+            </Button>
           </div>
         </>
-      )}
-      <div className="gmw-select-footer">
-        <Button
-          startIcon={<SvgWindowCollapse />}
-          size="small"
-          onClick={() => setIsExpanded((e) => !e)}
-        >
-          Close Properties
-        </Button>
-        <Button
-          styleType="default"
-          size="small"
-          onClick={onClickResetButton}
-        >
-          Reset
-        </Button>
-      </div>
-    </Surface >
-  ) : (
-    <div className="gmw-expand-selection">
-      <Button
-        endIcon={<SvgWindowPopout />}
-        onClick={() => setIsExpanded((e) => !e)}
-      >
-        Open Properties
-      </Button>
+      }
     </div>
   );
 };
