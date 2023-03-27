@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./ModelsTree.scss";
+import "../VisibilityTreeBase.scss";
 import * as React from "react";
 import { ControlledTree, SelectionMode, TreeNodeItem, useTreeModel } from "@itwin/components-react";
 import { IModelConnection, Viewport } from "@itwin/core-frontend";
@@ -124,7 +124,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   }, []);
 
   return (
-    <div className="tree-widget-models-tree" ref={props.rootElementRef}>
+    <div className="tree-widget-visibility-tree-base" ref={props.rootElementRef}>
       <ControlledTree
         nodeLoader={filteredNodeLoader}
         model={treeModel}

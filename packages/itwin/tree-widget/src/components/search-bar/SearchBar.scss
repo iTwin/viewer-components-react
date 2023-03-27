@@ -17,12 +17,8 @@
 }
 
 .tree-widget-header-tree-toolbar-icon {
-  color: var(--iui-color-text);
+  border: 0;
   padding: 0 calc(var(--iui-size-2xs) + var(--iui-size-3xs));
-
-  .tree-widget-header-tree-toolbar-icon-label {
-    margin-right: calc(var(--iui-size-2xs) + var(--iui-size-3xs));
-  }
 }
 
 .tree-widget-search-bar {

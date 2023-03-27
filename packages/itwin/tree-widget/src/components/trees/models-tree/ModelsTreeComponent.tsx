@@ -3,13 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./ModelsTree.scss";
+import "../VisibilityTreeBase.scss";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import { IModelApp, IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
-import { IconButton } from "@itwin/itwinui-react";
+import { Button, IconButton } from "@itwin/itwinui-react";
 import { ModelsTreeHeaderButtonProps, ModelTreeProps } from "../../../types";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
@@ -219,19 +219,17 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
   };
 
   return (
-    <IconButton
+    <Button
       className="tree-widget-header-tree-toolbar-icon"
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("toggle2DViews")}
       onClick={viewToggle2D}
       disabled={models2d.length === 0}
+      endIcon={is2dToggleActive ? <SvgVisibilityShow/> : <SvgVisibilityHide />}
     >
-      <div className="tree-widget-header-tree-toolbar-icon-label">
-        {TreeWidget.translate("label2D")}
-      </div>
-      {is2dToggleActive ? <SvgVisibilityShow/> : <SvgVisibilityHide />}
-    </IconButton>
+      {TreeWidget.translate("label2D")}
+    </Button>
   );
 }
 
@@ -259,19 +257,17 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
   };
 
   return (
-    <IconButton
+    <Button
       className="tree-widget-header-tree-toolbar-icon"
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("toggle3DViews")}
       onClick={viewToggle3D}
       disabled={models3d.length === 0}
+      endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
-      <div className="tree-widget-header-tree-toolbar-icon-label">
-        {TreeWidget.translate("label3D")}
-      </div>
-      {is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
-    </IconButton>
+      {TreeWidget.translate("label3D")}
+    </Button>
   );
 }
 

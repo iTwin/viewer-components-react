@@ -67,24 +67,4 @@
       background: hsl(var(--iui-color-foreground-hsl) / var(--iui-opacity-4));
     }
   }
-
-  .searchbox-step-button {
-    height: 100%;
-    width: var(--iui-size-xl);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    color: var(--iui-color-text);
-    font-size: var(--iui-size-s);
-    cursor: pointer;
-
-    &:hover {
-      color: var(--iui-color-icon-accent);
-    }
-  }
-
-  .searchbox-close-button {
-    z-index: 1000;
-  }
 }

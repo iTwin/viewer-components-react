@@ -203,8 +203,6 @@ SearchBoxState
     const { searchText, selectedIndex } = this.state;
     const searchClassName = classnames("tree-widget-searchbox", className);
     const showCount = resultCount > 0;
-    const isPrevEnabled = selectedIndex > 1;
-    const isNextEnabled = selectedIndex < resultCount;
 
     return (
       <div className={searchClassName} style={style}>
@@ -227,20 +225,16 @@ SearchBoxState
           )}
           <div className="searchbox-separator" />
           <IconButton
-            className="searchbox-step-button"
             size="small"
             styleType="borderless"
-            disabled={!isPrevEnabled}
             onClick={this._onPrevClick}
             title="Previous"
           >
             <SvgChevronUp />
           </IconButton>
           <IconButton
-            className="searchbox-step-button"
             size="small"
             styleType="borderless"
-            disabled={!isNextEnabled}
             onClick={this._onNextClick}
             title="Next"
           >
@@ -248,12 +242,10 @@ SearchBoxState
           </IconButton>
         </div>
         <IconButton
-          className="searchbox-step-button searchbox-close-button"
           size="small"
           styleType="borderless"
           onClick={this._handleIconClick}
           onKeyDown={this._handleIconClick}
-          tabIndex={0}
         >
           <SvgCloseSmall />
         </IconButton>
