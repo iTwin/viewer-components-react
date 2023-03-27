@@ -7,7 +7,7 @@
     },
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Use itwinui components and variables",
+      "comment": "Use itwinui components instead of custom components and itwin variables instead of @itwin/core-react variables",
       "type": "patch"
     }
   ],
