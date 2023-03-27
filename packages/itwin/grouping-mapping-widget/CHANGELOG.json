@@ -2,6 +2,30 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.11.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.11.1",
+      "date": "Mon, 27 Mar 2023 10:30:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed a crash that occurred while creating a Group by Selection."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.11.0",
+      "date": "Thu, 23 Mar 2023 15:12:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added support to override Mappings name in Mappings component."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.0",
       "tag": "@itwin/grouping-mapping-widget_v0.10.0",
       "date": "Tue, 07 Mar 2023 15:47:41 GMT",
