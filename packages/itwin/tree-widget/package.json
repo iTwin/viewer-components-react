@@ -37,8 +37,9 @@
     "rebuild": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@itwin/itwinui-icons-react": "^1.8.0",
-    "@itwin/itwinui-react": "^1.40.1",
+    "@itwin/itwinui-icons-react": "^2.1.0",
+    "@itwin/itwinui-react": "^2.7.0",
+    "@itwin/itwinui-variables": "^2.0.0",
     "classnames": "^2.3.1",
     "i18next": "^10.2.2",
     "react-redux": "^7.2.0",

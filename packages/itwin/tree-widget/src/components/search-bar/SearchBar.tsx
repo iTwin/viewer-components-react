@@ -124,7 +124,7 @@ SearchBarState
                 menuItems={() =>
                   React.Children.toArray(this.props.children)
                     .slice(overflowStart === 0 ? 0 : overflowStart - 1)
-                    .map((btn, index) => <MenuItem key={index}>{btn}</MenuItem>)
+                    .map((btn, index) => <MenuItem key={index} className="search-bar-dropdown-menu-item">{btn}</MenuItem>)
                 }
                 className="search-bar-dropdown-container"
               >

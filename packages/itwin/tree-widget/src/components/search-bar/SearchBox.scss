@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
 
 .tree-widget-searchbox {
   font-family: var(--iui-font-sans);
@@ -10,27 +9,27 @@
   align-items: center;
   position: relative;
   //default values (height, width, font-size, color)
-  height: 34px;
+  height: calc(var(--iui-size-xl) + var(--iui-size-3xs));
   width: 12em;
-  font-size: 14px;
-  color: $buic-text-color-reverse;
-  background: $buic-background-control;
-  border: 1px solid $buic-inputs-border;
+  font-size: calc(var(--iui-size-s) + var(--iui-size-3xs));
+  color: var(--iui-color-background-hsl) / var(--iui-opacity-2);
+  background: var(--iui-color-background);
+  border: 1px solid hsl(var(--iui-color-foreground-hsl) / var(--iui-opacity-4));
 
   input {
-    padding: 0 8px;
+    padding: 0 var(--iui-size-xs);
     height: 100%;
     width: 100%;
     flex: 1;
-    background: $buic-background-control;
-    margin-right: 8px;
-    color: $buic-text-color;
+    background: var(--iui-color-background);
+    margin-right: var(--iui-size-xs);
+    color: var(--iui-color-text);
     font-size: inherit;
     box-sizing: border-box;
     border: 0;
 
     &::placeholder {
-      color: $buic-foreground-disabled;
+      color: var(--iui-color-text-disabled);
     }
 
     &:focus-within,
@@ -50,13 +49,13 @@
   .searchbox-stepping-container {
     display: flex;
     align-items: center;
-    right: 32px;
+    right: var(--iui-size-xl);
     height: 100%;
 
     .searchbox-stepping-count {
-      font-size: 12px;
-      color: $buic-text-color;
-      margin-right: 4px;
+      font-size: var(--iui-size-s);
+      color: var(--iui-color-text);
+      margin-right: var(--iui-size-2xs);
       position: relative;
       word-wrap: none;
     }
@@ -64,24 +63,24 @@
     .searchbox-separator {
       height: 75%;
       width: 1px;
-      margin: 0 8px;
-      background: $buic-inputs-border;
+      margin: 0 var(--iui-size-xs);
+      background: hsl(var(--iui-color-foreground-hsl) / var(--iui-opacity-4));
     }
   }
 
   .searchbox-step-button {
     height: 100%;
-    width: 32px;
+    width: var(--iui-size-xl);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    color: $buic-icon-color;
-    font-size: 12px;
+    color: var(--iui-color-text);
+    font-size: var(--iui-size-s);
     cursor: pointer;
 
     &:hover {
-      color: $buic-accessory-primary;
+      color: var(--iui-color-icon-accent);
     }
   }
 

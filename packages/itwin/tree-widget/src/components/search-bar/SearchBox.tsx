@@ -7,7 +7,8 @@
 import * as React from "react";
 import classnames from "classnames";
 import type { CommonProps } from "@itwin/core-react";
-import { IconButton } from "../IconButton";
+import { SvgChevronDown, SvgChevronUp, SvgCloseSmall } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
 import "./SearchBox.scss";
 import { TreeWidget } from "../../TreeWidget";
 
@@ -231,26 +232,35 @@ SearchBoxState
           <div className="searchbox-separator" />
           <IconButton
             className="searchbox-step-button"
-            icon="icon-chevron-up"
+            size="small"
+            styleType="borderless"
             disabled={!isPrevEnabled}
             onClick={this._onPrevClick}
             title="Previous"
-          />
+          >
+            <SvgChevronUp />
+          </IconButton>
           <IconButton
             className="searchbox-step-button"
-            icon="icon-chevron-down"
+            size="small"
+            styleType="borderless"
             disabled={!isNextEnabled}
             onClick={this._onNextClick}
             title="Next"
-          />
+          >
+            <SvgChevronDown />
+          </IconButton>
         </div>
-        <span
-          className="searchbox-step-button icon icon-close searchbox-close-button"
+        <IconButton
+          className="searchbox-step-button searchbox-close-button"
+          size="small"
+          styleType="borderless"
           onClick={this._handleIconClick}
           onKeyDown={this._handleIconClick}
-          role="button"
           tabIndex={0}
-        />
+        >
+          <SvgCloseSmall />
+        </IconButton>
       </div>
     );
   }

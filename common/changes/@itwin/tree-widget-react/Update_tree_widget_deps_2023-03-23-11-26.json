@@ -2,8 +2,13 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Updated presentation, appui, itwinjs-core dependencies and removed SpatialTree",
+      "comment": "Updated presentation, appui, itwinjs-core, itwinui dependencies and removed SpatialTree",
       "type": "minor"
+    },
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "Use itwinui components and variables",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
 @import "../VisibilityTreeBase";
 
 .tree-widget-categories-tree {
@@ -10,9 +9,9 @@
 }
 
 .tree-widget-category-tree-search-bar {
-  margin-bottom: 8px;
+  margin-bottom: var(--iui-size-xs);
 }
 
 .tree-widget-category-tree-toolbar-icon {
-  color: $buic-icon-color;
+  color: var(--iui-color-text);
 }

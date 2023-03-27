@@ -6,6 +6,8 @@ import "./CategoriesTree.scss";
 import React, { useEffect, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
 import { CategoryTree } from "./CategoriesTree";
 import { CategoryInfo, CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
 import { enableCategory } from "../CategoriesVisibilityUtils";
@@ -13,7 +15,6 @@ import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
 import type { CategoriesTreeHeaderButtonProps, CategoriesTreeProps } from "../../../types";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import { IconButton } from "../../IconButton";
 import { TreeWidget } from "../../../TreeWidget";
 import { SearchBar } from "../../search-bar/SearchBar";
 
@@ -115,10 +116,13 @@ function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
       className="tree-widget-header-tree-toolbar-icon"
-      icon="icon-visibility"
+      size="small"
+      styleType="borderless"
       title={TreeWidget.translate("showAll")}
       onClick={showAll}
-    />
+    >
+      <SvgVisibilityShow />
+    </IconButton>
   );
 }
 
@@ -136,10 +140,13 @@ function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
   return (
     <IconButton
       className="tree-widget-header-tree-toolbar-icon"
-      icon="icon-visibility-hide-2"
+      size="small"
+      styleType="borderless"
       title={TreeWidget.translate("hideAll")}
       onClick={hideAll}
-    />
+    >
+      <SvgVisibilityHide />
+    </IconButton>
   );
 }
 
@@ -179,8 +186,11 @@ function InvertButton(props: CategoriesTreeHeaderButtonProps) {
     <IconButton
       className="tree-widget-header-tree-toolbar-icon"
       title={TreeWidget.translate("invert")}
-      icon="icon-visibility-invert"
+      size="small"
+      styleType="borderless"
       onClick={invert}
-    />
+    >
+      <SvgVisibilityHalf />
+    </IconButton>
   );
 }
