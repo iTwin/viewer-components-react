@@ -12,6 +12,7 @@ import {
   LabeledSelect,
   MenuItem,
   Small,
+  ToggleSwitch,
 } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
 import ActionPanel from "./ActionPanel";
@@ -20,41 +21,46 @@ import {
   BboxDimensionsDecorator,
 } from "../../decorators/BboxDimensionsDecorator";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleError, WidgetHeader } from "./utils";
-import { visualizeElements, zoomToElements } from "./viewerUtils";
+import { handleError } from "./utils";
+import { clearEmphasizedOverriddenElements, visualizeElements, zoomToElements } from "./viewerUtils";
 import "./CalculatedPropertyAction.scss";
-import type { ICalculatedPropertyTyped } from "./CalculatedPropertyTable";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type { CalculatedProperty, Group } from "@itwin/insights-client";
 import { CalculatedPropertyType } from "@itwin/insights-client";
+import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
+import { useActiveIModelConnection } from "@itwin/appui-react";
+import { getHiliteIdsAndKeysetFromGroup } from "./groupsHelpers";
 
-interface CalculatedPropertyActionProps {
-  iModelId: string;
+export interface CalculatedPropertyActionProps {
   mappingId: string;
-  groupId: string;
-  property?: ICalculatedPropertyTyped;
-  ids: string[];
-  returnFn: (modified: boolean) => Promise<void>;
+  group: Group;
+  calculatedProperty?: CalculatedProperty;
+  onSaveSuccess: () => void;
+  onClickCancel?: () => void;
 }
 
-const CalculatedPropertyAction = ({
-  iModelId,
+export const CalculatedPropertyAction = ({
   mappingId,
-  groupId,
-  property,
-  ids,
-  returnFn,
+  group,
+  calculatedProperty,
+  onSaveSuccess,
+  onClickCancel,
 }: CalculatedPropertyActionProps) => {
-  const { getAccessToken } = useGroupingMappingApiConfig();
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>(
-    property?.propertyName ?? "",
+    calculatedProperty?.propertyName ?? "",
   );
-  const [type, setType] = useState<CalculatedPropertyType>(property?.type ?? CalculatedPropertyType.Undefined);
+  const iModelConnection = useActiveIModelConnection();
+  const [type, setType] = useState<CalculatedPropertyType>(calculatedProperty?.type ?? CalculatedPropertyType.Undefined);
   const [bboxDecorator, setBboxDecorator] = useState<BboxDimensionsDecorator | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { hilitedElementsQueryCache } = useGroupHilitedElementsContext();
   const [inferredSpatialData, setInferredSpatialData] = useState<Map<BboxDimension, number> | undefined>();
   const [validator, showValidationMessage] = useValidator();
+  const [resolvedHiliteIds, setResolvedHiliteIds] = useState<string[]>([]);
+  const [colorProperty, setColorProperty] = useState<boolean>(false);
 
   useEffect(() => {
     const decorator = new BboxDimensionsDecorator();
@@ -66,35 +72,48 @@ const CalculatedPropertyAction = ({
   }, []);
 
   useEffect(() => {
-    if (ids.length === 0) {
-      return;
-    }
-    visualizeElements([ids[0]], "red");
-    void zoomToElements([ids[0]]);
-  }, [ids]);
+    const initialize = async () => {
+      if (!iModelConnection) return;
+      clearEmphasizedOverriddenElements();
+      if (!colorProperty) return;
+      setIsLoading(true);
+      const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
+      setResolvedHiliteIds(result.ids);
+      setIsLoading(false);
+    };
+    void initialize();
+  }, [iModelConnection, hilitedElementsQueryCache, group, colorProperty]);
 
   useEffect(() => {
-    if (ids.length === 0) {
+    if (!colorProperty || resolvedHiliteIds.length === 0) {
+      return;
+    }
+    visualizeElements([resolvedHiliteIds[0]], "red");
+    void zoomToElements([resolvedHiliteIds[0]]);
+  }, [colorProperty, resolvedHiliteIds]);
+
+  useEffect(() => {
+    if (!colorProperty || resolvedHiliteIds.length === 0) {
       return;
     }
     const setContext = async () => {
       if (bboxDecorator) {
-        await bboxDecorator.setContext(ids[0]);
+        await bboxDecorator.setContext(resolvedHiliteIds[0]);
         setInferredSpatialData(bboxDecorator.getInferredSpatialData());
       }
     };
     void setContext();
-  }, [bboxDecorator, ids]);
+  }, [bboxDecorator, colorProperty, resolvedHiliteIds]);
 
   useEffect(() => {
     if (bboxDecorator && type && inferredSpatialData) {
-      inferredSpatialData.has(BboxDimension[type as keyof typeof BboxDimension])
+      inferredSpatialData.has(BboxDimension[type as keyof typeof BboxDimension]) && colorProperty
         ? bboxDecorator.drawContext(
           BboxDimension[type as keyof typeof BboxDimension],
         )
         : bboxDecorator.clearContext();
     }
-  }, [bboxDecorator, inferredSpatialData, type]);
+  }, [bboxDecorator, colorProperty, inferredSpatialData, type]);
 
   const onSave = async () => {
     if (!validator.allValid()) {
@@ -106,13 +125,13 @@ const CalculatedPropertyAction = ({
 
       const accessToken = await getAccessToken();
 
-      property
+      calculatedProperty
         ? await mappingClient.updateCalculatedProperty(
           accessToken,
           iModelId,
           mappingId,
-          groupId,
-          property.id,
+          group.id,
+          calculatedProperty.id,
           {
             propertyName,
             type,
@@ -122,15 +141,18 @@ const CalculatedPropertyAction = ({
           accessToken,
           iModelId,
           mappingId,
-          groupId,
+          group.id,
           {
             propertyName,
             type,
           },
         );
-      await returnFn(true);
+      onSaveSuccess();
+      setPropertyName("");
+      setType(CalculatedPropertyType.Undefined);
     } catch (error: any) {
       handleError(error.status);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -148,19 +170,20 @@ const CalculatedPropertyAction = ({
 
   return (
     <>
-      <WidgetHeader
-        title={
-          property
-            ? `${property?.propertyName ?? ""}`
-            : "Create Calculated Property"
-        }
-        returnFn={async () => returnFn(false)}
-      />
       <div className='gmw-calculated-properties-action-container'>
         <Fieldset legend='Calculated Property Details' className='gmw-details-form'>
-          <Small className='gmw-field-legend'>
-            Asterisk * indicates mandatory fields.
-          </Small>
+          <div className='gmw-field-legend-container'>
+            <Small className='gmw-field-legend'>
+              Asterisk * indicates mandatory fields.
+            </Small>
+            <ToggleSwitch
+              label='Visualize Dimensions'
+              labelPosition='left'
+              disabled={isLoading}
+              checked={colorProperty}
+              onChange={() => setColorProperty((b) => !b)}
+            ></ToggleSwitch>
+          </div>
           <LabeledInput
             value={propertyName}
             required
@@ -243,12 +266,10 @@ const CalculatedPropertyAction = ({
       </div>
       <ActionPanel
         onSave={onSave}
-        onCancel={async () => returnFn(false)}
+        onCancel={onClickCancel}
         isSavingDisabled={!(type && propertyName)}
         isLoading={isLoading}
       />
     </>
   );
 };
-
-export default CalculatedPropertyAction;

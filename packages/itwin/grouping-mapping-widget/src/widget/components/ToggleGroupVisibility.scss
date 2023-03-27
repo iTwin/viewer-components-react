@@ -3,19 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
-@import "~@itwin/itwinui-css/scss/icon/index";
-@import "~@itwin/itwinui-css/scss/button/index";
 
-.gmw-loading-spinner {
-  display: flex;
-  align-items: center;
-}
-
-.gmw-center-overlay {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: $iui-baseline;
-  height: 100%;
+.gmw-toggle {
+  margin-right: $iui-xs;
 }
