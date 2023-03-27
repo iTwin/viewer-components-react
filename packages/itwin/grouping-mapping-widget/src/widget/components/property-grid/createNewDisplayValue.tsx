@@ -2,8 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { PropertyRecord } from "@itwin/appui-abstract";
-import { HighlightedText, HighlightingComponentProps, PropertyContainerType, PropertyValueRendererContext, PropertyValueRendererManager } from "@itwin/components-react";
+import type { PropertyRecord } from "@itwin/appui-abstract";
+import type { HighlightingComponentProps, PropertyValueRendererContext } from "@itwin/components-react";
+import { HighlightedText, PropertyContainerType, PropertyValueRendererManager } from "@itwin/components-react";
 import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
 import { Orientation } from "@itwin/core-react";
 import * as React from "react";
