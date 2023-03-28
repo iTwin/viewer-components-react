@@ -56,9 +56,8 @@ describe("GeoAddressSearch", () => {
 
   });
   after(async () => {
+    TestUtils.terminateUiComponents();
     await MockRender.App.shutdown();
-    await TestUtils.terminateUiComponents();
-
   });
 
   it("renders", () => {

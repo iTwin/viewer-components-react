@@ -3,7 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { StageUsage, ToolbarHelper, ToolbarOrientation, ToolbarUsage, UiItemsProvider } from "@itwin/appui-react";
+import { StageUsage, ToolbarHelper, ToolbarOrientation, ToolbarUsage } from "@itwin/appui-react";
+import type UiItemsProvider from "@itwin/appui-react";
 
 import { GeoToolsItemDef } from "./GeoToolsItemDef";
 
