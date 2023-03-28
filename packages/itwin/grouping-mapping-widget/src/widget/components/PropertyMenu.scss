@@ -2,32 +2,12 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
-
-.gmw-loading-overlay {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: $iui-baseline;
-  height: 100%;
-}
+@import "~@itwin/itwinui-css/scss/variables";
 
 .gmw-property-menu-wrapper {
   display: flex;
   flex-direction: column;
   height: 100%;
-
-  .gmw-information-panel {
-    max-width: 100%;
-    width: 100%;
-
-    .gmw-information-body {
-      textarea {
-        resize: vertical;
-      }
-    }
-  }
 
   .gmw-property-header {
     display: flex;
@@ -38,14 +18,10 @@
     display: flex;
     flex-direction: column;
     overflow: auto;
-    gap: $iui-baseline * 3;
-    .gmw-property-table {
+    gap: $iui-baseline * 2;
+    .gmw-property-menu-toolbar {
       display: flex;
-      flex-direction: column;
-      gap: $iui-baseline;
-      button {
-        align-self: flex-start;
-      }
+      justify-content: space-between;
     }
   }
 }
