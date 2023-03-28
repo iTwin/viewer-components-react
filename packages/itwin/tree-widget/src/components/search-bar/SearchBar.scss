@@ -10,6 +10,24 @@
   align-items: center;
   margin-top: calc(var(--iui-size-2xs) + var(--iui-size-3xs));
 
+  .search-bar-dropdown-menu-item {
+    width: 100%;
+    padding: 0;
+
+    >.iui-content {
+      height: calc(var(--iui-size-xl) + var(--iui-size-2xs));
+
+      >.iui-menu-label {
+        height: 100%;
+
+        >.iui-button {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+  }
+
   .search-bar-dropdown-menu-item:hover {
     background-color: transparent;
     cursor: default;
