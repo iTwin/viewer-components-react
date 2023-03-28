@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/geo-tools-react",
+      "comment": "Migrated geo-tools to iTwin.js 4.0",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/geo-tools-react"
+}
