@@ -2,12 +2,17 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Updated presentation, appui, itwinjs-core, itwinui dependencies and removed SpatialTree",
+      "comment": "Removed `SpatialTree` and related components in favor of the ones in `@itwin/breakdown-trees-react`",
       "type": "minor"
     },
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Use itwinui components instead of custom components and itwin variables instead of @itwin/core-react variables",
+      "comment": "Updated dependencies (`itwinui@2`, `appui@4`, `presentation-components@4`, `itwinjs-core@3.7`)",
+      "type": "minor"
+    },
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "Use iTwin UI components instead of custom ones and CSS variables from `@itwin/itwinui-variables` instead of `@itwin/core-react`",
       "type": "patch"
     }
   ],
