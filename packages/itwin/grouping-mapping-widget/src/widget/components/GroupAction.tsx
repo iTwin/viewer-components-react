@@ -128,7 +128,6 @@ export const GroupAction = (props: GroupActionProps) => {
 
   useEffect(() => {
     const reemphasize = async () => {
-      console.log(query);
       try {
         if (!query || query === "") {
           return;
