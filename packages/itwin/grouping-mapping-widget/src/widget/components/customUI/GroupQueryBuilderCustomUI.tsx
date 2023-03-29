@@ -79,7 +79,7 @@ export const GroupQueryBuilderCustomUI = ({
   }, [iModelConnection]);
 
   const onClickResetButton = async () => {
-    queryBuilder?.resetQuery();
+    queryBuilder?.resetQueryBuilder();
     updateQuery("");
     setCurrentPropertyList([]);
     if (resetView)
@@ -88,6 +88,8 @@ export const GroupQueryBuilderCustomUI = ({
         console.error(e)
       );
   };
+
+  console.log(currentPropertyList);
 
   const resize = useCallback((width, height) => setSize({ width, height }), []);
 

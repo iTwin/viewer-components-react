@@ -95,12 +95,10 @@ export const GroupAction = (props: GroupActionProps) => {
   useEffect(() => setQueryGenerationType(props.queryGenerationType), [props.queryGenerationType]);
 
   const resetView = useCallback(async () => {
-    if (groups.length > 0) {
-      if (showGroupColor) {
-        await visualizeGroupColors(iModelConnection, groups, groups, hiddenGroupsIds, hilitedElementsQueryCache);
-      } else {
-        clearOverriddenElements();
-      }
+    if (showGroupColor) {
+      await visualizeGroupColors(iModelConnection, groups, groups, hiddenGroupsIds, hilitedElementsQueryCache);
+    } else {
+      clearOverriddenElements();
     }
     clearEmphasizedElements();
   }, [groups, hiddenGroupsIds, hilitedElementsQueryCache, iModelConnection, showGroupColor]);
@@ -130,6 +128,7 @@ export const GroupAction = (props: GroupActionProps) => {
 
   useEffect(() => {
     const reemphasize = async () => {
+      console.log(query);
       try {
         if (!query || query === "") {
           return;
