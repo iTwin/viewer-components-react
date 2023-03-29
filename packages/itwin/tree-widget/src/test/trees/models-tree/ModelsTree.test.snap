@@ -213,7 +213,7 @@ exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
 <body>
   <div>
     <div
-      class="tree-widget-visibility-tree-base"
+      class="tree-widget-models-tree"
     >
       <div
         class="core-tree components-controlledTree components-smallEditor-host"
