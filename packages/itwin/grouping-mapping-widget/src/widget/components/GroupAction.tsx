@@ -226,75 +226,6 @@ export const GroupAction = (props: GroupActionProps) => {
     !isLoading
   );
 
-  const getContent = () => {
-    switch (index) {
-      case 0:
-        return (
-          <Fieldset legend={displayStrings.groupDetails} className='gmw-group-details'>
-            <Small className='gmw-field-legend'>
-              Asterisk * indicates mandatory fields.
-            </Small>
-            <LabeledInput
-              id='groupName'
-              name='groupName'
-              label='Name'
-              value={details.groupName}
-              required
-              onChange={(event) => {
-                handleInputChange(event, details, setDetails);
-                validator.showMessageFor("groupName");
-              }}
-              message={validator.message(
-                "groupName",
-                details.groupName,
-                NAME_REQUIREMENTS,
-              )}
-              status={
-                validator.message(
-                  "groupName",
-                  details.groupName,
-                  NAME_REQUIREMENTS,
-                )
-                  ? "negative"
-                  : undefined
-              }
-              onBlur={() => {
-                validator.showMessageFor("groupName");
-              }}
-              onBlurCapture={(event) => {
-                handleInputChange(event, details, setDetails);
-                validator.showMessageFor("groupName");
-              }}
-            />
-            <LabeledInput
-              id='description'
-              name='description'
-              label='Description'
-              value={details.description}
-              onChange={(event) => {
-                handleInputChange(event, details, setDetails);
-              }}
-            />
-          </Fieldset>
-        );
-      default:
-        return (
-          <Fieldset legend={displayStrings.groupBy} className='gmw-query-builder-container'>
-            <Label htmlFor='query-combo-input'>Query Generation Tool</Label>
-            <ComboBox
-              value={queryGenerationType}
-              inputProps={{
-                id: "query-combo-input",
-              }}
-              options={getOptions}
-              onChange={onChange}
-
-            />
-            {queryGenerationType && createQueryBuilderComponent()}
-          </Fieldset>);
-    }
-  };
-
   const getOptions = useMemo(
     (): SelectOption<string>[] =>
       groupUIs.map((ui) => ({
@@ -304,6 +235,7 @@ export const GroupAction = (props: GroupActionProps) => {
       })),
     [groupUIs]
   );
+
   const onChange = useCallback(
     async (value: string) => {
       setQueryGenerationType(value);
@@ -335,7 +267,65 @@ export const GroupAction = (props: GroupActionProps) => {
         wrapperClassName='gmw-group-add-modify-container'
         contentClassName="gmw-group-query-builder-content"
       >
-        {getContent()}
+        <Fieldset legend={displayStrings.groupDetails} className={index === 0 ? "gmw-group-details" : "gmw-hide"}>
+          <Small className='gmw-field-legend'>
+            Asterisk * indicates mandatory fields.
+          </Small>
+          <LabeledInput
+            id='groupName'
+            name='groupName'
+            label='Name'
+            value={details.groupName}
+            required
+            onChange={(event) => {
+              handleInputChange(event, details, setDetails);
+              validator.showMessageFor("groupName");
+            }}
+            message={validator.message(
+              "groupName",
+              details.groupName,
+              NAME_REQUIREMENTS,
+            )}
+            status={
+              validator.message(
+                "groupName",
+                details.groupName,
+                NAME_REQUIREMENTS,
+              )
+                ? "negative"
+                : undefined
+            }
+            onBlur={() => {
+              validator.showMessageFor("groupName");
+            }}
+            onBlurCapture={(event) => {
+              handleInputChange(event, details, setDetails);
+              validator.showMessageFor("groupName");
+            }}
+          />
+          <LabeledInput
+            id='description'
+            name='description'
+            label='Description'
+            value={details.description}
+            onChange={(event) => {
+              handleInputChange(event, details, setDetails);
+            }}
+          />
+        </Fieldset>
+        <Fieldset legend={displayStrings.groupBy} className={index === 1 ? "gmw-query-builder-container" : "gmw-hide"}>
+          <Label htmlFor='query-combo-input'>Query Generation Tool</Label>
+          <ComboBox
+            value={queryGenerationType}
+            inputProps={{
+              id: "query-combo-input",
+            }}
+            options={getOptions}
+            onChange={onChange}
+
+          />
+          {queryGenerationType && createQueryBuilderComponent()}
+        </Fieldset>
       </HorizontalTabs>
       <ActionPanel
         onSave={async () => {
