@@ -7,22 +7,26 @@
 .gmw-group-add-modify-container {
   display: flex;
   flex-direction: column;
-  gap: $iui-baseline;
   overflow-x: auto;
   height: 100%;
-
+  .gmw-group-query-builder-content {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
   .gmw-group-details {
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
   }
-
   .gmw-query-builder-container {
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
     flex-grow: 1;
     min-width: 0;
+    min-height: 0;
     .gmw-radio-group-tile {
       display: flex;
       justify-content: center;

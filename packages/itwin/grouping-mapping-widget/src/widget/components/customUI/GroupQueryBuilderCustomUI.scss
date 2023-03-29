@@ -8,6 +8,7 @@
   display: flex;
   flex-grow: 1;
   flex-direction: column;
+  min-height: 0;
   .gmw-select-element-hint {
     display: flex;
     justify-content: center;
@@ -22,7 +23,7 @@
     .gmw-select-property-grid {
       flex-grow: 1;
       min-width: 0;
-      min-height: $iui-baseline * 30;
+      min-height: 0;
     }
   }
   .gmw-select-reset-button {
