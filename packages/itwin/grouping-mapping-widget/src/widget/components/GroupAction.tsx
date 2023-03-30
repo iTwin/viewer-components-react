@@ -13,6 +13,7 @@ import type {
   SelectOption,
 } from "@itwin/itwinui-react";
 import {
+  Button,
   ComboBox,
   Fieldset,
   HorizontalTabs,
@@ -27,9 +28,9 @@ import {
   EmptyMessage,
   handleError,
   handleInputChange,
+  LoadingSpinner,
 } from "./utils";
 import "./GroupAction.scss";
-import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import {
   clearEmphasizedElements,
@@ -251,6 +252,7 @@ export const GroupAction = (props: GroupActionProps) => {
   return (
     <>
       <HorizontalTabs
+        activeIndex={index}
         labels={[
           <Tab key={1} label='Details' startIcon={
             validator.message(
@@ -258,7 +260,7 @@ export const GroupAction = (props: GroupActionProps) => {
               details.groupName,
               NAME_REQUIREMENTS,
             ) ? <StatusIcon status="error" /> : undefined} />,
-          <Tab key={2} label='Group By' />,
+          <Tab key={2} label='Group By*' />,
         ]}
         type='borderless'
         onTabSelected={setIndex}
@@ -325,20 +327,43 @@ export const GroupAction = (props: GroupActionProps) => {
           {queryGenerationType && createQueryBuilderComponent()}
         </Fieldset>
       </HorizontalTabs>
-      <ActionPanel
-        onSave={async () => {
-          await save();
-        }}
-        onCancel={props.onClickCancel ? async () => {
-          Presentation.selection.clearSelection(
-            "GroupingMappingWidget",
-            iModelConnection,
-          );
-          props.onClickCancel && props.onClickCancel();
-        } : undefined}
-        isSavingDisabled={isBlockingActions}
-        isLoading={isLoading}
-      />
+      <div className='gmw-action-panel'>
+        {isLoading &&
+          <LoadingSpinner />
+        }
+        {index !== 0 ?
+          <Button
+            disabled={isBlockingActions}
+            styleType='high-visibility'
+            id='save-app'
+            onClick={async () => {
+              await save();
+            }}
+          >
+            Save
+          </Button> :
+          <Button
+            styleType='high-visibility'
+            id='save-app'
+            onClick={() => setIndex(1)}
+          >
+            Go to Group By
+          </Button>
+        }
+        <Button
+          type='button'
+          id='cancel'
+          onClick={props.onClickCancel ? async () => {
+            Presentation.selection.clearSelection(
+              "GroupingMappingWidget",
+              iModelConnection,
+            );
+            props.onClickCancel && props.onClickCancel();
+          } : undefined}
+        >
+          Cancel
+        </Button>
+      </div>
     </>
   );
 };
