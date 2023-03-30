@@ -35,7 +35,7 @@ export class PropertyGridManager {
   /** Unregisters the PropertyGridManager internationalization service namespace */
   public static terminate() {
     if (PropertyGridManager._i18n) {
-      PropertyGridManager._i18n.unregisterNamespace(
+      PropertyGridManager._i18n.unregisterNamespace( // eslint-disable-line @itwin/no-internal
         PropertyGridManager.i18nNamespace
       );
     }

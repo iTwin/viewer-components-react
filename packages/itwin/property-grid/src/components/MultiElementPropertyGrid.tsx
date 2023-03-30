@@ -6,7 +6,7 @@
 import "./MultiElementPropertyGrid.scss";
 import classnames from "classnames";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { UiFramework, useActiveFrontstageDef, useActiveIModelConnection, WidgetState } from "@itwin/appui-react";
+import { UiFramework, useActiveIModelConnection, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
 import { Id64, Logger } from "@itwin/core-bentley";
 import { SvgArrowDown, SvgArrowUp, SvgPropertiesList } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
@@ -26,11 +26,6 @@ enum MultiElementPropertyContent {
   PropertyGrid = 0,
   ElementList = 1,
   SingleElementPropertyGrid = 2,
-}
-
-function useSpecificWidgetDef(id: string) {
-  const frontstageDef = useActiveFrontstageDef();
-  return frontstageDef?.findWidgetDef(id);
 }
 
 export const MultiElementPropertyGridId = "vcr:MultiElementPropertyGrid";

@@ -17,10 +17,10 @@ import type { FavoritePropertiesScope } from "@itwin/presentation-frontend";
 import type {
   PropertyRecord,
 } from "@itwin/appui-abstract";
-import type React from "react";
-import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
+import type { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 
-export type ContextMenuItemInfo = ContextMenuItemProps & React.Attributes & {
+export type ContextMenuItemInfo = ContextMenuItemProps & {
+  key?: string | number;
   label: string;
   isValid?: (record: PropertyRecord, field?: Field) => boolean;
   forcePosition?: number;

@@ -8,8 +8,7 @@ import classnames from "classnames";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { PropertyValueRendererManager } from "@itwin/components-react";
-import { IModelConnection } from "@itwin/core-frontend";
-import { ContextMenuItem, GlobalContextMenu, Orientation, useOptionalDisposable, useResizeObserver } from "@itwin/core-react";
+import { ContextMenuItem, GlobalContextMenu, Orientation, ResizableContainerObserver, useOptionalDisposable } from "@itwin/core-react";
 import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { Field, getInstancesCount, InstanceKey, KeySet } from "@itwin/presentation-common";
@@ -23,6 +22,7 @@ import {
   FilteringPropertyGrid, FilteringPropertyGridWithUnifiedSelection, NonEmptyValuesPropertyDataFilterer, PlaceholderPropertyDataFilterer,
 } from "./FilteringPropertyGrid";
 
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
   PropertyData,
@@ -99,13 +99,10 @@ export const PropertyGrid = ({
     new PlaceholderPropertyDataFilterer()
   );
 
-  const [height, setHeight] = useState(0);
-  const [width, setWidth] = useState(0);
+  const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const handleResize = useCallback((w: number, h: number) => {
-    setHeight(h);
-    setWidth(w);
+    setSize({ width: w, height: h });
   }, []);
-  const ref = useResizeObserver<HTMLDivElement>(handleResize);
 
   const localizations = useMemo(() => {
     return {
@@ -416,7 +413,7 @@ export const PropertyGrid = ({
     }
 
     return (
-      <div ref={ref} style={{ width: "100%", height: "100%" }}>
+      <ResizableContainerObserver onResize={handleResize}>
         {disableUnifiedSelection ? (
           <FilteringPropertyGrid
             orientation={orientation ?? Orientation.Horizontal}
@@ -446,7 +443,7 @@ export const PropertyGrid = ({
             autoExpandChildCategories={autoExpandChildCategories}
           />
         )}
-      </div>
+      </ResizableContainerObserver>
     );
   };
 
