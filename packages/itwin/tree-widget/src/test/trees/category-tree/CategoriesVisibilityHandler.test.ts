@@ -10,13 +10,14 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import * as UiComponents from "@itwin/components-react";
 import { BeEvent, Id64String, using } from "@itwin/core-bentley";
 import {
-  IModelConnection, PerModelCategoryVisibility, ScreenViewport, SubCategoriesCache, ViewManager, Viewport, ViewState,
+  IModelConnection, PerModelCategoryVisibility, ScreenViewport, ViewManager, Viewport, ViewState,
 } from "@itwin/core-frontend";
 import { ECInstancesNodeKey, StandardNodeTypes } from "@itwin/presentation-common";
 import { renderHook } from "@testing-library/react-hooks";
 import {
   CategoryInfo, CategoryVisibilityHandler, CategoryVisibilityHandlerParams, useCategories,
 } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import { SubCategoryAppearance } from "@itwin/core-common";
 
 const createKey = (id: Id64String): ECInstancesNodeKey => {
   return {
@@ -34,7 +35,7 @@ describe("CategoryVisibilityHandler", () => {
   const viewStateMock = moq.Mock.ofType<ViewState>();
   const selectedViewStateMock = moq.Mock.ofType<ViewState>();
   const selectedViewMock = moq.Mock.ofType<ScreenViewport>();
-  const subCategoriesCacheMock = moq.Mock.ofType<SubCategoriesCache>();
+  const categoriesMock = moq.Mock.ofType<IModelConnection.Categories>();
   const perModelCategoryVisibilityMock = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>();
 
   const categoryNode = { id: "CategoryId", label: PropertyRecord.fromString("category-node"), autoExpand: true };
@@ -56,11 +57,30 @@ describe("CategoryVisibilityHandler", () => {
     viewStateMock.reset();
     viewManagerMock.reset();
     selectedViewMock.reset();
-    subCategoriesCacheMock.reset();
+    categoriesMock.reset();
     perModelCategoryVisibilityMock.reset();
 
-    imodelMock.setup((x) => x.subcategories).returns(() => subCategoriesCacheMock.object);
-    subCategoriesCacheMock.setup((x) => x.getSubCategories("CategoryId")).returns(() => new Set(categories[0].subCategoryIds));
+    imodelMock.setup((x) => x.categories).returns(() => categoriesMock.object);
+    categoriesMock.setup(async (x) => x.getCategoryInfo("CategoryId")).returns(async () => (
+      new Map(
+        [[
+          categories[0].categoryId,
+          {
+            id: categories[0].categoryId,
+            subCategories: new Map(
+              [[
+                categories[0].subCategoryIds![0],
+                {
+                  id: categories[0].subCategoryIds![0],
+                  categoryId: categories[0].categoryId,
+                  appearance: new SubCategoryAppearance(),
+                },
+              ]]
+            ),
+          },
+        ]]
+      )
+    ));
     viewManagerMock.setup((x) => x.selectedView).returns(() => selectedViewMock.object);
     selectedViewMock.setup((x) => x.view).returns(() => selectedViewStateMock.object);
     selectedViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);

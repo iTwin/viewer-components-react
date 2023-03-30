@@ -16,9 +16,10 @@ import {
   TreeSelectionModificationEventArgs, TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
 import { BeEvent, IDisposable } from "@itwin/core-bentley";
-import { CheckBoxState, isPromiseLike } from "@itwin/core-react";
+import { CheckBoxState } from "@itwin/core-react";
 import { NodeKey } from "@itwin/presentation-common";
 import { UnifiedSelectionTreeEventHandler, UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
+import { isPromiseLike } from "../utils/IsPromiseLike";
 
 /**
  * Data structure that describes instance visibility status.

@@ -38,7 +38,7 @@ export function enableCategory(viewManager: ViewManager, imodel: IModelConnectio
   if (!viewManager.selectedView)
     return;
 
-  const updateViewport = (vp: Viewport) => {
+  const updateViewport = async (vp: Viewport) => {
     // Only act on viewports that are both 3D or both 2D. Important if we have multiple viewports opened and we
     // are using 'allViewports' property
     if (viewManager.selectedView && viewManager.selectedView.view.is3d() === vp.view.is3d()) {
@@ -55,13 +55,9 @@ export function enableCategory(viewManager: ViewManager, imodel: IModelConnectio
 
       // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
       if (false === enabled) {
-        ids.forEach((id) => {
-          const subCategoryIds = imodel.subcategories.getSubCategories(id);
-          // istanbul ignore else
-          if (subCategoryIds) {
-            subCategoryIds.forEach((subCategoryId) => enableSubCategory(viewManager, subCategoryId, false, forAllViewports));
-          }
-        });
+        (await imodel.categories.getCategoryInfo(ids)).forEach((categoryInfo) => {
+          categoryInfo.subCategories.forEach((value) => enableSubCategory(viewManager, value.id, false, forAllViewports))
+        })
       }
     }
   };
@@ -114,13 +110,10 @@ export async function loadCategoriesFromViewport(iModel?: IModelConnection, vp?:
 
   // istanbul ignore else
   if (iModel) {
-    const reader = iModel.createQueryReader(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
-    // istanbul ignore next
-    while (await reader.step()) {
-      const subCategoryIds = iModel.subcategories.getSubCategories(reader.current.id);
-      categories.push({ categoryId: reader.current.id, subCategoryIds: (subCategoryIds) ? [...subCategoryIds] : undefined });
-    }
+    const categorieIds = await iModel.createQueryReader(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
+    (await iModel.categories.getCategoryInfo(categorieIds)).forEach((val) => {
+      categories.push({ categoryId: val.id, subCategoryIds: val.subCategories.size ? [...val.subCategories.keys()] : undefined });
+    })
   }
-
   return categories;
 }

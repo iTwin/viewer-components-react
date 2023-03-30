@@ -34,7 +34,8 @@ describe("ModelsTree", () => {
   const sizeProps = { width: 200, height: 200 };
 
   before(async () => {
-    await NoRenderApp.startup();
+    // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+    await NoRenderApp.startup(); // eslint-disable-line @itwin/no-internal
     await TestUtils.initialize();
   });
 
@@ -71,11 +72,11 @@ describe("ModelsTree", () => {
       selectionManagerMock.setup((x) => x.selectionChange).returns(() => selectionChangeEvent);
       selectionManagerMock.setup((x) => x.getSelectionLevels(imodelMock.object)).returns(() => []);
       selectionManagerMock.setup((x) => x.getSelection(imodelMock.object, moq.It.isAny())).returns(() => new KeySet());
-      Presentation.setSelectionManager(selectionManagerMock.object);
 
       const mocks = mockPresentationManager();
       presentationManagerMock = mocks.presentationManager;
-      Presentation.setPresentationManager(presentationManagerMock.object);
+
+      void Presentation.initialize({ presentation: presentationManagerMock.object, selection: selectionManagerMock.object });
     });
 
     const setupDataProvider = (nodes: TreeNodeItem[]) => {
@@ -319,7 +320,8 @@ describe("ModelsTree", () => {
 
           const filteredNode: Node = {
             key: createKey("element", "filtered-element"),
-            label: LabelDefinition.fromLabelString("filtered-node"),
+            // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+            label: LabelDefinition.fromLabelString("filtered-node"), // eslint-disable-line @itwin/no-internal
           };
           const filter: NodePathElement[] = [{ node: filteredNode, children: [], index: 0 }];
           (PresentationTreeDataProvider.prototype.getFilteredNodePaths as any).restore();

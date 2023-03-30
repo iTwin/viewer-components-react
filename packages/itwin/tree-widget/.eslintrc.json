@@ -15,7 +15,7 @@
       "always"
     ],
     "@itwin/no-internal": [
-      "off",
+      "error",
       {
         "tag": [
           "internal"
