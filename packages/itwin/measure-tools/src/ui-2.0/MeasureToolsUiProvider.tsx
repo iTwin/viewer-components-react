@@ -5,17 +5,17 @@
 
 import * as React from "react";
 import type {
-  CommonToolbarItem,
+  ToolbarItem,
 } from "@itwin/appui-abstract";
 import {
   ConditionalBooleanValue,
 } from "@itwin/appui-abstract";
 import type {
-  ToolItemDef,
+  ToolItemDef, Widget,
 } from "@itwin/appui-react";
 import {
   SyncUiEventId, ToolbarHelper, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
-  ToolbarOrientation, ToolbarUsage, CommonWidgetProps, UiItemsProvider, WidgetState
+  ToolbarOrientation, ToolbarUsage, UiItemsProvider, WidgetState
 } from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
@@ -50,7 +50,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     stageUsage: string,
     toolbarUsage: ToolbarUsage,
     toolbarOrientation: ToolbarOrientation,
-  ): CommonToolbarItem[] {
+  ): ToolbarItem[] {
     if (stageUsage === StageUsage.General && toolbarUsage === ToolbarUsage.ContentManipulation) {
       const featureFlags = MeasureTools.featureFlags;
       const tools: ToolItemDef[] = [];
@@ -122,11 +122,8 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     stageUsage: string,
     _location: StagePanelLocation,
     section?: StagePanelSection | undefined,
-  ): ReadonlyArray<CommonWidgetProps> {
-    const widgets: CommonWidgetProps[] = [];
-
-    const preferredLocation = this._props?.widgetPlacement?.location ?? StagePanelLocation.Right;
-    const preferredSection = this._props?.widgetPlacement?.section ?? StagePanelSection.Start;
+  ): ReadonlyArray<Widget> {
+    const widgets: Widget[] = [];
 
     if (
       (
@@ -137,7 +134,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
       widgets.push({
         id: MeasurementPropertyWidgetId,
         label: MeasureTools.localization.getLocalizedString("MeasureTools:Generic.measurements"),
-        getWidgetContent: () => <MeasurementPropertyWidget />, // eslint-disable-line react/display-name
+        content: () => <MeasurementPropertyWidget />, // eslint-disable-line react/display-name
         defaultState: WidgetState.Hidden,
         icon: "icon-measure",
       });

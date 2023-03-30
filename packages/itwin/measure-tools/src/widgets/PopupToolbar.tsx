@@ -5,9 +5,8 @@
 /* eslint-disable deprecation/deprecation */
 
 import * as React from "react";
-import { CommonToolbarItem, ToolbarComposer } from "@itwin/appui-react";
+import { ToolbarComposer } from "@itwin/appui-react";
 import { ExtensibleToolbarProps } from "@itwin/appui-react";
-import { ToolbarWithOverflow } from "@itwin/components-react";
 
 /** Popup toolbar properties. */
 export interface PopupToolbarProps extends ExtensibleToolbarProps {
