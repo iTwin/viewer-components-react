@@ -68,9 +68,8 @@ export class PropertyGridManager {
     key: string | string[],
     options?: LocalizationOptions
   ): string {
-    return PropertyGridManager.i18n.getLocalizedStringWithNamespace(
-      PropertyGridManager.i18nNamespace,
-      key,
+    return PropertyGridManager.i18n.getLocalizedString(
+      `${PropertyGridManager.i18nNamespace}:${key}`,
       options
     );
   }

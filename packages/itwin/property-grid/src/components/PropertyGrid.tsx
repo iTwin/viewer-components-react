@@ -4,51 +4,37 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./PropertyGrid.scss";
-import type { Field, InstanceKey } from "@itwin/presentation-common";
-import { KeySet } from "@itwin/presentation-common";
-import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
+import classnames from "classnames";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useActiveIModelConnection } from "@itwin/appui-react";
+import { PropertyValueRendererManager } from "@itwin/components-react";
+import { IModelConnection } from "@itwin/core-frontend";
+import { ContextMenuItem, GlobalContextMenu, Orientation, useOptionalDisposable, useResizeObserver } from "@itwin/core-react";
+import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
+import { Field, getInstancesCount, InstanceKey, KeySet } from "@itwin/presentation-common";
+import { FavoritePropertiesScope, ISelectionProvider, Presentation, SelectionChangeEventArgs } from "@itwin/presentation-frontend";
+import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
+import { getShowNullValuesPreference, saveShowNullValuesPreference } from "../api/ShowNullValuesPreferenceClient";
+import { copyToClipboard } from "../api/WebUtilities";
+import { PropertyGridManager } from "../PropertyGridManager";
+import { PropertyGridDefaultContextMenuKey } from "../types";
+import {
+  FilteringPropertyGrid, FilteringPropertyGridWithUnifiedSelection, NonEmptyValuesPropertyDataFilterer, PlaceholderPropertyDataFilterer,
+} from "./FilteringPropertyGrid";
+
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type {
   PropertyData,
   PropertyDataFiltererBase,
   PropertyGridContextMenuArgs,
 } from "@itwin/components-react";
-import {
-  PropertyValueRendererManager,
-} from "@itwin/components-react";
-import {
-  ContextMenuItem,
-  GlobalContextMenu,
-  Orientation,
-  useOptionalDisposable,
-  useResizeObserver,
-} from "@itwin/core-react";
-import {
-  UiFramework,
-  useActiveIModelConnection,
-} from "@itwin/appui-react";
 import type { ReactNode } from "react";
-import { IconButton } from "@itwin/itwinui-react";
-import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-
-import { copyToClipboard } from "../api/WebUtilities";
-import { PropertyGridManager } from "../PropertyGridManager";
 import type {
   ContextMenuItemInfo,
   OnSelectEventArgs,
   PropertyGridProps,
 } from "../types";
-import { PropertyGridDefaultContextMenuKey } from "../types";
-import {
-  FilteringPropertyGrid,
-  FilteringPropertyGridWithUnifiedSelection,
-  NonEmptyValuesPropertyDataFilterer,
-  PlaceholderPropertyDataFilterer,
-} from "./FilteringPropertyGrid";
-import classnames from "classnames";
-import { AutoExpandingPropertyDataProvider } from "../api/AutoExpandingPropertyDataProvider";
-import { getShowNullValuesPreference, saveShowNullValuesPreference } from "../api/ShowNullValuesPreferenceClient";
 
 interface PropertyGridPropsWithSingleElement extends PropertyGridProps {
   instanceKey?: InstanceKey;
@@ -232,9 +218,7 @@ export const PropertyGrid = ({
   const buildContextMenu = useCallback(
     async (args: PropertyGridContextMenuArgs) => {
       if (dataProvider) {
-        const field = await dataProvider.getFieldByPropertyRecord(
-          args.propertyRecord
-        );
+        const field = await dataProvider.getFieldByPropertyDescription(args.propertyRecord.property);
         const items: ContextMenuItemInfo[] = [];
         if (enableFavoriteProperties) {
           if (field && iModelConnection) {
@@ -466,13 +450,38 @@ export const PropertyGrid = ({
     );
   };
 
+  const numItemsSelected = useSelectedItemsNum(iModelConnection);
+
   return (
     <div
       className={classnames("property-grid-widget-container", rootClassName)}
     >
-      {!!UiFramework.frameworkState?.sessionState?.numItemsSelected && renderHeader()}
+      {!!numItemsSelected && renderHeader()}
       <div className={"property-grid-container"}>{renderPropertyGrid()}</div>
       {renderContextMenu()}
     </div>
   );
 };
+
+function useSelectedItemsNum(imodel?: IModelConnection) {
+  const [numSelected, setNumSelected] = React.useState<number | undefined>(() => {
+    return imodel ? getInstancesCount(Presentation.selection.getSelection(imodel, 0)) : undefined;
+  });
+
+  React.useEffect(() => {
+    if (!imodel)
+      return;
+
+    const onSelectionChange = (args: SelectionChangeEventArgs, provider: ISelectionProvider) => {
+      if (args.imodel !== imodel || args.level !== 0)
+        return;
+
+      const selection = provider.getSelection(imodel, 0);
+      setNumSelected(getInstancesCount(selection));
+    };
+
+    return Presentation.selection.selectionChange.addListener(onSelectionChange);
+  }, [imodel]);
+
+  return numSelected;
+}
