@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Updated dependencies: `itwinjs-core@3.7`, `appui@4.0`, `presentation-components@4.0`, `itwinui@2.0`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
