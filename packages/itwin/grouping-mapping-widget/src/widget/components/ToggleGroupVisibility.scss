@@ -2,17 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
-@import "../VisibilityTreeBase";
+@import "~@itwin/itwinui-css/scss/variables";
 
-.tree-widget-models-tree {
-  @include tree-widget-visibility-tree-base;
-}
-
-.tree-widget-models-tree-container {
-  flex: 1;
-}
-
-.tree-widget-models-tree-toolbar-icon {
-  color: $buic-icon-color;
+.gmw-toggle {
+  margin-right: $iui-xs;
 }

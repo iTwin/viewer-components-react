@@ -40,8 +40,6 @@ export interface SearchBarProps extends CommonProps {
   /** Filtering is cleared after everything's loaded */
   onFilterStart: (newFilter: string) => void;
   /** Filtering is cleared after everything's loaded */
-  onFilterCancel?: () => void;
-  /** Filtering is cleared after everything's loaded */
   onFilterClear?: () => void;
   /** Total number of results/entries */
   resultCount: number;
@@ -124,7 +122,7 @@ SearchBarState
                 menuItems={() =>
                   React.Children.toArray(this.props.children)
                     .slice(overflowStart === 0 ? 0 : overflowStart - 1)
-                    .map((btn, index) => <MenuItem key={index}>{btn}</MenuItem>)
+                    .map((btn, index) => <MenuItem key={index} className="search-bar-dropdown-menu-item">{btn}</MenuItem>)
                 }
                 className="search-bar-dropdown-container"
               >
@@ -145,8 +143,7 @@ SearchBarState
               searchText={value}
               valueChangedDelay={valueChangedDelay}
               placeholder={placeholder}
-              onFilterCancel={this.props.onFilterCancel}
-              onFilterClear={this.props.onFilterClear}
+              onClear={this.props.onFilterClear}
               onFilterStart={this.props.onFilterStart}
               resultCount={this.props.resultCount}
               onIconClick={this._onToggleSearch}

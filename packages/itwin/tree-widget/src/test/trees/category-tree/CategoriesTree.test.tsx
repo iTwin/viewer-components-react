@@ -74,11 +74,6 @@ describe("CategoryTree", () => {
       rulesetVariablesMock = mocks.rulesetVariablesManager;
       Presentation.setPresentationManager(presentationManagerMock.object);
 
-      async function* generator() {
-        return;
-      }
-
-      imodelMock.setup((x) => x.query(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => generator());
       viewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
       viewStateMock.setup((x) => x.is3d()).returns(() => true);
 

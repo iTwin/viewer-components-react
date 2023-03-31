@@ -31,7 +31,6 @@ import { useMappingClient } from "./context/MappingClientContext";
 import type { IMappingsClient, Mapping } from "@itwin/insights-client";
 import { BlockingOverlay } from "./BlockingOverlay";
 import { HorizontalTile } from "./HorizontalTile";
-import { clearAll } from "./viewerUtils";
 import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import type { CreateTypeFromInterface } from "../utils";
@@ -92,13 +91,10 @@ export const Mappings = ({
 }: MappingsProps) => {
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<Mapping | undefined>(undefined);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
   const [showBlockingOverlay, setShowBlockingOverlay] =
     useState<boolean>(false);
-  const [selectedMapping, setSelectedMapping] = useState<Mapping | undefined>(
-    undefined
-  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
   const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
@@ -114,8 +110,6 @@ export const Mappings = ({
   }, [getAccessToken, mappingClient, iModelId, setIsLoading]);
 
   const refresh = useCallback(async () => {
-    clearAll();
-    setSelectedMapping(undefined);
     setMappings([]);
     await fetchMappings(
       setMappings,
@@ -185,6 +179,7 @@ export const Mappings = ({
                             key={0}
                             onClick={() => {
                               onClickMappingModify(mapping);
+                              close();
                             }}
                             icon={<SvgEdit />}
                           >
@@ -194,7 +189,6 @@ export const Mappings = ({
                         <MenuItem
                           key={1}
                           onClick={async () => {
-                            setSelectedMapping(mapping);
                             setShowBlockingOverlay(true);
                             close();
                             await toggleExtraction(
@@ -215,8 +209,7 @@ export const Mappings = ({
                         <MenuItem
                           key={2}
                           onClick={() => {
-                            setSelectedMapping(mapping);
-                            setShowDeleteModal(true);
+                            setShowDeleteModal(mapping);
                             close();
                           }}
                           icon={<SvgDelete />}
@@ -241,15 +234,14 @@ export const Mappings = ({
         )}
       </Surface>
       <DeleteModal
-        entityName={selectedMapping?.mappingName ?? ""}
-        show={showDeleteModal}
-        setShow={setShowDeleteModal}
+        entityName={showDeleteModal?.mappingName}
+        onClose={() => setShowDeleteModal(undefined)}
         onDelete={async () => {
           const accessToken = await getAccessToken();
           await mappingClient.deleteMapping(
             accessToken,
             iModelId,
-            selectedMapping?.id ?? ""
+            showDeleteModal?.id ?? ""
           );
         }}
         refresh={refresh}

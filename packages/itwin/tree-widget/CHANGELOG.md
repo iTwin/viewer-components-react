@@ -1,6 +1,13 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 23 Mar 2023 15:12:36 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Mar 2023 10:46:34 GMT and should not be manually modified.
+
+## 0.7.2
+Fri, 24 Mar 2023 10:46:34 GMT
+
+### Patches
+
+- Fixed tree filtering not being removed when search box is closed
 
 ## 0.7.1
 Thu, 23 Mar 2023 15:12:36 GMT

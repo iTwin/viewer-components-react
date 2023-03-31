@@ -104,13 +104,11 @@ const GroupingMapping = (props: GroupingMappingProps) => {
       customUIs={injectedCustomUI}
     >
       <div className="gmw-group-mapping-container">
-        {// Will remove until all components are correctly componentized
-          currentRoute.step !== RouteStep.Properties && routingHistory.length < 4 &&
-          <GroupingMappingHeader
-            routingHistory={routingHistory}
-            goBack={goBack}
-            currentRoute={currentRoute}
-          />}
+        <GroupingMappingHeader
+          routingHistory={routingHistory}
+          goBack={goBack}
+          currentRoute={currentRoute}
+        />
         <GroupingMappingContent
           routingHistory={routingHistory}
           navigateTo={navigateTo}

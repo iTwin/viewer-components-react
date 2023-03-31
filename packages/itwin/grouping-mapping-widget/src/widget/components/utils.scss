@@ -6,35 +6,6 @@
 @import "~@itwin/itwinui-css/scss/icon/index";
 @import "~@itwin/itwinui-css/scss/button/index";
 
-.gmw-widget-header-container {
-  display: flex;
-  margin-bottom: $iui-baseline * 3;
-
-  .gmw-chevron {
-    @include iui-icons-large();
-    cursor: pointer;
-    align-self: center;
-    margin-right: $iui-s;
-  }
-
-  .gmw-chevron-disabled {
-    @include iui-icons-large();
-    @include themed {
-      fill: t(iui-icons-color-actionable-disabled);
-    }
-    cursor: not-allowed;
-
-    align-self: center;
-    margin-right: $iui-s;
-  }
-
-  .gmw-title {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-}
-
 .gmw-loading-spinner {
   display: flex;
   align-items: center;

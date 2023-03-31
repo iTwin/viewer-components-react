@@ -114,11 +114,11 @@ export async function loadCategoriesFromViewport(iModel?: IModelConnection, vp?:
 
   // istanbul ignore else
   if (iModel) {
-    const rowIterator = iModel.query(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
+    const reader = iModel.createQueryReader(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
     // istanbul ignore next
-    for await (const row of rowIterator) {
-      const subCategoryIds = iModel.subcategories.getSubCategories(row.id);
-      categories.push({ categoryId: row.id, subCategoryIds: (subCategoryIds) ? [...subCategoryIds] : undefined });
+    while (await reader.step()) {
+      const subCategoryIds = iModel.subcategories.getSubCategories(reader.current.id);
+      categories.push({ categoryId: reader.current.id, subCategoryIds: (subCategoryIds) ? [...subCategoryIds] : undefined });
     }
   }
 
