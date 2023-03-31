@@ -218,14 +218,14 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     // This calls invalidateRenderPlan()
     vp.displayStyle.changeMapLayerProps({
       subLayers: validation.subLayers,
-    }, layerRequiringCredentialsIdx, isOverlay);
-    vp.displayStyle.changeMapLayerCredentials(layerRequiringCredentialsIdx, isOverlay, source.userName, source.password);
+    }, {index: layerRequiringCredentialsIdx, isOverlay});
+    vp.displayStyle.changeMapLayerCredentials({index: layerRequiringCredentialsIdx, isOverlay}, source.userName, source.password);
 
     // Either initial attach/initialize failed or the layer failed to load at least one tile
     // because of an invalid token; in both cases tile tree needs to be fully reset
-    const provider = vp.getMapLayerImageryProvider(layerRequiringCredentialsIdx, isOverlay);
+    const provider = vp.getMapLayerImageryProvider({index: layerRequiringCredentialsIdx, isOverlay});
     provider?.resetStatus();
-    vp.resetMapLayer(layerRequiringCredentialsIdx, isOverlay);
+    vp.resetMapLayer({index: layerRequiringCredentialsIdx, isOverlay});
 
     // This handler will close the layer source handler, and therefore the MapUrl dialog.
     // don't call it if the dialog needs to remains open.
@@ -261,7 +261,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     }
     const settings = source.toLayerSettings(subLayers);
     if (settings) {
-      vp.displayStyle.attachMapLayer({ settings, isOverlay });
+      vp.displayStyle.attachMapLayer({settings, mapLayerIndex: {index: -1, isOverlay}});
 
       const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerAttached", { sourceName: source.name, sourceUrl: source.url });
       IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));

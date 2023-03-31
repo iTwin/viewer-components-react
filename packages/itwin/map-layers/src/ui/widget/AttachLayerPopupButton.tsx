@@ -126,7 +126,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
                 const settings = mapLayerSettings.toLayerSettings(subLayers);
 
                 if (settings) {
-                  activeViewport.displayStyle.attachMapLayer({ settings, isOverlay });
+                  activeViewport.displayStyle.attachMapLayer({ settings, mapLayerIndex: {index: -1, isOverlay} });
 
                   const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerAttached", { sourceName: settings.name, sourceUrl: settings.url });
                   IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));

@@ -111,7 +111,7 @@ function getStyleMapLayerSettings(settings: ImageMapLayerSettings, isOverlay: bo
     isOverlay,
     layerIndex,
     // provider: IModelApp.mapLayerFormatRegistry.createImageryProvider(settings),
-    provider: IModelApp.viewManager.selectedView?.getMapLayerImageryProvider(layerIndex, isOverlay),
+    provider: IModelApp.viewManager.selectedView?.getMapLayerImageryProvider({index: layerIndex, isOverlay}),
     treeVisibility,
   };
 }
@@ -153,11 +153,11 @@ export function SubLayersTree(props: { mapLayer: StyleMapLayerSettings }) {
     const displayStyle = vp?.displayStyle;
     if (displayStyle && vp) {
       const indexInDisplayStyle = displayStyle ? displayStyle.findMapLayerIndexByNameAndSource(mapLayer.name, mapLayer.source, mapLayer.isOverlay) : -1;
-      displayStyle.changeMapSubLayerProps({ visible: true }, -1, indexInDisplayStyle, mapLayer.isOverlay);
-      const updatedMapLayer = displayStyle.mapLayerAtIndex(indexInDisplayStyle, mapLayer.isOverlay);
+      displayStyle.changeMapSubLayerProps({ visible: true }, -1, {index: indexInDisplayStyle, isOverlay: mapLayer.isOverlay});
+      const updatedMapLayer = displayStyle.mapLayerAtIndex({index: indexInDisplayStyle, isOverlay: mapLayer.isOverlay});
       if (updatedMapLayer) {
         if (updatedMapLayer instanceof ImageMapLayerSettings) {
-          const treeVisibility = vp.getMapLayerScaleRangeVisibility(indexInDisplayStyle, mapLayer.isOverlay);
+          const treeVisibility = vp.getMapLayerScaleRangeVisibility({index: indexInDisplayStyle, isOverlay: mapLayer.isOverlay});
           setMapLayer(getStyleMapLayerSettings(updatedMapLayer, mapLayer.isOverlay, indexInDisplayStyle, treeVisibility));
         }
 
@@ -170,10 +170,10 @@ export function SubLayersTree(props: { mapLayer: StyleMapLayerSettings }) {
     const displayStyle = vp?.displayStyle;
     if (displayStyle && vp) {
       const indexInDisplayStyle = displayStyle ? displayStyle.findMapLayerIndexByNameAndSource(mapLayer.name, mapLayer.source, mapLayer.isOverlay) : -1;
-      displayStyle.changeMapSubLayerProps({ visible: false }, -1, indexInDisplayStyle, mapLayer.isOverlay);
-      const updatedMapLayer = displayStyle.mapLayerAtIndex(indexInDisplayStyle, mapLayer.isOverlay);
+      displayStyle.changeMapSubLayerProps({ visible: false }, -1, {index: indexInDisplayStyle, isOverlay: mapLayer.isOverlay});
+      const updatedMapLayer = displayStyle.mapLayerAtIndex({index: indexInDisplayStyle, isOverlay: mapLayer.isOverlay});
       if (updatedMapLayer && updatedMapLayer instanceof ImageMapLayerSettings) {
-        const treeVisibility = vp.getMapLayerScaleRangeVisibility(indexInDisplayStyle, mapLayer.isOverlay);
+        const treeVisibility = vp.getMapLayerScaleRangeVisibility({index: indexInDisplayStyle, isOverlay: mapLayer.isOverlay});
         setMapLayer(getStyleMapLayerSettings(updatedMapLayer, mapLayer.isOverlay, indexInDisplayStyle, treeVisibility));
       }
     }
@@ -357,8 +357,8 @@ class SubLayerCheckboxHandler extends TreeEventHandler {
           // Update displaystyle state
           if (-1 !== indexInDisplayStyle && displayStyle) {
             if (prevVisibleLayer && prevVisibleLayer.id !== undefined)
-              displayStyle.changeMapSubLayerProps({ visible: false }, prevVisibleLayer.id, indexInDisplayStyle, this._mapLayer.isOverlay);
-            displayStyle.changeMapSubLayerProps({ visible: isSelected }, subLayerId, indexInDisplayStyle, this._mapLayer.isOverlay);
+              displayStyle.changeMapSubLayerProps({ visible: false }, prevVisibleLayer.id, {index: indexInDisplayStyle, isOverlay: this._mapLayer.isOverlay});
+            displayStyle.changeMapSubLayerProps({ visible: isSelected }, subLayerId, {index: indexInDisplayStyle, isOverlay: this._mapLayer.isOverlay});
           }
 
           // Cascade state

@@ -107,7 +107,7 @@ describe("MapUrlDialog", () => {
       assert.fail("Invalid layer settings");
 
     if (!isOAuth) {
-      displayStyleMock.verify((x) => x.attachMapLayer({settings:sampleLayerSettings, isOverlay:false}), moq.Times.once());
+      displayStyleMock.verify((x) => x.attachMapLayer({settings: sampleLayerSettings, mapLayerIndex: {index: -1, isOverlay: false}}), moq.Times.once());
 
       spyMessage.calledWithExactly(new NotifyMessageDetails(OutputMessagePriority.Info, "Messages.MapLayerAttached"));
     }
@@ -189,7 +189,7 @@ describe("MapUrlDialog", () => {
 
     if (!sampleWmsLayerSettings)
       assert.fail("Invalid layer settings");
-    displayStyleMock.verify((x) => x.attachMapLayer({settings:sampleWmsLayerSettings, isOverlay:false}), moq.Times.once());
+    displayStyleMock.verify((x) => x.attachMapLayer({settings: sampleWmsLayerSettings, mapLayerIndex: {index: -1, isOverlay: false}}), moq.Times.once());
 
     spyMessage.calledWithExactly(new NotifyMessageDetails(OutputMessagePriority.Info, "Messages.MapLayerAttached"));
 
@@ -267,7 +267,7 @@ describe("MapUrlDialog", () => {
     // Check that single sub-layer visibility has been forced to true (was initially false)
     const cloned = ImageMapLayerSettings.fromJSON({...sampleLayerSettings.toJSON(), subLayers:  [{ name: "subLayer1", visible: true }]});
 
-    displayStyleMock.verify((x) => x.attachMapLayer({settings:cloned, isOverlay:false}), moq.Times.once());
+    displayStyleMock.verify((x) => x.attachMapLayer({settings: cloned, mapLayerIndex: {index: -1, isOverlay: false}}), moq.Times.once());
 
     spyMessage.calledWithExactly(new NotifyMessageDetails(OutputMessagePriority.Info, "Messages.MapLayerAttached"));
 

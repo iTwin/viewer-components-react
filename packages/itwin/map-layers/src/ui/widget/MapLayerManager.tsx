@@ -65,8 +65,8 @@ function getMapLayerSettingsFromViewport(viewport: Viewport, getBackgroundMap: b
   for (let layerIndex = 0; layerIndex < displayStyleLayers.length; layerIndex++) {
     const layerSettings = displayStyleLayers[layerIndex];
     const isOverlay = !getBackgroundMap;
-    const layerProvider = viewport.getMapLayerImageryProvider(layerIndex, isOverlay);
-    const treeVisibility = viewport.getMapLayerScaleRangeVisibility(layerIndex, isOverlay);
+    const layerProvider = viewport.getMapLayerImageryProvider({index: layerIndex, isOverlay});
+    const treeVisibility = viewport.getMapLayerScaleRangeVisibility({index: layerIndex, isOverlay});
     const popSubLayers = populateSubLayers && (layerSettings instanceof ImageMapLayerSettings);
     layers.push({
       visible: layerSettings.visible,
@@ -335,10 +335,10 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
     switch (action) {
       case "delete":
-        activeViewport.displayStyle.detachMapLayerByIndex(indexInDisplayStyle, mapLayerSettings.isOverlay);
+        activeViewport.displayStyle.detachMapLayerByIndex({index: indexInDisplayStyle, isOverlay: mapLayerSettings.isOverlay});
         break;
       case "zoom-to-layer":
-        activeViewport.viewMapLayerRange(indexInDisplayStyle, mapLayerSettings.isOverlay, activeViewport).then((status) => {
+        activeViewport.viewMapLayerRange({index: indexInDisplayStyle, isOverlay: mapLayerSettings.isOverlay}, activeViewport).then((status) => {
           if (!status) {
             const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.NoRangeDefined");
             IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, `${msg} [${mapLayerSettings.name}]`));
@@ -359,7 +359,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       const indexInDisplayStyle = displayStyle.findMapLayerIndexByNameAndSource(mapLayerSettings.name, mapLayerSettings.source, mapLayerSettings.isOverlay);
       if (-1 !== indexInDisplayStyle) {
         // update the display style
-        displayStyle.changeMapLayerProps({ visible: isVisible }, indexInDisplayStyle, mapLayerSettings.isOverlay);
+        displayStyle.changeMapLayerProps({ visible: isVisible }, {index: indexInDisplayStyle, isOverlay: mapLayerSettings.isOverlay});
 
         // force UI to update
         loadMapLayerSettingsFromViewport(activeViewport);
@@ -415,9 +415,9 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
     if (destination.droppableId !== source.droppableId) {
       // see if we moved from "overlayMapLayers" to "backgroundMapLayers" or vice-versa
-      const settings = activeViewport.displayStyle.mapLayerAtIndex(fromIndexInDisplayStyle, fromMapLayer.isOverlay);
+      const settings = activeViewport.displayStyle.mapLayerAtIndex({index: fromIndexInDisplayStyle, isOverlay: fromMapLayer.isOverlay});
       if (settings) {
-        activeViewport.displayStyle.detachMapLayerByIndex(fromIndexInDisplayStyle, fromMapLayer.isOverlay);
+        activeViewport.displayStyle.detachMapLayerByIndex({index: fromIndexInDisplayStyle, isOverlay: fromMapLayer.isOverlay});
 
         // Manually reverse index when moved from one section to the other
         if (fromMapLayer.isOverlay && backgroundMapLayers) {
@@ -426,11 +426,11 @@ export function MapLayerManager(props: MapLayerManagerProps) {
           toIndexInDisplayStyle = overlayMapLayers.length - destination.index;
         }
 
-        activeViewport.displayStyle.attachMapLayer({ settings, isOverlay: !fromMapLayer.isOverlay, insertIndex: toIndexInDisplayStyle });
+        activeViewport.displayStyle.attachMapLayer({ settings, mapLayerIndex: {isOverlay: !fromMapLayer.isOverlay, index: toIndexInDisplayStyle} });
       }
     } else {
       if (undefined === destination.index) {
-        displayStyle.moveMapLayerToBottom(fromIndexInDisplayStyle, destination.droppableId === "overlayMapLayers");
+        displayStyle.moveMapLayerToBottom({index: fromIndexInDisplayStyle, isOverlay: destination.droppableId === "overlayMapLayers"});
       } else {
         if (toMapLayer) {
           if (toIndexInDisplayStyle !== -1)
