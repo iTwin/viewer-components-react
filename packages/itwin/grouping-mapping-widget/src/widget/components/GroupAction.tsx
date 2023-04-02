@@ -16,22 +16,16 @@ import {
   Button,
   ComboBox,
   Fieldset,
-  HorizontalTabs,
   Label,
-  LabeledInput,
-  Small,
-  Tab,
   toaster,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  EmptyMessage,
   handleError,
-  handleInputChange,
   LoadingSpinner,
 } from "./utils";
 import "./GroupAction.scss";
-import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
+import useValidator from "../hooks/useValidator";
 import {
   clearEmphasizedElements,
   clearOverriddenElements,
@@ -47,12 +41,18 @@ import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI"
 import type { Group } from "@itwin/insights-client";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { visualizeGroupColors } from "./groupsHelpers";
-import { StatusIcon } from "./StatusIcon";
+import { QueryBuilderCustomUI } from "./QueryBuilderCustomUI";
+import { GroupDetails } from "./GroupDetails";
 
 const defaultDisplayStrings = {
   groupDetails: "Group Details",
   groupBy: "Group By",
 };
+
+enum GroupActionStep {
+  QueryBuilder,
+  GroupDetails,
+}
 
 export interface GroupActionProps {
   mappingId: string;
@@ -83,7 +83,7 @@ export const GroupAction = (props: GroupActionProps) => {
     props.queryGenerationType,
   );
   const isUpdating = isLoading || isRendering;
-  const [index, setIndex] = React.useState(0);
+  const [currentStep, setCurrentStep] = React.useState(GroupActionStep.QueryBuilder);
 
   useEffect(() => {
     if (!iModelConnection) {
@@ -159,7 +159,7 @@ export const GroupAction = (props: GroupActionProps) => {
   }, [iModelConnection]);
 
   const save = useCallback(async () => {
-    if (!validator.allValid() || !validator.check(details.groupName, NAME_REQUIREMENTS)) {
+    if (!validator.allValid()) {
       setShowValidationMessage(true);
       return;
     }
@@ -194,6 +194,8 @@ export const GroupAction = (props: GroupActionProps) => {
         groupName: props.group?.groupName ?? "",
         description: props.group?.description ?? "",
       });
+      setCurrentStep(GroupActionStep.QueryBuilder);
+      setShowValidationMessage(false);
       props.onSaveSuccess();
     } catch (error: any) {
       handleError(error.status);
@@ -201,22 +203,6 @@ export const GroupAction = (props: GroupActionProps) => {
       setIsLoading(false);
     }
   }, [validator, setShowValidationMessage, query, simpleSelectionQuery, getAccessToken, props, mappingClient, iModelId, details, iModelConnection]);
-
-  const createQueryBuilderComponent = () => {
-    if (queryGenerationType && queryGenerationType.length > 0) {
-      const selectedCustomUI = groupUIs.find(
-        (e) => e.name === queryGenerationType,
-      );
-      if (selectedCustomUI) {
-        return React.createElement(selectedCustomUI.uiComponent, {
-          updateQuery: setQuery,
-          isUpdating,
-          resetView,
-        });
-      }
-    }
-    return <EmptyMessage message='No query generation method selected. ' />;
-  };
 
   const isBlockingActions = !(
     details.groupName &&
@@ -251,103 +237,74 @@ export const GroupAction = (props: GroupActionProps) => {
 
   return (
     <>
-      <HorizontalTabs
-        activeIndex={index}
-        labels={[
-          <Tab key={1} label='Details' startIcon={
-            validator.message(
-              "groupName",
-              details.groupName,
-              NAME_REQUIREMENTS,
-            ) ? <StatusIcon status="error" /> : undefined} />,
-          <Tab key={2} label='Group By*' />,
-        ]}
-        type='borderless'
-        onTabSelected={setIndex}
-        wrapperClassName='gmw-group-add-modify-container'
-        contentClassName="gmw-group-query-builder-content"
-      >
-        <Fieldset legend={displayStrings.groupDetails} className={index === 0 ? "gmw-group-details" : "gmw-hide"}>
-          <Small className='gmw-field-legend'>
-            Asterisk * indicates mandatory fields.
-          </Small>
-          <LabeledInput
-            id='groupName'
-            name='groupName'
-            label='Name'
-            value={details.groupName}
-            required
-            onChange={(event) => {
-              handleInputChange(event, details, setDetails);
-              validator.showMessageFor("groupName");
-            }}
-            message={validator.message(
-              "groupName",
-              details.groupName,
-              NAME_REQUIREMENTS,
-            )}
-            status={
-              validator.message(
-                "groupName",
-                details.groupName,
-                NAME_REQUIREMENTS,
-              )
-                ? "negative"
-                : undefined
-            }
-            onBlur={() => {
-              validator.showMessageFor("groupName");
-            }}
-            onBlurCapture={(event) => {
-              handleInputChange(event, details, setDetails);
-              validator.showMessageFor("groupName");
-            }}
-          />
-          <LabeledInput
-            id='description'
-            name='description'
-            label='Description'
-            value={details.description}
-            onChange={(event) => {
-              handleInputChange(event, details, setDetails);
-            }}
+      <div className="gmw-group-add-modify-container">
+        <Fieldset legend={displayStrings.groupBy} className={
+          currentStep === GroupActionStep.QueryBuilder
+            ? "gmw-query-builder-container"
+            : "gmw-hide"
+        }>
+          <span>
+            <Label htmlFor='query-combo-input'>Query Generation Tool</Label>
+            <ComboBox
+              value={queryGenerationType}
+              inputProps={{
+                id: "query-combo-input",
+              }}
+              options={getOptions}
+              onChange={onChange}
+            />
+          </span>
+          <QueryBuilderCustomUI
+            queryGenerationType={queryGenerationType}
+            groupUIs={groupUIs}
+            isUpdating={isUpdating}
+            resetView={resetView}
+            setQuery={setQuery}
           />
         </Fieldset>
-        <Fieldset legend={displayStrings.groupBy} className={index === 1 ? "gmw-query-builder-container" : "gmw-hide"}>
-          <Label htmlFor='query-combo-input'>Query Generation Tool</Label>
-          <ComboBox
-            value={queryGenerationType}
-            inputProps={{
-              id: "query-combo-input",
-            }}
-            options={getOptions}
-            onChange={onChange}
-
+        <Fieldset
+          legend={displayStrings.groupDetails}
+          className={
+            currentStep === GroupActionStep.GroupDetails
+              ? "gmw-group-details"
+              : "gmw-hide"
+          }>
+          <GroupDetails
+            details={details}
+            setDetails={setDetails}
+            validator={validator}
           />
-          {queryGenerationType && createQueryBuilderComponent()}
         </Fieldset>
-      </HorizontalTabs>
+      </div>
       <div className='gmw-action-panel'>
         {isLoading &&
           <LoadingSpinner />
         }
-        {index !== 0 ?
+        {currentStep !== GroupActionStep.QueryBuilder ?
+          <>
+            <Button
+              id='save-app'
+              onClick={() => setCurrentStep(GroupActionStep.QueryBuilder)}
+            >
+              Back
+            </Button>
+            <Button
+              disabled={isBlockingActions}
+              styleType='high-visibility'
+              id='save-app'
+              onClick={async () => {
+                await save();
+              }}
+            >
+              Save
+            </Button>
+          </> :
           <Button
-            disabled={isBlockingActions}
             styleType='high-visibility'
             id='save-app'
-            onClick={async () => {
-              await save();
-            }}
+            onClick={() => setCurrentStep(GroupActionStep.GroupDetails)}
           >
-            Save
-          </Button> :
-          <Button
-            styleType='high-visibility'
-            id='save-app'
-            onClick={() => setIndex(1)}
-          >
-            Go to Group By
+            Next
           </Button>
         }
         <Button

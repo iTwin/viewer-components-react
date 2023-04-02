@@ -24,7 +24,7 @@ import { ResizableContainerObserver } from "@itwin/core-react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
 import { PropertyAction } from "../PropertyAction";
-import { Button, Text } from "@itwin/itwinui-react";
+import { Alert, Button } from "@itwin/itwinui-react";
 
 const createPropertyDataProvider = (
   keys: KeySet,
@@ -89,8 +89,6 @@ export const GroupQueryBuilderCustomUI = ({
       );
   };
 
-  console.log(currentPropertyList);
-
   const resize = useCallback((width, height) => setSize({ width, height }), []);
 
   const propertyContextValues = useMemo(
@@ -116,9 +114,9 @@ export const GroupQueryBuilderCustomUI = ({
   return (
     <div className="gmw-select-query-generator-container">
       {!dataProvider || selectionKeySet.size === 0 ? (
-        <div className="gmw-select-element-hint">
-          <Text>No elements have been selected.</Text>
-        </div>
+        <Alert type='informational'>
+          Please select on an element within the viewer first, then select properties to generate a group query.
+        </Alert>
       ) :
         <>
           <div className="gmw-select-property-grid-container">

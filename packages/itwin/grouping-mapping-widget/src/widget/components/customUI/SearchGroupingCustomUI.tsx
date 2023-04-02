@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
+import { Alert, Button, LabeledTextarea } from "@itwin/itwinui-react";
 import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
 import { LoadingSpinner } from "../utils";
 import "./SearchGroupingCustomUI.scss";
@@ -122,10 +122,10 @@ export const SearchGroupingCustomUI = ({
 
   return (
     <div className='gmw-search-form'>
-      <Text>
+      <Alert type='informational'>
         Generate a query by keywords. Keywords wrapped in double quotes will be
         considered a required criteria.
-      </Text>
+      </Alert>
       <LabeledTextarea
         label='Query Keywords'
         required

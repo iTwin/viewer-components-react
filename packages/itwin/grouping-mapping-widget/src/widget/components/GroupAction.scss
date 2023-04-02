@@ -12,12 +12,6 @@
   .gmw-hide {
     display: none;
   }
-  .gmw-group-query-builder-content {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: column;
-    min-height: 0;
-  }
   .gmw-group-details {
     display: flex;
     flex-direction: column;
@@ -30,9 +24,5 @@
     flex-grow: 1;
     min-width: 0;
     min-height: 0;
-    .gmw-radio-group-tile {
-      display: flex;
-      justify-content: center;
-    }
   }
 }

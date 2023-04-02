@@ -11,7 +11,7 @@ import { QueryRowFormat } from "@itwin/core-common";
 export const handleInputChange = <T,>(
   e: React.ChangeEvent<HTMLInputElement>,
   values: T,
-  setValues: React.Dispatch<React.SetStateAction<T>>,
+  setValues: (newValues: T) => void,
 ) => {
   const { name, value } = e.target;
 

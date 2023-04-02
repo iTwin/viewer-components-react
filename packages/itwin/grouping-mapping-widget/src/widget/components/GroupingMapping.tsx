@@ -105,7 +105,6 @@ const GroupingMapping = (props: GroupingMappingProps) => {
     >
       <div className="gmw-group-mapping-container">
         <GroupingMappingHeader
-          routingHistory={routingHistory}
           goBack={goBack}
           currentRoute={currentRoute}
         />

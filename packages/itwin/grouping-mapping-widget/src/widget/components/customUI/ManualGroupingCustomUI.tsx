@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import { Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
+import { Alert, Button, LabeledTextarea, Text } from "@itwin/itwinui-react";
 import { LoadingSpinner } from "../utils";
 import "./ManualGroupingCustomUI.scss";
 import type { GroupingCustomUIProps } from "./GroupingMappingCustomUI";
@@ -17,9 +17,9 @@ export const ManualGroupingCustomUI = ({
 
   return (
     <div className='gmw-manual-form'>
-      <Text>
+      <Alert type='informational'>
         Generate group using an ECSQL query. Please select ECInstanceId and ECClassId columns in the query.
-      </Text>
+      </Alert>
       <LabeledTextarea
         label='Query'
         required
