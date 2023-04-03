@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/measure-tools-react",
       "comment": "Updating to use v3.7.0 of core packages and v4.0.0-dev of appui",
-      "type": "patch"
+      "type": ""
     }
   ],
   "packageName": "@itwin/measure-tools-react"
