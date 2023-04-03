@@ -40,11 +40,9 @@ describe("CategoryVisibilityHandler", () => {
   (categoryNode as any).__key = categoryKey = createKey(categoryNode.id);
   (subcategoryNode as any).__key = subcategoryKey = createKey(subcategoryNode.id);
 
-  const categoryId = "CategoryId";
-  const subCategoryId = "SubCategoryId";
   const categories: CategoryInfo[] = [{
-    categoryId,
-    subCategoryIds: [subCategoryId],
+    categoryId: "CategoryId",
+    subCategoryIds: ["SubCategoryId"],
   }];
 
   beforeEach(() => {
