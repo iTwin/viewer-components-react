@@ -105,14 +105,14 @@ export async function loadCategoriesFromViewport(iModel?: IModelConnection, vp?:
   const selectUsedSpatialCategoryIds = "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement3d WHERE Category.Id IN (SELECT ECInstanceId from BisCore.SpatialCategory)";
   const selectUsedDrawingCategoryIds = "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement2d WHERE Model.Id=? AND Category.Id IN (SELECT ECInstanceId from BisCore.DrawingCategory)";
   const ecsql = vp.view.is3d() ? selectUsedSpatialCategoryIds : selectUsedDrawingCategoryIds;
-  const ecsql2 = `SELECT ECInstanceId as id, UserLabel as label, CodeValue as code FROM ${vp.view.is3d() ? "BisCore.SpatialCategory" : "BisCore.DrawingCategory"} WHERE ECInstanceId IN (${ecsql})`;
+  const ecsql2 = `SELECT ECInstanceId as id FROM ${vp.view.is3d() ? "BisCore.SpatialCategory" : "BisCore.DrawingCategory"} WHERE ECInstanceId IN (${ecsql})`;
 
   const categories: CategoryInfo[] = [];
 
   // istanbul ignore else
   if (iModel) {
-    const categorieIds = await iModel.createQueryReader(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
-    (await iModel.categories.getCategoryInfo(categorieIds)).forEach((val) => {
+    const rows = await iModel.createQueryReader(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
+    (await iModel.categories.getCategoryInfo(rows.map((row) => row.id))).forEach((val) => {
       categories.push({ categoryId: val.id, subCategoryIds: val.subCategories.size ? [...val.subCategories.keys()] : undefined });
     });
   }

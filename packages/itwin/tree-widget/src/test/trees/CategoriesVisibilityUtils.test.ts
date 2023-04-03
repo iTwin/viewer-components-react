@@ -67,8 +67,8 @@ describe("CategoryVisibilityUtils", () => {
   beforeEach(() => {
     imodelMock.setup((x) => x.createQueryReader(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => queryReaderMock.object);
     imodelMock.setup((x) => x.categories).returns(() => categoriesMock.object);
-    queryReaderMock.setup(async (x) => x.toArray()).returns(async () => ["CategoryId"]);
-    categoriesMock.setup(async (x) => x.getCategoryInfo(["CategoryId"])).returns(async () => categoriesInfo);
+    queryReaderMock.setup(async (x) => x.toArray()).returns(async () => [{ id: categoryId }]);
+    categoriesMock.setup(async (x) => x.getCategoryInfo([categoryId])).returns(async () => categoriesInfo);
     viewManagerMock.setup((x) => x.selectedView).returns(() => selectedViewMock.object);
     selectedViewMock.setup((x) => x.view).returns(() => selectedViewStateMock.object);
     selectedViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
