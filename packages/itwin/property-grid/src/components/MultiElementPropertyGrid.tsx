@@ -4,31 +4,20 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./MultiElementPropertyGrid.scss";
+import classnames from "classnames";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { UiFramework, useActiveIModelConnection, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
+import { Id64, Logger } from "@itwin/core-bentley";
+import { SvgArrowDown, SvgArrowUp, SvgPropertiesList } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
+import { Presentation } from "@itwin/presentation-frontend";
+import { PropertyGridManager } from "../PropertyGridManager";
+import { ElementList as ElementListComponent } from "./ElementList";
+import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid";
 
 import type { InstanceKey, KeySet } from "@itwin/presentation-common";
 import type { SelectionChangeEventArgs } from "@itwin/presentation-frontend";
-import { Presentation } from "@itwin/presentation-frontend";
-import {
-  FrontstageManager,
-  UiFramework,
-  useActiveFrontstageDef,
-  useActiveIModelConnection,
-} from "@itwin/appui-react";
-import {
-  SvgArrowDown,
-  SvgArrowUp,
-  SvgPropertiesList,
-} from "@itwin/itwinui-icons-react";
-
 import type { PropertyGridProps } from "../types";
-import { ElementList } from "./ElementList";
-import { PropertyGrid } from "./PropertyGrid";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import classnames from "classnames";
-import { WidgetState } from "@itwin/appui-abstract";
-import { Id64, Logger } from "@itwin/core-bentley";
-import { IconButton } from "@itwin/itwinui-react";
-import { PropertyGridManager } from "../PropertyGridManager";
 
 const PropertyGridSelectionScope = "Property Grid";
 const LOGGER_CATEGORY = "PropertyGrid";
@@ -37,11 +26,6 @@ enum MultiElementPropertyContent {
   PropertyGrid = 0,
   ElementList = 1,
   SingleElementPropertyGrid = 2,
-}
-
-function useSpecificWidgetDef(id: string) {
-  const frontstageDef = useActiveFrontstageDef();
-  return frontstageDef?.findWidgetDef(id);
 }
 
 export const MultiElementPropertyGridId = "vcr:MultiElementPropertyGrid";
@@ -65,11 +49,11 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
       if (iModelConnection) {
         const selectionSet =
           Presentation.selection.getSelection(iModelConnection);
-        const instanceKeys: InstanceKey[] = [];
+        const selectedInstanceKeys: InstanceKey[] = [];
         selectionSet.instanceKeys.forEach(
           (ids: Set<string>, className: string) => {
             ids.forEach((id: string) => {
-              instanceKeys.push({
+              selectedInstanceKeys.push({
                 id,
                 className,
               });
@@ -83,7 +67,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
           setAncestorKeys([]);
         }
 
-        setInstanceKeys(instanceKeys);
+        setInstanceKeys(selectedInstanceKeys);
         setSelectedInstanceKey(undefined);
       }
     };
@@ -97,7 +81,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
 
     const removePresentationListener = Presentation.selection.selectionChange.addListener(onSelectionChange);
     // if the frontstage changes and a selection set is already active we need to resync this widget's state with that selection
-    const removeFrontstageReadyListener = FrontstageManager.onFrontstageReadyEvent.addListener(onFrontstageReady);
+    const removeFrontstageReadyListener = UiFramework.frontstages.onFrontstageReadyEvent.addListener(onFrontstageReady);
     return () => {
       removePresentationListener();
       removeFrontstageReadyListener();
@@ -202,7 +186,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
     ...useMemo(() => {
       const moreThanOneElement = instanceKeys.length > 1;
       const _items = [
-        <PropertyGrid
+        <PropertyGridComponent
           {...props}
           headerContent={
             moreThanOneElement
@@ -253,7 +237,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
       ];
       if (iModelConnection) {
         _items.push(
-          <ElementList
+          <ElementListComponent
             iModelConnection={iModelConnection}
             instanceKeys={instanceKeys}
             onBack={() => {
@@ -274,7 +258,7 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   ];
 
   items.push(
-    <PropertyGrid
+    <PropertyGridComponent
       {...props}
       instanceKey={selectedInstanceKey}
       disableUnifiedSelection={true}
@@ -286,12 +270,10 @@ export const MultiElementPropertyGrid = (props: PropertyGridProps) => {
   );
 
   useEffect(() => {
-    if (UiFramework.uiVersion !== "1") {
-      if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
-        widgetDef?.setWidgetState(WidgetState.Open);
-      } else {
-        widgetDef?.setWidgetState(WidgetState.Hidden);
-      }
+    if (instanceKeys.some((key) => !Id64.isTransient(key.id))) {
+      widgetDef?.setWidgetState(WidgetState.Open);
+    } else {
+      widgetDef?.setWidgetState(WidgetState.Hidden);
     }
   }, [widgetDef, instanceKeys]);
 
