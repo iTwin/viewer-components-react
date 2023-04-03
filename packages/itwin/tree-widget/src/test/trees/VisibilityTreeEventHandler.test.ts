@@ -19,7 +19,6 @@ import { flushAsyncOperations } from "../TestUtils";
 import { createSimpleTreeModelNode } from "./Common";
 
 describe("VisibilityTreeEventHandler", () => {
-
   const modelSourceMock = moq.Mock.ofType<TreeModelSource>();
   const modelMock = moq.Mock.ofType<TreeModel>();
   const nodeLoaderMock = moq.Mock.ofType<AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>>();
@@ -42,7 +41,16 @@ describe("VisibilityTreeEventHandler", () => {
     isDisabled: false,
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
+    getVisibilityStatus.returns(testVisibilityStatus);
+    modelMock.setup((x) => x.getNode(moq.It.isAny())).returns(() => createSimpleTreeModelNode());
+    modelSourceMock.setup((x) => x.onModelChanged).returns(() => new BeUiEvent<[TreeModel, TreeModelChanges]>());
+    modelSourceMock.setup((x) => x.getModel()).returns(() => modelMock.object);
+    nodeLoaderMock.setup((x) => x.dataProvider).returns(() => dataProviderMock.object);
+    nodeLoaderMock.setup((x) => x.modelSource).returns(() => modelSourceMock.object);
+  });
+
+  afterEach(() => {
     modelSourceMock.reset();
     modelMock.reset();
     nodeLoaderMock.reset();
@@ -50,13 +58,6 @@ describe("VisibilityTreeEventHandler", () => {
     selectionHandlerMock.reset();
     getVisibilityStatus.reset();
     changeVisibility.reset();
-
-    getVisibilityStatus.returns(testVisibilityStatus);
-    modelMock.setup((x) => x.getNode(moq.It.isAny())).returns(() => createSimpleTreeModelNode());
-    modelSourceMock.setup((x) => x.onModelChanged).returns(() => new BeUiEvent<[TreeModel, TreeModelChanges]>());
-    modelSourceMock.setup((x) => x.getModel()).returns(() => modelMock.object);
-    nodeLoaderMock.setup((x) => x.dataProvider).returns(() => dataProviderMock.object);
-    nodeLoaderMock.setup((x) => x.modelSource).returns(() => modelSourceMock.object);
   });
 
   const createHandler = (partialProps?: Partial<VisibilityTreeEventHandlerParams>): VisibilityTreeEventHandler => {
