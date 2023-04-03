@@ -32,7 +32,7 @@ export class TreeWidget {
   /** Unregisters the TreeWidget internationalization service namespace */
   public static terminate() {
     if (TreeWidget._i18n)
-      TreeWidget._i18n.unregisterNamespace(TreeWidget.i18nNamespace);
+      TreeWidget._i18n.unregisterNamespace(TreeWidget.i18nNamespace); // eslint-disable-line @itwin/no-internal
     TreeWidget._i18n = undefined;
     TreeWidget._initialized = false;
   }

@@ -4,17 +4,16 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./ElementList.scss";
+import classnames from "classnames";
+import * as React from "react";
+import { Logger } from "@itwin/core-bentley";
+import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
+import { IconButton, MenuItem } from "@itwin/itwinui-react";
+import { PresentationLabelsProvider } from "@itwin/presentation-components";
+import { PropertyGridManager } from "../PropertyGridManager";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
-import { PresentationLabelsProvider } from "@itwin/presentation-components";
-import { IconButton, MenuItem } from "@itwin/itwinui-react";
-import classnames from "classnames";
-import * as React from "react";
-
-import { PropertyGridManager } from "../PropertyGridManager";
-import { Logger } from "@itwin/core-bentley";
-import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
 
 export interface ElementListProps {
   iModelConnection: IModelConnection;
