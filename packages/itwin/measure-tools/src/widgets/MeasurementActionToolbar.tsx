@@ -433,7 +433,6 @@ export class MeasurementActionToolbar {
   }
 
   private static buildToolbar(measurements: Measurement[], actionItemList: MeasurementActionItemDef[]): React.ReactNode {
-    console.log("buildingToolbar");
     const toolItems: ToolbarActionItem[] = actionItemList.map((itemDef: MeasurementActionItemDef) => {
       itemDef.measurements = measurements;
       return ToolbarItemUtilities.createActionItem(itemDef.id, 1, itemDef.iconSpec, itemDef.label, itemDef.execute);
