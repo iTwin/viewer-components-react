@@ -5,13 +5,13 @@
 
 import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import type { SelectableContentDefinition } from "@itwin/components-react";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { CategoryTreeProps } from "./components/trees/category-tree/CategoriesTree";
 import type { ModelsTreeProps } from "./components/trees/models-tree/ModelsTree";
 import type { CategoryInfo, ModelInfo } from "./tree-widget-react";
 
 export interface TreeHeaderButtonProps {
-  viewport: Viewport;
+  viewport: ScreenViewport;
 }
 
 export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
