@@ -2,9 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-
-@import "~@itwin/core-react/lib/cjs/core-react/style/index";
-@import "~@itwin/core-react/lib/cjs/core-react/text/index";
+@import "~@itwin/core-react/lib/cjs/core-react/index";
 
 $header-height: 50px;
 
@@ -26,10 +24,6 @@ $header-height: 50px;
   overflow: hidden;
 }
 
-.virtualized-grid-node-content>.components--hoverable:hover {
-  background: $buic-row-hover  !important;
-}
-
 .property-grid-react-panel-label-and-class {
   flex: 1;
   display: block;
@@ -38,8 +32,7 @@ $header-height: 50px;
 
 .property-grid-react-panel-label {
   @include uicore-text(leading);
-  font-size: $uicore-font-size-leading;
-  padding: $uicore-xs 0;
+  padding: var(--iui-size-xs) 0;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -55,7 +48,6 @@ $header-height: 50px;
 
 .property-grid-react-panel-class {
   @include uicore-text;
-  font-size: $uicore-font-size;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -63,22 +55,21 @@ $header-height: 50px;
 
 .property-grid-react-filtering-pg-label {
   @include uicore-text;
-  font-size: $uicore-font-size;
   text-align: center;
-  padding: 0 $uicore-m;
+  padding: 0 var(--iui-size-m);
 }
 
 .property-grid-react-filtering-pg-icon {
   font-size: 64px;
-  color: RGBA(var(--buic-foreground-body-rgb), 0.3);
-  margin-bottom: $uicore-m;
+  color: hsl(var(--iui-color-foreground-hsl) / 0.3);
+  margin-bottom: var(--iui-size-m);
 }
 
 #property-grid-react-element-list-back-btn {
   margin-right: 2px;
   padding: 0 4px;
 
-  >svg {
+  > svg {
     width: 22px;
     height: 22px;
     margin: 0;
