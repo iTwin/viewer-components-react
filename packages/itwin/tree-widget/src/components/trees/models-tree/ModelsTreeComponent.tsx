@@ -3,17 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./ModelsTree.scss";
+import "../VisibilityTreeBase.scss";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import { IModelApp, IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
+import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
+import { Button, IconButton } from "@itwin/itwinui-react";
 import { ModelsTreeHeaderButtonProps, ModelTreeProps } from "../../../types";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 import { ModelsTree } from "./ModelsTree";
-import { IconButton } from "../../IconButton";
 import { TreeWidget } from "../../../TreeWidget";
 import { SearchBar } from "../../search-bar/SearchBar";
 
@@ -140,10 +141,13 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
       className="tree-widget-header-tree-toolbar-icon"
-      icon="icon-visibility"
+      size="small"
+      styleType="borderless"
       title={TreeWidget.translate("showAll")}
       onClick={showAll}
-    />
+    >
+      <SvgVisibilityShow />
+    </IconButton>
   );
 }
 
@@ -156,10 +160,13 @@ function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
       className="tree-widget-header-tree-toolbar-icon"
-      icon="icon-visibility-hide-2"
+      size="small"
+      styleType="borderless"
       title={TreeWidget.translate("hideAll")}
       onClick={hideAll}
-    />
+    >
+      <SvgVisibilityHide />
+    </IconButton>
   );
 }
 
@@ -179,10 +186,13 @@ function InvertButton(props: ModelsTreeHeaderButtonProps) {
   return (
     <IconButton
       className="tree-widget-header-tree-toolbar-icon"
+      size="small"
+      styleType="borderless"
       title={TreeWidget.translate("invert")}
-      icon="icon-visibility-invert"
       onClick={invert}
-    />
+    >
+      <SvgVisibilityHalf />
+    </IconButton>
   );
 }
 
@@ -209,14 +219,17 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
   };
 
   return (
-    <IconButton
+    <Button
       className="tree-widget-header-tree-toolbar-icon"
-      icon={is2dToggleActive ? "icon-visibility" : "icon-visibility-hide-2"}
+      size="small"
+      styleType="borderless"
       title={TreeWidget.translate("toggle2DViews")}
       onClick={viewToggle2D}
-      label={TreeWidget.translate("label2D")}
       disabled={models2d.length === 0}
-    />
+      endIcon={is2dToggleActive ? <SvgVisibilityShow/> : <SvgVisibilityHide />}
+    >
+      {TreeWidget.translate("label2D")}
+    </Button>
   );
 }
 
@@ -244,14 +257,17 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
   };
 
   return (
-    <IconButton
+    <Button
       className="tree-widget-header-tree-toolbar-icon"
-      icon={is3dToggleActive ? "icon-visibility" : "icon-visibility-hide-2"}
+      size="small"
+      styleType="borderless"
       title={TreeWidget.translate("toggle3DViews")}
       onClick={viewToggle3D}
-      label={TreeWidget.translate("label3D")}
       disabled={models3d.length === 0}
-    />
+      endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
+    >
+      {TreeWidget.translate("label3D")}
+    </Button>
   );
 }
 

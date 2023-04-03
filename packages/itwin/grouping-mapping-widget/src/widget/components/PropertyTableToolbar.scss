@@ -2,20 +2,11 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
-@import "~@itwin/itwinui-css/scss/icon/index";
-@import "~@itwin/itwinui-css/scss/button/index";
 
-.gmw-loading-spinner {
+.gmw-property-table-toolbar {
   display: flex;
-  align-items: center;
-}
-
-.gmw-center-overlay {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: $iui-baseline;
-  height: 100%;
+  justify-content: space-between;
+  .gmw-property-table-refresh-button {
+    margin-left: auto;
+  }
 }

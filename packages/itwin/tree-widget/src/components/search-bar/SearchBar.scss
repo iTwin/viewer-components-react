@@ -2,18 +2,41 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
 
 // Buttons dropdown container
 .search-bar-dropdown-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 6px;
+  margin-top: calc(var(--iui-size-2xs) + var(--iui-size-3xs));
+
+  .search-bar-dropdown-menu-item {
+    width: 100%;
+    padding: 0;
+
+    >.iui-content {
+      height: calc(var(--iui-size-xl) + var(--iui-size-2xs));
+
+      >.iui-menu-label {
+        height: 100%;
+
+        >.iui-button {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+  }
+
+  .search-bar-dropdown-menu-item:hover {
+    background-color: transparent;
+    cursor: default;
+  }
 }
 
 .tree-widget-header-tree-toolbar-icon {
-  color: $buic-icon-color;
+  border: 0;
+  padding: 0 calc(var(--iui-size-2xs) + var(--iui-size-3xs));
 }
 
 .tree-widget-search-bar {
@@ -25,14 +48,14 @@
   .search-bar-button-container {
     display: flex;
     align-items: center;
-    width: calc(100% - 26px);
+    width: calc(100% - var(--iui-size-l));
 
     &.right {
       justify-content: flex-end;
     }
 
     &.contracted {
-      width: 32px;
+      width: var(--iui-size-xl);
     }
   }
 
@@ -40,8 +63,8 @@
   .search-bar-search-icon {
     opacity: 0;
     transition: all 0.2s ease;
-    color: $buic-icon-color;
-    height: 32px;
+    color: var(--iui-color-text);
+    height: var(--iui-size-xl);
 
     &.show {
       opacity: 1;
@@ -54,7 +77,7 @@
     height: 100%;
 
     .search-bar-search-box {
-      height: 32px;
+      height: var(--iui-size-xl);
       float: right;
       margin-right: 0;
       box-sizing: border-box;
@@ -67,7 +90,7 @@
       &.show {
         visibility: visible;
         opacity: 1;
-        width: 100%
+        width: 100%;
       }
     }
   }

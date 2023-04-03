@@ -5,8 +5,8 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen } from "../test/test-utils";
-import { WidgetHeader } from "../widget/components/utils";
 import { faker } from "@faker-js/faker";
+import { WidgetHeader } from "../widget/components/WidgetHeader";
 
 describe("Widget Header Component", () => {
   it("title renders", async () => {

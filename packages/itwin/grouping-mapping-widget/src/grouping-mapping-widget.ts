@@ -16,7 +16,10 @@ export { MappingAction, MappingActionProps } from "./widget/components/MappingAc
 export { GroupingMappingContext, GroupingMappingContextProps } from "./widget/components/GroupingMappingContext";
 export { Groupings, GroupingProps } from "./widget/components/Grouping";
 export { GroupAction, GroupActionProps } from "./widget/components/GroupAction";
-export { PropertyMenu } from "./widget/components/PropertyMenu";
+export { PropertyMenu, PropertyMenuProps } from "./widget/components/PropertyMenu";
+export { GroupPropertyAction, GroupPropertyActionProps } from "./widget/components/GroupPropertyAction";
+export { CalculatedPropertyAction, CalculatedPropertyActionProps } from "./widget/components/CalculatedPropertyAction";
+export { CustomCalculationAction, CustomCalculationActionProps } from "./widget/components/CustomCalculationAction";
 export { SearchGroupingCustomUI } from "./widget/components/customUI/SearchGroupingCustomUI";
 export { ManualGroupingCustomUI } from "./widget/components/customUI/ManualGroupingCustomUI";
 export { GroupQueryBuilderCustomUI } from "./widget/components/customUI/GroupQueryBuilderCustomUI";

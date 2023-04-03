@@ -15,10 +15,12 @@ import {
   createMappingClient,
   MappingClientContext,
 } from "./context/MappingClientContext";
-import type { Group, IMappingsClient } from "@itwin/insights-client";
+import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, IMappingsClient } from "@itwin/insights-client";
 import { createGroupingMappingCustomUI, GroupingMappingCustomUIContext } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI";
+import type { QueryCacheItem } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
+import { PropertiesContext } from "./context/PropertiesContext";
 
 export interface GroupingMappingContextProps {
   /**
@@ -59,10 +61,14 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     iModelId: props.iModelId,
     prefix: props.prefix,
   });
-  const hilitedElementsQueryCache = useRef<Map<string, string[]>>(new Map());
+  const hilitedElementsQueryCache = useRef<Map<string, QueryCacheItem>>(new Map());
   const [hiddenGroupsIds, setHiddenGroupsIds] = useState<string[]>([]);
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
+  const [propertiesShowGroup, setPropertiesShowGroup] = useState<boolean>(false);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [groupProperties, setGroupProperties] = useState<GroupProperty[]>([]);
+  const [calculatedProperties, setCalculatedProperties] = useState<CalculatedProperty[]>([]);
+  const [customCalculationProperties, setCustomCalculationProperties] = useState<CustomCalculation[]>([]);
 
   useEffect(() => {
     setApiConfig(() => ({
@@ -93,6 +99,20 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     [groups, hiddenGroupsIds, showGroupColor]
   );
 
+  const propertiesContextValue = useMemo(
+    () => ({
+      showGroupColor: propertiesShowGroup,
+      setShowGroupColor: setPropertiesShowGroup,
+      groupProperties,
+      setGroupProperties,
+      calculatedProperties,
+      setCalculatedProperties,
+      customCalculationProperties,
+      setCustomCalculationProperties,
+    }),
+    [calculatedProperties, customCalculationProperties, groupProperties, propertiesShowGroup]
+  );
+
   const customUIContextValue = useMemo(() => ({
     customUIs,
     setCustomUIs,
@@ -103,7 +123,9 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       <MappingClientContext.Provider value={mappingClient}>
         <GroupingMappingCustomUIContext.Provider value={customUIContextValue}>
           <GroupHilitedElementsContext.Provider value={hilitedElementsContextValue}>
-            {props.children}
+            <PropertiesContext.Provider value={propertiesContextValue}>
+              {props.children}
+            </PropertiesContext.Provider>
           </GroupHilitedElementsContext.Provider>
         </GroupingMappingCustomUIContext.Provider>
       </MappingClientContext.Provider>
