@@ -443,7 +443,6 @@ export class MeasurementActionToolbar {
       usage={ToolbarUsage.ContentManipulation}
       orientation={ToolbarOrientation.Horizontal}
     />;
-
   }
 }
 
