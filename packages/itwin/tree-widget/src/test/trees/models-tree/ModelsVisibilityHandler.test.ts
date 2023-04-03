@@ -35,8 +35,9 @@ describe("ModelsVisibilityHandler", () => {
 
   const imodelMock = moq.Mock.ofType<IModelConnection>();
 
-  beforeEach(() => {
+  afterEach(() => {
     imodelMock.reset();
+    sinon.restore();
   });
 
   interface ViewportMockProps {
@@ -141,8 +142,8 @@ describe("ModelsVisibilityHandler", () => {
     it("should subscribe for 'onIModelHierarchyChanged' event if hierarchy auto update is enabled", () => {
       const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
       const changeEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
-      presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent);
-      void Presentation.initialize({ presentation: presentationManagerMock.object });
+      presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent); // eslint-disable-line @itwin/no-internal
+      sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
       createHandler({ viewport: mockViewport().object, hierarchyAutoUpdateEnabled: true });
       expect(changeEvent.numberOfListeners).to.eq(1);
     });
@@ -164,8 +165,8 @@ describe("ModelsVisibilityHandler", () => {
     it("should unsubscribe from 'onIModelHierarchyChanged' event", () => {
       const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
       const changeEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
-      presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent);
-      void Presentation.initialize({ presentation: presentationManagerMock.object });
+      presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent); // eslint-disable-line @itwin/no-internal
+      sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
       using(createHandler({ viewport: mockViewport().object, hierarchyAutoUpdateEnabled: true }), (_) => { });
       expect(changeEvent.numberOfListeners).to.eq(0);
     });

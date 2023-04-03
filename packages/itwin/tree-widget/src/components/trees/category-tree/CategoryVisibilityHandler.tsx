@@ -87,14 +87,14 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
 
       // make sure parent category is enabled
       if (shouldDisplay && parentId)
-        this.enableCategory([parentId], true, false);
+        await this.enableCategory([parentId], true, false);
 
       this.enableSubCategory(childId, shouldDisplay);
       return;
     }
 
     const instanceId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
-    this.enableCategory([instanceId], shouldDisplay, true);
+    await this.enableCategory([instanceId], shouldDisplay, true);
   }
 
   public getSubCategoryVisibility(id: string) {
@@ -148,8 +148,8 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     return (NodeKey.isInstancesNodeKey(nodeKey) && nodeKey.instanceKeys.length > 0) ? nodeKey.instanceKeys[0].id : /* istanbul ignore next */ "";
   }
 
-  public enableCategory(ids: string[], enabled: boolean, enableAllSubCategories = true) {
-    enableCategory(this._viewManager, this._imodel, ids, enabled, this._useAllViewports, enableAllSubCategories);
+  public async enableCategory(ids: string[], enabled: boolean, enableAllSubCategories = true) {
+    await enableCategory(this._viewManager, this._imodel, ids, enabled, this._useAllViewports, enableAllSubCategories);
   }
 
   public enableSubCategory(key: string, enabled: boolean) {

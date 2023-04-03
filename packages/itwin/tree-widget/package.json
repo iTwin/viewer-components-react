@@ -112,5 +112,16 @@
     "@itwin/presentation-components": "^4.0.0-dev.30",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
+  },
+  "eslintConfig": {
+    "plugins": ["@itwin"],
+    "extends": ["plugin:@itwin/ui"],
+    "rules": {
+      "@itwin/no-internal": ["error"],
+      "@typescript-eslint/no-floating-promises": [
+        "error",
+        { "ignoreIIFE": true }
+      ]
+    }
   }
 }

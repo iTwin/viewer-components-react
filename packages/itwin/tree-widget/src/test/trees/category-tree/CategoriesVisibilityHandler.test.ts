@@ -10,14 +10,13 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import * as UiComponents from "@itwin/components-react";
 import { BeEvent, Id64String, using } from "@itwin/core-bentley";
 import {
-  IModelConnection, PerModelCategoryVisibility, ScreenViewport, ViewManager, Viewport, ViewState,
+  IModelConnection, PerModelCategoryVisibility, ViewManager, Viewport, ViewState,
 } from "@itwin/core-frontend";
 import { ECInstancesNodeKey, StandardNodeTypes } from "@itwin/presentation-common";
 import { renderHook } from "@testing-library/react-hooks";
 import {
   CategoryInfo, CategoryVisibilityHandler, CategoryVisibilityHandlerParams, useCategories,
 } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
-import { SubCategoryAppearance } from "@itwin/core-common";
 
 const createKey = (id: Id64String): ECInstancesNodeKey => {
   return {
@@ -33,10 +32,6 @@ describe("CategoryVisibilityHandler", () => {
   const imodelMock = moq.Mock.ofType<IModelConnection>();
   const viewManagerMock = moq.Mock.ofType<ViewManager>();
   const viewStateMock = moq.Mock.ofType<ViewState>();
-  const selectedViewStateMock = moq.Mock.ofType<ViewState>();
-  const selectedViewMock = moq.Mock.ofType<ScreenViewport>();
-  const categoriesMock = moq.Mock.ofType<IModelConnection.Categories>();
-  const perModelCategoryVisibilityMock = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>();
 
   const categoryNode = { id: "CategoryId", label: PropertyRecord.fromString("category-node"), autoExpand: true };
   const subcategoryNode = { id: "SubCategoryId", label: PropertyRecord.fromString("subcategory-node"), parentId: "CategoryId" };
@@ -45,46 +40,16 @@ describe("CategoryVisibilityHandler", () => {
   (categoryNode as any).__key = categoryKey = createKey(categoryNode.id);
   (subcategoryNode as any).__key = subcategoryKey = createKey(subcategoryNode.id);
 
-  const categories: CategoryInfo[] = [
-    {
-      categoryId: "CategoryId",
-      subCategoryIds: ["SubCategoryId"],
-    },
-  ];
+  const categoryId = "CategoryId";
+  const subCategoryId = "SubCategoryId";
+  const categories: CategoryInfo[] = [{
+    categoryId,
+    subCategoryIds: [subCategoryId],
+  }];
 
   beforeEach(() => {
     imodelMock.reset();
     viewStateMock.reset();
-    viewManagerMock.reset();
-    selectedViewMock.reset();
-    categoriesMock.reset();
-    perModelCategoryVisibilityMock.reset();
-
-    imodelMock.setup((x) => x.categories).returns(() => categoriesMock.object);
-    categoriesMock.setup(async (x) => x.getCategoryInfo("CategoryId")).returns(async () => (
-      new Map(
-        [[
-          categories[0].categoryId,
-          {
-            id: categories[0].categoryId,
-            subCategories: new Map(
-              [[
-                categories[0].subCategoryIds![0],
-                {
-                  id: categories[0].subCategoryIds![0],
-                  categoryId: categories[0].categoryId,
-                  appearance: new SubCategoryAppearance(),
-                },
-              ]]
-            ),
-          },
-        ]]
-      )
-    ));
-    viewManagerMock.setup((x) => x.selectedView).returns(() => selectedViewMock.object);
-    selectedViewMock.setup((x) => x.view).returns(() => selectedViewStateMock.object);
-    selectedViewMock.setup((x) => x.perModelCategoryVisibility).returns(() => perModelCategoryVisibilityMock.object);
-    perModelCategoryVisibilityMock.setup((x) => x[Symbol.iterator]()).returns(() => [][Symbol.iterator]());
   });
 
   afterEach(() => {
@@ -152,7 +117,7 @@ describe("CategoryVisibilityHandler", () => {
         .returns(() => [][Symbol.iterator]());
 
       await using(createHandler({ activeView: mockViewport().object }), async (handler) => {
-        const enableCategorySpy = sinon.spy(handler, "enableCategory");
+        const enableCategorySpy = sinon.stub(handler, "enableCategory");
         await handler.changeVisibility(categoryNode, categoryKey, true);
         expect(enableCategorySpy).to.be.calledWith([categoryNode.id], true, true);
       });
@@ -160,7 +125,7 @@ describe("CategoryVisibilityHandler", () => {
 
     it("calls enableSubcategoryCategory", async () => {
       await using(createHandler({ activeView: mockViewport().object, categories }), async (handler) => {
-        const enableSubCategorySpy = sinon.spy(handler, "enableSubCategory");
+        const enableSubCategorySpy = sinon.stub(handler, "enableSubCategory");
         await handler.changeVisibility(subcategoryNode, subcategoryKey, false);
         expect(enableSubCategorySpy).to.be.calledWith(subcategoryNode.id, false);
       });
@@ -168,8 +133,8 @@ describe("CategoryVisibilityHandler", () => {
 
     it("calls enableSubcategoryCategory and enableCategory to ensure that parent category is enabled", async () => {
       await using(createHandler({ activeView: mockViewport().object, categories }), async (handler) => {
-        const enableCategorySpy = sinon.spy(handler, "enableCategory");
-        const enableSubCategorySpy = sinon.spy(handler, "enableSubCategory");
+        const enableCategorySpy = sinon.stub(handler, "enableCategory");
+        const enableSubCategorySpy = sinon.stub(handler, "enableSubCategory");
         await handler.changeVisibility(subcategoryNode, subcategoryKey, true);
         expect(enableCategorySpy).to.be.calledWith(["CategoryId"], true, false);
         expect(enableSubCategorySpy).to.be.calledWith(subcategoryNode.id, true);

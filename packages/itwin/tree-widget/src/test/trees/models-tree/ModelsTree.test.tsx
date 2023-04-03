@@ -17,7 +17,7 @@ import {
 import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { Presentation, PresentationManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
+import { Presentation, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
   TestIModelBuilder,
@@ -51,11 +51,6 @@ describe("ModelsTree", () => {
   describe("#unit", () => {
     const imodelMock = moq.Mock.ofType<IModelConnection>();
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
-    let presentationManagerMock: moq.IMock<PresentationManager>;
-
-    after(() => {
-      Presentation.terminate();
-    });
 
     beforeEach(() => {
       imodelMock.reset();
@@ -74,9 +69,8 @@ describe("ModelsTree", () => {
       selectionManagerMock.setup((x) => x.getSelection(imodelMock.object, moq.It.isAny())).returns(() => new KeySet());
 
       const mocks = mockPresentationManager();
-      presentationManagerMock = mocks.presentationManager;
-
-      void Presentation.initialize({ presentation: presentationManagerMock.object, selection: selectionManagerMock.object });
+      sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
+      sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
     });
 
     const setupDataProvider = (nodes: TreeNodeItem[]) => {

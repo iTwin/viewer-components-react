@@ -17,7 +17,7 @@ import {
 import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import { ECInstancesNodeKey, KeySet, LabelDefinition, Node, NodePathElement, StandardNodeTypes } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { Presentation, PresentationManager, RulesetVariablesManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
+import { Presentation, RulesetVariablesManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
   TestIModelBuilder,
@@ -41,17 +41,11 @@ describe("CategoryTree", () => {
 
     after(async () => {
       TestUtils.terminate();
-      Presentation.terminate();
       await IModelApp.shutdown();
-    });
-
-    afterEach(() => {
-      sinon.restore();
     });
 
     const imodelMock = moq.Mock.ofType<IModelConnection>();
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
-    let presentationManagerMock: moq.IMock<PresentationManager>;
     let rulesetVariablesMock: moq.IMock<RulesetVariablesManager>;
     const viewportMock = moq.Mock.ofType<Viewport>();
     const viewStateMock = moq.Mock.ofType<SpatialViewState>();
@@ -70,15 +64,17 @@ describe("CategoryTree", () => {
       selectionManagerMock.setup((x) => x.getSelection(imodelMock.object, moq.It.isAny())).returns(() => new KeySet());
 
       const mocks = mockPresentationManager();
-      presentationManagerMock = mocks.presentationManager;
       rulesetVariablesMock = mocks.rulesetVariablesManager;
-
-      void Presentation.initialize({ presentation: presentationManagerMock.object, selection: selectionManagerMock.object });
+      sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
+      sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
 
       viewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
       // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
       viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+    });
 
+    afterEach(() => {
+      sinon.restore();
     });
 
     const createKey = (id: Id64String): ECInstancesNodeKey => {
