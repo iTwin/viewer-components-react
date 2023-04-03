@@ -24,7 +24,7 @@ export class PopupToolbar extends React.PureComponent<PopupToolbarProps> {
 
   constructor(popUpProps: PopupToolbarProps) {
     super(popUpProps);
-    this._toolbar = ToolbarComposer(popUpProps);
+    this._toolbar = <ToolbarComposer items={popUpProps.items} orientation={popUpProps.orientation} usage={popUpProps.usage}/>;
     this._isClosing = false;
 
     this.handleMouseDown = this.handleMouseDown.bind(this);

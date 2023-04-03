@@ -4,17 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import type {
-  ToolbarItem,
-} from "@itwin/appui-abstract";
 import {
   ConditionalBooleanValue,
 } from "@itwin/appui-abstract";
 import type {
+  ToolbarItem,
   ToolItemDef, Widget,
 } from "@itwin/appui-react";
 import {
-  SyncUiEventId, ToolbarHelper, StagePanelLocation, StagePanelSection, StageUsage, ToolbarItemUtilities,
+  SyncUiEventId, ToolbarHelper, StageUsage, ToolbarItemUtilities,
   ToolbarOrientation, ToolbarUsage, UiItemsProvider, WidgetState
 } from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
@@ -31,10 +29,6 @@ const isSheetViewActive = () => !!IModelApp.viewManager.selectedView?.view?.isSh
 export interface MeasureToolsUiProviderOptions {
   itemPriority?: number;
   groupPriority?: number;
-  widgetPlacement?: {
-    location: StagePanelLocation;
-    section?: StagePanelSection;
-  };
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
@@ -45,7 +39,7 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
     this._props = props;
   }
 
-  public provideToolbarButtonItems(
+  public provideToolbarItems(
     _stageId: string,
     stageUsage: string,
     toolbarUsage: ToolbarUsage,
@@ -119,22 +113,13 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
 
   public provideWidgets(
     _stageId: string,
-    stageUsage: string,
-    _location: StagePanelLocation,
-    section?: StagePanelSection | undefined,
   ): ReadonlyArray<Widget> {
     const widgets: Widget[] = [];
-
-    if (
-      (
-        !section &&
-        stageUsage === StageUsage.General
-      )
-    ) {
+    {
       widgets.push({
         id: MeasurementPropertyWidgetId,
         label: MeasureTools.localization.getLocalizedString("MeasureTools:Generic.measurements"),
-        content: () => <MeasurementPropertyWidget />, // eslint-disable-line react/display-name
+        content: <MeasurementPropertyWidget />,
         defaultState: WidgetState.Hidden,
         icon: "icon-measure",
       });
