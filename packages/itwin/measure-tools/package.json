@@ -48,7 +48,6 @@
   ],
   "peerDependencies": {
     "@itwin/appui-abstract": "^3.7.0",
-    "@itwin/appui-layout-react": "^4.0.0.dev-13",
     "@itwin/appui-react": "^4.0.0-dev.13",
     "@itwin/components-react": "^4.0.0-dev.13",
     "@itwin/core-bentley": "^3.7.0",
@@ -63,7 +62,6 @@
   },
   "devDependencies": {
     "@itwin/appui-abstract": "^3.7.0",
-    "@itwin/appui-layout-react": "^4.0.0-dev.13",
     "@itwin/appui-react": "^4.0.0-dev.13",
     "@itwin/build-tools": "^3.7.0",
     "@itwin/certa": "^3.7.0",
