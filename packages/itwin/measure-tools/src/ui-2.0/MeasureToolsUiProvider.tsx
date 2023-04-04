@@ -13,7 +13,8 @@ import type {
 } from "@itwin/appui-react";
 import {
   SyncUiEventId, ToolbarHelper, StageUsage, ToolbarItemUtilities,
-  ToolbarOrientation, ToolbarUsage, UiItemsProvider, WidgetState
+  ToolbarOrientation, ToolbarUsage, UiItemsProvider, WidgetState,
+  StagePanelLocation, StagePanelSection
 } from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
@@ -29,6 +30,10 @@ const isSheetViewActive = () => !!IModelApp.viewManager.selectedView?.view?.isSh
 export interface MeasureToolsUiProviderOptions {
   itemPriority?: number;
   groupPriority?: number;
+  widgetPlacement?: {
+    location: StagePanelLocation;
+    section?: StagePanelSection;
+  };
 }
 
 export class MeasureToolsUiItemsProvider implements UiItemsProvider {
@@ -113,16 +118,27 @@ export class MeasureToolsUiItemsProvider implements UiItemsProvider {
 
   public provideWidgets(
     _stageId: string,
+    stageUsage: string,
+    location: StagePanelLocation,
+    section?: StagePanelSection | undefined,
   ): ReadonlyArray<Widget> {
     const widgets: Widget[] = [];
-    {
-      widgets.push({
-        id: MeasurementPropertyWidgetId,
-        label: MeasureTools.localization.getLocalizedString("MeasureTools:Generic.measurements"),
-        content: <MeasurementPropertyWidget />,
-        defaultState: WidgetState.Hidden,
-        icon: "icon-measure",
-      });
+    const preferredLocation = this._props?.widgetPlacement?.location ?? StagePanelLocation.Right;
+    const preferredSection = this._props?.widgetPlacement?.section ?? StagePanelSection.Start;
+    if (
+      stageUsage === StageUsage.General &&
+      location === preferredLocation &&
+      section === preferredSection
+    ) {
+      {
+        widgets.push({
+          id: MeasurementPropertyWidgetId,
+          label: MeasureTools.localization.getLocalizedString("MeasureTools:Generic.measurements"),
+          content: <MeasurementPropertyWidget />,
+          defaultState: WidgetState.Hidden,
+          icon: "icon-measure",
+        });
+      }
     }
     return widgets;
   }
