@@ -56,7 +56,6 @@
     "@itwin/core-frontend": "^3.7.0",
     "@itwin/core-geometry": "^3.7.0",
     "@itwin/core-react": "^4.0.0-dev.13",
-    "@itwin/ecschema-metadata": "^4.0.0-dev.66",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "redux": "^4.2.1"
