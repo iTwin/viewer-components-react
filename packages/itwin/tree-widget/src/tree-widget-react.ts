@@ -6,6 +6,5 @@
 export * from "./types";
 export * from "./TreeWidget";
 export * from "./components/TreeWidgetComponent";
-export * from "./components/header/TreeHeader";
 export * from "./components/trees";
 export * from "./components/TreeWidgetUiItemsProvider";

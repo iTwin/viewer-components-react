@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useState } from "react";
-import { useResizeObserver } from "@itwin/core-react";
+import { ResizableContainerObserver } from "@itwin/core-react";
 
 export interface Size {
   width: number;
@@ -21,11 +21,10 @@ export const AutoSizer = (props: AutoSizerProps) => {
     setHeight(h);
     setWidth(w);
   }, []);
-  const ref = useResizeObserver<HTMLDivElement>(handleResize);
 
   return (
-    <div ref={ref} style={{ width: "100%", height: "100%" }}>
-      {props.children({ width, height })}
-    </div>
+    <ResizableContainerObserver onResize={handleResize}>
+      {props.children({ height, width })}
+    </ResizableContainerObserver>
   );
 };

@@ -22,6 +22,7 @@ import { PrimitivePropertyRenderer } from "./PrimitivePropertyRenderer";
 import type { PropertyGridColumnInfo } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/PropertyGridColumns";
 import type { HighlightingComponentProps } from "@itwin/components-react/lib/cjs/components-react/common/HighlightingComponentProps";
 import { CommonPropertyRenderer } from "@itwin/components-react/lib/cjs/components-react/properties/renderers/CommonPropertyRenderer";
+import { createNewDisplayValue } from "./createNewDisplayValue";
 
 /** Properties shared by all renderers and PropertyView
  * @public
@@ -125,7 +126,7 @@ PropertyRendererState
       return;
     }
 
-    const displayValue = CommonPropertyRenderer.createNewDisplayValue(
+    const displayValue = createNewDisplayValue(
       props.orientation,
       props.propertyRecord,
       props.indentation,

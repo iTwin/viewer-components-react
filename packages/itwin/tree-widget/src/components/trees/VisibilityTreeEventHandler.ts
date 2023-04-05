@@ -6,20 +6,20 @@
  * @module IModelComponents
  */
 
+import { Observable } from "rxjs";
 import { EMPTY } from "rxjs/internal/observable/empty";
 import { from } from "rxjs/internal/observable/from";
 import { map } from "rxjs/internal/operators/map";
 import { mergeMap } from "rxjs/internal/operators/mergeMap";
-import { toRxjsObservable } from "@itwin/components-react";
-import { CheckBoxState, isPromiseLike } from "@itwin/core-react";
-import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
-import type {
-  CheckBoxInfo, CheckboxStateChange, TreeCheckboxStateChangeEventArgs, TreeModelNode, TreeNodeItem,
+import {
+  CheckBoxInfo, CheckboxStateChange, TreeCheckboxStateChangeEventArgs, TreeModelNode, TreeNodeItem, TreeSelectionChange,
   TreeSelectionModificationEventArgs, TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
-import type { BeEvent, IDisposable } from "@itwin/core-bentley";
-import type { NodeKey } from "@itwin/presentation-common";
-import type { UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
+import { BeEvent, IDisposable } from "@itwin/core-bentley";
+import { CheckBoxState } from "@itwin/core-react";
+import { NodeKey } from "@itwin/presentation-common";
+import { UnifiedSelectionTreeEventHandler, UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
+import { isPromiseLike } from "../utils/IsPromiseLike";
 
 /**
  * Data structure that describes instance visibility status.
@@ -106,7 +106,7 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   public override onSelectionModified({ modifications }: TreeSelectionModificationEventArgs) {
-    const filteredModification = toRxjsObservable(modifications).pipe(
+    const filteredModification = new Observable<TreeSelectionChange>((subscriber) => modifications.subscribe(subscriber)).pipe(
       map(({ selectedNodeItems, deselectedNodeItems }) => {
         return {
           selectedNodeItems: this.filterSelectionItems(selectedNodeItems),
@@ -118,7 +118,7 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   public override onSelectionReplaced({ replacements }: TreeSelectionReplacementEventArgs) {
-    const filteredReplacements = toRxjsObservable(replacements).pipe(
+    const filteredReplacements = new Observable<{ selectedNodeItems: TreeNodeItem[] }>((subscriber) => replacements.subscribe(subscriber)).pipe(
       map(({ selectedNodeItems }) => {
         return {
           selectedNodeItems: this.filterSelectionItems(selectedNodeItems),
@@ -137,10 +137,13 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     if (!this._visibilityHandler)
       return undefined;
 
+    // eslint-disable-next-line deprecation/deprecation
     from(event.stateChanges)
       .pipe(
+        // eslint-disable-next-line deprecation/deprecation
         mergeMap((changes) => this.changeVisibility(changes)),
       )
+      // eslint-disable-next-line deprecation/deprecation
       .subscribe({
         complete: handleStateChanged,
         error: handleStateChanged,
@@ -149,13 +152,16 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   private changeVisibility(changes: CheckboxStateChange[]) {
+    // eslint-disable-next-line deprecation/deprecation
     return from(changes)
       .pipe(
+        // eslint-disable-next-line deprecation/deprecation
         mergeMap(({ nodeItem, newState }) => {
           // istanbul ignore if
           if (!this._visibilityHandler)
             return EMPTY;
           this._isChangingVisibility = true;
+          // eslint-disable-next-line deprecation/deprecation
           return from(this._visibilityHandler.changeVisibility(nodeItem, this.getNodeKey(nodeItem), newState === CheckBoxState.On));
         }, 1),
       );

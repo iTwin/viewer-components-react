@@ -14,6 +14,9 @@ Array [
                   "categoryId": "0x13",
                   "modelId": "0x11",
                 },
+                "filtering": Object {
+                  "descriptor": [Function],
+                },
                 "icon": "icon-item",
                 "label": PropertyRecord {
                   "property": Object {
@@ -51,6 +54,9 @@ Array [
         ],
         "extendedData": Object {
           "isModel": true,
+        },
+        "filtering": Object {
+          "descriptor": [Function],
         },
         "hasChildren": true,
         "icon": "icon-model",
@@ -104,6 +110,9 @@ Array [
                     "extendedData": Object {
                       "categoryId": "0x13",
                       "modelId": "0x11",
+                    },
+                    "filtering": Object {
+                      "descriptor": [Function],
                     },
                     "icon": "icon-item",
                     "label": PropertyRecord {
@@ -160,6 +169,9 @@ Array [
         "extendedData": Object {
           "isModel": true,
         },
+        "filtering": Object {
+          "descriptor": [Function],
+        },
         "hasChildren": true,
         "icon": "icon-model",
         "label": PropertyRecord {
@@ -201,7 +213,7 @@ exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
 <body>
   <div>
     <div
-      class="tree-widget-models-tree"
+      class="tree-widget-visibility-tree-base"
     >
       <div
         class="core-tree components-controlledTree components-smallEditor-host"
@@ -220,6 +232,7 @@ exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
               style="position: absolute; left: 0px; top: 0px; height: 25px; width: 100%;"
             >
               <div
+                aria-selected="false"
                 class="core-tree-node with-checkbox"
                 data-testid="tree-node"
                 role="treeitem"

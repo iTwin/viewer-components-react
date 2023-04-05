@@ -2,42 +2,50 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { StagePanelLocation, StagePanelSection } from "@itwin/appui-abstract";
-import type { SpatialContainmentTreeProps } from "@itwin/appui-react";
+
+import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import type { SelectableContentDefinition } from "@itwin/components-react";
-import type { IModelConnection } from "@itwin/core-frontend";
+import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { CategoryTreeProps } from "./components/trees/category-tree/CategoriesTree";
 import type { ModelsTreeProps } from "./components/trees/models-tree/ModelsTree";
+import type { CategoryInfo, ModelInfo } from "./tree-widget-react";
+
+export interface TreeHeaderButtonProps {
+  viewport: ScreenViewport;
+}
+
+export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
+  models: ModelInfo[];
+}
+
+export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
+  categories: CategoryInfo[];
+  filteredCategories?: CategoryInfo[];
+}
 
 export interface IModelContentTreeProps
   extends Omit<React.AllHTMLAttributes<HTMLDivElement>, "children"> {
   iModel: IModelConnection;
 }
 
-export type ModelTreeProps = Omit<
-ModelsTreeProps,
+export interface ModelTreeProps extends Omit<ModelsTreeProps,
 | "iModel"
 | "activeView"
 | "width"
 | "height"
 | "filterInfo"
 | "onFilterApplied"
->;
+> { headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode> }
 
-export type CategoriesTreeProps = Omit<
-CategoryTreeProps,
+export interface CategoriesTreeProps extends Omit<CategoryTreeProps,
 | "iModel"
 | "activeView"
 | "width"
 | "height"
 | "filterInfo"
 | "onFilterApplied"
->;
-
-export type SpatialTreeProps = Omit<
-SpatialContainmentTreeProps,
-"iModel" | "width" | "height"
->;
+| "categories"
+> { headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode> }
 
 export const ModelsTreeId = "models-tree";
 
@@ -53,11 +61,9 @@ export interface TreeWidgetOptions {
   additionalTrees?: SelectableContentDefinition[];
   modelsTreeProps?: ModelTreeProps;
   categoriesTreeProps?: CategoriesTreeProps;
-  spatialTreeProps?: SpatialTreeProps;
   defaultTreeId?: string;
   hideTrees?: {
     modelsTree?: boolean;
     categoriesTree?: boolean;
-    spatialTree?: boolean;
   };
 }

@@ -6,17 +6,13 @@ import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import {
-  Button,
   ButtonGroup,
   DropdownMenu,
   IconButton,
   MenuItem,
-  ProgressRadial,
   Surface,
-  ToggleSwitch,
 } from "@itwin/itwinui-react";
 import {
-  SvgAdd,
   SvgDelete,
   SvgEdit,
   SvgMore,
@@ -48,6 +44,8 @@ import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI"
 import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { getGroupColor, getHiliteIdsFromGroups, hideGroups, visualizeGroupColors } from "./groupsHelpers";
+import { ToggleGroupVisibility } from "./ToggleGroupVisibility";
+import { GroupsAddButton } from "./GroupsAddButton";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 
@@ -57,6 +55,7 @@ export interface GroupingProps {
   onClickGroupTitle?: (group: Group) => void;
   onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
   onClickRenderContextCustomUI?: (contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>, group: Group) => void;
+  isNonEmphasizedSelectable?: boolean;
   emphasizeElements?: boolean;
 }
 
@@ -91,6 +90,7 @@ export const Groupings = ({
   onClickGroupModify,
   onClickRenderContextCustomUI,
   emphasizeElements = true,
+  isNonEmphasizedSelectable = false,
 }: GroupingProps) => {
   const iModelConnection = useActiveIModelConnection();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
@@ -100,12 +100,8 @@ export const Groupings = ({
     .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];
   const contextUIs: ContextCustomUI[] = useGroupingMappingCustomUI().customUIs
     .filter((p) => p.type === GroupingMappingCustomUIType.Context) as ContextCustomUI[];
-
-  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<Group | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [selectedGroup, setSelectedGroup] = useState<Group | undefined>(
-    undefined,
-  );
   const [isLoadingQuery, setLoadingQuery] = useState<boolean>(false);
 
   const getHiliteIdsFromGroupsWrapper = useCallback(
@@ -125,9 +121,10 @@ export const Groupings = ({
       if (!iModelConnection) return;
       setLoadingQuery(true);
       await visualizeGroupColors(iModelConnection, groups, viewGroups, hiddenGroupsIds, hilitedElementsQueryCache, emphasizeElements);
+      isNonEmphasizedSelectable && clearEmphasizedElements();
       setLoadingQuery(false);
     },
-    [iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache, emphasizeElements],
+    [iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache, emphasizeElements, isNonEmphasizedSelectable],
   );
 
   useEffect(() => {
@@ -207,11 +204,9 @@ export const Groupings = ({
       await showGroup(group);
       setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
     }
-
   };
 
   const refresh = useCallback(async () => {
-    setSelectedGroup(undefined);
     setGroups([]);
     await fetchGroups(
       setGroups,
@@ -243,67 +238,32 @@ export const Groupings = ({
     await zoomToElements(allIds);
   }, [setHiddenGroupsIds, groups, hideGroupsWrapper, getHiliteIdsFromGroupsWrapper]);
 
-  const toggleGroupColor = useCallback(
-    async (e: any) => {
-      if (e.target.checked) {
-        await visualizeGroupColorsWrapper(groups);
-        setShowGroupColor(true);
-      } else {
-        clearEmphasizedOverriddenElements();
-        setShowGroupColor(false);
-      }
-    },
-    [groups, visualizeGroupColorsWrapper, setShowGroupColor],
-  );
-
   return (
     <>
       <Surface className='gmw-groups-container'>
         <div className='gmw-toolbar'>
-          {onClickAddGroup && groupUIs.length > 0 &&
-            <DropdownMenu
-              className='gmw-custom-ui-dropdown'
-              disabled={isLoadingQuery}
-              menuItems={() =>
-                groupUIs.map((p, index) => (
-                  <MenuItem
-                    key={index}
-                    onClick={() => addGroup(p.name)}
-                    icon={p.icon}
-                    className='gmw-menu-item'
-                    data-testid={`gmw-add-${index}`}
-                  >
-                    {p.displayLabel}
-                  </MenuItem>
-                ))
-              }
-            >
-              <Button
-                data-testid="gmw-add-group-button"
-                className='add-load-button'
-                startIcon={
-                  isLoadingQuery ? (
-                    <ProgressRadial size='small' indeterminate />
-                  ) : (
-                    <SvgAdd />
-                  )
-                }
-                styleType='high-visibility'
-                disabled={isLoadingQuery}
-              >
-                {isLoadingQuery ? "Loading" : "Add Group"}
-              </Button>
-            </DropdownMenu>}
+          {onClickAddGroup && groupUIs.length > 0 ? (
+            <GroupsAddButton
+              isLoadingQuery={isLoadingQuery}
+              groupUIs={groupUIs}
+              onClickAddGroup={addGroup}
+            />
+          ) : (
+            <ToggleGroupVisibility
+              isLoadingQuery={isLoadingQuery}
+              showGroupColor={showGroupColor}
+              setShowGroupColor={setShowGroupColor}
+            />
+          )}
           {iModelConnection &&
             <ButtonGroup className='gmw-toolbar-buttons'>
-              <ToggleSwitch
-                label='Color by Group'
-                labelPosition='left'
-                className='gmw-toggle'
-                disabled={isLoadingQuery}
-                checked={showGroupColor}
-                onChange={toggleGroupColor}
-              ></ToggleSwitch>
+              {onClickAddGroup && groupUIs.length > 0 && (
+                <ToggleGroupVisibility
+                  isLoadingQuery={isLoadingQuery}
+                  showGroupColor={showGroupColor}
+                  setShowGroupColor={setShowGroupColor}
+                />
+              )}
               <IconButton
                 title='Show All'
                 onClick={showAll}
@@ -410,7 +370,7 @@ export const Groupings = ({
                                     key={index}
                                     className='gmw-menu-item'
                                     data-testid={`gmw-edit-${index}`}
-                                    onClick={async () => onModify(g, p.name)}
+                                    onClick={async () => {await onModify(g, p.name); close();}}
                                     icon={p.icon}
                                   >
                                     {p.displayLabel}
@@ -442,8 +402,7 @@ export const Groupings = ({
                           <MenuItem
                             key={2}
                             onClick={() => {
-                              setSelectedGroup(g);
-                              setShowDeleteModal(true);
+                              setShowDeleteModal(g);
                               close();
                             }}
                             icon={<SvgDelete />}
@@ -477,16 +436,15 @@ export const Groupings = ({
         )}
       </Surface>
       <DeleteModal
-        entityName={selectedGroup?.groupName ?? ""}
-        show={showDeleteModal}
-        setShow={setShowDeleteModal}
+        entityName={showDeleteModal?.groupName}
+        onClose={() => setShowDeleteModal(undefined)}
         onDelete={async () => {
           const accessToken = await getAccessToken();
           await mappingClient.deleteGroup(
             accessToken,
             iModelId,
             mapping.id,
-            selectedGroup?.id ?? "",
+            showDeleteModal?.id ?? "",
           );
         }}
         refresh={refresh}

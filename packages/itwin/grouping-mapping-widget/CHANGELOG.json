@@ -2,6 +2,71 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.12.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.12.0",
+      "date": "Mon, 03 Apr 2023 15:34:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improved modularity to PropertyMenu, GroupPropertyAction, CalculatedPropertyAction, CustomCalculationAction components."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.1",
+      "tag": "@itwin/grouping-mapping-widget_v0.11.1",
+      "date": "Mon, 27 Mar 2023 10:30:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed a crash that occurred while creating a Group by Selection."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.11.0",
+      "date": "Thu, 23 Mar 2023 15:12:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added support to override Mappings name in Mappings component."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.10.0",
+      "date": "Tue, 07 Mar 2023 15:47:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Insights Client version bump. Removed url dependency."
+          },
+          {
+            "comment": "Added property override to Presentation within Properties selection to display all hidden properties."
+          },
+          {
+            "comment": "Change itwinui-react dependency version control to caret."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Improved modularity to Mapping, MappingAction, Grouping, GroupAction components."
+          },
+          {
+            "comment": "The view of the widget is now handled by a routing component that displays different views based on the \"step\" of the current route."
+          },
+          {
+            "comment": "Added \"GroupingMappingContext\" component to provide a context for all Grouping and Mapping components, including properties such as custom callback to retrieve access token, iModelId, client prefix, custom implementation of MappingClient, and custom UI's for adding and updating groups and providing additional group context capabilities."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.3",
       "tag": "@itwin/grouping-mapping-widget_v0.9.3",
       "date": "Thu, 19 Jan 2023 10:29:18 GMT",

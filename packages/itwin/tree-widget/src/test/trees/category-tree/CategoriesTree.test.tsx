@@ -3,35 +3,30 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import * as React from "react";
 import { expect } from "chai";
 import { join } from "path";
-import * as React from "react";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { BeEvent } from "@itwin/core-bentley";
-import { BisCodeSpec, Code, IModel, RelatedElement } from "@itwin/core-common";
-import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { KeySet, LabelDefinition, StandardNodeTypes } from "@itwin/presentation-common";
+import { TreeNodeItem } from "@itwin/components-react";
+import { BeEvent, Id64String } from "@itwin/core-bentley";
+import {
+  BisCodeSpec, CategoryProps, Code, ElementProps, IModel, ModelProps, PhysicalElementProps, RelatedElement, RelatedElementProps, SubCategoryProps,
+} from "@itwin/core-common";
+import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
+import { ECInstancesNodeKey, KeySet, LabelDefinition, Node, NodePathElement, StandardNodeTypes } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
+import { Presentation, RulesetVariablesManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
+  TestIModelBuilder,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { CategoryTree, RULESET_CATEGORIES, toggleAllCategories } from "../../../components/trees/category-tree/CategoriesTree";
+import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
 import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 import { mockPresentationManager, TestUtils } from "../../TestUtils";
-
-import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-import type { Id64String } from "@itwin/core-bentley";
-import type { IModelConnection, ScreenViewport, SpatialViewState, SubCategoriesCache, ViewManager, Viewport } from "@itwin/core-frontend";
-import type { TreeDataChangesListener, TreeNodeItem } from "@itwin/components-react";
-import type { ECInstancesNodeKey, Node, NodePathElement } from "@itwin/presentation-common";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { PresentationManager, RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
-import type { TestIModelBuilder } from "@itwin/presentation-testing";
-import type { CategoryProps, ElementProps, ModelProps, PhysicalElementProps, RelatedElementProps, SubCategoryProps } from "@itwin/core-common";
 
 describe("CategoryTree", () => {
 
@@ -39,23 +34,18 @@ describe("CategoryTree", () => {
     const sizeProps = { width: 200, height: 200 };
 
     before(async () => {
-      await NoRenderApp.startup();
+      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+      await NoRenderApp.startup(); // eslint-disable-line @itwin/no-internal
       await TestUtils.initialize();
     });
 
     after(async () => {
       TestUtils.terminate();
-      Presentation.terminate();
       await IModelApp.shutdown();
-    });
-
-    afterEach(() => {
-      sinon.restore();
     });
 
     const imodelMock = moq.Mock.ofType<IModelConnection>();
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
-    let presentationManagerMock: moq.IMock<PresentationManager>;
     let rulesetVariablesMock: moq.IMock<RulesetVariablesManager>;
     const viewportMock = moq.Mock.ofType<Viewport>();
     const viewStateMock = moq.Mock.ofType<SpatialViewState>();
@@ -72,21 +62,19 @@ describe("CategoryTree", () => {
       selectionManagerMock.setup((x) => x.selectionChange).returns(() => selectionChangeEvent);
       selectionManagerMock.setup((x) => x.getSelectionLevels(imodelMock.object)).returns(() => []);
       selectionManagerMock.setup((x) => x.getSelection(imodelMock.object, moq.It.isAny())).returns(() => new KeySet());
-      Presentation.setSelectionManager(selectionManagerMock.object);
 
       const mocks = mockPresentationManager();
-      presentationManagerMock = mocks.presentationManager;
       rulesetVariablesMock = mocks.rulesetVariablesManager;
-      Presentation.setPresentationManager(presentationManagerMock.object);
+      sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
+      sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
 
-      async function* generator() {
-        return;
-      }
-
-      imodelMock.setup((x) => x.query(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => generator());
       viewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
-      viewStateMock.setup((x) => x.is3d()).returns(() => true);
+      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+    });
 
+    afterEach(() => {
+      sinon.restore();
     });
 
     const createKey = (id: Id64String): ECInstancesNodeKey => {
@@ -134,6 +122,7 @@ describe("CategoryTree", () => {
         const result = render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
@@ -154,6 +143,7 @@ describe("CategoryTree", () => {
         const result = render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
@@ -169,6 +159,7 @@ describe("CategoryTree", () => {
         render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
@@ -179,10 +170,12 @@ describe("CategoryTree", () => {
 
       it("sets ruleset variable 'ViewType' to '3d'", async () => {
         viewStateMock.reset();
-        viewStateMock.setup((x) => x.is3d()).returns(() => true);
+        // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+        viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
         render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
@@ -194,10 +187,12 @@ describe("CategoryTree", () => {
 
       it("sets ruleset variable 'ViewType' to '2d'", async () => {
         viewStateMock.reset();
-        viewStateMock.setup((x) => x.is3d()).returns(() => false);
+        // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+        viewStateMock.setup((x) => x.is3d()).returns(() => false); // eslint-disable-line @itwin/no-internal
         render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
@@ -214,6 +209,7 @@ describe("CategoryTree", () => {
         const result = render(
           <CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             activeView={viewportMock.object}
@@ -234,6 +230,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -254,6 +251,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -298,6 +296,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -316,6 +315,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -335,6 +335,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               activeView={viewportMock.object}
@@ -362,7 +363,8 @@ describe("CategoryTree", () => {
         it("filters nodes", async () => {
           const filteredNode: Node = {
             key: createKey("filtered-node"),
-            label: LabelDefinition.fromLabelString("filtered-node"),
+            // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+            label: LabelDefinition.fromLabelString("filtered-node"), // eslint-disable-line @itwin/no-internal
           };
           const filterValue: NodePathElement[] = [{ node: filteredNode, children: [], index: 0 }];
           (PresentationTreeDataProvider.prototype.getFilteredNodePaths as any).restore();
@@ -371,6 +373,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
@@ -383,7 +386,8 @@ describe("CategoryTree", () => {
         it("invokes onFilterApplied callback", async () => {
           const filteredNode: Node = {
             key: createKey("filtered-node"),
-            label: LabelDefinition.fromLabelString("filtered-node"),
+            // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+            label: LabelDefinition.fromLabelString("filtered-node"), // eslint-disable-line @itwin/no-internal
           };
           const filterValue: NodePathElement[] = [{ node: filteredNode, children: [], index: 0 }];
           (PresentationTreeDataProvider.prototype.getFilteredNodePaths as any).restore();
@@ -393,6 +397,7 @@ describe("CategoryTree", () => {
           const result = render(
             <CategoryTree
               {...sizeProps}
+              categories={[]}
               viewManager={viewManagerMock.object}
               iModel={imodelMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
@@ -408,6 +413,7 @@ describe("CategoryTree", () => {
         it("renders VisibilityTreeNoFilteredData", async () => {
           const result = render(<CategoryTree
             {...sizeProps}
+            categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
@@ -415,64 +421,6 @@ describe("CategoryTree", () => {
           />);
 
           await waitFor(() => result.getByText("categoriesTree.noCategoryFound"));
-        });
-      });
-
-    });
-
-    describe("toggleAllCategories", () => {
-      const subcategoriesCacheMock = moq.Mock.ofType<SubCategoriesCache>();
-      let enableAllStub: sinon.SinonStub<[ViewManager, IModelConnection, string[], boolean, boolean, (boolean | undefined)?], void>;
-
-      beforeEach(() => {
-        enableAllStub = sinon.stub(CategoryVisibilityHandler, "enableCategory");
-        subcategoriesCacheMock.reset();
-        imodelMock.reset();
-        async function* generator() {
-          yield { id: "CategoryId" };
-          return;
-        }
-
-        imodelMock.setup((x) => x.query(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => generator());
-        imodelMock.setup((x) => x.subcategories).returns(() => subcategoriesCacheMock.object);
-      });
-
-      it("enables all categories", async () => {
-        await toggleAllCategories(viewManagerMock.object, imodelMock.object, true, viewportMock.object);
-        expect(enableAllStub).to.be.calledWith(viewManagerMock.object, imodelMock.object, ["CategoryId"], true);
-      });
-
-      it("disables all categories", async () => {
-        await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object);
-        expect(enableAllStub).to.be.calledWith(viewManagerMock.object, imodelMock.object, ["CategoryId"], false);
-      });
-
-      describe("with filtered dataProvider", () => {
-        let dataProvider: IPresentationTreeDataProvider;
-        let testNode: TreeNodeItem;
-
-        beforeEach(() => {
-          testNode = { id: "filteredNodeId", label: PropertyRecord.fromString("test-node") };
-          dataProvider = {
-            imodel: imodelMock.object,
-            rulesetId: "",
-            onTreeNodeChanged: new BeEvent<TreeDataChangesListener>(),
-            dispose: () => { },
-            getFilteredNodePaths: async () => [],
-            getNodeKey: (node: TreeNodeItem) => (node as any).__key,
-            getNodesCount: async () => 1,
-            getNodes: async () => [{ ...testNode, __key: createKey(testNode.id) }],
-          };
-        });
-
-        it("enables all categories", async () => {
-          await toggleAllCategories(viewManagerMock.object, imodelMock.object, true, viewportMock.object, true, dataProvider);
-          expect(enableAllStub).to.be.calledWith(viewManagerMock.object, imodelMock.object, [testNode.id], true);
-        });
-
-        it("disables all categories", async () => {
-          await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object, true, dataProvider);
-          expect(enableAllStub).to.be.calledWith(viewManagerMock.object, imodelMock.object, [testNode.id], false);
         });
       });
     });

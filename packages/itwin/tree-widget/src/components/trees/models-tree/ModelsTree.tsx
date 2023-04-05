@@ -3,24 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./ModelsTree.scss";
+import "../VisibilityTreeBase.scss";
 import * as React from "react";
-import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
+import { ControlledTree, SelectionMode, TreeNodeItem, useTreeModel } from "@itwin/components-react";
+import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { useDisposable, useOptionalDisposable } from "@itwin/core-react";
-import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
-import { Presentation } from "@itwin/presentation-frontend";
+import { NodeKey, Ruleset } from "@itwin/presentation-common";
+import { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
-import { ClassGroupingOption } from "../Common";
+import { ClassGroupingOption, VisibilityTreeFilterInfo } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { useVisibilityTreeFiltering, useVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
-import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
-import type { VisibilityTreeFilterInfo } from "../Common";
-import type { ModelsTreeSelectionPredicate } from "./ModelsVisibilityHandler";
-import type { TreeNodeItem } from "@itwin/components-react";
-import type { Id64Array } from "@itwin/core-bentley";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { NodeKey, Ruleset } from "@itwin/presentation-common";
-import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { ModelsTreeSelectionPredicate, ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 
 const PAGING_SIZE = 20;
 
@@ -65,11 +59,6 @@ export interface ModelsTreeProps {
    * @alpha
    */
   filterInfo?: VisibilityTreeFilterInfo;
-  /**
-   * Filter the hierarchy by given element IDs.
-   * @alpha
-   */
-  filteredElementIds?: Id64Array;
   /**
    * Callback invoked when tree is filtered.
    */
@@ -135,7 +124,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   }, []);
 
   return (
-    <div className="tree-widget-models-tree" ref={props.rootElementRef}>
+    <div className="tree-widget-visibility-tree-base" ref={props.rootElementRef}>
       <ControlledTree
         nodeLoader={filteredNodeLoader}
         model={treeModel}
@@ -154,18 +143,10 @@ export function ModelsTree(props: ModelsTreeProps) {
 }
 
 function useModelsTreeNodeLoader(props: ModelsTreeProps) {
-  // note: this is a temporary workaround for auto-update not working on ruleset variable changes - instead
-  // of auto-updating we just re-create the node loader by re-creating the ruleset
-  const rulesets = React.useMemo(() => {
-    return {
-      general: (!props.enableElementsClassGrouping) ? { ...RULESET_MODELS } : /* istanbul ignore next */ { ...RULESET_MODELS_GROUPED_BY_CLASS },
-      search: { ...RULESET_MODELS_SEARCH },
-    };
-  }, [props.filteredElementIds]); // eslint-disable-line react-hooks/exhaustive-deps
-  // const rulesets = {
-  //   general: (!props.enableElementsClassGrouping) ? RULESET_MODELS : /* istanbul ignore next */ RULESET_MODELS_GROUPED_BY_CLASS,
-  //   search: RULESET_MODELS_SEARCH,
-  // };
+  const rulesets = {
+    general: (!props.enableElementsClassGrouping) ? RULESET_MODELS : /* istanbul ignore next */ RULESET_MODELS_GROUPED_BY_CLASS,
+    search: RULESET_MODELS_SEARCH,
+  };
 
   const { nodeLoader, onItemsRendered } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
@@ -183,15 +164,6 @@ function useModelsTreeNodeLoader(props: ModelsTreeProps) {
 
   const activeNodeLoader = props.filterInfo?.filter ? searchNodeLoader : nodeLoader;
   const activeItemsRenderedCallback = props.filterInfo?.filter ? onSearchItemsRendered : onItemsRendered;
-
-  const vars = Presentation.presentation.vars(activeNodeLoader.dataProvider.rulesetId);
-  if (props.filteredElementIds) {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    vars.setId64s("filtered-element-ids", props.filteredElementIds);
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    vars.unset("filtered-element-ids");
-  }
 
   return {
     nodeLoader: activeNodeLoader,

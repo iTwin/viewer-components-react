@@ -7,7 +7,8 @@
 import * as React from "react";
 import classnames from "classnames";
 import type { CommonProps } from "@itwin/core-react";
-import { IconButton } from "../IconButton";
+import { SvgChevronDown, SvgChevronUp, SvgCloseSmall } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
 import "./SearchBox.scss";
 import { TreeWidget } from "../../TreeWidget";
 
@@ -28,10 +29,6 @@ export interface SearchBoxProps extends CommonProps {
   onIconClick?: () => void;
   /** Filtering is cleared after everything's loaded */
   onFilterStart: (newFilter: string) => void;
-  /** Filtering is cleared after everything's loaded */
-  onFilterClear?: () => void;
-  /** Filtering is cleared after everything's loaded */
-  onFilterCancel?: () => void;
   /** Tells the component if parent component is still handling the filtering */
   filteringInProgress?: boolean;
   /** Total number of results/entries */
@@ -206,8 +203,6 @@ SearchBoxState
     const { searchText, selectedIndex } = this.state;
     const searchClassName = classnames("tree-widget-searchbox", className);
     const showCount = resultCount > 0;
-    const isPrevEnabled = selectedIndex > 1;
-    const isNextEnabled = selectedIndex < resultCount;
 
     return (
       <div className={searchClassName} style={style}>
@@ -230,27 +225,30 @@ SearchBoxState
           )}
           <div className="searchbox-separator" />
           <IconButton
-            className="searchbox-step-button"
-            icon="icon-chevron-up"
-            disabled={!isPrevEnabled}
+            size="small"
+            styleType="borderless"
             onClick={this._onPrevClick}
             title="Previous"
-          />
+          >
+            <SvgChevronUp />
+          </IconButton>
           <IconButton
-            className="searchbox-step-button"
-            icon="icon-chevron-down"
-            disabled={!isNextEnabled}
+            size="small"
+            styleType="borderless"
             onClick={this._onNextClick}
             title="Next"
-          />
+          >
+            <SvgChevronDown />
+          </IconButton>
         </div>
-        <span
-          className="searchbox-step-button icon icon-close searchbox-close-button"
+        <IconButton
+          size="small"
+          styleType="borderless"
           onClick={this._handleIconClick}
           onKeyDown={this._handleIconClick}
-          role="button"
-          tabIndex={0}
-        />
+        >
+          <SvgCloseSmall />
+        </IconButton>
       </div>
     );
   }

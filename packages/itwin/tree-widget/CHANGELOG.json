@@ -2,6 +2,91 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@itwin/tree-widget-react_v0.8.0",
+      "date": "Mon, 03 Apr 2023 15:34:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Removed `SpatialTree` and related components in favor of the ones in `@itwin/breakdown-trees-react`"
+          },
+          {
+            "comment": "Updated dependencies (`itwinui@2`, `appui@4`, `presentation-components@4`, `itwinjs-core@3.7`)"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Use iTwin UI components instead of custom ones and CSS variables from `@itwin/itwinui-variables` instead of `@itwin/core-react`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.2",
+      "tag": "@itwin/tree-widget-react_v0.7.2",
+      "date": "Fri, 24 Mar 2023 10:46:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed tree filtering not being removed when search box is closed"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.1",
+      "tag": "@itwin/tree-widget-react_v0.7.1",
+      "date": "Thu, 23 Mar 2023 15:12:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "'ModelsTree': Restored 'HideAll' button behavior to hide only models"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.0",
+      "tag": "@itwin/tree-widget-react_v0.7.0",
+      "date": "Mon, 20 Mar 2023 14:48:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "ModelsTree: ensure that the \"Show all\" button is going to show all elements when there are elements with an \"exclusive\" flag"
+          },
+          {
+            "comment": "'2d' and '3d' buttons react to visibility changes in the viewport. The '2d' button will be disabled if no models with the PlanProjection flag are present in the model."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add an option to control what buttons are available in tree toolbars."
+          },
+          {
+            "comment": "Upgrade `itwinjs-core` dependencies to `^3.6.0`"
+          },
+          {
+            "comment": "Upgrade `typescript` to `~4.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.2",
+      "tag": "@itwin/tree-widget-react_v0.6.2",
+      "date": "Thu, 09 Mar 2023 20:08:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "`ModelsTreeComponent`: ensure that the \"show all\" and \"hide all\" buttons affect all iModel content"
+          },
+          {
+            "comment": "Models Tree: Remove unused feature of filtering the tree by element ids"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.1",
       "tag": "@itwin/tree-widget-react_v0.6.1",
       "date": "Thu, 19 Jan 2023 10:29:18 GMT",

@@ -4,21 +4,21 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
+import { EMPTY, from, Subject } from "rxjs";
 import * as sinon from "sinon";
 import * as moq from "typemoq";
+import { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange, TreeModel, TreeModelChanges, TreeModelSource } from "@itwin/components-react";
 import { BeEvent, BeUiEvent, using } from "@itwin/core-bentley";
-import { VisibilityTreeEventHandler } from "../../components/trees/VisibilityTreeEventHandler";
+import { CheckBoxState } from "@itwin/core-react";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { SelectionHandler } from "@itwin/presentation-frontend";
+import {
+  IVisibilityHandler, VisibilityChangeListener, VisibilityStatus, VisibilityTreeEventHandler, VisibilityTreeEventHandlerParams,
+} from "../../components/trees/VisibilityTreeEventHandler";
 import { flushAsyncOperations } from "../TestUtils";
 import { createSimpleTreeModelNode } from "./Common";
-import type { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange, TreeModel, TreeModelChanges, TreeModelSource } from "@itwin/components-react";
-import type { SelectionHandler } from "@itwin/presentation-frontend";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus, VisibilityTreeEventHandlerParams } from "../../components/trees/VisibilityTreeEventHandler";
-import { EMPTY, from, Subject } from "rxjs";
-import { CheckBoxState } from "@itwin/core-react";
 
 describe("VisibilityTreeEventHandler", () => {
-
   const modelSourceMock = moq.Mock.ofType<TreeModelSource>();
   const modelMock = moq.Mock.ofType<TreeModel>();
   const nodeLoaderMock = moq.Mock.ofType<AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>>();
@@ -41,7 +41,16 @@ describe("VisibilityTreeEventHandler", () => {
     isDisabled: false,
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
+    getVisibilityStatus.returns(testVisibilityStatus);
+    modelMock.setup((x) => x.getNode(moq.It.isAny())).returns(() => createSimpleTreeModelNode());
+    modelSourceMock.setup((x) => x.onModelChanged).returns(() => new BeUiEvent<[TreeModel, TreeModelChanges]>());
+    modelSourceMock.setup((x) => x.getModel()).returns(() => modelMock.object);
+    nodeLoaderMock.setup((x) => x.dataProvider).returns(() => dataProviderMock.object);
+    nodeLoaderMock.setup((x) => x.modelSource).returns(() => modelSourceMock.object);
+  });
+
+  afterEach(() => {
     modelSourceMock.reset();
     modelMock.reset();
     nodeLoaderMock.reset();
@@ -49,13 +58,6 @@ describe("VisibilityTreeEventHandler", () => {
     selectionHandlerMock.reset();
     getVisibilityStatus.reset();
     changeVisibility.reset();
-
-    getVisibilityStatus.returns(testVisibilityStatus);
-    modelMock.setup((x) => x.getNode(moq.It.isAny())).returns(() => createSimpleTreeModelNode());
-    modelSourceMock.setup((x) => x.onModelChanged).returns(() => new BeUiEvent<[TreeModel, TreeModelChanges]>());
-    modelSourceMock.setup((x) => x.getModel()).returns(() => modelMock.object);
-    nodeLoaderMock.setup((x) => x.dataProvider).returns(() => dataProviderMock.object);
-    nodeLoaderMock.setup((x) => x.modelSource).returns(() => modelSourceMock.object);
   });
 
   const createHandler = (partialProps?: Partial<VisibilityTreeEventHandlerParams>): VisibilityTreeEventHandler => {
@@ -153,6 +155,7 @@ describe("VisibilityTreeEventHandler", () => {
       changeVisibility.returns(errorSubject);
       await using(eventHandler, async (_) => {
         eventHandler.onCheckboxStateChanged({
+          // eslint-disable-next-line deprecation/deprecation
           stateChanges: from([changes]),
         });
         onVisibilityChange.raiseEvent(["testId1"]);

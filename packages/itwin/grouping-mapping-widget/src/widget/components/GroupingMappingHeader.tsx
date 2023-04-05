@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import type { Route } from "./GroupingMapping";
-import { WidgetHeader } from "./utils";
+import { WidgetHeader } from "./WidgetHeader";
 
 export const GroupingMappingHeader = ({
   routingHistory,

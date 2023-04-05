@@ -1,6 +1,13 @@
 # Change Log - @itwin/one-click-lca-react
 
-This log was last generated on Mon, 26 Sep 2022 17:13:11 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Mar 2023 15:47:41 GMT and should not be manually modified.
+
+## 0.3.0
+Tue, 07 Mar 2023 15:47:41 GMT
+
+### Minor changes
+
+- Insights Client version bump. Removed url dependency.
 
 ## 0.2.0
 Mon, 26 Sep 2022 17:13:11 GMT

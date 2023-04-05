@@ -3,19 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { TreeNodeItem } from "@itwin/components-react";
-import type { Id64String } from "@itwin/core-bentley";
-import { BeEvent } from "@itwin/core-bentley";
+import { TreeNodeItem } from "@itwin/components-react";
+import { BeEvent, Id64String } from "@itwin/core-bentley";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
-import { PerModelCategoryVisibility } from "@itwin/core-frontend";
-import { KeySet, NodeKey } from "@itwin/presentation-common";
+import { IModelConnection, PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
+import { ECClassGroupingNodeKey, GroupingNodeKey, Keys, KeySet, NodeKey } from "@itwin/presentation-common";
+import { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
+import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import { CachingElementIdsContainer } from "./Utils";
-import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { ECClassGroupingNodeKey, GroupingNodeKey, Keys } from "@itwin/presentation-common";
-import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
 /**
  * Visibility tree node types.
@@ -70,7 +67,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     this._listeners.push(this._props.viewport.onAlwaysDrawnChanged.addListener(this.onElementAlwaysDrawnChanged));
     this._listeners.push(this._props.viewport.onNeverDrawnChanged.addListener(this.onElementNeverDrawnChanged));
     if (this._props.hierarchyAutoUpdateEnabled) {
-      this._listeners.push(Presentation.presentation.onIModelHierarchyChanged.addListener(/* istanbul ignore next */() => this._elementIdsCache.clear()));
+      this._listeners.push(Presentation.presentation.onIModelHierarchyChanged.addListener(/* istanbul ignore next */() => this._elementIdsCache.clear())); // eslint-disable-line @itwin/no-internal
     }
   }
 
@@ -420,21 +417,21 @@ export class SubjectModelIdsCache {
   }
 
   private async initSubjectModels() {
-    const querySubjects = (): AsyncIterableIterator<{ id: Id64String, parentId?: Id64String, targetPartitionId?: Id64String }> => {
+    const querySubjects = async (): Promise<Array<{ id: Id64String, parentId?: Id64String, targetPartitionId?: Id64String }>> => {
       const subjectsQuery = `
         SELECT ECInstanceId id, Parent.Id parentId, json_extract(JsonProperties, '$.Subject.Model.TargetPartition') targetPartitionId
         FROM bis.Subject
       `;
-      return this._imodel.query(subjectsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
+      return this._imodel.createQueryReader(subjectsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
     };
-    const queryModels = (): AsyncIterableIterator<{ id: Id64String, parentId: Id64String }> => {
+    const queryModels = async (): Promise<Array<{ id: Id64String, parentId: Id64String }>> => {
       const modelsQuery = `
         SELECT p.ECInstanceId id, p.Parent.Id parentId
         FROM bis.InformationPartitionElement p
         INNER JOIN bis.GeometricModel3d m ON m.ModeledElement.Id = p.ECInstanceId
         WHERE NOT m.IsPrivate
       `;
-      return this._imodel.query(modelsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
+      return this._imodel.createQueryReader(modelsQuery, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
     };
 
     function pushToMap<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue) {
@@ -448,7 +445,7 @@ export class SubjectModelIdsCache {
 
     this._subjectsHierarchy = new Map();
     const targetPartitionSubjects = new Map<Id64String, Id64String[]>();
-    for await (const subject of querySubjects()) {
+    for (const subject of await querySubjects()) {
       // istanbul ignore else
       if (subject.parentId)
         pushToMap(this._subjectsHierarchy, subject.parentId, subject.id);
@@ -458,7 +455,7 @@ export class SubjectModelIdsCache {
     }
 
     this._subjectModels = new Map();
-    for await (const model of queryModels()) {
+    for (const model of await queryModels()) {
       // istanbul ignore next
       const subjectIds = targetPartitionSubjects.get(model.id) ?? [];
       // istanbul ignore else
@@ -563,10 +560,10 @@ async function createGroupedElementsInfo(imodel: IModelConnection, rulesetId: st
 
   let modelId, categoryId;
   const query = `SELECT Model.Id AS modelId, Category.Id AS categoryId FROM bis.GeometricElement3d WHERE ECInstanceId = ? LIMIT 1`;
-  for await (const modelAndCategoryIds of imodel.query(query, QueryBinder.from([elementId.value]), { rowFormat: QueryRowFormat.UseJsPropertyNames })) {
-    modelId = modelAndCategoryIds.modelId;
-    categoryId = modelAndCategoryIds.categoryId;
-    break;
+  const reader = imodel.createQueryReader(query, QueryBinder.from([elementId.value]), { rowFormat: QueryRowFormat.UseJsPropertyNames });
+  if (await reader.step()) {
+    modelId = reader.current.modelId;
+    categoryId = reader.current.categoryId;
   }
   return { modelId, categoryId, elementIds: groupedElementIdsContainer };
 }

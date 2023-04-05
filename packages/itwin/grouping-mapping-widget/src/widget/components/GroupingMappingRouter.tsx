@@ -3,11 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
+import { CalculatedPropertyAction } from "./CalculatedPropertyAction";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { CustomCalculationAction } from "./CustomCalculationAction";
 import { GroupAction } from "./GroupAction";
 import { Groupings } from "./Grouping";
 import type { Route } from "./GroupingMapping";
 import { RouteStep } from "./GroupingMapping";
+import { GroupPropertyAction } from "./GroupPropertyAction";
 import { Mappings } from "./Mapping";
 import { MappingAction } from "./MappingAction";
 import { PropertyMenu } from "./PropertyMenu";
@@ -22,7 +25,7 @@ export const GroupingMappingRouter = ({
   goBack: () => void;
 }) => {
   const { iModelId } = useGroupingMappingApiConfig();
-  const { mapping, group, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
+  const { mapping, group, property, calculatedProperty, customCalculation, groupContextCustomUI, queryGenerationType } = currentRoute.groupingRouteFields;
 
   switch (currentRoute.step) {
     case RouteStep.Mappings:
@@ -112,14 +115,73 @@ export const GroupingMappingRouter = ({
       if (mapping && group) {
         return (
           <PropertyMenu
-            iModelId={iModelId}
-            mappingId={mapping.id}
+            mapping={mapping}
             group={group}
-            goBack={async () => goBack()}
+            color="red"
+            onClickAddGroupProperty={() =>
+              navigateTo((prev) => ({ step: RouteStep.PropertyAction, title: "Add Property", groupingRouteFields: { ...prev?.groupingRouteFields } }))
+            }
+            onClickModifyGroupProperty={(gp) =>
+              navigateTo((prev) => ({ step: RouteStep.PropertyAction, title: gp.propertyName, groupingRouteFields: { ...prev?.groupingRouteFields, property: gp } }))
+            }
+            onClickAddCalculatedProperty={() =>
+              navigateTo((prev) => ({ step: RouteStep.CalculatedPropertyAction, title: "Create Calculated Property", groupingRouteFields: { ...prev?.groupingRouteFields } }))
+            }
+            onClickModifyCalculatedProperty={(cp) =>
+              navigateTo((prev) => ({ step: RouteStep.CalculatedPropertyAction, title: cp.propertyName, groupingRouteFields: { ...prev?.groupingRouteFields, calculatedProperty: cp } }))
+            }
+            onClickAddCustomCalculationProperty={() =>
+              navigateTo((prev) => ({ step: RouteStep.CustomCalculationPropertyAction, title: "Create Custom Calculation", groupingRouteFields: { ...prev?.groupingRouteFields } }))
+            }
+            onClickModifyCustomCalculation={(cc) =>
+              navigateTo((prev) => ({ step: RouteStep.CustomCalculationPropertyAction, title: cc.propertyName, groupingRouteFields: { ...prev?.groupingRouteFields, customCalculation: cc } }))
+            }
           />
         );
       }
       return null;
+    case RouteStep.PropertyAction: {
+      if (mapping && group) {
+        return (
+          <GroupPropertyAction
+            mappingId={mapping.id}
+            group={group}
+            groupProperty={property}
+            onSaveSuccess={goBack}
+            onClickCancel={goBack}
+          />
+        );
+      }
+      return null;
+    }
+    case RouteStep.CalculatedPropertyAction: {
+      if (mapping && group) {
+        return (
+          <CalculatedPropertyAction
+            mappingId={mapping.id}
+            group={group}
+            calculatedProperty={calculatedProperty}
+            onSaveSuccess={goBack}
+            onClickCancel={goBack}
+          />
+        );
+      }
+      return null;
+    }
+    case RouteStep.CustomCalculationPropertyAction: {
+      if (mapping && group) {
+        return (
+          <CustomCalculationAction
+            mappingId={mapping.id}
+            groupId={group.id}
+            customCalculation={customCalculation}
+            onSaveSuccess={goBack}
+            onClickCancel={goBack}
+          />
+        );
+      }
+      return null;
+    }
     default:
       return null;
   }

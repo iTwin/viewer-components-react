@@ -3,14 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Id64String } from "@itwin/core-bentley";
-import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
-import { Id64 } from "@itwin/core-bentley";
+import { PropertyDescription, PropertyRecord, PropertyValue, PropertyValueFormat } from "@itwin/appui-abstract";
+import { TreeModelNode } from "@itwin/components-react";
+import { Id64, Id64String } from "@itwin/core-bentley";
 import { CheckBoxState } from "@itwin/core-react";
-import { StandardNodeTypes } from "@itwin/presentation-common";
-import type { ECClassGroupingNodeKey, ECInstancesNodeKey, InstanceKey } from "@itwin/presentation-common";
-import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
-import type { TreeModelNode } from "@itwin/components-react";
+import { ECClassGroupingNodeKey, ECInstancesNodeKey, InstanceKey, StandardNodeTypes } from "@itwin/presentation-common";
 
 export const createSimpleTreeModelNode = (id?: string): TreeModelNode => {
   const label = createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Node Label" });

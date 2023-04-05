@@ -8,6 +8,12 @@ Each one has it's own folder and README describing the package.
 
 ## List of actively maintained packages within this repository
 
+### iTwin.js@^4 Compatible
+
+| Name                            | Folder                                                              | Changelog                                                          | Version                                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| @itwin/map-layers        | [map-layers](./packages/itwin/map-layers/)                        | [changelog](./packages/itwin/map-layers/CHANGELOG.md)             | [![npm version](https://badge.fury.io/js/%40itwin%2Fmap-layers.svg)](https://badge.fury.io/js/%40itwin%2Fmap-layers)               |
+
 ### iTwin.js@^3 Compatible
 
 | Name                            | Folder                                                              | Changelog                                                          | Version                                                                                                                                          |
@@ -21,6 +27,7 @@ Each one has it's own folder and README describing the package.
 | @itwin/imodel-react-hooks       | [imodel-react-hooks](./packages/itwin/imodel-react-hooks)           | [changelog](./packages/itwin/imodel-react-hooks/CHANGELOG.md)      | [![npm version](https://badge.fury.io/js/%40itwin%2Fimodel-react-hooks.svg)](https://badge.fury.io/js/%40itwin%2Fimodel-react-hooks)             |
 | @itwin/one-click-lca-react      | [one-click-lca-widget](./packages/itwin/one-click-lca-widget)       | [changelog](./packages/itwin/one-click-lca-widget/CHANGELOG.md)    | [![npm version](https://badge.fury.io/js/%40itwin%2Fone-click-lca-react.svg)](https://badge.fury.io/js/%40itwin%2Fone-click-lca-react)           |
 | @itwin/infrastructure-iot-react | [infrastructure-iot](./packages/itwin/infrastructure-iot)           | [changelog](./packages/itwin/infrastructure-iot/CHANGELOG.md)      | [![npm version](https://badge.fury.io/js/%40itwin%2Finfrastructure-iot-react.svg)](https://badge.fury.io/js/%40itwin%2Finfrastructure-iot-react) |
+| @itwin/ec3-widget-react         | [ec3-widget](./packages/itwin/ec3-widget)                           | [changelog](./packages/itwin/ec3-widget/CHANGELOG.md)              | [![npm version](https://badge.fury.io/js/%40itwin%2Fec3-widget-react.svg)](https://badge.fury.io/js/%40itwin%2Fec3-widget-react)                 |
 | @itwin/reports-config-widget-react     | [reports-config-widget](./packages/itwin/reports-config-widget)       | [changelog](./packages/itwin/reports-config-widget/CHANGELOG.md)    | [![npm version](https://badge.fury.io/js/%40itwin%2Freports-config-widget-react.svg)](https://badge.fury.io/js/%40itwin%2Freports-config-widget-react)
 
 ## Archived

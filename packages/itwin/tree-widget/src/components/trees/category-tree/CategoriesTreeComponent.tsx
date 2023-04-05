@@ -2,21 +2,42 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import "./CategoriesTree.scss";
-import React, { useCallback } from "react";
+import "../VisibilityTreeBase.scss";
+import React, { useEffect, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
-import { IModelApp } from "@itwin/core-frontend";
-import { CategoryTree, getCategories, toggleAllCategories } from "./CategoriesTree";
-import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
-import { TreeHeaderComponent } from "../../header/TreeHeader";
+import { IModelApp, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
+import { IconButton } from "@itwin/itwinui-react";
+import { CategoryTree } from "./CategoriesTree";
+import { CategoryInfo, CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
+import { enableCategory } from "../CategoriesVisibilityUtils";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
-import type { CategoriesTreeProps } from "../../../types";
+import type { CategoriesTreeHeaderButtonProps, CategoriesTreeProps } from "../../../types";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { TreeWidget } from "../../../TreeWidget";
+import { SearchBar } from "../../search-bar/SearchBar";
 
 export function CategoriesTreeComponent(props: CategoriesTreeProps) {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
+  if (!iModel || !viewport) {
+    return null;
+  }
+
+  return (
+    <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
+  );
+}
+
+CategoriesTreeComponent.ShowAllButton = ShowAllButton;
+CategoriesTreeComponent.HideAllButton = HideAllButton;
+CategoriesTreeComponent.InvertButton = InvertButton;
+
+function CategoriesTreeComponentImpl(props: CategoriesTreeProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
+  const categories = useCategories(IModelApp.viewManager, props.iModel, props.viewport);
+  const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[]>();
   const {
     searchOptions,
     filterString,
@@ -25,86 +46,150 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
     filteredProvider,
   } = useTreeFilteringState();
 
-  const showAll = useCallback(async () => {
-    if (!iModel) return;
+  useEffect(() => {
+    (async () => {
+      if (filteredProvider)
+        setFilteredCategories((await getFilteredCategories(filteredProvider)).map((category) => ({ categoryId: category })));
+      else
+        setFilteredCategories(undefined);
+    })();
+  }, [filteredProvider]);
 
-    return toggleAllCategories(
+  return (
+    <>
+      <SearchBar
+        value=""
+        valueChangedDelay={500}
+        placeholder={TreeWidget.translate("search")}
+        title={TreeWidget.translate("searchForSomething")}
+        filteringInProgress={searchOptions.isFiltering}
+        onFilterClear={searchOptions.onFilterCancel}
+        onFilterStart={searchOptions.onFilterStart}
+        onSelectedChanged={searchOptions.onResultSelectedChanged}
+        resultCount={searchOptions.matchedResultCount ?? 0}
+      >
+        {props.headerButtons
+          ? props.headerButtons.map((btn, index) =>
+            <React.Fragment key={index}>
+              {btn({ viewport: props.viewport, categories, filteredCategories })}
+            </React.Fragment>)
+          : [
+            <ShowAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="show-all-btn" />,
+            <HideAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="hide-all-btn" />,
+            <InvertButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="invert-all-btn" />,
+          ]
+        }
+      </SearchBar>
+      <AutoSizer>
+        {({ width, height }) => (
+          <CategoryTree
+            {...props}
+            categories={categories}
+            width={width}
+            height={height}
+            filterInfo={{ filter: filterString, activeMatchIndex }}
+            onFilterApplied={onFilterApplied}
+          />
+        )}
+      </AutoSizer>
+    </>
+  );
+}
+
+async function getFilteredCategories(filteredProvider: IPresentationTreeDataProvider) {
+  const nodes = await filteredProvider.getNodes();
+  return nodes.map((node) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredProvider.getNodeKey(node)));
+}
+
+function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
+  const showAll = async () => {
+    await enableCategory(
       IModelApp.viewManager,
-      iModel,
+      props.viewport.iModel,
+      (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
       true,
-      undefined,
       true,
-      filteredProvider
     );
-  }, [iModel, filteredProvider]);
+  };
 
-  const hideAll = useCallback(async () => {
-    if (!iModel) return;
-    return toggleAllCategories(
+  return (
+    <IconButton
+      className="tree-widget-header-tree-toolbar-icon"
+      size="small"
+      styleType="borderless"
+      title={TreeWidget.translate("showAll")}
+      onClick={showAll}
+    >
+      <SvgVisibilityShow />
+    </IconButton>
+  );
+}
+
+function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
+  const hideAll = async () => {
+    await enableCategory(
       IModelApp.viewManager,
-      iModel,
+      props.viewport.iModel,
+      (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
       false,
-      undefined,
       true,
-      filteredProvider
     );
-  }, [iModel, filteredProvider]);
+  };
 
-  const invert = useCallback(async () => {
-    if (!iModel || !viewport) return;
+  return (
+    <IconButton
+      className="tree-widget-header-tree-toolbar-icon"
+      size="small"
+      styleType="borderless"
+      title={TreeWidget.translate("hideAll")}
+      onClick={hideAll}
+    >
+      <SvgVisibilityHide />
+    </IconButton>
+  );
+}
 
-    const ids = await getCategories(iModel, viewport, filteredProvider);
+function InvertButton(props: CategoriesTreeHeaderButtonProps) {
+  const invert = async () => {
+    const ids = (props.filteredCategories ?? props.categories).map((category) => category.categoryId);
+
     const enabled: string[] = [];
     const disabled: string[] = [];
     for (const id of ids) {
-      if (viewport.view.viewsCategory(id)) {
+      if (props.viewport.view.viewsCategory(id)) {
         enabled.push(id);
       } else {
         disabled.push(id);
       }
     }
     // Disable enabled
-    CategoryVisibilityHandler.enableCategory(
+    await enableCategory(
       IModelApp.viewManager,
-      iModel,
+      props.viewport.iModel,
       enabled,
       false,
       true
     );
+
     // Enable disabled
-    CategoryVisibilityHandler.enableCategory(
+    await enableCategory(
       IModelApp.viewManager,
-      iModel,
+      props.viewport.iModel,
       disabled,
       true,
       true
     );
-  }, [iModel, viewport, filteredProvider]);
+  };
 
   return (
-    <>
-      {iModel && viewport &&
-        <>
-          <TreeHeaderComponent
-            searchOptions={searchOptions}
-            showAll={showAll}
-            hideAll={hideAll}
-            invert={invert}
-          />
-          <AutoSizer>
-            {({ width, height }) => (
-              <CategoryTree
-                {...props}
-                iModel={iModel}
-                width={width}
-                height={height}
-                filterInfo={{ filter: filterString, activeMatchIndex }}
-                onFilterApplied={onFilterApplied}
-              />
-            )}
-          </AutoSizer>
-        </>
-      }
-    </>
+    <IconButton
+      className="tree-widget-header-tree-toolbar-icon"
+      title={TreeWidget.translate("invert")}
+      size="small"
+      styleType="borderless"
+      onClick={invert}
+    >
+      <SvgVisibilityHalf />
+    </IconButton>
   );
 }

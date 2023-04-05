@@ -1,6 +1,54 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Thu, 19 Jan 2023 10:29:18 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Apr 2023 15:34:07 GMT and should not be manually modified.
+
+## 0.8.0
+Mon, 03 Apr 2023 15:34:07 GMT
+
+### Minor changes
+
+- Removed `SpatialTree` and related components in favor of the ones in `@itwin/breakdown-trees-react`
+- Updated dependencies (`itwinui@2`, `appui@4`, `presentation-components@4`, `itwinjs-core@3.7`)
+
+### Patches
+
+- Use iTwin UI components instead of custom ones and CSS variables from `@itwin/itwinui-variables` instead of `@itwin/core-react`
+
+## 0.7.2
+Fri, 24 Mar 2023 10:46:34 GMT
+
+### Patches
+
+- Fixed tree filtering not being removed when search box is closed
+
+## 0.7.1
+Thu, 23 Mar 2023 15:12:36 GMT
+
+### Patches
+
+- 'ModelsTree': Restored 'HideAll' button behavior to hide only models
+
+## 0.7.0
+Mon, 20 Mar 2023 14:48:35 GMT
+
+### Minor changes
+
+- Add an option to control what buttons are available in tree toolbars.
+- Upgrade `itwinjs-core` dependencies to `^3.6.0`
+- Upgrade `typescript` to `~4.4.0`
+
+### Patches
+
+- ModelsTree: ensure that the "Show all" button is going to show all elements when there are elements with an "exclusive" flag
+- '2d' and '3d' buttons react to visibility changes in the viewport. The '2d' button will be disabled if no models with the PlanProjection flag are present in the model.
+
+## 0.6.2
+Thu, 09 Mar 2023 20:08:53 GMT
+
+### Patches
+
+- `ModelsTreeComponent`: ensure that the "show all" and "hide all" buttons affect all iModel content
+- Models Tree: Remove unused feature of filtering the tree by element ids
 
 ## 0.6.1
 Thu, 19 Jan 2023 10:29:18 GMT
@@ -165,6 +213,10 @@ Tue, 13 Jul 2021 17:43:28 GMT
 ### Minor changes
 
 - Added a UiProvider that implements the existing tree widget
+
+### Updates
+
+- add rebuild script
 
 ## 1.3.1
 Tue, 08 Jun 2021 21:23:59 GMT
