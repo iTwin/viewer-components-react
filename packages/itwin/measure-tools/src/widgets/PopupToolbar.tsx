@@ -3,67 +3,45 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 /* eslint-disable deprecation/deprecation */
-
 import * as React from "react";
+import { useEffect, useState, useRef }from "react";
 import { ToolbarComposer } from "@itwin/appui-react";
 import { ExtensibleToolbarProps } from "@itwin/appui-react";
 
-/** Popup toolbar properties. */
 export interface PopupToolbarProps extends ExtensibleToolbarProps {
   onClose?: () => void;
 }
 
-/** A wrapper around the nine-zone toolbar that can be used as a Popup menu, it hooks into document
- * events to determine if the user clicked outside or used the mouse wheel, which will invoke a close
- * handler.
- */
-export class PopupToolbar extends React.PureComponent<PopupToolbarProps> {
-  private _toolbar: JSX.Element;
-  private _wrapperRef?: any;
-  private _isClosing: boolean;
+export const PopupToolbar: React.FC<PopupToolbarProps> = ({ items, usage, orientation, onClose }: PopupToolbarProps) => {
+  const [isClosing, setIsClosing] = useState<boolean>(false);
 
-  constructor(popUpProps: PopupToolbarProps) {
-    super(popUpProps);
-    this._toolbar = <ToolbarComposer items={popUpProps.items} orientation={popUpProps.orientation} usage={popUpProps.usage}/>;
-    this._isClosing = false;
+  const ref = useRef(null);
 
-    this.handleMouseDown = this.handleMouseDown.bind(this);
-    this.handleMouseWheel = this.handleMouseWheel.bind(this);
-    this.setWrapperRef = this.setWrapperRef.bind(this);
-  }
-
-  public override componentDidMount() {
-    document.addEventListener("mousedown", this.handleMouseDown);
-    document.addEventListener("wheel", this.handleMouseWheel);
-  }
-
-  public override componentWillUnmount() {
-    document.removeEventListener("mousedown", this.handleMouseDown);
-    document.removeEventListener("wheel", this.handleMouseWheel);
-    this._isClosing = false;
-  }
-
-  private handleMouseWheel(_event: WheelEvent) {
-    if (!this._isClosing && this.props.onClose) {
-      this.props.onClose();
-      this._isClosing = true;
+  const handleMouseWheel = () => {
+    if (!isClosing && onClose) {
+      onClose();
+      setIsClosing(true);
     }
   }
 
-  private handleMouseDown(event: MouseEvent) {
-    if (!this._isClosing && this.props.onClose !== undefined && this._wrapperRef && !this._wrapperRef.contains(event.target)) {
-      this.props.onClose();
-      this._isClosing = true;
+  const handleMouseDown = () => {
+    if (!isClosing && onClose) {
+      setIsClosing(true);
     }
   }
 
-  private setWrapperRef(node: any) {
-    this._wrapperRef = node;
-  }
+  useEffect(() => {   
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("wheel", handleMouseWheel);
 
-  public override render() {
-    return (<div ref={this.setWrapperRef}>
-      {this._toolbar}
-    </div>);
-  }
-}
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("wheel", handleMouseWheel);
+      setIsClosing(false);
+    }
+  }, [])
+
+  return <div ref={ref}>
+    <ToolbarComposer items={items} orientation={orientation} usage={usage} />
+  </div>
+};
