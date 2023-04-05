@@ -4,10 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import classnames from "classnames";
-import SvgStatusSuccess from "@itwin/itwinui-icons-react/esm/icons/StatusSuccess";
-import SvgStatusError from "@itwin/itwinui-icons-react/esm/icons/StatusError";
-import SvgStatusWarning from "@itwin/itwinui-icons-react/esm/icons/StatusWarning";
-import SvgInfoCircular from "@itwin/itwinui-icons-react/esm/icons/InfoCircular";
+import { SvgInfoCircular, SvgStatusError, SvgStatusSuccess, SvgStatusWarning } from "@itwin/itwinui-icons-react";
 import "./StatusIcon.scss";
 
 const StatusIconMap = {

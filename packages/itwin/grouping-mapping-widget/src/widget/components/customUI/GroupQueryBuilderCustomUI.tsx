@@ -120,17 +120,15 @@ export const GroupQueryBuilderCustomUI = ({
       ) :
         <>
           <div className="gmw-select-property-grid-container">
-            <div className="gmw-select-property-grid">
-              <ResizableContainerObserver onResize={resize} />
-              <PropertyGridWrapperContext.Provider value={propertyContextValues}>
-                <VirtualizedPropertyGridWithDataProvider
-                  dataProvider={dataProvider}
-                  width={size.width}
-                  height={size.height}
-                  actionButtonRenderers={actionButtonRenderers}
-                />
-              </PropertyGridWrapperContext.Provider>
-            </div>
+            <ResizableContainerObserver onResize={resize} />
+            <PropertyGridWrapperContext.Provider value={propertyContextValues}>
+              <VirtualizedPropertyGridWithDataProvider
+                dataProvider={dataProvider}
+                width={size.width}
+                height={size.height}
+                actionButtonRenderers={actionButtonRenderers}
+              />
+            </PropertyGridWrapperContext.Provider>
           </div>
           <div className="gmw-select-reset-button">
             <Button
