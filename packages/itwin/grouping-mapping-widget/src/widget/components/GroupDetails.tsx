@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 import { LabeledInput, Small } from "@itwin/itwinui-react";
 import React from "react";
 import type SimpleReactValidator from "simple-react-validator";
