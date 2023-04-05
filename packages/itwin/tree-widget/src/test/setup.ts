@@ -15,12 +15,14 @@ jsdomGlobal();
 
 import * as chai from "chai";
 import chaiJestSnapshot from "chai-jest-snapshot";
+import chaiSubset from "chai-subset";
 import sinonChai from "sinon-chai";
 import path from "path";
 
 // setup chai
 chai.should();
 chai.use(chaiJestSnapshot);
+chai.use(chaiSubset);
 chai.use(sinonChai);
 
 before(async function () {
