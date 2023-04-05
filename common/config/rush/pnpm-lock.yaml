@@ -551,6 +551,7 @@ importers:
       '@itwin/core-quantity': ^3.7.0
       '@itwin/core-react': ^4.0.0-dev.13
       '@itwin/core-telemetry': ^3.7.0
+      '@itwin/ecschema-metadata': ^4.0.0-dev.66
       '@itwin/eslint-plugin': ^3.7.0
       '@itwin/imodel-components-react': ^4.0.0-dev.13
       '@itwin/presentation-common': ^4.0.0-dev.66
@@ -600,9 +601,10 @@ importers:
       '@itwin/core-orbitgt': 3.7.1
       '@itwin/core-quantity': 3.7.1_@itwin+core-bentley@3.7.1
       '@itwin/core-react': 4.0.0-dev.13_5beced3238b7f35a0c0f8fe406b86ddf
+      '@itwin/ecschema-metadata': 4.0.0-dev.68_f8e786ea9e5732ee812be941f847f878
       '@itwin/eslint-plugin': 3.7.1_eslint@7.32.0+typescript@4.6.3
       '@itwin/imodel-components-react': 4.0.0-dev.13_483fcf2076c1568bab7f4be50905676c
-      '@itwin/presentation-common': 4.0.0-dev.66_94355e9609de2975afe398485abd2942
+      '@itwin/presentation-common': 4.0.0-dev.66_e008abd33acb32a7cf1dfc16645cfe80
       '@itwin/presentation-components': 4.0.0-dev.31_1c104483cc45cd818b3be27f439fc0c1
       '@itwin/presentation-frontend': 4.0.0-dev.66_8ce69cd4dd33a2c29e3a30c3a0329453
       '@itwin/webgl-compatibility': 3.7.1
@@ -3752,6 +3754,17 @@ packages:
       - '@itwin/core-geometry'
       - debug
 
+  /@itwin/ecschema-metadata/4.0.0-dev.68_f8e786ea9e5732ee812be941f847f878:
+    resolution: {integrity: sha512-HQrgPXyotDqaWVWbJOdDmr4Ee5Pgbtznb+8VELhHsaT/XWYRsRwQGVfbnltwJxuwBWpbxbn94g95qYx1EQhejg==}
+    peerDependencies:
+      '@itwin/core-bentley': ^4.0.0-dev.68
+      '@itwin/core-quantity': ^4.0.0-dev.68
+    dependencies:
+      '@itwin/core-bentley': 3.7.1
+      '@itwin/core-quantity': 3.7.1_@itwin+core-bentley@3.7.1
+      almost-equal: 1.1.0
+    dev: true
+
   /@itwin/eslint-plugin/3.1.2_eslint@7.32.0+typescript@4.3.5:
     resolution: {integrity: sha512-nmJuvCdc+ucehQmpUymLDEispyXtPhJtkxAbBXYXeXoiXF0v9QM7smsS2xNwZqaZfaHQkoBtzbkr3YMoMs9eDA==}
     hasBin: true
@@ -4570,7 +4583,7 @@ packages:
       '@itwin/core-quantity': 3.5.0_@itwin+core-bentley@3.5.0
     dev: true
 
-  /@itwin/presentation-common/4.0.0-dev.66_94355e9609de2975afe398485abd2942:
+  /@itwin/presentation-common/4.0.0-dev.66_e008abd33acb32a7cf1dfc16645cfe80:
     resolution: {integrity: sha512-Ur65Bx169cvua9mbIBmOZIHkCoz8HYMGX7MLr9KTRfhqzd9eaHd1apZyu3xTIOTP8aHdFHEIaqAMrRZZKWnTuA==}
     peerDependencies:
       '@itwin/core-bentley': ^4.0.0-dev.66
@@ -4581,6 +4594,7 @@ packages:
       '@itwin/core-bentley': 3.7.1
       '@itwin/core-common': 3.7.1_959ee76f33ed1944c35aec3c0d82ba52
       '@itwin/core-quantity': 3.7.1_@itwin+core-bentley@3.7.1
+      '@itwin/ecschema-metadata': 4.0.0-dev.68_f8e786ea9e5732ee812be941f847f878
     dev: true
 
   /@itwin/presentation-components/3.1.2_6dc572512739a5db0200fb0de758fa33:
@@ -4810,7 +4824,7 @@ packages:
       '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-react': 2.8.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
-      '@itwin/presentation-common': 4.0.0-dev.66_94355e9609de2975afe398485abd2942
+      '@itwin/presentation-common': 4.0.0-dev.66_e008abd33acb32a7cf1dfc16645cfe80
       '@itwin/presentation-frontend': 4.0.0-dev.66_8ce69cd4dd33a2c29e3a30c3a0329453
       classnames: 2.3.1
       fast-deep-equal: 3.1.3
@@ -4918,7 +4932,7 @@ packages:
       '@itwin/core-common': 3.7.1_959ee76f33ed1944c35aec3c0d82ba52
       '@itwin/core-frontend': 3.7.1_791e691e277aed8f8b5beeac11c5b449
       '@itwin/core-quantity': 3.7.1_@itwin+core-bentley@3.7.1
-      '@itwin/presentation-common': 4.0.0-dev.66_94355e9609de2975afe398485abd2942
+      '@itwin/presentation-common': 4.0.0-dev.66_e008abd33acb32a7cf1dfc16645cfe80
     dev: true
 
   /@itwin/presentation-testing/3.5.0_8d0cef496bc5c8b5c63948d6636c2c21:
@@ -7487,6 +7501,10 @@ packages:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
       uri-js: 4.4.1
+    dev: true
+
+  /almost-equal/1.1.0:
+    resolution: {integrity: sha512-0V/PkoculFl5+0Lp47JoxUcO0xSxhIBvm+BxHdD/OgXNmdRpRHCFnKVuUoWyS9EzQP+otSGv0m9Lb4yVkQBn2A==}
     dev: true
 
   /ansi-colors/4.1.1:
