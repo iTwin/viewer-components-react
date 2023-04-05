@@ -2,17 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/index";
-@import "../VisibilityTreeBase";
-
-.tree-widget-categories-tree {
-  @include tree-widget-visibility-tree-base;
-}
-
-.tree-widget-category-tree-search-bar {
-  margin-bottom: $uicore-s;
-}
-
-.tree-widget-category-tree-toolbar-icon {
-  color: $buic-icon-color;
+/** Checks if the specified argument is a promise */
+export function isPromiseLike(obj: unknown): obj is PromiseLike<unknown> {
+  return !!(obj && (typeof obj === "object") && (typeof (obj as any).then === "function"));
 }

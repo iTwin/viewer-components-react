@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { SpatialContainmentTreeProps, StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 import type { SelectableContentDefinition } from "@itwin/components-react";
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import type { CategoryTreeProps } from "./components/trees/category-tree/CategoriesTree";
@@ -47,12 +47,6 @@ export interface CategoriesTreeProps extends Omit<CategoryTreeProps,
 | "categories"
 > { headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode> }
 
-export type SpatialTreeProps = Omit<
-// eslint-disable-next-line deprecation/deprecation
-SpatialContainmentTreeProps,
-"iModel" | "width" | "height"
->;
-
 export const ModelsTreeId = "models-tree";
 
 export const CategoriesTreeId = "categories-tree";
@@ -67,11 +61,9 @@ export interface TreeWidgetOptions {
   additionalTrees?: SelectableContentDefinition[];
   modelsTreeProps?: ModelTreeProps;
   categoriesTreeProps?: CategoriesTreeProps;
-  spatialTreeProps?: SpatialTreeProps;
   defaultTreeId?: string;
   hideTrees?: {
     modelsTree?: boolean;
     categoriesTree?: boolean;
-    spatialTree?: boolean;
   };
 }

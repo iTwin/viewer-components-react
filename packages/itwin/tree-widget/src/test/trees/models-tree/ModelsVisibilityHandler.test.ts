@@ -8,22 +8,23 @@ import * as sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BeEvent, Id64String, using } from "@itwin/core-bentley";
-import { QueryRowFormat } from "@itwin/core-common";
+import { ECSqlReader, QueryRowFormat } from "@itwin/core-common";
 import {
-  IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility, SpatialViewState, Viewport, ViewState, ViewState3d,
+  IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility, Viewport, ViewState, ViewState3d,
 } from "@itwin/core-frontend";
-import { isPromiseLike } from "@itwin/core-react";
-import { FilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { IModelHierarchyChangeEventArgs, Presentation, PresentationManager } from "@itwin/presentation-frontend";
 import { ModelsVisibilityHandler, ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { CachingElementIdsContainer } from "../../../components/trees/models-tree/Utils";
+import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
 
 describe("ModelsVisibilityHandler", () => {
 
   before(async () => {
-    await NoRenderApp.startup();
+    // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+    await NoRenderApp.startup(); // eslint-disable-line @itwin/no-internal
     await TestUtils.initialize();
   });
 
@@ -34,8 +35,9 @@ describe("ModelsVisibilityHandler", () => {
 
   const imodelMock = moq.Mock.ofType<IModelConnection>();
 
-  beforeEach(() => {
+  afterEach(() => {
     imodelMock.reset();
+    sinon.restore();
   });
 
   interface ViewportMockProps {
@@ -94,21 +96,35 @@ describe("ModelsVisibilityHandler", () => {
     subjectModels: Map<Id64String, Array<{ id: Id64String, content?: string }>>;
   }
 
+  interface SubjectsRow {
+    id: Id64String;
+    parentId?: Id64String;
+    targetPartitionId?: Id64String;
+  }
+
+  interface ElementRow {
+    id: Id64String;
+    parentId: Id64String;
+  }
+
   const mockSubjectModelIds = (props: SubjectModelIdsMockProps) => {
-    props.imodelMock.setup((x) => x.query(moq.It.is((q: string) => (-1 !== q.indexOf("FROM bis.Subject"))), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }))
-      .returns(async function* () {
-        const list = new Array<{ id: Id64String, parentId: Id64String }>();
-        props.subjectsHierarchy.forEach((ids, parentId) => ids.forEach((id) => list.push({ id, parentId })));
-        while (list.length)
-          yield list.shift();
-      });
-    props.imodelMock.setup((x) => x.query(moq.It.is((q: string) => (-1 !== q.indexOf("FROM bis.InformationPartitionElement"))), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }))
-      .returns(async function* () {
-        const list = new Array<{ id: Id64String, parentId: Id64String, content?: string }>();
-        props.subjectModels.forEach((modelInfos, subjectId) => modelInfos.forEach((modelInfo) => list.push({ id: modelInfo.id, parentId: subjectId, content: modelInfo.content })));
-        while (list.length)
-          yield list.shift();
-      });
+    const subjectQueryReaderMock = moq.Mock.ofType<ECSqlReader>();
+    const elementQueryReaderMock = moq.Mock.ofType<ECSqlReader>();
+
+    props.imodelMock.setup((x) => x.createQueryReader(moq.It.is((q: string) => (-1 !== q.indexOf("FROM bis.Subject"))), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }))
+      .returns(() => subjectQueryReaderMock.object);
+
+    props.imodelMock.setup((x) => x.createQueryReader(moq.It.is((q: string) => (-1 !== q.indexOf("FROM bis.InformationPartitionElement"))), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }))
+      .returns(() => elementQueryReaderMock.object);
+
+    const subjectQueryRows: SubjectsRow[] = [];
+    props.subjectsHierarchy.forEach((ids, parentId) => ids.forEach((id) => subjectQueryRows.push({ id, parentId })));
+    subjectQueryReaderMock.setup(async (x) => x.toArray()).returns(async () => subjectQueryRows);
+
+    const elementQueryRows: ElementRow[] = [];
+    props.subjectModels.forEach((modelInfos, subjectId) => modelInfos.forEach((modelInfo) => elementQueryRows.push({ id: modelInfo.id, parentId: subjectId })));
+    elementQueryReaderMock.setup(async (x) => x.toArray()).returns(async () => elementQueryRows);
+
   };
 
   describe("constructor", () => {
@@ -126,8 +142,8 @@ describe("ModelsVisibilityHandler", () => {
     it("should subscribe for 'onIModelHierarchyChanged' event if hierarchy auto update is enabled", () => {
       const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
       const changeEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
-      presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent);
-      Presentation.setPresentationManager(presentationManagerMock.object);
+      presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent); // eslint-disable-line @itwin/no-internal
+      sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
       createHandler({ viewport: mockViewport().object, hierarchyAutoUpdateEnabled: true });
       expect(changeEvent.numberOfListeners).to.eq(1);
     });
@@ -149,8 +165,8 @@ describe("ModelsVisibilityHandler", () => {
     it("should unsubscribe from 'onIModelHierarchyChanged' event", () => {
       const presentationManagerMock = moq.Mock.ofType<PresentationManager>();
       const changeEvent = new BeEvent<(args: IModelHierarchyChangeEventArgs) => void>();
-      presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent);
-      Presentation.setPresentationManager(presentationManagerMock.object);
+      presentationManagerMock.setup((x) => x.onIModelHierarchyChanged).returns(() => changeEvent); // eslint-disable-line @itwin/no-internal
+      sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
       using(createHandler({ viewport: mockViewport().object, hierarchyAutoUpdateEnabled: true }), (_) => { });
       expect(changeEvent.numberOfListeners).to.eq(0);
     });
@@ -295,8 +311,8 @@ describe("ModelsVisibilityHandler", () => {
         const vpMock = mockViewport({ viewState: viewStateMock.object });
         await using(createHandler({ viewport: vpMock.object }), async (handler) => {
           await Promise.all([handler.getVisibilityStatus(node, node.__key), handler.getVisibilityStatus(node, node.__key)]);
-          // expect the `query` to be called only twice (once for subjects and once for models)
-          imodelMock.verify((x) => x.query(moq.It.isAnyString(), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }), moq.Times.exactly(2));
+          // expect the `createQueryReader` to be called only twice (once for subjects and once for models)
+          imodelMock.verify((x) => x.createQueryReader(moq.It.isAnyString(), undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }), moq.Times.exactly(2));
         });
       });
 
@@ -306,7 +322,7 @@ describe("ModelsVisibilityHandler", () => {
           const node = createSubjectNode();
           const key = node.__key.instanceKeys[0];
 
-          const filteredProvider = moq.Mock.ofType<FilteredPresentationTreeDataProvider>();
+          const filteredProvider = moq.Mock.ofType<IFilteredPresentationTreeDataProvider>();
           filteredProvider.setup((x) => x.nodeMatchesFilter(node)).returns(() => true);
 
           mockSubjectModelIds({
@@ -338,7 +354,7 @@ describe("ModelsVisibilityHandler", () => {
           const node = createSubjectNode(parentSubjectId);
           const childNode = createSubjectNode(childSubjectId);
 
-          const filteredProvider = moq.Mock.ofType<FilteredPresentationTreeDataProvider>();
+          const filteredProvider = moq.Mock.ofType<IFilteredPresentationTreeDataProvider>();
           filteredProvider.setup(async (x) => x.getNodes(node)).returns(async () => [childNode]).verifiable(moq.Times.never());
           filteredProvider.setup(async (x) => x.getNodes(childNode)).returns(async () => []).verifiable(moq.Times.never());
           filteredProvider.setup((x) => x.nodeMatchesFilter(moq.It.isAny())).returns(() => true);
@@ -378,7 +394,7 @@ describe("ModelsVisibilityHandler", () => {
           const node = createSubjectNode(parentSubjectId);
           const childNodes = [createSubjectNode(childSubjectIds[0]), createSubjectNode(childSubjectIds[1])];
 
-          const filteredProvider = moq.Mock.ofType<FilteredPresentationTreeDataProvider>();
+          const filteredProvider = moq.Mock.ofType<IFilteredPresentationTreeDataProvider>();
           filteredProvider.setup(async (x) => x.getNodes(node)).returns(async () => childNodes).verifiable(moq.Times.once());
           filteredProvider.setup(async (x) => x.getNodes(childNodes[0])).returns(async () => []).verifiable(moq.Times.never());
           filteredProvider.setup(async (x) => x.getNodes(childNodes[1])).returns(async () => []).verifiable(moq.Times.never());
@@ -424,7 +440,7 @@ describe("ModelsVisibilityHandler", () => {
           const node = createSubjectNode(parentSubjectIds);
           const childNode = createSubjectNode(childSubjectId);
 
-          const filteredProvider = moq.Mock.ofType<FilteredPresentationTreeDataProvider>();
+          const filteredProvider = moq.Mock.ofType<IFilteredPresentationTreeDataProvider>();
           filteredProvider.setup(async (x) => x.getNodes(node)).returns(async () => [childNode]).verifiable(moq.Times.once());
           filteredProvider.setup(async (x) => x.getNodes(childNode)).returns(async () => []).verifiable(moq.Times.never());
           filteredProvider.setup((x) => x.getNodeKey(childNode)).returns(() => childNode.__key).verifiable(moq.Times.once());
@@ -1024,7 +1040,7 @@ describe("ModelsVisibilityHandler", () => {
         const node = createSubjectNode();
         const subjectModelIds = ["0x1", "0x2"];
 
-        const viewStateMock = moq.Mock.ofType<SpatialViewState>();
+        const viewStateMock = moq.Mock.ofType<ViewState>();
         viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
 
         const vpMock = mockViewport({ viewState: viewStateMock.object });
@@ -1043,7 +1059,7 @@ describe("ModelsVisibilityHandler", () => {
         const node = createSubjectNode();
         const subjectModelIds = ["0x1", "0x2"];
 
-        const viewStateMock = moq.Mock.ofType<SpatialViewState>();
+        const viewStateMock = moq.Mock.ofType<ViewState>();
         viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
 
         const vpMock = mockViewport({ viewState: viewStateMock.object });
@@ -1066,11 +1082,11 @@ describe("ModelsVisibilityHandler", () => {
             const key = node.__key.instanceKeys[0];
             const subjectModelIds = ["0x1", "0x2"];
 
-            const filteredDataProvider = moq.Mock.ofType<FilteredPresentationTreeDataProvider>();
+            const filteredDataProvider = moq.Mock.ofType<IFilteredPresentationTreeDataProvider>();
             filteredDataProvider.setup(async (x) => x.getNodes(node)).returns(async () => []).verifiable(moq.Times.never());
             filteredDataProvider.setup((x) => x.nodeMatchesFilter(node)).returns(() => true);
 
-            const viewStateMock = moq.Mock.ofType<SpatialViewState>();
+            const viewStateMock = moq.Mock.ofType<ViewState>();
             viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
 
             mockSubjectModelIds({
@@ -1102,14 +1118,14 @@ describe("ModelsVisibilityHandler", () => {
             const parentSubjectModelIds = ["0x10", "0x11"];
             const childSubjectModelIds = ["0x20"];
 
-            const filteredDataProvider = moq.Mock.ofType<FilteredPresentationTreeDataProvider>();
+            const filteredDataProvider = moq.Mock.ofType<IFilteredPresentationTreeDataProvider>();
             filteredDataProvider.setup(async (x) => x.getNodes(node)).returns(async () => [childNode]).verifiable(moq.Times.once());
             filteredDataProvider.setup(async (x) => x.getNodes(childNode)).returns(async () => []).verifiable(moq.Times.never());
             filteredDataProvider.setup((x) => x.getNodeKey(childNode)).returns(() => childNode.__key).verifiable(moq.Times.once());
             filteredDataProvider.setup((x) => x.nodeMatchesFilter(node)).returns(() => false);
             filteredDataProvider.setup((x) => x.nodeMatchesFilter(childNode)).returns(() => true);
 
-            const viewStateMock = moq.Mock.ofType<SpatialViewState>();
+            const viewStateMock = moq.Mock.ofType<ViewState>();
             viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
 
             mockSubjectModelIds({
@@ -1166,7 +1182,7 @@ describe("ModelsVisibilityHandler", () => {
         const node = createModelNode();
         const key = node.__key.instanceKeys[0];
 
-        const viewStateMock = moq.Mock.ofType<SpatialViewState>();
+        const viewStateMock = moq.Mock.ofType<ViewState>();
         viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
 
         const vpMock = mockViewport({ viewState: viewStateMock.object });
@@ -1182,7 +1198,7 @@ describe("ModelsVisibilityHandler", () => {
         const node = createModelNode();
         const key = node.__key.instanceKeys[0];
 
-        const viewStateMock = moq.Mock.ofType<SpatialViewState>();
+        const viewStateMock = moq.Mock.ofType<ViewState>();
         viewStateMock.setup((x) => x.isSpatialView()).returns(() => true);
 
         const vpMock = mockViewport({ viewState: viewStateMock.object });

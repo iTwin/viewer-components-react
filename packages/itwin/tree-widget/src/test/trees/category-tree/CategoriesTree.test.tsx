@@ -17,7 +17,7 @@ import {
 import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import { ECInstancesNodeKey, KeySet, LabelDefinition, Node, NodePathElement, StandardNodeTypes } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { Presentation, PresentationManager, RulesetVariablesManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
+import { Presentation, RulesetVariablesManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
   TestIModelBuilder,
@@ -34,23 +34,18 @@ describe("CategoryTree", () => {
     const sizeProps = { width: 200, height: 200 };
 
     before(async () => {
-      await NoRenderApp.startup();
+      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+      await NoRenderApp.startup(); // eslint-disable-line @itwin/no-internal
       await TestUtils.initialize();
     });
 
     after(async () => {
       TestUtils.terminate();
-      Presentation.terminate();
       await IModelApp.shutdown();
-    });
-
-    afterEach(() => {
-      sinon.restore();
     });
 
     const imodelMock = moq.Mock.ofType<IModelConnection>();
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
-    let presentationManagerMock: moq.IMock<PresentationManager>;
     let rulesetVariablesMock: moq.IMock<RulesetVariablesManager>;
     const viewportMock = moq.Mock.ofType<Viewport>();
     const viewStateMock = moq.Mock.ofType<SpatialViewState>();
@@ -67,21 +62,19 @@ describe("CategoryTree", () => {
       selectionManagerMock.setup((x) => x.selectionChange).returns(() => selectionChangeEvent);
       selectionManagerMock.setup((x) => x.getSelectionLevels(imodelMock.object)).returns(() => []);
       selectionManagerMock.setup((x) => x.getSelection(imodelMock.object, moq.It.isAny())).returns(() => new KeySet());
-      Presentation.setSelectionManager(selectionManagerMock.object);
 
       const mocks = mockPresentationManager();
-      presentationManagerMock = mocks.presentationManager;
       rulesetVariablesMock = mocks.rulesetVariablesManager;
-      Presentation.setPresentationManager(presentationManagerMock.object);
+      sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
+      sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
 
-      async function* generator() {
-        return;
-      }
-
-      imodelMock.setup((x) => x.query(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => generator());
       viewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
-      viewStateMock.setup((x) => x.is3d()).returns(() => true);
+      // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+      viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
+    });
 
+    afterEach(() => {
+      sinon.restore();
     });
 
     const createKey = (id: Id64String): ECInstancesNodeKey => {
@@ -177,7 +170,8 @@ describe("CategoryTree", () => {
 
       it("sets ruleset variable 'ViewType' to '3d'", async () => {
         viewStateMock.reset();
-        viewStateMock.setup((x) => x.is3d()).returns(() => true);
+        // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+        viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
         render(
           <CategoryTree
             {...sizeProps}
@@ -193,7 +187,8 @@ describe("CategoryTree", () => {
 
       it("sets ruleset variable 'ViewType' to '2d'", async () => {
         viewStateMock.reset();
-        viewStateMock.setup((x) => x.is3d()).returns(() => false);
+        // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+        viewStateMock.setup((x) => x.is3d()).returns(() => false); // eslint-disable-line @itwin/no-internal
         render(
           <CategoryTree
             {...sizeProps}
@@ -368,7 +363,8 @@ describe("CategoryTree", () => {
         it("filters nodes", async () => {
           const filteredNode: Node = {
             key: createKey("filtered-node"),
-            label: LabelDefinition.fromLabelString("filtered-node"),
+            // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+            label: LabelDefinition.fromLabelString("filtered-node"), // eslint-disable-line @itwin/no-internal
           };
           const filterValue: NodePathElement[] = [{ node: filteredNode, children: [], index: 0 }];
           (PresentationTreeDataProvider.prototype.getFilteredNodePaths as any).restore();
@@ -390,7 +386,8 @@ describe("CategoryTree", () => {
         it("invokes onFilterApplied callback", async () => {
           const filteredNode: Node = {
             key: createKey("filtered-node"),
-            label: LabelDefinition.fromLabelString("filtered-node"),
+            // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
+            label: LabelDefinition.fromLabelString("filtered-node"), // eslint-disable-line @itwin/no-internal
           };
           const filterValue: NodePathElement[] = [{ node: filteredNode, children: [], index: 0 }];
           (PresentationTreeDataProvider.prototype.getFilteredNodePaths as any).restore();
