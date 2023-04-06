@@ -79,6 +79,11 @@
       "packageName": "@itwin/map-layers",
       "projectFolder": "packages/itwin/map-layers",
       "versionPolicyName": "itwin-map-layers"
+    },
+    {
+      "packageName": "test-viewer",
+      "projectFolder": "apps/test-viewer",
+      "shouldPublish": false
     }
   ]
 }
