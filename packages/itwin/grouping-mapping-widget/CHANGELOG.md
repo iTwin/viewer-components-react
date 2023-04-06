@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 27 Mar 2023 10:30:56 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Apr 2023 15:34:07 GMT and should not be manually modified.
+
+## 0.12.0
+Mon, 03 Apr 2023 15:34:07 GMT
+
+### Minor changes
+
+- Improved modularity to PropertyMenu, GroupPropertyAction, CalculatedPropertyAction, CustomCalculationAction components.
 
 ## 0.11.1
 Mon, 27 Mar 2023 10:30:56 GMT

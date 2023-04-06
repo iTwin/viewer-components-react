@@ -135,7 +135,6 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
         false
       );
     }
-    props.viewport.invalidateScene();
   };
 
   return (
@@ -154,7 +153,6 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 function HideAllButton(props: ModelsTreeHeaderButtonProps) {
   const hideAll = async () => {
     props.viewport.changeModelDisplay(props.models.map((model) => model.id), false);
-    props.viewport.invalidateScene();
   };
 
   return (
@@ -180,7 +178,6 @@ function InvertButton(props: ModelsTreeHeaderButtonProps) {
     });
     await props.viewport.addViewedModels(notViewedModels);
     props.viewport.changeModelDisplay(models, false);
-    props.viewport.invalidateScene();
   };
 
   return (
@@ -215,7 +212,6 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
     } else {
       await props.viewport.addViewedModels(models2d);
     }
-    props.viewport.invalidateScene();
   };
 
   return (
@@ -226,7 +222,7 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
       title={TreeWidget.translate("toggle2DViews")}
       onClick={viewToggle2D}
       disabled={models2d.length === 0}
-      endIcon={is2dToggleActive ? <SvgVisibilityShow/> : <SvgVisibilityHide />}
+      endIcon={is2dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
       {TreeWidget.translate("label2D")}
     </Button>
@@ -253,7 +249,6 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
     } else {
       await props.viewport.addViewedModels(models3d);
     }
-    props.viewport.invalidateScene();
   };
 
   return (

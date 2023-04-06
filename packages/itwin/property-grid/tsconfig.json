@@ -5,7 +5,8 @@
     "skipLibCheck": true,
     "jsx": "react",
     "preserveSymlinks": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "importsNotUsedAsValues": "error"
   },
   "include": ["./src/**/*.ts*"],
   "exclude": ["lib", "node_modules"]

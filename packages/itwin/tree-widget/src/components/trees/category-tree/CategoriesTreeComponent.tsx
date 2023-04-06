@@ -102,8 +102,8 @@ async function getFilteredCategories(filteredProvider: IPresentationTreeDataProv
 }
 
 function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const showAll = () => {
-    enableCategory(
+  const showAll = async () => {
+    await enableCategory(
       IModelApp.viewManager,
       props.viewport.iModel,
       (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
@@ -126,8 +126,8 @@ function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
 }
 
 function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
-  const hideAll = () => {
-    enableCategory(
+  const hideAll = async () => {
+    await enableCategory(
       IModelApp.viewManager,
       props.viewport.iModel,
       (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
@@ -150,7 +150,7 @@ function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
 }
 
 function InvertButton(props: CategoriesTreeHeaderButtonProps) {
-  const invert = () => {
+  const invert = async () => {
     const ids = (props.filteredCategories ?? props.categories).map((category) => category.categoryId);
 
     const enabled: string[] = [];
@@ -163,7 +163,7 @@ function InvertButton(props: CategoriesTreeHeaderButtonProps) {
       }
     }
     // Disable enabled
-    enableCategory(
+    await enableCategory(
       IModelApp.viewManager,
       props.viewport.iModel,
       enabled,
@@ -172,7 +172,7 @@ function InvertButton(props: CategoriesTreeHeaderButtonProps) {
     );
 
     // Enable disabled
-    enableCategory(
+    await enableCategory(
       IModelApp.viewManager,
       props.viewport.iModel,
       disabled,
