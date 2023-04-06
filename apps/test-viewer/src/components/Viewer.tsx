@@ -5,11 +5,16 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FitViewTool, IModelApp, ScreenViewport, StandardViewId } from "@itwin/core-frontend";
-import {
-  Viewer as WebViewer, ViewerContentToolsProvider, ViewerNavigationToolsProvider, ViewerPerformance, ViewerStatusbarItemsProvider,
-} from "@itwin/web-viewer-react";
+import { Viewer as WebViewer, ViewerPerformance } from "@itwin/web-viewer-react";
 import { history } from "../history";
+import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { useAuthorizationContext } from "./Authorization";
+
+const uiConfig = getUiProvidersConfig();
+
+async function onIModelAppInit() {
+  await uiConfig.initialize();
+}
 
 export function Viewer() {
   const { client: authClient } = useAuthorizationContext();
@@ -22,16 +27,16 @@ export function Viewer() {
       iModelId={iModelId ?? ""}
       authClient={authClient}
       viewCreatorOptions={viewCreatorOptions}
-      enablePerformanceMonitors={true} // see description in the README (https://www.npmjs.com/package/@itwin/web-viewer-react)
+      enablePerformanceMonitors={false}
+      onIModelAppInit={onIModelAppInit}
       uiProviders={[
-        new ViewerNavigationToolsProvider(),
-        new ViewerContentToolsProvider({
-          vertical: {
-            measureGroup: false,
-          },
-        }),
-        new ViewerStatusbarItemsProvider(),
+        ...uiConfig.uiItemsProviders
       ]}
+      defaultUiConfig={{
+        hideNavigationAid: true,
+        hideStatusBar: true,
+        hideToolSettings: true
+      }}
     />
   );
 }

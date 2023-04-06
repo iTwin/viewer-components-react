@@ -25,6 +25,8 @@
     "@itwin/presentation-common": "^3.7.1",
     "@itwin/presentation-components": "^4.0.0-dev.34",
     "@itwin/presentation-frontend": "^3.7.1",
+    "@itwin/property-grid-react": "workspace:*",
+    "@itwin/tree-widget-react": "workspace:*",
     "@itwin/web-viewer-react": "4.0.0-dev.7",
     "@itwin/webgl-compatibility": "^3.7.1",
     "@types/history": "^4.7.11",
@@ -40,10 +42,18 @@
     "rimraf": "^3.0.2",
     "typescript": "~4.4.0"
   },
+  "dependenciesMeta": {
+    "@itwin/property-grid-react": {
+      "injected": true
+    },
+    "@itwin/tree-widget-react": {
+      "injected": true
+    }
+  },
   "scripts": {
     "start": "react-scripts --max_old_space_size=4096 start",
-    "build": "react-scripts --max_old_space_size=4096 build",
-    "eject": "react-scripts eject",
+    "build": "",
+    "eject": "",
     "test": "",
     "cover": "",
     "lint": "",
