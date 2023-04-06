@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { StageUsage, ToolbarHelper, ToolbarOrientation, ToolbarUsage, UiItemsProvider } from "@itwin/appui-react";
+import { StageUsage, ToolbarHelper, ToolbarOrientation, ToolbarUsage } from "@itwin/appui-react";
+import type { UiItemsProvider } from "@itwin/appui-react";
 
 import { GeoToolsItemDef } from "./GeoToolsItemDef";
 
