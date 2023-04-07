@@ -13,79 +13,61 @@ const packages = [{
   dir: "property-grid"
 }]
 
-const args = process.argv.slice(2);
-const scripName = process.argv[1];
-const packageName = args[0];
-const isHardLink = args[1];
+linkPackages();
 
-if (packageName !== undefined && typeof packageName !== "string") {
-  throw new Error(`Usage: ${scripName} [package name] [--hard]`);
-}
-if (isHardLink !== undefined && isHardLink !== "--hard") {
-  throw new Error(`Usage: ${scripName} [package name] [--hard]`);
-}
-
-linkPackages(packageName, isHardLink);
-
-function linkPackages(packageName, hardLink) {
+function linkPackages() {
   for (const package of packages) {
-    if (packageName && package.name !== packageName)
-      continue;
-
     const sourcePath = getSourceLibPath(package.dir, packages.libDirName);
     if (!fs.existsSync(sourcePath)) {
       console.warn(`Package ${package.name} source path does not exist: ${sourcePath}`);
       continue;
     }
     const targetPath = getTargetLibPath(package.name, package.libDirName);
-    if (fs.existsSync(targetPath)) {
-      console.log(`Deleting package ${package.name} linked folder: ${targetPath}`);
-      fs.rmSync(targetPath, { recursive: true })
-    }
 
-    if (hardLink) {
-      console.log(`Hard linking ${package.name}: ${sourcePath} -> ${targetPath}`);
-      hardLinkFiles(sourcePath, targetPath);
-      continue;
-    }
+    copyChangedFiles(package.name, sourcePath, targetPath);
 
-    console.log(`Copying package ${package.name}: ${sourcePath} -> ${targetPath}`);
-    fs.cpSync(sourcePath, targetPath, { recursive: true });
+    let lastChange = undefined;
+    fs.watch(sourcePath, { recursive: true }, () => {
+      const now = new Date();
+      if (now === lastChange) {
+        return;
+      }
+      lastChange = now;
+      setTimeout(() => {
+        if (now === lastChange) {
+          copyChangedFiles(package.name, sourcePath, targetPath);
+          lastChange = undefined;
+        }
+      }, 100);
+    });
   }
 }
 
+function copyChangedFiles(packageName, sourceDir, targetDir) {
+  console.log(`[${new Date().toLocaleTimeString()}] Updating ${packageName}`);
+  fs.cpSync(sourceDir, targetDir, {
+    recursive: true,
+    filter: (source, dest) => {
+      if (!fs.existsSync(dest)) {
+        return true;
+      }
+      const sourceStat = fs.statSync(source);
+      if (sourceStat.isDirectory()) {
+        return true;
+      }
+      const destStat = fs.statSync(dest);
+      return sourceStat.mtime.getTime() > destStat.mtime.getTime();
+    },
+  });
+}
+
 function getTargetLibPath(packageName, distDirName) {
-  const packagePath = path.resolve("node_modules", packageName);
+  const packagePath = path.resolve(__dirname, "../node_modules", packageName);
   const realPath = fs.realpathSync(packagePath);
   return path.resolve(realPath, distDirName ?? "lib");
 }
 
 function getSourceLibPath(packageDir, distDirName) {
-  const sourcePath = path.resolve("../../packages/itwin", packageDir);
+  const sourcePath = path.resolve(__dirname, "../../../packages/itwin", packageDir);
   return path.resolve(sourcePath, distDirName ?? "lib");
-}
-
-function hardLinkFiles(source, target) {
-  const sourceFiles = fs.readdirSync(source);
-  for (const sourceFile of sourceFiles) {
-    const sourcePath = path.resolve(source, sourceFile);
-    const targetPath = path.resolve(target, sourceFile);
-
-    if (fs.statSync(sourcePath).isDirectory()) {
-      if (sourceFile === "test") {
-        console.log(`Skipping directory: ${sourcePath}`)
-        continue;
-      }
-
-      hardLinkFiles(sourcePath, targetPath);
-      continue;
-    }
-
-    const targetDir = path.dirname(targetPath);
-    if (!fs.existsSync(targetDir))
-      fs.mkdirSync(targetDir, { recursive: true });
-
-    console.log(`Linking: ${sourcePath} -> ${targetPath}`);
-    fs.linkSync(sourcePath, targetPath)
-  }
 }
