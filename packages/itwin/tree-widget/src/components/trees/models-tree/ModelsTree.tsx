@@ -93,8 +93,8 @@ export function ModelsTree(props: ModelsTreeProps) {
 
   const { activeView, modelsVisibilityHandler, selectionPredicate } = props;
   const nodeSelectionPredicate = React.useCallback((key: NodeKey, node: TreeNodeItem) => {
-    return !selectionPredicate ? true : selectionPredicate(key, ModelsVisibilityHandler.getNodeType(node, nodeLoader.dataProvider));
-  }, [selectionPredicate, nodeLoader.dataProvider]);
+    return !selectionPredicate ? true : selectionPredicate(key, ModelsVisibilityHandler.getNodeType(node));
+  }, [selectionPredicate]);
 
   const visibilityHandler = useVisibilityHandler(
     nodeLoader.dataProvider.rulesetId,

@@ -9,10 +9,9 @@ import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import * as UiComponents from "@itwin/components-react";
 import { BeEvent, Id64String, using } from "@itwin/core-bentley";
-import {
-  IModelConnection, PerModelCategoryVisibility, ViewManager, Viewport, ViewState,
-} from "@itwin/core-frontend";
+import { IModelConnection, PerModelCategoryVisibility, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
 import { ECInstancesNodeKey, StandardNodeTypes } from "@itwin/presentation-common";
+import { PresentationTreeNodeItem } from "@itwin/presentation-components";
 import { renderHook } from "@testing-library/react-hooks";
 import {
   CategoryInfo, CategoryVisibilityHandler, CategoryVisibilityHandlerParams, useCategories,
@@ -33,12 +32,18 @@ describe("CategoryVisibilityHandler", () => {
   const viewManagerMock = moq.Mock.ofType<ViewManager>();
   const viewStateMock = moq.Mock.ofType<ViewState>();
 
-  const categoryNode = { id: "CategoryId", label: PropertyRecord.fromString("category-node"), autoExpand: true };
-  const subcategoryNode = { id: "SubCategoryId", label: PropertyRecord.fromString("subcategory-node"), parentId: "CategoryId" };
-  let categoryKey: ECInstancesNodeKey;
-  let subcategoryKey: ECInstancesNodeKey;
-  (categoryNode as any).__key = categoryKey = createKey(categoryNode.id);
-  (subcategoryNode as any).__key = subcategoryKey = createKey(subcategoryNode.id);
+  const categoryNode: PresentationTreeNodeItem = {
+    id: "CategoryId",
+    key: createKey("CategoryId"),
+    label: PropertyRecord.fromString("category-node"),
+    autoExpand: true,
+  };
+  const subcategoryNode: PresentationTreeNodeItem = {
+    id: "SubCategoryId",
+    parentId: "CategoryId",
+    key: createKey("SubCategoryId"),
+    label: PropertyRecord.fromString("subcategory-node"),
+  };
 
   const categories: CategoryInfo[] = [{
     categoryId: "CategoryId",
@@ -116,7 +121,7 @@ describe("CategoryVisibilityHandler", () => {
 
       await using(createHandler({ activeView: mockViewport().object }), async (handler) => {
         const enableCategorySpy = sinon.stub(handler, "enableCategory");
-        await handler.changeVisibility(categoryNode, categoryKey, true);
+        await handler.changeVisibility(categoryNode, true);
         expect(enableCategorySpy).to.be.calledWith([categoryNode.id], true, true);
       });
     });
@@ -124,7 +129,7 @@ describe("CategoryVisibilityHandler", () => {
     it("calls enableSubcategoryCategory", async () => {
       await using(createHandler({ activeView: mockViewport().object, categories }), async (handler) => {
         const enableSubCategorySpy = sinon.stub(handler, "enableSubCategory");
-        await handler.changeVisibility(subcategoryNode, subcategoryKey, false);
+        await handler.changeVisibility(subcategoryNode, false);
         expect(enableSubCategorySpy).to.be.calledWith(subcategoryNode.id, false);
       });
     });
@@ -133,7 +138,7 @@ describe("CategoryVisibilityHandler", () => {
       await using(createHandler({ activeView: mockViewport().object, categories }), async (handler) => {
         const enableCategorySpy = sinon.stub(handler, "enableCategory");
         const enableSubCategorySpy = sinon.stub(handler, "enableSubCategory");
-        await handler.changeVisibility(subcategoryNode, subcategoryKey, true);
+        await handler.changeVisibility(subcategoryNode, true);
         expect(enableCategorySpy).to.be.calledWith(["CategoryId"], true, false);
         expect(enableSubCategorySpy).to.be.calledWith(subcategoryNode.id, true);
         expect(enableCategorySpy.calledBefore(enableSubCategorySpy)).to.be.true;
@@ -147,7 +152,7 @@ describe("CategoryVisibilityHandler", () => {
     it("calls getCategoryVisibility", () => {
       using(createHandler({}), (handler) => {
         const spy = sinon.stub(handler, "getCategoryVisibility");
-        handler.getVisibilityStatus(categoryNode, categoryKey);
+        handler.getVisibilityStatus(categoryNode);
         expect(spy).to.be.calledWith(categoryNode.id);
       });
     });
@@ -155,7 +160,7 @@ describe("CategoryVisibilityHandler", () => {
     it("calls getSubCategoryVisibility", () => {
       using(createHandler({ categories }), (handler) => {
         const spy = sinon.stub(handler, "getSubCategoryVisibility");
-        handler.getVisibilityStatus(subcategoryNode, subcategoryKey);
+        handler.getVisibilityStatus(subcategoryNode);
         expect(spy).to.be.calledWith(subcategoryNode.id);
       });
     });
