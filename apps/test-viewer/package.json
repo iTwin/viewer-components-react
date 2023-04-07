@@ -33,8 +33,8 @@
     "@types/node": "^14.18.42",
     "@types/react": "^17.0.56",
     "@types/react-dom": "^17.0.19",
-    "extra-fs": "3.2.15",
     "history": "^4.10.1",
+    "npm-run-all": "^4.1.5",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.9",
@@ -53,13 +53,15 @@
   },
   "scripts": {
     "start": "react-scripts --max_old_space_size=4096 start",
+    "start:dev": "run-p start link:deps",
     "build": "",
     "eject": "",
     "test": "",
     "cover": "",
     "lint": "",
     "clean": "rimraf lib .rush/temp/package-deps*.json",
-    "rebuild": "npm run clean && npm run build"
+    "rebuild": "npm run clean && npm run build",
+    "link:deps": "node ./scripts/linkWorkspaceDeps.js"
   },
   "eslintConfig": {
     "extends": [
