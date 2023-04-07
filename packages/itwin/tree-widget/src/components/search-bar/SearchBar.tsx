@@ -2,19 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import * as React from "react";
-import classnames from "classnames";
-import type { CommonProps } from "@itwin/core-react";
-import { SearchBox } from "./SearchBox";
-import "./SearchBar.scss";
-import {
-  ButtonGroup,
-  DropdownMenu,
-  IconButton,
-  MenuItem,
-} from "@itwin/itwinui-react";
-import { SvgMore, SvgSearch } from "@itwin/itwinui-icons-react";
 
+import "./SearchBar.scss";
+import classnames from "classnames";
+import { Children, createRef, PureComponent } from "react";
+import { SvgMore, SvgSearch } from "@itwin/itwinui-icons-react";
+import { ButtonGroup, DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
+import { SearchBox } from "./SearchBox";
+
+import type { CommonProps } from "@itwin/core-react";
 export enum Alignment {
   Left = 0,
   Right = 1,
@@ -53,11 +49,8 @@ interface SearchBarState {
 }
 
 /** SearchBox with expanding search box capability */
-export class SearchBar extends React.PureComponent<
-SearchBarProps,
-SearchBarState
-> {
-  private _searchBox = React.createRef<SearchBox>();
+export class SearchBar extends PureComponent<SearchBarProps, SearchBarState> {
+  private _searchBox = createRef<SearchBox>();
 
   public static defaultProps: Partial<SearchBarProps> = {
     alignment: Alignment.Right,
@@ -117,21 +110,21 @@ SearchBarState
       <div className={classes}>
         {enableGrouping && <div className={contentClassName}>
           <ButtonGroup
+            // note: I have no idea why TS wants these attributes, since they're all optional..
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus={undefined} nonce={undefined} content={undefined} rel={undefined} rev={undefined}
             overflowButton={(overflowStart) => (
               <DropdownMenu
-                menuItems={() =>
-                  React.Children.toArray(this.props.children)
-                    .slice(overflowStart === 0 ? 0 : overflowStart - 1)
-                    .map((btn, index) => <MenuItem key={index} className="search-bar-dropdown-menu-item">{btn}</MenuItem>)
-                }
+                menuItems={() => Children.toArray(this.props.children)
+                  .slice(overflowStart === 0 ? 0 : overflowStart - 1)
+                  .map((btn, index) => <MenuItem key={index} className="search-bar-dropdown-menu-item">{btn}</MenuItem>)}
                 className="search-bar-dropdown-container"
               >
                 <IconButton styleType="borderless" size="small">
                   <SvgMore />
                 </IconButton>
               </DropdownMenu>
-            )}
-          >
+            )}>
             {this.props.children}
           </ButtonGroup>
         </div>}
