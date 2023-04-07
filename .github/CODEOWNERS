@@ -10,6 +10,8 @@
 # review when someone opens a pull request.
 *  @itwin/viewer-components-reviewers
 
+/apps/test-viewer  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
+
 /packages/itwin/property-grid  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation @JoeZman
 /common/changes/@itwin/property-grid-react  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation @JoeZman
 
