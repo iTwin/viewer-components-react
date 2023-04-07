@@ -33,6 +33,7 @@
     "@types/node": "^14.18.42",
     "@types/react": "^17.0.56",
     "@types/react-dom": "^17.0.19",
+    "extra-fs": "3.2.15",
     "history": "^4.10.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
