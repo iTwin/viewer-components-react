@@ -93,7 +93,7 @@ $default-font-size: --iui-font-size-1;
 
     &:focus {
       outline: none;
-      box-shadow: $uicore-button-focus-boxshadow;
+      box-shadow: $buic-focus-boxshadow 0px 0px 0px 2px;
     }
   }
 
