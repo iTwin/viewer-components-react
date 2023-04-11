@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/geo-tools-react",
       "comment": "Migrated geo-tools to iTwin.js 3.7",
-      "type": "minor"
+      "type": "none"
     }
   ],
   "packageName": "@itwin/geo-tools-react"
