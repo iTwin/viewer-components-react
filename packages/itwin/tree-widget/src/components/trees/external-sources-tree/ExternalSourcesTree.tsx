@@ -14,7 +14,6 @@ import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
  * Presentation rules used by ControlledCategoriesTree
  * @internal
  */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 export const RULESET_EXTERNAL_SOURCES = RULESET_EXTERNAL_SOURCES_IMPORT as Ruleset;
 
 const PAGING_SIZE = 20;
