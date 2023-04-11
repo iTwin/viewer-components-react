@@ -110,9 +110,6 @@ export class SearchBar extends PureComponent<SearchBarProps, SearchBarState> {
       <div className={classes}>
         {enableGrouping && <div className={contentClassName}>
           <ButtonGroup
-            // note: I have no idea why TS wants these attributes, since they're all optional..
-            // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus={undefined} nonce={undefined} content={undefined} rel={undefined} rev={undefined}
             overflowButton={(overflowStart) => (
               <DropdownMenu
                 menuItems={() => Children.toArray(this.props.children)
