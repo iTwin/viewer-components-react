@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetComponent.scss";
-import * as React from "react";
 import { SelectableContent, SelectableContentDefinition } from "@itwin/components-react";
 
 interface TreeWidgetComponentProps {

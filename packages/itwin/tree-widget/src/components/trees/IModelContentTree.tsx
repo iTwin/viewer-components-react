@@ -2,13 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useMemo } from "react";
-import type { Ruleset } from "@itwin/presentation-common";
-import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+import classNames from "classnames";
+import { useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
+import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import IMODEL_CONTENT_RULESET from "../rulesets/IModelContent.json";
 import { AutoSizer } from "../utils/AutoSizer";
-import classNames from "classnames";
+
+import type { Ruleset } from "@itwin/presentation-common";
 import type { IModelContentTreeProps } from "../../types";
 
 export const IModelContentTree = (props: IModelContentTreeProps) => {

@@ -8,6 +8,7 @@ import { TreeNodeItem, useAsyncValue } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport } from "../CategoriesVisibilityUtils";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
@@ -73,15 +74,22 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
 
   public onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
-  public getVisibilityStatus(node: TreeNodeItem, nodeKey: NodeKey): VisibilityStatus {
-    const instanceId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
+  public getVisibilityStatus(node: TreeNodeItem): VisibilityStatus {
+    if (!isPresentationTreeNodeItem(node)) {
+      return { state: "visible", isDisabled: true };
+    }
+    const instanceId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(node.key);
     return { state: node.parentId ? this.getSubCategoryVisibility(instanceId) : this.getCategoryVisibility(instanceId) };
   }
 
-  public async changeVisibility(node: TreeNodeItem, nodeKey: NodeKey, shouldDisplay: boolean): Promise<void> {
+  public async changeVisibility(node: TreeNodeItem, shouldDisplay: boolean): Promise<void> {
+    if (!isPresentationTreeNodeItem(node)) {
+      return;
+    }
+
     // handle subcategory visibility change
     if (node.parentId) {
-      const childId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
+      const childId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(node.key);
       // istanbul ignore next
       const parentId = this.getParent(childId)?.categoryId;
 
@@ -93,7 +101,7 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
       return;
     }
 
-    const instanceId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
+    const instanceId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(node.key);
     await this.enableCategory([instanceId], shouldDisplay, true);
   }
 

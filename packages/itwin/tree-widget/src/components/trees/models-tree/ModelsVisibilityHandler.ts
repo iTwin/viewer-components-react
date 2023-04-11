@@ -8,7 +8,7 @@ import { BeEvent, Id64String } from "@itwin/core-bentley";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
 import { IModelConnection, PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
 import { ECClassGroupingNodeKey, GroupingNodeKey, Keys, KeySet, NodeKey } from "@itwin/presentation-common";
-import { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { IFilteredPresentationTreeDataProvider, isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
@@ -81,8 +81,11 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   /** Sets data provider that is used to get filtered tree hierarchy. */
   public setFilteredDataProvider(provider: IFilteredPresentationTreeDataProvider | undefined) { this._filteredDataProvider = provider; }
 
-  public static getNodeType(item: TreeNodeItem, dataProvider: IPresentationTreeDataProvider) {
-    if (NodeKey.isClassGroupingNodeKey(dataProvider.getNodeKey(item)))
+  public static getNodeType(item: TreeNodeItem) {
+    if (!isPresentationTreeNodeItem(item))
+      return ModelsTreeNodeType.Unknown;
+
+    if (NodeKey.isClassGroupingNodeKey(item.key))
       return ModelsTreeNodeType.Grouping;
 
     if (!item.extendedData)
@@ -108,42 +111,50 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   }
 
   /** Returns visibility status of the tree node. */
-  public getVisibilityStatus(node: TreeNodeItem, nodeKey: NodeKey): VisibilityStatus | Promise<VisibilityStatus> {
-    if (NodeKey.isClassGroupingNodeKey(nodeKey))
-      return this.getElementGroupingNodeDisplayStatus(node.id, nodeKey);
+  public getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus> {
+    if (!isPresentationTreeNodeItem(node)) {
+      return { state: "visible", isDisabled: true };
+    }
 
-    if (!NodeKey.isInstancesNodeKey(nodeKey))
+    if (NodeKey.isClassGroupingNodeKey(node.key))
+      return this.getElementGroupingNodeDisplayStatus(node.id, node.key);
+
+    if (!NodeKey.isInstancesNodeKey(node.key))
       return { state: "hidden", isDisabled: true };
 
     if (ModelsVisibilityHandler.isSubjectNode(node)) {
       // note: subject nodes may be merged to represent multiple subject instances
-      return this.getSubjectNodeVisibility(nodeKey.instanceKeys.map((key) => key.id), node);
+      return this.getSubjectNodeVisibility(node.key.instanceKeys.map((key) => key.id), node);
     }
     if (ModelsVisibilityHandler.isModelNode(node))
-      return this.getModelDisplayStatus(nodeKey.instanceKeys[0].id);
+      return this.getModelDisplayStatus(node.key.instanceKeys[0].id);
     if (ModelsVisibilityHandler.isCategoryNode(node))
-      return this.getCategoryDisplayStatus(nodeKey.instanceKeys[0].id, this.getCategoryParentModelId(node));
-    return this.getElementDisplayStatus(nodeKey.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node));
+      return this.getCategoryDisplayStatus(node.key.instanceKeys[0].id, this.getCategoryParentModelId(node));
+    return this.getElementDisplayStatus(node.key.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node));
   }
 
   /** Changes visibility of the items represented by the tree node. */
-  public async changeVisibility(node: TreeNodeItem, nodeKey: NodeKey, on: boolean) {
-    if (NodeKey.isClassGroupingNodeKey(nodeKey)) {
-      await this.changeElementGroupingNodeState(nodeKey, on);
+  public async changeVisibility(node: TreeNodeItem, on: boolean) {
+    if (!isPresentationTreeNodeItem(node)) {
       return;
     }
 
-    if (!NodeKey.isInstancesNodeKey(nodeKey))
+    if (NodeKey.isClassGroupingNodeKey(node.key)) {
+      await this.changeElementGroupingNodeState(node.key, on);
+      return;
+    }
+
+    if (!NodeKey.isInstancesNodeKey(node.key))
       return;
 
     if (ModelsVisibilityHandler.isSubjectNode(node)) {
-      await this.changeSubjectNodeState(nodeKey.instanceKeys.map((key) => key.id), node, on);
+      await this.changeSubjectNodeState(node.key.instanceKeys.map((key) => key.id), node, on);
     } else if (ModelsVisibilityHandler.isModelNode(node)) {
-      await this.changeModelState(nodeKey.instanceKeys[0].id, on);
+      await this.changeModelState(node.key.instanceKeys[0].id, on);
     } else if (ModelsVisibilityHandler.isCategoryNode(node)) {
-      this.changeCategoryState(nodeKey.instanceKeys[0].id, this.getCategoryParentModelId(node), on);
+      this.changeCategoryState(node.key.instanceKeys[0].id, this.getCategoryParentModelId(node), on);
     } else {
-      await this.changeElementState(nodeKey.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node), on);
+      await this.changeElementState(node.key.instanceKeys[0].id, this.getElementModelId(node), this.getElementCategoryId(node), on);
     }
   }
 
@@ -170,7 +181,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return this.getSubjectDisplayStatus(ids);
 
     const children = await provider.getNodes(node);
-    const childrenDisplayStatuses = await Promise.all(children.map((childNode) => this.getVisibilityStatus(childNode, provider.getNodeKey(childNode))));
+    const childrenDisplayStatuses = await Promise.all(children.map((childNode) => this.getVisibilityStatus(childNode)));
     if (childrenDisplayStatuses.some((status) => status.state === "visible"))
       return { state: "visible", tooltip: createTooltip("visible", "subject.atLeastOneModelVisible") };
     return { state: "hidden", tooltip: createTooltip("hidden", "subject.allModelsHidden") };
@@ -276,7 +287,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return this.changeSubjectState(ids, on);
 
     const children = await provider.getNodes(node);
-    return Promise.all(children.map(async (childNode) => this.changeVisibility(childNode, provider.getNodeKey(childNode), on)));
+    return Promise.all(children.map(async (childNode) => this.changeVisibility(childNode, on)));
   }
 
   private async changeSubjectState(ids: Id64String[], on: boolean) {
