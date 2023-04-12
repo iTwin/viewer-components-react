@@ -21,11 +21,6 @@
   },
   "projects": [
     {
-      "packageName": "@itwin/breakdown-trees-react",
-      "projectFolder": "packages/itwin/breakdown-trees",
-      "versionPolicyName": "itwin-breakdown-trees"
-    },
-    {
       "packageName": "@itwin/geo-tools-react",
       "projectFolder": "packages/itwin/geo-tools",
       "versionPolicyName": "itwin-geo-tools"
