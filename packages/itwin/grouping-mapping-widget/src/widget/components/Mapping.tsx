@@ -97,7 +97,10 @@ export const Mappings = ({
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mappings, setMappings] = useState<Mapping[]>([]);
-  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
+  const displayStrings = React.useMemo(
+    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
+    [userDisplayStrings]
+  );
 
   useEffect(() => {
     void fetchMappings(
