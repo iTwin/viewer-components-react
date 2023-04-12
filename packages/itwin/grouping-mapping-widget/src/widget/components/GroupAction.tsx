@@ -274,12 +274,12 @@ export const GroupAction = (props: GroupActionProps) => {
         {props.onClickCancel && <Button
           type='button'
           id='cancel'
-          onClick={() => {
+          onClick={async () => {
             Presentation.selection.clearSelection(
               "GroupingMappingWidget",
               iModelConnection,
             );
-            props.onClickCancel;
+            props.onClickCancel && props.onClickCancel();
           }}
         >
           Cancel
