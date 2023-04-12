@@ -55,6 +55,10 @@ describe("GeoAddressSearch", () => {
     providerStub.getAddresses.reset();
 
   });
+  after(async () => {
+    TestUtils.terminateUiComponents();
+    await MockRender.App.shutdown();
+  });
 
   it("renders", () => {
     const wrapper = mount(<GeoAddressSearch />);
