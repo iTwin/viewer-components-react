@@ -77,6 +77,7 @@
     "@itwin/core-react": "^4.0.0-dev.13",
     "@itwin/ecschema-metadata": "^4.0.0-dev.66",
     "@itwin/eslint-plugin": "^3.7.0",
+    "@itwin/core-i18n": "3.7.1",
     "@itwin/imodel-components-react": "^4.0.0-dev.13",
     "@itwin/presentation-common": "^4.0.0-dev.66",
     "@itwin/presentation-components": "^4.0.0-dev.30",
@@ -110,8 +111,7 @@
   },
   "dependencies": {
     "@bentley/icons-generic-webfont": "^1.0.29",
-    "@itwin/core-telemetry": "^3.7.0",
-    "@itwin/core-i18n": "3.7.1"
+    "@itwin/core-telemetry": "^3.7.0"
   },
   "nyc": {
     "nycrc-path": "./node_modules/@itwin/build-tools/.nycrc",

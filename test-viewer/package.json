@@ -50,6 +50,9 @@
     },
     "@itwin/tree-widget-react": {
       "injected": true
+    },
+    "@itwin/measure-tools-react": {
+      "injected": true
     }
   },
   "scripts": {

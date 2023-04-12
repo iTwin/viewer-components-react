@@ -776,7 +776,6 @@ importers:
       webpack-cli: ^5.0.1
     dependencies:
       '@bentley/icons-generic-webfont': 1.0.34
-      '@itwin/core-i18n': 3.7.1_@itwin+core-bentley@3.7.1
       '@itwin/core-telemetry': 3.7.1_@itwin+core-geometry@3.7.1
     devDependencies:
       '@itwin/appui-abstract': 3.7.1_@itwin+core-bentley@3.7.1
@@ -789,6 +788,7 @@ importers:
       '@itwin/core-common': 3.7.1_959ee76f33ed1944c35aec3c0d82ba52
       '@itwin/core-frontend': 3.7.1_791e691e277aed8f8b5beeac11c5b449
       '@itwin/core-geometry': 3.7.1
+      '@itwin/core-i18n': 3.7.1_@itwin+core-bentley@3.7.1
       '@itwin/core-markup': 3.7.1_eb90fa5b63e5b45b17a085991dba7c1c
       '@itwin/core-orbitgt': 3.7.1
       '@itwin/core-quantity': 3.7.1_@itwin+core-bentley@3.7.1
