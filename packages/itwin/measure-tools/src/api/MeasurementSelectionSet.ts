@@ -5,12 +5,8 @@
 
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import { BeUiEvent, Id64 } from "@itwin/core-bentley";
-import type {
-  IModelConnection, SelectAddEvent, SelectionSetEvent, SelectRemoveEvent, SelectReplaceEvent,
-} from "@itwin/core-frontend";
-import {
-  SelectionSetEventType,
-} from "@itwin/core-frontend";
+import type { IModelConnection, SelectAddEvent, SelectionSetEvent, SelectRemoveEvent, SelectReplaceEvent } from "@itwin/core-frontend";
+import { SelectionSetEventType } from "@itwin/core-frontend";
 import { SessionStateActionId, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
 import { Measurement } from "./Measurement";
 import { MeasurementSyncUiEventId } from "./MeasurementEnums";

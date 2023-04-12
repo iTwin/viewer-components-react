@@ -4,12 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 import * as React from "react";
-import {
-  ConditionalBooleanValue,
-} from "@itwin/appui-abstract";
+import { ConditionalBooleanValue } from "@itwin/appui-abstract";
 import type {
-  ToolbarItem,
-  ToolItemDef, UiItemsProvider, Widget,
+  ToolbarItem, ToolItemDef, UiItemsProvider, Widget
 } from "@itwin/appui-react";
 import {
   StagePanelLocation, StagePanelSection, StageUsage, SyncUiEventId, ToolbarHelper, ToolbarItemUtilities,
