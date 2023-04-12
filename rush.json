@@ -6,7 +6,7 @@
   "pnpmOptions": {
     "useWorkspaces": true
   },
-  "projectFolderMinDepth": 1,
+  "projectFolderMinDepth": 2,
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
   "gitPolicy": {
@@ -82,7 +82,7 @@
     },
     {
       "packageName": "test-viewer",
-      "projectFolder": "test-viewer",
+      "projectFolder": "apps/test-viewer",
       "shouldPublish": false
     }
   ]
