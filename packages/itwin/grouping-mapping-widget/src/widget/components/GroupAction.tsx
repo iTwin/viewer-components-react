@@ -14,9 +14,6 @@ import type {
 } from "@itwin/itwinui-react";
 import {
   Button,
-  ComboBox,
-  Fieldset,
-  Label,
   toaster,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -41,8 +38,10 @@ import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI"
 import type { Group } from "@itwin/insights-client";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { visualizeGroupColors } from "./groupsHelpers";
-import { QueryBuilderCustomUI } from "./QueryBuilderCustomUI";
-import { GroupDetails } from "./GroupDetails";
+import { QueryBuilderStep } from "./QueryBuilderStep";
+import { GroupDetailsStep } from "./GroupDetailsStep";
+import { QueryBuilderActionPanel } from "./QueryBuilderActionPanel";
+import { GroupDetailsActionPanel } from "./GroupDetailsActionPanel";
 
 const defaultDisplayStrings = {
   groupDetails: "Group Details",
@@ -235,91 +234,56 @@ export const GroupAction = (props: GroupActionProps) => {
     [iModelConnection, resetView]
   );
 
+  const isQueryBuilderStep = currentStep === GroupActionStep.QueryBuilder;
+  const isGroupDetailsStep = currentStep === GroupActionStep.GroupDetails;
   return (
     <>
       <div className="gmw-group-add-modify-container">
-        <Fieldset legend={displayStrings.groupBy} className={
-          currentStep === GroupActionStep.QueryBuilder
-            ? "gmw-query-builder-container"
-            : "gmw-hide"
-        }>
-          <span>
-            <Label htmlFor='query-combo-input'>Query Generation Tool</Label>
-            <ComboBox
-              value={queryGenerationType}
-              inputProps={{
-                id: "query-combo-input",
-              }}
-              options={getOptions}
-              onChange={onChange}
-            />
-          </span>
-          <QueryBuilderCustomUI
-            queryGenerationType={queryGenerationType}
-            groupUIs={groupUIs}
-            isUpdating={isUpdating}
-            resetView={resetView}
-            setQuery={setQuery}
-          />
-        </Fieldset>
-        <Fieldset
-          legend={displayStrings.groupDetails}
-          className={
-            currentStep === GroupActionStep.GroupDetails
-              ? "gmw-group-details"
-              : "gmw-hide"
-          }>
-          <GroupDetails
-            details={details}
-            setDetails={setDetails}
-            validator={validator}
-          />
-        </Fieldset>
+        <QueryBuilderStep
+          isHidden={!isQueryBuilderStep}
+          queryGenerationType={queryGenerationType}
+          groupUIs={groupUIs}
+          isUpdating={isUpdating}
+          resetView={resetView}
+          setQuery={setQuery}
+          onChange={onChange}
+          getOptions={getOptions}
+          displayStrings={{ ...displayStrings }}
+        />
+        {isGroupDetailsStep && <GroupDetailsStep
+          details={details}
+          setDetails={setDetails}
+          validator={validator}
+          displayStrings={{ ...displayStrings }}
+        />}
       </div>
       <div className='gmw-action-panel'>
         {isLoading &&
           <LoadingSpinner />
         }
-        {currentStep !== GroupActionStep.QueryBuilder ?
-          <>
-            <Button
-              id='save-app'
-              onClick={() => setCurrentStep(GroupActionStep.QueryBuilder)}
-            >
-              Back
-            </Button>
-            <Button
-              disabled={isBlockingActions}
-              styleType='high-visibility'
-              id='save-app'
-              onClick={async () => {
-                await save();
-              }}
-            >
-              Save
-            </Button>
-          </> :
-          <Button
-            styleType='high-visibility'
-            id='save-app'
-            onClick={() => setCurrentStep(GroupActionStep.GroupDetails)}
-          >
-            Next
-          </Button>
-        }
-        <Button
+        {isQueryBuilderStep && (
+          <QueryBuilderActionPanel onClickNext={() => setCurrentStep(GroupActionStep.GroupDetails)} />
+        )}
+        {isGroupDetailsStep && (
+          <GroupDetailsActionPanel
+            isSaveDisabled={isBlockingActions}
+            onClickSave={save}
+            onClickBack={() => setCurrentStep(GroupActionStep.QueryBuilder)}
+          />
+        )}
+        {props.onClickCancel && <Button
           type='button'
           id='cancel'
-          onClick={props.onClickCancel ? async () => {
+          onClick={async () => {
             Presentation.selection.clearSelection(
               "GroupingMappingWidget",
               iModelConnection,
             );
             props.onClickCancel && props.onClickCancel();
-          } : undefined}
+          }}
         >
           Cancel
-        </Button>
+        </Button>}
       </div>
     </>
   );

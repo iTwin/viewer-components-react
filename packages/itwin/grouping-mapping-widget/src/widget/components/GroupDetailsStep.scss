@@ -4,9 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.gmw-group-add-modify-container {
+.gmw-group-details {
   display: flex;
   flex-direction: column;
-  overflow-x: auto;
-  height: 100%;
+  gap: $iui-baseline;
 }

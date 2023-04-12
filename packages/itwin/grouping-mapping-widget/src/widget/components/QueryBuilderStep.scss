@@ -4,9 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.gmw-group-add-modify-container {
+.gmw-hide {
+  display: none;
+}
+.gmw-query-builder-container {
   display: flex;
   flex-direction: column;
-  overflow-x: auto;
-  height: 100%;
+  gap: $iui-baseline;
+  flex-grow: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
 }
