@@ -53,7 +53,7 @@ export class GeoTools {
     key: string | string[],
     options?: LocalizationOptions
   ): string {
-    return GeoTools.i18n.getLocalizedStringWithNamespace(GeoTools.i18nNamespace, key, options);
+    return GeoTools.i18n.getLocalizedString(`${GeoTools.i18nNamespace}:${key}`, options);
   }
 
   public static loggerCategory(obj: any): string {
