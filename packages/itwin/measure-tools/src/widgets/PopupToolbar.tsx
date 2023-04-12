@@ -4,9 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 /* eslint-disable deprecation/deprecation */
 import * as React from "react";
-import { useEffect, useState, useRef }from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ToolbarComposer } from "@itwin/appui-react";
-import { ExtensibleToolbarProps } from "@itwin/appui-react";
+import type { ExtensibleToolbarProps } from "@itwin/appui-react";
 
 export interface PopupToolbarProps extends ExtensibleToolbarProps {
   onClose?: () => void;
@@ -17,20 +17,20 @@ export const PopupToolbar: React.FC<PopupToolbarProps> = ({ items, usage, orient
 
   const ref = useRef(null);
 
-  const handleMouseWheel = () => {
+  const handleMouseWheel = useCallback(() => {
     if (!isClosing && onClose) {
       onClose();
       setIsClosing(true);
     }
-  }
+  }, [isClosing, onClose]);
 
-  const handleMouseDown = () => {
+  const handleMouseDown = useCallback(() => {
     if (!isClosing && onClose) {
       setIsClosing(true);
     }
-  }
+  }, [isClosing, onClose]);
 
-  useEffect(() => {   
+  useEffect(() => {
     document.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("wheel", handleMouseWheel);
 
@@ -38,10 +38,10 @@ export const PopupToolbar: React.FC<PopupToolbarProps> = ({ items, usage, orient
       document.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("wheel", handleMouseWheel);
       setIsClosing(false);
-    }
-  }, [])
+    };
+  }, [handleMouseWheel, handleMouseDown]);
 
   return <div ref={ref}>
     <ToolbarComposer items={items} orientation={orientation} usage={usage} />
-  </div>
+  </div>;
 };

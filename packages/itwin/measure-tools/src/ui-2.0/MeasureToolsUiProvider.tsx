@@ -9,12 +9,11 @@ import {
 } from "@itwin/appui-abstract";
 import type {
   ToolbarItem,
-  ToolItemDef, Widget,
+  ToolItemDef, UiItemsProvider, Widget,
 } from "@itwin/appui-react";
 import {
-  SyncUiEventId, ToolbarHelper, StageUsage, ToolbarItemUtilities,
-  ToolbarOrientation, ToolbarUsage, UiItemsProvider, WidgetState,
-  StagePanelLocation, StagePanelSection
+  StagePanelLocation, StagePanelSection, StageUsage, SyncUiEventId, ToolbarHelper, ToolbarItemUtilities,
+  ToolbarOrientation, ToolbarUsage, WidgetState,
 } from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";

@@ -7,7 +7,8 @@ import * as React from "react";
 import type { XAndY } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import { RelativePosition } from "@itwin/appui-abstract";
-import { ActionButtonItemDef, CursorInformation, CursorPopupManager, ToolbarUsage, ItemProps, ToolbarOrientation, ToolbarItemUtilities, ToolbarActionItem } from "@itwin/appui-react";
+import type { ItemProps, ToolbarActionItem } from "@itwin/appui-react";
+import { ActionButtonItemDef, CursorInformation, CursorPopupManager, ToolbarItemUtilities, ToolbarOrientation, ToolbarUsage } from "@itwin/appui-react";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import type { Measurement, MeasurementPickContext } from "../api/Measurement";
 import { MeasurementManager } from "../api/MeasurementManager";
@@ -436,7 +437,7 @@ export class MeasurementActionToolbar {
     const toolItems: ToolbarActionItem[] = actionItemList.map((itemDef: MeasurementActionItemDef, index) => {
       itemDef.measurements = measurements;
       return ToolbarItemUtilities.createActionItem(itemDef.id, index * 10, itemDef.iconSpec, itemDef.label, itemDef.execute);
-    })
+    });
     return <PopupToolbar
       items={toolItems}
       usage={ToolbarUsage.ContentManipulation}
