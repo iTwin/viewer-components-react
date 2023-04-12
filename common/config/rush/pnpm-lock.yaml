@@ -1289,6 +1289,7 @@ importers:
       '@itwin/imodel-components-react': ^4.0.0-dev.15
       '@itwin/imodels-access-frontend': ^3.0.0
       '@itwin/itwinui-react': ^2.7.0
+      '@itwin/measure-tools-react': workspace:*
       '@itwin/presentation-common': ^3.7.1
       '@itwin/presentation-components': ^4.0.0-dev.34
       '@itwin/presentation-frontend': ^3.7.1
@@ -1329,6 +1330,7 @@ importers:
       '@itwin/imodel-components-react': 4.0.0-dev.15_463390e99ed08189e46ae312ecd9b28a
       '@itwin/imodels-access-frontend': 3.0.0_fff931033b92bb16fed9d96490961451
       '@itwin/itwinui-react': 2.8.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/measure-tools-react': link:../packages/itwin/measure-tools
       '@itwin/presentation-common': 3.7.1_94355e9609de2975afe398485abd2942
       '@itwin/presentation-components': 4.0.0-dev.34_7ab171ca3cebbe42ba95cdb3b6aefbae
       '@itwin/presentation-frontend': 3.7.1_c482609af89846ad3fc781b11c45fc49
