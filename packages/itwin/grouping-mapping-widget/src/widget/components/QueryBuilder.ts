@@ -65,10 +65,6 @@ export class QueryBuilder {
     this.dataProvider = provider;
   }
 
-  public resetQuery = () => {
-    this.query = undefined;
-  }
-
   private isCategory(propertyField: PropertiesField): boolean {
     const classInfo =
       propertyField.properties[0].property.navigationPropertyInfo?.classInfo;
@@ -77,13 +73,17 @@ export class QueryBuilder {
 
   private _propertyMap: Map<string, AddedProperty> = new Map();
 
+  public resetQueryBuilder = () => {
+    this._propertyMap = new Map();
+  };
+
   private regenerateQuery = () => {
-    this.resetQuery();
+    this.query = undefined;
 
     for (const property of this._propertyMap.values()) {
       this.buildProperty(property.propertyRecord, property.propertiesField);
     }
-  }
+  };
 
   public async addProperty(prop: PropertyRecord): Promise<boolean> {
     // TODO: only handle primitive properties now
@@ -439,7 +439,7 @@ export class QueryBuilder {
     }
 
     return querySegments;
-  }
+  };
 
   private propertyQuerySegment = (className: string, property: ClassProperty, needsQuote: boolean): string => {
     if (this.isFloat(property.value))
@@ -449,7 +449,7 @@ export class QueryBuilder {
 
     const propertyValue = needsQuote ? `'${property.value}'` : property.value;
     return `${className}.${property.name} = ${propertyValue}`;
-  }
+  };
 
   private categoryWhereQuery(codeValue: string): string {
     return `((BisCore.Category.CodeValue = '${codeValue}') OR (BisCore.Category.UserLabel = '${codeValue}'))`;

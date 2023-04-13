@@ -9,24 +9,20 @@ import type {
 } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useActiveIModelConnection } from "@itwin/appui-react";
+import type {
+  SelectOption,
+} from "@itwin/itwinui-react";
 import {
-  Fieldset,
-  LabeledInput,
-  RadioTile,
-  RadioTileGroup,
-  Small,
+  Button,
   toaster,
 } from "@itwin/itwinui-react";
-import type { ReactElement } from "react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  EmptyMessage,
   handleError,
-  handleInputChange,
+  LoadingSpinner,
 } from "./utils";
 import "./GroupAction.scss";
-import ActionPanel from "./ActionPanel";
-import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
+import useValidator from "../hooks/useValidator";
 import {
   clearEmphasizedElements,
   clearOverriddenElements,
@@ -37,17 +33,25 @@ import {
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
-import { SvgAdd } from "@itwin/itwinui-icons-react";
 import type { GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
 import type { Group } from "@itwin/insights-client";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { visualizeGroupColors } from "./groupsHelpers";
+import { QueryBuilderStep } from "./QueryBuilderStep";
+import { GroupDetailsStep } from "./GroupDetailsStep";
+import { QueryBuilderActionPanel } from "./QueryBuilderActionPanel";
+import { GroupDetailsActionPanel } from "./GroupDetailsActionPanel";
 
 const defaultDisplayStrings = {
   groupDetails: "Group Details",
   groupBy: "Group By",
 };
+
+enum GroupActionStep {
+  QueryBuilder,
+  GroupDetails,
+}
 
 export interface GroupActionProps {
   mappingId: string;
@@ -71,13 +75,14 @@ export const GroupAction = (props: GroupActionProps) => {
   });
   const [query, setQuery] = useState<string>("");
   const [simpleSelectionQuery, setSimpleSelectionQuery] = useState<string>("");
-  const [validator, showValidationMessage] = useValidator();
+  const [validator, setShowValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [queryGenerationType, setQueryGenerationType] = useState(
     props.queryGenerationType,
   );
   const isUpdating = isLoading || isRendering;
+  const [currentStep, setCurrentStep] = React.useState(GroupActionStep.QueryBuilder);
 
   useEffect(() => {
     if (!iModelConnection) {
@@ -89,32 +94,14 @@ export const GroupAction = (props: GroupActionProps) => {
 
   useEffect(() => setQueryGenerationType(props.queryGenerationType), [props.queryGenerationType]);
 
-  const resetView = async () => {
-    if (groups.length > 0) {
-      if (showGroupColor) {
-        await visualizeGroupColors(iModelConnection, groups, groups, hiddenGroupsIds, hilitedElementsQueryCache);
-      } else {
-        clearOverriddenElements();
-      }
+  const resetView = useCallback(async () => {
+    if (showGroupColor) {
+      await visualizeGroupColors(iModelConnection, groups, groups, hiddenGroupsIds, hilitedElementsQueryCache);
+    } else {
+      clearOverriddenElements();
     }
     clearEmphasizedElements();
-  };
-
-  const changeGroupByType = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const {
-      target: { value },
-    } = event;
-    setQueryGenerationType(value);
-    Presentation.selection.clearSelection(
-      "GroupingMappingWidget",
-      iModelConnection,
-    );
-    setQuery("");
-    setSimpleSelectionQuery("");
-    await resetView();
-  };
+  }, [groups, hiddenGroupsIds, hilitedElementsQueryCache, iModelConnection, showGroupColor]);
 
   useEffect(() => {
     const removeListener = Presentation.selection.selectionChange.addListener(
@@ -145,7 +132,6 @@ export const GroupAction = (props: GroupActionProps) => {
         if (!query || query === "") {
           return;
         }
-
         setIsRendering(true);
         transparentOverriddenElements();
         const resolvedHiliteIds = await visualizeElementsByQuery(
@@ -173,7 +159,7 @@ export const GroupAction = (props: GroupActionProps) => {
 
   const save = useCallback(async () => {
     if (!validator.allValid()) {
-      showValidationMessage(true);
+      setShowValidationMessage(true);
       return;
     }
     try {
@@ -207,29 +193,15 @@ export const GroupAction = (props: GroupActionProps) => {
         groupName: props.group?.groupName ?? "",
         description: props.group?.description ?? "",
       });
+      setCurrentStep(GroupActionStep.QueryBuilder);
+      setShowValidationMessage(false);
       props.onSaveSuccess();
     } catch (error: any) {
       handleError(error.status);
     } finally {
       setIsLoading(false);
     }
-  }, [validator, showValidationMessage, query, simpleSelectionQuery, getAccessToken, props, mappingClient, iModelId, details, iModelConnection]);
-
-  const createQueryBuilderComponent = () => {
-    if (queryGenerationType && queryGenerationType.length > 0) {
-      const selectedCustomUI = groupUIs.find(
-        (e) => e.name === queryGenerationType,
-      );
-      if (selectedCustomUI) {
-        return React.createElement(selectedCustomUI.uiComponent, {
-          updateQuery: setQuery,
-          isUpdating,
-          resetView,
-        });
-      }
-    }
-    return <EmptyMessage message='No query generation method selected. ' />;
-  };
+  }, [validator, setShowValidationMessage, query, simpleSelectionQuery, getAccessToken, props, mappingClient, iModelId, details, iModelConnection]);
 
   const isBlockingActions = !(
     details.groupName &&
@@ -238,95 +210,81 @@ export const GroupAction = (props: GroupActionProps) => {
     !isLoading
   );
 
-  const getRadioTileComponent = (
-    icon: ReactElement,
-    value: string,
-    label: string,
-  ) => {
-    return (
-      <RadioTile
-        name={"groupby"}
-        icon={icon}
-        key={value}
-        onChange={changeGroupByType}
-        value={value}
-        label={label}
-        disabled={isUpdating}
-        checked={queryGenerationType === value}
-      />
-    );
-  };
+  const getOptions = useMemo(
+    (): SelectOption<string>[] =>
+      groupUIs.map((ui) => ({
+        label: ui.displayLabel,
+        value: ui.name,
+        icon: ui.icon,
+      })),
+    [groupUIs]
+  );
 
+  const onChange = useCallback(
+    async (value: string) => {
+      setQueryGenerationType(value);
+      Presentation.selection.clearSelection(
+        "GroupingMappingWidget",
+        iModelConnection,
+      );
+      setQuery("");
+      setSimpleSelectionQuery("");
+      await resetView();
+    },
+    [iModelConnection, resetView]
+  );
+
+  const isQueryBuilderStep = currentStep === GroupActionStep.QueryBuilder;
+  const isGroupDetailsStep = currentStep === GroupActionStep.GroupDetails;
   return (
     <>
-      <div className='gmw-group-add-modify-container'>
-        <Fieldset legend={displayStrings.groupDetails} className='gmw-group-details'>
-          <Small className='gmw-field-legend'>
-            Asterisk * indicates mandatory fields.
-          </Small>
-          <LabeledInput
-            id='groupName'
-            name='groupName'
-            label='Name'
-            value={details.groupName}
-            required
-            onChange={(event) => {
-              handleInputChange(event, details, setDetails);
-              validator.showMessageFor("groupName");
-            }}
-            message={validator.message(
-              "groupName",
-              details.groupName,
-              NAME_REQUIREMENTS,
-            )}
-            status={
-              validator.message(
-                "groupName",
-                details.groupName,
-                NAME_REQUIREMENTS,
-              )
-                ? "negative"
-                : undefined
-            }
-            onBlur={() => {
-              validator.showMessageFor("groupName");
-            }}
-            onBlurCapture={(event) => {
-              handleInputChange(event, details, setDetails);
-              validator.showMessageFor("groupName");
-            }}
-          />
-          <LabeledInput
-            id='description'
-            name='description'
-            label='Description'
-            value={details.description}
-            onChange={(event) => {
-              handleInputChange(event, details, setDetails);
-            }}
-          />
-        </Fieldset>
-        <Fieldset legend={displayStrings.groupBy} className='gmw-query-builder-container'>
-          <RadioTileGroup className='gmw-radio-group-tile' required>
-            {groupUIs.map((ext) => getRadioTileComponent(ext.icon ?? <SvgAdd />, ext.name, ext.displayLabel))}
-          </RadioTileGroup>
-          {queryGenerationType && createQueryBuilderComponent()}
-        </Fieldset>
+      <div className="gmw-group-add-modify-container">
+        <QueryBuilderStep
+          isHidden={!isQueryBuilderStep}
+          queryGenerationType={queryGenerationType}
+          groupUIs={groupUIs}
+          isUpdating={isUpdating}
+          resetView={resetView}
+          setQuery={setQuery}
+          onChange={onChange}
+          getOptions={getOptions}
+          displayStrings={{ ...displayStrings }}
+        />
+        {isGroupDetailsStep && <GroupDetailsStep
+          details={details}
+          setDetails={setDetails}
+          validator={validator}
+          displayStrings={{ ...displayStrings }}
+        />}
       </div>
-      <ActionPanel
-        onSave={async () => {
-          await save();
-        }}
-        onCancel={props.onClickCancel ? async () => {
-          Presentation.selection.clearSelection(
-            "GroupingMappingWidget",
-            iModelConnection,
-          );
-          props.onClickCancel && props.onClickCancel();
-        } : undefined}
-        isSavingDisabled={isBlockingActions}
-        isLoading={isLoading}
-      />
+      <div className='gmw-action-panel'>
+        {isLoading &&
+          <LoadingSpinner />
+        }
+        {isQueryBuilderStep && (
+          <QueryBuilderActionPanel onClickNext={() => setCurrentStep(GroupActionStep.GroupDetails)} />
+        )}
+        {isGroupDetailsStep && (
+          <GroupDetailsActionPanel
+            isSaveDisabled={isBlockingActions}
+            onClickSave={save}
+            onClickBack={() => setCurrentStep(GroupActionStep.QueryBuilder)}
+          />
+        )}
+        {props.onClickCancel && <Button
+          type='button'
+          id='cancel'
+          onClick={async () => {
+            Presentation.selection.clearSelection(
+              "GroupingMappingWidget",
+              iModelConnection,
+            );
+            props.onClickCancel && props.onClickCancel();
+          }}
+        >
+          Cancel
+        </Button>}
+      </div>
     </>
   );
 };
