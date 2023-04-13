@@ -11,7 +11,11 @@ const packages = [{
 }, {
   name: "@itwin/property-grid-react",
   dir: "property-grid"
-}]
+}, {
+  name: "@itwin/measure-tools-react",
+  dir: "measure-tools"
+}
+]
 
 linkPackages();
 

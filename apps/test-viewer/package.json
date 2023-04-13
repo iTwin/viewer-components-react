@@ -27,6 +27,7 @@
     "@itwin/presentation-frontend": "^3.7.1",
     "@itwin/property-grid-react": "workspace:*",
     "@itwin/tree-widget-react": "workspace:*",
+    "@itwin/measure-tools-react": "workspace:*",
     "@itwin/web-viewer-react": "4.0.0-dev.7",
     "@itwin/webgl-compatibility": "^3.7.1",
     "@types/history": "^4.7.11",
@@ -48,6 +49,9 @@
       "injected": true
     },
     "@itwin/tree-widget-react": {
+      "injected": true
+    },
+    "@itwin/measure-tools-react": {
       "injected": true
     }
   },
