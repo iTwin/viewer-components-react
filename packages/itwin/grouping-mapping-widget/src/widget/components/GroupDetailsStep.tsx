@@ -2,9 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import {
-  Fieldset,
-} from "@itwin/itwinui-react";
+import { Fieldset } from "@itwin/itwinui-react";
 import React from "react";
 import "./GroupAction.scss";
 import type { GroupDetailsProps } from "./GroupDetails";

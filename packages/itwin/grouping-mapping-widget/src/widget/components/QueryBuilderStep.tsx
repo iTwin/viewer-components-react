@@ -3,14 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import type {
-  SelectOption,
-} from "@itwin/itwinui-react";
-import {
-  ComboBox,
-  Fieldset,
-  Label,
-} from "@itwin/itwinui-react";
+import type { SelectOption } from "@itwin/itwinui-react";
+import { ComboBox, Fieldset, Label } from "@itwin/itwinui-react";
 import type { QueryBuilderCustomUIProps } from "./QueryBuilderCustomUI";
 import { QueryBuilderCustomUI } from "./QueryBuilderCustomUI";
 import "./QueryBuilderStep.scss";
