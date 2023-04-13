@@ -34,7 +34,10 @@ export const MappingImportWizardModal = ({
   const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
   const [importing, setImporting] = useState<boolean>(false);
 
-  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
+  const displayStrings = React.useMemo(
+    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
+    [userDisplayStrings]
+  );
 
   const steps = useRef<StepProperties[]>([
     {

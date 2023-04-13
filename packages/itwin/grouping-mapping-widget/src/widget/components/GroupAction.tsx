@@ -90,7 +90,10 @@ export const GroupAction = (props: GroupActionProps) => {
     }
   }, [iModelConnection]);
 
-  const displayStrings = { ...defaultDisplayStrings, ...props.displayStrings };
+  const displayStrings = React.useMemo(
+    () => ({ ...defaultDisplayStrings, ...props.displayStrings }),
+    [props.displayStrings]
+  );
 
   useEffect(() => setQueryGenerationType(props.queryGenerationType), [props.queryGenerationType]);
 

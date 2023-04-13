@@ -53,7 +53,10 @@ const ConfirmMappingImport = ({
   const [validator, showValidationMessage] = useValidator();
   const [errored, setErrored] = useState<boolean>(false);
 
-  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
+  const displayStrings = React.useMemo(
+    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
+    [userDisplayStrings]
+  );
 
   useEffect(() => {
     setSelectedMappings((selectedMappings) =>
