@@ -10,7 +10,7 @@ import type {
 } from "@itwin/appui-react";
 import {
   StagePanelLocation, StagePanelSection, StageUsage, SyncUiEventId, ToolbarHelper, ToolbarItemUtilities,
-  ToolbarOrientation, ToolbarUsage, WidgetState,
+  ToolbarOrientation, ToolbarUsage, WidgetState
 } from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
