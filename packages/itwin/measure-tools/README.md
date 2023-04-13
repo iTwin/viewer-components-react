@@ -58,7 +58,7 @@ Below is an example to enable the toolbar with a default action provider. Action
 MeasurementActionToolbar.setDefaultActionProvider();
 ```
 
-![Measurement Action Toolbar](https://github.com/imodeljs/viewer-components-react/blob/master/packages/measure-tools/docs/images/MTDocs-ActionToolbar.gif?raw=true)
+![Measurement Action Toolbar](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/measure-tools/docs/images/MTDocs-ActionToolbar.gif?raw=true)
 
 Below is an example of registering a custom action, it toggles the display style of a measurement so that it renders semi-transparently like if it were "ghosted".
 

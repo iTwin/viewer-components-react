@@ -5,10 +5,8 @@
 
 import type { Id64Arg, Id64String } from "@itwin/core-bentley";
 import { BeUiEvent, Id64 } from "@itwin/core-bentley";
-import type {
-  IModelConnection, SelectAddEvent, SelectionSetEvent, SelectRemoveEvent, SelectReplaceEvent} from "@itwin/core-frontend";
-import { SelectionSetEventType,
-} from "@itwin/core-frontend";
+import type { IModelConnection, SelectAddEvent, SelectionSetEvent, SelectRemoveEvent, SelectReplaceEvent } from "@itwin/core-frontend";
+import { SelectionSetEventType } from "@itwin/core-frontend";
 import { SessionStateActionId, SyncUiEventDispatcher, UiFramework } from "@itwin/appui-react";
 import { Measurement } from "./Measurement";
 import { MeasurementSyncUiEventId } from "./MeasurementEnums";
@@ -72,7 +70,7 @@ export class MeasurementSelectionSet {
   public static get nextTransientId(): Id64String | undefined {
     const globalSS = MeasurementSelectionSet.global;
     if (globalSS.imodel)
-      return globalSS.imodel.transientIds.next;
+      return globalSS.imodel.transientIds.getNext();
 
     return undefined;
   }
@@ -442,7 +440,7 @@ export class MeasurementSelectionSet {
     }
   }
 
-  private onSyncEvent(args: UiSyncEventArgs ) {
+  private onSyncEvent(args: UiSyncEventArgs) {
     if (args.eventIds.has(SessionStateActionId.SetIModelConnection))
       this.changeActiveIModel(this.getUiFameworkIModel());
   }
