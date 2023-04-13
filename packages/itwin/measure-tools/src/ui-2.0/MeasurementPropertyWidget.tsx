@@ -6,15 +6,16 @@ import * as React from "react";
 import type { Id64String } from "@itwin/core-bentley";
 import { IModelApp, SelectionSetEventType } from "@itwin/core-frontend";
 import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
-import { PropertyRecord, PropertyValueFormat, WidgetState } from "@itwin/appui-abstract";
-import { useActiveFrontstageDef, useActiveIModelConnection } from "@itwin/appui-react";
-import { PropertyGrid, SimplePropertyDataProvider } from "@itwin/components-react";
-import { Orientation } from "@itwin/core-react";
+import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
+import { useActiveFrontstageDef, useActiveIModelConnection, WidgetState } from "@itwin/appui-react";
+import { SimplePropertyDataProvider, VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
+import { Orientation, ResizableContainerObserver } from "@itwin/core-react";
 import type { AggregatableValue, Measurement, MeasurementWidgetData } from "../api/Measurement";
 import type { MeasurementSelectionSetEvent } from "../api/MeasurementSelectionSet";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
 import { MeasureTools } from "../MeasureTools";
+import { useCallback, useState } from "react";
 
 export function useSpecificWidgetDef(id: string) {
   const frontstageDef = useActiveFrontstageDef();
@@ -28,6 +29,7 @@ export const MeasurementPropertyWidget = () => {
   const activeIModelConnection = useActiveIModelConnection();
   const [dataProvider] = React.useState(new SimplePropertyDataProvider());
   const [lastSelectedCount, setLastSelectedCount] = React.useState(MeasurementSelectionSet.global.measurements.length);
+  const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
 
   const createPropertyRecord = (displayLabel: string, value: string): PropertyRecord => {
     const propValue: PropertyValue = { valueFormat: PropertyValueFormat.Primitive, displayValue: value, value };
@@ -181,5 +183,12 @@ export const MeasurementPropertyWidget = () => {
     }
   }, [widgetDef, lastSelectedCount]);
 
-  return <PropertyGrid dataProvider={dataProvider} orientation={Orientation.Vertical} />;
+  const handleResize = useCallback((w: number, h: number) => {
+    setSize({ width: w, height: h });
+  }, []);
+
+  return <ResizableContainerObserver onResize={handleResize}>
+    <VirtualizedPropertyGridWithDataProvider dataProvider={dataProvider} orientation={Orientation.Vertical} height={height} width={width} />
+  </ResizableContainerObserver>;
+
 };

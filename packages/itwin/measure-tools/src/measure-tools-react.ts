@@ -46,7 +46,6 @@ export * from "./ui-2.0/MeasureToolsUiProvider";
 export * from "./ui-2.0/MeasurementPropertyWidget";
 
 export * from "./widgets/MeasurementActionToolbar";
-export * from "./widgets/MeasurementWidget";
 export * from "./widgets/PopupToolbar";
 
 export * from "./MeasureTools";

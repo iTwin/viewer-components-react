@@ -6,7 +6,7 @@
   "pnpmOptions": {
     "useWorkspaces": true
   },
-  "projectFolderMinDepth": 1,
+  "projectFolderMinDepth": 2,
   "projectFolderMaxDepth": 3,
   "ensureConsistentVersions": false,
   "gitPolicy": {
@@ -20,11 +20,6 @@
     "defaultBranch": "master"
   },
   "projects": [
-    {
-      "packageName": "@itwin/breakdown-trees-react",
-      "projectFolder": "packages/itwin/breakdown-trees",
-      "versionPolicyName": "itwin-breakdown-trees"
-    },
     {
       "packageName": "@itwin/geo-tools-react",
       "projectFolder": "packages/itwin/geo-tools",
@@ -82,7 +77,7 @@
     },
     {
       "packageName": "test-viewer",
-      "projectFolder": "test-viewer",
+      "projectFolder": "apps/test-viewer",
       "shouldPublish": false
     }
   ]

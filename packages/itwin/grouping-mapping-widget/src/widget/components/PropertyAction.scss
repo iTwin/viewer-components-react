@@ -2,17 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
-.gmw-manual-form {
+.gmw-property-selection-checkbox {
   display: flex;
-  flex-direction: column;
-  gap: $iui-baseline;
-  overflow: auto;
-  margin-top: $iui-baseline;
-  > .gmw-manual-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: $iui-s;
-  }
+  justify-content: center;
 }
