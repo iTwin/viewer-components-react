@@ -10,7 +10,6 @@ import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import type { HighlightableTreeProps, TreeModel, TreeModelNode, TreeModelSource } from "@itwin/components-react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import styles from "./TreeWithRulesetTree.module.scss";
-import { useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "@itwin/appui-react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import { BreakdownTrees } from "../BreakdownTrees";
@@ -31,6 +30,7 @@ import { VisibilityHandler } from "./EventHandlers/VisibilityHandler";
 import classNames from "classnames";
 import "./global.scss";
 import { useResizeObserver } from "@itwin/core-react";
+import { VisibilityTreeNoFilteredData, useVisibilityTreeFiltering } from "./VisibilityTreeRenderer";
 
 export interface TreeWithRulesetEventHandlers {
   onZoomToElement: BeEvent<() => void>;

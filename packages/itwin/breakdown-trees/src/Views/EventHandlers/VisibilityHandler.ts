@@ -9,8 +9,8 @@ import { EmphasizeElements } from "@itwin/core-frontend";
 import { KeySet, NodeKey } from "@itwin/presentation-common";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { TreeModelNode, TreeModelRootNode, TreeModelSource, TreeNodeItem } from "@itwin/components-react";
-import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "@itwin/appui-react";
 import { RelatedElementIdsProvider } from "../RelatedElementIdsProvider";
+import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "./VisibilityTreeEventHandler";
 
 export class NodeDetails {
   public keySet: KeySet;

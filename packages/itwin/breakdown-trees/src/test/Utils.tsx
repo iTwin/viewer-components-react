@@ -20,7 +20,6 @@ import faker from "faker";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BreakdownTrees } from "../breakdown-trees-react";
-import { getPropertyRecordAsString } from "@itwin/components-react";
 import { TreeWithRulesetControllerBase } from "../Controllers/TreeWithRulesetControllerBase";
 import type { Localization } from "@itwin/core-common";
 
@@ -56,6 +55,7 @@ export class TestUtils {
       this.store = createAppStore();
 
       await UiFramework.initialize(this.store);
+      console.log("HELLO");
       await BreakdownTrees.initialize(TestUtils.localization);
       // Set the iModelConnection in the Redux store
       if (imodel)
@@ -131,7 +131,7 @@ export const setupDataProvider = (imodel: IModelConnection, nodes = [createRando
   // const getNodeKey = testParentChildPair ? (node: any) => (node as any)[PRESENTATION_TREE_NODE_KEY] : (node: any) => node.key;
   const getNodes = testParentChildPair ?
     async (parentNode?: TreeNodeItem) => {
-      if (parentNode && getPropertyRecordAsString(parentNode.label) === "Parent") {
+      if (parentNode && parentNode.label.description === "Parent") {
         const children = [];
         for (let i = 0; i < numberOfChildren; i++) {
           const key = createRandomECInstancesNodeKey([parentNode.id]);
