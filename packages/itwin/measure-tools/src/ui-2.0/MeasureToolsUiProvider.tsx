@@ -5,12 +5,10 @@
 
 import * as React from "react";
 import { ConditionalBooleanValue } from "@itwin/appui-abstract";
-import type {
-  ToolbarItem, ToolItemDef, UiItemsProvider, Widget
-} from "@itwin/appui-react";
+import type { ToolbarItem, ToolItemDef, UiItemsProvider, Widget } from "@itwin/appui-react";
 import {
   StagePanelLocation, StagePanelSection, StageUsage, SyncUiEventId, ToolbarHelper, ToolbarItemUtilities,
-  ToolbarOrientation, ToolbarUsage, WidgetState
+  ToolbarOrientation, ToolbarUsage, WidgetState,
 } from "@itwin/appui-react";
 import { MeasurementSyncUiEventId } from "../api/MeasurementEnums";
 import { MeasurementUIEvents } from "../api/MeasurementUIEvents";
