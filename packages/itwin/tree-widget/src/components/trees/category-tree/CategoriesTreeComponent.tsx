@@ -8,17 +8,35 @@ import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react
 import { IModelApp, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import { CategoryTree } from "./CategoriesTree";
+import { CategoryTree, CategoryTreeProps } from "./CategoriesTree";
 import { CategoryInfo, CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
 import { enableCategory } from "../CategoriesVisibilityUtils";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
-import type { CategoriesTreeHeaderButtonProps, CategoriesTreeProps } from "../../../types";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
-import { SearchBar } from "../../search-bar/SearchBar";
+import { TreeHeader, TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 
-export function CategoriesTreeComponent(props: CategoriesTreeProps) {
+export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
+  categories: CategoryInfo[];
+  filteredCategories?: CategoryInfo[];
+}
+
+export interface CategoriesTreeComponentProps extends Omit<CategoryTreeProps,
+| "iModel"
+| "activeView"
+| "width"
+| "height"
+| "filterInfo"
+| "onFilterApplied"
+| "categories"
+| "categoryVisibilityHandler"
+| "viewManager"
+> {
+  headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
+}
+
+export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
@@ -34,14 +52,14 @@ export function CategoriesTreeComponent(props: CategoriesTreeProps) {
 CategoriesTreeComponent.ShowAllButton = ShowAllButton;
 CategoriesTreeComponent.HideAllButton = HideAllButton;
 CategoriesTreeComponent.InvertButton = InvertButton;
+CategoriesTreeComponent.Id = "categories-tree";
 
-function CategoriesTreeComponentImpl(props: CategoriesTreeProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
+function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
   const categories = useCategories(IModelApp.viewManager, props.iModel, props.viewport);
   const [filteredCategories, setFilteredCategories] = useState<CategoryInfo[]>();
   const {
     searchOptions,
     filterString,
-    activeMatchIndex,
     onFilterApplied,
     filteredProvider,
   } = useTreeFilteringState();
@@ -57,29 +75,29 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeProps & { iModel: IMod
 
   return (
     <>
-      <SearchBar
-        value=""
-        valueChangedDelay={500}
+      <TreeHeader
         placeholder={TreeWidget.translate("search")}
         title={TreeWidget.translate("searchForSomething")}
-        filteringInProgress={searchOptions.isFiltering}
         onFilterClear={searchOptions.onFilterCancel}
         onFilterStart={searchOptions.onFilterStart}
         onSelectedChanged={searchOptions.onResultSelectedChanged}
-        resultCount={searchOptions.matchedResultCount ?? 0}
+        resultCount={searchOptions.matchedResultCount}
+        selectedIndex={searchOptions.activeMatchIndex}
       >
         {props.headerButtons
-          ? props.headerButtons.map((btn, index) =>
-            <React.Fragment key={index}>
-              {btn({ viewport: props.viewport, categories, filteredCategories })}
-            </React.Fragment>)
+          ? props.headerButtons.map(
+            (btn, index) =>
+              <React.Fragment key={index}>
+                {btn({ viewport: props.viewport, categories, filteredCategories })}
+              </React.Fragment>
+          )
           : [
             <ShowAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="show-all-btn" />,
             <HideAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="hide-all-btn" />,
             <InvertButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="invert-all-btn" />,
           ]
         }
-      </SearchBar>
+      </TreeHeader>
       <AutoSizer>
         {({ width, height }) => (
           <CategoryTree
@@ -87,7 +105,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeProps & { iModel: IMod
             categories={categories}
             width={width}
             height={height}
-            filterInfo={{ filter: filterString, activeMatchIndex }}
+            filterInfo={{ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }}
             onFilterApplied={onFilterApplied}
           />
         )}

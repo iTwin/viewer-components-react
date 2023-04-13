@@ -8,11 +8,25 @@ import React from "react";
 import { StagePanelLocation, StagePanelSection, StageUsage, UiItemsProvider, Widget } from "@itwin/appui-react";
 import { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
-import { CategoriesTreeId, ModelsTreeId, TreeWidgetOptions } from "../types";
-import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
+import { CategoriesTreeComponent, CategoriesTreeComponentProps } from "./trees/category-tree/CategoriesTreeComponent";
 import { ClassGroupingOption } from "./trees/Common";
-import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
+import { ModelsTreeComponent, ModelTreeComponentProps } from "./trees/models-tree/ModelsTreeComponent";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
+
+export interface TreeWidgetOptions {
+  defaultPanelLocation?: StagePanelLocation;
+  defaultPanelSection?: StagePanelSection;
+  defaultTreeWidgetPriority?: number;
+  enableElementsClassGrouping?: boolean;
+  additionalTrees?: SelectableContentDefinition[];
+  modelsTreeProps?: ModelTreeComponentProps;
+  categoriesTreeProps?: CategoriesTreeComponentProps;
+  defaultTreeId?: string;
+  hideTrees?: {
+    modelsTree?: boolean;
+    categoriesTree?: boolean;
+  };
+}
 
 export const TreeWidgetId = "tree-widget-react:trees";
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
@@ -39,7 +53,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       if (!this._treeWidgetOptions?.hideTrees?.modelsTree) {
         trees.push({
           label: TreeWidget.translate("models"),
-          id: ModelsTreeId,
+          id: ModelsTreeComponent.Id,
           render: () => (
             <ModelsTreeComponent
               enableElementsClassGrouping={
@@ -56,7 +70,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       if (!this._treeWidgetOptions?.hideTrees?.categoriesTree) {
         trees.push({
           label: TreeWidget.translate("categories"),
-          id: CategoriesTreeId,
+          id: CategoriesTreeComponent.Id,
           render: () => (
             <CategoriesTreeComponent {...this._treeWidgetOptions?.categoriesTreeProps} />
           ),

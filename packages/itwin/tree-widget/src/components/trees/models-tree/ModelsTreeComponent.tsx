@@ -10,20 +10,34 @@ import { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import { IModelApp, IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
-import { ModelsTreeHeaderButtonProps, ModelTreeProps } from "../../../types";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
-import { ModelsTree } from "./ModelsTree";
+import { ModelsTree, ModelsTreeProps } from "./ModelsTree";
 import { TreeWidget } from "../../../TreeWidget";
-import { SearchBar } from "../../search-bar/SearchBar";
+import { TreeHeader, TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 
 export interface ModelInfo {
   id: string;
   isPlanProjection?: boolean;
 }
 
-export const ModelsTreeComponent = (props: ModelTreeProps) => {
+export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
+  models: ModelInfo[];
+}
+
+export interface ModelTreeComponentProps extends Omit<ModelsTreeProps,
+| "iModel"
+| "activeView"
+| "width"
+| "height"
+| "filterInfo"
+| "onFilterApplied"
+> {
+  headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
+}
+
+export const ModelsTreeComponent = (props: ModelTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
@@ -40,13 +54,14 @@ ModelsTreeComponent.HideAllButton = HideAllButton;
 ModelsTreeComponent.InvertButton = InvertButton;
 ModelsTreeComponent.View2DButton = View2DButton;
 ModelsTreeComponent.View3DButton = View3DButton;
+ModelsTreeComponent.Id = "models-tree";
 
-function ModelsTreeComponentImpl(props: ModelTreeProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
+function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
 
   const { viewport, iModel } = props;
 
-  const { searchOptions, filterString, activeMatchIndex, onFilterApplied } =
+  const { searchOptions, filterString, onFilterApplied } =
     useTreeFilteringState();
 
   const queryModels = useCallback(async (
@@ -76,22 +91,22 @@ function ModelsTreeComponentImpl(props: ModelTreeProps & { iModel: IModelConnect
 
   return (
     <>
-      <SearchBar
-        value=""
-        valueChangedDelay={500}
+      <TreeHeader
         placeholder={TreeWidget.translate("search")}
         title={TreeWidget.translate("searchForSomething")}
-        filteringInProgress={searchOptions.isFiltering}
         onFilterClear={searchOptions.onFilterCancel}
         onFilterStart={searchOptions.onFilterStart}
         onSelectedChanged={searchOptions.onResultSelectedChanged}
-        resultCount={searchOptions.matchedResultCount ?? 0}
+        resultCount={searchOptions.matchedResultCount}
+        selectedIndex={searchOptions.activeMatchIndex}
       >
         {props.headerButtons
-          ? props.headerButtons.map((btn, index) =>
-            <React.Fragment key={index}>
-              {btn({ viewport, models: availableModels })}
-            </React.Fragment>)
+          ? props.headerButtons.map(
+            (btn, index) =>
+              <React.Fragment key={index}>
+                {btn({ viewport, models: availableModels })}
+              </React.Fragment>
+          )
           : [
             <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" />,
             <HideAllButton viewport={viewport} models={availableModels} key="hide-all-btn" />,
@@ -100,7 +115,7 @@ function ModelsTreeComponentImpl(props: ModelTreeProps & { iModel: IModelConnect
             <View3DButton viewport={viewport} models={availableModels} key="view-3d-btn" />,
           ]
         }
-      </SearchBar>
+      </TreeHeader>
       <AutoSizer>
         {({ width, height }) => (
           <ModelsTree
@@ -109,7 +124,7 @@ function ModelsTreeComponentImpl(props: ModelTreeProps & { iModel: IModelConnect
             activeView={viewport}
             width={width}
             height={height}
-            filterInfo={{ filter: filterString, activeMatchIndex }}
+            filterInfo={{ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }}
             onFilterApplied={onFilterApplied}
           />
         )}

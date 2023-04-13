@@ -42,77 +42,20 @@
 .tree-widget-search-bar {
   display: flex;
   align-items: center;
-  position: relative;
+  height: var(--iui-size-xl);
 
   // button container
   .search-bar-button-container {
-    display: flex;
-    align-items: center;
     width: calc(100% - var(--iui-size-l));
-
-    &.right {
-      justify-content: flex-end;
-    }
+    transition: all 0.25s ease;
 
     &.contracted {
       width: var(--iui-size-xl);
     }
   }
 
-  // override of the search box styling
-  .search-bar-search-icon {
-    opacity: 0;
-    transition: all 0.2s ease;
-    color: var(--iui-color-text);
-    height: var(--iui-size-xl);
-
-    &.show {
-      opacity: 1;
-    }
-  }
-
   // search box container
   .search-bar-search-container {
     flex: 1;
-    height: 100%;
-
-    .search-bar-search-box {
-      height: var(--iui-size-xl);
-      float: right;
-      margin-right: 0;
-      box-sizing: border-box;
-      width: 0px;
-      visibility: hidden;
-      opacity: 0;
-      overflow: hidden;
-      transition: all 0.25s ease;
-
-      &.show {
-        visibility: visible;
-        opacity: 1;
-        width: 100%;
-      }
-    }
-  }
-}
-
-@keyframes show {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes hide {
-  0% {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  100% {
-    opacity: 0;
-    visibility: hidden;
   }
 }

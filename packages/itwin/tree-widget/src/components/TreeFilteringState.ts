@@ -11,33 +11,38 @@ export interface SearchOptions {
   onFilterStart: (newFilter: string) => void;
   onResultSelectedChanged: (index: number) => void;
   matchedResultCount: number | undefined;
+  activeMatchIndex: number | undefined;
+}
+
+interface TreeFilteringState {
+  filterString: string;
+  matchedResultCount?: number;
+  activeMatchIndex?: number;
+  filteredProvider?: IPresentationTreeDataProvider;
 }
 
 export const useTreeFilteringState = () => {
-  const [filterString, setFilterString] = useState("");
-  const [matchedResultCount, setMatchedResultCount] = useState<number>();
-  const [activeMatchIndex, setActiveMatchIndex] = useState<number>();
-  const [filteredProvider, setFilteredProvider] = useState<IPresentationTreeDataProvider>();
+  const [{ filterString, matchedResultCount, activeMatchIndex, filteredProvider }, setState] = useState<TreeFilteringState>({ filterString: "" });
 
   const onFilterCancel = React.useCallback(() => {
-    setFilterString("");
-    setMatchedResultCount(undefined);
-    setFilteredProvider(undefined);
+    setState({ filterString: "" });
   }, []);
 
   const onFilterStart = React.useCallback((newFilter: string) => {
-    setFilterString(newFilter);
-    setMatchedResultCount(undefined);
-    setFilteredProvider(undefined);
+    setState({ filterString: newFilter });
   }, []);
 
   const onResultSelectedChanged = React.useCallback((index: number) => {
-    setActiveMatchIndex(index);
+    setState((prev) => ({ ...prev, activeMatchIndex: index }));
   }, []);
 
   const onFilterApplied = React.useCallback((provider: IPresentationTreeDataProvider, matches: number) => {
-    setFilteredProvider(provider);
-    setMatchedResultCount(matches);
+    setState((prev) => ({
+      ...prev,
+      activeMatchIndex: prev.activeMatchIndex === undefined ? 1 : Math.min(prev.activeMatchIndex, matches),
+      matchedResultCount: matches,
+      filteredProvider: provider,
+    }));
   }, []);
 
   const isFiltering = !!filterString && matchedResultCount === undefined;
@@ -47,12 +52,12 @@ export const useTreeFilteringState = () => {
     onFilterStart,
     onResultSelectedChanged,
     matchedResultCount,
+    activeMatchIndex,
   };
 
   return {
     searchOptions,
     filterString,
-    activeMatchIndex,
     onFilterApplied,
     filteredProvider,
   };
