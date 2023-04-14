@@ -5,9 +5,12 @@
 
 import { NoRenderApp } from "@itwin/core-frontend";
 import { MeasureTools } from "../../MeasureTools";
+import { ITwinLocalization } from "@itwin/core-i18n";
 
+function supplyI18NOptions() { return { urlTemplate: `${window.location.origin}/locales/{{lng}}/{{ns}}.json` }; }
 // Before all tests, initialize any global services
 before(async () => {
-  await NoRenderApp.startup();
-  await MeasureTools.startup();
+  const local: ITwinLocalization = new ITwinLocalization(supplyI18NOptions());
+  await NoRenderApp.startup({ localization: local });
+  await MeasureTools.startup({ localization: local });
 });

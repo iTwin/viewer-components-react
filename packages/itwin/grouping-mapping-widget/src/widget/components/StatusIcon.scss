@@ -1,0 +1,26 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+@import "@itwin/itwinui-css/scss/icon/variables";
+
+.gmw-status-icon {
+  width: $iui-icons-default;
+  height: $iui-icons-default;
+
+  &-success {
+    fill: var(--iui-icons-color-positive);
+  }
+
+  &-error {
+    fill: var(--iui-icons-color-negative);
+  }
+
+  &-warning {
+    fill: var(--iui-icons-color-warning);
+  }
+
+  &-informational {
+    fill: var(--iui-icons-color-primary);
+  }
+}
