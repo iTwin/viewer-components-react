@@ -7,18 +7,22 @@ import "./TreeWidgetComponent.scss";
 import * as React from "react";
 import { SelectableContent, SelectableContentDefinition } from "@itwin/components-react";
 
+export interface TreeDefinition {
+  id: string;
+  getLabel: () => string;
+  render: () => React.ReactNode;
+}
+
 interface TreeWidgetComponentProps {
-  trees?: SelectableContentDefinition[];
+  trees: TreeDefinition[];
 }
 
 export function TreeWidgetComponent(props: TreeWidgetComponentProps) {
-  const trees: SelectableContentDefinition[] = [];
-
-  if (props.trees && props.trees.length !== 0) {
-    for (const entry of props.trees) {
-      trees.push(entry);
-    }
-  }
+  const trees: SelectableContentDefinition[] = props.trees.map((tree) => ({
+    id: tree.id,
+    label: tree.getLabel(),
+    render: tree.render,
+  }));
 
   return (
     <div className="tree-widget-visibility-widget">
