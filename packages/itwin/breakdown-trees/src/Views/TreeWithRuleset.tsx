@@ -30,7 +30,7 @@ import { VisibilityHandler } from "./EventHandlers/VisibilityHandler";
 import classNames from "classnames";
 import "./global.scss";
 import { useResizeObserver } from "@itwin/core-react";
-import { VisibilityTreeNoFilteredData, useVisibilityTreeFiltering } from "./VisibilityTreeRenderer";
+import { VisibilityTreeNoFilteredData, useVisibilityTreeFiltering } from "@itwin/tree-widget-react";
 
 export interface TreeWithRulesetEventHandlers {
   onZoomToElement: BeEvent<() => void>;

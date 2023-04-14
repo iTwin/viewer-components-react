@@ -10,7 +10,7 @@ import { KeySet, NodeKey } from "@itwin/presentation-common";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { TreeModelNode, TreeModelRootNode, TreeModelSource, TreeNodeItem } from "@itwin/components-react";
 import { RelatedElementIdsProvider } from "../RelatedElementIdsProvider";
-import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "./VisibilityTreeEventHandler";
+import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "@itwin/tree-widget-react";
 
 export class NodeDetails {
   public keySet: KeySet;
