@@ -49,7 +49,7 @@
       }
 
       &:focus {
-        box-shadow: $uicore-button-focus-boxshadow;
+        box-shadow: $buic-focus-boxshadow 0px 0px 0px 2px;
         outline: none;
       }
     }
