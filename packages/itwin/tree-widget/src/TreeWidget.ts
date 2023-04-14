@@ -5,6 +5,7 @@
 
 import { getClassName, UiError } from "@itwin/appui-abstract";
 import { IModelApp } from "@itwin/core-frontend";
+
 import type { Localization } from "@itwin/core-common";
 import type { LocalizationOptions } from "@itwin/core-i18n";
 

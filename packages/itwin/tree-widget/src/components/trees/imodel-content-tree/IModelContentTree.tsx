@@ -2,14 +2,20 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useMemo } from "react";
-import type { Ruleset } from "@itwin/presentation-common";
-import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
-import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
-import IMODEL_CONTENT_RULESET from "../rulesets/IModelContent.json";
-import { AutoSizer } from "../utils/AutoSizer";
+
 import classNames from "classnames";
-import type { IModelContentTreeProps } from "../../types";
+import React, { useMemo } from "react";
+import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
+import { IModelConnection } from "@itwin/core-frontend";
+import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+import { AutoSizer } from "../../utils/AutoSizer";
+import IMODEL_CONTENT_RULESET from "./IModelContent.json";
+
+import type { Ruleset } from "@itwin/presentation-common";
+
+export interface IModelContentTreeProps extends Omit<React.HTMLProps<HTMLDivElement>, "children"> {
+  iModel: IModelConnection;
+}
 
 export const IModelContentTree = (props: IModelContentTreeProps) => {
   const { iModel, className, ...divProps } = props;

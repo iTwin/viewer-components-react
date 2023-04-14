@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 export * from "./Common";
-export * from "./IModelContentTree";
+export * from "./imodel-content-tree/IModelContentTree";
 export * from "./VisibilityTreeEventHandler";
 export * from "./VisibilityTreeRenderer";
 export * from "./category-tree/CategoriesTree";

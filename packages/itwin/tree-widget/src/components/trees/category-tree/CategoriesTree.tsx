@@ -52,6 +52,10 @@ export interface CategoryTreeProps {
    */
   onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void;
   /**
+   * Available iModel categories
+   */
+  categories: CategoryInfo[];
+  /**
    * Custom category visibility handler to use for testing
    * @internal
    */
@@ -61,11 +65,6 @@ export interface CategoryTreeProps {
    * @internal
    */
   viewManager?: ViewManager;
-
-  /**
-   * Available iModel categories
-   */
-  categories: CategoryInfo[];
 }
 
 /**
