@@ -3,8 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "~@itwin/core-react/lib/esm/core-react/index";
-
 .search-bar {
   display: flex;
   align-items: center;
@@ -48,15 +46,15 @@
   .search-bar-dropdown-container {
     display: flex;
     align-items: center;
-    padding: 0 $uicore-s;
+    padding: var(--iui-size-s);
   }
 
   // override of the search box styling
   .search-bar-search-icons {
-    right: 0;
     opacity: 0;
-    color: $buic-icon-color;
     transition: all 0.2s ease;
+    color: var(--iui-color-text);
+    height: var(--iui-size-xl);
 
     &.show {
       opacity: 1;

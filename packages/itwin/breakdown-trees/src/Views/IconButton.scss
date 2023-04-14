@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/core-react/lib/esm/core-react/index";
-@import "~@itwin/appui-layout-react/lib/cjs/appui-layout-react/footer/_variables";
 
 .visibility-icon-button {
   display: inline-block;
@@ -16,15 +15,15 @@
   background-color: transparent;
   outline: none;
   box-shadow: none;
-  font-family: $uicore-font-family;
-  font-size: $uicore-font-size;
+  font-family: var(--iui-font-sans);
+  font-size: calc(var(--iui-size-s) + var(--iui-size-3xs));
   text-decoration: none;
   cursor: pointer;
   transition: color 0.25s;
 
   &:hover {
     text-decoration: none;
-    color: $buic-foreground-primary;
+    color: var(--buic-foreground-activehover);
   }
 
   &:active {

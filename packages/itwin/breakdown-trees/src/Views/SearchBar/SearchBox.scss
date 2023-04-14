@@ -6,32 +6,32 @@
 @import "~@itwin/core-react/lib/esm/core-react/index";
 
 .bldg-uisnip-core-searchbox {
-  @include uicore-font-family;
+  font-family: var(--iui-font-sans);
   display: flex;
   align-items: center;
   position: relative;
   //default values (height, width, font-size, color)
-  height: 34px;
+  height: calc(var(--iui-size-xl) + var(--iui-size-3xs));
   width: 12em;
-  font-size: $uicore-font-size;
-  color: $buic-text-color;
-  background: $buic-background-control;
-  border: 1px solid $buic-inputs-border;
+  font-size: calc(var(--iui-size-s) + var(--iui-size-3xs));
+  color: var(--iui-color-background-hsl) / var(--iui-opacity-2);
+  background: var(--iui-color-background);
+  border: 1px solid hsl(var(--iui-color-foreground-hsl) / var(--iui-opacity-4));
 
   input {
-    padding: 0 $uicore-s;
+    padding: 0 var(--iui-size-xs);
     height: 100%;
     width: 100%;
     flex: 1;
-    margin-right: $uicore-s;
-    color: inherit;
+    margin-right: var(--iui-size-xs);
+    color: var(--iui-color-text);
     font-size: inherit;
     box-sizing: border-box;
     border: 0;
-    background: $buic-background-control;
+    background: var(--iui-color-background);
 
     &::placeholder {
-      color: $buic-foreground-disabled;
+      color: var(--iui-color-text-disabled);
     }
 
     &:focus-within,
@@ -51,12 +51,12 @@
   .uisnip-core-searchbox-stepping-container {
     display: flex;
     align-items: center;
-    right: 32px;
+    right: var(--iui-size-xl);
     height: 100%;
 
     .uisnip-core-searchbox-stepping-count {
-      font-size: 12px;
-      margin-right: $uicore-xs;
+      font-size: var(--iui-size-s);
+      margin-right: var(--iui-size-2xs);
       position: relative;
       word-wrap: none;
     }
@@ -64,8 +64,8 @@
     .uisnip-core-searchbox-separator {
       height: 75%;
       width: 1px;
-      margin: 0 $uicore-s;
-      background: $buic-inputs-border;
+      margin: 0 var(--iui-size-xs);
+      background: hsl(var(--iui-color-foreground-hsl) / var(--iui-opacity-4));
     }
   }
 
@@ -76,11 +76,11 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    font-size: $uicore-font-size-small;
+    font-size: var(--iui-size-s);
     cursor: pointer;
 
     &:hover {
-      color: $buic-accessory-primary;
+      color: var(--iui-color-text)
     }
   }
 }

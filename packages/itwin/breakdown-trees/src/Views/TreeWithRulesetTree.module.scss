@@ -20,11 +20,11 @@
     align-items: center;
 
     &:hover {
-      background: $buic-row-hover;
+      background: var(--buic-row-hover);
     }
 
     &.selected {
-      background: $buic-row-selection;
+      background: var(--buic-row-selection);
     }
 
     .custom-tree-node-label {
@@ -35,7 +35,7 @@
       flex-wrap: nowrap;
       flex: 1;
 
-      > .custom-tree-node-label-wrapper {
+      >.custom-tree-node-label-wrapper {
         height: 24px;
         display: flex;
         align-items: center;
@@ -47,6 +47,7 @@
 .customTreeToolbar {
   display: flex;
   align-items: center;
+
   .right {
     justify-content: flex-end;
   }

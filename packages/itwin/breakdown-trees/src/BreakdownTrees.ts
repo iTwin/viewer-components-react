@@ -8,7 +8,7 @@
 import { UiError } from "@itwin/appui-abstract";
 import { getClassName } from "@itwin/appui-abstract";
 import type { Localization } from "@itwin/core-common";
-import type { LocalizationOptions } from "@itwin/core-i18n";
+import { ITwinLocalization, LocalizationOptions } from "@itwin/core-i18n";
 
 /**
  * Entry point for static initialization required by various
@@ -24,6 +24,7 @@ export class BreakdownTrees {
    * @param localization The internationalization service created by the IModelApp.
    */
   public static async initialize(localization: Localization): Promise<void> {
+    const local = new ITwinLocalization({ urlTemplate: `${window.location.origin}/locales/{{lng}}/{{ns}}.json` })
     BreakdownTrees._i18n = localization;
     await BreakdownTrees._i18n.registerNamespace(BreakdownTrees.i18nNamespace);
     return Promise.resolve();

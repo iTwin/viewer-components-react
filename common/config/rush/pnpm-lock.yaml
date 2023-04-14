@@ -116,6 +116,9 @@ importers:
       '@itwin/core-react': ^4.0.0-dev.13
       '@itwin/eslint-plugin': ^3.7.0
       '@itwin/imodel-components-react': ^4.0.0-dev.13
+      '@itwin/itwinui-icons-react': ^2.1.0
+      '@itwin/itwinui-react': ^2.7.0
+      '@itwin/itwinui-variables': ^2.0.0
       '@itwin/measure-tools-react': workspace:*
       '@itwin/presentation-common': ^4.0.0-dev.66
       '@itwin/presentation-components': ^4.0.0-dev.30
@@ -161,6 +164,9 @@ importers:
       typescript: ^4.4.0
       xmlhttprequest: ^1.8.0
     dependencies:
+      '@itwin/itwinui-icons-react': 2.1.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-react': 2.7.0_react-dom@17.0.2+react@17.0.2
+      '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
       i18next: 10.6.0
     devDependencies:

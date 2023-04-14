@@ -22,6 +22,7 @@ export function Viewer() {
   const { iTwinId, iModelId } = useIModelInfo();
 
   return (
+
     <WebViewer
       iTwinId={iTwinId ?? ""}
       iModelId={iModelId ?? ""}
