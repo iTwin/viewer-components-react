@@ -68,9 +68,7 @@ const fetchGroups = async (
       iModelId,
       mappingId
     );
-    setGroups(groups.sort(
-      (a, b) => a.groupName?.localeCompare(b.groupName ?? "") ?? 1
-    ));
+    setGroups(groups.sort((a, b) => a.groupName?.localeCompare(b.groupName ?? "") ?? 1));
   } catch (error: any) {
     handleError(error.status);
   } finally {
