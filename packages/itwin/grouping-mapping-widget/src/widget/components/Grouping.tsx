@@ -27,7 +27,7 @@ import type {
 } from "./customUI/GroupingMappingCustomUI";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { GroupsAddButton } from "./GroupsAddButton";
-import GroupItem from "./GroupItem";
+import { GroupItem } from "./GroupItem";
 
 export type IGroupTyped = CreateTypeFromInterface<Group>;
 

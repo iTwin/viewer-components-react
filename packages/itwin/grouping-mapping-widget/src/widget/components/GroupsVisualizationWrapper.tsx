@@ -24,6 +24,7 @@ import { Groupings } from "./Grouping";
 import { GroupColorLegend } from "./GroupColorLegend";
 import { GroupVisualizationActions } from "./GroupsVisualizationActions";
 import { GroupsShowHideButtons } from "./GroupsShowHideButtons";
+import "./GroupsVisualizationWrapper.scss";
 
 export interface GroupsVisualizationWrapperProps extends GroupingProps {
   isNonEmphasizedSelectable?: boolean;
@@ -198,7 +199,7 @@ export const GroupsVisualizationWrapper = ({
   ].flat(), [groups, hiddenGroupsIds, hideSingleGroupWrapper, isLoadingQuery, setHiddenGroupsIds, showGroup, showGroupColor]);
 
   return (
-    <>
+    <div className="groups-vis-wrapper-container">
       <GroupVisualizationActions
         isLoadingQuery={isLoadingQuery}
         showAll={showAll}
@@ -211,6 +212,6 @@ export const GroupsVisualizationWrapper = ({
         {...rest}
         disableActions={isLoadingQuery}
       />
-    </>
+    </div>
   );
 };

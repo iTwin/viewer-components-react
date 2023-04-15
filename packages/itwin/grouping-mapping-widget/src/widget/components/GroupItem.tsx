@@ -16,7 +16,7 @@ export interface GroupItemProps extends GroupingProps {
   setShowDeleteModal: (showDeleteModal: Group) => void;
 }
 
-const GroupItem = ({
+export const GroupItem = ({
   onClickGroupTitle,
   disableActions,
   group,
@@ -41,9 +41,7 @@ const GroupItem = ({
           {...rest}
         />
       }
-      onClickTitle={disableActions ? onTitleClick : undefined}
+      onClickTitle={disableActions ? undefined : onTitleClick}
     />
   );
 };
-
-export default GroupItem;
