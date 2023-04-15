@@ -14,7 +14,7 @@ interface GroupColorLegendProps {
 }
 
 export const GroupColorLegend = ({ group, groups }: GroupColorLegendProps) => (
-  <IconButton styleType="borderless" className="gmw-group-color-legend">
+  <IconButton styleType="borderless">
     <div
       className="gmw-color-legend"
       style={{

@@ -31,7 +31,7 @@ const GroupItem = ({
 
   return (
     <HorizontalTile
-      title={group.groupName ? group.groupName : "Untitled"}
+      title={group.groupName}
       subText={group.description}
       actionGroup={
         <GroupMenuActions
@@ -41,7 +41,7 @@ const GroupItem = ({
           {...rest}
         />
       }
-      onClickTitle={onTitleClick}
+      onClickTitle={disableActions ? onTitleClick : undefined}
     />
   );
 };

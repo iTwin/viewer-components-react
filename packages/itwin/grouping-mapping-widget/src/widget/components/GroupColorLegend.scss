@@ -4,9 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.gmw-group-color-legend {
-  margin-left: 0;
-  align-self: center;
-  min-width: $iui-l;
-  cursor: pointer;
+.gmw-color-legend {
+  border: 1px solid black;
 }

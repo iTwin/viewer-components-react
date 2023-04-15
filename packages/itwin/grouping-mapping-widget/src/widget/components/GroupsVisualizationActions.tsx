@@ -37,7 +37,6 @@ export const GroupVisualizationActions = ({
         onClick={showAll}
         disabled={isLoadingQuery}
         styleType="borderless"
-        className="gmw-group-visual-icon"
       >
         <SvgVisibilityShow />
       </IconButton>
@@ -46,7 +45,6 @@ export const GroupVisualizationActions = ({
         onClick={hideAll}
         disabled={isLoadingQuery}
         styleType="borderless"
-        className="gmw-group-visual-icon"
       >
         <SvgVisibilityHide />
       </IconButton>

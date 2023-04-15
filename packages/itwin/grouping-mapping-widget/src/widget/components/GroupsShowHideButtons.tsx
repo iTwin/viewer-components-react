@@ -6,7 +6,6 @@ import type { Group } from "@itwin/insights-client";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import React, { useCallback, useMemo } from "react";
-import "./GroupsShowHideButtons.scss";
 
 interface GroupsShowHideButtonsProps {
   group: Group;
@@ -41,7 +40,6 @@ export const GroupsShowHideButtons = ({
     <IconButton
       disabled={isLoadingQuery}
       styleType="borderless"
-      className="gmw-show-hide-button"
       onClick={toggleGroupVisibility}
     >
       {isGroupHidden ? <SvgVisibilityHide /> : <SvgVisibilityShow />}
