@@ -63,27 +63,22 @@ export const hideGroup = async (
 export const visualizeGroupColors = async (
   iModelConnection: IModelConnection,
   groups: Group[],
-  viewGroups: Group[],
   hiddenGroupsIds: string[],
   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
   doEmphasizeElements: boolean = true
 ) => {
   clearEmphasizedOverriddenElements();
   let allIds: string[] = [];
-  for (const group of viewGroups) {
-    const index =
-      viewGroups.length > groups.length
-        ? viewGroups.findIndex((g) => g.id === group.id)
-        : groups.findIndex((g) => g.id === group.id);
-    const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
+  for (let i = 0; i < groups.length; i++) {
+    const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, groups[i], hilitedElementsQueryCache);
     const hilitedIds = result.ids;
     overrideElements(
       hilitedIds,
-      getGroupColor(index),
+      getGroupColor(i),
       FeatureOverrideType.ColorAndAlpha,
     );
     doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
-    if (!hiddenGroupsIds.includes(group.id)) {
+    if (!hiddenGroupsIds.includes(groups[i].id)) {
       allIds = allIds.concat(hilitedIds);
     }
   }

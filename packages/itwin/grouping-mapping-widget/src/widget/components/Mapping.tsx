@@ -58,7 +58,10 @@ const fetchMappings = async (
     setIsLoading(true);
     const accessToken = await getAccessToken();
     const mappings = await mappingsClient.getMappings(accessToken, iModelId);
-    setMappings(mappings);
+    setMappings(mappings
+      .sort(
+        (a, b) => a.mappingName.localeCompare(b.mappingName) ?? 1
+      ));
   } catch (error: any) {
     handleError(error.status);
   } finally {
@@ -161,9 +164,6 @@ export const Mappings = ({
         ) : (
           <div className="gmw-mappings-list">
             {mappings
-              .sort(
-                (a, b) => a.mappingName.localeCompare(b.mappingName) ?? 1
-              )
               .map((mapping) => (
                 <HorizontalTile
                   key={mapping.id}

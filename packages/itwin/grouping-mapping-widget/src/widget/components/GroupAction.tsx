@@ -99,7 +99,7 @@ export const GroupAction = (props: GroupActionProps) => {
 
   const resetView = useCallback(async () => {
     if (showGroupColor) {
-      await visualizeGroupColors(iModelConnection, groups, groups, hiddenGroupsIds, hilitedElementsQueryCache);
+      await visualizeGroupColors(iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache);
     } else {
       clearOverriddenElements();
     }
