@@ -177,6 +177,9 @@ export const FilteringPropertyGrid = (
     <>
       <VirtualizedPropertyGridWithDataProvider
         {...props}
+        minLabelWidth={10}
+        minValueWidth={10}
+        actionButtonWidth={props.actionButtonWidth ?? props.actionButtonRenderers ? undefined : 0}
         dataProvider={autoExpandingFilteringDataProvider}
       />
     </>
