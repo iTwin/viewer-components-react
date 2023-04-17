@@ -16,11 +16,14 @@
     }
   }
 
-  .contents > .core-image-checkbox {
+  .contents > .visibility-tree-checkbox {
     position: absolute;
     top: unset;
     left: 5px;
-    margin: -2px 0px 0px 5px;
+
+    &:hover {
+      background-color: transparent;
+    }
   }
 
   .filteredTreeOverlay {
