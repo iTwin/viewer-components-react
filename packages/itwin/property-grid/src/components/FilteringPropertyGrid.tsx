@@ -179,7 +179,7 @@ export const FilteringPropertyGrid = (
         {...props}
         minLabelWidth={10}
         minValueWidth={10}
-        actionButtonWidth={props.actionButtonWidth ?? props.actionButtonRenderers ? 90 : 0}
+        actionButtonWidth={props.actionButtonWidth ?? props.actionButtonRenderers ? undefined : 0}
         dataProvider={autoExpandingFilteringDataProvider}
       />
     </>
