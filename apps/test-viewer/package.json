@@ -54,6 +54,9 @@
     },
     "@itwin/measure-tools-react": {
       "injected": true
+    },
+    "@itwin/breakdown-trees-react": {
+      "injected": true
     }
   },
   "scripts": {
