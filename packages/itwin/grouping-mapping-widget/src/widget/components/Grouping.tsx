@@ -75,7 +75,7 @@ const fetchGroups = async (
       iModelId,
       mappingId,
     );
-    setGroups(groups);
+    setGroups(groups.sort((a, b) => a.groupName.localeCompare(b.groupName)));
   } catch (error: any) {
     handleError(error.status);
   } finally {
@@ -299,10 +299,6 @@ export const Groupings = ({
         ) : (
           <div className='gmw-group-list'>
             {groups
-              .sort(
-                (a, b) =>
-                  a.groupName?.localeCompare(b.groupName ?? "") ?? 1,
-              )
               .map((g) => (
                 <HorizontalTile
                   key={g.id}
@@ -370,7 +366,7 @@ export const Groupings = ({
                                     key={index}
                                     className='gmw-menu-item'
                                     data-testid={`gmw-edit-${index}`}
-                                    onClick={async () => {await onModify(g, p.name); close();}}
+                                    onClick={async () => { await onModify(g, p.name); close(); }}
                                     icon={p.icon}
                                   >
                                     {p.displayLabel}
