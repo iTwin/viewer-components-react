@@ -58,7 +58,7 @@ const fetchMappings = async (
     setIsLoading(true);
     const accessToken = await getAccessToken();
     const mappings = await mappingsClient.getMappings(accessToken, iModelId);
-    setMappings(mappings.sort((a, b) => a.mappingName.localeCompare(b.mappingName) ?? 1));
+    setMappings(mappings.sort((a, b) => a.mappingName.localeCompare(b.mappingName)));
   } catch (error: any) {
     handleError(error.status);
   } finally {
