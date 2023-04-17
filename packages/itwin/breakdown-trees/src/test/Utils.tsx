@@ -22,14 +22,17 @@ import { PropertyRecord } from "@itwin/appui-abstract";
 import { BreakdownTrees } from "../breakdown-trees-react";
 import { TreeWithRulesetControllerBase } from "../Controllers/TreeWithRulesetControllerBase";
 import type { Localization } from "@itwin/core-common";
+import { configureStore } from "@reduxjs/toolkit";
 
 function createAppStore(): Store {
   const rootReducer = combineReducers({
     FrameworkReducer,
   } as any);
 
-  return createStore(rootReducer,
-    (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__());
+  return configureStore({ reducer: rootReducer })
+
+  // return createStore(rootReducer,
+  //   (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__());
 }
 
 export class TestContentControl extends ContentControl {
@@ -53,8 +56,16 @@ export class TestUtils {
       // This is required by our I18n module (specifically the i18next package).
       (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
       this.store = createAppStore();
-
-      await UiFramework.initialize(this.store);
+      console.log(this.store);
+      console.log("BEFORE");
+      try {
+        await UiFramework.initialize(this.store);
+      } catch (err) {
+        console.log(err);
+        throw (err);
+      }
+      // await UiFramework.initialize(this.store);
+      console.log("AFTER");
       await BreakdownTrees.initialize(TestUtils.localization);
       // Set the iModelConnection in the Redux store
       if (imodel)
