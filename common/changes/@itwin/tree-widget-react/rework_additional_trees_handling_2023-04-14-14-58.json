@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Reworked how trees are provided to the widget. Instaed of having separate configuration properties for hiding default trees and adding additional trees now there is only one property for supplying a list of trees to show.",
+      "comment": "**BREAKING:** Reworked how trees are provided to the widget. Instaed of having separate configuration properties for hiding default trees and adding additional trees now there is only one property for supplying a list of trees to show.",
       "type": "none"
     }
   ],
