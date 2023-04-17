@@ -2,30 +2,19 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-/* eslint-disable react/display-name */
 
 import React from "react";
 import { StagePanelLocation, StagePanelSection, StageUsage, UiItemsProvider, Widget } from "@itwin/appui-react";
-import { SelectableContentDefinition } from "@itwin/components-react";
 import { TreeWidget } from "../TreeWidget";
-import { CategoriesTreeComponent, CategoriesTreeComponentProps } from "./trees/category-tree/CategoriesTreeComponent";
-import { ClassGroupingOption } from "./trees/Common";
-import { ModelsTreeComponent, ModelTreeComponentProps } from "./trees/models-tree/ModelsTreeComponent";
-import { TreeWidgetComponent } from "./TreeWidgetComponent";
+import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
+import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
+import { TreeDefinition, TreeWidgetComponent } from "./TreeWidgetComponent";
 
 export interface TreeWidgetOptions {
   defaultPanelLocation?: StagePanelLocation;
   defaultPanelSection?: StagePanelSection;
   defaultTreeWidgetPriority?: number;
-  enableElementsClassGrouping?: boolean;
-  additionalTrees?: SelectableContentDefinition[];
-  modelsTreeProps?: ModelTreeComponentProps;
-  categoriesTreeProps?: CategoriesTreeComponentProps;
-  defaultTreeId?: string;
-  hideTrees?: {
-    modelsTree?: boolean;
-    categoriesTree?: boolean;
-  };
+  trees?: TreeDefinition[];
 }
 
 export const TreeWidgetId = "tree-widget-react:trees";
@@ -40,64 +29,32 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
     location: StagePanelLocation,
     section?: StagePanelSection
   ): ReadonlyArray<Widget> {
-    const widgets: Widget[] = [];
     const preferredLocation = this._treeWidgetOptions?.defaultPanelLocation ?? StagePanelLocation.Right;
     const preferredPanelSection = this._treeWidgetOptions?.defaultPanelSection ?? StagePanelSection.Start;
-    if (
-      location === preferredLocation &&
-      section === preferredPanelSection &&
-      stageUsage === StageUsage.General
-    ) {
-      const trees: SelectableContentDefinition[] = [];
 
-      if (!this._treeWidgetOptions?.hideTrees?.modelsTree) {
-        trees.push({
-          label: TreeWidget.translate("models"),
-          id: ModelsTreeComponent.Id,
-          render: () => (
-            <ModelsTreeComponent
-              enableElementsClassGrouping={
-                this._treeWidgetOptions?.enableElementsClassGrouping
-                  ? ClassGroupingOption.YesWithCounts
-                  : ClassGroupingOption.No
-              }
-              {...this._treeWidgetOptions?.modelsTreeProps}
-            />
-          ),
-        });
-      }
-
-      if (!this._treeWidgetOptions?.hideTrees?.categoriesTree) {
-        trees.push({
-          label: TreeWidget.translate("categories"),
-          id: CategoriesTreeComponent.Id,
-          render: () => (
-            <CategoriesTreeComponent {...this._treeWidgetOptions?.categoriesTreeProps} />
-          ),
-        });
-      }
-
-      if (this._treeWidgetOptions?.additionalTrees) {
-        trees.push(...this._treeWidgetOptions.additionalTrees);
-      }
-
-      if (this._treeWidgetOptions?.defaultTreeId && trees.length !== 0) {
-        // Adding the defaultTree to first index
-        const { defaultTreeId } = this._treeWidgetOptions;
-        const extractedDefaultTree = trees.filter((tree) => tree.id === defaultTreeId)[0];
-        const index = trees.indexOf(extractedDefaultTree);
-        trees.unshift(trees.splice(index, 1)[0]);
-      }
-
-      widgets.push({
-        id: TreeWidgetId,
-        label: TreeWidget.translate("treeview"),
-        content: <TreeWidgetComponent trees={trees} />,
-        icon: "icon-hierarchy-tree",
-        priority: this._treeWidgetOptions?.defaultTreeWidgetPriority,
-      });
+    if (location !== preferredLocation || section !== preferredPanelSection || stageUsage !== StageUsage.General) {
+      return [];
     }
 
-    return widgets;
+    const trees: TreeDefinition[] = this._treeWidgetOptions?.trees ?? [
+      {
+        id: ModelsTreeComponent.id,
+        getLabel: ModelsTreeComponent.getLabel,
+        render: () => <ModelsTreeComponent />,
+      },
+      {
+        id: CategoriesTreeComponent.id,
+        getLabel: CategoriesTreeComponent.getLabel,
+        render: () => <CategoriesTreeComponent />,
+      },
+    ];
+
+    return [{
+      id: TreeWidgetId,
+      label: TreeWidget.translate("treeview"),
+      content: <TreeWidgetComponent trees={trees} />,
+      icon: "icon-hierarchy-tree",
+      priority: this._treeWidgetOptions?.defaultTreeWidgetPriority,
+    }];
   }
 }

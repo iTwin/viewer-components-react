@@ -54,7 +54,8 @@ ModelsTreeComponent.HideAllButton = HideAllButton;
 ModelsTreeComponent.InvertButton = InvertButton;
 ModelsTreeComponent.View2DButton = View2DButton;
 ModelsTreeComponent.View3DButton = View3DButton;
-ModelsTreeComponent.Id = "models-tree";
+ModelsTreeComponent.id = "models-tree";
+ModelsTreeComponent.getLabel = () => TreeWidget.translate("models");
 
 function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
