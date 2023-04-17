@@ -9,10 +9,12 @@ import { Viewer as WebViewer, ViewerPerformance } from "@itwin/web-viewer-react"
 import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { useAuthorizationContext } from "./Authorization";
+import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 
 const uiConfig = getUiProvidersConfig();
 
 async function onIModelAppInit() {
+  await BreakdownTrees.initialize();
   await uiConfig.initialize();
 }
 

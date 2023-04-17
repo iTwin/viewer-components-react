@@ -55,7 +55,6 @@ export class TestUtils {
       this.store = createAppStore();
 
       await UiFramework.initialize(this.store);
-      console.log("HELLO");
       await BreakdownTrees.initialize(TestUtils.localization);
       // Set the iModelConnection in the Redux store
       if (imodel)

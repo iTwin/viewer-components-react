@@ -50,7 +50,7 @@ export const ComponentIndex: React.FC<ComponentIndexProps> = (props: ComponentIn
 
     populateContextMenuItems(treeName, functionIconMapperInner, dataProvider, props.eventHandlers);
 
-    const displayGuidHandlerInner = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon-label", () => { return props.displayGuids; }, props.setIsDisplayGuids);
+    const displayGuidHandlerInner = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("BreakdownTrees:contextMenu.showGuids"), "icon-label", () => { return props.displayGuids; }, props.setIsDisplayGuids);
     optionItemsInner.push(displayGuidHandlerInner);
     return { functionIconMapper: functionIconMapperInner, optionItems: optionItemsInner, displayGuidHandler: displayGuidHandlerInner };
   }, [dataProvider, props.eventHandlers, props.setIsDisplayGuids, props.displayGuids, props.additionalFunctionIconMapper]);

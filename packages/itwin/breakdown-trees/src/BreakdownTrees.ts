@@ -8,6 +8,7 @@
 import { UiError } from "@itwin/appui-abstract";
 import { getClassName } from "@itwin/appui-abstract";
 import type { Localization } from "@itwin/core-common";
+import { IModelApp } from "@itwin/core-frontend";
 import { ITwinLocalization, LocalizationOptions } from "@itwin/core-i18n";
 
 /**
@@ -16,16 +17,18 @@ import { ITwinLocalization, LocalizationOptions } from "@itwin/core-i18n";
  * @public
  */
 export class BreakdownTrees {
-
+  private static _initialized?: boolean;
   private static _i18n?: Localization;
 
   /**
    * Called by IModelApp to initialize the BreakdownTrees
    * @param localization The internationalization service created by the IModelApp.
    */
-  public static async initialize(localization: Localization): Promise<void> {
-    const local = new ITwinLocalization({ urlTemplate: `${window.location.origin}/locales/{{lng}}/{{ns}}.json` })
-    BreakdownTrees._i18n = localization;
+  public static async initialize(localization?: Localization): Promise<void> {
+    if (this._initialized) return;
+    // const local = new ITwinLocalization({ urlTemplate: `${window.location.origin}/locales/{{lng}}/{{ns}}.json` })
+    this._initialized = true;
+    BreakdownTrees._i18n = localization ?? IModelApp.localization;
     await BreakdownTrees._i18n.registerNamespace(BreakdownTrees.i18nNamespace);
     return Promise.resolve();
   }
@@ -58,7 +61,7 @@ export class BreakdownTrees {
    * @internal
    */
   public static translate(key: string | string[], options?: LocalizationOptions): string {
-    return BreakdownTrees.i18n.getLocalizedStringWithNamespace(BreakdownTrees.i18nNamespace, key, options);
+    return BreakdownTrees.i18n.getLocalizedString(key, options);
   }
 
   /** @internal */

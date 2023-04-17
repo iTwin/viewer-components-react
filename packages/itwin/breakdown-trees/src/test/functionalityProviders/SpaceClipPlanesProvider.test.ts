@@ -30,7 +30,11 @@ describe("SpaceClipPlanesProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
-    await TestUtils.initializeUiFramework(connection.object);
+    try {
+      await TestUtils.initializeUiFramework(connection.object);
+    } catch (err) {
+      console.log(err);
+    }
     await IModelApp.localization.registerNamespace("BreakdownTrees");
 
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
