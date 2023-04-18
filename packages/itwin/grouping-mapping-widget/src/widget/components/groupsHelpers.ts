@@ -67,7 +67,7 @@ const processGroup = async (
   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
   doEmphasizeElements: boolean,
   groupColor: string
-): Promise<string[]> => {
+) => {
   const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
   const hilitedIds = result.ids;
   overrideElements(hilitedIds, groupColor, FeatureOverrideType.ColorAndAlpha);
