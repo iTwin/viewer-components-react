@@ -24,20 +24,20 @@ import { Groupings } from "./Grouping";
 import { GroupColorLegend } from "./GroupColorLegend";
 import { GroupVisualizationActions } from "./GroupsVisualizationActions";
 import { GroupsShowHideButtons } from "./GroupsShowHideButtons";
-import "./GroupsVisualizationWrapper.scss";
+import "./GroupsVisualization.scss";
 
-export interface GroupsVisualizationWrapperProps extends GroupingProps {
+export interface GroupsVisualizationProps extends GroupingProps {
   isNonEmphasizedSelectable?: boolean;
   emphasizeElements?: boolean;
 }
 
-export const GroupsVisualizationWrapper = ({
+export const GroupsVisualization = ({
   emphasizeElements = true,
   isNonEmphasizedSelectable = false,
   onClickGroupModify,
   onClickAddGroup,
   ...rest
-}: GroupsVisualizationWrapperProps) => {
+}: GroupsVisualizationProps) => {
   const iModelConnection = useActiveIModelConnection();
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
@@ -199,7 +199,7 @@ export const GroupsVisualizationWrapper = ({
   ].flat(), [groups, hiddenGroupsIds, hideSingleGroupWrapper, isLoadingQuery, setHiddenGroupsIds, showGroup, showGroupColor]);
 
   return (
-    <div className="groups-vis-wrapper-container">
+    <div className="groups-vis-container">
       <GroupVisualizationActions
         isLoadingQuery={isLoadingQuery}
         showAll={showAll}

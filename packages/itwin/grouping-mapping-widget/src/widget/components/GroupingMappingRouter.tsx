@@ -13,7 +13,7 @@ import { GroupPropertyAction } from "./GroupPropertyAction";
 import { Mappings } from "./Mapping";
 import { MappingAction } from "./MappingAction";
 import { PropertyMenu } from "./PropertyMenu";
-import { GroupsVisualizationWrapper } from "./GroupsVisualizationWrapper";
+import { GroupsVisualization } from "./GroupsVisualization";
 
 export const GroupingMappingRouter = ({
   currentRoute,
@@ -54,7 +54,7 @@ export const GroupingMappingRouter = ({
     case RouteStep.Groups:
       if (mapping) {
         return (
-          <GroupsVisualizationWrapper
+          <GroupsVisualization
             mapping={mapping}
             onClickAddGroup={(qType) =>
               navigateTo((prev) => ({
