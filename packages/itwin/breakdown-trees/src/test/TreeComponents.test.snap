@@ -117,7 +117,7 @@ exports[`TreeComponent tests. TreeNodeWrapper renders correctly 1`] = `
             null
           </div>
         }
-        level={[Function]}
+        level={1}
         onClick={[Function]}
         onClickExpansionToggle={[Function]}
         onMouseDown={[Function]}
@@ -136,7 +136,7 @@ exports[`TreeComponent tests. TreeNodeWrapper renders correctly 1`] = `
             className="contents"
             style={
               Object {
-                "marginLeft": NaN,
+                "marginLeft": 20,
               }
             }
           >
