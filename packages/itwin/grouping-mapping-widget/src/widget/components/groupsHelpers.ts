@@ -60,7 +60,7 @@ export const hideGroup = async (
   hideElements(result.ids);
 };
 
-const processGroup = async (
+const processGroupVisualization = async (
   iModelConnection: IModelConnection,
   group: Group,
   hiddenGroupsIds: string[],
@@ -87,7 +87,7 @@ export const visualizeGroupColors = async (
   clearEmphasizedOverriddenElements();
 
   const allIdsPromises = groups.map(async (group, index) =>
-    processGroup(
+    processGroupVisualization(
       iModelConnection,
       group,
       hiddenGroupsIds,
