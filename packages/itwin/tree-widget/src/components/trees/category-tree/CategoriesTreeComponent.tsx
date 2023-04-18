@@ -52,7 +52,8 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
 CategoriesTreeComponent.ShowAllButton = ShowAllButton;
 CategoriesTreeComponent.HideAllButton = HideAllButton;
 CategoriesTreeComponent.InvertButton = InvertButton;
-CategoriesTreeComponent.Id = "categories-tree";
+CategoriesTreeComponent.id = "categories-tree";
+CategoriesTreeComponent.getLabel = () => TreeWidget.translate("categories");
 
 function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iModel: IModelConnection, viewport: ScreenViewport }) {
   const categories = useCategories(IModelApp.viewManager, props.iModel, props.viewport);
