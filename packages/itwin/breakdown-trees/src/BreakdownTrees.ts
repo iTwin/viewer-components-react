@@ -38,6 +38,7 @@ export class BreakdownTrees {
     if (BreakdownTrees._i18n)
       BreakdownTrees._i18n.unregisterNamespace(BreakdownTrees.i18nNamespace);
     BreakdownTrees._i18n = undefined;
+    BreakdownTrees._initialized = false;
   }
 
   /** The internationalization service created by the IModelApp. */

@@ -15,6 +15,7 @@ import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import { assert } from "chai";
 import { ConvexClipPlaneSet } from "@itwin/core-geometry";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
+import { BreakdownTrees } from "../../BreakdownTrees";
 
 describe("BuildingClipPlanesProvider", () => {
   let checkIsBuildingStub: sinon.SinonStub;
@@ -45,6 +46,7 @@ describe("BuildingClipPlanesProvider", () => {
     queryBuildingRangeStub.restore();
     createRange3DPlaneStub.restore();
     TestUtils.terminateUiFramework();
+    BreakdownTrees.terminate();
   });
 
   it("should perform action for BuildingClipPlanesProvider", async () => {
