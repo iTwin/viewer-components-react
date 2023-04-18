@@ -60,6 +60,23 @@ export const hideGroup = async (
   hideElements(result.ids);
 };
 
+const processGroup = async (
+  iModelConnection: IModelConnection,
+  group: Group,
+  hiddenGroupsIds: string[],
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
+  doEmphasizeElements: boolean,
+  groupColor: string
+): Promise<string[]> => {
+  const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
+  const hilitedIds = result.ids;
+  overrideElements(hilitedIds, groupColor, FeatureOverrideType.ColorAndAlpha);
+
+  doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
+
+  return hiddenGroupsIds.includes(group.id) ? [] : hilitedIds;
+};
+
 export const visualizeGroupColors = async (
   iModelConnection: IModelConnection,
   groups: Group[],
@@ -68,20 +85,20 @@ export const visualizeGroupColors = async (
   doEmphasizeElements: boolean = true
 ) => {
   clearEmphasizedOverriddenElements();
-  let allIds: string[] = [];
-  for (let i = 0; i < groups.length; i++) {
-    const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, groups[i], hilitedElementsQueryCache);
-    const hilitedIds = result.ids;
-    overrideElements(
-      hilitedIds,
-      getGroupColor(i),
-      FeatureOverrideType.ColorAndAlpha,
-    );
-    doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
-    if (!hiddenGroupsIds.includes(groups[i].id)) {
-      allIds = allIds.concat(hilitedIds);
-    }
-  }
+
+  const allIdsPromises = groups.map(async (group, index) =>
+    processGroup(
+      iModelConnection,
+      group,
+      hiddenGroupsIds,
+      hilitedElementsQueryCache,
+      doEmphasizeElements,
+      getGroupColor(index)
+    )
+  );
+
+  const allIdsArrays = await Promise.all(allIdsPromises);
+  const allIds = allIdsArrays.flat();
 
   await zoomToElements(allIds);
 };

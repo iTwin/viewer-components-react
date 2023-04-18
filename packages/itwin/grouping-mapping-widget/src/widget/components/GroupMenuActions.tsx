@@ -38,8 +38,8 @@ export const GroupMenuActions = ({
   return (
     <div className="gmw-actions">
       {actionButtonRenderers &&
-        actionButtonRenderers.map((actionButton) =>
-          actionButton({ group })
+        actionButtonRenderers.map((actionButton, index) =>
+          <React.Fragment key={index}>{actionButton({ group })}</React.Fragment>
         )}
       <DropdownMenu
         className="gmw-action-dropdown"
@@ -54,7 +54,7 @@ export const GroupMenuActions = ({
                 data-testid="gmw-context-menu-item"
                 subMenuItems={groupUIs.map((p, index) => (
                   <MenuItem
-                    key={index}
+                    key={p.name}
                     className="gmw-menu-item"
                     data-testid={`gmw-edit-${index}`}
                     onClick={async () => {
