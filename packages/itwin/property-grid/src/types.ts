@@ -41,6 +41,7 @@ export interface PropertyGridProps {
     dataProvider: IPresentationPropertyDataProvider
   ) => Promise<void>;
   actionButtonRenderers?: ActionButtonRenderer[];
+  actionButtonsWidth?: number;
   enableCopyingPropertyText?: boolean;
   enableNullValueToggle?: boolean;
   enableAncestorNavigation?: boolean;
