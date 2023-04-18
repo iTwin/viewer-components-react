@@ -10,7 +10,7 @@ import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/
 import { IconButton } from "@itwin/itwinui-react";
 import { CategoryTree, CategoryTreeProps } from "./CategoriesTree";
 import { CategoryInfo, CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
-import { enableCategory } from "../CategoriesVisibilityUtils";
+import { enableCategory, enableSubCategory } from "../CategoriesVisibilityUtils";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
@@ -173,14 +173,40 @@ function InvertButton(props: CategoriesTreeHeaderButtonProps) {
 
     const enabled: string[] = [];
     const disabled: string[] = [];
-    for (const id of ids) {
-      if (props.viewport.view.viewsCategory(id)) {
-        enabled.push(id);
+    const enabledSubCategories: string[] = [];
+    const disabledSubCategories: string[] = [];
+
+    (await props.viewport.iModel.categories.getCategoryInfo(ids)).forEach((category) => {
+      if (!props.viewport.view.viewsCategory(category.id)) {
+        disabled.push(category.id);
       } else {
-        disabled.push(id);
+        // First, we need to check if at least one subcategory is disabled. If it is true, then only subcategories should change display, not categories.
+        let isAtLeastOneSubCategoryDisabled: boolean = false;
+        const subCategories = [...category.subCategories.values()];
+        for (const subCategory of subCategories) {
+          if (!props.viewport.isSubCategoryVisible(subCategory.id)) {
+            isAtLeastOneSubCategoryDisabled = true;
+            break;
+          }
+        }
+        if (isAtLeastOneSubCategoryDisabled) {
+          subCategories.forEach((subCategory) => {
+            props.viewport.isSubCategoryVisible(subCategory.id) ? enabledSubCategories.push(subCategory.id) : disabledSubCategories.push(subCategory.id);
+          });
+        } else{
+          enabled.push(category.id);
+        }
       }
-    }
+    });
+
     // Disable enabled
+    enabledSubCategories.forEach((subCategory) => enableSubCategory(
+      IModelApp.viewManager,
+      subCategory,
+      false,
+      true
+    ));
+
     await enableCategory(
       IModelApp.viewManager,
       props.viewport.iModel,
@@ -190,6 +216,13 @@ function InvertButton(props: CategoriesTreeHeaderButtonProps) {
     );
 
     // Enable disabled
+    disabledSubCategories.forEach((subCategory) => enableSubCategory(
+      IModelApp.viewManager,
+      subCategory,
+      true,
+      true
+    ));
+
     await enableCategory(
       IModelApp.viewManager,
       props.viewport.iModel,
