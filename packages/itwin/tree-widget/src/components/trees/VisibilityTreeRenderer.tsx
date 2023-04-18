@@ -53,7 +53,7 @@ export const visibilityTreeNodeCheckboxRenderer = (props: NodeCheckboxRenderProp
     className="visibility-tree-checkbox"
     variant="eyeball"
     checked={props.checked}
-    onClick={(e) => { props.onChange(e.currentTarget.checked); }}
+    onChange={(e) => { props.onChange(e.currentTarget.checked); }}
     disabled={props.disabled}
     title={props.title}
   />

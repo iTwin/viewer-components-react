@@ -21,7 +21,7 @@
     top: unset;
     left: 5px;
 
-    &:hover {
+    &:hover, &:disabled {
       background-color: transparent;
     }
   }
