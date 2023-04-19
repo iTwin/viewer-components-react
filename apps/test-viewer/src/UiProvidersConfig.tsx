@@ -6,7 +6,8 @@ import { UiItemsProvider } from "@itwin/appui-react";
 import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
 import { PropertyGridManager, PropertyGridUiItemsProvider } from "@itwin/property-grid-react";
 import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
-import { BreakdownTrees, SampleSpatialTree } from "@itwin/breakdown-trees-react";
+import { BreakdownTrees } from "@itwin/breakdown-trees-react";
+import { SampleSpatialTree } from "./components/SampleSpatialTree";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;

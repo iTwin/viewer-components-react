@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { SpatialContainmentTree } from "../breakdown-trees-react";
+import { SpatialContainmentTree } from "@itwin/breakdown-trees-react";
 import React from "react";
 
 export const SampleSpatialTree: React.FC = () => {
