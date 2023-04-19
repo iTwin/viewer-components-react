@@ -14,6 +14,7 @@ export * from "./Views/FunctionalityProviders/TreeNodeFunctionIconMapper";
 export * from "./Views/TreeWithRuleset";
 export * from "./Views/LoadableRuleSetComponent";
 export * from "./Views/OptionItemHandlers";
+export * from "./Views/SampleSpatialTree"
 import spatialRulesDefault from "./assets/SpatialBreakdown.json";
 export { spatialRulesDefault };
 import spatialRulesByType from "./assets/SpatialBreakdownByType.json";

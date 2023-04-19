@@ -117,17 +117,9 @@ describe("TreeComponent tests.", () => {
 
   it("TreeNodeWrapper renders correctly", () => {
     const node = moq.Mock.ofType<TreeModelNode>();
-    const propertyRecord = moq.Mock.ofType<PropertyRecord>();
-    const propertyValue = moq.Mock.ofType<PropertyValue>();
-    const propertyDescription = moq.Mock.ofType<PropertyDescription>();
-    propertyValue.setup((x) => x.valueFormat).returns(() => 0);
-    propertyDescription.setup((x) => x.name).returns(() => "propertyRecName");
-    propertyDescription.setup((x) => x.displayLabel).returns(() => "propertyRecDisplayLabel");
-    propertyDescription.setup((x) => x.typename).returns(() => "propertyRecTypeName");
-    propertyRecord.setup((x) => x.value).returns(() => propertyValue.object);
-    propertyRecord.setup((x) => x.property).returns(() => propertyDescription.object);
+    const propertyRecord = PropertyRecord.fromString("TreeNodeWrapper")
     node.setup((x) => x.depth).returns(() => 1);
-    node.setup((x) => x.label).returns(() => propertyRecord.object);
+    node.setup((x) => x.label).returns(() => propertyRecord);
     const treeModel = moq.Mock.ofType<TreeModel>();
     const treeAction = moq.Mock.ofType<TreeActions>();
     const dataProvider = setupDataProvider(connection.object);

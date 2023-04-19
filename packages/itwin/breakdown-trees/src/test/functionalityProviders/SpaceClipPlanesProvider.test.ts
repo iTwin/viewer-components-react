@@ -18,6 +18,7 @@ import { Code } from "@itwin/core-common";
 import { ClipVector, Range3d } from "@itwin/core-geometry";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
 import { SectioningUtil } from "../../Views/visibility/SectioningUtil";
+import { BreakdownTrees } from "../../BreakdownTrees";
 
 describe("SpaceClipPlanesProvider", () => {
   let isolateRoomsForStoriesStub: sinon.SinonStub;
@@ -30,11 +31,8 @@ describe("SpaceClipPlanesProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
-    try {
-      await TestUtils.initializeUiFramework(connection.object);
-    } catch (err) {
-      console.log(err);
-    }
+    await BreakdownTrees.initialize();
+    await TestUtils.initializeUiFramework(connection.object);
     await IModelApp.localization.registerNamespace("BreakdownTrees");
 
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
@@ -66,6 +64,7 @@ describe("SpaceClipPlanesProvider", () => {
     checkIsSpaceStub.restore();
     createCaptureSpy.restore();
     TestUtils.terminateUiFramework();
+    BreakdownTrees.terminate();
   });
   it("should perform action for SpaceClipPlanesProvider", async () => {
     const dummyTreeModelItem: TreeModelNode = FunctionalityProviderTestUtils.createTreeModelNode(MockStrings.IfcWallNode);

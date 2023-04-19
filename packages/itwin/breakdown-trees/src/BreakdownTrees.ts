@@ -25,7 +25,8 @@ export class BreakdownTrees {
    * @param localization The internationalization service created by the IModelApp.
    */
   public static async initialize(localization?: Localization): Promise<void> {
-    if (this._initialized) return;
+    if (this._initialized)
+      return;
     // const local = new ITwinLocalization({ urlTemplate: `${window.location.origin}/locales/{{lng}}/{{ns}}.json` })
     this._initialized = true;
     BreakdownTrees._i18n = localization ?? IModelApp.localization;

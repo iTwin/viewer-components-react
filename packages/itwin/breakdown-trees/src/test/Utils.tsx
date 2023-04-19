@@ -29,8 +29,6 @@ function createAppStore(): Store {
     FrameworkReducer,
   } as any);
 
-  // return configureStore({ reducer: rootReducer })
-
   return createStore(rootReducer,
     (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__());
 }

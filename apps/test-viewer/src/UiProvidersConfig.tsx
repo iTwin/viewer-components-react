@@ -2,15 +2,11 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { UiItemsProvider, useActiveIModelConnection } from "@itwin/appui-react";
+import { UiItemsProvider } from "@itwin/appui-react";
 import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
 import { PropertyGridManager, PropertyGridUiItemsProvider } from "@itwin/property-grid-react";
 import { MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
-import { BreakdownTrees, SpatialContainmentTree, SpatialContainmentTreeProps } from "@itwin/breakdown-trees-react";
-import React from "react";
-import { SelectableContentDefinition } from "@itwin/components-react";
-
-import { ITwinLocalization } from "@itwin/core-i18n";
+import { BreakdownTrees, SampleSpatialTree } from "@itwin/breakdown-trees-react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -49,41 +45,22 @@ interface UiItem {
   createUiItemsProvider: () => UiItemsProvider;
 }
 
-
-const SampleSpatialTree: React.FC = () => {
-  const iModel = useActiveIModelConnection();
-  return <>
-    {iModel && <SpatialContainmentTree
-      iModel={iModel}
-      groupByType={true}
-      setGroupByType={() => { return "group-by-type" }}
-      groupByDiscipline={true}
-      setGroupByDiscipline={() => { return "group-by-discipline" }}
-      displayGuids={true}
-      setIsDisplayGuids={() => { return "discard-guid-from-labe" }}
-      enableVisibility={true}
-      clipHeight={1.2}
-      clipAtSpaces={true}
-    />}
-  </>
-}
-const getSpatialTree = (): SelectableContentDefinition => {
-  return {
-    id: "spatial-containment-tree",
-    label: "containment",
-    render: () => (
-      <SampleSpatialTree />
-    ),
-  };
-};
-
 const configuredUiItems = new Map<string, UiItem>([
   [
     "tree-widget",
     {
-      initialize: async () => TreeWidget.initialize(),
+      initialize: async () => {
+        TreeWidget.initialize();
+        BreakdownTrees.initialize();
+      },
       createUiItemsProvider: () => new TreeWidgetUiItemsProvider({
-        additionalTrees: [getSpatialTree()]
+        additionalTrees: [{
+          id: "spatial-containment-tree",
+          label: "containment",
+          render: () => (
+            <SampleSpatialTree />
+          ),
+        }]
       }),
     }
   ],

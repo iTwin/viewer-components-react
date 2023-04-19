@@ -14,7 +14,6 @@ import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 const uiConfig = getUiProvidersConfig();
 
 async function onIModelAppInit() {
-  await BreakdownTrees.initialize();
   await uiConfig.initialize();
 }
 
@@ -24,7 +23,6 @@ export function Viewer() {
   const { iTwinId, iModelId } = useIModelInfo();
 
   return (
-
     <WebViewer
       iTwinId={iTwinId ?? ""}
       iModelId={iModelId ?? ""}

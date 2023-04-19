@@ -27,6 +27,7 @@ describe("BuildingClipPlanesProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
+    await BreakdownTrees.initialize();
     await TestUtils.initializeUiFramework(connection.object);
     await IModelApp.localization.registerNamespace("BreakdownTrees");
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
