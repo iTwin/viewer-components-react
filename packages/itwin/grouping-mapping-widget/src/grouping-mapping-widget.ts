@@ -15,6 +15,7 @@ export { Mappings, MappingsProps } from "./widget/components/Mapping";
 export { MappingAction, MappingActionProps } from "./widget/components/MappingAction";
 export { GroupingMappingContext, GroupingMappingContextProps } from "./widget/components/GroupingMappingContext";
 export { Groupings, GroupingProps } from "./widget/components/Grouping";
+export { GroupsVisualization, GroupsVisualizationProps } from "./widget/components/GroupsVisualization";
 export { GroupAction, GroupActionProps } from "./widget/components/GroupAction";
 export { PropertyMenu, PropertyMenuProps } from "./widget/components/PropertyMenu";
 export { GroupPropertyAction, GroupPropertyActionProps } from "./widget/components/GroupPropertyAction";
