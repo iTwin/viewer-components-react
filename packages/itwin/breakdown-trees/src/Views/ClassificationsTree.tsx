@@ -46,7 +46,7 @@ export const ClassificationsTree: React.FC<ClassificationsTreeProps> = (props: C
     const functionIconMapperInner = props.additionalFunctionIconMapper ?? new TreeNodeFunctionIconInfoMapper(dataProvider);
     const optionItemsInner: OptionItemHandler[] = [];
     populateMapWithCommonMenuItems(CLASSIFICATIONS_TREE_NAME, functionIconMapperInner, dataProvider, classificationRules.id, props.eventHandlers);
-    const displayGuidHandlerInner = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon - label", () => { return props.displayGuids; }, props.setIsDisplayGuids);
+    const displayGuidHandlerInner = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon-label", () => { return props.displayGuids; }, props.setIsDisplayGuids);
     optionItemsInner.push(displayGuidHandlerInner);
     return { functionIconMapper: functionIconMapperInner, optionItems: optionItemsInner, displayGuidHandler: displayGuidHandlerInner };
   }, [dataProvider, props.additionalFunctionIconMapper, props.displayGuids, props.eventHandlers, props.setIsDisplayGuids]);

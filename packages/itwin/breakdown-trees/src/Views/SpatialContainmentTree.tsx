@@ -101,11 +101,11 @@ export const SpatialContainmentTree: React.FC<SpatialContainmentTreeProps> = (pr
 
     populateContextAndOptionMenuItems(treeName, functionIconMapperInner, optionItemsInner, dataProvider, spatialRules, props.eventHandlers, props.clipHeight, props.clipAtSpaces);
 
-    const displayGuidHandlerInner = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon - label", () => props.displayGuids, props.setIsDisplayGuids);
+    const displayGuidHandlerInner = new GenericOptionItemHandler("Show Guids", BreakdownTrees.translate("contextMenu.showGuids"), "icon-label", () => props.displayGuids, props.setIsDisplayGuids);
     optionItemsInner.push(displayGuidHandlerInner);
-    const groupByTypeHandlerInner = new GenericOptionItemHandler("Group By Type", BreakdownTrees.translate("contextMenu.groupByType"), "icon - hierarchy - tree", () => props.groupByType, props.setGroupByType);
+    const groupByTypeHandlerInner = new GenericOptionItemHandler("Group By Type", BreakdownTrees.translate("contextMenu.groupByType"), "icon-hierarchy - tree", () => props.groupByType, props.setGroupByType);
     optionItemsInner.push(groupByTypeHandlerInner);
-    const groupByDisciplineHandlerInner = new GenericOptionItemHandler("Group By Discipline", BreakdownTrees.translate("contextMenu.groupByDiscipline"), "icon - hierarchy - tree", () => props.groupByDiscipline, props.setGroupByDiscipline);
+    const groupByDisciplineHandlerInner = new GenericOptionItemHandler("Group By Discipline", BreakdownTrees.translate("contextMenu.groupByDiscipline"), "icon-hierarchy - tree", () => props.groupByDiscipline, props.setGroupByDiscipline);
     optionItemsInner.push(groupByDisciplineHandlerInner);
 
     return { functionIconMapper: functionIconMapperInner, optionItems: optionItemsInner, displayGuidHandler: displayGuidHandlerInner, groupByTypeHandler: groupByTypeHandlerInner, groupByDisciplineHandler: groupByDisciplineHandlerInner };
@@ -158,14 +158,14 @@ function populateContextAndOptionMenuItems(treeName: string, mapper: TreeNodeFun
 
   populateMapWithCommonMenuItems(treeName, mapper, dataProvider, spatialRules.id, eventHandlers);
 
-  const labelHandler = new LabelHandler(storyClipSectionProvider, "Toggle Space Labels", BreakdownTrees.translate("contextMenu.toggleSpaceLabels"), "icon - text");
+  const labelHandler = new LabelHandler(storyClipSectionProvider, "Toggle Space Labels", BreakdownTrees.translate("contextMenu.toggleSpaceLabels"), "icon-text");
   optionItems.push(labelHandler);
 
-  const topViewHandler = new TopViewHandler([storyClipSectionProvider, spaceClipSectionProvider, buildingClipSectionProvider], "Top Down View", BreakdownTrees.translate("contextMenu.topDownView"), "icon - cube - faces - top");
+  const topViewHandler = new TopViewHandler([storyClipSectionProvider, spaceClipSectionProvider, buildingClipSectionProvider], "Top Down View", BreakdownTrees.translate("contextMenu.topDownView"), "icon-cube - faces - top");
   optionItems.push(topViewHandler);
 
   if (clipAtSpaces !== undefined) {
-    const clipAtSpacesHandler = new ClipAtSpacesHandler(storyClipSectionProvider, clipAtSpaces, "Clip At Spaces", BreakdownTrees.translate("contextMenu.clipAtSpaces"), "icon - section - tool");
+    const clipAtSpacesHandler = new ClipAtSpacesHandler(storyClipSectionProvider, clipAtSpaces, "Clip At Spaces", BreakdownTrees.translate("contextMenu.clipAtSpaces"), "icon-section - tool");
     optionItems.push(clipAtSpacesHandler);
   }
 }
