@@ -19,6 +19,7 @@ export { GroupAction, GroupActionProps } from "./widget/components/GroupAction";
 export { PropertyMenu, PropertyMenuProps } from "./widget/components/PropertyMenu";
 export { GroupPropertyAction, GroupPropertyActionProps } from "./widget/components/GroupPropertyAction";
 export { CalculatedPropertyAction, CalculatedPropertyActionProps } from "./widget/components/CalculatedPropertyAction";
+export { CalculatedPropertyActionWithVisuals, CalculatedPropertyActionWithVisualsProps } from "./widget/components/CalculatedPropertyActionWithVisuals";
 export { CustomCalculationAction, CustomCalculationActionProps } from "./widget/components/CustomCalculationAction";
 export { SearchGroupingCustomUI } from "./widget/components/customUI/SearchGroupingCustomUI";
 export { ManualGroupingCustomUI } from "./widget/components/customUI/ManualGroupingCustomUI";
