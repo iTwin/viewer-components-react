@@ -38,7 +38,12 @@ export class StoryClipPlanesProvider extends ToggledTopFitViewFunctionalityProvi
         // section the story
         const sectionCreated = await SectioningUtil.isolateRoomsForStories(this._treeDataProvider.imodel, vp, nodeInstanceId, this.clipHeight, this.clipAtSpaces);
         if (!sectionCreated) {
-          const message: NotifyMessageDetailsType = new NotifyMessageDetails(OutputMessagePriority.Info, BreakdownTrees.translate("BreakdownTrees:clipSection.briefTimeoutMessage"), BreakdownTrees.translate("BreakdownTrees:clipSection.detailedTimeoutMessage"), OutputMessageType.Toast);
+          const message: NotifyMessageDetailsType = new NotifyMessageDetails(
+            OutputMessagePriority.Info,
+            BreakdownTrees.translate("clipSection.briefTimeoutMessage"),
+            BreakdownTrees.translate("clipSection.detailedTimeoutMessage"),
+            OutputMessageType.Toast
+          );
           MessageManager.addMessage(message);
           return false;
         }

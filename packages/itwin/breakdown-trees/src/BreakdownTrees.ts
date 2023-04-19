@@ -9,7 +9,7 @@ import { UiError } from "@itwin/appui-abstract";
 import { getClassName } from "@itwin/appui-abstract";
 import type { Localization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
-import { ITwinLocalization, LocalizationOptions } from "@itwin/core-i18n";
+import { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
  * Entry point for static initialization required by various
@@ -27,10 +27,9 @@ export class BreakdownTrees {
   public static async initialize(localization?: Localization): Promise<void> {
     if (this._initialized)
       return;
-    // const local = new ITwinLocalization({ urlTemplate: `${window.location.origin}/locales/{{lng}}/{{ns}}.json` })
-    this._initialized = true;
     BreakdownTrees._i18n = localization ?? IModelApp.localization;
     await BreakdownTrees._i18n.registerNamespace(BreakdownTrees.i18nNamespace);
+    this._initialized = true;
     return Promise.resolve();
   }
 
@@ -63,6 +62,11 @@ export class BreakdownTrees {
    * @internal
    */
   public static translate(key: string | string[], options?: LocalizationOptions): string {
+    if (Array.isArray(key)) {
+      key = key.map((element) => {
+        return "BreakdownTrees" + element;
+      });
+    }
     return BreakdownTrees.i18n.getLocalizedString(key, options);
   }
 

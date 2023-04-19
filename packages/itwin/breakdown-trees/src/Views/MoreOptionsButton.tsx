@@ -49,7 +49,7 @@ export const MoreOptionsButton: React.FC<MoreOptionsButtonProps> = (props: MoreO
       icon="icon-more-2"
       className={classnames("toolbar-icon", "right")}
       onClick={() => setDisplayDropdown(!displayDropdown)}
-      title={BreakdownTrees.translate("BreakdownTrees:contextMenu.moreOptions")}
+      title={BreakdownTrees.translate("contextMenu.moreOptions")}
     />
     <div>
       <Popup

@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/esm/core-react/index";
 
 .visibility-icon-button {
   display: inline-block;
@@ -45,7 +44,7 @@
   &[disabled]:active,
   &[disabled]:focus {
     opacity: 0.4;
-    color: $uicore-gray;
+    color: var(--buic-foreground-body);
     background: transparent;
     cursor: not-allowed;
     pointer-events: none;

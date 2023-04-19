@@ -16,7 +16,7 @@ export const SampleSpatialTree: React.FC = () => {
       groupByDiscipline={true}
       setGroupByDiscipline={() => { return "group-by-discipline" }}
       displayGuids={true}
-      setIsDisplayGuids={() => { return "discard-guid-from-labe" }}
+      setIsDisplayGuids={() => { return "discard-guid-from-label" }}
       enableVisibility={true}
       clipHeight={1.2}
       clipAtSpaces={true}

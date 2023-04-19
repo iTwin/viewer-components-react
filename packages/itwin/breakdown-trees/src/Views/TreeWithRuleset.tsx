@@ -139,8 +139,9 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
   } = useTreeFilteringState();
   const noFilteredDataRenderer = React.useCallback(() => {
     return <VisibilityTreeNoFilteredData
-      title={BreakdownTrees.translate("BreakdownTrees:searchTool.noData")}
-      message={BreakdownTrees.translate("BreakdownTrees:searchTool.noMatchingItem")}
+      title={BreakdownTrees.translate("searchTool.noData")}
+      message={
+        BreakdownTrees.translate("searchTool.noMatchingItem")}
     />;
   }, []);
 
@@ -155,8 +156,9 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
     searchBar = <SearchBar
       value={filterString}
       valueChangedDelay={500}
-      placeholder={BreakdownTrees.translate("BreakdownTrees:searchTool.placeHolder")}
-      title={BreakdownTrees.translate("BreakdownTrees:searchTool.title")}
+      placeholder={BreakdownTrees.translate("searchTool.placeHolder")}
+      title={
+        BreakdownTrees.translate("searchTool.title")}
       filteringInProgress={searchOptions.isFiltering}
       onFilterCancel={searchOptions.onFilterCancel}
       onFilterClear={searchOptions.onFilterCancel}
@@ -165,7 +167,7 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
       resultCount={searchOptions.matchedResultCount ?? 0}
     >
       {functionsToolbar}
-    </SearchBar>;
+    </SearchBar >;
   } else {
     filteredNodeLoader = nodeLoader;
   }
@@ -239,13 +241,13 @@ const createVisibilityHandler = (rulesetId: string, treeDataProvider: IPresentat
 export function populateMapWithCommonMenuItems(treeName: string, treeFunctionalityMapper: TreeNodeFunctionIconInfoMapper, dataProvider: IPresentationTreeDataProvider, rulesetId: string, eventHandlers?: TreeWithRulesetEventHandlers) {
   treeFunctionalityMapper.registerForNodesOfClasses(["BisCore:GeometricElement3d"], {
     key: ToolbarItemKeys.zoom,
-    label: BreakdownTrees.translate("BreakdownTrees:contextMenu.zoomSelectedLabel"),
+    label: BreakdownTrees.translate("contextMenu.zoomSelectedLabel"),
     functionalityProvider: new ZoomFunctionalityProvider(treeName, dataProvider, eventHandlers?.onZoomToElement),
     toolbarIcon: "icon-re-center",
   });
   const selectRelatedIcon: FunctionIconInfo = {
     key: ToolbarItemKeys.selectRelated,
-    label: BreakdownTrees.translate("BreakdownTrees:contextMenu.selectRelatedLabel"),
+    label: BreakdownTrees.translate("contextMenu.selectRelatedLabel"),
     functionalityProvider: new SelectRelatedFunctionalityProvider(treeName, dataProvider, rulesetId, eventHandlers?.onSelectRelated),
     toolbarIcon: "icon-selection",
   };

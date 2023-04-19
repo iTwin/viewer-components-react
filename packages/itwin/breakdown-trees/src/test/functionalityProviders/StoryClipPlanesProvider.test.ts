@@ -87,7 +87,7 @@ describe("StoryClipPlanesProvider", () => {
 
     assert.strictEqual(queryStoryRangeStub.calledOnce, true);
     assert.strictEqual(performToggleStub.calledOnce, false);
-    assert.strictEqual(MessageManager.messages[0].briefMessage, BreakdownTrees.translate("BreakdownTrees:clipSection.briefTimeoutMessage"));
+    assert.strictEqual(MessageManager.messages[0].briefMessage, BreakdownTrees.translate("clipSection.briefTimeoutMessage"));
     queryRoomsStub.restore();
     queryStoryRangeStub.restore();
     performToggleStub.restore();
