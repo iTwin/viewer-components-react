@@ -6,33 +6,33 @@ import type { Group } from "@itwin/insights-client";
 import { SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import React, { useCallback, useMemo } from "react";
+import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 
 interface GroupsShowHideButtonsProps {
   group: Group;
-  hiddenGroupsIds: string[];
   isLoadingQuery: boolean;
-  setHiddenGroupsIds: (ids: string[]) => void;
   showGroup: (group: Group) => Promise<void>;
   hideGroup: (group: Group) => Promise<void>;
 }
 
 export const GroupsShowHideButtons = ({
   group,
-  hiddenGroupsIds,
   isLoadingQuery,
-  setHiddenGroupsIds,
   showGroup,
   hideGroup,
 }: GroupsShowHideButtonsProps) => {
-  const isGroupHidden = useMemo(() => group.id && hiddenGroupsIds.includes(group.id), [group.id, hiddenGroupsIds]);
+  const { hiddenGroupsIds, setHiddenGroupsIds } = useGroupHilitedElementsContext();
+  const isGroupHidden = useMemo(() => group.id && hiddenGroupsIds.has(group.id), [group.id, hiddenGroupsIds]);
 
   const toggleGroupVisibility = useCallback(async () => {
     if (isGroupHidden) {
       await showGroup(group);
-      setHiddenGroupsIds(hiddenGroupsIds.filter((id) => group.id !== id));
+      setHiddenGroupsIds(new Set([...hiddenGroupsIds].filter((id) => group.id !== id)));
     } else {
       await hideGroup(group);
-      setHiddenGroupsIds(hiddenGroupsIds.concat(group.id ? [group.id] : []));
+      if (group.id) {
+        setHiddenGroupsIds(new Set([...hiddenGroupsIds, group.id]));
+      }
     }
   }, [group, hiddenGroupsIds, hideGroup, isGroupHidden, setHiddenGroupsIds, showGroup]);
 

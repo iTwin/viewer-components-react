@@ -121,14 +121,12 @@ export const GroupsVisualization = ({
       clearHiddenElements();
 
       // hide group Ids filter
-      const newHiddenGroups: Group[] = hiddenGroupsIds
-        .map((id) => groups.find((g) => g.id === id))
-        .filter((g): g is Group => !!g && g.id !== viewGroup.id);
+      const newHiddenGroups: Group[] = groups.filter((g) => hiddenGroupsIds.has(g.id) && g.id !== viewGroup.id);
 
       // view group Ids filter
-      const viewIds = await getHiliteIdsFromGroupsWrapper(
-        groups.filter((g) => !newHiddenGroups.find((hg) => hg.id === g.id))
-      );
+      const viewGroups = groups.filter((g) => !hiddenGroupsIds.has(g.id) || g.id === viewGroup.id);
+      const viewIds = await getHiliteIdsFromGroupsWrapper(viewGroups);
+
       let hiddenIds = await getHiliteIdsFromGroupsWrapper(newHiddenGroups);
       hiddenIds = hiddenIds.filter((id) => !viewIds.includes(id));
       hideElements(hiddenIds);
@@ -140,7 +138,7 @@ export const GroupsVisualization = ({
     setLoadingQuery(true);
 
     clearHiddenElements();
-    setHiddenGroupsIds([]);
+    setHiddenGroupsIds(new Set());
     const allIds = await getHiliteIdsFromGroupsWrapper(groups);
     await zoomToElements(allIds);
 
@@ -150,7 +148,7 @@ export const GroupsVisualization = ({
   const hideAll = useCallback(async () => {
     await hideAllGroups();
     setHiddenGroupsIds(
-      groups.map((g) => g.id).filter((id): id is string => !!id)
+      new Set(groups.map((g) => g.id))
     );
     const allIds = await getHiliteIdsFromGroupsWrapper(groups);
     await zoomToElements(allIds);
@@ -164,9 +162,9 @@ export const GroupsVisualization = ({
   const onModify = useCallback(
     async (group: Group, type: string) => {
       if (!onClickGroupModify) return;
-      if (group.id && hiddenGroupsIds.includes(group.id)) {
+      if (group.id && hiddenGroupsIds.has(group.id)) {
         await showGroup(group);
-        setHiddenGroupsIds(hiddenGroupsIds.filter((id) => id !== group.id));
+        setHiddenGroupsIds(new Set([...hiddenGroupsIds].filter((id) => id !== group.id)));
       }
       clearEmphasizedElements();
       onClickGroupModify(group, type);
@@ -189,14 +187,12 @@ export const GroupsVisualization = ({
     (props: ActionButtonRendererProps) => (
       <GroupsShowHideButtons
         {...props}
-        hiddenGroupsIds={hiddenGroupsIds}
         isLoadingQuery={isLoadingQuery}
-        setHiddenGroupsIds={setHiddenGroupsIds}
         showGroup={showGroup}
         hideGroup={hideSingleGroupWrapper}
       />
     ),
-  ].flat(), [groups, hiddenGroupsIds, hideSingleGroupWrapper, isLoadingQuery, setHiddenGroupsIds, showGroup, showGroupColor]);
+  ].flat(), [groups, hideSingleGroupWrapper, isLoadingQuery, showGroup, showGroupColor]);
 
   return (
     <div className="groups-vis-container">

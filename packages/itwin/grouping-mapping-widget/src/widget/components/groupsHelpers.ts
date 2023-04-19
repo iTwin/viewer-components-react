@@ -63,7 +63,7 @@ export const hideGroup = async (
 const processGroupVisualization = async (
   iModelConnection: IModelConnection,
   group: Group,
-  hiddenGroupsIds: string[],
+  hiddenGroupsIds: Set<string>,
   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
   doEmphasizeElements: boolean,
   groupColor: string
@@ -74,13 +74,13 @@ const processGroupVisualization = async (
 
   doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
 
-  return hiddenGroupsIds.includes(group.id) ? [] : hilitedIds;
+  return hiddenGroupsIds.has(group.id) ? [] : hilitedIds;
 };
 
 export const visualizeGroupColors = async (
   iModelConnection: IModelConnection,
   groups: Group[],
-  hiddenGroupsIds: string[],
+  hiddenGroupsIds: Set<string>,
   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
   doEmphasizeElements: boolean = true
 ) => {
