@@ -64,8 +64,10 @@ export class BreakdownTrees {
   public static translate(key: string | string[], options?: LocalizationOptions): string {
     if (Array.isArray(key)) {
       key = key.map((element) => {
-        return "BreakdownTrees" + element;
+        return "BreakdownTrees:" + element;
       });
+    } else {
+      key = "BreakdownTrees:" + key;
     }
     return BreakdownTrees.i18n.getLocalizedString(key, options);
   }
