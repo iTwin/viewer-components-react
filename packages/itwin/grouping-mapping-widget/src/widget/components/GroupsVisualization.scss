@@ -4,6 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 @import "~@itwin/itwinui-css/scss/variables";
 
-.gmw-custom-ui-dropdown {
-  width: $iui-3xl + $iui-xl;
+.groups-vis-container {
+  display: flex;
+  flex-direction: column;
+  gap: $iui-baseline;
+  flex-grow: 1;
 }
