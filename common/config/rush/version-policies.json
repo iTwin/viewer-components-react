@@ -6,19 +6,19 @@
   {
     "policyName": "itwin-tree-widget",
     "definitionName": "lockStepVersion",
-    "version": "0.9.0-dev.2",
+    "version": "0.9.0-dev.3",
     "nextBump": "prerelease"
   },
   {
     "policyName": "itwin-property-grid",
     "definitionName": "lockStepVersion",
-    "version": "0.10.0-dev.2",
+    "version": "0.10.0-dev.3",
     "nextBump": "prerelease"
   },
   {
     "policyName": "itwin-measure-tools",
     "definitionName": "lockStepVersion",
-    "version": "0.11.0-dev.2",
+    "version": "0.11.0-dev.3",
     "nextBump": "prerelease"
   },
   {
@@ -29,7 +29,7 @@
   {
     "policyName": "itwin-geo-tools",
     "definitionName": "lockStepVersion",
-    "version": "0.3.0-dev.2",
+    "version": "0.3.0-dev.3",
     "nextBump": "prerelease"
   },
   {
@@ -65,7 +65,7 @@
   {
     "policyName": "itwin-map-layers",
     "definitionName": "lockStepVersion",
-    "version": "4.0.0-dev.47",
+    "version": "4.0.0-dev.48",
     "nextBump": "prerelease"
   }
 ]
