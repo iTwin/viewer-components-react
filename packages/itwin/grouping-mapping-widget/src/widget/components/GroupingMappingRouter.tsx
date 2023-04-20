@@ -93,6 +93,7 @@ export const GroupingMappingRouter = ({
         if (queryGenerationType) {
           return (
             <GroupAction
+              shouldVisualize={false}
               mappingId={mapping.id}
               group={group}
               onClickCancel={goBack}
