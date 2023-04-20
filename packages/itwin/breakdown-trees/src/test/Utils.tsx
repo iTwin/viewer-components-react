@@ -29,7 +29,10 @@ function createAppStore(): Store {
     FrameworkReducer,
   } as any);
 
-  return configureStore({ reducer: rootReducer, enhancers: (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__() });
+  return configureStore({
+    reducer: rootReducer,
+    enhancers: (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__()
+  });
 }
 
 export class TestContentControl extends ContentControl {
@@ -54,7 +57,6 @@ export class TestUtils {
       (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
       this.store = createAppStore();
       await UiFramework.initialize(this.store);
-      // await UiFramework.initialize(this.store);
       await BreakdownTrees.initialize(TestUtils.localization);
       // Set the iModelConnection in the Redux store
       if (imodel)

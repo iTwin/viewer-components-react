@@ -58,7 +58,12 @@ export class ZoomFunctionalityProvider extends TreeNodeFunctionalityProvider {
           // check if element has any child with geometry
           const child = await DataLink.queryChildWithGeometry(this._treeDataProvider.imodel, elementKey.instanceKeys[0].id);
           if (child.length === 0) {
-            const message: NotifyMessageDetailsType = new NotifyMessageDetails(OutputMessagePriority.Info, BreakdownTrees.translate("zoomToElement.briefTimeoutMessage"), BreakdownTrees.translate("zoomToElement.detailedTimeoutMessage"), OutputMessageType.Toast);
+            const message: NotifyMessageDetailsType = new NotifyMessageDetails(
+              OutputMessagePriority.Info,
+              BreakdownTrees.translate("zoomToElement.briefTimeoutMessage"),
+              BreakdownTrees.translate("zoomToElement.detailedTimeoutMessage"),
+              OutputMessageType.Toast
+            );
             MessageManager.addMessage(message);
             return;
           }

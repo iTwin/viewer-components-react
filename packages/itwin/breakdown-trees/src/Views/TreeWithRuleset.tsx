@@ -144,8 +144,7 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
   const noFilteredDataRenderer = React.useCallback(() => {
     return <VisibilityTreeNoFilteredData
       title={BreakdownTrees.translate("searchTool.noData")}
-      message={
-        BreakdownTrees.translate("searchTool.noMatchingItem")}
+      message={BreakdownTrees.translate("searchTool.noMatchingItem")}
     />;
   }, []);
 
@@ -161,8 +160,7 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
       value={filterString}
       valueChangedDelay={500}
       placeholder={BreakdownTrees.translate("searchTool.placeHolder")}
-      title={
-        BreakdownTrees.translate("searchTool.title")}
+      title={BreakdownTrees.translate("searchTool.title")}
       filteringInProgress={searchOptions.isFiltering}
       onFilterCancel={searchOptions.onFilterCancel}
       onFilterClear={searchOptions.onFilterCancel}
@@ -171,7 +169,7 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
       resultCount={searchOptions.matchedResultCount ?? 0}
     >
       {functionsToolbar}
-    </SearchBar >;
+    </SearchBar>;
   } else {
     filteredNodeLoader = nodeLoader;
   }

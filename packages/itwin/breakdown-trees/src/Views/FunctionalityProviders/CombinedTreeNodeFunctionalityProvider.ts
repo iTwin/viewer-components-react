@@ -46,7 +46,6 @@ export class CombinedTreeNodeFunctionalityProvider extends TreeNodeFunctionality
         }
       }
     }
-
   }
 
   public async performAction(nodes: TreeModelNode[], treeModel: TreeModel) {
