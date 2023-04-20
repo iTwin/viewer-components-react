@@ -2,6 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import type { IModelConnection } from "@itwin/core-frontend";
+import type {
+  ISelectionProvider,
+  SelectionChangeEventArgs,
+} from "@itwin/presentation-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import type {
   SelectOption,
 } from "@itwin/itwinui-react";
@@ -16,19 +23,25 @@ import {
 } from "./utils";
 import "./GroupAction.scss";
 import useValidator from "../hooks/useValidator";
+import {
+  clearEmphasizedElements,
+  clearOverriddenElements,
+  transparentOverriddenElements,
+  visualizeElementsByQuery,
+  zoomToElements,
+} from "./viewerUtils";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingCustomUI } from "./context/GroupingMappingCustomUIContext";
 import type { GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { GroupingMappingCustomUIType } from "./customUI/GroupingMappingCustomUI";
 import type { Group } from "@itwin/insights-client";
+import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
+import { visualizeGroupColors } from "./groupsHelpers";
 import { QueryBuilderStep } from "./QueryBuilderStep";
 import { GroupDetailsStep } from "./GroupDetailsStep";
 import { QueryBuilderActionPanel } from "./QueryBuilderActionPanel";
 import { GroupDetailsActionPanel } from "./GroupDetailsActionPanel";
-import type { IModelConnection } from "@itwin/core-frontend";
-import { useVisualization } from "../hooks/useVisualization";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 
 const defaultDisplayStrings = {
   groupDetails: "Group Details",
@@ -42,7 +55,6 @@ enum GroupActionStep {
 
 export interface GroupActionProps {
   mappingId: string;
-  shouldVisualize: boolean;
   group?: Group;
   queryGenerationType: string;
   onSaveSuccess: () => void;
@@ -51,10 +63,8 @@ export interface GroupActionProps {
 }
 
 export const GroupAction = (props: GroupActionProps) => {
-  const iModelConnection = useActiveIModelConnection();
-  if (!iModelConnection) {
-    throw new Error("This component requires an active iModelConnection.");
-  }
+  const iModelConnection = useActiveIModelConnection() as IModelConnection;
+  const { showGroupColor, groups, hiddenGroupsIds, hilitedElementsQueryCache } = useGroupHilitedElementsContext();
   const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs
@@ -64,29 +74,21 @@ export const GroupAction = (props: GroupActionProps) => {
     description: props.group?.description ?? "",
   });
   const [query, setQuery] = useState<string>("");
-  const [queryRowCount, setQueryRowCount] = useState<number>(0);
-
+  const [simpleSelectionQuery, setSimpleSelectionQuery] = useState<string>("");
   const [validator, setShowValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
+  const [isRendering, setIsRendering] = useState<boolean>(false);
   const [queryGenerationType, setQueryGenerationType] = useState(
     props.queryGenerationType,
   );
-  const {
-    isRendering,
-    setIsRendering,
-    simpleSelectionQuery,
-    setSimpleSelectionQuery,
-    clearPresentationSelection,
-    resetView,
-  } = useVisualization(
-    props.shouldVisualize,
-    iModelConnection,
-    query,
-    queryGenerationType
-  );
   const isUpdating = isLoading || isRendering;
   const [currentStep, setCurrentStep] = React.useState(GroupActionStep.QueryBuilder);
+
+  useEffect(() => {
+    if (!iModelConnection) {
+      throw new Error("This component requires an active iModelConnection.");
+    }
+  }, [iModelConnection]);
 
   const displayStrings = React.useMemo(
     () => ({ ...defaultDisplayStrings, ...props.displayStrings }),
@@ -95,53 +97,68 @@ export const GroupAction = (props: GroupActionProps) => {
 
   useEffect(() => setQueryGenerationType(props.queryGenerationType), [props.queryGenerationType]);
 
+  const resetView = useCallback(async () => {
+    if (showGroupColor) {
+      await visualizeGroupColors(iModelConnection, groups, hiddenGroupsIds, hilitedElementsQueryCache);
+    } else {
+      clearOverriddenElements();
+    }
+    clearEmphasizedElements();
+  }, [groups, hiddenGroupsIds, hilitedElementsQueryCache, iModelConnection, showGroupColor]);
+
   useEffect(() => {
-    const fetchQueryRowCount = async () => {
+    const removeListener = Presentation.selection.selectionChange.addListener(
+      async (
+        evt: SelectionChangeEventArgs,
+        selectionProvider: ISelectionProvider,
+      ) => {
+        if (queryGenerationType === "Selection") {
+          const selection = selectionProvider.getSelection(
+            evt.imodel,
+            evt.level,
+          );
+          const query = selection.instanceKeys.size > 0
+            ? `SELECT ECInstanceId FROM ${selection.instanceKeys.keys().next().value}`
+            : "";
+          setSimpleSelectionQuery(query);
+        }
+      },
+    );
+    return () => {
+      removeListener();
+    };
+  }, [iModelConnection, queryGenerationType]);
+
+  useEffect(() => {
+    const reemphasize = async () => {
       try {
         if (!query || query === "") {
-          setQueryRowCount(0);
           return;
         }
-        setIsLoading(true);
-        const result = await iModelConnection.queryRowCount(query);
-        setQueryRowCount(result);
+        setIsRendering(true);
+        transparentOverriddenElements();
+        const resolvedHiliteIds = await visualizeElementsByQuery(
+          query,
+          "red",
+          iModelConnection,
+        );
+        await zoomToElements(resolvedHiliteIds);
       } catch {
-        toaster.negative("Query failed to resolve.");
+        toaster.negative("Sorry, we have failed to generate a valid query. 😔");
       } finally {
-        setIsLoading(false);
+        setIsRendering(false);
       }
     };
 
-    void fetchQueryRowCount();
-  }, [iModelConnection, query, setIsRendering]);
+    void reemphasize();
+  }, [iModelConnection, query]);
 
-  const isBlockingActions = !(
-    details.groupName &&
-    (query || simpleSelectionQuery) &&
-    !isRendering &&
-    !isLoading
-  );
-
-  const getOptions = useMemo(
-    (): SelectOption<string>[] =>
-      groupUIs.map((ui) => ({
-        label: ui.displayLabel,
-        value: ui.name,
-        icon: ui.icon,
-      })),
-    [groupUIs]
-  );
-
-  const onChange = useCallback(
-    async (value: string) => {
-      setQueryGenerationType(value);
-      clearPresentationSelection();
-      setQuery("");
-      setSimpleSelectionQuery("");
-      await resetView();
-    },
-    [clearPresentationSelection, resetView, setSimpleSelectionQuery]
-  );
+  useEffect(() => {
+    Presentation.selection.clearSelection(
+      "GroupingMappingWidget",
+      iModelConnection,
+    );
+  }, [iModelConnection]);
 
   const save = useCallback(async () => {
     if (!validator.allValid()) {
@@ -171,7 +188,10 @@ export const GroupAction = (props: GroupActionProps) => {
             query: currentQuery,
           },
         );
-      clearPresentationSelection();
+      Presentation.selection.clearSelection(
+        "GroupingMappingWidget",
+        iModelConnection,
+      );
       setDetails({
         groupName: props.group?.groupName ?? "",
         description: props.group?.description ?? "",
@@ -184,7 +204,38 @@ export const GroupAction = (props: GroupActionProps) => {
     } finally {
       setIsLoading(false);
     }
-  }, [validator, setShowValidationMessage, query, simpleSelectionQuery, getAccessToken, props, mappingClient, iModelId, details, clearPresentationSelection]);
+  }, [validator, setShowValidationMessage, query, simpleSelectionQuery, getAccessToken, props, mappingClient, iModelId, details, iModelConnection]);
+
+  const isBlockingActions = !(
+    details.groupName &&
+    (query || simpleSelectionQuery) &&
+    !isRendering &&
+    !isLoading
+  );
+
+  const getOptions = useMemo(
+    (): SelectOption<string>[] =>
+      groupUIs.map((ui) => ({
+        label: ui.displayLabel,
+        value: ui.name,
+        icon: ui.icon,
+      })),
+    [groupUIs]
+  );
+
+  const onChange = useCallback(
+    async (value: string) => {
+      setQueryGenerationType(value);
+      Presentation.selection.clearSelection(
+        "GroupingMappingWidget",
+        iModelConnection,
+      );
+      setQuery("");
+      setSimpleSelectionQuery("");
+      await resetView();
+    },
+    [iModelConnection, resetView]
+  );
 
   const isQueryBuilderStep = currentStep === GroupActionStep.QueryBuilder;
   const isGroupDetailsStep = currentStep === GroupActionStep.GroupDetails;
@@ -192,7 +243,6 @@ export const GroupAction = (props: GroupActionProps) => {
     <>
       <div className="gmw-group-add-modify-container">
         <QueryBuilderStep
-          queryRowCount={queryRowCount}
           isHidden={!isQueryBuilderStep}
           queryGenerationType={queryGenerationType}
           groupUIs={groupUIs}
@@ -228,7 +278,10 @@ export const GroupAction = (props: GroupActionProps) => {
           type='button'
           id='cancel'
           onClick={async () => {
-            clearPresentationSelection();
+            Presentation.selection.clearSelection(
+              "GroupingMappingWidget",
+              iModelConnection,
+            );
             props.onClickCancel && props.onClickCancel();
           }}
         >
