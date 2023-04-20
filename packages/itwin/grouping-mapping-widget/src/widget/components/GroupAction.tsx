@@ -226,7 +226,7 @@ export const GroupAction = (props: GroupActionProps) => {
         {props.onClickCancel && <Button
           type='button'
           id='cancel'
-          onClick={async () => {
+          onClick={() => {
             clearPresentationSelection();
             props.onClickCancel && props.onClickCancel();
           }}
