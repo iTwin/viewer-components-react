@@ -32,22 +32,6 @@
     overflow-y: overlay;
     gap: $iui-s;
     margin-top: $iui-s;
-
-    .gmw-actions {
-      display: flex;
-      flex-direction: row;
-    }
-  }
-
-  .gmw-group-view-icon {
-    margin-left: 0;
-    align-self: center;
-    min-width: $iui-l;
-    cursor: pointer;
-
-    .gmw-color-legend {
-      border: 1px solid black;
-    }
   }
 
   .gmw-menu-item {
