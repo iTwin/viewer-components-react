@@ -18,6 +18,7 @@ export { Groupings, GroupingProps } from "./widget/components/Grouping";
 export { GroupsVisualization, GroupsVisualizationProps } from "./widget/components/GroupsVisualization";
 export { GroupAction, GroupActionProps } from "./widget/components/GroupAction";
 export { PropertyMenu, PropertyMenuProps } from "./widget/components/PropertyMenu";
+export { PropertyMenuWithVisualization, PropertyMenuWithVisualizationProps } from "./widget/components/PropertyMenuWithVisualization";
 export { GroupPropertyAction, GroupPropertyActionProps } from "./widget/components/GroupPropertyAction";
 export { CalculatedPropertyAction, CalculatedPropertyActionProps } from "./widget/components/CalculatedPropertyAction";
 export { CalculatedPropertyActionWithVisuals, CalculatedPropertyActionWithVisualsProps } from "./widget/components/CalculatedPropertyActionWithVisuals";

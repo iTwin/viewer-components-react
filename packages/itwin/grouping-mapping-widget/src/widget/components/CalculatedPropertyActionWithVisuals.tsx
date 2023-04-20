@@ -24,8 +24,7 @@ import { clearEmphasizedOverriddenElements, visualizeElements, zoomToElements } 
 import "./CalculatedPropertyActionWithVisuals.scss";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import type { CalculatedProperty, Group } from "@itwin/insights-client";
-import { CalculatedPropertyType } from "@itwin/insights-client";
+import type { CalculatedProperty, CalculatedPropertyType, Group } from "@itwin/insights-client";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { getHiliteIdsAndKeysetFromGroup } from "./groupsHelpers";
@@ -52,7 +51,7 @@ export const CalculatedPropertyActionWithVisuals = ({
     calculatedProperty?.propertyName ?? "",
   );
   const iModelConnection = useActiveIModelConnection();
-  const [type, setType] = useState<CalculatedPropertyType>(calculatedProperty?.type ?? CalculatedPropertyType.Undefined);
+  const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.type);
   const [bboxDecorator, setBboxDecorator] = useState<BboxDimensionsDecorator | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { hilitedElementsQueryCache } = useGroupHilitedElementsContext();
@@ -115,7 +114,7 @@ export const CalculatedPropertyActionWithVisuals = ({
   }, [bboxDecorator, colorProperty, inferredSpatialData, type]);
 
   const onSave = async () => {
-    if (!validator.allValid()) {
+    if (!validator.allValid() || !type) {
       showValidationMessage(true);
       return;
     }
@@ -148,7 +147,7 @@ export const CalculatedPropertyActionWithVisuals = ({
         );
       onSaveSuccess();
       setPropertyName("");
-      setType(CalculatedPropertyType.Undefined);
+      setType(undefined);
     } catch (error: any) {
       handleError(error.status);
     } finally {

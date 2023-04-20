@@ -37,12 +37,12 @@ export const CalculatedPropertyAction = ({
   const [propertyName, setPropertyName] = useState<string>(
     calculatedProperty?.propertyName ?? "",
   );
-  const [type, setType] = useState<CalculatedPropertyType | undefined>(undefined);
+  const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.type);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [validator, showValidationMessage] = useValidator();
 
   const onSave = async () => {
-    if (!validator.allValid()) {
+    if (!validator.allValid() || !type) {
       showValidationMessage(true);
       return;
     }

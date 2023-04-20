@@ -14,8 +14,8 @@ import type SimpleReactValidator from "simple-react-validator";
 interface SharedCalculatedPropertyFormsProps {
   propertyName: string;
   setPropertyName: (value: string) => void;
-  type: CalculatedPropertyType;
-  setType: (value: CalculatedPropertyType) => void;
+  type: CalculatedPropertyType | undefined;
+  setType: (value: CalculatedPropertyType | undefined) => void;
   validator: SimpleReactValidator;
   itemRenderer?: (option: SelectOption<string>) => JSX.Element;
   selectedItemRenderer?: (option: SelectOption<string>) => JSX.Element;
