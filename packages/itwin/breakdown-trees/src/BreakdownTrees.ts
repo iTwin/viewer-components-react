@@ -9,7 +9,7 @@ import { UiError } from "@itwin/appui-abstract";
 import { getClassName } from "@itwin/appui-abstract";
 import type { Localization } from "@itwin/core-common";
 import { IModelApp } from "@itwin/core-frontend";
-import { LocalizationOptions } from "@itwin/core-i18n";
+import type { LocalizationOptions } from "@itwin/core-i18n";
 
 /**
  * Entry point for static initialization required by various

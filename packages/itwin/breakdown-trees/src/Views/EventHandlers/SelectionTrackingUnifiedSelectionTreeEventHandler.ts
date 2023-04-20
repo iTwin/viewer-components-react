@@ -5,7 +5,8 @@
 import * as React from "react";
 import type { TreeModelChanges, TreeModelNode, TreeModelSource } from "@itwin/components-react";
 import { useDisposable } from "@itwin/core-react";
-import { VisibilityTreeEventHandler, VisibilityTreeEventHandlerParams } from "@itwin/tree-widget-react";
+import type { VisibilityTreeEventHandlerParams } from "@itwin/tree-widget-react";
+import { VisibilityTreeEventHandler } from "@itwin/tree-widget-react";
 
 export interface SelectionTrackingUnifiedSelectionTreeEventHandlerParams extends VisibilityTreeEventHandlerParams {
   onNewSelectionSetCallback: (newSelection: TreeModelNode[]) => void;

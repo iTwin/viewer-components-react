@@ -120,8 +120,7 @@
     "@itwin/tree-widget-react": "workspace:*",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
-    "react-redux": "7.2.6",
-    "rxjs": "^6.6.2"
+    "react-redux": "7.2.6"
   },
   "nyc": {
     "extends": "./node_modules/@itwin/build-tools/.nycrc",

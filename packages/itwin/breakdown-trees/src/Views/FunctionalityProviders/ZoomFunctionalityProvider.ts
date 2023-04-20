@@ -15,6 +15,7 @@ import { MessageManager } from "@itwin/appui-react";
 import { DataLink } from "../visibility/DataLink";
 import { BreakdownTrees } from "../../BreakdownTrees";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 
 export class ZoomFunctionalityProvider extends TreeNodeFunctionalityProvider {
   private _onActionPerformedEvent: BeEvent<() => void> | undefined;
@@ -49,32 +50,33 @@ export class ZoomFunctionalityProvider extends TreeNodeFunctionalityProvider {
   }
 
   public async zoomSelected(node: TreeModelNode) {
-    const elementKey = this._treeDataProvider.getNodeKey(node.item);
-    if (NodeKey.isInstancesNodeKey(elementKey)) {
-      const data = await DataLink.querySpatialIndex(this._treeDataProvider.imodel, elementKey.instanceKeys[0].id);
-      if (data.length === 0) {
-        // check if element has any child with geometry
-        const child = await DataLink.queryChildWithGeometry(this._treeDataProvider.imodel, elementKey.instanceKeys[0].id);
-        if (child.length === 0) {
-          const message: NotifyMessageDetailsType = new NotifyMessageDetails(OutputMessagePriority.Info, BreakdownTrees.translate("zoomToElement.briefTimeoutMessage"), BreakdownTrees.translate("zoomToElement.detailedTimeoutMessage"), OutputMessageType.Toast);
-          MessageManager.addMessage(message);
-          return;
+    if (isPresentationTreeNodeItem(node.item)) {
+      const elementKey = node.item.key;
+      if (NodeKey.isInstancesNodeKey(elementKey)) {
+        const data = await DataLink.querySpatialIndex(this._treeDataProvider.imodel, elementKey.instanceKeys[0].id);
+        if (data.length === 0) {
+          // check if element has any child with geometry
+          const child = await DataLink.queryChildWithGeometry(this._treeDataProvider.imodel, elementKey.instanceKeys[0].id);
+          if (child.length === 0) {
+            const message: NotifyMessageDetailsType = new NotifyMessageDetails(OutputMessagePriority.Info, BreakdownTrees.translate("zoomToElement.briefTimeoutMessage"), BreakdownTrees.translate("zoomToElement.detailedTimeoutMessage"), OutputMessageType.Toast);
+            MessageManager.addMessage(message);
+            return;
+          }
+
+          const elemProps = await ZoomFunctionalityProvider.getElementProps(
+            IModelApp.viewManager.selectedView!.iModel,
+            child,
+          );
+          IModelApp.viewManager.selectedView!.zoomToElementProps(elemProps);
+
+        } else {
+          const elemProps = await ZoomFunctionalityProvider.getElementProps(
+            IModelApp.viewManager.selectedView!.iModel,
+            elementKey.instanceKeys[0].id,
+          );
+          IModelApp.viewManager.selectedView!.zoomToElementProps(elemProps);
         }
-
-        const elemProps = await ZoomFunctionalityProvider.getElementProps(
-          IModelApp.viewManager.selectedView!.iModel,
-          child,
-        );
-        IModelApp.viewManager.selectedView!.zoomToElementProps(elemProps);
-
-      } else {
-        const elemProps = await ZoomFunctionalityProvider.getElementProps(
-          IModelApp.viewManager.selectedView!.iModel,
-          elementKey.instanceKeys[0].id,
-        );
-        IModelApp.viewManager.selectedView!.zoomToElementProps(elemProps);
       }
     }
-
   }
 }

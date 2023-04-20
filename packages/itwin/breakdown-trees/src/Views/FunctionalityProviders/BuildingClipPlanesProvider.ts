@@ -10,6 +10,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { ToggledTopFitViewFunctionalityProvider } from "./ToggledTopFitViewFunctionalityProvider";
 import { ClipPrimitive, ClipVector, ConvexClipPlaneSet, Range3d } from "@itwin/core-geometry";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 
 export class BuildingClipPlanesProvider extends ToggledTopFitViewFunctionalityProvider {
   constructor(functionalitySourceName: string, treeDataProvider: IPresentationTreeDataProvider, setTopView: boolean) {
@@ -66,11 +67,13 @@ export class BuildingClipPlanesProvider extends ToggledTopFitViewFunctionalityPr
   }
 
   private async clipViewToBilding(node: TreeModelNode) {
-    const elementKey = this._treeDataProvider.getNodeKey(node.item);
-    if (NodeKey.isInstancesNodeKey(elementKey)) {
-      const instanceId = elementKey.instanceKeys[0].id;
-      await this.createSectionPlanes(instanceId);
-      await super.performAction([node]);
+    if (isPresentationTreeNodeItem(node.item)) {
+      const elementKey = node.item.key;
+      if (NodeKey.isInstancesNodeKey(elementKey)) {
+        const instanceId = elementKey.instanceKeys[0].id;
+        await this.createSectionPlanes(instanceId);
+        await super.performAction([node]);
+      }
     }
   }
 }

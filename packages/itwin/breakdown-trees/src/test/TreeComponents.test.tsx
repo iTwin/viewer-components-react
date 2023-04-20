@@ -16,7 +16,7 @@ import * as moq from "typemoq";
 import type { RegisteredRuleset, Ruleset } from "@itwin/presentation-common";
 import type { IModelHierarchyChangeEventArgs, PresentationManager, RulesetManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
-import type { TreeActions, TreeModel, TreeModelNode } from "@itwin/components-react";
+import type { HighlightableTreeNodeProps, TreeActions, TreeModel, TreeModelNode } from "@itwin/components-react";
 import { PropertyValueRendererManager } from "@itwin/components-react";
 import sinon from "sinon";
 import { TreeNodeFunctionIconInfoMapper } from "../Views/FunctionalityProviders/TreeNodeFunctionIconMapper";
@@ -26,7 +26,7 @@ import { ClassificationsTree } from "../Views/ClassificationsTree";
 import { ComponentIndex } from "../Views/ComponentIndex";
 import { SpatialContainmentTree } from "../Views/SpatialContainmentTree";
 import { expect } from "chai";
-import { PrimitiveValue, PropertyDescription, PropertyRecord, PropertyValue, PropertyValueFormat } from "@itwin/appui-abstract";
+import { PropertyRecord } from "@itwin/appui-abstract";
 
 describe("TreeComponent tests.", () => {
 
@@ -117,8 +117,10 @@ describe("TreeComponent tests.", () => {
 
   it("TreeNodeWrapper renders correctly", () => {
     const node = moq.Mock.ofType<TreeModelNode>();
-    const propertyRecord = PropertyRecord.fromString("TreeNodeWrapper")
+    const highlightProps: HighlightableTreeNodeProps = { searchText: "tree" };
+    const propertyRecord = PropertyRecord.fromString("TreeNodeWrapper");
     node.setup((x) => x.depth).returns(() => 1);
+    node.setup((x) => x.id).returns(() => "TreeNodeWrapper");
     node.setup((x) => x.label).returns(() => propertyRecord);
     const treeModel = moq.Mock.ofType<TreeModel>();
     const treeAction = moq.Mock.ofType<TreeActions>();
@@ -129,7 +131,7 @@ describe("TreeComponent tests.", () => {
 
     const wrapper = (
       <TreeNodeWrapper node={node.object} treeActions={treeAction.object} itemsMapper={functionIconMapper} visibilityHandler={undefined} treeModel={treeModel.object}
-        selectedTreenodeCount={0} />
+        selectedTreenodeCount={0} highlightingProps={highlightProps} />
     );
     mount(wrapper).should.matchSnapshot();
     reactNode.reset();

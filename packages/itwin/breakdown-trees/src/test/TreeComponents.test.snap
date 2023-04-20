@@ -66,6 +66,11 @@ exports[`TreeComponent tests. SpatialContainmentTree renders correctly with chil
 
 exports[`TreeComponent tests. TreeNodeWrapper renders correctly 1`] = `
 <TreeNodeWrapper
+  highlightingProps={
+    Object {
+      "searchText": "tree",
+    }
+  }
   itemsMapper={
     TreeNodeFunctionIconInfoMapper {
       "_TreeNodeClassFunctionIconInfoMap": Map {},
@@ -99,17 +104,7 @@ exports[`TreeComponent tests. TreeNodeWrapper renders correctly 1`] = `
         isLeaf={false}
         isLoading={[Function]}
         isSelected={[Function]}
-        key="function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    _this._interceptor.removeInvocation(invocation_1);
-                    var method = new MethodInfo(target, p);
-                    var methodInvocation = new MethodInvocation(target, method, args, ProxyType.DYNAMIC);
-                    _this._interceptor.intercept(methodInvocation);
-                    return methodInvocation.returnValue;
-                }"
+        key="TreeNodeWrapper"
         label={
           <div
             className={undefined}

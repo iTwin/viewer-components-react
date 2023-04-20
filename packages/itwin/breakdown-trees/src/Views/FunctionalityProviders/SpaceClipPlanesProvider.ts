@@ -12,6 +12,7 @@ import type { GeometricElement3dProps } from "@itwin/core-common";
 import { Placement3d } from "@itwin/core-common";
 import { ClipPrimitive, ClipVector, ConvexClipPlaneSet } from "@itwin/core-geometry";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 
 export class SpaceClipPlanesProvider extends ToggledTopFitViewFunctionalityProvider {
   public defaultHeight?: number;
@@ -64,11 +65,13 @@ export class SpaceClipPlanesProvider extends ToggledTopFitViewFunctionalityProvi
   }
 
   private async clipViewToSpace(node: TreeModelNode) {
-    const elementKey = this._treeDataProvider.getNodeKey(node.item);
-    if (NodeKey.isInstancesNodeKey(elementKey)) {
-      const instanceId = elementKey.instanceKeys[0].id;
-      await this.createSectionPlanes(instanceId);
-      await super.performAction([node]);
+    if (isPresentationTreeNodeItem(node.item)) {
+      const elementKey = node.item.key;
+      if (NodeKey.isInstancesNodeKey(elementKey)) {
+        const instanceId = elementKey.instanceKeys[0].id;
+        await this.createSectionPlanes(instanceId);
+        await super.performAction([node]);
+      }
     }
   }
 }
