@@ -31,7 +31,7 @@ describe("BuildingClipPlanesProvider", () => {
     await TestUtils.initializeUiFramework(connection.object);
     await IModelApp.localization.registerNamespace("BreakdownTrees");
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
-    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey);
+    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey); // eslint-disable-line deprecation/deprecation
 
     const viewStateMock = moq.Mock.ofType<ViewState>();
     viewStateMock.setup((x) => x.setViewClip(moq.It.isAny()));
