@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/breakdown-trees-react",
+      "comment": "updating to core@3.7.0 and appui@4.0.0",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/breakdown-trees-react"
+}
