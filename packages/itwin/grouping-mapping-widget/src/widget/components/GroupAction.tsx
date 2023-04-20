@@ -2,13 +2,11 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { IModelConnection } from "@itwin/core-frontend";
 import type {
   ISelectionProvider,
   SelectionChangeEventArgs,
 } from "@itwin/presentation-frontend";
 import { Presentation } from "@itwin/presentation-frontend";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import type {
   SelectOption,
 } from "@itwin/itwinui-react";
@@ -63,9 +61,11 @@ export interface GroupActionProps {
 }
 
 export const GroupAction = (props: GroupActionProps) => {
-  const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const { showGroupColor, groups, hiddenGroupsIds, hilitedElementsQueryCache } = useGroupHilitedElementsContext();
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
+  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
+  if (!iModelConnection) {
+    throw new Error("This component requires an active iModelConnection.");
+  }
   const mappingClient = useMappingClient();
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs
     .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];

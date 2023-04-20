@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { Group } from "@itwin/insights-client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
@@ -25,6 +24,7 @@ import { GroupColorLegend } from "./GroupColorLegend";
 import { GroupVisualizationActions } from "./GroupsVisualizationActions";
 import { GroupsShowHideButtons } from "./GroupsShowHideButtons";
 import "./GroupsVisualization.scss";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export interface GroupsVisualizationProps extends GroupingProps {
   isNonEmphasizedSelectable?: boolean;
@@ -38,7 +38,7 @@ export const GroupsVisualization = ({
   onClickAddGroup,
   ...rest
 }: GroupsVisualizationProps) => {
-  const iModelConnection = useActiveIModelConnection();
+  const { iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }

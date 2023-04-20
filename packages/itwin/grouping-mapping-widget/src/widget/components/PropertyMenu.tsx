@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { Presentation } from "@itwin/presentation-frontend";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import React, { useEffect, useMemo, useState } from "react";
 
 import {
@@ -62,10 +61,9 @@ export const PropertyMenu = ({
 }: PropertyMenuProps) => {
   const groupId = group.id;
   const mappingId = mapping.id;
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
+  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const { hilitedElementsQueryCache } = useGroupHilitedElementsContext();
   const mappingClient = useMappingClient();
-  const iModelConnection = useActiveIModelConnection();
   const {
     showGroupColor,
     setShowGroupColor,
