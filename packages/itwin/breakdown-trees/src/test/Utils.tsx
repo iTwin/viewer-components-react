@@ -10,7 +10,7 @@ import { ContentControl, FrameworkReducer, SyncUiEventDispatcher, UiFramework } 
 import type { TreeNodeItem } from "@itwin/components-react";
 import { Id64 } from "@itwin/core-bentley";
 import type { AnyAction, Store } from "redux";
-import { combineReducers, createStore } from "redux";
+import { combineReducers } from "redux";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey, InstanceKey, Ruleset } from "@itwin/presentation-common";
@@ -29,8 +29,7 @@ function createAppStore(): Store {
     FrameworkReducer,
   } as any);
 
-  return createStore(rootReducer,
-    (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__());
+  return configureStore({ reducer: rootReducer, enhancers: (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__() });
 }
 
 export class TestContentControl extends ContentControl {

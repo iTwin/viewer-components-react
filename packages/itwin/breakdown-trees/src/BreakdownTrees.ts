@@ -62,12 +62,13 @@ export class BreakdownTrees {
    * @internal
    */
   public static translate(key: string | string[], options?: LocalizationOptions): string {
+    const prefix = "BreakdownTrees:";
     if (Array.isArray(key)) {
       key = key.map((element) => {
-        return "BreakdownTrees:" + element;
+        return `${prefix}${element}`;
       });
     } else {
-      key = "BreakdownTrees:" + key;
+      key = `${prefix}${key}`;
     }
     return BreakdownTrees.i18n.getLocalizedString(key, options);
   }
