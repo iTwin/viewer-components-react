@@ -8,15 +8,16 @@ import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react
 import { IModelApp, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import { CategoryTree } from "./CategoriesTree";
-import { CategoryInfo, CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
-import { enableCategory } from "../CategoriesVisibilityUtils";
-import { useTreeFilteringState } from "../../TreeFilteringState";
-import { AutoSizer } from "../../utils/AutoSizer";
-import type { CategoriesTreeHeaderButtonProps, CategoriesTreeProps } from "../../../types";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { IPresentationTreeDataProvider, isPresentationTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { SearchBar } from "../../search-bar/SearchBar";
+import { useTreeFilteringState } from "../../TreeFilteringState";
+import { AutoSizer } from "../../utils/AutoSizer";
+import { enableCategory } from "../CategoriesVisibilityUtils";
+import { CategoryTree } from "./CategoriesTree";
+import { CategoryInfo, CategoryVisibilityHandler, useCategories } from "./CategoryVisibilityHandler";
+
+import type { CategoriesTreeHeaderButtonProps, CategoriesTreeProps } from "../../../types";
 
 export function CategoriesTreeComponent(props: CategoriesTreeProps) {
   const iModel = useActiveIModelConnection();
@@ -98,7 +99,9 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeProps & { iModel: IMod
 
 async function getFilteredCategories(filteredProvider: IPresentationTreeDataProvider) {
   const nodes = await filteredProvider.getNodes();
-  return nodes.map((node) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredProvider.getNodeKey(node)));
+  return nodes
+    .filter((node) => isPresentationTreeNodeItem(node))
+    .map((node) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey((node as PresentationTreeNodeItem).key));
 }
 
 function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
