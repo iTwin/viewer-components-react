@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed issue that caused CustomUI's to show up twice.",
+      "comment": "Fixed an issue that caused CustomUI's to show up twice on drop down menus.",
       "type": "patch"
     }
   ],
