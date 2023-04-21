@@ -47,7 +47,8 @@ export interface GroupingProps {
   onClickGroupModify?: (group: Group, queryGenerationType: string) => void;
   onClickRenderContextCustomUI?: (
     contextCustomUI: Exclude<ContextCustomUI["uiComponent"], undefined>,
-    group: Group
+    group: Group,
+    displayLabel: string,
   ) => void;
   disableActions?: boolean;
 }

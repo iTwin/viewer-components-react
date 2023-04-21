@@ -44,7 +44,7 @@ export interface ContextCustomUI extends IGroupingMappingCustomUI {
   /**
    * User defined component for UI interaction with grouping mapping widget.
    */
-  uiComponent?:  React.ComponentType<ContextCustomUIProps>;
+  uiComponent?: React.ComponentType<ContextCustomUIProps>;
   /**
    * Callback function for context custom UI menu item click event.
    */
@@ -101,4 +101,9 @@ export interface GroupingCustomUIProps {
    * To reset the viewer.
    */
   resetView?: () => Promise<void>;
+  /**
+   * The current query for the Group being edited.
+   */
+  initialEditModeQuery?: string;
+
 }
