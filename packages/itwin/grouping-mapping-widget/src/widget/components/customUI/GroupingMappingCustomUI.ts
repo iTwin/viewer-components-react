@@ -102,7 +102,7 @@ export interface GroupingCustomUIProps {
    */
   resetView?: () => Promise<void>;
   /**
-   * The current query for the Group being edited.
+   * The initial query for the Group being edited.
    */
   initialEditModeQuery?: string;
 
