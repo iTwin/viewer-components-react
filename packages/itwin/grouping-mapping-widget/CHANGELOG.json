@@ -2,6 +2,26 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.13.0",
+      "date": "Tue, 18 Apr 2023 17:46:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed a visualization race condition that caused some Groups to not visualize."
+          },
+          {
+            "comment": "Fixed Select Query Builder reset button. No longer fails to visualize. "
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Updated the Selection query builder to use VirtualizedPropertyGridWithDataProvider from @itwin/components-react, replacing the previous PropertyGrid implementation."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.0",
       "tag": "@itwin/grouping-mapping-widget_v0.12.0",
       "date": "Mon, 03 Apr 2023 15:34:07 GMT",

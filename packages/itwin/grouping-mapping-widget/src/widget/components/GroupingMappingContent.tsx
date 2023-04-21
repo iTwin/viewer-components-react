@@ -26,7 +26,7 @@ export const GroupingMappingContent = ({
   useEffect(() => {
     if (routingHistory.length === 1) {
       setShowGroupColor(false);
-      setHiddenGroupsIds([]);
+      setHiddenGroupsIds(new Set());
       clearAll();
       // Turn off visualiztion in properties menu
     } else if (routingHistory.length === 2) {

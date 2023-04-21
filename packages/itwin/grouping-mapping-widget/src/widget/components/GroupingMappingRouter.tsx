@@ -7,13 +7,13 @@ import { CalculatedPropertyAction } from "./CalculatedPropertyAction";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { CustomCalculationAction } from "./CustomCalculationAction";
 import { GroupAction } from "./GroupAction";
-import { Groupings } from "./Grouping";
 import type { Route } from "./GroupingMapping";
 import { RouteStep } from "./GroupingMapping";
 import { GroupPropertyAction } from "./GroupPropertyAction";
 import { Mappings } from "./Mapping";
 import { MappingAction } from "./MappingAction";
 import { PropertyMenu } from "./PropertyMenu";
+import { GroupsVisualization } from "./GroupsVisualization";
 
 export const GroupingMappingRouter = ({
   currentRoute,
@@ -54,7 +54,7 @@ export const GroupingMappingRouter = ({
     case RouteStep.Groups:
       if (mapping) {
         return (
-          <Groupings
+          <GroupsVisualization
             mapping={mapping}
             onClickAddGroup={(qType) =>
               navigateTo((prev) => ({

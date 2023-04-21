@@ -1,6 +1,18 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 03 Apr 2023 15:34:07 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Apr 2023 17:46:22 GMT and should not be manually modified.
+
+## 0.13.0
+Tue, 18 Apr 2023 17:46:22 GMT
+
+### Minor changes
+
+- Updated the Selection query builder to use VirtualizedPropertyGridWithDataProvider from @itwin/components-react, replacing the previous PropertyGrid implementation.
+
+### Patches
+
+- Fixed a visualization race condition that caused some Groups to not visualize.
+- Fixed Select Query Builder reset button. No longer fails to visualize. 
 
 ## 0.12.0
 Mon, 03 Apr 2023 15:34:07 GMT

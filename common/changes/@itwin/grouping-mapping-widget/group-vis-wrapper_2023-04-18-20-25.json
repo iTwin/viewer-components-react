@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed a visualization race condition that caused some Groups to not visualize.",
+      "comment": "Groups visualization has been optimized.",
       "type": "patch"
     }
   ],

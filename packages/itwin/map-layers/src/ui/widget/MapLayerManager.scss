@@ -268,7 +268,7 @@ $default-font-size: --iui-font-size-1;
 
     &:focus {
       outline: none;
-      box-shadow: $uicore-button-focus-boxshadow;
+      box-shadow: rgba(var(--iui-color-border-accent), var(--iui-opacity-4)) 0px 0px 0px 2px;
     }
   }
 }
