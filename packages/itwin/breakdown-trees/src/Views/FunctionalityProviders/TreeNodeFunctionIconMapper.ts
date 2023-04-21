@@ -73,24 +73,23 @@ export class TreeNodeFunctionIconInfoMapper {
 
   public async getFunctionIconInfosFor(node?: TreeModelNode): Promise<FunctionIconInfo[]> {
     const returnedList: number[] = [];
-    if (node) {
-      if (isPresentationTreeNodeItem(node.item)) {
-        const elementKey = node.item.key;
-        if (NodeKey.isGroupingNodeKey(elementKey)) {
-          returnedList.push(...this._groupNodeFunctionIconInfos);
-        } else if (NodeKey.isInstancesNodeKey(elementKey)) {
-          const classHierarchyArray = await IModelReadRpcInterface.getClient().getClassHierarchy(
-            this._treeDataProvider.imodel.getRpcProps(),
-            elementKey.instanceKeys[0].className
-          );
-          for (const className of classHierarchyArray) {
-            const mappedFunctionalityProviders = this._TreeNodeClassFunctionIconInfoMap.get(className);
-            if (mappedFunctionalityProviders)
-              returnedList.push(...mappedFunctionalityProviders);
-          }
+    if (node && (isPresentationTreeNodeItem(node.item))) {
+      const elementKey = node.item.key;
+      if (NodeKey.isGroupingNodeKey(elementKey)) {
+        returnedList.push(...this._groupNodeFunctionIconInfos);
+      } else if (NodeKey.isInstancesNodeKey(elementKey)) {
+        const classHierarchyArray = await IModelReadRpcInterface.getClient().getClassHierarchy(
+          this._treeDataProvider.imodel.getRpcProps(),
+          elementKey.instanceKeys[0].className
+        );
+        for (const className of classHierarchyArray) {
+          const mappedFunctionalityProviders = this._TreeNodeClassFunctionIconInfoMap.get(className);
+          if (mappedFunctionalityProviders)
+            returnedList.push(...mappedFunctionalityProviders);
         }
       }
     }
+
     returnedList.push(...this._globalFunctionIconInfos);
     return this._functionIconInfos.map((value: FunctionIconInfo, index: number, _array) => {
       const returnValue = { ...value };

@@ -32,20 +32,22 @@ export class CombinedTreeNodeFunctionalityProvider extends TreeNodeFunctionality
   }
 
   private async delegateToAppropriateProvider(node: TreeModelNode, treeModel: TreeModel) {
-    if (isPresentationTreeNodeItem(node.item)) {
-      const elementKey = node.item.key;
-      if (NodeKey.isGroupingNodeKey(elementKey)) {
-        if (this._groupNodeFunctionalityProvider)
-          return this._groupNodeFunctionalityProvider.performAction([node], treeModel);
-      } else if (NodeKey.isInstancesNodeKey(elementKey)) {
-        const classHierarchyArray = await IModelReadRpcInterface.getClient().getClassHierarchy(this._treeDataProvider.imodel.getRpcProps(), elementKey.instanceKeys[0].className);
-        for (const className of classHierarchyArray) {
-          const mappedFunctionalityProvider = this._classFunctionalityMap.get(className);
-          if (mappedFunctionalityProvider)
-            return mappedFunctionalityProvider.performAction([node], treeModel);
-        }
+    if (!isPresentationTreeNodeItem(node.item)) {
+      return;
+    }
+    const elementKey = node.item.key;
+    if (NodeKey.isGroupingNodeKey(elementKey)) {
+      if (this._groupNodeFunctionalityProvider)
+        return this._groupNodeFunctionalityProvider.performAction([node], treeModel);
+    } else if (NodeKey.isInstancesNodeKey(elementKey)) {
+      const classHierarchyArray = await IModelReadRpcInterface.getClient().getClassHierarchy(this._treeDataProvider.imodel.getRpcProps(), elementKey.instanceKeys[0].className);
+      for (const className of classHierarchyArray) {
+        const mappedFunctionalityProvider = this._classFunctionalityMap.get(className);
+        if (mappedFunctionalityProvider)
+          return mappedFunctionalityProvider.performAction([node], treeModel);
       }
     }
+
   }
 
   public async performAction(nodes: TreeModelNode[], treeModel: TreeModel) {

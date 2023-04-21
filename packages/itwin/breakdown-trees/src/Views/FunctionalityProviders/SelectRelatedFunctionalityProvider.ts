@@ -34,22 +34,22 @@ export class SelectRelatedFunctionalityProvider extends TreeNodeFunctionalityPro
 
   public async selectRelated(node: TreeModelNode) {
     const keys = new KeySet();
-    if (isPresentationTreeNodeItem(node.item)) {
-      const elementKey = node.item.key;
-      keys.add(elementKey);
-
-      if (NodeKey.isInstancesNodeKey(elementKey)) {
-        if (elementKey.instanceKeys !== undefined) {
-          const instanceId = elementKey.instanceKeys[0].id;
-          const childElemIds = await this.getAllChildNodesFromRule(this._treeDataProvider.imodel, this._rulesetId, instanceId);
-          if (childElemIds && childElemIds.size > 0)
-            keys.add(childElemIds);
-          Presentation.selection.replaceSelection(this._functionalitySourceName, this._treeDataProvider.imodel, keys);
-        }
-      } else {
-        await this.getGroupNodeDetails(node.item, keys);
+    const elementKey = isPresentationTreeNodeItem(node.item) ? node.item.key : undefined;
+    if (!elementKey) {
+      return null;
+    }
+    keys.add(elementKey);
+    if (NodeKey.isInstancesNodeKey(elementKey)) {
+      if (elementKey.instanceKeys !== undefined) {
+        const instanceId = elementKey.instanceKeys[0].id;
+        const childElemIds = await this.getAllChildNodesFromRule(this._treeDataProvider.imodel, this._rulesetId, instanceId);
+        if (childElemIds && childElemIds.size > 0)
+          keys.add(childElemIds);
         Presentation.selection.replaceSelection(this._functionalitySourceName, this._treeDataProvider.imodel, keys);
       }
+    } else {
+      await this.getGroupNodeDetails(node.item, keys);
+      Presentation.selection.replaceSelection(this._functionalitySourceName, this._treeDataProvider.imodel, keys);
     }
     return null;
   }
@@ -62,17 +62,18 @@ export class SelectRelatedFunctionalityProvider extends TreeNodeFunctionalityPro
   private async getGroupNodeDetails(node: TreeNodeItem, keys: KeySet) {
     const childNodes = await this._treeDataProvider.getNodes(node);
     for (const child of childNodes) {
-      if (isPresentationTreeNodeItem(child)) {
-        const childNodeKey = child.key;
-        if (NodeKey.isInstancesNodeKey(childNodeKey) && childNodeKey.instanceKeys.length > 0) {
-          keys.add(childNodeKey.instanceKeys);
-          const childInstanceId = childNodeKey.instanceKeys[0].id;
-          const childElemIds = await this.getAllChildNodesFromRule(this._treeDataProvider.imodel, this._rulesetId, childInstanceId);
-          if (childElemIds && childElemIds.size > 0)
-            keys.add(childElemIds);
-        } else {
-          await this.getGroupNodeDetails(child, keys);
-        }
+      if (!isPresentationTreeNodeItem(child)) {
+        return;
+      }
+      const childNodeKey = child.key;
+      if (NodeKey.isInstancesNodeKey(childNodeKey) && childNodeKey.instanceKeys.length > 0) {
+        keys.add(childNodeKey.instanceKeys);
+        const childInstanceId = childNodeKey.instanceKeys[0].id;
+        const childElemIds = await this.getAllChildNodesFromRule(this._treeDataProvider.imodel, this._rulesetId, childInstanceId);
+        if (childElemIds && childElemIds.size > 0)
+          keys.add(childElemIds);
+      } else {
+        await this.getGroupNodeDetails(child, keys);
       }
     }
   }

@@ -71,12 +71,11 @@ export class VisibilityHandler implements IVisibilityHandler {
   public onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
   public async getNodeVisibilityStatus(node: TreeNodeItem) {
-    if (isPresentationTreeNodeItem(node)) {
-      const nodeKey = node.key;
-      return this.getVisibilityStatus(node, nodeKey);
-    } else {
+    const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
+    if (!nodeKey) {
       return undefined;
     }
+    return this.getVisibilityStatus(node, nodeKey);
   }
 
   public async getVisibilityStatus(node: TreeNodeItem, nodeKey: NodeKey): Promise<VisibilityStatus> {
@@ -242,15 +241,18 @@ export class VisibilityHandler implements IVisibilityHandler {
   private async getGroupNodeDetails(node: TreeNodeItem, nodeDetails: NodeDetails) {
     const childNodes = await this._treeDataProvider.getNodes(node);
     for (const child of childNodes) {
-      if (isPresentationTreeNodeItem(child)) {
-        const childNodeKey = child.key;
-        if (NodeKey.isInstancesNodeKey(childNodeKey) && childNodeKey.instanceKeys.length > 0) {
-          nodeDetails.keySet.add(childNodeKey.instanceKeys);
-          const childInstanceId = childNodeKey.instanceKeys[0].id;
-          await this.getKeySetFromRule(this._props.rulesetId, childInstanceId, nodeDetails);
-        } else {
-          await this.getGroupNodeDetails(child, nodeDetails);
-        }
+
+      if (!isPresentationTreeNodeItem(child)) {
+        return;
+      }
+
+      const childNodeKey = child.key;
+      if (NodeKey.isInstancesNodeKey(childNodeKey) && childNodeKey.instanceKeys.length > 0) {
+        nodeDetails.keySet.add(childNodeKey.instanceKeys);
+        const childInstanceId = childNodeKey.instanceKeys[0].id;
+        await this.getKeySetFromRule(this._props.rulesetId, childInstanceId, nodeDetails);
+      } else {
+        await this.getGroupNodeDetails(child, nodeDetails);
       }
     }
   }
@@ -263,16 +265,20 @@ export class VisibilityHandler implements IVisibilityHandler {
 
   // Check visibility Status of each child node. If any child is invisible, set nodeDetails.isAllChildrenVisible = false.
   private async getNodeDetailsFromRule(node: TreeNodeItem, rulesetId: string, nodeDetails: NodeDetails, hiddenElems: Set<string>) {
-    if (isPresentationTreeNodeItem(node)) {
-      const elementKey = node.key;
-      const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey(elementKey);
-      if (instanceId !== "") {
-        await this.getKeySetFromRule(rulesetId, instanceId, nodeDetails);
-      } else {
-        // If the clicked node is not an instance node, get it's child nodes and then apply rule on the child which is an instance node.
-        await this.getGroupNodeDetails(node, nodeDetails);
-      }
+
+    if (!isPresentationTreeNodeItem(node)) {
+      return;
     }
+
+    const elementKey = node.key;
+    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey(elementKey);
+    if (instanceId !== "") {
+      await this.getKeySetFromRule(rulesetId, instanceId, nodeDetails);
+    } else {
+      // If the clicked node is not an instance node, get it's child nodes and then apply rule on the child which is an instance node.
+      await this.getGroupNodeDetails(node, nodeDetails);
+    }
+
     const elementIds: Id64Array = [];
 
     nodeDetails.keySet.instanceKeys.forEach((values: Set<string>) => {

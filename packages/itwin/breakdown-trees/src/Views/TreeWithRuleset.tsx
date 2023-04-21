@@ -91,18 +91,19 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
     let selectedNodesCount: number = 0;
     // Find corresponding treeNodes from selected elements in view
     for (const treeNode of treeModelData.iterateTreeModelNodes()) {
-      if (isPresentationTreeNodeItem(treeNode.item)) {
-        const nodeKey = treeNode.item.key;
-        if (NodeKey.isInstancesNodeKey(nodeKey)) {
-          const mappedInstance = nodeKey.instanceKeys.find((instanceKey) => selectedElemId.has(instanceKey.id));
-          if (mappedInstance) {
-            selectedNodesCount++;
-            expandParentNodes(treeNode, treeModelData);
-          }
-        }
-        if (selectedElemId.size === selectedNodesCount)
-          break;
+      const nodeKey = isPresentationTreeNodeItem(treeNode.item) ? treeNode.item.key : undefined;
+      if (!nodeKey) {
+        break;
       }
+      if (NodeKey.isInstancesNodeKey(nodeKey)) {
+        const mappedInstance = nodeKey.instanceKeys.find((instanceKey) => selectedElemId.has(instanceKey.id));
+        if (mappedInstance) {
+          selectedNodesCount++;
+          expandParentNodes(treeNode, treeModelData);
+        }
+      }
+      if (selectedElemId.size === selectedNodesCount)
+        break;
     }
   };
 

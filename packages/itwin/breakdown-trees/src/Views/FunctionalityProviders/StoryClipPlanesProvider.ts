@@ -56,14 +56,14 @@ export class StoryClipPlanesProvider extends ToggledTopFitViewFunctionalityProvi
   }
 
   private async clipSection(node: TreeModelNode) {
-    if (isPresentationTreeNodeItem(node.item)) {
-      const elementKey = node.item.key;
-      if (NodeKey.isInstancesNodeKey(elementKey)) {
-        const instanceId = elementKey.instanceKeys[0].id;
-        if (await this.createSectionPlane(instanceId))
-          await super.performAction([node]);
-      }
+    const elementKey = isPresentationTreeNodeItem(node.item) ? node.item.key : undefined;
+    if (!elementKey) {
+      return;
+    }
+    if (NodeKey.isInstancesNodeKey(elementKey)) {
+      const instanceId = elementKey.instanceKeys[0].id;
+      if (await this.createSectionPlane(instanceId))
+        await super.performAction([node]);
     }
   }
-
 }
