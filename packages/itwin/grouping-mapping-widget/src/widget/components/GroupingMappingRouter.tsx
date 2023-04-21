@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import { CalculatedPropertyAction } from "./CalculatedPropertyAction";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { CustomCalculationAction } from "./CustomCalculationAction";
 import { GroupAction } from "./GroupAction";
@@ -12,7 +11,8 @@ import { RouteStep } from "./GroupingMapping";
 import { GroupPropertyAction } from "./GroupPropertyAction";
 import { Mappings } from "./Mapping";
 import { MappingAction } from "./MappingAction";
-import { PropertyMenu } from "./PropertyMenu";
+import { CalculatedPropertyActionWithVisuals } from "./CalculatedPropertyActionWithVisuals";
+import { PropertyMenuWithVisualization } from "./PropertyMenuWithVisualization";
 import { GroupsVisualization } from "./GroupsVisualization";
 
 export const GroupingMappingRouter = ({
@@ -115,7 +115,7 @@ export const GroupingMappingRouter = ({
     case RouteStep.Properties:
       if (mapping && group) {
         return (
-          <PropertyMenu
+          <PropertyMenuWithVisualization
             mapping={mapping}
             group={group}
             color="red"
@@ -158,7 +158,7 @@ export const GroupingMappingRouter = ({
     case RouteStep.CalculatedPropertyAction: {
       if (mapping && group) {
         return (
-          <CalculatedPropertyAction
+          <CalculatedPropertyActionWithVisuals
             mappingId={mapping.id}
             group={group}
             calculatedProperty={calculatedProperty}

@@ -8,6 +8,7 @@ import { TreeNodeItem, useAsyncValue } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport } from "../CategoriesVisibilityUtils";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
@@ -73,12 +74,20 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
 
   public onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
-  public getVisibilityStatus(node: TreeNodeItem, nodeKey: NodeKey): VisibilityStatus {
+  public getVisibilityStatus(node: TreeNodeItem,): VisibilityStatus {
+    const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
+    if (!nodeKey)
+      return { state: "hidden", isDisabled: true};
+
     const instanceId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
     return { state: node.parentId ? this.getSubCategoryVisibility(instanceId) : this.getCategoryVisibility(instanceId) };
   }
 
-  public async changeVisibility(node: TreeNodeItem, nodeKey: NodeKey, shouldDisplay: boolean): Promise<void> {
+  public async changeVisibility(node: TreeNodeItem, shouldDisplay: boolean): Promise<void> {
+    const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
+    if (!nodeKey)
+      return;
+
     // handle subcategory visibility change
     if (node.parentId) {
       const childId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
