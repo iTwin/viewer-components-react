@@ -17,7 +17,6 @@ import {
 } from "@itwin/components-react";
 import { BeEvent, IDisposable } from "@itwin/core-bentley";
 import { CheckBoxState } from "@itwin/core-react";
-import { NodeKey } from "@itwin/presentation-common";
 import { UnifiedSelectionTreeEventHandler, UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
 import { isPromiseLike } from "../utils/IsPromiseLike";
 
@@ -42,8 +41,8 @@ export type VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: M
  * @alpha
  */
 export interface IVisibilityHandler extends IDisposable {
-  getVisibilityStatus(node: TreeNodeItem, nodeKey: NodeKey): VisibilityStatus | Promise<VisibilityStatus>;
-  changeVisibility(node: TreeNodeItem, nodeKey: NodeKey, shouldDisplay: boolean): Promise<void>;
+  getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus>;
+  changeVisibility(node: TreeNodeItem, shouldDisplay: boolean): Promise<void>;
   onVisibilityChange: BeEvent<VisibilityChangeListener>;
 }
 
@@ -51,7 +50,7 @@ export interface IVisibilityHandler extends IDisposable {
  * Type definition of predicate used to decide if node can be selected.
  * @alpha
  */
-export type VisibilityTreeSelectionPredicate = (key: NodeKey, node: TreeNodeItem) => boolean;
+export type VisibilityTreeSelectionPredicate = (node: TreeNodeItem) => boolean;
 
 /**
  * Parameters for [[VisibilityTreeEventHandler]]
@@ -102,7 +101,7 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     if (!this._selectionPredicate)
       return items;
 
-    return items.filter((item) => this._selectionPredicate!(this.getNodeKey(item), item));
+    return items.filter((item) => this._selectionPredicate!(item));
   }
 
   public override onSelectionModified({ modifications }: TreeSelectionModificationEventArgs) {
@@ -162,7 +161,7 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
             return EMPTY;
           this._isChangingVisibility = true;
           // eslint-disable-next-line deprecation/deprecation
-          return from(this._visibilityHandler.changeVisibility(nodeItem, this.getNodeKey(nodeItem), newState === CheckBoxState.On));
+          return from(this._visibilityHandler.changeVisibility(nodeItem, newState === CheckBoxState.On));
         }, 1),
       );
   }
@@ -214,7 +213,7 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     if (!this._visibilityHandler)
       return { ...node.checkbox, isVisible: false };
 
-    const result = visibilityStatus?.get(node.id) ?? this._visibilityHandler.getVisibilityStatus(node.item, this.getNodeKey(node.item));
+    const result = visibilityStatus?.get(node.id) ?? this._visibilityHandler.getVisibilityStatus(node.item);
 
     if (isPromiseLike(result))
       return this.createCheckboxInfo(await result);
