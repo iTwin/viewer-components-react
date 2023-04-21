@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Added additional prop to GroupCustomUI that supplies the current Group's query during edit mode.",
+      "comment": "Added additional prop to GroupCustomUI that supplies the initial Group's query during edit mode.",
       "type": "minor"
     }
   ],
