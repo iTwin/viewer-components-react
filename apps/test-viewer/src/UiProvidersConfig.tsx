@@ -57,7 +57,7 @@ const configuredUiItems = new Map<string, UiItem>([
       createUiItemsProvider: () => new TreeWidgetUiItemsProvider({
         additionalTrees: [{
           id: "spatial-containment-tree",
-          label: "containment",
+          label: "Spatial Containment",
           render: () => (
             <SampleSpatialTree />
           ),

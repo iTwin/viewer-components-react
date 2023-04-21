@@ -7,7 +7,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import { EmphasizeElements } from "@itwin/core-frontend";
 import { KeySet, NodeKey } from "@itwin/presentation-common";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { TreeModelNode, TreeModelRootNode, TreeModelSource, TreeNodeItem } from "@itwin/components-react";
 import { RelatedElementIdsProvider } from "../RelatedElementIdsProvider";
@@ -75,11 +75,11 @@ export class VisibilityHandler implements IVisibilityHandler {
     if (!nodeKey) {
       return undefined;
     }
-    return this.getVisibilityStatus(node, nodeKey);
+    return this.getVisibilityStatus(node);
   }
 
-  public async getVisibilityStatus(node: TreeNodeItem, nodeKey: NodeKey): Promise<VisibilityStatus> {
-    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
+  public async getVisibilityStatus(node: TreeNodeItem): Promise<VisibilityStatus> {
+    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey((node as PresentationTreeNodeItem).key);
     return this.isItemVisible(instanceId, node);
   }
 
@@ -130,8 +130,8 @@ export class VisibilityHandler implements IVisibilityHandler {
     return { state };
   }
 
-  public async changeVisibility(node: TreeNodeItem, nodeKey: NodeKey, _shouldDisplay: boolean) {
-    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
+  public async changeVisibility(node: TreeNodeItem, _shouldDisplay: boolean) {
+    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey((node as PresentationTreeNodeItem).key);
     return this.manageVisibility(node, instanceId);
   }
   private async manageVisibility(node: TreeNodeItem, instanceId: string) {
