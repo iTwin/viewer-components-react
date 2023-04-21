@@ -8,6 +8,7 @@ import { TreeModelNode } from "@itwin/components-react";
 import { Id64, Id64String } from "@itwin/core-bentley";
 import { CheckBoxState } from "@itwin/core-react";
 import { ECClassGroupingNodeKey, ECInstancesNodeKey, InstanceKey, StandardNodeTypes } from "@itwin/presentation-common";
+import { PresentationTreeNodeItem } from "@itwin/presentation-components";
 
 export const createSimpleTreeModelNode = (id?: string): TreeModelNode => {
   const label = createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Node Label" });
@@ -38,8 +39,8 @@ export const createSimpleTreeModelNode = (id?: string): TreeModelNode => {
   };
 };
 
-export const createSubjectNode = (ids?: Id64String | Id64String[]) => ({
-  __key: createKey("subject", ids ? ids : "subject_id"),
+export const createSubjectNode = (ids?: Id64String | Id64String[]): PresentationTreeNodeItem => ({
+  key: createKey("subject", ids ? ids : "subject_id"),
   id: "subject",
   label: PropertyRecord.fromString("subject"),
   extendedData: {
@@ -47,8 +48,8 @@ export const createSubjectNode = (ids?: Id64String | Id64String[]) => ({
   },
 });
 
-export const createModelNode = () => ({
-  __key: createKey("model", "model_id"),
+export const createModelNode = (): PresentationTreeNodeItem => ({
+  key: createKey("model", "model_id"),
   id: "model",
   label: PropertyRecord.fromString("model"),
   extendedData: {
@@ -56,8 +57,8 @@ export const createModelNode = () => ({
   },
 });
 
-export const createCategoryNode = (parentModelKey?: InstanceKey) => ({
-  __key: createKey("category", "category_id"),
+export const createCategoryNode = (parentModelKey?: InstanceKey): PresentationTreeNodeItem => ({
+  key: createKey("category", "category_id"),
   id: "category",
   parentId: "model",
   label: PropertyRecord.fromString("category"),
@@ -67,14 +68,14 @@ export const createCategoryNode = (parentModelKey?: InstanceKey) => ({
   },
 });
 
-export const createElementClassGroupingNode = (elementIds: Id64String[]) => ({
-  __key: createClassGroupingKey(elementIds),
+export const createElementClassGroupingNode = (elementIds: Id64String[]): PresentationTreeNodeItem => ({
+  key: createClassGroupingKey(elementIds),
   id: "element_class_grouping",
   label: PropertyRecord.fromString("grouping"),
 });
 
-export const createElementNode = (modelId?: Id64String, categoryId?: Id64String) => ({
-  __key: createKey("element", "element_id"),
+export const createElementNode = (modelId?: Id64String, categoryId?: Id64String): PresentationTreeNodeItem => ({
+  key: createKey("element", "element_id"),
   id: "element",
   label: PropertyRecord.fromString("element"),
   extendedData: {
