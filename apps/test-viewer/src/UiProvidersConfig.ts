@@ -6,6 +6,7 @@ import { UiItemsProvider } from "@itwin/appui-react";
 import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
 import { PropertyGridManager, PropertyGridUiItemsProvider } from "@itwin/property-grid-react";
 import { MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
+import { MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -64,6 +65,13 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => MeasureTools.startup(),
       createUiItemsProvider: () => new MeasureToolsUiItemsProvider(),
+    }
+  ],
+  [
+    "map-layers",
+    {
+      initialize: async () => MapLayersUI.initialize(),
+      createUiItemsProvider: () => new MapLayersUiItemsProvider(),
     }
   ]
 ])
