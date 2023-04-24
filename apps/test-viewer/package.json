@@ -28,6 +28,7 @@
     "@itwin/presentation-frontend": "^3.7.1",
     "@itwin/property-grid-react": "workspace:*",
     "@itwin/tree-widget-react": "workspace:*",
+    "@itwin/map-layers": "workspace:*",
     "@itwin/measure-tools-react": "workspace:*",
     "@itwin/web-viewer-react": "4.0.0-dev.7",
     "@itwin/webgl-compatibility": "^3.7.1",
@@ -56,6 +57,9 @@
       "injected": true
     },
     "@itwin/breakdown-trees-react": {
+      "injected": true
+    },
+    "@itwin/map-layers": {
       "injected": true
     }
   },

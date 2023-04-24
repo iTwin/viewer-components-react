@@ -17,6 +17,9 @@ const packages = [{
 }, {
   name: "@itwin/breakdown-trees-react",
   dir: "breakdown-trees"
+}, {
+  name: "@itwin/map-layers",
+  dir: "map-layers"
 }
 ]
 

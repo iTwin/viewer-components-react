@@ -8,6 +8,7 @@ import { PropertyGridManager, PropertyGridUiItemsProvider } from "@itwin/propert
 import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
+import { MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -80,6 +81,13 @@ const configuredUiItems = new Map<string, UiItem>([
         MeasurementActionToolbar.setDefaultActionProvider();
       },
       createUiItemsProvider: () => new MeasureToolsUiItemsProvider(),
+    }
+  ],
+  [
+    "map-layers",
+    {
+      initialize: async () => MapLayersUI.initialize(),
+      createUiItemsProvider: () => new MapLayersUiItemsProvider(),
     }
   ]
 ])
