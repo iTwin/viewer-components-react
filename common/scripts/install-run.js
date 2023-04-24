@@ -9,43 +9,10 @@
 //
 // For more information, see: https://rushjs.io/pages/maintainer/setup_new_repo/
 
-/******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ({
-
-/***/ 679877:
-/*!************************************************!*\
-  !*** ./lib-esnext/utilities/npmrcUtilities.js ***!
-  \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "syncNpmrc": () => (/* binding */ syncNpmrc)
-/* harmony export */ });
-/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! fs */ 657147);
-/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(fs__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! path */ 371017);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
-// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.
-// IMPORTANT - do not use any non-built-in libraries in this file
-
-
-/**
- * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
- * unusable lines from the .npmrc file.
- *
- * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
- * the .npmrc file to provide different authentication tokens for different registry.
- * However, if the environment variable is undefined, it expands to an empty string, which
- * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
- * we'd prefer to skip that line and continue looking in other places such as the user's
- * home directory.
- *
- * @returns
- * The text of the the .npmrc.
- */
+/*---------------------------------------------------------------------------------------------
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 function _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath) {
     logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
     logger.info(`  --> "${targetNpmrcPath}"`);
