@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/map-layers",
-      "comment": "Adjusted map-layers dependencies (now use core packages 3.7.1)",
+      "comment": "",
       "type": "none"
     }
   ],
