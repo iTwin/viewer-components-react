@@ -5,8 +5,8 @@
 import * as React from "react";
 import type { TreeModelChanges, TreeModelNode, TreeModelSource } from "@itwin/components-react";
 import { useDisposable } from "@itwin/core-react";
-import type { VisibilityTreeEventHandlerParams } from "@itwin/appui-react";
-import { VisibilityTreeEventHandler } from "@itwin/appui-react";
+import type { VisibilityTreeEventHandlerParams } from "@itwin/tree-widget-react";
+import { VisibilityTreeEventHandler } from "@itwin/tree-widget-react";
 
 export interface SelectionTrackingUnifiedSelectionTreeEventHandlerParams extends VisibilityTreeEventHandlerParams {
   onNewSelectionSetCallback: (newSelection: TreeModelNode[]) => void;
@@ -15,14 +15,14 @@ export interface SelectionTrackingUnifiedSelectionTreeEventHandlerParams extends
 export class SelectionTrackingUnifiedSelectionTreeEventHandler extends VisibilityTreeEventHandler {
   private _onNewSelectionSetCallback: (newSelection: TreeModelNode[]) => void;
 
-  constructor(params: SelectionTrackingUnifiedSelectionTreeEventHandlerParams){
+  constructor(params: SelectionTrackingUnifiedSelectionTreeEventHandlerParams) {
     super(params);
     this._onNewSelectionSetCallback = params.onNewSelectionSetCallback;
   }
-  private collectSelectedNodes(modelSource: TreeModelSource): TreeModelNode[]{
+  private collectSelectedNodes(modelSource: TreeModelSource): TreeModelNode[] {
     const nodeIterator = modelSource.getModel().iterateTreeModelNodes();
     const selectedNodes: TreeModelNode[] = [];
-    for (const treeNode of nodeIterator){
+    for (const treeNode of nodeIterator) {
       if (treeNode.isSelected)
         selectedNodes.push(treeNode);
     }

@@ -37,7 +37,7 @@ describe("DataLink", () => {
   beforeEach(() => {
     queryStub = sinon.stub(IModelConnection.prototype, "query");
 
-    connectionMock.setup((x) => x.query(Moq.It.isAny(), undefined, defaultRowFormat))
+    connectionMock.setup((x) => x.query(Moq.It.isAny(), undefined, defaultRowFormat)) // eslint-disable-line deprecation/deprecation
       .callback(queryStub)
       .returns(queryResultGenerator);
   });
@@ -81,7 +81,7 @@ describe("DataLink", () => {
 
   it("should run the query again with compositeOverlaps class if compositeCompose returns undefined", async () => {
     connectionMock.reset();
-    connectionMock.setup((x) => x.query(Moq.It.isAny(), undefined, defaultRowFormat))
+    connectionMock.setup((x) => x.query(Moq.It.isAny(), undefined, defaultRowFormat)) // eslint-disable-line deprecation/deprecation
       .callback(queryStub)
       .returns(emptyQueryResultGenerator);
 

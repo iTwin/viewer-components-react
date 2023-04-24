@@ -5,7 +5,9 @@
 import { UiItemsProvider } from "@itwin/appui-react";
 import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
 import { PropertyGridManager, PropertyGridUiItemsProvider } from "@itwin/property-grid-react";
-import { MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
+import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
+import { BreakdownTrees } from "@itwin/breakdown-trees-react";
+import { SampleSpatialTree } from "./components/SampleSpatialTree";
 import { MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 
 export interface UiProvidersConfig {
@@ -49,8 +51,19 @@ const configuredUiItems = new Map<string, UiItem>([
   [
     "tree-widget",
     {
-      initialize: async () => TreeWidget.initialize(),
-      createUiItemsProvider: () => new TreeWidgetUiItemsProvider(),
+      initialize: async () => {
+        await BreakdownTrees.initialize();
+        await TreeWidget.initialize();
+      },
+      createUiItemsProvider: () => new TreeWidgetUiItemsProvider({
+        additionalTrees: [{
+          id: "spatial-containment-tree",
+          label: "Spatial Containment",
+          render: () => (
+            <SampleSpatialTree />
+          ),
+        }]
+      }),
     }
   ],
   [
@@ -63,7 +76,10 @@ const configuredUiItems = new Map<string, UiItem>([
   [
     "measure-tools",
     {
-      initialize: async () => MeasureTools.startup(),
+      initialize: async () => {
+        await MeasureTools.startup();
+        MeasurementActionToolbar.setDefaultActionProvider();
+      },
       createUiItemsProvider: () => new MeasureToolsUiItemsProvider(),
     }
   ],

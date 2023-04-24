@@ -34,8 +34,9 @@
   },
   {
     "policyName": "itwin-breakdown-trees",
-    "definitionName": "individualVersion",
-    "lockedMajor": 0
+    "definitionName": "lockStepVersion",
+    "version": "0.4.0-dev.0",
+    "nextBump": "prerelease"
   },
   {
     "policyName": "grouping-mapping-widget",
