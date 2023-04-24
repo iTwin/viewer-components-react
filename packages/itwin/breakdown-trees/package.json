@@ -1,6 +1,6 @@
 {
   "name": "@itwin/breakdown-trees-react",
-  "version": "0.4.0-dev.0",
+  "version": "0.4.0-dev.1",
   "description": "Package for breakdown trees",
   "keywords": [
     "Bentley",
@@ -114,7 +114,7 @@
     "@itwin/core-frontend": "^3.7.0",
     "@itwin/core-geometry": "^3.7.0",
     "@itwin/core-react": "^4.0.0-dev.17",
-    "@itwin/measure-tools-react": "workspace:^0.11.0-dev.3",
+    "@itwin/measure-tools-react": "workspace:^0.11.0-dev.4",
     "@itwin/presentation-common": "^4.0.0-dev.66",
     "@itwin/presentation-components": "^4.0.0-dev.39",
     "@itwin/presentation-frontend": "^4.0.0-dev.66",
