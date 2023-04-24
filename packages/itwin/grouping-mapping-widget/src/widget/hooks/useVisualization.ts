@@ -45,9 +45,7 @@ export const useVisualization = (shouldVisualize: boolean, iModelConnection: IMo
         }
       },
     );
-    return () => {
-      removeListener();
-    };
+    return removeListener;
   }, [iModelConnection, queryGenerationType, shouldVisualize]);
 
   useEffect(() => {
