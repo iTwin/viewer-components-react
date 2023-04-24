@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "",
-      "type": "none"
+      "comment": "Fixed header not appearing while in ContextCustomUI",
+      "type": "patch"
     }
   ],
   "packageName": "@itwin/grouping-mapping-widget"

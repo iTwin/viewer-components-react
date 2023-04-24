@@ -62,7 +62,7 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
     prefix: props.prefix,
   });
   const hilitedElementsQueryCache = useRef<Map<string, QueryCacheItem>>(new Map());
-  const [hiddenGroupsIds, setHiddenGroupsIds] = useState<string[]>([]);
+  const [hiddenGroupsIds, setHiddenGroupsIds] = useState<Set<string>>(new Set());
   const [showGroupColor, setShowGroupColor] = useState<boolean>(false);
   const [propertiesShowGroup, setPropertiesShowGroup] = useState<boolean>(false);
   const [groups, setGroups] = useState<Group[]>([]);

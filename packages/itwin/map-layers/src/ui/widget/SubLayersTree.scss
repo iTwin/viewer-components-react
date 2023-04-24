@@ -13,6 +13,7 @@
   .core-tree-node {
     >.contents {
       padding-left: 31px;
+
       >.core-image-checkbox {
         top: 5px;
       }
@@ -49,7 +50,7 @@
       }
 
       &:focus {
-        box-shadow: $buic-focus-boxshadow 0px 0px 0px 2px;
+        box-shadow: rgba(var(--iui-color-border-accent), var(--iui-opacity-4)) 0px 0px 0px 2px;
         outline: none;
       }
     }

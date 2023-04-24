@@ -268,7 +268,7 @@ $default-font-size: --iui-font-size-1;
 
     &:focus {
       outline: none;
-      box-shadow: $buic-focus-boxshadow 0px 0px 0px 2px;
+      box-shadow: rgba(var(--iui-color-border-accent), var(--iui-opacity-4)) 0px 0px 0px 2px;
     }
   }
 }

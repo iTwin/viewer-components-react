@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed Select Query Builder reset button. No longer fails to visualize. ",
+      "comment": "Groups visualization has been optimized.",
       "type": "patch"
     }
   ],
