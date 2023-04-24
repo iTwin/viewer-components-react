@@ -30,6 +30,7 @@ export const GroupMenuActions = ({
   setShowDeleteModal,
 }: GroupMenuActionsProps) => {
   const { iModelId } = useGroupingMappingApiConfig();
+
   const onModify = useCallback(async (group: Group, type: string) => {
     if (!onClickGroupModify) return;
     onClickGroupModify(group, type);
@@ -82,7 +83,8 @@ export const GroupMenuActions = ({
                   ) {
                     onClickRenderContextCustomUI(
                       p.uiComponent,
-                      group
+                      group,
+                      p.displayLabel
                     );
                   }
                   if (p.onClick) {
