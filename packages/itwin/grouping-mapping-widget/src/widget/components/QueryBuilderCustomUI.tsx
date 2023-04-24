@@ -5,6 +5,7 @@
 import React from "react";
 import type { GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
 import { EmptyMessage } from "./utils";
+import type { Group } from "@itwin/insights-client";
 
 export interface QueryBuilderCustomUIProps {
   queryGenerationType: string;
@@ -12,6 +13,7 @@ export interface QueryBuilderCustomUIProps {
   isUpdating: boolean;
   resetView: () => Promise<void>;
   setQuery: (query: string) => void;
+  group?: Group;
 }
 
 export const QueryBuilderCustomUI = ({
@@ -20,6 +22,7 @@ export const QueryBuilderCustomUI = ({
   isUpdating,
   resetView,
   setQuery,
+  group,
 }: QueryBuilderCustomUIProps) => {
   if (queryGenerationType && queryGenerationType.length > 0) {
     const selectedCustomUI = groupUIs.find((e) => e.name === queryGenerationType);
@@ -28,6 +31,7 @@ export const QueryBuilderCustomUI = ({
         updateQuery: setQuery,
         isUpdating,
         resetView,
+        initialEditModeQuery: group?.query,
       });
     }
   }
