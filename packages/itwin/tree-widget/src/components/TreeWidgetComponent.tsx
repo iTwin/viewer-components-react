@@ -64,20 +64,18 @@ function useActiveTrees(treeDefinitions: TreeDefinition[]) {
 }
 
 async function getActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnection): Promise<SelectableContentDefinition[]> {
-  const activeTrees: SelectableContentDefinition[] = [];
-  for (const treeDef of treeDefinitions) {
+  const handleDefinition = async (treeDef: TreeDefinition) => {
     if (treeDef.shouldShow !== undefined && !(await treeDef.shouldShow(imodel))) {
-      continue;
+      return undefined;
     }
-
-    activeTrees.push({
+    return {
       id: treeDef.id,
       label: treeDef.getLabel(),
       render: treeDef.render,
-    });
-  }
+    };
+  };
 
-  return activeTrees;
+  return (await Promise.all(treeDefinitions.map(handleDefinition))).filter((tree) => tree !== undefined) as SelectableContentDefinition[];
 }
 
 function getSelectableContentProps(trees?: SelectableContentDefinition[]): SelectableContentProps {
@@ -98,7 +96,7 @@ function getSelectableContentProps(trees?: SelectableContentDefinition[]): Selec
 
   if (trees.length === 0) {
     return {
-      defaultSelectedContentId: "no-tress",
+      defaultSelectedContentId: "no-trees",
       children: [{
         id: "no-trees",
         label: "",
