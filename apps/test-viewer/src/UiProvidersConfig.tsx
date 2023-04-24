@@ -51,8 +51,8 @@ const configuredUiItems = new Map<string, UiItem>([
     "tree-widget",
     {
       initialize: async () => {
-        BreakdownTrees.initialize();
-        TreeWidget.initialize();
+        await BreakdownTrees.initialize();
+        await TreeWidget.initialize();
       },
       createUiItemsProvider: () => new TreeWidgetUiItemsProvider({
         additionalTrees: [{
@@ -76,7 +76,7 @@ const configuredUiItems = new Map<string, UiItem>([
     "measure-tools",
     {
       initialize: async () => {
-        MeasureTools.startup();
+        await MeasureTools.startup();
         MeasurementActionToolbar.setDefaultActionProvider();
       },
       createUiItemsProvider: () => new MeasureToolsUiItemsProvider(),
