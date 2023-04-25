@@ -7,7 +7,7 @@ import "../VisibilityTreeBase.scss";
 import * as React from "react";
 import { ControlledTree, SelectionMode, TreeNodeItem, useTreeModel } from "@itwin/components-react";
 import { IModelConnection, Viewport } from "@itwin/core-frontend";
-import { useDisposable, useOptionalDisposable } from "@itwin/core-react";
+import { useDisposable } from "@itwin/core-react";
 import { NodeKey, Ruleset } from "@itwin/presentation-common";
 import { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
@@ -49,7 +49,7 @@ export interface ModelsTreeProps {
   /**
    * Active view used to determine and control visibility
    */
-  activeView?: Viewport;
+  activeView: Viewport;
   /**
    * Ref to the root HTML element used by this component
    */
@@ -174,31 +174,26 @@ function useModelsTreeNodeLoader(props: ModelsTreeProps) {
 function useVisibilityHandler(
   rulesetId: string,
   iModel: IModelConnection,
-  activeView?: Viewport,
+  activeView: Viewport,
   visibilityHandler?: ModelsVisibilityHandler,
   filteredDataProvider?: IFilteredPresentationTreeDataProvider,
   hierarchyAutoUpdateEnabled?: boolean,
 ) {
   const subjectModelIdsCache = React.useMemo(() => new SubjectModelIdsCache(iModel), [iModel]);
-  const defaultVisibilityHandler = useOptionalDisposable(React.useCallback(() => {
-    if (activeView)
-      return createVisibilityHandler(rulesetId, activeView, subjectModelIdsCache, hierarchyAutoUpdateEnabled);
-    return undefined;
-  }, [rulesetId, activeView, subjectModelIdsCache, hierarchyAutoUpdateEnabled]));
 
-  const handler = visibilityHandler ?? defaultVisibilityHandler;
+  const defaultVisibilityHandler = useDisposable(React.useCallback(
+    () =>
+    // istanbul ignore next
+      visibilityHandler ?? new ModelsVisibilityHandler({ rulesetId, viewport: activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache }),
+    [rulesetId, activeView, subjectModelIdsCache, hierarchyAutoUpdateEnabled, visibilityHandler])
+  );
 
   React.useEffect(() => {
-    handler && handler.setFilteredDataProvider(filteredDataProvider);
-  }, [handler, filteredDataProvider]);
+    defaultVisibilityHandler && defaultVisibilityHandler.setFilteredDataProvider(filteredDataProvider);
+  }, [defaultVisibilityHandler, filteredDataProvider]);
 
-  return handler;
+  return defaultVisibilityHandler;
 }
-
-const createVisibilityHandler = (rulesetId: string, activeView: Viewport, subjectModelIdsCache: SubjectModelIdsCache, hierarchyAutoUpdateEnabled?: boolean): ModelsVisibilityHandler | undefined => {
-  // istanbul ignore next
-  return new ModelsVisibilityHandler({ rulesetId, viewport: activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache });
-};
 
 const isFilteredDataProvider = (dataProvider: IPresentationTreeDataProvider | IFilteredPresentationTreeDataProvider): dataProvider is IFilteredPresentationTreeDataProvider => {
   const filteredProvider = dataProvider as IFilteredPresentationTreeDataProvider;

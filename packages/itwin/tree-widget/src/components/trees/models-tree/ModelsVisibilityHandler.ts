@@ -6,13 +6,15 @@
 import { TreeNodeItem } from "@itwin/components-react";
 import { BeEvent, Id64String } from "@itwin/core-bentley";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
-import { IModelConnection, PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
 import { ECClassGroupingNodeKey, GroupingNodeKey, Keys, KeySet, NodeKey } from "@itwin/presentation-common";
 import { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import { CachingElementIdsContainer } from "./Utils";
+import { ModelsTreeHeaderButtonProps } from "./ModelsTreeComponent";
+import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 
 /**
  * Visibility tree node types.
@@ -71,6 +73,10 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     }
   }
 
+  public get viewport() {
+    return this._props.viewport;
+  }
+
   public dispose() {
     this._listeners.forEach((remove) => remove());
     clearTimeout(this._pendingVisibilityChange);
@@ -100,9 +106,11 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   public static isSubjectNode(node: TreeNodeItem) {
     return node.extendedData && node.extendedData.isSubject;
   }
+
   public static isModelNode(node: TreeNodeItem) {
     return node.extendedData && node.extendedData.isModel;
   }
+
   public static isCategoryNode(node: TreeNodeItem) {
     return node.extendedData && node.extendedData.isCategory;
   }
@@ -578,3 +586,58 @@ const createTooltip = (status: "visible" | "hidden" | "disabled", tooltipStringI
   const tooltipString = TreeWidget.translate(tooltipStringId);
   return `${statusString}: ${tooltipString}`;
 };
+
+export async function showAllModels(props: ModelsTreeHeaderButtonProps) {
+  await props.viewport.addViewedModels(props.models.map((model) => model.id));
+  props.viewport.clearNeverDrawn();
+  props.viewport.clearAlwaysDrawn();
+  await toggleAllCategories(
+    IModelApp.viewManager,
+    props.viewport.iModel,
+    true,
+    props.viewport,
+    false,
+  );
+}
+
+export async function hideAllModels(props: ModelsTreeHeaderButtonProps) {
+  props.viewport.changeModelDisplay(
+    props.models.map((model) => model.id),
+    false
+  );
+}
+
+export async function invertAllModels(props: ModelsTreeHeaderButtonProps) {
+  const notViewedModels: string[] = [];
+  const models: string[] = [];
+  props.models.forEach((model) => {
+    if (props.viewport.viewsModel(model.id)) models.push(model.id);
+    else notViewedModels.push(model.id);
+  });
+  await props.viewport.addViewedModels(notViewedModels);
+  props.viewport.changeModelDisplay(models, false);
+}
+
+export async function view2DModels(models2d: string[], is2dToggleActive: boolean, viewport: Viewport) {
+  // istanbul ignore if
+  if (!models2d)
+    return;
+  if (is2dToggleActive)
+    viewport.changeModelDisplay(models2d, false);
+  else
+    await viewport.addViewedModels(models2d);
+}
+
+export async function view3DModels(models3d: string[], is3dToggleActive: boolean, viewport: Viewport) {
+  // istanbul ignore if
+  if (!models3d)
+    return;
+  if (is3dToggleActive)
+    viewport.changeModelDisplay(models3d, false);
+  else
+    await viewport.addViewedModels(models3d);
+}
+
+export function areAllModelsVisible(models: string[], viewport: Viewport) {
+  return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
+}

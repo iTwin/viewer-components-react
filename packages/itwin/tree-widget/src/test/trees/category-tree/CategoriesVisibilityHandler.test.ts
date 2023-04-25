@@ -15,8 +15,9 @@ import {
 import { ECInstancesNodeKey, StandardNodeTypes } from "@itwin/presentation-common";
 import { renderHook } from "@testing-library/react-hooks";
 import {
-  CategoryInfo, CategoryVisibilityHandler, CategoryVisibilityHandlerParams, useCategories,
+  CategoryInfo, CategoryVisibilityHandler, CategoryVisibilityHandlerParams, hideAllCategories, invertAllCategories, showAllCategories, useCategories,
 } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
 
 const createKey = (id: Id64String): ECInstancesNodeKey => {
   return {
@@ -32,18 +33,25 @@ describe("CategoryVisibilityHandler", () => {
   const imodelMock = moq.Mock.ofType<IModelConnection>();
   const viewManagerMock = moq.Mock.ofType<ViewManager>();
   const viewStateMock = moq.Mock.ofType<ViewState>();
-
-  const categoryNode = { id: "CategoryId", label: PropertyRecord.fromString("category-node"), autoExpand: true };
-  const subcategoryNode = { id: "SubCategoryId", label: PropertyRecord.fromString("subcategory-node"), parentId: "CategoryId" };
-  let categoryKey: ECInstancesNodeKey;
-  let subcategoryKey: ECInstancesNodeKey;
-  (categoryNode as any).__key = categoryKey = createKey(categoryNode.id);
-  (subcategoryNode as any).__key = subcategoryKey = createKey(subcategoryNode.id);
+  const iModelCategoriesMock = moq.Mock.ofType<IModelConnection.Categories>();
 
   const categories: CategoryInfo[] = [{
     categoryId: "CategoryId",
-    subCategoryIds: ["SubCategoryId"],
+    subCategoryIds: ["SubCategoryId1", "SubCategoryId2"],
   }];
+
+  const filteredCategories: CategoryInfo[] = [{
+    categoryId: "FilteredCategoryId",
+    subCategoryIds: ["FilteredSubCategoryId1", "FilteredSubCategoryId2"],
+  }];
+
+  const categoryNode = { id: categories[0].categoryId, label: PropertyRecord.fromString("category-node"), autoExpand: true };
+  const subCategoryNodes = [{ id: categories[0].subCategoryIds![0], label: PropertyRecord.fromString("subcategory-node"), parentId: categories[0].categoryId }, { id: categories[0].subCategoryIds![1], label: PropertyRecord.fromString("subcategory-node"), parentId: categories[0].categoryId }];
+  let categoryKey: ECInstancesNodeKey;
+  const subcategoryKeys: ECInstancesNodeKey[] = new Array(2);
+  (categoryNode as any).__key = categoryKey = createKey(categoryNode.id);
+  (subCategoryNodes[0] as any).__key = subcategoryKeys[0] = createKey(subCategoryNodes[0].id);
+  (subCategoryNodes[1] as any).__key = subcategoryKeys[1] = createKey(subCategoryNodes[1].id);
 
   beforeEach(() => {
     imodelMock.reset();
@@ -87,7 +95,7 @@ describe("CategoryVisibilityHandler", () => {
     const props: CategoryVisibilityHandlerParams = {
       viewManager: partialProps.viewManager || viewManagerMock.object,
       imodel: partialProps.imodel || imodelMock.object,
-      activeView: partialProps.activeView,
+      activeView: partialProps.activeView ?? mockViewport().object,
       categories: partialProps.categories || [],
       allViewports: partialProps.allViewports,
     };
@@ -124,8 +132,8 @@ describe("CategoryVisibilityHandler", () => {
     it("calls enableSubcategoryCategory", async () => {
       await using(createHandler({ activeView: mockViewport().object, categories }), async (handler) => {
         const enableSubCategorySpy = sinon.stub(handler, "enableSubCategory");
-        await handler.changeVisibility(subcategoryNode, subcategoryKey, false);
-        expect(enableSubCategorySpy).to.be.calledWith(subcategoryNode.id, false);
+        await handler.changeVisibility(subCategoryNodes[0], subcategoryKeys[0], false);
+        expect(enableSubCategorySpy).to.be.calledWith(subCategoryNodes[0].id, false);
       });
     });
 
@@ -133,9 +141,9 @@ describe("CategoryVisibilityHandler", () => {
       await using(createHandler({ activeView: mockViewport().object, categories }), async (handler) => {
         const enableCategorySpy = sinon.stub(handler, "enableCategory");
         const enableSubCategorySpy = sinon.stub(handler, "enableSubCategory");
-        await handler.changeVisibility(subcategoryNode, subcategoryKey, true);
+        await handler.changeVisibility(subCategoryNodes[0], subcategoryKeys[0], true);
         expect(enableCategorySpy).to.be.calledWith(["CategoryId"], true, false);
-        expect(enableSubCategorySpy).to.be.calledWith(subcategoryNode.id, true);
+        expect(enableSubCategorySpy).to.be.calledWith(subCategoryNodes[0].id, true);
         expect(enableCategorySpy.calledBefore(enableSubCategorySpy)).to.be.true;
       });
     });
@@ -155,8 +163,8 @@ describe("CategoryVisibilityHandler", () => {
     it("calls getSubCategoryVisibility", () => {
       using(createHandler({ categories }), (handler) => {
         const spy = sinon.stub(handler, "getSubCategoryVisibility");
-        handler.getVisibilityStatus(subcategoryNode, subcategoryKey);
-        expect(spy).to.be.calledWith(subcategoryNode.id);
+        handler.getVisibilityStatus(subCategoryNodes[0], subcategoryKeys[0]);
+        expect(spy).to.be.calledWith(subCategoryNodes[0].id);
       });
     });
 
@@ -200,7 +208,7 @@ describe("CategoryVisibilityHandler", () => {
 
     it("returns 'hidden' if active viewport is not supplied", () => {
       using(createHandler({ categories }), (handler) => {
-        expect(handler.getSubCategoryVisibility("SubCategoryId")).to.be.eq("hidden");
+        expect(handler.getSubCategoryVisibility("SubCategoryId1")).to.be.eq("hidden");
       });
     });
 
@@ -214,25 +222,25 @@ describe("CategoryVisibilityHandler", () => {
       const viewMock = mockViewport({ viewState: viewStateMock.object });
       viewStateMock.setup((x) => x.viewsCategory("CategoryId")).returns(() => false);
       using(createHandler({ activeView: viewMock.object, categories }), (handler) => {
-        expect(handler.getSubCategoryVisibility("SubCategoryId")).to.be.eq("hidden");
+        expect(handler.getSubCategoryVisibility("SubCategoryId1")).to.be.eq("hidden");
       });
     });
 
     it("returns 'hidden' if subCategory is not visible in view", () => {
       const viewMock = mockViewport({ viewState: viewStateMock.object });
       viewStateMock.setup((x) => x.viewsCategory("CategoryId")).returns(() => true);
-      viewMock.setup((x) => x.isSubCategoryVisible("SubCategoryId")).returns(() => false);
+      viewMock.setup((x) => x.isSubCategoryVisible("SubCategoryId1")).returns(() => false);
       using(createHandler({ activeView: viewMock.object, categories }), (handler) => {
-        expect(handler.getSubCategoryVisibility("SubCategoryId")).to.be.eq("hidden");
+        expect(handler.getSubCategoryVisibility("SubCategoryId1")).to.be.eq("hidden");
       });
     });
 
     it("returns 'visible' if subCategory and parent are visible in view", () => {
       const viewMock = mockViewport({ viewState: viewStateMock.object });
       viewStateMock.setup((x) => x.viewsCategory("CategoryId")).returns(() => true);
-      viewMock.setup((x) => x.isSubCategoryVisible("SubCategoryId")).returns(() => true);
+      viewMock.setup((x) => x.isSubCategoryVisible("SubCategoryId1")).returns(() => true);
       using(createHandler({ activeView: viewMock.object, categories }), (handler) => {
-        expect(handler.getSubCategoryVisibility("SubCategoryId")).to.be.eq("visible");
+        expect(handler.getSubCategoryVisibility("SubCategoryId1")).to.be.eq("visible");
       });
     });
 
@@ -276,6 +284,164 @@ describe("CategoryVisibilityHandler", () => {
         await new Promise((resolve) => setTimeout(resolve));
         expect(spy).to.be.calledOnce;
       });
+    });
+  });
+
+  describe("showAllCategories", () => {
+
+    it("Calls enableCategory", async () => {
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      await showAllCategories({ categories, viewport: mockViewport().object });
+      expect(enableCategorySpy.args[0][2][0]).to.be.eq("CategoryId");
+      expect(enableCategorySpy.args[0][3]).to.be.eq(true);
+    });
+
+    it("Calls enableCategory with filtered categories when filtered categories are provided", async () => {
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      await showAllCategories({ categories, filteredCategories, viewport: mockViewport().object });
+      expect(enableCategorySpy.args[0][2][0]).to.be.eq("FilteredCategoryId");
+      expect(enableCategorySpy.args[0][3]).to.be.eq(true);
+    });
+  });
+
+  describe("hideAllCategories", () => {
+
+    it("Calls enableCateogry", async () => {
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      await hideAllCategories({ categories, viewport: mockViewport().object });
+      expect(enableCategorySpy.args[0][2][0]).to.be.eq("CategoryId");
+      expect(enableCategorySpy.args[0][3]).to.be.eq(false);
+    });
+
+    it("Calls enableCategory with filtered categories when filtered categories are provided", async () => {
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      await hideAllCategories({ categories, filteredCategories, viewport: mockViewport().object });
+      expect(enableCategorySpy.args[0][2][0]).to.be.eq("FilteredCategoryId");
+      expect(enableCategorySpy.args[0][3]).to.be.eq(false);
+    });
+  });
+
+  describe("invertAllCategories", () => {
+    beforeEach(() => {
+      iModelCategoriesMock.reset();
+      imodelMock.setup((x) => x.categories).returns(() => iModelCategoriesMock.object);
+    });
+
+    it("Enables disabled category", async () => {
+      viewStateMock.setup((x) => x.viewsCategory("CategoryId")).returns(() => false);
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      const enableSubCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableSubCategory");
+      await invertAllCategories({ categories, viewport: mockViewport({ viewState: viewStateMock.object }).object });
+      expect(enableCategorySpy.args[0][2].length).to.be.eq(0);
+      expect(enableCategorySpy.args[0][3]).to.be.eq(false);
+      expect(enableCategorySpy.args[1][2][0]).to.be.eq("CategoryId");
+      expect(enableCategorySpy.args[1][3]).to.be.eq(true);
+      expect(enableSubCategorySpy).to.be.not.called;
+    });
+
+    it("Disables enabled category when all subCategories are enabled", async () => {
+      viewStateMock.setup((x) => x.viewsCategory("CategoryId")).returns(() => true);
+      const viewportMock = mockViewport({ viewState: viewStateMock.object });
+      viewportMock.setup((x) => x.isSubCategoryVisible("SubCategoryId1")).returns(() => true);
+      viewportMock.setup((x) => x.isSubCategoryVisible("SubCategoryId2")).returns(() => true);
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      const enableSubCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableSubCategory");
+      await invertAllCategories({ categories, viewport: viewportMock.object });
+      expect(enableCategorySpy.args[0][2][0]).to.be.eq("CategoryId");
+      expect(enableCategorySpy.args[0][3]).to.be.eq(false);
+      expect(enableCategorySpy.args[1][2].length).to.be.eq(0);
+      expect(enableCategorySpy.args[1][3]).to.be.eq(true);
+      expect(enableSubCategorySpy).to.be.not.called;
+    });
+
+    it("Inverts subcategories when category has at least one disabled subcategory", async () => {
+      viewStateMock.setup((x) => x.viewsCategory("CategoryId")).returns(() => true);
+      const viewportMock = mockViewport({ viewState: viewStateMock.object });
+      viewportMock.setup((x) => x.isSubCategoryVisible("SubCategoryId1")).returns(() => true);
+      viewportMock.setup((x) => x.isSubCategoryVisible("SubCategoryId2")).returns(() => false);
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      const enableSubCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableSubCategory");
+      await invertAllCategories({ categories, viewport: viewportMock.object });
+      expect(enableCategorySpy.args[0][2].length).to.be.eq(0);
+      expect(enableCategorySpy.args[0][3]).to.be.eq(false);
+      expect(enableCategorySpy.args[1][2].length).to.be.eq(0);
+      expect(enableCategorySpy.args[1][3]).to.be.eq(true);
+      expect(enableSubCategorySpy.args[0][1]).to.be.eq("SubCategoryId1");
+      expect(enableSubCategorySpy.args[0][2]).to.be.eq(false);
+      expect(enableSubCategorySpy.args[1][1]).to.be.eq("SubCategoryId2");
+      expect(enableSubCategorySpy.args[1][2]).to.be.eq(true);
+    });
+
+    it("Disables category when category doesn't have any subCategories", async () => {
+      viewStateMock.setup((x) => x.viewsCategory("CategoryWithoutSubCategoriesId")).returns(() => true);
+      const categoryWithoutSubCategories: CategoryInfo[] = [{ categoryId: "CategoryWithoutSubCategoriesId" }];
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      const enableSubCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableSubCategory");
+      await invertAllCategories({ categories: categoryWithoutSubCategories, viewport: mockViewport({ viewState: viewStateMock.object }).object });
+      expect(enableCategorySpy.args[0][2][0]).to.be.eq("CategoryWithoutSubCategoriesId");
+      expect(enableCategorySpy.args[0][3]).to.be.eq(false);
+      expect(enableCategorySpy.args[1][2].length).to.be.eq(0);
+      expect(enableCategorySpy.args[1][3]).to.be.eq(true);
+      expect(enableSubCategorySpy).to.not.be.called;
+    });
+
+    it("Enables disabled filtered category", async () => {
+      viewStateMock.setup((x) => x.viewsCategory("FilteredCategoryId")).returns(() => false);
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      const enableSubCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableSubCategory");
+      await invertAllCategories({ categories, filteredCategories, viewport: mockViewport({ viewState: viewStateMock.object }).object });
+      expect(enableCategorySpy.args[0][2].length).to.be.eq(0);
+      expect(enableCategorySpy.args[0][3]).to.be.eq(false);
+      expect(enableCategorySpy.args[1][2][0]).to.be.eq("FilteredCategoryId");
+      expect(enableCategorySpy.args[1][3]).to.be.eq(true);
+      expect(enableSubCategorySpy).to.be.not.called;
+    });
+
+    it("Disables enabled filtered category when all subCategories are enabled", async () => {
+      viewStateMock.setup((x) => x.viewsCategory("FilteredCategoryId")).returns(() => true);
+      const viewportMock = mockViewport({ viewState: viewStateMock.object });
+      viewportMock.setup((x) => x.isSubCategoryVisible("FilteredSubCategoryId1")).returns(() => true);
+      viewportMock.setup((x) => x.isSubCategoryVisible("FilteredSubCategoryId2")).returns(() => true);
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      const enableSubCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableSubCategory");
+      await invertAllCategories({ categories, filteredCategories, viewport: viewportMock.object });
+      expect(enableCategorySpy.args[0][2][0]).to.be.eq("FilteredCategoryId");
+      expect(enableCategorySpy.args[0][3]).to.be.eq(false);
+      expect(enableCategorySpy.args[1][2].length).to.be.eq(0);
+      expect(enableCategorySpy.args[1][3]).to.be.eq(true);
+      expect(enableSubCategorySpy).to.be.not.called;
+    });
+
+    it("Inverts filtered subcategories when filteredcategory has at least one disabled subcategory", async () => {
+      viewStateMock.setup((x) => x.viewsCategory("FilteredCategoryId")).returns(() => true);
+      const viewportMock = mockViewport({ viewState: viewStateMock.object });
+      viewportMock.setup((x) => x.isSubCategoryVisible("FilteredSubCategoryId1")).returns(() => true);
+      viewportMock.setup((x) => x.isSubCategoryVisible("FilteredSubCategoryId2")).returns(() => false);
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      const enableSubCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableSubCategory");
+      await invertAllCategories({ categories, filteredCategories, viewport: viewportMock.object });
+      expect(enableCategorySpy.args[0][2].length).to.be.eq(0);
+      expect(enableCategorySpy.args[0][3]).to.be.eq(false);
+      expect(enableCategorySpy.args[1][2].length).to.be.eq(0);
+      expect(enableCategorySpy.args[1][3]).to.be.eq(true);
+      expect(enableSubCategorySpy.args[0][1]).to.be.eq("FilteredSubCategoryId1");
+      expect(enableSubCategorySpy.args[0][2]).to.be.eq(false);
+      expect(enableSubCategorySpy.args[1][1]).to.be.eq("FilteredSubCategoryId2");
+      expect(enableSubCategorySpy.args[1][2]).to.be.eq(true);
+    });
+
+    it("Disables filtered category when category doesn't have any subCategories", async () => {
+      viewStateMock.setup((x) => x.viewsCategory("FilteredCategoryWithoutSubCategoriesId")).returns(() => true);
+      const viewportMock = mockViewport({ viewState: viewStateMock.object });
+      const categoryWithoutSubCategories: CategoryInfo[] = [{ categoryId: "FilteredCategoryWithoutSubCategoriesId" }];
+      const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+      const enableSubCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableSubCategory");
+      await invertAllCategories({ categories, filteredCategories: categoryWithoutSubCategories, viewport: viewportMock.object });
+      expect(enableCategorySpy.args[0][2][0]).to.be.eq("FilteredCategoryWithoutSubCategoriesId");
+      expect(enableCategorySpy.args[0][3]).to.be.eq(false);
+      expect(enableCategorySpy.args[1][2].length).to.be.eq(0);
+      expect(enableCategorySpy.args[1][3]).to.be.eq(true);
+      expect(enableSubCategorySpy).to.not.be.called;
     });
   });
 });

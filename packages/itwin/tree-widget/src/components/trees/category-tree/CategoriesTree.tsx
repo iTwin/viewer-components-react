@@ -33,7 +33,7 @@ export interface CategoryTreeProps {
   /** Flag for accommodating all viewports */
   allViewports?: boolean;
   /** Active viewport */
-  activeView?: Viewport;
+  activeView: Viewport;
   /**
    * An IModel to pull data from
    */
@@ -126,7 +126,7 @@ export function CategoryTree(props: CategoryTreeProps) {
   );
 }
 
-function useCategoryVisibilityHandler(viewManager: ViewManager, imodel: IModelConnection, categories: CategoryInfo[], activeView?: Viewport, allViewports?: boolean, visibilityHandler?: CategoryVisibilityHandler) {
+function useCategoryVisibilityHandler(viewManager: ViewManager, imodel: IModelConnection, categories: CategoryInfo[], activeView: Viewport, allViewports?: boolean, visibilityHandler?: CategoryVisibilityHandler) {
   return useDisposable(React.useCallback(
     () =>
       // istanbul ignore next

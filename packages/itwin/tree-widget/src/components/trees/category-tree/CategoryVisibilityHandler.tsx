@@ -6,10 +6,11 @@
 import * as React from "react";
 import { TreeNodeItem, useAsyncValue } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport } from "../CategoriesVisibilityUtils";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
+import { CategoriesTreeHeaderButtonProps } from "./CategoriesTreeComponent";
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
@@ -37,7 +38,7 @@ export interface CategoryVisibilityHandlerParams {
   viewManager: ViewManager;
   imodel: IModelConnection;
   categories: CategoryInfo[];
-  activeView?: Viewport;
+  activeView: Viewport;
   allViewports?: boolean;
 }
 
@@ -46,7 +47,7 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
   private _viewManager: ViewManager;
   private _imodel: IModelConnection;
   private _pendingVisibilityChange: any | undefined;
-  private _activeView?: Viewport;
+  private _activeView: Viewport;
   private _useAllViewports: boolean;
   private _categories: CategoryInfo[];
 
@@ -57,17 +58,13 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     // istanbul ignore next
     this._useAllViewports = params.allViewports ?? false;
     this._categories = params.categories;
-    if (this._activeView) {
-      this._activeView.onDisplayStyleChanged.addListener(this.onDisplayStyleChanged);
-      this._activeView.onViewedCategoriesChanged.addListener(this.onViewedCategoriesChanged);
-    }
+    this._activeView.onDisplayStyleChanged.addListener(this.onDisplayStyleChanged);
+    this._activeView.onViewedCategoriesChanged.addListener(this.onViewedCategoriesChanged);
   }
 
   public dispose() {
-    if (this._activeView) {
-      this._activeView.onDisplayStyleChanged.removeListener(this.onDisplayStyleChanged);
-      this._activeView.onViewedCategoriesChanged.removeListener(this.onViewedCategoriesChanged);
-    }
+    this._activeView.onDisplayStyleChanged.removeListener(this.onDisplayStyleChanged);
+    this._activeView.onViewedCategoriesChanged.removeListener(this.onViewedCategoriesChanged);
     clearTimeout(this._pendingVisibilityChange);
   }
 
@@ -99,7 +96,7 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
 
   public getSubCategoryVisibility(id: string) {
     const parentItem = this.getParent(id);
-    if (!parentItem || !this._activeView)
+    if (!parentItem)
       return "hidden";
 
     const isVisible = this._activeView.view.viewsCategory(parentItem.categoryId) && this._activeView.isSubCategoryVisible(id);
@@ -107,8 +104,6 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
   }
 
   public getCategoryVisibility(id: string) {
-    if (!this._activeView)
-      return "hidden";
     return this._activeView.view.viewsCategory(id) ? "visible" : "hidden";
   }
 
@@ -155,4 +150,78 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
   public enableSubCategory(key: string, enabled: boolean) {
     enableSubCategory(this._viewManager, key, enabled, this._useAllViewports);
   }
+}
+
+export async function showAllCategories(props: CategoriesTreeHeaderButtonProps) {
+  await enableCategory(
+    IModelApp.viewManager,
+    props.viewport.iModel,
+    (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
+    true,
+    true
+  );
+}
+
+export async function hideAllCategories(props: CategoriesTreeHeaderButtonProps) {
+  await enableCategory(
+    IModelApp.viewManager,
+    props.viewport.iModel,
+    (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
+    false,
+    true
+  );
+}
+
+export async function invertAllCategories(props: CategoriesTreeHeaderButtonProps) {
+  const ids = props.filteredCategories ?? props.categories;
+  const enabled: string[] = [];
+  const disabled: string[] = [];
+  const enabledSubCategories: string[] = [];
+  const disabledSubCategories: string[] = [];
+
+  for (const category of ids) {
+    if (!props.viewport.view.viewsCategory(category.categoryId)) {
+      disabled.push(category.categoryId);
+      continue;
+    }
+    // First, we need to check if at least one subcategory is disabled. If it is true, then only subcategories should change display, not categories.
+    if (category.subCategoryIds?.some((subCategory) => !props.viewport.isSubCategoryVisible(subCategory))) {
+      for (const subCategory of category.subCategoryIds)
+        props.viewport.isSubCategoryVisible(subCategory) ? enabledSubCategories.push(subCategory) : disabledSubCategories.push(subCategory);
+    } else{
+      enabled.push(category.categoryId);
+    }
+  }
+
+  // Disable enabled
+  enabledSubCategories.forEach((subCategory) => enableSubCategory(
+    IModelApp.viewManager,
+    subCategory,
+    false,
+    true
+  ));
+
+  await enableCategory(
+    IModelApp.viewManager,
+    props.viewport.iModel,
+    enabled,
+    false,
+    true
+  );
+
+  // Enable disabled
+  disabledSubCategories.forEach((subCategory) => enableSubCategory(
+    IModelApp.viewManager,
+    subCategory,
+    true,
+    true
+  ));
+
+  await enableCategory(
+    IModelApp.viewManager,
+    props.viewport.iModel,
+    disabled,
+    true,
+    true
+  );
 }

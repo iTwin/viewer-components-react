@@ -14,11 +14,13 @@ import {
 } from "@itwin/core-frontend";
 import { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { IModelHierarchyChangeEventArgs, Presentation, PresentationManager } from "@itwin/presentation-frontend";
-import { ModelsVisibilityHandler, ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { areAllModelsVisible, hideAllModels, invertAllModels, ModelsVisibilityHandler, ModelsVisibilityHandlerProps, showAllModels, view2DModels, view3DModels } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { CachingElementIdsContainer } from "../../../components/trees/models-tree/Utils";
 import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
+import { ModelInfo } from "../../../tree-widget-react";
+import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
 
 describe("ModelsVisibilityHandler", () => {
 
@@ -127,6 +129,8 @@ describe("ModelsVisibilityHandler", () => {
 
   };
 
+  const modelsInfo: ModelInfo[] = [{ id: "ModelId1"}, { id: "ModelId2" }];
+
   describe("constructor", () => {
 
     it("should subscribe for viewport change events", () => {
@@ -147,7 +151,6 @@ describe("ModelsVisibilityHandler", () => {
       createHandler({ viewport: mockViewport().object, hierarchyAutoUpdateEnabled: true });
       expect(changeEvent.numberOfListeners).to.eq(1);
     });
-
   });
 
   describe("dispose", () => {
@@ -1572,6 +1575,94 @@ describe("ModelsVisibilityHandler", () => {
 
     });
 
+  });
+
+  describe("show all", () => {
+
+    it("Calls expected functions", async () => {
+      const vpMock = mockViewport();
+      const toggleAllCategoriesSpy = sinon.stub(categoriesVisibilityUtils, "toggleAllCategories");
+      await showAllModels({ models: modelsInfo, viewport: vpMock.object });
+      vpMock.verify(async (x) => x.addViewedModels(modelsInfo.map((model) => model.id)), moq.Times.once());
+      vpMock.verify((x) => x.clearNeverDrawn(), moq.Times.once());
+      vpMock.verify((x) => x.clearNeverDrawn(), moq.Times.once());
+      expect(toggleAllCategoriesSpy).to.be.calledWith(IModelApp.viewManager, vpMock.object.iModel, true, vpMock.object, false);
+    });
+  });
+
+  describe("hide all", () => {
+
+    it("Calls toggleAllCategories", async () => {
+      const vpMock = mockViewport();
+      await hideAllModels({ models: modelsInfo, viewport: vpMock.object });
+      vpMock.verify((x) => x.changeModelDisplay(modelsInfo.map((model) => model.id), false), moq.Times.once());
+    });
+  });
+
+  describe("invertAll", () => {
+
+    it("Calls expected functions", async () => {
+      const vpMock = mockViewport();
+      vpMock.setup((x) => x.viewsModel("ModelId1")).returns(() => true);
+      vpMock.setup((x) => x.viewsModel("ModelId2")).returns(() => false);
+      await invertAllModels({ models: modelsInfo, viewport: vpMock.object });
+      vpMock.verify(async (x) => x.addViewedModels(["ModelId2"]), moq.Times.once());
+      vpMock.verify((x) => x.changeModelDisplay(["ModelId1"], false), moq.Times.once());
+    });
+  });
+
+  describe("view2D", () => {
+
+    it("Disables models when toggle is active", async () => {
+      const vpMock = mockViewport();
+      await view2DModels(modelsInfo.map((model) => model.id), true, vpMock.object);
+      vpMock.verify(async (vp) => vp.changeModelDisplay(modelsInfo.map((modelInfo) => modelInfo.id), false), moq.Times.once());
+    });
+
+    it("Enables models when toggle is not active", async () => {
+      const vpMock = mockViewport();
+      await view2DModels(modelsInfo.map((x) => x.id ), false, vpMock.object);
+      vpMock.verify(async (vp) => vp.addViewedModels(modelsInfo.map((modelInfo) => modelInfo.id)), moq.Times.once());
+    });
+  });
+
+  describe("view3D", () => {
+
+    it("Disables models when toggle is active", async () => {
+      const vpMock = mockViewport();
+      await view3DModels(modelsInfo.map((x) => x.id), true, vpMock.object);
+      vpMock.verify((vp) => vp.changeModelDisplay(modelsInfo.map((modelInfo) => modelInfo.id), false), moq.Times.once());
+    });
+
+    it("Enables models when toggle is not active", async () => {
+      const vpMock = mockViewport();
+      await view3DModels(modelsInfo.map((x) => x.id ), false, vpMock.object);
+      vpMock.verify(async (vp) => vp.addViewedModels(modelsInfo.map((modelInfo) => modelInfo.id)), moq.Times.once());
+    });
+  });
+
+  describe("arAllModelsVisible", () => {
+
+    it("Returns false if models array is empty", () => {
+      const val = areAllModelsVisible([], mockViewport().object);
+      expect(val).to.be.false;
+    });
+
+    it("Returns false if at least one model is not visible", () => {
+      const vpMock = mockViewport();
+      vpMock.setup((x) => x.viewsModel("ModelId1")).returns(() => true);
+      vpMock.setup((x) => x.viewsModel("ModelId2")).returns(() => false);
+      const val = areAllModelsVisible(modelsInfo.map((model) => model.id), vpMock.object);
+      expect(val).to.be.false;
+    });
+
+    it("Returns true if all models are visible", () => {
+      const vpMock = mockViewport();
+      vpMock.setup((x) => x.viewsModel("ModelId1")).returns(() => true);
+      vpMock.setup((x) => x.viewsModel("ModelId2")).returns(() => true);
+      const val = areAllModelsVisible(modelsInfo.map((model) => model.id), vpMock.object);
+      expect(val).to.be.true;
+    });
   });
 
   describe("visibility change event", () => {
