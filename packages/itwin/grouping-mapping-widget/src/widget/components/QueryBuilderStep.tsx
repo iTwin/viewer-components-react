@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import type { SelectOption } from "@itwin/itwinui-react";
-import { ComboBox, Fieldset, Label } from "@itwin/itwinui-react";
+import { ComboBox, Fieldset, Label, Text } from "@itwin/itwinui-react";
 import type { QueryBuilderCustomUIProps } from "./QueryBuilderCustomUI";
 import { QueryBuilderCustomUI } from "./QueryBuilderCustomUI";
 import "./QueryBuilderStep.scss";
@@ -14,13 +14,14 @@ const defaultDisplayStrings = {
 };
 
 export interface QueryBuilderStepProps extends QueryBuilderCustomUIProps {
+  queryRowCount: number;
   isHidden: boolean;
   onChange: (value: string) => Promise<void>;
   getOptions: SelectOption<string>[];
   displayStrings?: Partial<typeof defaultDisplayStrings>;
 }
 
-export const QueryBuilderStep = ({ isHidden, onChange, getOptions, displayStrings: userDisplayStrings, ...rest }: QueryBuilderStepProps) => {
+export const QueryBuilderStep = ({ queryRowCount, isHidden, onChange, getOptions, displayStrings: userDisplayStrings, ...rest }: QueryBuilderStepProps) => {
   const containerClassName = isHidden ? "gmw-hide" : "gmw-query-builder-container";
 
   const displayStrings = React.useMemo(
@@ -41,6 +42,7 @@ export const QueryBuilderStep = ({ isHidden, onChange, getOptions, displayString
           onChange={onChange}
         />
       </span>
+      <Text>{`Row Count: ${queryRowCount}`}</Text>
       <QueryBuilderCustomUI
         {...rest}
       />
