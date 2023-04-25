@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/grouping-mapping-widget",
+      "comment": "Fixed a bug in both Mapping and Groupings components where the title remained clickable even when onClickTitle was undefined. The title is now no longer clickable in such cases.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/grouping-mapping-widget"
+}

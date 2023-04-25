@@ -170,7 +170,7 @@ export const Mappings = ({
                   subText={mapping.description ?? ""}
                   subtextToolTip={mapping.description ?? ""}
                   titleTooltip={mapping.mappingName}
-                  onClickTitle={() => onClickMappingTitle ? onClickMappingTitle(mapping) : undefined}
+                  onClickTitle={onClickMappingTitle ? () => onClickMappingTitle(mapping) : undefined}
                   actionGroup={
                     <DropdownMenu
                       menuItems={(close: () => void) => [
