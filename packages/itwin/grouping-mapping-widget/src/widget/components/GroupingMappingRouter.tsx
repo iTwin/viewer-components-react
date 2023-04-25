@@ -77,10 +77,10 @@ export const GroupingMappingRouter = ({
                 groupingRouteFields: { ...prev?.groupingRouteFields, group: g, queryGenerationType: qType },
               }))
             }
-            onClickRenderContextCustomUI={(ccUI, g) =>
+            onClickRenderContextCustomUI={(ccUI, g, displayLabel) =>
               navigateTo((prev) => ({
-                step: RouteStep.GroupAction,
-                title: ccUI.displayName ?? "",
+                step: RouteStep.GroupContextCustomUI,
+                title: displayLabel,
                 groupingRouteFields: { ...prev?.groupingRouteFields, group: g, groupContextCustomUI: ccUI },
               }))
             }
@@ -101,15 +101,18 @@ export const GroupingMappingRouter = ({
               queryGenerationType={queryGenerationType}
             />
           );
-        } else if (group && groupContextCustomUI) {
-          return (
-            React.createElement(groupContextCustomUI, {
-              iModelId,
-              mappingId: mapping.id,
-              groupId: group.id,
-            })
-          );
         }
+      }
+      return null;
+    case RouteStep.GroupContextCustomUI:
+      if (mapping && group && groupContextCustomUI) {
+        return (
+          React.createElement(groupContextCustomUI, {
+            iModelId,
+            mappingId: mapping.id,
+            groupId: group.id,
+          })
+        );
       }
       return null;
     case RouteStep.Properties:

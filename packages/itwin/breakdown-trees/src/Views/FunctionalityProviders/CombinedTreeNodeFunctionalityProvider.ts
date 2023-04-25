@@ -6,6 +6,7 @@
 import { NodeKey } from "@itwin/presentation-common";
 import type { TreeModel, TreeModelNode } from "@itwin/components-react";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
 import { IModelReadRpcInterface } from "@itwin/core-common";
 
@@ -31,7 +32,10 @@ export class CombinedTreeNodeFunctionalityProvider extends TreeNodeFunctionality
   }
 
   private async delegateToAppropriateProvider(node: TreeModelNode, treeModel: TreeModel) {
-    const elementKey = this._treeDataProvider.getNodeKey(node.item);
+    if (!isPresentationTreeNodeItem(node.item)) {
+      return;
+    }
+    const elementKey = node.item.key;
     if (NodeKey.isGroupingNodeKey(elementKey)) {
       if (this._groupNodeFunctionalityProvider)
         return this._groupNodeFunctionalityProvider.performAction([node], treeModel);
@@ -43,6 +47,7 @@ export class CombinedTreeNodeFunctionalityProvider extends TreeNodeFunctionality
           return mappedFunctionalityProvider.performAction([node], treeModel);
       }
     }
+
   }
 
   public async performAction(nodes: TreeModelNode[], treeModel: TreeModel) {

@@ -201,6 +201,7 @@ export const GroupAction = (props: GroupActionProps) => {
           onChange={onChange}
           getOptions={getOptions}
           displayStrings={{ ...displayStrings }}
+          group={props.group}
         />
         {isGroupDetailsStep && <GroupDetailsStep
           details={details}

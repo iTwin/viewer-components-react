@@ -7,7 +7,8 @@ import * as React from "react";
 import {
   AbstractTreeNodeLoaderWithProvider, TreeImageLoader, TreeNodeRenderer, TreeNodeRendererProps, TreeRenderer, TreeRendererProps,
 } from "@itwin/components-react";
-import { ImageCheckBox, NodeCheckboxRenderProps } from "@itwin/core-react";
+import { NodeCheckboxRenderProps } from "@itwin/core-react";
+import { Checkbox } from "@itwin/itwinui-react";
 import { IPresentationTreeDataProvider, useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
 import { VisibilityTreeFilterInfo } from "./Common";
 
@@ -48,13 +49,13 @@ export const createVisibilityTreeNodeRenderer = (iconsEnabled: boolean, descript
  * @alpha
  */
 export const visibilityTreeNodeCheckboxRenderer = (props: NodeCheckboxRenderProps) => (
-  <ImageCheckBox
+  <Checkbox
+    className="visibility-tree-checkbox"
+    variant="eyeball"
     checked={props.checked}
+    onChange={(e) => { props.onChange(e.currentTarget.checked); }}
     disabled={props.disabled}
-    imageOn="icon-visibility"
-    imageOff="icon-visibility-hide-2"
-    onClick={props.onChange}
-    tooltip={props.title}
+    title={props.title}
   />
 );
 

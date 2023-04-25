@@ -261,7 +261,7 @@ describe("Groupings View", () => {
     await user.click(contextMenuItems[0]);
 
     // Callback should have been called with correct parameters
-    expect(onClickRenderContextCustomUIMock).toBeCalledWith(mockedUIComponent, mockGroups.groups[0]);
+    expect(onClickRenderContextCustomUIMock).toBeCalledWith(mockedUIComponent, mockGroups.groups[0], mockContextUI.displayLabel);
   });
 
   it("Set up both grouping and context custom UI", async () => {
@@ -338,6 +338,6 @@ describe("Groupings View", () => {
     await user.click(contextMenuItems[1]);
 
     // Callback should have been called with correct parameters
-    expect(onClickRenderContextCustomUIMock).toBeCalledWith(mockedContextUIComponent, mockGroups.groups[0]);
+    expect(onClickRenderContextCustomUIMock).toBeCalledWith(mockedContextUIComponent, mockGroups.groups[0], mockContextUI.displayLabel);
   });
 });
