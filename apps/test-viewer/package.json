@@ -62,6 +62,9 @@
     },
     "@itwin/map-layers": {
       "injected": true
+    },
+    "@itwin/geo-tools-react": {
+      "injected": true
     }
   },
   "scripts": {

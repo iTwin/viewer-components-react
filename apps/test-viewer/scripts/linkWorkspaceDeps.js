@@ -20,6 +20,9 @@ const packages = [{
 }, {
   name: "@itwin/map-layers",
   dir: "map-layers"
+}, {
+  name: "@itwin/geo-tools-react",
+  dir: "geo-tools"
 }
 ]
 
