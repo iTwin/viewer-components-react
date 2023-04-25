@@ -11,8 +11,8 @@
   "learnMore": "Learn more",
   "models": "Models",
   "categories": "Categories",
-  "containment": "Spatial Containment",
   "treeview": "Tree View",
+  "noTrees": "There are no trees available for this iModel.",
   "categoriesTree": {
     "noCategoryFound": "No category found.",
     "noMatchingCategoryNames": "There are no category names matching your search."

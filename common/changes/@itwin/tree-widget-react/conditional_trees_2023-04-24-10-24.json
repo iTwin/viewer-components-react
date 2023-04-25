@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "Added ability to conditionally show trees inside widget.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/tree-widget-react"
+}
