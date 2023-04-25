@@ -46,6 +46,9 @@ export interface GroupingMappingContextProps {
    * Custom UI to add and update groups or provide additional group context capabilities.
    */
   customUIs?: GroupingMappingCustomUI[];
+  /**
+   * A custom iModelConnection to use instead of the active iModelConnection from UiFramework.
+   */
   iModelConnection?: IModelConnection;
   children?: React.ReactNode;
 }
