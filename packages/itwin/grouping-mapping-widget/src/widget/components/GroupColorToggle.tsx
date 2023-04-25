@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useEffect, useState } from "react";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { ToggleSwitchProps } from "@itwin/itwinui-react";
 import { toaster, ToggleSwitch } from "@itwin/itwinui-react";
 import type { Group } from "@itwin/insights-client";
@@ -12,6 +11,7 @@ import { getHiliteIdsAndKeysetFromGroup } from "./groupsHelpers";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { usePropertiesContext } from "./context/PropertiesContext";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
 export interface GroupColorToggleProps extends Partial<ToggleSwitchProps> {
   color: string;
@@ -24,7 +24,7 @@ export const GroupColorToggle = ({
   ...rest
 }: GroupColorToggleProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const iModelConnection = useActiveIModelConnection();
+  const { iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
