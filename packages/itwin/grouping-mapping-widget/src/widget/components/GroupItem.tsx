@@ -9,7 +9,7 @@ import type { ContextCustomUI, GroupingCustomUI } from "./customUI/GroupingMappi
 import type { GroupingProps } from "./Grouping";
 import { GroupMenuActions } from "./GroupMenuActions";
 
-export interface GroupItemProps extends GroupingProps {
+export interface GroupItemProps extends Omit<GroupingProps, "onClickAddGroup"> {
   group: Group;
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
@@ -24,7 +24,7 @@ export const GroupItem = ({
 }: GroupItemProps) => {
 
   const onTitleClick = () => {
-    if (onClickGroupTitle && !disableActions) {
+    if (onClickGroupTitle) {
       onClickGroupTitle(group);
     }
   };
@@ -36,12 +36,11 @@ export const GroupItem = ({
       actionGroup={
         <GroupMenuActions
           group={group}
-          onClickGroupTitle={onClickGroupTitle}
           disableActions={disableActions}
           {...rest}
         />
       }
-      onClickTitle={disableActions ? undefined : onTitleClick}
+      onClickTitle={onClickGroupTitle && !disableActions ? onTitleClick : undefined}
     />
   );
 };

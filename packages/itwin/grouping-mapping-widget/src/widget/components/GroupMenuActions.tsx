@@ -11,7 +11,7 @@ import type { GroupingProps } from "./Grouping";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import "./GroupMenuActions.scss";
 
-export interface GroupMenuActionsProps extends GroupingProps {
+export interface GroupMenuActionsProps extends Omit<GroupingProps, "onClickAddGroup" | "onClickGroupTitle"> {
   group: Group;
   groupUIs: GroupingCustomUI[];
   contextUIs: ContextCustomUI[];
