@@ -10,8 +10,8 @@
   box-sizing: border-box;
   position: absolute;
   //  border-radius: 4px;
-  background: $buic-background-1;
-  border: 1px solid $buic-background-panel-stroke;
+  background: var(--buic-background-1);
+  border: 1px solid var(--buic-background-panel-stroke);
   visibility: hidden;
   z-index: 100;
   animation-duration: 250ms;

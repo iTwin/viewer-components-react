@@ -7,6 +7,7 @@
     "@itwin/appui-abstract": "^3.7.1",
     "@itwin/appui-layout-react": "^4.0.0-dev.15",
     "@itwin/appui-react": "^4.0.0-dev.15",
+    "@itwin/breakdown-trees-react": "workspace:*",
     "@itwin/browser-authorization": "^0.8.0",
     "@itwin/components-react": "^4.0.0-dev.15",
     "@itwin/core-bentley": "^3.7.1",
@@ -54,6 +55,9 @@
       "injected": true
     },
     "@itwin/measure-tools-react": {
+      "injected": true
+    },
+    "@itwin/breakdown-trees-react": {
       "injected": true
     },
     "@itwin/map-layers": {

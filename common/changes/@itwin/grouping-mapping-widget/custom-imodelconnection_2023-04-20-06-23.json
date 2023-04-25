@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Added additional prop to GroupCustomUI that supplies the initial Group's query during edit mode.",
+      "comment": "Added ability to provide an iModelConnection.",
       "type": "minor"
     }
   ],

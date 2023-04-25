@@ -7,10 +7,11 @@ import { BeEvent } from "@itwin/core-bentley";
 import type { Viewport } from "@itwin/core-frontend";
 import { EmphasizeElements } from "@itwin/core-frontend";
 import { KeySet, NodeKey } from "@itwin/presentation-common";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { TreeModelNode, TreeModelRootNode, TreeModelSource, TreeNodeItem } from "@itwin/components-react";
-import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "@itwin/appui-react";
 import { RelatedElementIdsProvider } from "../RelatedElementIdsProvider";
+import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "@itwin/tree-widget-react";
 
 export class NodeDetails {
   public keySet: KeySet;
@@ -70,12 +71,15 @@ export class VisibilityHandler implements IVisibilityHandler {
   public onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
   public async getNodeVisibilityStatus(node: TreeNodeItem) {
-    const nodeKey = this._treeDataProvider.getNodeKey(node);
-    return this.getVisibilityStatus(node, nodeKey);
+    const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
+    if (!nodeKey) {
+      return undefined;
+    }
+    return this.getVisibilityStatus(node);
   }
 
-  public async getVisibilityStatus(node: TreeNodeItem, nodeKey: NodeKey): Promise<VisibilityStatus> {
-    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
+  public async getVisibilityStatus(node: TreeNodeItem): Promise<VisibilityStatus> {
+    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey((node as PresentationTreeNodeItem).key);
     return this.isItemVisible(instanceId, node);
   }
 
@@ -126,8 +130,8 @@ export class VisibilityHandler implements IVisibilityHandler {
     return { state };
   }
 
-  public async changeVisibility(node: TreeNodeItem, nodeKey: NodeKey, _shouldDisplay: boolean) {
-    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
+  public async changeVisibility(node: TreeNodeItem, _shouldDisplay: boolean) {
+    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey((node as PresentationTreeNodeItem).key);
     return this.manageVisibility(node, instanceId);
   }
   private async manageVisibility(node: TreeNodeItem, instanceId: string) {
@@ -237,7 +241,12 @@ export class VisibilityHandler implements IVisibilityHandler {
   private async getGroupNodeDetails(node: TreeNodeItem, nodeDetails: NodeDetails) {
     const childNodes = await this._treeDataProvider.getNodes(node);
     for (const child of childNodes) {
-      const childNodeKey = this._treeDataProvider.getNodeKey(child);
+
+      if (!isPresentationTreeNodeItem(child)) {
+        return;
+      }
+
+      const childNodeKey = child.key;
       if (NodeKey.isInstancesNodeKey(childNodeKey) && childNodeKey.instanceKeys.length > 0) {
         nodeDetails.keySet.add(childNodeKey.instanceKeys);
         const childInstanceId = childNodeKey.instanceKeys[0].id;
@@ -256,16 +265,22 @@ export class VisibilityHandler implements IVisibilityHandler {
 
   // Check visibility Status of each child node. If any child is invisible, set nodeDetails.isAllChildrenVisible = false.
   private async getNodeDetailsFromRule(node: TreeNodeItem, rulesetId: string, nodeDetails: NodeDetails, hiddenElems: Set<string>) {
-    const elementKey = this._treeDataProvider.getNodeKey(node);
-    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey(elementKey);
-    const elementIds: Id64Array = [];
 
+    if (!isPresentationTreeNodeItem(node)) {
+      return;
+    }
+
+    const elementKey = node.key;
+    const instanceId = VisibilityHandler.getInstanceIdFromTreeNodeKey(elementKey);
     if (instanceId !== "") {
       await this.getKeySetFromRule(rulesetId, instanceId, nodeDetails);
     } else {
       // If the clicked node is not an instance node, get it's child nodes and then apply rule on the child which is an instance node.
       await this.getGroupNodeDetails(node, nodeDetails);
     }
+
+    const elementIds: Id64Array = [];
+
     nodeDetails.keySet.instanceKeys.forEach((values: Set<string>) => {
       values.forEach((value: string) => {
         elementIds.push(value);

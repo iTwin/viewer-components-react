@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { NodeKey } from "@itwin/presentation-common";
 import type { TreeModelNode } from "@itwin/components-react";
 import type { TreeNodeFunctionalityProvider } from "./TreeNodeFunctionalityProvider";
@@ -72,12 +73,15 @@ export class TreeNodeFunctionIconInfoMapper {
 
   public async getFunctionIconInfosFor(node?: TreeModelNode): Promise<FunctionIconInfo[]> {
     const returnedList: number[] = [];
-    if (node) {
-      const elementKey = this._treeDataProvider.getNodeKey(node.item);
+    if (node && (isPresentationTreeNodeItem(node.item))) {
+      const elementKey = node.item.key;
       if (NodeKey.isGroupingNodeKey(elementKey)) {
         returnedList.push(...this._groupNodeFunctionIconInfos);
       } else if (NodeKey.isInstancesNodeKey(elementKey)) {
-        const classHierarchyArray = await IModelReadRpcInterface.getClient().getClassHierarchy(this._treeDataProvider.imodel.getRpcProps(), elementKey.instanceKeys[0].className);
+        const classHierarchyArray = await IModelReadRpcInterface.getClient().getClassHierarchy(
+          this._treeDataProvider.imodel.getRpcProps(),
+          elementKey.instanceKeys[0].className
+        );
         for (const className of classHierarchyArray) {
           const mappedFunctionalityProviders = this._TreeNodeClassFunctionIconInfoMap.get(className);
           if (mappedFunctionalityProviders)
@@ -85,6 +89,7 @@ export class TreeNodeFunctionIconInfoMapper {
         }
       }
     }
+
     returnedList.push(...this._globalFunctionIconInfos);
     return this._functionIconInfos.map((value: FunctionIconInfo, index: number, _array) => {
       const returnValue = { ...value };

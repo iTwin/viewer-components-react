@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./GroupingMapping.scss";
+import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import type {
   ClientPrefix,
@@ -21,6 +22,7 @@ import type { GroupingMappingCustomUI } from "./customUI/GroupingMappingCustomUI
 import type { QueryCacheItem } from "./context/GroupHilitedElementsContext";
 import { GroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
 import { PropertiesContext } from "./context/PropertiesContext";
+import { useActiveIModelConnection } from "@itwin/appui-react";
 
 export interface GroupingMappingContextProps {
   /**
@@ -44,6 +46,10 @@ export interface GroupingMappingContextProps {
    * Custom UI to add and update groups or provide additional group context capabilities.
    */
   customUIs?: GroupingMappingCustomUI[];
+  /**
+   * A custom iModelConnection to use instead of the active iModelConnection from UiFramework.
+   */
+  iModelConnection?: IModelConnection;
   children?: React.ReactNode;
 }
 
@@ -51,6 +57,7 @@ const authorizationClientGetAccessToken = async () =>
   (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
 
 export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
+  const activeIModelConntextion = useActiveIModelConnection();
   const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
   const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
   const [customUIs, setCustomUIs] = useState<GroupingMappingCustomUI[]>(
@@ -75,8 +82,9 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       prefix: props.prefix,
       iModelId: props.iModelId,
       getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
+      iModelConnection: props.iModelConnection ?? activeIModelConntextion,
     }));
-  }, [props.getAccessToken, props.iModelId, props.prefix]);
+  }, [activeIModelConntextion, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
 
   useEffect(() => {
     setMappingClient(createMappingClient(clientProp));
