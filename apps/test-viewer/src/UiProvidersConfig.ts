@@ -7,6 +7,7 @@ import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react"
 import { PropertyGridManager, PropertyGridUiItemsProvider } from "@itwin/property-grid-react";
 import { MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import { MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
+import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -72,6 +73,13 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => MapLayersUI.initialize(),
       createUiItemsProvider: () => new MapLayersUiItemsProvider(),
+    }
+  ],
+  [
+    "geo-tools",
+    {
+      initialize: async () => GeoTools.initialize(),
+      createUiItemsProvider: () => new GeoToolsAddressSearchProvider(),
     }
   ]
 ])
