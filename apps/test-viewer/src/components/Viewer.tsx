@@ -9,6 +9,7 @@ import { Viewer as WebViewer, ViewerPerformance } from "@itwin/web-viewer-react"
 import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { useAuthorizationContext } from "./Authorization";
+import { ApiKeys } from "./ApiKeys";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -20,8 +21,6 @@ export function Viewer() {
   const { client: authClient } = useAuthorizationContext();
   const viewCreatorOptions = useViewCreatorOptions();
   const { iTwinId, iModelId } = useIModelInfo();
-  const [BingMapsKey] = useState(process.env.IMJS_BING_MAPS_KEY ?? "");
-  const [CesiumKey] = useState(process.env.IMJS_CESIUM_ION_KEY ?? "");
 
   return (
     <WebViewer
@@ -39,8 +38,8 @@ export function Viewer() {
         hideStatusBar: true,
         hideToolSettings: true
       }}
-      mapLayerOptions={{ BingMaps: { key: "key", value: BingMapsKey } }}
-      tileAdmin={{ cesiumIonKey: CesiumKey }}
+      mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
+      tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
 
     />
   );
