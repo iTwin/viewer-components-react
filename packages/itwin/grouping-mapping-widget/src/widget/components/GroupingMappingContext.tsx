@@ -54,7 +54,7 @@ const authorizationClientGetAccessToken = async () =>
   (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
 
 export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
-  const iModelConnectionUIF = useActiveIModelConnection();
+  const activeIModelConntextion = useActiveIModelConnection();
   const clientProp: IMappingsClient | ClientPrefix = props.client ?? props.prefix;
   const [mappingClient, setMappingClient] = useState<IMappingsClient>(createMappingClient(clientProp));
   const [customUIs, setCustomUIs] = useState<GroupingMappingCustomUI[]>(
@@ -79,9 +79,9 @@ export const GroupingMappingContext = (props: GroupingMappingContextProps) => {
       prefix: props.prefix,
       iModelId: props.iModelId,
       getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
-      iModelConnection: props.iModelConnection ?? iModelConnectionUIF,
+      iModelConnection: props.iModelConnection ?? activeIModelConntextion,
     }));
-  }, [iModelConnectionUIF, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
+  }, [activeIModelConntextion, props.getAccessToken, props.iModelConnection, props.iModelId, props.prefix]);
 
   useEffect(() => {
     setMappingClient(createMappingClient(clientProp));
