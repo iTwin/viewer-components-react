@@ -24,6 +24,7 @@ importers:
       '@itwin/core-quantity': ^3.7.1
       '@itwin/core-react': ^4.0.0-dev.15
       '@itwin/core-telemetry': ^3.7.1
+      '@itwin/geo-tools-react': workspace:*
       '@itwin/imodel-components-react': ^4.0.0-dev.15
       '@itwin/imodels-access-frontend': ^3.0.0
       '@itwin/itwinui-react': ^2.7.0
@@ -67,6 +68,7 @@ importers:
       '@itwin/core-quantity': 3.7.1_@itwin+core-bentley@3.7.1
       '@itwin/core-react': 4.0.0-dev.16_5beced3238b7f35a0c0f8fe406b86ddf
       '@itwin/core-telemetry': 3.7.1_@itwin+core-geometry@3.7.1
+      '@itwin/geo-tools-react': link:../../packages/itwin/geo-tools
       '@itwin/imodel-components-react': 4.0.0-dev.16_a7f68987b1dfe8b4939d65353ae226c2
       '@itwin/imodels-access-frontend': 3.0.0_fff931033b92bb16fed9d96490961451
       '@itwin/itwinui-react': 2.7.0_react-dom@17.0.2+react@17.0.2

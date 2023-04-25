@@ -20,6 +20,7 @@
     "@itwin/core-quantity": "^3.7.1",
     "@itwin/core-react": "^4.0.0-dev.15",
     "@itwin/core-telemetry": "^3.7.1",
+    "@itwin/geo-tools-react": "workspace:*",
     "@itwin/imodels-access-frontend": "^3.0.0",
     "@itwin/imodel-components-react": "^4.0.0-dev.15",
     "@itwin/itwinui-react": "^2.7.0",
@@ -60,6 +61,9 @@
       "injected": true
     },
     "@itwin/map-layers": {
+      "injected": true
+    },
+    "@itwin/geo-tools-react": {
       "injected": true
     }
   },

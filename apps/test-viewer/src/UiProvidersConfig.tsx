@@ -9,6 +9,7 @@ import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } f
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
 import { MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
+import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -88,6 +89,13 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => MapLayersUI.initialize(),
       createUiItemsProvider: () => new MapLayersUiItemsProvider(),
+    }
+  ],
+  [
+    "geo-tools",
+    {
+      initialize: async () => GeoTools.initialize(),
+      createUiItemsProvider: () => new GeoToolsAddressSearchProvider(),
     }
   ]
 ])
