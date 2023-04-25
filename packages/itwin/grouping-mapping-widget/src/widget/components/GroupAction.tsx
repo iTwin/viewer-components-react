@@ -27,7 +27,6 @@ import { GroupDetailsStep } from "./GroupDetailsStep";
 import { QueryBuilderActionPanel } from "./QueryBuilderActionPanel";
 import { GroupDetailsActionPanel } from "./GroupDetailsActionPanel";
 import { useVisualization } from "../hooks/useVisualization";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 
 const defaultDisplayStrings = {
   groupDetails: "Group Details",
@@ -50,11 +49,10 @@ export interface GroupActionProps {
 }
 
 export const GroupAction = (props: GroupActionProps) => {
-  const iModelConnection = useActiveIModelConnection();
+  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const groupUIs: GroupingCustomUI[] = useGroupingMappingCustomUI().customUIs
     .filter((p) => p.type === GroupingMappingCustomUIType.Grouping) as GroupingCustomUI[];

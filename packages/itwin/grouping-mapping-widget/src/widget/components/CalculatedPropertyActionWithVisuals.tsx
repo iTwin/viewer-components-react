@@ -26,7 +26,6 @@ import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import type { CalculatedProperty, CalculatedPropertyType, Group } from "@itwin/insights-client";
 import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import { getHiliteIdsAndKeysetFromGroup } from "./groupsHelpers";
 import { SharedCalculatedPropertyForms } from "./SharedCalculatedPropertyForms";
 
@@ -45,12 +44,11 @@ export const CalculatedPropertyActionWithVisuals = ({
   onSaveSuccess,
   onClickCancel,
 }: CalculatedPropertyActionWithVisualsProps) => {
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
+  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>(
     calculatedProperty?.propertyName ?? "",
   );
-  const iModelConnection = useActiveIModelConnection();
   const [type, setType] = useState<CalculatedPropertyType | undefined>(calculatedProperty?.type);
   const [bboxDecorator, setBboxDecorator] = useState<BboxDimensionsDecorator | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
