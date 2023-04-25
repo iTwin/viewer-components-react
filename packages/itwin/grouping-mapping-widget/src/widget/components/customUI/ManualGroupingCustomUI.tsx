@@ -12,8 +12,9 @@ export const ManualGroupingCustomUI = ({
   updateQuery,
   isUpdating,
   resetView,
+  initialEditModeQuery,
 }: GroupingCustomUIProps) => {
-  const [manualInput, setManualInput] = React.useState("");
+  const [manualInput, setManualInput] = React.useState(initialEditModeQuery ?? "");
 
   return (
     <div className='gmw-manual-form'>

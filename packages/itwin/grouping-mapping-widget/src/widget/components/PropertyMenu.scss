@@ -7,21 +7,6 @@
 .gmw-property-menu-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100%;
-
-  .gmw-property-header {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .gmw-property-menu-container {
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-    gap: $iui-baseline * 2;
-    .gmw-property-menu-toolbar {
-      display: flex;
-      justify-content: space-between;
-    }
-  }
+  flex-grow: 1;
+  gap: $iui-baseline * 2;
 }

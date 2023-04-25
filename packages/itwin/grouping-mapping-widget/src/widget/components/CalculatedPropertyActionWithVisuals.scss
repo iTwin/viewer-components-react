@@ -12,5 +12,16 @@
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
+
+    .gmw-select-item {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
   }
+}
+
+.gmw-gr-cp-menu-item {
+  display: flex;
+  justify-content: space-between;
 }
