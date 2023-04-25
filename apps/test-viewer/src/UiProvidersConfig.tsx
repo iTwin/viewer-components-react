@@ -77,6 +77,7 @@ const configuredUiItems = new Map<string, UiItem>([
     "measure-tools",
     {
       initialize: async () => {
+        //measure-tools not showing measurements
         await MeasureTools.startup();
         MeasurementActionToolbar.setDefaultActionProvider();
       },
