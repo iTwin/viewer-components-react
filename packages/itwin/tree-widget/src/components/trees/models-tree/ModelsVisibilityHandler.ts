@@ -618,7 +618,7 @@ export async function invertAllModels(models: string[], viewport: Viewport) {
   viewport.changeModelDisplay(viewedModels, false);
 }
 
-export async function toggleModels(models: string[], isToggleActive: boolean, viewport: Viewport) {
+export async function toggleModels(models: string[], enable: boolean, viewport: Viewport) {
   // istanbul ignore if
   if (!models)
     return;
