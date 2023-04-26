@@ -10,7 +10,6 @@ import { IModelApp, IModelConnection, ViewManager, Viewport } from "@itwin/core-
 import { NodeKey } from "@itwin/presentation-common";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport } from "../CategoriesVisibilityUtils";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
-import { CategoriesTreeHeaderButtonProps } from "./CategoriesTreeComponent";
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
@@ -152,42 +151,41 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
   }
 }
 
-export async function showAllCategories(props: CategoriesTreeHeaderButtonProps) {
+export async function showAllCategories(categories: string[], viewport: Viewport) {
   await enableCategory(
     IModelApp.viewManager,
-    props.viewport.iModel,
-    (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
+    viewport.iModel,
+    categories,
     true,
     true
   );
 }
 
-export async function hideAllCategories(props: CategoriesTreeHeaderButtonProps) {
+export async function hideAllCategories(categories: string[], viewport: Viewport) {
   await enableCategory(
     IModelApp.viewManager,
-    props.viewport.iModel,
-    (props.filteredCategories ?? props.categories).map((category) => category.categoryId),
+    viewport.iModel,
+    categories,
     false,
     true
   );
 }
 
-export async function invertAllCategories(props: CategoriesTreeHeaderButtonProps) {
-  const ids = props.filteredCategories ?? props.categories;
+export async function invertAllCategories(categories: CategoryInfo[], viewport: Viewport) {
   const enabled: string[] = [];
   const disabled: string[] = [];
   const enabledSubCategories: string[] = [];
   const disabledSubCategories: string[] = [];
 
-  for (const category of ids) {
-    if (!props.viewport.view.viewsCategory(category.categoryId)) {
+  for (const category of categories) {
+    if (!viewport.view.viewsCategory(category.categoryId)) {
       disabled.push(category.categoryId);
       continue;
     }
     // First, we need to check if at least one subcategory is disabled. If it is true, then only subcategories should change display, not categories.
-    if (category.subCategoryIds?.some((subCategory) => !props.viewport.isSubCategoryVisible(subCategory))) {
+    if (category.subCategoryIds?.some((subCategory) => !viewport.isSubCategoryVisible(subCategory))) {
       for (const subCategory of category.subCategoryIds)
-        props.viewport.isSubCategoryVisible(subCategory) ? enabledSubCategories.push(subCategory) : disabledSubCategories.push(subCategory);
+        viewport.isSubCategoryVisible(subCategory) ? enabledSubCategories.push(subCategory) : disabledSubCategories.push(subCategory);
     } else{
       enabled.push(category.categoryId);
     }
@@ -203,7 +201,7 @@ export async function invertAllCategories(props: CategoriesTreeHeaderButtonProps
 
   await enableCategory(
     IModelApp.viewManager,
-    props.viewport.iModel,
+    viewport.iModel,
     enabled,
     false,
     true
@@ -219,7 +217,7 @@ export async function invertAllCategories(props: CategoriesTreeHeaderButtonProps
 
   await enableCategory(
     IModelApp.viewManager,
-    props.viewport.iModel,
+    viewport.iModel,
     disabled,
     true,
     true

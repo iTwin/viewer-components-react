@@ -14,7 +14,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import {
   BisCodeSpec, CategoryProps, Code, ElementProps, IModel, ModelProps, PhysicalElementProps, RelatedElement, RelatedElementProps,
 } from "@itwin/core-common";
-import { IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
@@ -26,7 +26,7 @@ import { fireEvent, render, waitFor } from "@testing-library/react";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
 import { ModelsTreeNodeType, ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-import { deepEquals, mockPresentationManager, TestUtils } from "../../TestUtils";
+import { deepEquals, mockPresentationManager, mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
 import { RULESET_MODELS, RULESET_MODELS_GROUPED_BY_CLASS } from "../../../tree-widget-react";
 
@@ -51,45 +51,6 @@ describe("ModelsTree", () => {
     imodelMock.reset();
     sinon.restore();
   });
-
-  interface ViewportMockProps {
-    viewState?: ViewState;
-    perModelCategoryVisibility?: PerModelCategoryVisibility.Overrides;
-    onViewedCategoriesPerModelChanged?: BeEvent<(vp: Viewport) => void>;
-    onViewedCategoriesChanged?: BeEvent<(vp: Viewport) => void>;
-    onViewedModelsChanged?: BeEvent<(vp: Viewport) => void>;
-    onAlwaysDrawnChanged?: BeEvent<() => void>;
-    onNeverDrawnChanged?: BeEvent<() => void>;
-  }
-
-  const mockViewport = (props?: ViewportMockProps) => {
-    if (!props)
-      props = {};
-    if (!props.viewState)
-      props.viewState = moq.Mock.ofType<ViewState>().object;
-    if (!props.perModelCategoryVisibility)
-      props.perModelCategoryVisibility = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>().object;
-    if (!props.onViewedCategoriesPerModelChanged)
-      props.onViewedCategoriesPerModelChanged = new BeEvent<(vp: Viewport) => void>();
-    if (!props.onViewedCategoriesChanged)
-      props.onViewedCategoriesChanged = new BeEvent<(vp: Viewport) => void>();
-    if (!props.onViewedModelsChanged)
-      props.onViewedModelsChanged = new BeEvent<(vp: Viewport) => void>();
-    if (!props.onAlwaysDrawnChanged)
-      props.onAlwaysDrawnChanged = new BeEvent<() => void>();
-    if (!props.onNeverDrawnChanged)
-      props.onNeverDrawnChanged = new BeEvent<() => void>();
-    const vpMock = moq.Mock.ofType<Viewport>();
-    vpMock.setup((x) => x.iModel).returns(() => imodelMock.object);
-    vpMock.setup((x) => x.view).returns(() => props!.viewState!);
-    vpMock.setup((x) => x.perModelCategoryVisibility).returns(() => props!.perModelCategoryVisibility!);
-    vpMock.setup((x) => x.onViewedCategoriesPerModelChanged).returns(() => props!.onViewedCategoriesPerModelChanged!);
-    vpMock.setup((x) => x.onViewedCategoriesChanged).returns(() => props!.onViewedCategoriesChanged!);
-    vpMock.setup((x) => x.onViewedModelsChanged).returns(() => props!.onViewedModelsChanged!);
-    vpMock.setup((x) => x.onAlwaysDrawnChanged).returns(() => props!.onAlwaysDrawnChanged!);
-    vpMock.setup((x) => x.onNeverDrawnChanged).returns(() => props!.onNeverDrawnChanged!);
-    return vpMock;
-  };
 
   describe("#unit", () => {
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();

@@ -183,16 +183,17 @@ function useVisibilityHandler(
 
   const defaultVisibilityHandler = useDisposable(React.useCallback(
     () =>
-    // istanbul ignore next
-      visibilityHandler ?? new ModelsVisibilityHandler({ rulesetId, viewport: activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache }),
-    [rulesetId, activeView, subjectModelIdsCache, hierarchyAutoUpdateEnabled, visibilityHandler])
+      new ModelsVisibilityHandler({ rulesetId, viewport: activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache }),
+    [rulesetId, activeView, subjectModelIdsCache, hierarchyAutoUpdateEnabled])
   );
 
-  React.useEffect(() => {
-    defaultVisibilityHandler && defaultVisibilityHandler.setFilteredDataProvider(filteredDataProvider);
-  }, [defaultVisibilityHandler, filteredDataProvider]);
+  const handler = visibilityHandler ?? defaultVisibilityHandler;
 
-  return defaultVisibilityHandler;
+  React.useEffect(() => {
+    handler && handler.setFilteredDataProvider(filteredDataProvider);
+  }, [handler, filteredDataProvider]);
+
+  return handler;
 }
 
 const isFilteredDataProvider = (dataProvider: IPresentationTreeDataProvider | IFilteredPresentationTreeDataProvider): dataProvider is IFilteredPresentationTreeDataProvider => {

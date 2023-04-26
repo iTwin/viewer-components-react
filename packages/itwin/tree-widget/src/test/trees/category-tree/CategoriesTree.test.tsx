@@ -14,7 +14,7 @@ import { BeEvent, Id64String } from "@itwin/core-bentley";
 import {
   BisCodeSpec, CategoryProps, Code, ElementProps, IModel, ModelProps, PhysicalElementProps, RelatedElement, RelatedElementProps, SubCategoryProps,
 } from "@itwin/core-common";
-import { IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility, SpatialViewState, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, NoRenderApp, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import { ECInstancesNodeKey, KeySet, LabelDefinition, Node, NodePathElement, StandardNodeTypes } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, RulesetVariablesManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
@@ -26,7 +26,7 @@ import { fireEvent, render, waitFor } from "@testing-library/react";
 import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
 import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-import { mockPresentationManager, TestUtils } from "../../TestUtils";
+import { mockPresentationManager, mockViewport, TestUtils } from "../../TestUtils";
 
 describe("CategoryTree", () => {
 
@@ -47,7 +47,7 @@ describe("CategoryTree", () => {
     const imodelMock = moq.Mock.ofType<IModelConnection>();
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
     let rulesetVariablesMock: moq.IMock<RulesetVariablesManager>;
-    const viewportMock = moq.Mock.ofType<Viewport>();
+    let viewportMock = moq.Mock.ofType<Viewport>();
     const viewStateMock = moq.Mock.ofType<SpatialViewState>();
     const viewManagerMock = moq.Mock.ofType<ViewManager>();
 
@@ -68,7 +68,7 @@ describe("CategoryTree", () => {
       sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
       sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
 
-      viewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
+      viewportMock = mockViewport();
       // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
       viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
     });
@@ -84,33 +84,6 @@ describe("CategoryTree", () => {
         instanceKeys: [{ className: "MyDomain:SpatialCategory", id }],
         pathFromRoot: [],
       };
-    };
-
-    interface ViewportMockProps {
-      viewState?: ViewState;
-      perModelCategoryVisibility?: PerModelCategoryVisibility.Overrides;
-      onViewedCategoriesChanged?: BeEvent<(vp: Viewport) => void>;
-      onDisplayStyleChanged?: BeEvent<(vp: Viewport) => void>;
-    }
-
-    const mockViewport = (props?: ViewportMockProps) => {
-      if (!props)
-        props = {};
-      if (!props.viewState)
-        props.viewState = moq.Mock.ofType<ViewState>().object;
-      if (!props.perModelCategoryVisibility)
-        props.perModelCategoryVisibility = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>().object;
-      if (!props.onDisplayStyleChanged)
-        props.onDisplayStyleChanged = new BeEvent<(vp: Viewport) => void>();
-      if (!props.onViewedCategoriesChanged)
-        props.onViewedCategoriesChanged = new BeEvent<(vp: Viewport) => void>();
-      const vpMock = moq.Mock.ofType<Viewport>();
-      vpMock.setup((x) => x.iModel).returns(() => imodelMock.object);
-      vpMock.setup((x) => x.view).returns(() => props!.viewState!);
-      vpMock.setup((x) => x.perModelCategoryVisibility).returns(() => props!.perModelCategoryVisibility!);
-      vpMock.setup((x) => x.onViewedCategoriesChanged).returns(() => props!.onViewedCategoriesChanged!);
-      vpMock.setup((x) => x.onDisplayStyleChanged).returns(() => props!.onDisplayStyleChanged!);
-      return vpMock;
     };
 
     describe("<CategoryTree />", () => {
@@ -174,7 +147,7 @@ describe("CategoryTree", () => {
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
-            activeView={mockViewport().object}
+            activeView={viewportMock.object}
           />,
         );
         await waitFor(() => result.getByText("test-node"));
@@ -190,7 +163,7 @@ describe("CategoryTree", () => {
             categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
-            activeView={viewportMock.object}
+            activeView={mockViewport({ viewState: viewStateMock.object }).object}
             categoryVisibilityHandler={visibilityHandler.object}
           />,
         );

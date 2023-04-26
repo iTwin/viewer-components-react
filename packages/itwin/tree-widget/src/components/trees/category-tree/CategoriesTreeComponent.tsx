@@ -66,7 +66,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
   useEffect(() => {
     (async () => {
       if (filteredProvider)
-        setFilteredCategories((await getFilteredCategories(filteredProvider, filterString)));
+        setFilteredCategories((await getFilteredCategories(filteredProvider)));
       else
         setFilteredCategories(undefined);
     })();
@@ -114,14 +114,17 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
   );
 }
 
-async function getFilteredCategories(filteredProvider: IPresentationTreeDataProvider, filterString: string) {
+async function getFilteredCategories(filteredProvider: IPresentationTreeDataProvider) {
   const filteredCategories: CategoryInfo[] = [];
-  const filteredNodePaths = await filteredProvider.getFilteredNodePaths(filterString);
-  for (const filteredNodePath of filteredNodePaths) {
-    const filteredCategoryId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredNodePath.node.key);
+  const nodes = await filteredProvider.getNodes();
+  for (const node of nodes) {
+    const filteredCategoryId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredProvider.getNodeKey(node));
     const filteredSubCategoriesIds: string[] = [];
-    for (const filteredNodePathChildren of filteredNodePath.children) {
-      filteredSubCategoriesIds.push(CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredNodePathChildren.node.key));
+    if (!node.hasChildren)
+      continue;
+
+    for (const nodeChild of await filteredProvider.getNodes(node)) {
+      filteredSubCategoriesIds.push(CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredProvider.getNodeKey(nodeChild)));
     }
     filteredCategories.push({ categoryId: filteredCategoryId, subCategoryIds: filteredSubCategoriesIds });
   }
@@ -135,7 +138,7 @@ function ShowAllButton(props: CategoriesTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
-      onClick={() => void showAllCategories(props)}
+      onClick={() => void showAllCategories((props.filteredCategories ?? props.categories).map((category) => category.categoryId), props.viewport)}
     >
       <SvgVisibilityShow />
     </IconButton>
@@ -149,7 +152,7 @@ function HideAllButton(props: CategoriesTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
-      onClick={() => void hideAllCategories(props)}
+      onClick={() => void hideAllCategories((props.filteredCategories ?? props.categories).map((category) => category.categoryId), props.viewport)}
     >
       <SvgVisibilityHide />
     </IconButton>
@@ -163,7 +166,7 @@ function InvertAllButton(props: CategoriesTreeHeaderButtonProps) {
       title={TreeWidget.translate("invert")}
       size="small"
       styleType="borderless"
-      onClick={() => void invertAllCategories(props)}
+      onClick={() => void invertAllCategories(props.filteredCategories ?? props.categories, props.viewport)}
     >
       <SvgVisibilityHalf />
     </IconButton>

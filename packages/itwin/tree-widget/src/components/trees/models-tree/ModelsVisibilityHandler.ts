@@ -13,7 +13,6 @@ import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import { CachingElementIdsContainer } from "./Utils";
-import { ModelsTreeHeaderButtonProps } from "./ModelsTreeComponent";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 
 /**
@@ -73,6 +72,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     }
   }
 
+  // istanbul ignore next
   public get viewport() {
     return this._props.viewport;
   }
@@ -587,55 +587,45 @@ const createTooltip = (status: "visible" | "hidden" | "disabled", tooltipStringI
   return `${statusString}: ${tooltipString}`;
 };
 
-export async function showAllModels(props: ModelsTreeHeaderButtonProps) {
-  await props.viewport.addViewedModels(props.models.map((model) => model.id));
-  props.viewport.clearNeverDrawn();
-  props.viewport.clearAlwaysDrawn();
+export async function showAllModels(models: string[], viewport: Viewport) {
+  await viewport.addViewedModels(models);
+  viewport.clearNeverDrawn();
+  viewport.clearAlwaysDrawn();
   await toggleAllCategories(
     IModelApp.viewManager,
-    props.viewport.iModel,
+    viewport.iModel,
     true,
-    props.viewport,
+    viewport,
     false,
   );
 }
 
-export async function hideAllModels(props: ModelsTreeHeaderButtonProps) {
-  props.viewport.changeModelDisplay(
-    props.models.map((model) => model.id),
+export async function hideAllModels(models: string[], viewport: Viewport) {
+  viewport.changeModelDisplay(
+    models,
     false
   );
 }
 
-export async function invertAllModels(props: ModelsTreeHeaderButtonProps) {
+export async function invertAllModels(models: string[], viewport: Viewport) {
   const notViewedModels: string[] = [];
-  const models: string[] = [];
-  props.models.forEach((model) => {
-    if (props.viewport.viewsModel(model.id)) models.push(model.id);
-    else notViewedModels.push(model.id);
+  const viewedModels: string[] = [];
+  models.forEach((modelId) => {
+    if (viewport.viewsModel(modelId)) viewedModels.push(modelId);
+    else notViewedModels.push(modelId);
   });
-  await props.viewport.addViewedModels(notViewedModels);
-  props.viewport.changeModelDisplay(models, false);
+  await viewport.addViewedModels(notViewedModels);
+  viewport.changeModelDisplay(viewedModels, false);
 }
 
-export async function view2DModels(models2d: string[], is2dToggleActive: boolean, viewport: Viewport) {
+export async function toggleModels(models: string[], isToggleActive: boolean, viewport: Viewport) {
   // istanbul ignore if
-  if (!models2d)
+  if (!models)
     return;
-  if (is2dToggleActive)
-    viewport.changeModelDisplay(models2d, false);
+  if (isToggleActive)
+    viewport.changeModelDisplay(models, false);
   else
-    await viewport.addViewedModels(models2d);
-}
-
-export async function view3DModels(models3d: string[], is3dToggleActive: boolean, viewport: Viewport) {
-  // istanbul ignore if
-  if (!models3d)
-    return;
-  if (is3dToggleActive)
-    viewport.changeModelDisplay(models3d, false);
-  else
-    await viewport.addViewedModels(models3d);
+    await viewport.addViewedModels(models);
 }
 
 export function areAllModelsVisible(models: string[], viewport: Viewport) {

@@ -15,7 +15,7 @@ import { AutoSizer } from "../../utils/AutoSizer";
 import { ModelsTree, ModelsTreeProps } from "./ModelsTree";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader, TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
-import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, view2DModels, view3DModels } from "./ModelsVisibilityHandler";
+import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
 
 export interface ModelInfo {
   id: string;
@@ -141,7 +141,7 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
-      onClick={() => void showAllModels(props)}
+      onClick={() => void showAllModels(props.models.map((model) => model.id), props.viewport)}
     >
       <SvgVisibilityShow />
     </IconButton>
@@ -155,7 +155,7 @@ function HideAllButton(props: ModelsTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
-      onClick={() => void hideAllModels(props)}
+      onClick={() => void hideAllModels(props.models.map((model) => model.id), props.viewport)}
     >
       <SvgVisibilityHide />
     </IconButton>
@@ -169,7 +169,7 @@ function InvertButton(props: ModelsTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("invert")}
-      onClick={() => void invertAllModels(props)}
+      onClick={() => void invertAllModels(props.models.map((model) => model.id), props.viewport)}
     >
       <SvgVisibilityHalf />
     </IconButton>
@@ -185,7 +185,7 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
   useEffect(() => {
     setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport));
-    return props.viewport.onViewedModelsChanged.addListener(() => setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport)));
+    return props.viewport.onViewedModelsChanged.addListener(/* istanbul ignore next */() => setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport)));
   }, [models2d, props.viewport]);
 
   return (
@@ -194,7 +194,7 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("toggle2DViews")}
-      onClick={() => void view2DModels(models2d, is2dToggleActive, props.viewport)}
+      onClick={() => void toggleModels(models2d, is2dToggleActive, props.viewport)}
       disabled={models2d.length === 0}
       endIcon={is2dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
@@ -212,7 +212,7 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
 
   useEffect(() => {
     setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport));
-    return props.viewport.onViewedModelsChanged.addListener(() => setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport)));
+    return props.viewport.onViewedModelsChanged.addListener(/* istanbul ignore next */() => setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport)));
   }, [models3d, props.viewport]);
 
   return (
@@ -221,7 +221,7 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("toggle3DViews")}
-      onClick={() => void view3DModels(models3d, is3dToggleActive, props.viewport)}
+      onClick={() => void toggleModels(models3d, is3dToggleActive, props.viewport)}
       disabled={models3d.length === 0}
       endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
