@@ -99,7 +99,17 @@ const configuredUiItems = new Map<string, UiItem>([
     }
   ],
   [
+    "map-layers-featureInfo-tool",
     {
+      initialize: async () => { },
+      createUiItemsProvider: () => getDefaultMapFeatureInfoToolItemDef(),
+    }
+  ],
+  [
+    "geo-tool",
+    {
+      initialize: async () => { GeoTools.initialize() },
+      createUiItemsProvider: () => new GeoToolsAddressSearchProvider(),
     }
   ]
 ])
