@@ -9,6 +9,7 @@ import { IModelApp, NotifyMessageDetails, OutputMessagePriority, OutputMessageTy
 import { ToggledTopFitViewFunctionalityProvider } from "./ToggledTopFitViewFunctionalityProvider";
 import { SectioningUtil } from "../visibility/SectioningUtil";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { NotifyMessageDetailsType } from "@itwin/appui-react";
 import { MessageManager } from "@itwin/appui-react";
 import { BreakdownTrees } from "../../BreakdownTrees";
@@ -38,7 +39,12 @@ export class StoryClipPlanesProvider extends ToggledTopFitViewFunctionalityProvi
         // section the story
         const sectionCreated = await SectioningUtil.isolateRoomsForStories(this._treeDataProvider.imodel, vp, nodeInstanceId, this.clipHeight, this.clipAtSpaces);
         if (!sectionCreated) {
-          const message: NotifyMessageDetailsType = new NotifyMessageDetails(OutputMessagePriority.Info, BreakdownTrees.translate("clipSection.briefTimeoutMessage"), BreakdownTrees.translate("clipSection.detailedTimeoutMessage"), OutputMessageType.Toast);
+          const message: NotifyMessageDetailsType = new NotifyMessageDetails(
+            OutputMessagePriority.Info,
+            BreakdownTrees.translate("clipSection.briefTimeoutMessage"),
+            BreakdownTrees.translate("clipSection.detailedTimeoutMessage"),
+            OutputMessageType.Toast
+          );
           MessageManager.addMessage(message);
           return false;
         }
@@ -50,12 +56,14 @@ export class StoryClipPlanesProvider extends ToggledTopFitViewFunctionalityProvi
   }
 
   private async clipSection(node: TreeModelNode) {
-    const elementKey = this._treeDataProvider.getNodeKey(node.item);
+    const elementKey = isPresentationTreeNodeItem(node.item) ? node.item.key : undefined;
+    if (!elementKey) {
+      return;
+    }
     if (NodeKey.isInstancesNodeKey(elementKey)) {
       const instanceId = elementKey.instanceKeys[0].id;
       if (await this.createSectionPlane(instanceId))
         await super.performAction([node]);
     }
   }
-
 }

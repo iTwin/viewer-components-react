@@ -2,16 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
-.gmw-manual-form {
-  display: flex;
-  flex-direction: column;
-  gap: $iui-baseline;
-  overflow: auto;
-  > .gmw-manual-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: $iui-s;
+export class ApiKeys {
+  public static get BingMapsKey() {
+    return process.env.IMJS_BING_MAPS_KEY ?? "";
+  }
+
+  public static get CesiumKey() {
+    return process.env.IMJS_CESIUM_ION_KEY ?? "";
   }
 }

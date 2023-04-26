@@ -7,6 +7,7 @@
     "@itwin/appui-abstract": "^3.7.1",
     "@itwin/appui-layout-react": "^4.0.0-dev.15",
     "@itwin/appui-react": "^4.0.0-dev.15",
+    "@itwin/breakdown-trees-react": "workspace:*",
     "@itwin/browser-authorization": "^0.8.0",
     "@itwin/components-react": "^4.0.0-dev.15",
     "@itwin/core-bentley": "^3.7.1",
@@ -19,6 +20,7 @@
     "@itwin/core-quantity": "^3.7.1",
     "@itwin/core-react": "^4.0.0-dev.15",
     "@itwin/core-telemetry": "^3.7.1",
+    "@itwin/geo-tools-react": "workspace:*",
     "@itwin/imodels-access-frontend": "^3.0.0",
     "@itwin/imodel-components-react": "^4.0.0-dev.15",
     "@itwin/itwinui-react": "^2.7.0",
@@ -56,7 +58,13 @@
     "@itwin/measure-tools-react": {
       "injected": true
     },
+    "@itwin/breakdown-trees-react": {
+      "injected": true
+    },
     "@itwin/map-layers": {
+      "injected": true
+    },
+    "@itwin/geo-tools-react": {
       "injected": true
     }
   },

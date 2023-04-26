@@ -18,6 +18,7 @@ import { Code } from "@itwin/core-common";
 import { ClipVector, Range3d } from "@itwin/core-geometry";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
 import { SectioningUtil } from "../../Views/visibility/SectioningUtil";
+import { BreakdownTrees } from "../../BreakdownTrees";
 
 describe("SpaceClipPlanesProvider", () => {
   let isolateRoomsForStoriesStub: sinon.SinonStub;
@@ -30,11 +31,12 @@ describe("SpaceClipPlanesProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
+    await BreakdownTrees.initialize();
     await TestUtils.initializeUiFramework(connection.object);
     await IModelApp.localization.registerNamespace("BreakdownTrees");
 
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
-    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey);
+    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey); // eslint-disable-line deprecation/deprecation
 
     isolateRoomsForStoriesStub = sinon.stub(SectioningUtil, "isolateRoomsForStories");
 
@@ -62,6 +64,7 @@ describe("SpaceClipPlanesProvider", () => {
     checkIsSpaceStub.restore();
     createCaptureSpy.restore();
     TestUtils.terminateUiFramework();
+    BreakdownTrees.terminate();
   });
   it("should perform action for SpaceClipPlanesProvider", async () => {
     const dummyTreeModelItem: TreeModelNode = FunctionalityProviderTestUtils.createTreeModelNode(MockStrings.IfcWallNode);
