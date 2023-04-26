@@ -796,7 +796,6 @@ importers:
       react-beautiful-dnd: ^13.0.0
       react-dom: ^17.0.0
       react-redux: ^7.2.2
-      react-resize-detector: ^8.0.4
       redux: ^4.1.0
       rimraf: ^3.0.2
       sinon: ^9.0.2
@@ -852,7 +851,6 @@ importers:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-redux: 7.2.9_react-dom@17.0.2+react@17.0.2
-      react-resize-detector: 8.1.0_react-dom@17.0.2+react@17.0.2
       redux: 4.2.1
       rimraf: 3.0.2
       sinon: 9.2.4
@@ -20935,17 +20933,6 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
     dev: false
-
-  /react-resize-detector/8.1.0_react-dom@17.0.2+react@17.0.2:
-    resolution: {integrity: sha512-S7szxlaIuiy5UqLhLL1KY3aoyGHbZzsTpYal9eYMwCyKqoqoVLCmIgAgNyIM1FhnP2KyBygASJxdhejrzjMb+w==}
-    peerDependencies:
-      react: ^16.0.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
-    dependencies:
-      lodash: 4.17.21
-      react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
-    dev: true
 
   /react-router-dom/6.10.0_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-E5dfxRPuXKJqzwSe/qGcqdwa18QiWC6f3H3cWXM24qj4N0/beCIf/CWTipop2xm7mR0RCS99NnaqPNjHtrAzCg==}
