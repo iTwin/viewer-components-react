@@ -11,7 +11,6 @@ import type { PresentationManager, RulesetVariablesManager } from "@itwin/presen
 import { BeEvent } from "@itwin/core-bentley";
 import type { VariableValue } from "@itwin/presentation-common";
 import { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
-import { CategoryInfo } from "../components/trees/category-tree/CategoryVisibilityHandler";
 
 export class TestUtils {
   private static _initialized = false;
@@ -101,13 +100,3 @@ export function mockViewport(props?: ViewportMockProps) {
   vpMock.setup((x) => x.onNeverDrawnChanged).returns(() => props!.onNeverDrawnChanged!);
   return vpMock;
 }
-
-export const testCategories: CategoryInfo[] = [{
-  categoryId: "CategoryId",
-  subCategoryIds: ["SubCategoryId1", "SubCategoryId2"],
-}];
-
-export const testFilteredCategories: CategoryInfo[] = [{
-  categoryId: "FilteredCategoryId",
-  subCategoryIds: ["FilteredSubCategoryId1", "FilteredSubCategoryId2"],
-}];
