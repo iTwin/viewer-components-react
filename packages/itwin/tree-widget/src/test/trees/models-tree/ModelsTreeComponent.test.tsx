@@ -177,7 +177,7 @@ describe("<ModelsTreeComponent />", () => {
         expect(view2DSpy).to.be.calledOnce;
       });
 
-      it("Button is disabled when there are no models with planProjection", async () => {
+      it("renders disabled button when there are no plan projection models", async () => {
         const view2DSpy = sinon.stub(modelsVisibilityHandler, "view2DModels");
         const result = render(
           <ModelsTreeComponent.View2DButton
@@ -245,7 +245,7 @@ describe("<ModelsTreeComponent />", () => {
         expect(view3DSpy).to.be.calledOnce;
       });
 
-      it("Button is disabled when all models are with planProjection", async () => {
+      it("renders disabled button when all models are plan projection models", async () => {
         const vie3DSpy = sinon.stub(modelsVisibilityHandler, "view3DModels");
         const result = render(
           <ModelsTreeComponent.View3DButton
