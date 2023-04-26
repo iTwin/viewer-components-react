@@ -22,6 +22,7 @@
     "@itwin/imodels-access-frontend": "^3.0.0",
     "@itwin/imodel-components-react": "^4.0.0-dev.15",
     "@itwin/itwinui-react": "^2.7.0",
+    "@itwin/map-layers-formats": "^3.7.1",
     "@itwin/presentation-common": "^3.7.1",
     "@itwin/presentation-components": "^4.0.0-dev.34",
     "@itwin/presentation-frontend": "^3.7.1",

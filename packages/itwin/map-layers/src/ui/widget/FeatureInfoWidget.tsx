@@ -3,8 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
+import { useResizeDetector } from "react-resize-detector";
 
-import { PropertyGrid } from "@itwin/components-react";
+import { VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
 import { FillCentered, Orientation } from "@itwin/core-react";
 
 import { FeatureInfoDataProvider, MapFeatureInfoDataUpdate, MapFeatureInfoLoadState } from "./FeatureInfoDataProvider";
@@ -23,6 +24,8 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
   const [loadingData, setLoadingData] = React.useState<boolean>(false);
   const [hasData, setHasData] = React.useState<boolean>(false);
   const [noRecordsMessage] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.NoRecords"));
+
+  const { width, height, ref } = useResizeDetector();
 
   const handleLoadStateChange = (state: MapFeatureInfoLoadState) => {
     setLoadingData(state === MapFeatureInfoLoadState.DataLoadStart);
@@ -65,8 +68,11 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
   } else if (!hasData) {
     return (<FillCentered><span><i>{noRecordsMessage}</i></span></FillCentered>);
   } else {
-    if (dataProvider.current)
-      return (<PropertyGrid dataProvider={dataProvider.current} orientation={Orientation.Vertical} // eslint-disable-line deprecation/deprecation
+    if (dataProvider.current && width && height)
+      return (<VirtualizedPropertyGridWithDataProvider
+        width={width}
+        height={height}
+        dataProvider={dataProvider.current} orientation={Orientation.Vertical}
         isPropertySelectionEnabled={featureInfoOpts?.propertyGridOptions?.isPropertySelectionEnabled} />);
     else
       return (<></>);

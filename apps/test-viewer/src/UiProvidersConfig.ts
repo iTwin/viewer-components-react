@@ -6,7 +6,7 @@ import { UiItemsProvider } from "@itwin/appui-react";
 import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
 import { PropertyGridManager, PropertyGridUiItemsProvider } from "@itwin/property-grid-react";
 import { MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
-import { MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
+import { DefaultMapFeatureInfoTool, FeatureInfoUiItemsProvider, MapLayersUI, MapLayersUiItemsProvider, getDefaultMapFeatureInfoToolItemDef } from "@itwin/map-layers";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -70,8 +70,22 @@ const configuredUiItems = new Map<string, UiItem>([
   [
     "map-layers",
     {
-      initialize: async () => MapLayersUI.initialize(),
+      initialize: async () => MapLayersUI.initialize({}),
       createUiItemsProvider: () => new MapLayersUiItemsProvider(),
+    }
+  ],
+  [
+    "map-layers-featureInfo-widget",
+    {
+      initialize: async () => { },
+      createUiItemsProvider: () => new FeatureInfoUiItemsProvider({ onMapHit: DefaultMapFeatureInfoTool.onMapHit }),
+    }
+  ],
+  [
+    "map-layers-featureInfo-tool",
+    {
+      initialize: async () => { },
+      createUiItemsProvider: () => getDefaultMapFeatureInfoToolItemDef(),
     }
   ]
 ])
