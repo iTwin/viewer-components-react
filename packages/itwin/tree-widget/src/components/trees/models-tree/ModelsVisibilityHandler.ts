@@ -72,11 +72,6 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
     }
   }
 
-  // istanbul ignore next
-  public get viewport() {
-    return this._props.viewport;
-  }
-
   public dispose() {
     this._listeners.forEach((remove) => remove());
     clearTimeout(this._pendingVisibilityChange);
@@ -622,7 +617,7 @@ export async function toggleModels(models: string[], enable: boolean, viewport: 
   // istanbul ignore if
   if (!models)
     return;
-  if (isToggleActive)
+  if (enable)
     viewport.changeModelDisplay(models, false);
   else
     await viewport.addViewedModels(models);

@@ -29,6 +29,7 @@ export interface CategoriesTreeComponentProps extends Omit<CategoryTreeProps,
 | "filterInfo"
 | "onFilterApplied"
 | "categories"
+| "categoryVisibilityHandler"
 | "viewManager"
 > {
   headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
@@ -70,7 +71,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
       else
         setFilteredCategories(undefined);
     })();
-  }, [filteredProvider, filterString]);
+  }, [filteredProvider]);
 
   return (
     <>
