@@ -34,9 +34,8 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   public onDataChanged = new PropertyDataChangeEvent();
   public onDataLoadStateChanged = new BeEvent<MapFeatureInfoLoadListener>();
   public onDataUpdated = new BeEvent<MapFeatureInfoDataUpdatedListener>();
-  private _lastData = new SimplePropertyData();
+  private _data = new SimplePropertyData();
   constructor(onMapHit: MapHitEvent) {
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     this._removeListener = onMapHit.addListener(this._handleMapHit, this);
   }
 
@@ -45,10 +44,8 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   }
 
   private async _handleMapHit(mapHit: HitDetail) {
-    this._lastData = new SimplePropertyData();
+    this._data = new SimplePropertyData();
 
-    //this.records = {};
-    //this.categories = [];
     let recordCount = 0;
     if (mapHit?.isMapHit) {
       this.onDataLoadStateChanged.raiseEvent(MapFeatureInfoLoadState.DataLoadStart);
@@ -61,7 +58,7 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
           const layerCategory = (
             layerCatIdx === -1 ?
               { name: curLayerInfo.layerName, label: curLayerInfo.layerName, expand: true, childCategories: [] }
-              : this._lastData.categories[layerCatIdx]);
+              : this._data.categories[layerCatIdx]);
 
           if (curLayerInfo.info && !(curLayerInfo.info instanceof HTMLElement)) {
             // This is not an HTMLElement, so iterate over each sub-layer info
@@ -97,47 +94,47 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   }
 
   public addSubCategory(categoryName: string) {
-    this._lastData.records[categoryName] = [];
+    this._data.records[categoryName] = [];
   }
   public addCategory(category: PropertyCategory): number {
 
-    const categoryIdx = this._lastData.categories.push(category) - 1;
-    this._lastData.records[this._lastData.categories[categoryIdx].name] = [];
+    const categoryIdx = this._data.categories.push(category) - 1;
+    this._data.records[this._data.categories[categoryIdx].name] = [];
     return categoryIdx;
   }
 
   public findCategoryIndex(category: PropertyCategory): number {
-    const index = this._lastData.categories.findIndex((testCategory: PropertyCategory) => {
+    const index = this._data.categories.findIndex((testCategory: PropertyCategory) => {
       return testCategory.name === category.name;
     });
     return index;
   }
   public findCategoryIndexByName(name: string): number {
-    const index = this._lastData.categories.findIndex((testCategory: PropertyCategory) => {
+    const index = this._data.categories.findIndex((testCategory: PropertyCategory) => {
       return testCategory.name === name;
     });
     return index;
   }
 
   public addProperty(propertyRecord: PropertyRecord, categoryName: string): void {
-    const idx = this._lastData.records[categoryName].findIndex((prop) => prop.property.name === propertyRecord.property.name);
+    const idx = this._data.records[categoryName].findIndex((prop) => prop.property.name === propertyRecord.property.name);
     if (idx === -1) {
-      this._lastData.records[categoryName].push(propertyRecord);
+      this._data.records[categoryName].push(propertyRecord);
     } else {
-      this._lastData.records[categoryName][idx].isMerged = true;
-      this._lastData.records[categoryName][idx].isReadonly = true;
+      this._data.records[categoryName][idx].isMerged = true;
+      this._data.records[categoryName][idx].isReadonly = true;
     }
   }
 
   public removeProperty(propertyRecord: PropertyRecord, categoryIdx: number): boolean {
-    const index = this._lastData.records[this._lastData.categories[categoryIdx].name].findIndex((record: PropertyRecord) => {
+    const index = this._data.records[this._data.categories[categoryIdx].name].findIndex((record: PropertyRecord) => {
       return record === propertyRecord;
     });
 
     let result = false;
 
     if (index >= 0) {
-      this._lastData.records[this._lastData.categories[categoryIdx].name].splice(index, 1);
+      this._data.records[this._data.categories[categoryIdx].name].splice(index, 1);
       this.onDataChanged.raiseEvent();
       result = true;
     }
@@ -145,21 +142,20 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   }
 
   public replaceProperty(propertyRecord: PropertyRecord, categoryIdx: number, newRecord: PropertyRecord): boolean {
-    const index = this._lastData.records[this._lastData.categories[categoryIdx].name].findIndex((record: PropertyRecord) => {
+    const index = this._data.records[this._data.categories[categoryIdx].name].findIndex((record: PropertyRecord) => {
       return record === propertyRecord;
     });
 
     let result = false;
 
-    // istanbul ignore else
     if (index >= 0) {
-      this._lastData.records[this._lastData.categories[categoryIdx].name].splice(index, 1, newRecord);
+      this._data.records[this._data.categories[categoryIdx].name].splice(index, 1, newRecord);
       result = true;
     }
     return result;
   }
 
   public async getData(): Promise<PropertyData> {
-    return this._lastData;
+    return this._data;
   }
 }
