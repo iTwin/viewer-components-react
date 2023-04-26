@@ -70,13 +70,13 @@ importers:
       '@itwin/core-quantity': 3.7.1_@itwin+core-bentley@3.7.1
       '@itwin/core-react': 4.0.0-dev.16_5beced3238b7f35a0c0f8fe406b86ddf
       '@itwin/core-telemetry': 3.7.1_@itwin+core-geometry@3.7.1
-      '@itwin/frontend-devtools': 3.7.4_dd5593b8ff877ca340a9a3caa619602d
+      '@itwin/frontend-devtools': 3.7.1_dd5593b8ff877ca340a9a3caa619602d
       '@itwin/geo-tools-react': file:../../packages/itwin/geo-tools_203d7305dd49b61d66e0f27456ceafa1
       '@itwin/imodel-components-react': 4.0.0-dev.16_a7f68987b1dfe8b4939d65353ae226c2
       '@itwin/imodels-access-frontend': 3.0.0_fff931033b92bb16fed9d96490961451
       '@itwin/itwinui-react': 2.7.0_react-dom@17.0.2+react@17.0.2
       '@itwin/map-layers': file:../../packages/itwin/map-layers_e6fd31cd3f7f26f4751d568467352809
-      '@itwin/map-layers-formats': 3.7.4_c75a4a10c1f370465cba1aa13b33b9c9
+      '@itwin/map-layers-formats': 3.7.1_c75a4a10c1f370465cba1aa13b33b9c9
       '@itwin/measure-tools-react': file:../../packages/itwin/measure-tools_c7b38fd40cc8dc34e59c312c3e6b6681
       '@itwin/presentation-common': 3.7.1_94355e9609de2975afe398485abd2942
       '@itwin/presentation-components': 4.0.0-dev.36_9243d0c042199f1f78feba71732ca9cf
@@ -1493,6 +1493,7 @@ packages:
       xml2js: 0.4.23
     transitivePeerDependencies:
       - encoding
+    dev: true
 
   /@azure/core-lro/1.0.5:
     resolution: {integrity: sha512-0EFCFZxARrIoLWMIRt4vuqconRVIO2Iin7nFBfJiYCCbKp5eEmxutNk8uqudPmG0XFl5YqlVh68/al/vbE5OOg==}
@@ -1513,6 +1514,7 @@ packages:
       '@azure/abort-controller': 1.1.0
       '@azure/logger': 1.0.3
       tslib: 2.3.1
+    dev: true
 
   /@azure/core-paging/1.2.1:
     resolution: {integrity: sha512-UtH5iMlYsvg+nQYIl4UHlvvSrsBjOlRF4fs0j7mxd3rWdAStrKYrh2durOpHs5C9yZbVhsVDaisoyaf/lL1EVA==}
@@ -1523,12 +1525,6 @@ packages:
 
   /@azure/core-paging/1.4.0:
     resolution: {integrity: sha512-tabFtZTg8D9XqZKEfNUOGh63SuYeOxmvH4GDcOJN+R1bZWZ1FZskctgY9Pmuwzhn+0Xvq9rmimK9hsvtLkeBsw==}
-    engines: {node: '>=14.0.0'}
-    dependencies:
-      tslib: 2.3.1
-
-  /@azure/core-paging/1.5.0:
-    resolution: {integrity: sha512-zqWdVIt+2Z+3wqxEOGzR5hXFZ8MGKK52x4vFLw8n58pR6ZfKRx3EXYTxTaYxYHc/PexPUTyimcTWFJbji9Z6Iw==}
     engines: {node: '>=14.0.0'}
     dependencies:
       tslib: 2.3.1
@@ -1547,6 +1543,7 @@ packages:
     dependencies:
       '@opentelemetry/api': 1.4.1
       tslib: 2.3.1
+    dev: true
 
   /@azure/core-tracing/1.0.0-preview.9:
     resolution: {integrity: sha512-zczolCLJ5QG42AEPQ+Qg9SRYNUyB+yZ5dzof4YEc+dyWczO9G2sBqbAjLB7IqrsdHN2apkiB2oXeDKCsq48jug==}
@@ -1562,6 +1559,7 @@ packages:
     dependencies:
       '@azure/abort-controller': 1.1.0
       tslib: 2.3.1
+    dev: true
 
   /@azure/logger/1.0.3:
     resolution: {integrity: sha512-aK4s3Xxjrx3daZr3VylxejK3vG5ExXck5WOHDJ8in/k9AqlfIyFMMT1uG7u8mNjX+QRILTIn0/Xgschfh/dQ9g==}
@@ -1576,13 +1574,14 @@ packages:
       '@azure/abort-controller': 1.1.0
       '@azure/core-http': 3.0.0
       '@azure/core-lro': 2.5.1
-      '@azure/core-paging': 1.5.0
+      '@azure/core-paging': 1.4.0
       '@azure/core-tracing': 1.0.0-preview.13
       '@azure/logger': 1.0.3
       events: 3.3.0
       tslib: 2.3.1
     transitivePeerDependencies:
       - encoding
+    dev: true
 
   /@azure/storage-blob/12.2.1:
     resolution: {integrity: sha512-erqCSmDL8b/AHZi94nq+nCE+2whQmvBDkAv4N9uic0MRac/gRyZqnsqkfrun/gr2rZo+qVtnMenwkkE3roXn8Q==}
@@ -4916,14 +4915,6 @@ packages:
       inversify: 5.0.5
       reflect-metadata: 0.1.13
 
-  /@itwin/cloud-agnostic-core/1.6.0:
-    resolution: {integrity: sha512-IKj3lxaVQqGezz7bkFjKEf9g7Bk4i2cu2aCJsd9HnV2gn79lo8oU0UiPJ+kuVtMsEcN/yRq/EXk/IR/VnNkLKA==}
-    engines: {node: '>=12.20 <19.0.0'}
-    dependencies:
-      inversify: 5.0.5
-      reflect-metadata: 0.1.13
-    dev: false
-
   /@itwin/components-react/3.1.2_ad1af7938be23ef7011d65ba65fd969c:
     resolution: {integrity: sha512-2rGylM6SgRpjxbNwMW7adKTUQGStyYYJrwhid5PTeyV7/OoYNYyq6oUUQpgeNKD+PRDiLiyj92+GFmtixW3EAA==}
     peerDependencies:
@@ -5288,10 +5279,6 @@ packages:
   /@itwin/core-bentley/3.7.1:
     resolution: {integrity: sha512-akEbRBI/a2b+F8nWreJoWr0O7UNG5Y/EArdw5KDX0D+LiYe45iAptjeIYmzwVgfwQQOnsYYnXi+5RotM4WlIHg==}
 
-  /@itwin/core-bentley/3.7.4:
-    resolution: {integrity: sha512-GYZA3pFf4tkNyPUNVKgR59GXaopaTWIG9UILwYaNimYh7JjSGS9QA8fSAzYvkkSQiAHtmAA0yFzRoVniPu6OSw==}
-    dev: false
-
   /@itwin/core-common/3.1.2_3677922ab283ebfe2b0729d579358145:
     resolution: {integrity: sha1-8yzbjDldWYWsEbi3ZeAWhH5SCLo=}
     peerDependencies:
@@ -5412,22 +5399,6 @@ packages:
       semver: 7.4.0
     transitivePeerDependencies:
       - debug
-
-  /@itwin/core-common/3.7.4_271f0cd87c1e426cfe149030e44b1e5a:
-    resolution: {integrity: sha512-vQCWseUwFxNSTD4R2dKgZdDkgRyLjlIiNt2fYsdXRzlBkD265OLrU6x4gY5scAeoXJ3rTlIfhqjOiDqJWqic4w==}
-    peerDependencies:
-      '@itwin/core-bentley': ^3.7.4
-      '@itwin/core-geometry': ^3.7.4
-    dependencies:
-      '@itwin/core-bentley': 3.7.4
-      '@itwin/core-geometry': 3.7.4
-      '@itwin/object-storage-core': 1.6.0
-      flatbuffers: 1.12.0
-      js-base64: 3.7.2
-      semver: 7.4.0
-    transitivePeerDependencies:
-      - debug
-    dev: false
 
   /@itwin/core-frontend/3.1.2_5a82738ef9179eb6bb289529ae5c5770:
     resolution: {integrity: sha512-wwWlXO7bJx9oYqbcibuUgtt4SvrOtV/56du9j/RWlprgT7N3JMdDcncA9ym6IMcGnhWNYb6fan9LyZJzwsHLng==}
@@ -5684,45 +5655,6 @@ packages:
       - encoding
       - supports-color
 
-  /@itwin/core-frontend/3.7.4_254e0a35e7c1b5ffa74f0a242a79326b:
-    resolution: {integrity: sha512-UNgb/6WRM7tf916YojuHINitEgw2uXQYIL/1U5cwM4PoAjzgSXE6UAk53QwXCtsaY1pAQEIgBbJrCA+k2KT02w==}
-    peerDependencies:
-      '@itwin/appui-abstract': ^3.7.4
-      '@itwin/core-bentley': ^3.7.4
-      '@itwin/core-common': ^3.7.4
-      '@itwin/core-geometry': ^3.7.4
-      '@itwin/core-orbitgt': ^3.7.4
-      '@itwin/core-quantity': ^3.7.4
-      '@itwin/webgl-compatibility': ^3.7.4
-    dependencies:
-      '@itwin/appui-abstract': 3.7.1_@itwin+core-bentley@3.7.1
-      '@itwin/cloud-agnostic-core': 1.6.0
-      '@itwin/core-bentley': 3.7.4
-      '@itwin/core-common': 3.7.4_271f0cd87c1e426cfe149030e44b1e5a
-      '@itwin/core-geometry': 3.7.4
-      '@itwin/core-i18n': 3.7.4_@itwin+core-bentley@3.7.4
-      '@itwin/core-orbitgt': 3.7.1
-      '@itwin/core-quantity': 3.7.1_@itwin+core-bentley@3.7.1
-      '@itwin/core-telemetry': 3.7.4_@itwin+core-geometry@3.7.4
-      '@itwin/object-storage-azure': 1.6.0
-      '@itwin/object-storage-core': 1.6.0
-      '@itwin/webgl-compatibility': 3.7.1
-      '@loaders.gl/core': 3.1.8
-      '@loaders.gl/draco': 3.1.8
-      deep-assign: 2.0.0
-      fuse.js: 3.6.1
-      lodash: 4.17.21
-      qs: 6.10.3
-      reflect-metadata: 0.1.13
-      semver: 7.4.0
-      superagent: 7.1.5
-      wms-capabilities: 0.4.0
-    transitivePeerDependencies:
-      - debug
-      - encoding
-      - supports-color
-    dev: false
-
   /@itwin/core-geometry/3.1.2:
     resolution: {integrity: sha512-fYmV5bFPrXepZJmH2BreGQ8V2iYxjDiyNlGa9LLGKxClnEnWYSYctT0H6QUUx6B0fwQ/HIRQKdSqGbZ7wRV1Ag==}
     dependencies:
@@ -5769,13 +5701,6 @@ packages:
     dependencies:
       '@itwin/core-bentley': 3.7.1
       flatbuffers: 1.12.0
-
-  /@itwin/core-geometry/3.7.4:
-    resolution: {integrity: sha512-1nWNMezKd+2jl+JPq3BpNj/SOylku0VUIJU22AGKnlNCrcoz8HA1es1q8ZKY27xoE5mw6ARIvBk/CYZXZT1TEg==}
-    dependencies:
-      '@itwin/core-bentley': 3.7.4
-      flatbuffers: 1.12.0
-    dev: false
 
   /@itwin/core-i18n/3.1.2_@itwin+core-bentley@3.1.2:
     resolution: {integrity: sha512-8uzFoed2+lt8F+x5P3hwIJI/mznODizNqk8a7DUHx6Q18AUPjdUEDZRRZ6jfqgL4YQAvvf2OxNNo1qv5brBySg==}
@@ -5869,19 +5794,6 @@ packages:
       i18next-http-backend: 1.4.5
     transitivePeerDependencies:
       - encoding
-
-  /@itwin/core-i18n/3.7.4_@itwin+core-bentley@3.7.4:
-    resolution: {integrity: sha512-ygfY10Dt1Ir77gdqKa+RNJqlOWAhc8frsKPiPUUHc48s13GE13SEimYS8uU9mqlxMjVliY8342uk0oqdefr68Q==}
-    peerDependencies:
-      '@itwin/core-bentley': ^3.7.4
-    dependencies:
-      '@itwin/core-bentley': 3.7.4
-      i18next: 21.10.0
-      i18next-browser-languagedetector: 6.1.4
-      i18next-http-backend: 1.4.5
-    transitivePeerDependencies:
-      - encoding
-    dev: false
 
   /@itwin/core-markup/3.1.2_6a6465ae15903d79698f2170b25fd468:
     resolution: {integrity: sha512-zGRs+IkYNDQp/TDPB9F+/fT6wNckDQLlBaOXTRY/SktgBCBooI1ElZ5coP8IH4YTzd7cYDEjGBWAxUoIC7hHNg==}
@@ -6347,16 +6259,6 @@ packages:
       - '@itwin/core-geometry'
       - debug
 
-  /@itwin/core-telemetry/3.7.4_@itwin+core-geometry@3.7.4:
-    resolution: {integrity: sha512-C4zy2xf1Aek6qQJOTg41/JwR0FuS8UK14zPYOaYqgx1rhbM7g2oNyE94xUEJsjcadtvR46gvRy/JAewCe04HPw==}
-    dependencies:
-      '@itwin/core-bentley': 3.7.4
-      '@itwin/core-common': 3.7.4_271f0cd87c1e426cfe149030e44b1e5a
-    transitivePeerDependencies:
-      - '@itwin/core-geometry'
-      - debug
-    dev: false
-
   /@itwin/core-webpack-tools/3.7.1_webpack@5.76.0:
     resolution: {integrity: sha512-prde7KCoGVVTxFql3iVXvKMXKnjCnO+5yMwXLFZ691Ldkn8LQ2gFgp8KxpyLNvBsArIYOh+xq47KZUitm9TQgw==}
     peerDependencies:
@@ -6630,13 +6532,13 @@ packages:
       - supports-color
     dev: true
 
-  /@itwin/frontend-devtools/3.7.4_dd5593b8ff877ca340a9a3caa619602d:
-    resolution: {integrity: sha512-Q8X9V29piVdCbkcL3f/aWbVVCYleHXCJhhvizUP9Ntm/3q9lw6r8m5ASV94ooU3pqM5ahc7TxMRSV+mWTVmboQ==}
+  /@itwin/frontend-devtools/3.7.1_dd5593b8ff877ca340a9a3caa619602d:
+    resolution: {integrity: sha512-3mnMqyVMfkYv55UatJzlvpn34ZZMxRXjlJaA47cTSzBb/92mrlyr5OGlrsndU7iWcVkiTNjeLWzKGQl7kHNniw==}
     dependencies:
-      '@itwin/core-bentley': 3.7.4
-      '@itwin/core-common': 3.7.4_271f0cd87c1e426cfe149030e44b1e5a
-      '@itwin/core-frontend': 3.7.4_254e0a35e7c1b5ffa74f0a242a79326b
-      '@itwin/core-geometry': 3.7.4
+      '@itwin/core-bentley': 3.7.1
+      '@itwin/core-common': 3.7.1_959ee76f33ed1944c35aec3c0d82ba52
+      '@itwin/core-frontend': 3.7.1_791e691e277aed8f8b5beeac11c5b449
+      '@itwin/core-geometry': 3.7.1
       file-saver: 2.0.5
     transitivePeerDependencies:
       - '@itwin/appui-abstract'
@@ -7236,13 +7138,13 @@ packages:
   /@itwin/itwinui-variables/2.0.0:
     resolution: {integrity: sha512-fifv56z4pIVNA7KucfFiDdLThOFOLUF7MYY6VQclfF5uju0Jzl3JmnlTbmBiYlOo9oVn3drtHsA356UWIKclNQ==}
 
-  /@itwin/map-layers-formats/3.7.4_c75a4a10c1f370465cba1aa13b33b9c9:
-    resolution: {integrity: sha512-YiOUxl7OYLchfwLRrESH1/JH9lpozdnf7FuaeOhSEUnap3FSD/48v7gji5GdYDcUy5WQ2gX529BHwK4Pi/l+RQ==}
+  /@itwin/map-layers-formats/3.7.1_c75a4a10c1f370465cba1aa13b33b9c9:
+    resolution: {integrity: sha512-HyLN0ZZMmnqinAk5jVJ5Tc63nE58UMf5p9gwT47wgRPpWj30wosPLTCWTVbVHybT/FICMyBRoh11sdlz4f8m3A==}
     peerDependencies:
-      '@itwin/appui-abstract': 3.7.4
-      '@itwin/core-bentley': 3.7.4
-      '@itwin/core-common': 3.7.4
-      '@itwin/core-geometry': 3.7.4
+      '@itwin/appui-abstract': 3.7.1
+      '@itwin/core-bentley': 3.7.1
+      '@itwin/core-common': 3.7.1
+      '@itwin/core-geometry': 3.7.1
     dependencies:
       '@itwin/appui-abstract': 3.7.1_@itwin+core-bentley@3.7.1
       '@itwin/core-bentley': 3.7.1
@@ -7265,21 +7167,6 @@ packages:
       - debug
       - encoding
 
-  /@itwin/object-storage-azure/1.6.0:
-    resolution: {integrity: sha512-b0rxhn0NAFY1alOEGMAUaJtK8WG7xoJPDOVjuA8nC7zFcxxtP2VOsSOauuie2zzL3GDi9OU6vywR3gAcJcTZww==}
-    engines: {node: '>=12.20 <19.0.0'}
-    dependencies:
-      '@azure/core-paging': 1.5.0
-      '@azure/storage-blob': 12.13.0
-      '@itwin/cloud-agnostic-core': 1.6.0
-      '@itwin/object-storage-core': 1.6.0
-      inversify: 5.0.5
-      reflect-metadata: 0.1.13
-    transitivePeerDependencies:
-      - debug
-      - encoding
-    dev: false
-
   /@itwin/object-storage-core/1.4.0:
     resolution: {integrity: sha512-ixAgmeLuz3y34SyIDZbNNAfJBgfyqLjQZP0g8maLMd5TGcpU7ZNykA9Gtx1chSJcxUM+J3U7uaLBjULPkTtr7g==}
     engines: {node: '>=12.20 <17.0.0'}
@@ -7290,18 +7177,6 @@ packages:
       reflect-metadata: 0.1.13
     transitivePeerDependencies:
       - debug
-
-  /@itwin/object-storage-core/1.6.0:
-    resolution: {integrity: sha512-6X6YZ5E/kSJJlKQm7+xluzBGBGPILlEmEfzBgEcDqEwABS214OcKU74kW5mfrB6AiNXKZ2RkxfafW/ZpYi24fg==}
-    engines: {node: '>=12.20 <19.0.0'}
-    dependencies:
-      '@itwin/cloud-agnostic-core': 1.6.0
-      axios: 0.27.2
-      inversify: 5.0.5
-      reflect-metadata: 0.1.13
-    transitivePeerDependencies:
-      - debug
-    dev: false
 
   /@itwin/presentation-backend/3.7.0_1ad89a4ab899794f101a6a30d8253cfe:
     resolution: {integrity: sha512-22VittFbt8x9GF7pooclOiNvn96FUfDxwetifAgUHXt+7blIN90VjePx7rk4fifF/lkltsxPY6jzb4aalz0TDw==}
@@ -7884,7 +7759,7 @@ packages:
       '@itwin/core-bentley': ^3.0.0
     dependencies:
       '@itwin/core-bentley': 3.7.1
-      '@itwin/core-geometry': 3.7.4
+      '@itwin/core-geometry': 3.7.1
       axios: 0.25.0
     transitivePeerDependencies:
       - debug
@@ -8725,6 +8600,7 @@ packages:
   /@opentelemetry/api/1.4.1:
     resolution: {integrity: sha512-O2yRJce1GOc6PAy3QxFM4NzFiWzvScDC1/5ihYBL6BUEVdq0XMWN01sppE+H6bBXbaFYipjwFLEWLg5PaSOThA==}
     engines: {node: '>=8.0.0'}
+    dev: true
 
   /@opentelemetry/context-base/0.10.2:
     resolution: {integrity: sha512-hZNKjKOYsckoOEgBziGMnBcX0M7EtstnCmwz5jZUOUYwlZ+/xxX6z3jPu1XVO2Jivk0eLfuP9GP+vFD49CMetw==}
@@ -9815,6 +9691,7 @@ packages:
     resolution: {integrity: sha512-sOUTGn6h1SfQ+gbgqC364jLFBw2lnFqkgF3q0WovEHRLMrVD1sd5aufqi/aJObLekJO+Aq5z646U4Oxy6shXMA==}
     dependencies:
       '@types/node': 18.15.3
+    dev: true
 
   /@types/ws/8.5.4:
     resolution: {integrity: sha512-zdQDHKUgcX/zBc4GrwsE/7dVdAD8JR4EuiAXiiUhhfyIJXXb2+PrGshFyeXWQPMmmZ2XxgaqclgpIC7eTXc1mg==}
@@ -20977,6 +20854,7 @@ packages:
 
   /react-is/18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
+    dev: false
 
   /react-redux/7.2.6_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-10RPdsz0UUrRL1NZE0ejTkucnclYSgXp5q+tB5SWx2qeG2ZJQJyymgAhwKy73yiL/13btfB6fPr+rgbMAaZIAQ==}
@@ -21166,7 +21044,7 @@ packages:
     dependencies:
       object-assign: 4.1.1
       react: 17.0.2
-      react-is: 18.2.0
+      react-is: 17.0.2
     dev: true
 
   /react-split/2.0.14_react@17.0.2:

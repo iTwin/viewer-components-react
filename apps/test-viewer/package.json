@@ -67,9 +67,6 @@
     },
     "@itwin/geo-tools-react": {
       "injected": true
-    },
-    "@itwin/frontend-devtools": {
-      "injected": true
     }
   },
   "scripts": {
