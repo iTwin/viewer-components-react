@@ -5,11 +5,11 @@
 
 import "../VisibilityTreeBase.scss";
 import * as React from "react";
-import { ControlledTree, SelectionMode, TreeNodeItem, useTreeModel } from "@itwin/components-react";
+import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { useDisposable } from "@itwin/core-react";
-import { NodeKey, Ruleset } from "@itwin/presentation-common";
-import { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+import { Ruleset } from "@itwin/presentation-common";
+import { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider, isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { ClassGroupingOption, VisibilityTreeFilterInfo } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
@@ -92,9 +92,6 @@ export function ModelsTree(props: ModelsTreeProps) {
   const filterApplied = filteredNodeLoader !== nodeLoader;
 
   const { activeView, modelsVisibilityHandler, selectionPredicate } = props;
-  const nodeSelectionPredicate = React.useCallback((key: NodeKey, node: TreeNodeItem) => {
-    return !selectionPredicate ? true : selectionPredicate(key, ModelsVisibilityHandler.getNodeType(node, nodeLoader.dataProvider));
-  }, [selectionPredicate, nodeLoader.dataProvider]);
 
   const visibilityHandler = useVisibilityHandler(
     nodeLoader.dataProvider.rulesetId,
@@ -107,8 +104,8 @@ export function ModelsTree(props: ModelsTreeProps) {
     nodeLoader: filteredNodeLoader,
     visibilityHandler,
     collapsedChildrenDisposalEnabled: true,
-    selectionPredicate: nodeSelectionPredicate,
-  }), [filteredNodeLoader, visibilityHandler, nodeSelectionPredicate]));
+    selectionPredicate: (node) => !selectionPredicate || !isPresentationTreeNodeItem(node) ? true : selectionPredicate(node.key, ModelsVisibilityHandler.getNodeType(node)),
+  }), [filteredNodeLoader, visibilityHandler, selectionPredicate]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
   const treeRenderer = useVisibilityTreeRenderer(true, false);

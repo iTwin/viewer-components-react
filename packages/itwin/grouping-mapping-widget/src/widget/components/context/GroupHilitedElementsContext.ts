@@ -12,17 +12,17 @@ export interface QueryCacheItem {
 }
 export interface GroupHilitedElements {
   hilitedElementsQueryCache: MutableRefObject<Map<string, QueryCacheItem>>;
-  hiddenGroupsIds: string[];
+  hiddenGroupsIds: Set<string>;
   showGroupColor: boolean;
   groups: Group[];
   setGroups: (groups: Group[]) => void;
-  setHiddenGroupsIds: (hiddenGroupIds: string[]) => void;
+  setHiddenGroupsIds: (hiddenGroupIds: Set<string>) => void;
   setShowGroupColor: (showGroupColor: boolean | ((showGroupColor: boolean) => boolean)) => void;
 }
 
 export const GroupHilitedElementsContext = React.createContext<GroupHilitedElements>({
   hilitedElementsQueryCache: { current: new Map() },
-  hiddenGroupsIds: [],
+  hiddenGroupsIds: new Set(),
   showGroupColor: false,
   groups: [],
   setGroups: () => { },

@@ -2,25 +2,25 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { SvgAdd } from "@itwin/itwinui-icons-react";
-import { Button, DropdownMenu, MenuItem, ProgressRadial } from "@itwin/itwinui-react";
+import { Button, DropdownMenu, MenuItem, Text } from "@itwin/itwinui-react";
 import React from "react";
 import type { GroupingCustomUI } from "./customUI/GroupingMappingCustomUI";
+import "./GroupsAddButton.scss";
 
 export interface GroupsDropdownMenuProps {
-  isLoadingQuery: boolean;
+  disabled?: boolean;
   groupUIs: GroupingCustomUI[];
   onClickAddGroup: (type: string) => void;
 }
 
 export const GroupsAddButton = ({
-  isLoadingQuery,
+  disabled,
   groupUIs,
   onClickAddGroup,
 }: GroupsDropdownMenuProps) => (
   <DropdownMenu
     className="gmw-custom-ui-dropdown"
-    disabled={isLoadingQuery}
+    disabled={disabled}
     menuItems={() =>
       groupUIs.map((p, index) => (
         <MenuItem
@@ -36,17 +36,10 @@ export const GroupsAddButton = ({
   >
     <Button
       data-testid="gmw-add-group-button"
-      startIcon={
-        isLoadingQuery ? (
-          <ProgressRadial size="small" indeterminate />
-        ) : (
-          <SvgAdd />
-        )
-      }
       styleType="high-visibility"
-      disabled={isLoadingQuery}
+      disabled={disabled}
     >
-      {isLoadingQuery ? "Loading" : "Add Group"}
+      <Text>Add Group</Text>
     </Button>
   </DropdownMenu>
 );

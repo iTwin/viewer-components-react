@@ -3,6 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
 import * as React from "react";
 import { createContext } from "react";
 
@@ -11,6 +12,7 @@ export type GetAccessTokenFn = () => Promise<AccessToken>;
 export interface GroupingMappingApiConfig {
   getAccessToken: GetAccessTokenFn;
   iModelId: string;
+  iModelConnection?: IModelConnection;
   prefix?: ClientPrefix;
 }
 
@@ -19,6 +21,7 @@ export const GroupingMappingApiConfigContext =
     getAccessToken: async () => "",
     iModelId: "",
     prefix: undefined,
+    iModelConnection: undefined,
   });
 
 export const useGroupingMappingApiConfig = () => {

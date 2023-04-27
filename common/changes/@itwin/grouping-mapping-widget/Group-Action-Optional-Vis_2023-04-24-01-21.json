@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/grouping-mapping-widget",
-      "comment": "Fixed Select Query Builder reset button. No longer fails to visualize. ",
-      "type": "patch"
+      "comment": "Added shouldVisualize prop to GroupAction which enables or disables visualization.",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/grouping-mapping-widget"

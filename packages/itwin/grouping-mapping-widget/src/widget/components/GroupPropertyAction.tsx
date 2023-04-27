@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 import { renderToStaticMarkup } from "react-dom/server";
 import { PropertyValueFormat } from "@itwin/presentation-common";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import {
   Alert,
@@ -95,8 +94,7 @@ export const GroupPropertyAction = ({
   onSaveSuccess,
   onClickCancel,
 }: GroupPropertyActionProps) => {
-  const iModelConnection = useActiveIModelConnection();
-  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
+  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const { hilitedElementsQueryCache } = useGroupHilitedElementsContext();
   const [propertyName, setPropertyName] = useState<string>("");

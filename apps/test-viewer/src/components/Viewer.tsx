@@ -9,6 +9,7 @@ import { Viewer as WebViewer, ViewerPerformance } from "@itwin/web-viewer-react"
 import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { useAuthorizationContext } from "./Authorization";
+import { ApiKeys } from "./ApiKeys";
 
 const uiConfig = getUiProvidersConfig();
 
@@ -37,6 +38,9 @@ export function Viewer() {
         hideStatusBar: true,
         hideToolSettings: true
       }}
+      mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
+      tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
+
     />
   );
 }

@@ -3,17 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import { CalculatedPropertyAction } from "./CalculatedPropertyAction";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { CustomCalculationAction } from "./CustomCalculationAction";
 import { GroupAction } from "./GroupAction";
-import { Groupings } from "./Grouping";
 import type { Route } from "./GroupingMapping";
 import { RouteStep } from "./GroupingMapping";
 import { GroupPropertyAction } from "./GroupPropertyAction";
 import { Mappings } from "./Mapping";
 import { MappingAction } from "./MappingAction";
-import { PropertyMenu } from "./PropertyMenu";
+import { CalculatedPropertyActionWithVisuals } from "./CalculatedPropertyActionWithVisuals";
+import { PropertyMenuWithVisualization } from "./PropertyMenuWithVisualization";
+import { GroupsVisualization } from "./GroupsVisualization";
 
 export const GroupingMappingRouter = ({
   currentRoute,
@@ -54,7 +54,7 @@ export const GroupingMappingRouter = ({
     case RouteStep.Groups:
       if (mapping) {
         return (
-          <Groupings
+          <GroupsVisualization
             mapping={mapping}
             onClickAddGroup={(qType) =>
               navigateTo((prev) => ({
@@ -77,10 +77,10 @@ export const GroupingMappingRouter = ({
                 groupingRouteFields: { ...prev?.groupingRouteFields, group: g, queryGenerationType: qType },
               }))
             }
-            onClickRenderContextCustomUI={(ccUI, g) =>
+            onClickRenderContextCustomUI={(ccUI, g, displayLabel) =>
               navigateTo((prev) => ({
-                step: RouteStep.GroupAction,
-                title: ccUI.displayName ?? "",
+                step: RouteStep.GroupContextCustomUI,
+                title: displayLabel,
                 groupingRouteFields: { ...prev?.groupingRouteFields, group: g, groupContextCustomUI: ccUI },
               }))
             }
@@ -93,6 +93,7 @@ export const GroupingMappingRouter = ({
         if (queryGenerationType) {
           return (
             <GroupAction
+              shouldVisualize={false}
               mappingId={mapping.id}
               group={group}
               onClickCancel={goBack}
@@ -100,21 +101,24 @@ export const GroupingMappingRouter = ({
               queryGenerationType={queryGenerationType}
             />
           );
-        } else if (group && groupContextCustomUI) {
-          return (
-            React.createElement(groupContextCustomUI, {
-              iModelId,
-              mappingId: mapping.id,
-              groupId: group.id,
-            })
-          );
         }
+      }
+      return null;
+    case RouteStep.GroupContextCustomUI:
+      if (mapping && group && groupContextCustomUI) {
+        return (
+          React.createElement(groupContextCustomUI, {
+            iModelId,
+            mappingId: mapping.id,
+            groupId: group.id,
+          })
+        );
       }
       return null;
     case RouteStep.Properties:
       if (mapping && group) {
         return (
-          <PropertyMenu
+          <PropertyMenuWithVisualization
             mapping={mapping}
             group={group}
             color="red"
@@ -157,7 +161,7 @@ export const GroupingMappingRouter = ({
     case RouteStep.CalculatedPropertyAction: {
       if (mapping && group) {
         return (
-          <CalculatedPropertyAction
+          <CalculatedPropertyActionWithVisuals
             mappingId={mapping.id}
             group={group}
             calculatedProperty={calculatedProperty}

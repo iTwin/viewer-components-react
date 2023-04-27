@@ -73,5 +73,19 @@
         "${workspaceFolder}/packages/itwin/tree-widget/lib/**/*.js"
       ]
     },
+    {
+      "name": "Tests: Breakdown-trees",
+      "cwd": "${workspaceFolder}/packages/itwin/breakdown-trees",
+      "type": "node",
+      "request": "launch",
+      "outputCapture": "std",
+      "program": "${workspaceFolder}/packages/itwin/breakdown-trees/node_modules/mocha/bin/_mocha",
+      "args": [
+        "./lib/cjs/test/**/*.test.js"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/itwin/breakdown-trees/lib/**/*.js"
+      ]
+    },
   ]
 }

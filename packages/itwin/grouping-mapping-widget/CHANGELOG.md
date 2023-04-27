@@ -1,6 +1,34 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 03 Apr 2023 15:34:07 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Apr 2023 19:57:10 GMT and should not be manually modified.
+
+## 0.14.0
+Mon, 24 Apr 2023 19:57:10 GMT
+
+### Minor changes
+
+- Grouping component no longer handles Group visualization. This has been moved to the new GroupsVisualization component.
+- CalculatedPropertyAction visualization toggle has been moved to CalculatedPropertyActionWithVisuals.
+- PropertyMenu Group hiliting and information panel has been moved to PropertyMenuWithVisualization.
+- Added additional prop to GroupCustomUI that supplies the initial Group's query during edit mode.
+
+### Patches
+
+- Groups visualization has been optimized.
+- Fixed an issue that caused CustomUI's to show up twice on drop down menus.
+- Fixed header not appearing while in ContextCustomUI
+
+## 0.13.0
+Tue, 18 Apr 2023 17:46:22 GMT
+
+### Minor changes
+
+- Updated the Selection query builder to use VirtualizedPropertyGridWithDataProvider from @itwin/components-react, replacing the previous PropertyGrid implementation.
+
+### Patches
+
+- Fixed a visualization race condition that caused some Groups to not visualize.
+- Fixed Select Query Builder reset button. No longer fails to visualize. 
 
 ## 0.12.0
 Mon, 03 Apr 2023 15:34:07 GMT
