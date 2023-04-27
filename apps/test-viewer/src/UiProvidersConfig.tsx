@@ -8,9 +8,8 @@ import { PropertyGridManager, PropertyGridUiItemsProvider } from "@itwin/propert
 import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
-import { DefaultMapFeatureInfoTool, FeatureInfoUiItemsProvider, MapLayersUI, MapLayersUiItemsProvider, getDefaultMapFeatureInfoToolItemDef } from "@itwin/map-layers";
+import { DefaultMapFeatureInfoTool, FeatureInfoUiItemsProvider, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
-import { FrontendDevTools } from "@itwin/frontend-devtools";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
 
 export interface UiProvidersConfig {
@@ -92,14 +91,12 @@ const configuredUiItems = new Map<string, UiItem>([
     "map-layers",
     {
       initialize: async () => {
-        await FrontendDevTools.initialize();
         await MapLayersFormats.initialize();
         await MapLayersUI.initialize();
       },
       createUiItemsProviders: () => [
         new MapLayersUiItemsProvider(),
-        new FeatureInfoUiItemsProvider({ onMapHit: DefaultMapFeatureInfoTool.onMapHit }),
-        getDefaultMapFeatureInfoToolItemDef()
+        new FeatureInfoUiItemsProvider({ onMapHit: DefaultMapFeatureInfoTool.onMapHit })
       ]
     }
   ],
