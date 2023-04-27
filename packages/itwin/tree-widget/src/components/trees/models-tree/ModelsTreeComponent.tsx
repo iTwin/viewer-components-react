@@ -185,7 +185,7 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
 
   useEffect(() => {
     setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport));
-    return props.viewport.onViewedModelsChanged.addListener(/* istanbul ignore next */() => setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport)));
+    return props.viewport.onViewedModelsChanged.addListener((vp: Viewport) => setIs2dToggleActive(areAllModelsVisible(models2d, vp)));
   }, [models2d, props.viewport]);
 
   return (
@@ -212,7 +212,7 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
 
   useEffect(() => {
     setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport));
-    return props.viewport.onViewedModelsChanged.addListener(/* istanbul ignore next */() => setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport)));
+    return props.viewport.onViewedModelsChanged.addListener((vp: Viewport) => setIs3dToggleActive(areAllModelsVisible(models3d, vp)));
   }, [models3d, props.viewport]);
 
   return (

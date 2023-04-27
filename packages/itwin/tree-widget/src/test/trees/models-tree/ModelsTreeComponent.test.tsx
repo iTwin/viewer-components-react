@@ -12,6 +12,7 @@ import sinon from "sinon";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { expect } from "chai";
 import * as modelsVisibilityHandler from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { BeEvent } from "@itwin/core-bentley";
 
 describe("<ModelsTreeComponent />", () => {
 
@@ -30,6 +31,7 @@ describe("<ModelsTreeComponent />", () => {
 
   afterEach(() => {
     sinon.restore();
+    vpMock.reset();
     vpMock = mockViewport();
   });
 
@@ -139,6 +141,24 @@ describe("<ModelsTreeComponent />", () => {
         fireEvent.click(button);
         vpMock.verify((x) => x.changeModelDisplay(["modelTestId"], false), moq.Times.once());
       });
+
+      it("checks if areAllModelsVisible was called", async () => {
+        const onViewedModelsChanged: BeEvent<(vp: Viewport) => void> = new BeEvent<(vp: Viewport) => void>();
+        const viewportMock = mockViewport({ onViewedModelsChanged });
+        viewportMock.setup((x) => x.viewsModel("modelTestId")).returns(() => true);
+        viewportMock.setup((x) => x.viewsModel("modelTestId")).returns(() => true);
+        viewportMock.setup((x) => x.viewsModel("modelTestId")).returns(() => false);
+        const areAllModelsVisibleSpy = sinon.stub(modelsVisibilityHandler, "areAllModelsVisible");
+        render(
+          <ModelsTreeComponent.View2DButton
+            models={[{ id:"modelTestId", isPlanProjection: false }]}
+            viewport={viewportMock.object}
+          />
+        );
+        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.calledOnce);
+        onViewedModelsChanged.raiseEvent(viewportMock.object);
+        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.calledTwice);
+      });
     });
 
     describe("<View3DButton />", () => {
@@ -194,6 +214,24 @@ describe("<ModelsTreeComponent />", () => {
         const button = await waitFor(() => result.getByRole("button"));
         fireEvent.click(button);
         vpMock.verify((x) => x.changeModelDisplay(["modelTestId"], false), moq.Times.once());
+      });
+
+      it("checks if areAllModelsVisible was called", async () => {
+        const onViewedModelsChanged: BeEvent<(vp: Viewport) => void> = new BeEvent<(vp: Viewport) => void>();
+        const viewportMock = mockViewport({ onViewedModelsChanged });
+        viewportMock.setup((x) => x.viewsModel("modelTestId")).returns(() => true);
+        viewportMock.setup((x) => x.viewsModel("modelTestId")).returns(() => true);
+        viewportMock.setup((x) => x.viewsModel("modelTestId")).returns(() => false);
+        const areAllModelsVisibleSpy = sinon.stub(modelsVisibilityHandler, "areAllModelsVisible");
+        render(
+          <ModelsTreeComponent.View3DButton
+            models={[{ id:"modelTestId", isPlanProjection: false }]}
+            viewport={viewportMock.object}
+          />
+        );
+        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.calledOnce);
+        onViewedModelsChanged.raiseEvent(viewportMock.object);
+        await waitFor(() => expect(areAllModelsVisibleSpy).to.be.calledTwice);
       });
     });
   });

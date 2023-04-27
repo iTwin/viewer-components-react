@@ -1540,7 +1540,7 @@ describe("ModelsVisibilityHandler", () => {
 
   describe("showAllModels", () => {
 
-    it("calls expected functions", async () => {
+    it("checks if showAllModels calls expected functions", async () => {
       const vpMock = mockViewport();
       const toggleAllCategoriesSpy = sinon.stub(categoriesVisibilityUtils, "toggleAllCategories");
       await showAllModels(modelsInfo.map((model) => model.id), vpMock.object );
@@ -1553,7 +1553,7 @@ describe("ModelsVisibilityHandler", () => {
 
   describe("hideAllModels", () => {
 
-    it("calls toggleAllCategories", async () => {
+    it("checks if hideAllModels calls expected functions", async () => {
       const vpMock = mockViewport();
       await hideAllModels(modelsInfo.map((model) => model.id), vpMock.object );
       vpMock.verify((x) => x.changeModelDisplay(modelsInfo.map((model) => model.id), false), moq.Times.once());
@@ -1562,7 +1562,7 @@ describe("ModelsVisibilityHandler", () => {
 
   describe("invertAllModels", () => {
 
-    it("calls expected functions", async () => {
+    it("checks if invertAllModels calls expected functions", async () => {
       const vpMock = mockViewport();
       vpMock.setup((x) => x.viewsModel("ModelId1")).returns(() => true);
       vpMock.setup((x) => x.viewsModel("ModelId2")).returns(() => false);
