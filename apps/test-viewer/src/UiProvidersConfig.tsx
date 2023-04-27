@@ -10,6 +10,8 @@ import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
 import { DefaultMapFeatureInfoTool, FeatureInfoUiItemsProvider, MapLayersUI, MapLayersUiItemsProvider, getDefaultMapFeatureInfoToolItemDef } from "@itwin/map-layers";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
+import { FrontendDevTools } from "@itwin/frontend-devtools";
+import { MapLayersFormats } from "@itwin/map-layers-formats";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -20,12 +22,14 @@ export function getUiProvidersConfig(): UiProvidersConfig {
   const enabledWidgets = process.env.IMJS_ENABLED_WIDGETS ?? "";
   const matchingItems = collectSupportedItems(enabledWidgets.split(" "));
 
+  const uiItemsProviders = matchingItems.map((item) => item.createUiItemsProviders());
+
   return {
     initialize: async () => {
       const promises = matchingItems.map((item) => item.initialize());
       await Promise.all(promises);
     },
-    uiItemsProviders: matchingItems.map((item) => item.createUiItemsProvider()),
+    uiItemsProviders: uiItemsProviders.flat(),
   };
 }
 
@@ -45,7 +49,7 @@ function collectSupportedItems(ids: string[]) {
 
 interface UiItem {
   initialize: () => Promise<void>;
-  createUiItemsProvider: () => UiItemsProvider;
+  createUiItemsProviders: () => UiItemsProvider[];
 }
 
 const configuredUiItems = new Map<string, UiItem>([
@@ -56,7 +60,7 @@ const configuredUiItems = new Map<string, UiItem>([
         await BreakdownTrees.initialize();
         await TreeWidget.initialize();
       },
-      createUiItemsProvider: () => new TreeWidgetUiItemsProvider({
+      createUiItemsProviders: () => [new TreeWidgetUiItemsProvider({
         additionalTrees: [{
           id: "spatial-containment-tree",
           label: "Spatial Containment",
@@ -64,14 +68,14 @@ const configuredUiItems = new Map<string, UiItem>([
             <SampleSpatialTree />
           ),
         }]
-      }),
+      })],
     }
   ],
   [
     "property-grid",
     {
       initialize: async () => PropertyGridManager.initialize(),
-      createUiItemsProvider: () => new PropertyGridUiItemsProvider(),
+      createUiItemsProviders: () => [new PropertyGridUiItemsProvider()],
     }
   ],
   [
@@ -81,35 +85,29 @@ const configuredUiItems = new Map<string, UiItem>([
         await MeasureTools.startup();
         MeasurementActionToolbar.setDefaultActionProvider();
       },
-      createUiItemsProvider: () => new MeasureToolsUiItemsProvider(),
+      createUiItemsProviders: () => [new MeasureToolsUiItemsProvider()],
     }
   ],
   [
     "map-layers",
     {
-      initialize: async () => MapLayersUI.initialize({}),
-      createUiItemsProvider: () => new MapLayersUiItemsProvider(),
-    }
-  ],
-  [
-    "map-layers-featureInfo-widget",
-    {
-      initialize: async () => { },
-      createUiItemsProvider: () => new FeatureInfoUiItemsProvider({ onMapHit: DefaultMapFeatureInfoTool.onMapHit }),
-    }
-  ],
-  [
-    "map-layers-featureInfo-tool",
-    {
-      initialize: async () => { },
-      createUiItemsProvider: () => getDefaultMapFeatureInfoToolItemDef(),
+      initialize: async () => {
+        await FrontendDevTools.initialize();
+        await MapLayersFormats.initialize();
+        MapLayersUI.initialize();
+      },
+      createUiItemsProviders: () => [
+        new MapLayersUiItemsProvider(),
+        new FeatureInfoUiItemsProvider({ onMapHit: DefaultMapFeatureInfoTool.onMapHit }),
+        getDefaultMapFeatureInfoToolItemDef()
+      ]
     }
   ],
   [
     "geo-tool",
     {
       initialize: async () => { GeoTools.initialize() },
-      createUiItemsProvider: () => new GeoToolsAddressSearchProvider(),
+      createUiItemsProviders: () => [new GeoToolsAddressSearchProvider()],
     }
   ]
 ])
