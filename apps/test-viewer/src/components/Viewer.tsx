@@ -10,11 +10,13 @@ import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { useAuthorizationContext } from "./Authorization";
 import { ApiKeys } from "./ApiKeys";
+import { FrontendDevTools } from "@itwin/frontend-devtools";
 
 const uiConfig = getUiProvidersConfig();
 
 async function onIModelAppInit() {
   await uiConfig.initialize();
+  await FrontendDevTools.initialize();
 }
 
 export function Viewer() {
