@@ -66,7 +66,7 @@ While we expect this package to be mostly used with [AppUI](https://github.com/i
 
 - `TreeWidgetComponent` renders a tree selector and selected tree (based on the `trees` prop).
 
-- Visibility tree components help your build trees that look and feel like [Models](#models-tree) and [Categories](#categories-tree) trees, letting you control display of elements in the hierarchy.
+- Visibility tree components help you build trees that look and feel like [Models](#models-tree) and [Categories](#categories-tree) trees, letting you control display of elements in the hierarchy.
 
   - `useVisibilityTreeRenderer` returns a tree renderer that renders nodes with "eye" checkboxes. Its building blocks:
     - `createVisibilityTreeNodeRenderer`
@@ -112,7 +112,7 @@ Available header buttons:
 
 `ModelsTreeComponent` building blocks:
 
-- `ModelsTree` renders the tree without a the header.
+- `ModelsTree` renders the tree without the header.
 - `ModelsVisibilityHandler` knows how to get and control display of various concepts displayed in the Models tree: Subjects, Models, Categories, Elements.
 
 ### Categories tree
@@ -147,7 +147,7 @@ Available header buttons:
 
 `CategoriesTreeComponent` building blocks:
 
-- `CategoryTree` renders the tree without a the header.
+- `CategoryTree` renders the tree without the header.
 - `CategoryVisibilityHandler` knows how to get and control display of Categories and SubCategories.
 
 ### IModel content tree
