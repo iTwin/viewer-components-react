@@ -43,7 +43,7 @@ describe("CategoryVisibilityHandler", () => {
   const categoryNode: PresentationTreeNodeItem  = { key: createKey(categories[0].categoryId), id: categories[0].categoryId, label: PropertyRecord.fromString("category-node"), autoExpand: true };
   const subCategoryNodes = [
     { key: createKey(categories[0].subCategoryIds![0]), id: categories[0].subCategoryIds![0], label: PropertyRecord.fromString("subcategory-node-1"), parentId: categories[0].categoryId },
-    { key: createKey(categories[0].subCategoryIds![1]), id: categories[0].subCategoryIds![1], label: PropertyRecord.fromString("subcategory-node-2"), parentId: categories[0].categoryId }
+    { key: createKey(categories[0].subCategoryIds![1]), id: categories[0].subCategoryIds![1], label: PropertyRecord.fromString("subcategory-node-2"), parentId: categories[0].categoryId },
   ];
 
   beforeEach(() => {

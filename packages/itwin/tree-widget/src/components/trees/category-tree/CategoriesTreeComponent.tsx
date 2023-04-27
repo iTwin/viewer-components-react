@@ -9,7 +9,7 @@ import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react
 import { IModelApp, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import { IPresentationTreeDataProvider, isPresentationTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
+import { IPresentationTreeDataProvider, isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader, TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
@@ -127,8 +127,8 @@ async function getFilteredCategories(filteredProvider: IPresentationTreeDataProv
     }
     const filteredCategoryId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(node.key);
     const filteredSubCategoriesIds = node.hasChildren
-      ? (await filteredProvider.getNodes(node)).filter(isPresentationTreeNodeItem).map((child) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey((child as PresentationTreeNodeItem).key))
-      : []
+      ? (await filteredProvider.getNodes(node)).filter(isPresentationTreeNodeItem).map((child) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(child.key))
+      : [];
     filteredCategories.push({ categoryId: filteredCategoryId, subCategoryIds: filteredSubCategoriesIds });
   }
   return filteredCategories;

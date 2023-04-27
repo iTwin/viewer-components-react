@@ -1290,7 +1290,7 @@ importers:
       '@itwin/presentation-common': ^3.7.0
       '@itwin/presentation-components': ^4.0.0-dev.39
       '@itwin/presentation-frontend': ^3.7.0
-      '@itwin/presentation-testing': ^4.0.0-dev.40
+      '@itwin/presentation-testing': 4.0.0-dev.40
       '@itwin/webgl-compatibility': ^3.7.0
       '@rushstack/eslint-patch': 1.2.0
       '@testing-library/react': ^12.0.0
@@ -1363,7 +1363,7 @@ importers:
       '@itwin/presentation-common': 3.7.1_94355e9609de2975afe398485abd2942
       '@itwin/presentation-components': 4.0.0-dev.39_bc327e953e8db592e7d5ea64ebdae24b
       '@itwin/presentation-frontend': 3.7.1_c482609af89846ad3fc781b11c45fc49
-      '@itwin/presentation-testing': 4.0.0-dev.41_a039d5ecf195d9a9202e082bbdfc8cb6
+      '@itwin/presentation-testing': 4.0.0-dev.40_a039d5ecf195d9a9202e082bbdfc8cb6
       '@itwin/webgl-compatibility': 3.7.1
       '@rushstack/eslint-patch': 1.2.0
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
@@ -7660,8 +7660,8 @@ packages:
       '@itwin/presentation-common': 4.0.0-dev.70_d9b832bedd73dc86fc28c2f6d5d17cfe
     dev: true
 
-  /@itwin/presentation-testing/4.0.0-dev.41_a039d5ecf195d9a9202e082bbdfc8cb6:
-    resolution: {integrity: sha512-IBbrlqEtQn+shOFKZrrnn1DTA1q+FSGzBf8Z34JyFvcZ70Yb4bQuz/61hSjSP+2ZkadJpxioCZBWiwD9EwdruA==}
+  /@itwin/presentation-testing/4.0.0-dev.40_a039d5ecf195d9a9202e082bbdfc8cb6:
+    resolution: {integrity: sha512-HWJu3FdWnU5d42nVCV9Yk/ivWevsOnVki5SmfLMJ1IHuS0o5SbqDimxpT8MHRaSjhNzL0lErd03S/0DkGTAbQA==}
     peerDependencies:
       '@itwin/appui-abstract': ^3.6.3 || ^4.0.0-dev.85
       '@itwin/components-react': ^4.0.0-dev.18
@@ -7671,7 +7671,7 @@ packages:
       '@itwin/core-frontend': ^3.6.3 || ^4.0.0-dev.85
       '@itwin/presentation-backend': ^3.6.3 || ^4.0.0-dev.85
       '@itwin/presentation-common': ^3.6.3 || ^4.0.0-dev.85
-      '@itwin/presentation-components': ^4.0.0-dev.41
+      '@itwin/presentation-components': ^4.0.0-dev.40
       '@itwin/presentation-frontend': ^3.6.3 || ^4.0.0-dev.85
     dependencies:
       '@itwin/appui-abstract': 3.7.1_@itwin+core-bentley@3.7.1
