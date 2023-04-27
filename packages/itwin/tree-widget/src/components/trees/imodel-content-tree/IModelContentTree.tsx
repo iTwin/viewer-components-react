@@ -7,22 +7,32 @@ import classNames from "classnames";
 import React, { useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
 import { IModelConnection } from "@itwin/core-frontend";
+import { Ruleset } from "@itwin/presentation-common";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
-import { AutoSizer } from "../../utils/AutoSizer";
-import IMODEL_CONTENT_RULESET from "./IModelContent.json";
 
-import type { Ruleset } from "@itwin/presentation-common";
+/**
+ * Presentation rules used by IModelContentTree
+ * @internal
+ */
+export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export interface IModelContentTreeProps extends Omit<React.HTMLProps<HTMLDivElement>, "children"> {
+  /** An IModel to pull data from */
   iModel: IModelConnection;
+  /** Width of the component */
+  width: number;
+  /** Height of the component */
+  height: number;
+  /** Selection mode in the tree */
+  selectionMode?: SelectionMode;
 }
 
 export const IModelContentTree = (props: IModelContentTreeProps) => {
-  const { iModel, className, ...divProps } = props;
+  const { iModel, className, width, height, ...divProps } = props;
 
   const { nodeLoader } = usePresentationTreeNodeLoader({
     imodel: iModel,
-    ruleset: IMODEL_CONTENT_RULESET as Ruleset,
+    ruleset: RULESET_IMODEL_CONTENT,
     pagingSize: 20,
     appendChildrenCountForGroupingNodes: true,
   });
@@ -31,20 +41,16 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
   const treeModel = useTreeModel(nodeLoader.modelSource);
 
   return (
-    <AutoSizer>
-      {({ width, height }) => (
-        <div {...divProps} className={classNames("imodel-content-tree", className)}>
-          <ControlledTree
-            width={width}
-            height={height}
-            nodeLoader={nodeLoader}
-            selectionMode={SelectionMode.None}
-            eventsHandler={eventHandler}
-            model={treeModel}
-            iconsEnabled={true}
-          />
-        </div>
-      )}
-    </AutoSizer>
+    <div {...divProps} className={classNames("imodel-content-tree", className)}>
+      <ControlledTree
+        width={width}
+        height={height}
+        nodeLoader={nodeLoader}
+        selectionMode={props.selectionMode ?? SelectionMode.None}
+        eventsHandler={eventHandler}
+        model={treeModel}
+        iconsEnabled={true}
+      />
+    </div>
   );
 };

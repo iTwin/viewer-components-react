@@ -1134,7 +1134,7 @@ importers:
       '@itwin/presentation-common': 3.7.0
       '@itwin/presentation-components': 4.0.0-dev.31
       '@itwin/presentation-frontend': 3.7.0
-      '@itwin/presentation-testing': 4.0.0-dev.31
+      '@itwin/presentation-testing': 4.0.0-dev.40
       '@itwin/webgl-compatibility': 3.7.0
       '@rushstack/eslint-patch': 1.2.0
       '@testing-library/react': ^12.0.0
@@ -1205,7 +1205,7 @@ importers:
       '@itwin/presentation-common': 3.7.0_a6d80d8a9cbe6c9e4918bd3d1748cc3f
       '@itwin/presentation-components': 4.0.0-dev.31_833dc77a4f8229fb34cf6a850eb204b7
       '@itwin/presentation-frontend': 3.7.0_3df2ddb6f779a099b187706b89336d9d
-      '@itwin/presentation-testing': 4.0.0-dev.31_9563cb0765733f42f97f9cf59bde3c37
+      '@itwin/presentation-testing': 4.0.0-dev.40_9563cb0765733f42f97f9cf59bde3c37
       '@itwin/webgl-compatibility': 3.7.0
       '@rushstack/eslint-patch': 1.2.0
       '@testing-library/react': 12.1.5_react-dom@17.0.2+react@17.0.2
@@ -7585,19 +7585,19 @@ packages:
       '@itwin/presentation-common': 4.0.0-dev.70_d9b832bedd73dc86fc28c2f6d5d17cfe
     dev: true
 
-  /@itwin/presentation-testing/4.0.0-dev.31_9563cb0765733f42f97f9cf59bde3c37:
-    resolution: {integrity: sha512-Smdvm2mgSlVs/8YjgegsiyhiszAxpFGPxEmaykTOoHDvOjPS/LNd76qF/0fFgJxu0myWxMjFybW2+imaxnVsrw==}
+  /@itwin/presentation-testing/4.0.0-dev.40_9563cb0765733f42f97f9cf59bde3c37:
+    resolution: {integrity: sha512-HWJu3FdWnU5d42nVCV9Yk/ivWevsOnVki5SmfLMJ1IHuS0o5SbqDimxpT8MHRaSjhNzL0lErd03S/0DkGTAbQA==}
     peerDependencies:
-      '@itwin/appui-abstract': ^3.6.3 || ^4.0.0-dev.60
-      '@itwin/components-react': ^4.0.0-dev.12
-      '@itwin/core-backend': ^3.6.3 || ^4.0.0-dev.60
-      '@itwin/core-bentley': ^3.6.3 || ^4.0.0-dev.60
-      '@itwin/core-common': ^3.6.3 || ^4.0.0-dev.60
-      '@itwin/core-frontend': ^3.6.3 || ^4.0.0-dev.60
-      '@itwin/presentation-backend': ^3.6.3 || ^4.0.0-dev.60
-      '@itwin/presentation-common': ^3.6.3 || ^4.0.0-dev.60
-      '@itwin/presentation-components': ^4.0.0-dev.31
-      '@itwin/presentation-frontend': ^3.6.3 || ^4.0.0-dev.60
+      '@itwin/appui-abstract': ^3.6.3 || ^4.0.0-dev.85
+      '@itwin/components-react': ^4.0.0-dev.18
+      '@itwin/core-backend': ^3.6.3 || ^4.0.0-dev.85
+      '@itwin/core-bentley': ^3.6.3 || ^4.0.0-dev.85
+      '@itwin/core-common': ^3.6.3 || ^4.0.0-dev.85
+      '@itwin/core-frontend': ^3.6.3 || ^4.0.0-dev.85
+      '@itwin/presentation-backend': ^3.6.3 || ^4.0.0-dev.85
+      '@itwin/presentation-common': ^3.6.3 || ^4.0.0-dev.85
+      '@itwin/presentation-components': ^4.0.0-dev.40
+      '@itwin/presentation-frontend': ^3.6.3 || ^4.0.0-dev.85
     dependencies:
       '@itwin/appui-abstract': 3.7.0_@itwin+core-bentley@3.7.0
       '@itwin/components-react': 4.0.0-dev.13_706c08cd6281db88eb4b7f8330fa11e0
@@ -14968,7 +14968,7 @@ packages:
     resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==}
     engines: {node: '>= 4.0'}
     os: [darwin]
-    deprecated: fsevents 1 will break on node v14+ and could be using insecure binaries. Upgrade to fsevents 2.
+    deprecated: The v1 package contains DANGEROUS / INSECURE binaries. Upgrade to safe fsevents v2
     requiresBuild: true
     dependencies:
       bindings: 1.5.0
