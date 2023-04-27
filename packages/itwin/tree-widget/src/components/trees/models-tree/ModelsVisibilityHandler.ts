@@ -6,13 +6,14 @@
 import { TreeNodeItem } from "@itwin/components-react";
 import { BeEvent, Id64String } from "@itwin/core-bentley";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
-import { IModelConnection, PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
+import { IModelApp, IModelConnection, PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
 import { ECClassGroupingNodeKey, GroupingNodeKey, Keys, KeySet, NodeKey } from "@itwin/presentation-common";
 import { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import { CachingElementIdsContainer } from "./Utils";
+import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 
 /**
  * Visibility tree node types.
@@ -100,9 +101,11 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   public static isSubjectNode(node: TreeNodeItem) {
     return node.extendedData && node.extendedData.isSubject;
   }
+
   public static isModelNode(node: TreeNodeItem) {
     return node.extendedData && node.extendedData.isModel;
   }
+
   public static isCategoryNode(node: TreeNodeItem) {
     return node.extendedData && node.extendedData.isCategory;
   }
@@ -578,3 +581,48 @@ const createTooltip = (status: "visible" | "hidden" | "disabled", tooltipStringI
   const tooltipString = TreeWidget.translate(tooltipStringId);
   return `${statusString}: ${tooltipString}`;
 };
+
+export async function showAllModels(models: string[], viewport: Viewport) {
+  await viewport.addViewedModels(models);
+  viewport.clearNeverDrawn();
+  viewport.clearAlwaysDrawn();
+  await toggleAllCategories(
+    IModelApp.viewManager,
+    viewport.iModel,
+    true,
+    viewport,
+    false,
+  );
+}
+
+export async function hideAllModels(models: string[], viewport: Viewport) {
+  viewport.changeModelDisplay(
+    models,
+    false
+  );
+}
+
+export async function invertAllModels(models: string[], viewport: Viewport) {
+  const notViewedModels: string[] = [];
+  const viewedModels: string[] = [];
+  models.forEach((modelId) => {
+    if (viewport.viewsModel(modelId)) viewedModels.push(modelId);
+    else notViewedModels.push(modelId);
+  });
+  await viewport.addViewedModels(notViewedModels);
+  viewport.changeModelDisplay(viewedModels, false);
+}
+
+export async function toggleModels(models: string[], enable: boolean, viewport: Viewport) {
+  // istanbul ignore if
+  if (!models)
+    return;
+  if (enable)
+    viewport.changeModelDisplay(models, false);
+  else
+    await viewport.addViewedModels(models);
+}
+
+export function areAllModelsVisible(models: string[], viewport: Viewport) {
+  return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
+}

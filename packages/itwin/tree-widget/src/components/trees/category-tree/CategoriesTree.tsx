@@ -33,7 +33,7 @@ export interface CategoryTreeProps {
   /** Flag for accommodating all viewports */
   allViewports?: boolean;
   /** Active viewport */
-  activeView?: Viewport;
+  activeView: Viewport;
   /**
    * An IModel to pull data from
    */
@@ -82,12 +82,11 @@ export function CategoryTree(props: CategoryTreeProps) {
   // istanbul ignore next
   const viewManager = props.viewManager ?? IModelApp.viewManager;
   const { activeView, allViewports, categoryVisibilityHandler } = props;
-  const currentActiveView = activeView ?? viewManager.getFirstOpenView();
-  const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories, currentActiveView, allViewports, categoryVisibilityHandler);
+  const visibilityHandler = useCategoryVisibilityHandler(viewManager, props.iModel, props.categories, activeView, allViewports, categoryVisibilityHandler);
 
   React.useEffect(() => {
-    setViewType(currentActiveView); // eslint-disable-line @typescript-eslint/no-floating-promises
-  }, [currentActiveView]);
+    setViewType(activeView); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }, [activeView]);
 
   const eventHandler = useDisposable(React.useCallback(() => new VisibilityTreeEventHandler({
     nodeLoader: filteredNodeLoader,
@@ -126,19 +125,17 @@ export function CategoryTree(props: CategoryTreeProps) {
   );
 }
 
-function useCategoryVisibilityHandler(viewManager: ViewManager, imodel: IModelConnection, categories: CategoryInfo[], activeView?: Viewport, allViewports?: boolean, visibilityHandler?: CategoryVisibilityHandler) {
-  return useDisposable(React.useCallback(
+function useCategoryVisibilityHandler(viewManager: ViewManager, imodel: IModelConnection, categories: CategoryInfo[], activeView: Viewport, allViewports?: boolean, visibilityHandler?: CategoryVisibilityHandler) {
+  const defaultVisibilityHandler = useDisposable(React.useCallback(
     () =>
-      // istanbul ignore next
-      visibilityHandler ?? new CategoryVisibilityHandler({ viewManager, imodel, categories, activeView, allViewports }),
-    [viewManager, imodel, categories, activeView, allViewports, visibilityHandler]),
+      new CategoryVisibilityHandler({ viewManager, imodel, categories, activeView, allViewports }),
+    [viewManager, imodel, categories, activeView, allViewports]),
   );
+  // istanbul ignore if
+  return visibilityHandler ?? defaultVisibilityHandler;
 }
 
-async function setViewType(activeView?: Viewport) {
-  if (!activeView)
-    return;
-
+async function setViewType(activeView: Viewport) {
   const view = activeView.view as SpatialViewState;
   // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
   const viewType = view.is3d() ? "3d" : "2d"; // eslint-disable-line @itwin/no-internal

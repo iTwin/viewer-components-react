@@ -10,6 +10,7 @@ import { TreeWidget } from "../TreeWidget";
 import type { PresentationManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 import { BeEvent } from "@itwin/core-bentley";
 import type { VariableValue } from "@itwin/presentation-common";
+import { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
 
 export class TestUtils {
   private static _initialized = false;
@@ -52,4 +53,50 @@ export const mockPresentationManager = () => {
 
 export async function flushAsyncOperations() {
   return new Promise((resolve) => setTimeout(resolve));
+}
+
+interface ViewportMockProps {
+  viewState?: ViewState;
+  perModelCategoryVisibility?: PerModelCategoryVisibility.Overrides;
+  onViewedCategoriesPerModelChanged?: BeEvent<(vp: Viewport) => void>;
+  onViewedCategoriesChanged?: BeEvent<(vp: Viewport) => void>;
+  onViewedModelsChanged?: BeEvent<(vp: Viewport) => void>;
+  onAlwaysDrawnChanged?: BeEvent<() => void>;
+  onNeverDrawnChanged?: BeEvent<() => void>;
+  onDisplayStyleChanged?: BeEvent<(vp: Viewport) => void>;
+  imodel?: IModelConnection;
+}
+
+export function mockViewport(props?: ViewportMockProps) {
+  if (!props)
+    props = {};
+  if (!props.viewState)
+    props.viewState = moq.Mock.ofType<ViewState>().object;
+  if (!props.perModelCategoryVisibility)
+    props.perModelCategoryVisibility = moq.Mock.ofType<PerModelCategoryVisibility.Overrides>().object;
+  if (!props.onViewedCategoriesPerModelChanged)
+    props.onViewedCategoriesPerModelChanged = new BeEvent<(vp: Viewport) => void>();
+  if (!props.onDisplayStyleChanged)
+    props.onDisplayStyleChanged = new BeEvent<(vp: Viewport) => void>();
+  if (!props.onViewedCategoriesChanged)
+    props.onViewedCategoriesChanged = new BeEvent<(vp: Viewport) => void>();
+  if (!props.onViewedModelsChanged)
+    props.onViewedModelsChanged = new BeEvent<(vp: Viewport) => void>();
+  if (!props.onAlwaysDrawnChanged)
+    props.onAlwaysDrawnChanged = new BeEvent<() => void>();
+  if (!props.onNeverDrawnChanged)
+    props.onNeverDrawnChanged = new BeEvent<() => void>();
+  if (!props.imodel)
+    props.imodel = moq.Mock.ofType<IModelConnection>().object;
+  const vpMock = moq.Mock.ofType<Viewport>();
+  vpMock.setup((x) => x.iModel).returns(() => props!.imodel!);
+  vpMock.setup((x) => x.view).returns(() => props!.viewState!);
+  vpMock.setup((x) => x.perModelCategoryVisibility).returns(() => props!.perModelCategoryVisibility!);
+  vpMock.setup((x) => x.onViewedCategoriesPerModelChanged).returns(() => props!.onViewedCategoriesPerModelChanged!);
+  vpMock.setup((x) => x.onDisplayStyleChanged).returns(() => props!.onDisplayStyleChanged!);
+  vpMock.setup((x) => x.onViewedCategoriesChanged).returns(() => props!.onViewedCategoriesChanged!);
+  vpMock.setup((x) => x.onViewedModelsChanged).returns(() => props!.onViewedModelsChanged!);
+  vpMock.setup((x) => x.onAlwaysDrawnChanged).returns(() => props!.onAlwaysDrawnChanged!);
+  vpMock.setup((x) => x.onNeverDrawnChanged).returns(() => props!.onNeverDrawnChanged!);
+  return vpMock;
 }
