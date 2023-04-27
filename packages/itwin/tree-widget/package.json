@@ -70,7 +70,7 @@
     "@itwin/presentation-common": "^3.7.0",
     "@itwin/presentation-components": "^4.0.0-dev.39",
     "@itwin/presentation-frontend": "^3.7.0",
-    "@itwin/presentation-testing": "^4.0.0-dev.39",
+    "@itwin/presentation-testing": "^4.0.0-dev.40",
     "@itwin/webgl-compatibility": "^3.7.0",
     "@rushstack/eslint-patch": "1.2.0",
     "@testing-library/react": "^12.0.0",
@@ -117,6 +117,8 @@
     "react-dom": "^17.0.2"
   },
   "eslintConfig": {
-    "extends": [".eslintrc.js"]
+    "extends": [
+      ".eslintrc.js"
+    ]
   }
 }
