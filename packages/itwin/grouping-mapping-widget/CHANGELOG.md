@@ -1,6 +1,19 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 24 Apr 2023 19:57:10 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Apr 2023 16:44:34 GMT and should not be manually modified.
+
+## 0.15.0
+Thu, 27 Apr 2023 16:44:34 GMT
+
+### Minor changes
+
+- Added ability to provide an iModelConnection.
+- Added shouldVisualize prop to GroupAction which enables or disables visualization.
+
+### Patches
+
+- Fixed a bug in both Mapping and Groupings components where the title remained clickable even when onClickTitle was undefined. The title is now no longer clickable in such cases.
+- Fixed Group By not visualizing queries.
 
 ## 0.14.0
 Mon, 24 Apr 2023 19:57:10 GMT
