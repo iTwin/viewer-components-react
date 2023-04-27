@@ -11,24 +11,21 @@ import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { SelectionMode, TreeNodeItem } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
-import {
-  BisCodeSpec, CategoryProps, Code, ElementProps, IModel, ModelProps, PhysicalElementProps, RelatedElement, RelatedElementProps,
-} from "@itwin/core-common";
 import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
 import { KeySet, LabelDefinition, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-  TestIModelBuilder,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
 import { ModelsTreeNodeType, ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
+import { RULESET_MODELS, RULESET_MODELS_GROUPED_BY_CLASS } from "../../../tree-widget-react";
+import { addModel, addPartition, addPhysicalObject, addSpatialCategory } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
-import { RULESET_MODELS, RULESET_MODELS_GROUPED_BY_CLASS } from "../../../tree-widget-react";
 
 describe("ModelsTree", () => {
 
@@ -364,10 +361,10 @@ describe("ModelsTree", () => {
 
     it("does not show private categories with RULESET_MODELS", async () => {
       const iModel: IModelConnection = await buildTestIModel("ModelsTreeModels", (builder) => {
-        const partitionId = addPartition("BisCore:PhysicalPartition", builder, "TestPhysicalModel");
-        const definitionPartitionId = addPartition("BisCore:DefinitionPartition", builder, "TestDefinitionModel");
-        const modelId = addModel("BisCore:PhysicalModel", builder, partitionId);
-        const definitionModelId = addModel("BisCore:DefinitionModel", builder, definitionPartitionId);
+        const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
+        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
+        const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
+        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
 
         const categoryId = addSpatialCategory(builder, definitionModelId, "Test Spatial Category");
         addPhysicalObject(builder, modelId, categoryId);
@@ -384,10 +381,10 @@ describe("ModelsTree", () => {
 
     it("does not show private categories with RULESET_MODELS_GROUPED_BY_CLASS", async () => {
       const iModel: IModelConnection = await buildTestIModel("ModelsTreeModelsGroupedByClass", (builder) => {
-        const partitionId = addPartition("BisCore:PhysicalPartition", builder, "TestPhysicalModel");
-        const definitionPartitionId = addPartition("BisCore:DefinitionPartition", builder, "TestDefinitionModel");
-        const modelId = addModel("BisCore:PhysicalModel", builder, partitionId);
-        const definitionModelId = addModel("BisCore:DefinitionModel", builder, definitionPartitionId);
+        const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
+        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
+        const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
+        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
 
         const categoryId = addSpatialCategory(builder, definitionModelId, "Test Spatial Category");
         addPhysicalObject(builder, modelId, categoryId);
@@ -401,49 +398,5 @@ describe("ModelsTree", () => {
 
       expect(hierarchy).to.matchSnapshot();
     });
-
-    const addPartition = (classFullName: string, builder: TestIModelBuilder, name: string, parentId = IModel.rootSubjectId) => {
-      const parentProps: RelatedElementProps = {
-        relClassName: "BisCore:SubjectOwnsPartitionElements",
-        id: parentId,
-      };
-
-      const partitionProps: ElementProps = {
-        classFullName,
-        model: IModel.repositoryModelId,
-        parent: parentProps,
-        code: builder.createCode(parentId, BisCodeSpec.informationPartitionElement, name),
-      };
-      return builder.insertElement(partitionProps);
-    };
-
-    const addModel = (classFullName: string, builder: TestIModelBuilder, partitionId: string) => {
-      const modelProps: ModelProps = {
-        modeledElement: new RelatedElement({ id: partitionId }),
-        classFullName,
-        isPrivate: false,
-      };
-      return builder.insertModel(modelProps);
-    };
-
-    const addSpatialCategory = (builder: TestIModelBuilder, modelId: string, name: string, isPrivate?: boolean) => {
-      const spatialCategoryProps: CategoryProps = {
-        classFullName: "BisCore:SpatialCategory",
-        model: IModel.dictionaryId,
-        code: builder.createCode(modelId, BisCodeSpec.spatialCategory, name),
-        isPrivate,
-      };
-      return builder.insertElement(spatialCategoryProps);
-    };
-
-    const addPhysicalObject = (builder: TestIModelBuilder, modelId: string, categoryId: string, elemCode = Code.createEmpty()) => {
-      const physicalObjectProps: PhysicalElementProps = {
-        classFullName: "Generic:PhysicalObject",
-        model: modelId,
-        category: categoryId,
-        code: elemCode,
-      };
-      builder.insertElement(physicalObjectProps);
-    };
   });
 });
