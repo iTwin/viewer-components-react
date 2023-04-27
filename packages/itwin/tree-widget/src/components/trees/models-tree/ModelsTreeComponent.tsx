@@ -7,15 +7,15 @@ import "../VisibilityTreeBase.scss";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
-import { IModelApp, IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
+import { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
-import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 import { ModelsTree, ModelsTreeProps } from "./ModelsTree";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader, TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
 
 export interface ModelInfo {
   id: string;
@@ -135,31 +135,13 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
 }
 
 function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
-  const showAll = async () => {
-    if (!props.viewport)
-      return;
-
-    await props.viewport.addViewedModels(props.models.map((model) => model.id));
-    props.viewport.clearNeverDrawn();
-    props.viewport.clearAlwaysDrawn();
-    if (props.viewport.iModel) {
-      await toggleAllCategories(
-        IModelApp.viewManager,
-        props.viewport.iModel,
-        true,
-        props.viewport,
-        false
-      );
-    }
-  };
-
   return (
     <IconButton
       className="tree-widget-header-tree-toolbar-icon"
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("showAll")}
-      onClick={showAll}
+      onClick={() => void showAllModels(props.models.map((model) => model.id), props.viewport)}
     >
       <SvgVisibilityShow />
     </IconButton>
@@ -167,17 +149,13 @@ function ShowAllButton(props: ModelsTreeHeaderButtonProps) {
 }
 
 function HideAllButton(props: ModelsTreeHeaderButtonProps) {
-  const hideAll = async () => {
-    props.viewport.changeModelDisplay(props.models.map((model) => model.id), false);
-  };
-
   return (
     <IconButton
       className="tree-widget-header-tree-toolbar-icon"
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("hideAll")}
-      onClick={hideAll}
+      onClick={() => void hideAllModels(props.models.map((model) => model.id), props.viewport)}
     >
       <SvgVisibilityHide />
     </IconButton>
@@ -185,24 +163,13 @@ function HideAllButton(props: ModelsTreeHeaderButtonProps) {
 }
 
 function InvertButton(props: ModelsTreeHeaderButtonProps) {
-  const invert = async () => {
-    const notViewedModels: string[] = [];
-    const models: string[] = [];
-    props.models.forEach((model) => {
-      if (props.viewport.viewsModel(model.id)) models.push(model.id);
-      else notViewedModels.push(model.id);
-    });
-    await props.viewport.addViewedModels(notViewedModels);
-    props.viewport.changeModelDisplay(models, false);
-  };
-
   return (
     <IconButton
       className="tree-widget-header-tree-toolbar-icon"
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("invert")}
-      onClick={invert}
+      onClick={() => void invertAllModels(props.models.map((model) => model.id), props.viewport)}
     >
       <SvgVisibilityHalf />
     </IconButton>
@@ -214,21 +181,12 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
     return props.models.filter((model) => model.isPlanProjection).map((model) => model.id);
   }, [props.models]);
 
-  const [is2dToggleActive, setIs2dToggleActive] = useState(() => areAllModelsVisible(props.viewport, models2d));
+  const [is2dToggleActive, setIs2dToggleActive] = useState(false);
 
   useEffect(() => {
-    return props.viewport.onViewedModelsChanged.addListener(() => setIs2dToggleActive(areAllModelsVisible(props.viewport, models2d)));
+    setIs2dToggleActive(areAllModelsVisible(models2d, props.viewport));
+    return props.viewport.onViewedModelsChanged.addListener((vp: Viewport) => setIs2dToggleActive(areAllModelsVisible(models2d, vp)));
   }, [models2d, props.viewport]);
-  const viewToggle2D = async () => {
-    if (!models2d)
-      return;
-
-    if (is2dToggleActive) {
-      props.viewport.changeModelDisplay(models2d, false);
-    } else {
-      await props.viewport.addViewedModels(models2d);
-    }
-  };
 
   return (
     <Button
@@ -236,7 +194,7 @@ function View2DButton(props: ModelsTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("toggle2DViews")}
-      onClick={viewToggle2D}
+      onClick={() => void toggleModels(models2d, is2dToggleActive, props.viewport)}
       disabled={models2d.length === 0}
       endIcon={is2dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
@@ -250,22 +208,12 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
     return props.models.filter((model) => !model.isPlanProjection).map((model) => model.id);
   }, [props.models]);
 
-  const [is3dToggleActive, setIs3dToggleActive] = useState(() => areAllModelsVisible(props.viewport, models3d));
+  const [is3dToggleActive, setIs3dToggleActive] = useState(false);
 
   useEffect(() => {
-    return props.viewport.onViewedModelsChanged.addListener(() => setIs3dToggleActive(areAllModelsVisible(props.viewport, models3d)));
+    setIs3dToggleActive(areAllModelsVisible(models3d, props.viewport));
+    return props.viewport.onViewedModelsChanged.addListener((vp: Viewport) => setIs3dToggleActive(areAllModelsVisible(models3d, vp)));
   }, [models3d, props.viewport]);
-
-  const viewToggle3D = async () => {
-    if (!models3d)
-      return;
-
-    if (is3dToggleActive) {
-      props.viewport.changeModelDisplay(models3d, false);
-    } else {
-      await props.viewport.addViewedModels(models3d);
-    }
-  };
 
   return (
     <Button
@@ -273,15 +221,11 @@ function View3DButton(props: ModelsTreeHeaderButtonProps) {
       size="small"
       styleType="borderless"
       title={TreeWidget.translate("toggle3DViews")}
-      onClick={viewToggle3D}
+      onClick={() => void toggleModels(models3d, is3dToggleActive, props.viewport)}
       disabled={models3d.length === 0}
       endIcon={is3dToggleActive ? <SvgVisibilityShow /> : <SvgVisibilityHide />}
     >
       {TreeWidget.translate("label3D")}
     </Button>
   );
-}
-
-function areAllModelsVisible(viewport: Viewport, models: string[]): boolean {
-  return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
 }

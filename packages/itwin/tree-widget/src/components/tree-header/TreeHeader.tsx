@@ -14,10 +14,10 @@ import {
   MenuItem,
 } from "@itwin/itwinui-react";
 import { SvgMore } from "@itwin/itwinui-icons-react";
-import { ScreenViewport } from "@itwin/core-frontend";
+import { Viewport } from "@itwin/core-frontend";
 
 export interface TreeHeaderButtonProps {
-  viewport: ScreenViewport;
+  viewport: Viewport;
 }
 
 export interface TreeHeaderProps extends Omit<SearchBoxProps,
