@@ -10,8 +10,6 @@ import { history } from "../history";
 import { getUiProvidersConfig } from "../UiProvidersConfig";
 import { useAuthorizationContext } from "./Authorization";
 import { ApiKeys } from "./ApiKeys";
-import { FrontendDevTools } from "@itwin/frontend-devtools";
-import { MapLayersFormats } from "@itwin/map-layers-formats";
 
 const uiConfig = getUiProvidersConfig();
 
