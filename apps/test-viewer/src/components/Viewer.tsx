@@ -17,8 +17,6 @@ const uiConfig = getUiProvidersConfig();
 
 async function onIModelAppInit() {
   await uiConfig.initialize();
-  await FrontendDevTools.initialize();
-  await MapLayersFormats.initialize();
 }
 
 export function Viewer() {
