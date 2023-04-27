@@ -94,7 +94,7 @@ const configuredUiItems = new Map<string, UiItem>([
       initialize: async () => {
         await FrontendDevTools.initialize();
         await MapLayersFormats.initialize();
-        MapLayersUI.initialize();
+        await MapLayersUI.initialize();
       },
       createUiItemsProviders: () => [
         new MapLayersUiItemsProvider(),
