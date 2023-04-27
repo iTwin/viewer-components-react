@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 
-import { PropertyGrid } from "@itwin/components-react";
-import { FillCentered, Orientation } from "@itwin/core-react";
+import { VirtualizedPropertyGridWithDataProvider } from "@itwin/components-react";
+import { FillCentered, Orientation, ResizableContainerObserver } from "@itwin/core-react";
 
 import { FeatureInfoDataProvider, MapFeatureInfoDataUpdate, MapFeatureInfoLoadState } from "./FeatureInfoDataProvider";
 import { ProgressRadial } from "@itwin/itwinui-react";
@@ -23,6 +23,8 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
   const [loadingData, setLoadingData] = React.useState<boolean>(false);
   const [hasData, setHasData] = React.useState<boolean>(false);
   const [noRecordsMessage] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:FeatureInfoWidget.NoRecords"));
+
+  const [{ width, height }, setSize] = React.useState({ width: 0, height: 0 });
 
   const handleLoadStateChange = (state: MapFeatureInfoLoadState) => {
     setLoadingData(state === MapFeatureInfoLoadState.DataLoadStart);
@@ -60,14 +62,26 @@ export function MapFeatureInfoWidget({ featureInfoOpts }: MapFeatureInfoWidgetPr
 
   }, [featureInfoOpts?.showLoadProgressAnimation]);
 
+  const handleResize = React.useCallback((w: number, h: number) => {
+    setSize({ width: w, height: h });
+  }, []);
+
   if (loadingData) {
     return (<FillCentered><ProgressRadial indeterminate={true}></ProgressRadial></FillCentered>);
   } else if (!hasData) {
     return (<FillCentered><span><i>{noRecordsMessage}</i></span></FillCentered>);
   } else {
     if (dataProvider.current)
-      return (<PropertyGrid dataProvider={dataProvider.current} orientation={Orientation.Vertical} // eslint-disable-line deprecation/deprecation
-        isPropertySelectionEnabled={featureInfoOpts?.propertyGridOptions?.isPropertySelectionEnabled} />);
+      return (
+        <ResizableContainerObserver onResize={handleResize}>
+          <VirtualizedPropertyGridWithDataProvider
+            width={width}
+            height={height}
+            dataProvider={dataProvider.current}
+            orientation={Orientation.Vertical}
+            isPropertySelectionEnabled={featureInfoOpts?.propertyGridOptions?.isPropertySelectionEnabled} />
+        </ResizableContainerObserver>
+      );
     else
       return (<></>);
   }
