@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/breakdown-trees-react",
+      "comment": "Specify correct presentation package versions in peerDependencies.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/breakdown-trees-react"
+}
