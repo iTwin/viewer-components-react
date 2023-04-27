@@ -60,33 +60,45 @@ export const hideGroup = async (
   hideElements(result.ids);
 };
 
+const processGroupVisualization = async (
+  iModelConnection: IModelConnection,
+  group: Group,
+  hiddenGroupsIds: Set<string>,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
+  doEmphasizeElements: boolean,
+  groupColor: string
+) => {
+  const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
+  const hilitedIds = result.ids;
+  overrideElements(hilitedIds, groupColor, FeatureOverrideType.ColorAndAlpha);
+
+  doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
+
+  return hiddenGroupsIds.has(group.id) ? [] : hilitedIds;
+};
+
 export const visualizeGroupColors = async (
   iModelConnection: IModelConnection,
   groups: Group[],
-  viewGroups: Group[],
-  hiddenGroupsIds: string[],
+  hiddenGroupsIds: Set<string>,
   hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
   doEmphasizeElements: boolean = true
 ) => {
   clearEmphasizedOverriddenElements();
-  let allIds: string[] = [];
-  for (const group of viewGroups) {
-    const index =
-      viewGroups.length > groups.length
-        ? viewGroups.findIndex((g) => g.id === group.id)
-        : groups.findIndex((g) => g.id === group.id);
-    const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
-    const hilitedIds = result.ids;
-    overrideElements(
-      hilitedIds,
-      getGroupColor(index),
-      FeatureOverrideType.ColorAndAlpha,
-    );
-    doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
-    if (!hiddenGroupsIds.includes(group.id)) {
-      allIds = allIds.concat(hilitedIds);
-    }
-  }
+
+  const allIdsPromises = groups.map(async (group, index) =>
+    processGroupVisualization(
+      iModelConnection,
+      group,
+      hiddenGroupsIds,
+      hilitedElementsQueryCache,
+      doEmphasizeElements,
+      getGroupColor(index)
+    )
+  );
+
+  const allIdsArrays = await Promise.all(allIdsPromises);
+  const allIds = allIdsArrays.flat();
 
   await zoomToElements(allIds);
 };

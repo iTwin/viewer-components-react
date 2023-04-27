@@ -26,6 +26,9 @@ const enzyme = require("enzyme/build");
 const spies = require("chai-spies");
 const sinon = require("sinon");
 
+window.requestAnimationFrame = window.requestAnimationFrame || function (C) { return setTimeout(function () { C(+new Date()) }, 30) };
+window.cancelAnimationFrame = window.cancelAnimationFrame || clearTimeout;
+
 // Fix node's module loader to strip ?sprite from SVG imports
 const m = require("module");
 const origLoader = m._load;

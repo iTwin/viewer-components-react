@@ -15,6 +15,7 @@ import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import { assert } from "chai";
 import { ConvexClipPlaneSet } from "@itwin/core-geometry";
 import { FunctionalityProviderTestUtils, MockClassNames, MockStrings } from "./FunctionalityProviderTestUtils";
+import { BreakdownTrees } from "../../BreakdownTrees";
 
 describe("BuildingClipPlanesProvider", () => {
   let checkIsBuildingStub: sinon.SinonStub;
@@ -26,10 +27,11 @@ describe("BuildingClipPlanesProvider", () => {
   const dataProviderMock = moq.Mock.ofType<IPresentationTreeDataProvider>();
 
   before(async () => {
+    await BreakdownTrees.initialize();
     await TestUtils.initializeUiFramework(connection.object);
     await IModelApp.localization.registerNamespace("BreakdownTrees");
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
-    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey);
+    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey); // eslint-disable-line deprecation/deprecation
 
     const viewStateMock = moq.Mock.ofType<ViewState>();
     viewStateMock.setup((x) => x.setViewClip(moq.It.isAny()));
@@ -45,6 +47,7 @@ describe("BuildingClipPlanesProvider", () => {
     queryBuildingRangeStub.restore();
     createRange3DPlaneStub.restore();
     TestUtils.terminateUiFramework();
+    BreakdownTrees.terminate();
   });
 
   it("should perform action for BuildingClipPlanesProvider", async () => {

@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import { Presentation } from "@itwin/presentation-frontend";
 import type {
   ISelectionProvider,
@@ -25,6 +24,7 @@ import type { PropertyRecord } from "@itwin/appui-abstract";
 import { PropertyGridWrapperContext } from "../context/PropertyGridWrapperContext";
 import { PropertyAction } from "../PropertyAction";
 import { Alert, Button } from "@itwin/itwinui-react";
+import { useGroupingMappingApiConfig } from "../context/GroupingApiConfigContext";
 
 const createPropertyDataProvider = (
   keys: KeySet,
@@ -49,7 +49,7 @@ export const GroupQueryBuilderCustomUI = ({
   isUpdating,
   resetView,
 }: GroupingCustomUIProps) => {
-  const iModelConnection = useActiveIModelConnection();
+  const { iModelConnection } = useGroupingMappingApiConfig();
   if (!iModelConnection) {
     throw new Error("This component requires an active iModelConnection.");
   }

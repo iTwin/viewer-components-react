@@ -62,10 +62,6 @@ const GroupingMapping = (props: GroupingMappingProps) => {
   ]);
   const currentRoute = routingHistory[routingHistory.length - 1];
   const iModelId = useActiveIModelConnection()?.iModelId ?? "";
-  const groupUIs =
-    props.customUIs?.filter(
-      (p) => p.type === GroupingMappingCustomUIType.Grouping
-    );
   const navigateTo = useCallback((toRoute: (prev: Route | undefined) => Route) => {
     setRoutingHistory((r) => [...r, toRoute(r[r.length - 1])]);
   }, []);
@@ -90,11 +86,10 @@ const GroupingMapping = (props: GroupingMappingProps) => {
             groupingRouteFields: { ...prev?.groupingRouteFields, group },
           })),
       },
-      ...(props.customUIs ?? []),
       // No group UI's provided means the widget provides its own
-      ...groupUIs ?? defaultGroupingUI,
+      ...props.customUIs ?? defaultGroupingUI,
     ],
-    [groupUIs, navigateTo, props.customUIs]
+    [props.customUIs, navigateTo]
   );
 
   return (

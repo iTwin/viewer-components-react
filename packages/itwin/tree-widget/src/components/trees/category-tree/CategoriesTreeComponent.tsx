@@ -2,19 +2,22 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import "../VisibilityTreeBase.scss";
 import React, { useEffect, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
 import { IModelApp, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import { CategoryTree, CategoryTreeProps } from "./CategoriesTree";
-import { CategoryInfo, CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories } from "./CategoryVisibilityHandler";
-import { useTreeFilteringState } from "../../TreeFilteringState";
-import { AutoSizer } from "../../utils/AutoSizer";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { IPresentationTreeDataProvider, isPresentationTreeNodeItem, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { TreeHeader, TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+import { useTreeFilteringState } from "../../TreeFilteringState";
+import { AutoSizer } from "../../utils/AutoSizer";
+import { CategoryTree, CategoryTreeProps } from "./CategoriesTree";
+import {
+  CategoryInfo, CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories,
+} from "./CategoryVisibilityHandler";
 
 export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
   categories: CategoryInfo[];
@@ -119,14 +122,14 @@ async function getFilteredCategories(filteredProvider: IPresentationTreeDataProv
   const filteredCategories: CategoryInfo[] = [];
   const nodes = await filteredProvider.getNodes();
   for (const node of nodes) {
-    const filteredCategoryId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredProvider.getNodeKey(node));
-    const filteredSubCategoriesIds: string[] = [];
-    if (!node.hasChildren)
+    if (!isPresentationTreeNodeItem(node)) {
       continue;
-
-    for (const nodeChild of await filteredProvider.getNodes(node)) {
-      filteredSubCategoriesIds.push(CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(filteredProvider.getNodeKey(nodeChild)));
     }
+
+    const filteredCategoryId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(node.key);
+    const filteredSubCategoriesIds = node.hasChildren
+      ? (await filteredProvider.getNodes(node)).filter((child) => isPresentationTreeNodeItem(child)).map((child) => CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey((child as PresentationTreeNodeItem).key))
+      : [];
     filteredCategories.push({ categoryId: filteredCategoryId, subCategoryIds: filteredSubCategoriesIds });
   }
   return filteredCategories;

@@ -2,6 +2,58 @@
   "name": "@itwin/grouping-mapping-widget",
   "entries": [
     {
+      "version": "0.14.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.14.0",
+      "date": "Mon, 24 Apr 2023 19:57:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Grouping component no longer handles Group visualization. This has been moved to the new GroupsVisualization component."
+          },
+          {
+            "comment": "CalculatedPropertyAction visualization toggle has been moved to CalculatedPropertyActionWithVisuals."
+          },
+          {
+            "comment": "PropertyMenu Group hiliting and information panel has been moved to PropertyMenuWithVisualization."
+          },
+          {
+            "comment": "Added additional prop to GroupCustomUI that supplies the initial Group's query during edit mode."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Groups visualization has been optimized."
+          },
+          {
+            "comment": "Fixed an issue that caused CustomUI's to show up twice on drop down menus."
+          },
+          {
+            "comment": "Fixed header not appearing while in ContextCustomUI"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.0",
+      "tag": "@itwin/grouping-mapping-widget_v0.13.0",
+      "date": "Tue, 18 Apr 2023 17:46:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed a visualization race condition that caused some Groups to not visualize."
+          },
+          {
+            "comment": "Fixed Select Query Builder reset button. No longer fails to visualize. "
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Updated the Selection query builder to use VirtualizedPropertyGridWithDataProvider from @itwin/components-react, replacing the previous PropertyGrid implementation."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.0",
       "tag": "@itwin/grouping-mapping-widget_v0.12.0",
       "date": "Mon, 03 Apr 2023 15:34:07 GMT",

@@ -245,20 +245,10 @@ exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
                   data-testid="tree-node-contents"
                   style="margin-left: 24px;"
                 >
-                  <label
-                    class="core-image-checkbox"
-                  >
-                    <input
-                      type="checkbox"
-                    />
-                    <span
-                      class="image"
-                    >
-                      <i
-                        class="icon icon-visibility-hide-2"
-                      />
-                    </span>
-                  </label>
+                  <input
+                    class="iui-checkbox iui-checkbox-visibility visibility-tree-checkbox"
+                    type="checkbox"
+                  />
                   <div
                     class="core-tree-node-icon"
                   />
