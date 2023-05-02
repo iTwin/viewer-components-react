@@ -1,6 +1,13 @@
 # Change Log - @itwin/measure-tools-react
 
-This log was last generated on Thu, 01 Dec 2022 14:13:39 GMT and should not be manually modified.
+This log was last generated on Tue, 02 May 2023 16:12:17 GMT and should not be manually modified.
+
+## 0.11.0
+Tue, 02 May 2023 16:12:17 GMT
+
+### Minor changes
+
+- Updated to AppUI 4.0 and Presentation 4.0
 
 ## 0.10.6
 Thu, 01 Dec 2022 14:13:39 GMT

@@ -10,9 +10,8 @@
   },
   {
     "policyName": "itwin-property-grid",
-    "definitionName": "lockStepVersion",
-    "version": "0.10.0-dev.5",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "itwin-measure-tools",
@@ -27,7 +26,7 @@
   {
     "policyName": "itwin-geo-tools",
     "definitionName": "lockStepVersion",
-    "version": "0.3.0-dev.5",
+    "version": "0.3.0-dev.6",
     "nextBump": "prerelease"
   },
   {
@@ -63,7 +62,7 @@
   {
     "policyName": "itwin-map-layers",
     "definitionName": "lockStepVersion",
-    "version": "4.0.0-dev.50",
+    "version": "4.0.0-dev.51",
     "nextBump": "prerelease"
   }
 ]
