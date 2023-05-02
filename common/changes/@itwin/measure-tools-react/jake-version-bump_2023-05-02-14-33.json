@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/measure-tools-react",
+      "comment": "Updated to AppUI 4.0 and Presentation 4.0",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/measure-tools-react"
+}

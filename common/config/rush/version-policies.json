@@ -16,9 +16,8 @@
   },
   {
     "policyName": "itwin-measure-tools",
-    "definitionName": "lockStepVersion",
-    "version": "0.11.0-dev.5",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "itwin-imodel-react-hooks",
@@ -33,9 +32,8 @@
   },
   {
     "policyName": "itwin-breakdown-trees",
-    "definitionName": "lockStepVersion",
-    "version": "0.4.0-dev.2",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "grouping-mapping-widget",
