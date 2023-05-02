@@ -10,7 +10,7 @@ import { BreakdownTrees } from "../BreakdownTrees";
 import { ContextMenuItem, Icon, Popup } from "@itwin/core-react";
 import type { OptionItemHandler } from "./OptionItemHandlers/OptionItemHandler";
 import { RelativePosition } from "@itwin/appui-abstract";
-import styles from "./MoreOptionsButton.module.scss";
+import styles from "./MoreOptionsButton.scss";
 
 export interface MoreOptionsButtonProps {
   optionItems: OptionItemHandler[];

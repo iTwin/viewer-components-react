@@ -11,7 +11,7 @@ import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { NodeCheckboxProps, NodeCheckboxRenderProps } from "@itwin/core-react";
 import { CheckBoxState, ContextMenuItem, GlobalContextMenu, ImageCheckBox, TreeNode } from "@itwin/core-react";
 import type { VisibilityHandler } from "../EventHandlers/VisibilityHandler";
-import styles from "./FunctionalTreeNodeRenderer.module.scss";
+import styles from "./FunctionalTreeNodeRenderer.scss";
 import { ToolbarItemKeys } from "../TreeNodeFunctionsToolbar";
 
 /**
