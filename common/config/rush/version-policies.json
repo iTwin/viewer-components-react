@@ -11,9 +11,8 @@
   },
   {
     "policyName": "itwin-property-grid",
-    "definitionName": "lockStepVersion",
-    "version": "0.10.0-dev.5",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "itwin-measure-tools",
