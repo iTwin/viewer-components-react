@@ -123,11 +123,6 @@
     "react-dom": "^17.0.0",
     "react-redux": "7.2.6"
   },
-  "dependenciesMeta": {
-    "@itwin/tree-widget-react": {
-      "injected": true
-    }
-  },
   "nyc": {
     "extends": "./node_modules/@itwin/build-tools/.nycrc",
     "require": [
