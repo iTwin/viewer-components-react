@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/esm/core-react/index";
+
 @mixin ui-fw-visibility-tree-base {
   height: 100%;
   width: 100%;
@@ -11,7 +11,7 @@
   position: relative;
 
   .core-tree-node.with-checkbox {
-    > .contents {
+    >.contents {
       padding-left: 31px;
     }
   }
@@ -22,6 +22,7 @@
     padding: 0;
     margin: -2px 0px 0px 5px;
   }
+
   .filteredTreeOverlay {
     position: absolute;
     top: 0;
@@ -31,6 +32,7 @@
     z-index: 9999;
     background-color: rgba(255, 255, 255, 0.8);
   }
+
   .components-tree-errormessage {
     position: absolute;
     top: 40%;
@@ -39,7 +41,7 @@
     text-align: center;
     transform: translate(-50%, -50%);
     font-style: italic;
-    color: $buic-foreground-muted;
+    color: var(--buic-foreground-muted);
 
     .errormessage-header {
       display: block;

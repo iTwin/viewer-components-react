@@ -6,11 +6,11 @@
 import { useTreeFilteringState } from "./visibility/TreeFilteringState";
 import * as React from "react";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import type { HighlightableTreeProps, TreeModel, TreeModelNode, TreeModelSource } from "@itwin/components-react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import styles from "./TreeWithRulesetTree.module.scss";
-import { useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "@itwin/appui-react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import { BreakdownTrees } from "../BreakdownTrees";
@@ -31,6 +31,7 @@ import { VisibilityHandler } from "./EventHandlers/VisibilityHandler";
 import classNames from "classnames";
 import "./global.scss";
 import { useResizeObserver } from "@itwin/core-react";
+import { useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "@itwin/tree-widget-react";
 
 export interface TreeWithRulesetEventHandlers {
   onZoomToElement: BeEvent<() => void>;
@@ -67,17 +68,19 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
 
   const alterNodeLabel = React.useCallback((node: TreeModelNode): PropertyRecord => {
     if (!props.displayGuids) {
-      const elementKey = props.dataProvider.getNodeKey(node.item);
-      if (NodeKey.isInstancesNodeKey(elementKey)) {
-        const labelValue: any = node.label.value;
-        const displayVal: string = labelValue.displayValue;
-        const pos = displayVal.lastIndexOf("[");
-        const nodeLabel = PropertyRecord.fromString(pos > -1 ? displayVal.substring(0, pos) : displayVal);
-        return nodeLabel;
+      if (isPresentationTreeNodeItem(node.item)) {
+        const elementKey = node.item.key;
+        if (NodeKey.isInstancesNodeKey(elementKey)) {
+          const labelValue: any = node.label.value;
+          const displayVal: string = labelValue.displayValue;
+          const pos = displayVal.lastIndexOf("[");
+          const nodeLabel = PropertyRecord.fromString(pos > -1 ? displayVal.substring(0, pos) : displayVal);
+          return nodeLabel;
+        }
       }
     }
     return node.label;
-  }, [props.displayGuids, props.dataProvider]);
+  }, [props.displayGuids]);
 
   const expandTree = () => {
     const selectedElemId = props.iModel.selectionSet.elements;
@@ -88,7 +91,10 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
     let selectedNodesCount: number = 0;
     // Find corresponding treeNodes from selected elements in view
     for (const treeNode of treeModelData.iterateTreeModelNodes()) {
-      const nodeKey = props.dataProvider.getNodeKey(treeNode.item);
+      const nodeKey = isPresentationTreeNodeItem(treeNode.item) ? treeNode.item.key : undefined;
+      if (!nodeKey) {
+        break;
+      }
       if (NodeKey.isInstancesNodeKey(nodeKey)) {
         const mappedInstance = nodeKey.instanceKeys.find((instanceKey) => selectedElemId.has(instanceKey.id));
         if (mappedInstance) {
@@ -96,7 +102,6 @@ export const ControlledTreeWrapper: React.FC<ControlledTreeProps> = (props: Cont
           expandParentNodes(treeNode, treeModelData);
         }
       }
-
       if (selectedElemId.size === selectedNodesCount)
         break;
     }

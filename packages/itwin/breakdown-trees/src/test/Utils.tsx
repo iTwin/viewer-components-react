@@ -10,7 +10,7 @@ import { ContentControl, FrameworkReducer, SyncUiEventDispatcher, UiFramework } 
 import type { TreeNodeItem } from "@itwin/components-react";
 import { Id64 } from "@itwin/core-bentley";
 import type { AnyAction, Store } from "redux";
-import { combineReducers, createStore } from "redux";
+import { combineReducers } from "redux";
 import type { IModelConnection } from "@itwin/core-frontend";
 import { IModelApp } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey, InstanceKey, Ruleset } from "@itwin/presentation-common";
@@ -20,17 +20,19 @@ import faker from "faker";
 import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { BreakdownTrees } from "../breakdown-trees-react";
-import { getPropertyRecordAsString } from "@itwin/components-react";
 import { TreeWithRulesetControllerBase } from "../Controllers/TreeWithRulesetControllerBase";
 import type { Localization } from "@itwin/core-common";
+import { configureStore } from "@reduxjs/toolkit";
 
 function createAppStore(): Store {
   const rootReducer = combineReducers({
     FrameworkReducer,
   } as any);
 
-  return createStore(rootReducer,
-    (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__());
+  return configureStore({
+    reducer: rootReducer,
+    enhancers: (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__(),
+  });
 }
 
 export class TestContentControl extends ContentControl {
@@ -54,7 +56,6 @@ export class TestUtils {
       // This is required by our I18n module (specifically the i18next package).
       (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
       this.store = createAppStore();
-
       await UiFramework.initialize(this.store);
       await BreakdownTrees.initialize(TestUtils.localization);
       // Set the iModelConnection in the Redux store
@@ -131,7 +132,7 @@ export const setupDataProvider = (imodel: IModelConnection, nodes = [createRando
   // const getNodeKey = testParentChildPair ? (node: any) => (node as any)[PRESENTATION_TREE_NODE_KEY] : (node: any) => node.key;
   const getNodes = testParentChildPair ?
     async (parentNode?: TreeNodeItem) => {
-      if (parentNode && getPropertyRecordAsString(parentNode.label) === "Parent") {
+      if (parentNode && parentNode.label.description === "Parent") {
         const children = [];
         for (let i = 0; i < numberOfChildren; i++) {
           const key = createRandomECInstancesNodeKey([parentNode.id]);
