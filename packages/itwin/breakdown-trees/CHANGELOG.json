@@ -2,6 +2,42 @@
   "name": "@itwin/breakdown-trees-react",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@itwin/breakdown-trees-react_v0.4.0",
+      "date": "Tue, 02 May 2023 16:12:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Specify correct presentation package versions in peerDependencies."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "updating to core@3.7.0 and appui@4.0.0"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Updated to AppUI 4.0 and Presentation 4.0"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" to `0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/tree-widget-react\" to `0.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/measure-tools-react\" from `^0.11.0` to `^0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@itwin/tree-widget-react\" from `^0.9.0` to `^0.9.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.16",
       "tag": "@itwin/breakdown-trees-react_v0.3.16",
       "date": "Thu, 01 Dec 2022 14:13:39 GMT",

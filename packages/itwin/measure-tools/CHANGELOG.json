@@ -2,6 +2,23 @@
   "name": "@itwin/measure-tools-react",
   "entries": [
     {
+      "version": "0.11.0",
+      "tag": "@itwin/measure-tools-react_v0.11.0",
+      "date": "Tue, 02 May 2023 16:12:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Updating to use v3.7.0 of core packages and v4.0.0-dev of appui"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Updated to AppUI 4.0 and Presentation 4.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.6",
       "tag": "@itwin/measure-tools-react_v0.10.6",
       "date": "Thu, 01 Dec 2022 14:13:39 GMT",
