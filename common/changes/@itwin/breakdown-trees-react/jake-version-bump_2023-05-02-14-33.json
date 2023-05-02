@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/breakdown-trees-react",
+      "comment": "Updated to AppUI 4.0 and Presentation 4.0",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/breakdown-trees-react"
+}
