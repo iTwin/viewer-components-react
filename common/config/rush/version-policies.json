@@ -5,21 +5,18 @@
   },
   {
     "policyName": "itwin-tree-widget",
-    "definitionName": "lockStepVersion",
-    "version": "0.9.0-dev.5",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "itwin-property-grid",
-    "definitionName": "lockStepVersion",
-    "version": "0.10.0-dev.5",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "itwin-measure-tools",
-    "definitionName": "lockStepVersion",
-    "version": "0.11.0-dev.5",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "itwin-imodel-react-hooks",
@@ -29,14 +26,13 @@
   {
     "policyName": "itwin-geo-tools",
     "definitionName": "lockStepVersion",
-    "version": "0.3.0-dev.5",
+    "version": "0.3.0-dev.6",
     "nextBump": "prerelease"
   },
   {
     "policyName": "itwin-breakdown-trees",
-    "definitionName": "lockStepVersion",
-    "version": "0.4.0-dev.2",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "grouping-mapping-widget",
@@ -66,7 +62,7 @@
   {
     "policyName": "itwin-map-layers",
     "definitionName": "lockStepVersion",
-    "version": "4.0.0-dev.50",
+    "version": "4.0.0-dev.51",
     "nextBump": "prerelease"
   }
 ]

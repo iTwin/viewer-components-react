@@ -65,8 +65,7 @@ import {
   fetchPresentationDescriptor,
   findProperties,
 } from "./GroupPropertyUtils";
-import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
-import { getHiliteIdsAndKeysetFromGroup } from "./groupsHelpers";
+import { manufactureKeys } from "./viewerUtils";
 
 export interface GroupPropertyActionProps {
   mappingId: string;
@@ -96,7 +95,6 @@ export const GroupPropertyAction = ({
 }: GroupPropertyActionProps) => {
   const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-  const { hilitedElementsQueryCache } = useGroupHilitedElementsContext();
   const [propertyName, setPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
   const [quantityType, setQuantityType] = useState<QuantityType>(QuantityType.Undefined);
@@ -160,9 +158,9 @@ export const GroupPropertyAction = ({
 
       if (!iModelConnection) return;
 
-      const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
+      const result = await manufactureKeys(group.query, iModelConnection);
 
-      const descriptor = await fetchPresentationDescriptor(iModelConnection, result.keySet);
+      const descriptor = await fetchPresentationDescriptor(iModelConnection, result);
 
       // Only allow primitives and structs
       const propertyFields =
@@ -205,7 +203,7 @@ export const GroupPropertyAction = ({
       setIsLoading(false);
     };
     void generateProperties();
-  }, [getAccessToken, mappingClient, iModelConnection, iModelId, groupProperty, hilitedElementsQueryCache, mappingId, group]);
+  }, [getAccessToken, mappingClient, iModelConnection, iModelId, groupProperty, mappingId, group]);
 
   const onSave = async () => {
     if (!validator.allValid()) {
