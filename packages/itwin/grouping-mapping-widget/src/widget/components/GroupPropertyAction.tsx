@@ -65,8 +65,6 @@ import {
   fetchPresentationDescriptor,
   findProperties,
 } from "./GroupPropertyUtils";
-import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsContext";
-import { getHiliteIdsAndKeysetFromGroup } from "./groupsHelpers";
 import { manufactureKeys } from "./viewerUtils";
 
 export interface GroupPropertyActionProps {
