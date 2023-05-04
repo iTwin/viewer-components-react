@@ -26,7 +26,7 @@
   {
     "policyName": "itwin-geo-tools",
     "definitionName": "individualVersion",
-    "lockedMajor": 0
+    "lockedMajor": 4
   },
   {
     "policyName": "itwin-breakdown-trees",
@@ -61,6 +61,6 @@
   {
     "policyName": "itwin-map-layers",
     "definitionName": "individualVersion",
-    "lockedMajor": 0
+    "lockedMajor": 4
   }
 ]
