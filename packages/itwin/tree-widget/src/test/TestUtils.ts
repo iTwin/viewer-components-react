@@ -3,15 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as moq from "typemoq";
 import deepEqual from "deep-equal";
+import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
-import { TreeWidget } from "../TreeWidget";
-import type { PresentationManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 import { BeEvent } from "@itwin/core-bentley";
-import type { VariableValue } from "@itwin/presentation-common";
+import { EmptyLocalization } from "@itwin/core-common";
 import { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
+import { TreeWidget } from "../TreeWidget";
 
+import type { PresentationManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
+import type { VariableValue } from "@itwin/presentation-common";
 export class TestUtils {
   private static _initialized = false;
 
@@ -21,7 +22,7 @@ export class TestUtils {
 
     // eslint-disable-next-line deprecation/deprecation
     await UiFramework.initialize(undefined);
-    await TreeWidget.initialize();
+    await TreeWidget.initialize(new EmptyLocalization());
     TestUtils._initialized = true;
   }
 
