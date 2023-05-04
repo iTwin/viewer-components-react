@@ -101,7 +101,7 @@ const configuredUiItems = new Map<string, UiItem>([
     }
   ],
   [
-    "geo-tool",
+    "geo-tools",
     {
       initialize: async () => { GeoTools.initialize() },
       createUiItemsProviders: () => [new GeoToolsAddressSearchProvider()],
