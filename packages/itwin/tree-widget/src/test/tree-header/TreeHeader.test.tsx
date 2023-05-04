@@ -29,6 +29,9 @@ describe("<TreeHeader />", () => {
   });
 
   afterEach(() => {
+    global.cancelAnimationFrame = sinon.stub();
+    cleanup();
+    delete (global as any).cancelAnimationFrame;
     sinon.restore();
   });
 
@@ -66,7 +69,6 @@ describe("<TreeHeader />", () => {
   });
 
   it("handles buttons overflow", async () => {
-    global.cancelAnimationFrame = sinon.stub();
     sinon.stub(HTMLElement.prototype, "scrollWidth").get(() => 200);
     sinon.stub(HTMLElement.prototype, "offsetWidth").get(() => 32);
 
@@ -79,8 +81,5 @@ describe("<TreeHeader />", () => {
 
     expect(queryByRole("button", { name: "Button1"})).to.be.null;
     expect(queryByRole("button", {name: "Button2"})).to.be.null;
-
-    cleanup();
-    delete (global as any).cancelAnimationFrame;
   });
 });
