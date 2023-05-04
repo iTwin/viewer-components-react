@@ -42,7 +42,7 @@ export class TreeWidget {
   public static get i18n(): Localization {
     if (!TreeWidget._i18n)
       throw new UiError(
-        TreeWidget.loggerCategory(this),
+        TreeWidget.packageName,
         "TreeWidget not initialized"
       );
     return TreeWidget._i18n;
@@ -68,12 +68,5 @@ export class TreeWidget {
       stringKey,
       options
     );
-  }
-
-  public static loggerCategory(obj: any): string {
-    const className = getClassName(obj);
-    const category =
-      TreeWidget.packageName + (className ? `.${className}` : "");
-    return category;
   }
 }
