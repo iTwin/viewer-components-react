@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { UiItemsProvider } from "@itwin/appui-react";
-import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
+import { CategoriesTreeComponent, ModelsTreeComponent, TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
 import { PropertyGridManager, PropertyGridUiItemsProvider } from "@itwin/property-grid-react";
 import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
@@ -57,9 +57,17 @@ const configuredUiItems = new Map<string, UiItem>([
         await TreeWidget.initialize();
       },
       createUiItemsProvider: () => new TreeWidgetUiItemsProvider({
-        additionalTrees: [{
+        trees: [{
+          id: ModelsTreeComponent.id,
+          getLabel: ModelsTreeComponent.getLabel,
+          render: () => <ModelsTreeComponent />
+        }, {
+          id: CategoriesTreeComponent.id,
+          getLabel: CategoriesTreeComponent.getLabel,
+          render: () => <CategoriesTreeComponent />
+        }, {
           id: "spatial-containment-tree",
-          label: "Spatial Containment",
+          getLabel: () => "Spatial Containment",
           render: () => (
             <SampleSpatialTree />
           ),

@@ -3,18 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import classnames from "classnames";
-import { SearchBox, SearchBoxProps } from "./SearchBox";
 import "./TreeHeader.scss";
-import {
-  ButtonGroup,
-  DropdownMenu,
-  IconButton,
-  MenuItem,
-} from "@itwin/itwinui-react";
-import { SvgMore } from "@itwin/itwinui-icons-react";
+import classnames from "classnames";
+import * as React from "react";
 import { Viewport } from "@itwin/core-frontend";
+import { SvgMore } from "@itwin/itwinui-icons-react";
+import { ButtonGroup, DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
+import { SearchBox, SearchBoxProps } from "./SearchBox";
 
 export interface TreeHeaderButtonProps {
   viewport: Viewport;
@@ -28,7 +23,7 @@ export interface TreeHeaderProps extends Omit<SearchBoxProps,
 | "onSearchClose"
 > {
   /** Header buttons */
-  children: React.ReactNode[];
+  children?: React.ReactNode;
 }
 
 export function TreeHeader(props: TreeHeaderProps) {
@@ -41,7 +36,6 @@ export function TreeHeader(props: TreeHeaderProps) {
       <div className="search-bar-search-container">
         <SearchBox
           {...restProps}
-          valueChangedDelay={500}
           searchOpen={searchOpen}
           onSearchOpen={() => setSearchOpen(true)}
           onSearchClose={() => setSearchOpen(false)}
@@ -53,7 +47,7 @@ export function TreeHeader(props: TreeHeaderProps) {
 
 interface HeaderButtonsProps {
   contracted: boolean;
-  children: React.ReactNode[];
+  children?: React.ReactNode;
 }
 
 function HeaderButtons(props: HeaderButtonsProps) {
@@ -69,7 +63,7 @@ function HeaderButtons(props: HeaderButtonsProps) {
         <DropdownMenu
           menuItems={() =>
             React.Children.toArray(props.children)
-              .slice(overflowStart === 0 ? 0 : overflowStart - 1)
+              .slice(overflowStart - 1)
               .map((btn, index) => <MenuItem key={index} className="search-bar-dropdown-menu-item">{btn}</MenuItem>)
           }
           className="search-bar-dropdown-container"

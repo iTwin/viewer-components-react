@@ -2,15 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-/** @module SearchBox */
 
-import * as React from "react";
+import "./SearchBox.scss";
 import classnames from "classnames";
-import type { CommonProps } from "@itwin/core-react";
+import * as React from "react";
 import { SvgChevronDown, SvgChevronUp, SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import "./SearchBox.scss";
 import { TreeWidget } from "../../TreeWidget";
+
+import type { CommonProps } from "@itwin/core-react";
 
 export interface SearchBoxProps extends CommonProps {
   /** Specifies whether search bar should be open */
@@ -29,15 +29,15 @@ export interface SearchBoxProps extends CommonProps {
   selectedIndex?: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged: (index: number) => void;
-  /** placeholder value to show in gray before anything is entered in */
+  /** Placeholder value to show in gray before anything is entered in */
   placeholder?: string;
-  /** frequency to poll for changes in value */
+  /** Frequency to poll for changes in value */
   valueChangedDelay?: number;
   title?: string;
 }
 
 export function SearchBox(props: SearchBoxProps) {
-  const { className, valueChangedDelay, style, onFilterStart, selectedIndex, resultCount, title,
+  const { className, valueChangedDelay = 500, style, onFilterStart, selectedIndex, resultCount, title,
     onSelectedChanged, onFilterClear, placeholder, searchOpen, onSearchOpen, onSearchClose } = props;
   const [searchText, setSearchText] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -56,8 +56,8 @@ export function SearchBox(props: SearchBoxProps) {
   }, [searchText, valueChangedDelay, onFilterClear, onFilterStart]);
 
   React.useEffect(() => {
-    if (searchOpen) {
-      inputRef.current?.focus();
+    if (searchOpen && inputRef.current ) {
+      inputRef.current.focus();
     }
   }, [searchOpen]);
 
@@ -77,16 +77,16 @@ export function SearchBox(props: SearchBoxProps) {
   );
 
   return (
-    <div className={searchClassName} style={style}>
+    <div className={searchClassName} style={style} role="search" aria-label="Tree search">
       <input
         ref={inputRef}
         value={searchText}
         onChange={(e) => setSearchText(e.currentTarget.value)}
-        onPaste={(e) => setSearchText(e.currentTarget.value)}
-        onCut={(e) => setSearchText(e.currentTarget.value)}
         placeholder={
           placeholder ? placeholder : TreeWidget.translate("searchbox.search")
         }
+        type="text"
+        role="searchbox"
       />
       <SearchResultStepper selectedIndex={selectedIndex} total={resultCount} onStep={onSelectedChanged} />
       <IconButton
@@ -94,6 +94,7 @@ export function SearchBox(props: SearchBoxProps) {
         styleType="borderless"
         onClick={toggleSearch}
         title={!searchOpen ? title : undefined}
+        aria-label={searchOpen ? "Close" : "Open"}
       >
         {searchOpen ? <SvgCloseSmall /> : <SvgSearch />}
       </IconButton>
