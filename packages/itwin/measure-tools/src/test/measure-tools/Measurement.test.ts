@@ -11,8 +11,15 @@ import { MeasurementPreferences } from "../../api/MeasurementPreferences";
 import type { DistanceMeasurementProps } from "../../measurements/DistanceMeasurement";
 import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
 import { DistanceMeasurementSubClass } from "./MeasurementSerialization.test";
+import { TestUtils } from "../TestUtils";
 
 describe("Measurement tests", () => {
+
+  after(async () => {
+    await TestUtils.cleanup();
+  });
+
+
   it("Test equality, type mismatch", () => {
     const test = new DistanceMeasurement();
     const other = new DistanceMeasurementSubClass();

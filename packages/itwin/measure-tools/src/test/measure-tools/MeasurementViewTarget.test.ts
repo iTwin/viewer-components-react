@@ -6,8 +6,15 @@
 import { assert } from "chai";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
 import { MeasurementViewTarget } from "../../api/MeasurementViewTarget";
+import { TestUtils } from "../TestUtils";
 
 describe("MeasurementViewTarget tests", () => {
+
+  after(async () => {
+    await TestUtils.cleanup();
+  });
+
+
   it("Test add/remove", () => {
     const test = new MeasurementViewTarget();
     test.include(WellKnownViewType.XSection);

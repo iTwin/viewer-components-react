@@ -9,8 +9,15 @@ import { Measurement, MeasurementPickContext } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
 import { DistanceMeasurement, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement";
 import { MeasureDistanceToolModel } from "../../toolmodels/MeasureDistanceToolModel";
+import { TestUtils } from "../TestUtils";
 
 describe("DistanceMeasurement tests", () => {
+
+  after(async () => {
+    await TestUtils.cleanup();
+  });
+
+
   it("Test serialization/clone/equals", async () => {
     const measure1 = DistanceMeasurement.create(Point3d.create(0, 0, 0), Point3d.create(0, 10, 0), WellKnownViewType.XSection);
     assert.instanceOf(measure1.serializer, DistanceMeasurementSerializer);

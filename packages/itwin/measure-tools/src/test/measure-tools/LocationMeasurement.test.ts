@@ -10,8 +10,15 @@ import { Measurement, MeasurementPickContext } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
 import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement";
 import { MeasureLocationToolModel } from "../../toolmodels/MeasureLocationToolModel";
+import { TestUtils } from "../TestUtils";
 
 describe("LocationMeasurement tests", () => {
+
+  after(async () => {
+    await TestUtils.cleanup();
+  });
+
+
   it("Test serialization/clone/equals", async () => {
     const measure1 = LocationMeasurement.create(Point3d.create(100, 10, 20), WellKnownViewType.XSection);
     assert.instanceOf(measure1.serializer, LocationMeasurementSerializer);

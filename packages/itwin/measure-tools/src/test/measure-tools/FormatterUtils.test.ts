@@ -8,6 +8,7 @@ import { IModelApp } from "@itwin/core-frontend";
 import { Point3d } from "@itwin/core-geometry";
 import { assert } from "chai";
 import { FormatterUtils } from "../../api/FormatterUtils";
+import { TestUtils } from "../TestUtils";
 
 // NOTE: the quantityFormatter (and FormatterUtils) uses the 'apostrophe' and 'quotation mark' rather than the 'prime' and 'double prime'
 const deg = "\xB0";
@@ -15,13 +16,19 @@ const min = "\u0027";
 const sec = "\u0022";
 
 describe("FormatterUtils", () => {
+
+  after(async () => {
+    await TestUtils.cleanup();
+  });
+
+
   it("test formatCoordinates", async () => {
 
     await IModelApp.quantityFormatter.setActiveUnitSystem("metric");
-    let fCoords = await FormatterUtils.formatCoordinates(Point3d.create(1,2,3));
+    let fCoords = await FormatterUtils.formatCoordinates(Point3d.create(1, 2, 3));
     assert.strictEqual(fCoords, "1, 2, 3");
 
-    fCoords = await FormatterUtils.formatCoordinates(Point3d.create(1.2345678,5.654321,9.456789));
+    fCoords = await FormatterUtils.formatCoordinates(Point3d.create(1.2345678, 5.654321, 9.456789));
     assert.strictEqual(fCoords, "1.23, 5.65, 9.46");
 
     fCoords = await FormatterUtils.formatCoordinates(Point3d.create(-2.345, -1234.56, -0.001));

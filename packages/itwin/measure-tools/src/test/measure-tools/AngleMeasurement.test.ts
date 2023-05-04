@@ -9,8 +9,14 @@ import { Measurement, MeasurementPickContext } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
 import { AngleMeasurement, AngleMeasurementSerializer } from "../../measurements/AngleMeasurement";
 import { MeasureAngleToolModel } from "../../toolmodels/MeasureAngleToolModel";
+import { TestUtils } from "../TestUtils";
 
 describe("AngleMeasurement tests", () => {
+
+  after(async () => {
+    await TestUtils.cleanup();
+  });
+
   it("Test serialization/clone/equals", async () => {
     const measure1 = AngleMeasurement.create(Point3d.create(-1, 0, 0), Point3d.create(0, 1, 0), Point3d.create(1, 0, 0), WellKnownViewType.XSection);
     assert.instanceOf(measure1.serializer, AngleMeasurementSerializer);

@@ -10,9 +10,10 @@ import { Measurement } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
 import type { MeasurementProps } from "../../api/MeasurementProps";
 import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/AreaMeasurement";
-import type { DistanceMeasurementProps} from "../../measurements/DistanceMeasurement";
+import type { DistanceMeasurementProps } from "../../measurements/DistanceMeasurement";
 import { DistanceMeasurement, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement";
 import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement";
+import { TestUtils } from "../TestUtils";
 
 function assertIsArrayWithCount(json: any, ofLength: number) {
   assert.isArray(json);
@@ -22,7 +23,13 @@ function assertIsArrayWithCount(json: any, ofLength: number) {
 }
 
 describe("Measurement Serialization tests", () => {
-  it ("Test serializer registration", () => {
+
+  after(async () => {
+    await TestUtils.cleanup();
+  });
+
+
+  it("Test serializer registration", () => {
     // Base types should have registered their serializers. And there is forced uniqueness based on names, once a serializer is added it cannot be dropped.
     assert.isDefined(Measurement.findSerializer(DistanceMeasurementSerializer.distanceMeasurementName));
     assert.throws(() => {
@@ -30,7 +37,7 @@ describe("Measurement Serialization tests", () => {
     });
   });
 
-  it ("Test serializer subclassing", () => {
+  it("Test serializer subclassing", () => {
     const distSub1 = new DistanceMeasurementSubClass();
     distSub1.setStartPoint(Point3d.create(52, 100, 5));
     distSub1.extraProp = 42;
@@ -46,7 +53,7 @@ describe("Measurement Serialization tests", () => {
     assert.isTrue(distSub2?.equals(distSub1)); // Test out the equality function too
   });
 
-  it ("Test bad serialization inputs", () => {
+  it("Test bad serialization inputs", () => {
     let shouldBeUndefined = Measurement.parse(undefined);
     assert.isUndefined(shouldBeUndefined);
 
@@ -54,14 +61,14 @@ describe("Measurement Serialization tests", () => {
     assert.isUndefined(shouldBeUndefined);
 
     // Valid data for distance measurement, but should have a property name
-    shouldBeUndefined = Measurement.parse({startPoint: [0, 1, 2], endPoint: [0, 1, 2]});
+    shouldBeUndefined = Measurement.parse({ startPoint: [0, 1, 2], endPoint: [0, 1, 2] });
     assert.isUndefined(shouldBeUndefined);
 
-    const dist = Measurement.parse({ distanceMeasurement: { startPoint: [0, 1, 2], endPoint: [0, 1, 2] }});
+    const dist = Measurement.parse({ distanceMeasurement: { startPoint: [0, 1, 2], endPoint: [0, 1, 2] } });
     assert.instanceOf(dist, DistanceMeasurement);
   });
 
-  it ("Test serialize single type in single object", () => {
+  it("Test serialize single type in single object", () => {
 
     const toSerialize = new DistanceMeasurement();
     const json = Measurement.serialize(toSerialize);
@@ -76,7 +83,7 @@ describe("Measurement Serialization tests", () => {
     assert.isTrue(parsed instanceof DistanceMeasurement);
   });
 
-  it ("Test serialize single type in an array", () => {
+  it("Test serialize single type in an array", () => {
     const arrayToSerialize = [];
     arrayToSerialize.push(new LocationMeasurement());
     arrayToSerialize.push(new LocationMeasurement());
@@ -105,7 +112,7 @@ describe("Measurement Serialization tests", () => {
       assert.isTrue(m instanceof LocationMeasurement);
   });
 
-  it ("Test serialize multiple types in an array", () => {
+  it("Test serialize multiple types in an array", () => {
     const arrayToSerialize = [];
     arrayToSerialize.push(new DistanceMeasurement());
     arrayToSerialize.push(new DistanceMeasurementSubClass());
@@ -171,7 +178,7 @@ describe("Measurement Serialization tests", () => {
     assert.isTrue(locCount === 3);
   });
 
-  it ("Test serialize multiple types in single object", () => {
+  it("Test serialize multiple types in single object", () => {
     const distM = new DistanceMeasurement();
     const locM = new LocationMeasurement();
 
@@ -183,7 +190,7 @@ describe("Measurement Serialization tests", () => {
     assert.isNotArray(locJson.locationMeasurement);
 
     // Should have a single json object now that as "distanceMeasurement" with an array of 3 objects and "locationMeasurement" with a single object.
-    const singleJson = {...distJson, ...locJson};
+    const singleJson = { ...distJson, ...locJson };
 
     const parsed = Measurement.parse(singleJson);
     assert.isDefined(parsed);
@@ -243,10 +250,10 @@ describe("Measurement Serialization tests", () => {
     const locMeasure = measure as LocationMeasurement;
     assert.isTrue(locMeasure.location.isAlmostEqual(Point3d.create(71243.07966281034, 1210021.6234076065, 0)));
     assert.isDefined(locMeasure.geoLocation);
-    assert.isTrue(locMeasure.geoLocation!.equalsEpsilon({latitude: 0.7757382221073379, longitude: -1.4953775926575128, height: 0}, Geometry.smallAngleRadians));
+    assert.isTrue(locMeasure.geoLocation!.equalsEpsilon({ latitude: 0.7757382221073379, longitude: -1.4953775926575128, height: 0 }, Geometry.smallAngleRadians));
   });
 
-  it ("CivilSnapshot - Parse Legacy json [Multiple types in an array, each entry a single measurement]", () => {
+  it("CivilSnapshot - Parse Legacy json [Multiple types in an array, each entry a single measurement]", () => {
     // 1 area, 2 distance, 2 location, and a station offset (which will be ignored since it's a civil specific measurement)
     const civilSnapshotJsonStr = '{"version":1,"measurements":[{"distanceMeasurement":{"version":3,"startPoint":[70890.51458092594,1210069.0133838505,0],"endPoint":[71004.49564447837,1210091.8913034166,0],"viewportType":1,"showAxes":false,"isLocked":false}},{"distanceMeasurement":{"version":3,"startPoint":[71035.54424960377,1210039.598915837,0],"endPoint":[71140.94609331891,1210077.592603688,0],"viewportType":1,"showAxes":false,"isLocked":false}},{"areaMeasurement":{"version":2,"viewportType":1,"polygonPoints":[[70845.57581034972,1209907.642344054,0],[70926.8741316649,1209936.2397435117,0],[70943.62403706148,1209866.7889162574,0],[70857.01477013277,1209864.7462448676,0],[70845.57581034972,1209907.642344054,0]],"isLocked":false}},{"locationMeasurement":{"version":1,"location":[71080.89155445796,1209984.0382540335,0],"geoLocation":{"latitude":0.7757307196850269,"longitude":-1.4954120574982648,"height":0},"isLocked":false}},{"locationMeasurement":{"version":1,"location":[71243.07966281034,1210021.6234076065,0],"geoLocation":{"latitude":0.7757382221073379,"longitude":-1.4953775926575128,"height":0},"isLocked":false}},{"stationOffsetMeasurement":{"version":2,"refPoint":[71011.44072720376,1209847.1792709152,15.504021760744482],"pointOnAlignment":[71045.29800106747,1209930.6812270822,15.504021760744482],"distanceAlong":184.99075445611928,"signedOffset":90.10489263733663,"station":3801.5426467599036,"isLocked":false}}]}';
     const json = JSON.parse(civilSnapshotJsonStr);

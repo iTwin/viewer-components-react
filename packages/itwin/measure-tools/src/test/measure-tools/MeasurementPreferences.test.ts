@@ -7,8 +7,15 @@ import { assert } from "chai";
 import { MeasurementManager } from "../../api/MeasurementManager";
 import { MeasurementPreferences } from "../../api/MeasurementPreferences";
 import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
+import { TestUtils } from "../TestUtils";
 
 describe("MeasurementPreferences tests", () => {
+
+  after(async () => {
+    await TestUtils.cleanup();
+  });
+
+
   it("Test showAxes", () => {
     MeasurementPreferences.current.displayMeasurementAxes = true;
     const test1 = new DistanceMeasurement();
