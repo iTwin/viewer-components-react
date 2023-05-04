@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useActiveIModelConnection } from "@itwin/appui-react";
+import type { AccessToken } from "@itwin/core-bentley";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import type {
   GetIModelListParams,
@@ -17,7 +17,6 @@ import {
 import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
-import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import "./SelectIModel.scss";
 import { generateUrl } from "./utils";
@@ -25,14 +24,15 @@ import { generateUrl } from "./utils";
 const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
   iTwinId: string,
-  apiContext: ReportsApiConfig
+  baseUrl: string,
+  getAccessToken: () => Promise<AccessToken>
 ) => {
   const iModelClientOptions: IModelsClientOptions = {
-    api: { baseUrl: generateUrl(Constants.api.baseUrl, apiContext.baseUrl) },
+    api: { baseUrl: generateUrl(Constants.api.baseUrl, baseUrl) },
   };
 
   const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
-  const accessToken = await apiContext.getAccessToken();
+  const accessToken = await getAccessToken();
   const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
   const getiModelListParams: GetIModelListParams = {
     urlParams: { projectId: iTwinId },
@@ -53,19 +53,15 @@ export const SelectIModel = ({
   selectedIModelId,
   setSelectedIModelId,
 }: SelectedIModelProps) => {
-  const apiConfig = useReportsApiConfig();
-  const iModelId = useActiveIModelConnection()?.iModelId ?? "";
-  const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
+  const { iTwinId, iModelId, getAccessToken, baseUrl } = useReportsApiConfig();
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
 
   useEffect(() => {
-    if (iModelId && iTwinId) {
-      void fetchIModels(setIModels, iTwinId, apiConfig);
-    }
-  }, [apiConfig, setIModels, iModelId, iTwinId]);
+    void fetchIModels(setIModels, iTwinId, baseUrl, getAccessToken);
+  }, [baseUrl, getAccessToken, iTwinId, setIModels]);
 
   useEffect(() => {
-    if (iModelId && iModels.length > 0) {
+    if (iModels.length > 0) {
       setSelectedIModelId(iModelId);
     }
   }, [iModelId, iModels, setSelectedIModelId]);

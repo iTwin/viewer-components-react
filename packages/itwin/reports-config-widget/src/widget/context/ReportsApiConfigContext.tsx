@@ -6,14 +6,20 @@ import type { AccessToken } from "@itwin/core-bentley";
 import * as React from "react";
 import { createContext } from "react";
 
+export type GetAccessTokenFn = () => Promise<AccessToken>;
+
 export interface ReportsApiConfig {
-  getAccessToken: () => Promise<AccessToken>;
+  getAccessToken: GetAccessTokenFn;
+  iTwinId: string;
+  iModelId: string;
   baseUrl: string;
 }
 
 export const ReportsApiConfigContext = createContext<ReportsApiConfig>({
   getAccessToken: async () => "",
   baseUrl: "",
+  iTwinId: "",
+  iModelId: "",
 });
 
 export const useReportsApiConfig = () => {

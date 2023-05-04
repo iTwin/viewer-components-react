@@ -3,43 +3,70 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
-import { IModelApp } from "@itwin/core-frontend";
-import React, { useEffect, useState } from "react";
-import { Reports } from "../components/Reports";
-import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
-import { ReportsApiConfigContext } from "../context/ReportsApiConfigContext";
+import React, { useCallback, useState } from "react";
 import "./ReportsContainer.scss";
+import type { Report } from "@itwin/insights-client";
+import { useActiveIModelConnection } from "@itwin/appui-react";
+import { ReportsHeader } from "./ReportsHeader";
+import { ReportsRouter } from "./ReportsRouter";
+import { ReportsConfigContext } from "./ReportsConfigContext";
 
 interface ReportsContainerProps {
   getAccessToken?: () => Promise<AccessToken>;
   baseUrl: string;
 }
 
-const authorizationClientGetAccessToken = async () =>
-  (await IModelApp.authorizationClient?.getAccessToken()) ?? "";
+export enum RouteStep {
+  ReportsList,
+  ReportAction,
+  ReportMappings
+}
+
+export interface ReportsRouteFields {
+  report?: Report;
+}
+
+export interface Route {
+  step: RouteStep;
+  title: string;
+  reportsRoutingFields: ReportsRouteFields;
+}
 
 const ReportsContainer = ({
   getAccessToken,
   baseUrl,
 }: ReportsContainerProps) => {
-  const [apiConfig, setApiConfig] = useState<ReportsApiConfig>({
-    getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
-    baseUrl,
-  });
 
-  useEffect(() => {
-    setApiConfig(() => ({
-      baseUrl,
-      getAccessToken: getAccessToken ?? authorizationClientGetAccessToken,
-    }));
-  }, [getAccessToken, baseUrl]);
+  const [routingHistory, setRoutingHistory] = useState<Route[]>([
+    { step: RouteStep.ReportsList, title: "iTwin Reports", reportsRoutingFields: {} },
+  ]);
+  const currentRoute = routingHistory[routingHistory.length - 1];
+  const iModelId = useActiveIModelConnection()?.iModelId ?? "";
+  const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
+  const navigateTo = useCallback((toRoute: (prev: Route | undefined) => Route) => {
+    setRoutingHistory((r) => [...r, toRoute(r[r.length - 1])]);
+  }, []);
+
+  const goBack = useCallback(() => {
+    const updatedRouting = [...routingHistory];
+    updatedRouting.pop();
+    setRoutingHistory(updatedRouting);
+  }, [routingHistory]);
 
   return (
-    <ReportsApiConfigContext.Provider value={apiConfig}>
+    <ReportsConfigContext getAccessToken={getAccessToken} baseUrl={baseUrl} iTwinId={iTwinId} iModelId={iModelId}>
       <div className="rcw-reports-container">
-        <Reports />
+        <ReportsHeader
+          goBack={goBack}
+          currentRoute={currentRoute}
+        />
+        <ReportsRouter
+          currentRoute={currentRoute}
+          navigateTo={navigateTo}
+          goBack={goBack}
+        />
       </div>
-    </ReportsApiConfigContext.Provider>
+    </ReportsConfigContext>
   );
 };
 

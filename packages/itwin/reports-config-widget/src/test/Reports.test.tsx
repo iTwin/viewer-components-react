@@ -7,37 +7,18 @@ import "@testing-library/jest-dom";
 import {
   render,
   screen,
-  TestUtils,
   waitForElementToBeRemoved,
   within,
 } from "../test/test-utils";
 import { Reports } from "../widget/components/Reports";
-import type {
-  IModelConnection,
-  SelectionSet,
-  SelectionSetEvent,
-} from "@itwin/core-frontend";
-import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
-import * as moq from "typemoq";
-import type {
-  SelectionManager,
-  SelectionScopesManager,
-} from "@itwin/presentation-frontend";
-import {
-  Presentation,
-  SelectionChangeEvent,
-} from "@itwin/presentation-frontend";
 import faker from "@faker-js/faker";
 import type { ReportCollection } from "@itwin/insights-client";
 import userEvent from "@testing-library/user-event";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
-import type { BeEvent } from "@itwin/core-bentley";
-
-const mockITwinId = faker.datatype.uuid();
-const mockIModelId = faker.datatype.uuid();
+import { EmptyLocalization } from "@itwin/core-common";
 
 const reportsFactory = (): ReportCollection => ({
   reports: Array.from(
@@ -62,15 +43,6 @@ const reportsFactory = (): ReportCollection => ({
   },
 });
 
-const connectionMock = moq.Mock.ofType<IModelConnection>();
-const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
-const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
-
-jest.mock("@itwin/appui-react", () => ({
-  ...jest.requireActual("@itwin/appui-react"),
-  useActiveIModelConnection: () => connectionMock.object,
-}));
-
 jest.mock("../widget/components/ReportMappings", () => ({
   ReportMappings: () => "MockReportMappings",
 }));
@@ -78,40 +50,12 @@ jest.mock("../widget/components/ReportMappings", () => ({
 const server = setupServer();
 
 beforeAll(async () => {
-  // This is required by the i18n module within iTwin.js
-  (global as any).XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest; // eslint-disable-line @typescript-eslint/no-var-requires
-
-  await NoRenderApp.startup();
-  await Presentation.initialize();
-  const selectionSet = moq.Mock.ofType<SelectionSet>();
-  const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
-  selectionSet.setup((x) => x.elements).returns(() => new Set([]));
-  selectionSet.setup((x) => x.onChanged).returns(() => onChanged.object);
-  connectionMock
-    .setup((x) => x.selectionSet)
-    .returns(() => selectionSet.object);
-  connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId);
-  connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
-
-  selectionManagerMock
-    .setup((x) => x.selectionChange)
-    .returns(() => new SelectionChangeEvent());
-
-  selectionScopesManagerMock
-    .setup(async (x) => x.getSelectionScopes(connectionMock.object))
-    .returns(async () => []);
-  selectionManagerMock
-    .setup((x) => x.scopes)
-    .returns(() => selectionScopesManagerMock.object);
-
-  Presentation.setSelectionManager(selectionManagerMock.object);
-  await TestUtils.initializeUiFramework(connectionMock.object);
-  await ReportsConfigWidget.initialize();
+  const localization = new EmptyLocalization();
+  await ReportsConfigWidget.initialize(localization);
   server.listen();
 });
 
 afterAll(() => {
-  TestUtils.terminateUiFramework();
   server.close();
 });
 
@@ -132,14 +76,16 @@ describe("Reports View", () => {
       )
     );
 
-    const { user } = render(<Reports />);
+    const onClickAddMock = jest.fn();
+
+    const { user } = render(<Reports onClickAddReport={onClickAddMock} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
     const ctaButton = screen.getByRole("button", {
       name: /createonereportcta/i,
     });
     await user.click(ctaButton);
-    expect(screen.getByText(/addreport/i)).toBeInTheDocument();
+    expect(onClickAddMock).toBeCalled();
   });
 
   it("be able to add new report", async () => {
@@ -156,14 +102,15 @@ describe("Reports View", () => {
       )
     );
 
-    const { user } = render(<Reports />);
+    const onClickAddMock = jest.fn();
+    const { user } = render(<Reports onClickAddReport={onClickAddMock} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
     const newButton = screen.getByRole("button", {
       name: /new/i,
     });
     await user.click(newButton);
-    expect(screen.getByText(/addreport/i)).toBeInTheDocument();
+    expect(onClickAddMock).toBeCalled();
   });
 
   it("list all reports", async () => {
@@ -209,8 +156,8 @@ describe("Reports View", () => {
         }
       )
     );
-
-    const { user } = render(<Reports />);
+    const onClickModifyMock = jest.fn();
+    const { user } = render(<Reports onClickReportModify={onClickModifyMock} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -221,7 +168,7 @@ describe("Reports View", () => {
     const modifyButton = screen.getByRole("menuitem", { name: /modify/i });
     await user.click(modifyButton);
 
-    expect(screen.getByText(/modifyreport/i)).toBeInTheDocument();
+    expect(onClickModifyMock).toBeCalled();
   });
 
   it("remove a report", async () => {
@@ -291,9 +238,7 @@ describe("Reports View", () => {
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const searchButton = within(screen.getByTestId(/rcw-search-bar/i)).getByRole(
-      "button"
-    );
+    const searchButton = within(screen.getByTestId(/rcw-search-bar/i)).getByTestId(/rcw-search-button-closed/i);
     await user.click(searchButton);
     const searchInput = screen.getByRole("textbox", {
       name: /search\-textbox/i,
@@ -331,8 +276,8 @@ describe("Reports View", () => {
         }
       )
     );
-
-    const { user } = render(<Reports />);
+    const onClickModifyMock = jest.fn();
+    const { user } = render(<Reports onClickReportModify={onClickModifyMock} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -342,8 +287,7 @@ describe("Reports View", () => {
     await user.click(firstMenuDropdown);
     const modifyButton = screen.getByRole("menuitem", { name: /modify/i });
     await user.click(modifyButton);
-    // Modify report should appear
-    expect(screen.getByText(/modifyreport/i)).toBeInTheDocument();
+    expect(onClickModifyMock).toBeCalled();
   });
 
   it("click a report", async () => {
@@ -356,8 +300,8 @@ describe("Reports View", () => {
         }
       )
     );
-
-    const { user } = render(<Reports />);
+    const onClickTitleMock = jest.fn();
+    const { user } = render(<Reports onClickReportTitle={onClickTitleMock} />);
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -365,6 +309,6 @@ describe("Reports View", () => {
       mockedReports.reports[0].displayName
     );
     await user.click(reportName);
-    expect(screen.getByText(/MockReportMappings/i)).toBeInTheDocument();
+    expect(onClickTitleMock).toBeCalled();
   });
 });

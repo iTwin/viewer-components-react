@@ -4,14 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
-import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import "./ActionPanel.scss";
 import { LoadingSpinner } from "./utils";
 
 export interface ActionPanelProps {
   actionLabel: string;
   onAction: () => Promise<void>;
-  onCancel: () => void;
+  onCancel?: () => void;
   isCancelDisabled?: boolean;
   isSavingDisabled?: boolean;
   isLoading?: boolean;
@@ -35,16 +34,15 @@ const ActionPanel = ({
       >
         {actionLabel}
       </Button>
-      <Button
-        styleType="default"
-        type="button"
+      {onCancel && <Button
+        styleType='default'
+        type='button'
+        id='cancel'
         onClick={onCancel}
         disabled={isCancelDisabled || isLoading}
       >
-        {ReportsConfigWidget.localization.getLocalizedString(
-          "ReportsConfigWidget:Cancel"
-        )}
-      </Button>
+        Cancel
+      </Button>}
     </div>
   );
 };

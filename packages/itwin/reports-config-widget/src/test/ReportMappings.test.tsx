@@ -5,18 +5,12 @@
 import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
-import type {
-  IModelConnection,
-  SelectionSet,
-  SelectionSetEvent,
-} from "@itwin/core-frontend";
-import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import {
   act,
   render,
   screen,
-  TestUtils,
+  waitFor,
   waitForElementToBeRemoved,
   within,
 } from "./test-utils";
@@ -26,23 +20,15 @@ import type {
   Report,
   ReportMappingCollection,
 } from "@itwin/insights-client";
-import type { ReportMappingAndMapping } from "../widget/components/ReportMappings";
 import { ReportMappings } from "../widget/components/ReportMappings";
 import type { GetSingleIModelParams, IModelOperations, OperationOptions } from "@itwin/imodels-client-management";
 import { IModelState } from "@itwin/imodels-client-management";
-import type {
-  SelectionManager,
-  SelectionScopesManager,
-} from "@itwin/presentation-frontend";
-import {
-  Presentation,
-  SelectionChangeEvent,
-} from "@itwin/presentation-frontend";
-import type { BeEvent } from "@itwin/core-bentley";
-import type BulkExtractor from "../widget/components/BulkExtractor";
+import { BulkExtractor } from "../widget/components/BulkExtractor";
 import type { ReportMappingHorizontalTileProps } from "../widget/components/ReportMappingHorizontalTile";
 import { Text } from "@itwin/itwinui-react";
 import { EmptyLocalization } from "@itwin/core-common";
+import type { AddMappingsModalProps } from "../widget/components/AddMappingsModal";
+import type { ReportsApiConfig } from "../widget/context/ReportsApiConfigContext";
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -198,18 +184,7 @@ const mockMappingsFactory = (
   return mockMappings;
 };
 
-const connectionMock = moq.Mock.ofType<IModelConnection>();
-const mockBulkExtractor = moq.Mock.ofType<BulkExtractor>();
-const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
-const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 const mockIModelsClient = moq.Mock.ofType<IModelOperations<OperationOptions>>();
-
-interface AddMappingsModalProps {
-  reportId: string;
-  existingMappings: ReportMappingAndMapping[];
-  show: boolean;
-  returnFn: () => Promise<void>;
-}
 
 jest.mock("../widget/components/Constants.ts", () => ({
   STATUS_CHECK_INTERVAL: 10,
@@ -224,17 +199,12 @@ jest.mock("../widget/components/ReportMappingHorizontalTile", () => ({
   },
 }));
 
-jest.mock("@itwin/appui-react", () => ({
-  ...jest.requireActual("@itwin/appui-react"),
-  useActiveIModelConnection: () => connectionMock.object,
-}));
-
-let returnFn: () => Promise<void>;
+let onClose: () => Promise<void>;
 jest.mock("../widget/components/AddMappingsModal", () => ({
   ...jest.requireActual("../widget/components/AddMappingsModal"),
   AddMappingsModal: (props: AddMappingsModalProps) => {
-    returnFn = props.returnFn;
-    return <div data-testid="add-mappings-modal"/>;
+    onClose = props.onClose;
+    return <div data-testid="add-mappings-modal" />;
   },
 }));
 
@@ -266,36 +236,8 @@ jest.mock("@itwin/insights-client", () => ({
 }));
 
 beforeAll(async () => {
-  await NoRenderApp.startup({localization: new EmptyLocalization()});
-  await Presentation.initialize();
-  const selectionSet = moq.Mock.ofType<SelectionSet>();
-  const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
-  selectionSet.setup((x) => x.elements).returns(() => new Set([]));
-  selectionSet.setup((x) => x.onChanged).returns(() => onChanged.object);
-  connectionMock
-    .setup((x) => x.selectionSet)
-    .returns(() => selectionSet.object);
-  connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId1);
-  connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
-
-  selectionManagerMock
-    .setup((x) => x.selectionChange)
-    .returns(() => new SelectionChangeEvent());
-
-  selectionScopesManagerMock
-    .setup(async (x) => x.getSelectionScopes(connectionMock.object))
-    .returns(async () => []);
-  selectionManagerMock
-    .setup((x) => x.scopes)
-    .returns(() => selectionScopesManagerMock.object);
-
-  Presentation.setSelectionManager(selectionManagerMock.object);
-  await TestUtils.initializeUiFramework(connectionMock.object);
-  await ReportsConfigWidget.initialize();
-});
-
-afterAll(() => {
-  TestUtils.terminateUiFramework();
+  const localization = new EmptyLocalization();
+  await ReportsConfigWidget.initialize(localization);
 });
 
 afterEach(() => {
@@ -304,7 +246,6 @@ afterEach(() => {
   mockGetReportMappings.mockReset();
   mockDeleteReportMapping.mockReset();
   mockIModelsClient.reset();
-  mockBulkExtractor.reset();
 });
 
 describe("Report Mappings View", () => {
@@ -321,7 +262,7 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />);
+    render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -342,14 +283,13 @@ describe("Report Mappings View", () => {
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
     const { user } = render(
-      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
+      <ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId }
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const searchButton = within(screen.getByTestId(/rcw-search-bar/i)).getByRole(
-      "button"
-    );
+    const searchButton = within(screen.getByTestId(/rcw-search-bar/i)).getByTestId(/rcw-search-button-closed/i);
+
     await user.click(searchButton);
     const searchInput = screen.getByRole("textbox", {
       name: /search\-textbox/i,
@@ -397,7 +337,7 @@ describe("Report Mappings View", () => {
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
     const { user } = render(
-      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
+      <ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId }
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -414,7 +354,7 @@ describe("Report Mappings View", () => {
     expect(addMappingsModal).toBeInTheDocument();
 
     await act(async () => {
-      await returnFn();
+      await onClose();
     });
 
     const horizontalTiles = screen.getAllByTestId("horizontal-tile");
@@ -425,7 +365,7 @@ describe("Report Mappings View", () => {
 
   it("odata feed url", async () => {
     const { user } = render(
-      <ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />
+      <ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId }
     );
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
@@ -462,9 +402,19 @@ describe("Report Mappings View", () => {
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
     const iModels = mockIModelsResponse.map((iModel) => iModel.iModel.id);
-    mockBulkExtractor.setup(async (x) => x.runIModelExtractions(iModels)).returns(async () => Promise.resolve());
 
-    const { user } = render(<ReportMappings report={mockReport} bulkExtractor={mockBulkExtractor.object} goBack={jest.fn()} />);
+    const mockApiConfig: ReportsApiConfig = {
+      getAccessToken: jest.fn().mockResolvedValue("mockAccessToken"),
+      iTwinId: mockIModelId1,
+      iModelId: mockIModelId1,
+      baseUrl: "mockBaseUrl",
+    };
+
+    const bulkExtractor = new BulkExtractor(mockApiConfig, jest.fn, jest.fn);
+
+    const runIModelExtractionsMock = jest.spyOn(bulkExtractor, "runIModelExtractions").mockImplementation(async () => Promise.resolve());
+
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, bulkExtractor });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -472,7 +422,10 @@ describe("Report Mappings View", () => {
     expect(extractAllButton).toBeInTheDocument();
 
     await user.click(extractAllButton);
-    mockBulkExtractor.verify(async (x) => x.runIModelExtractions(iModels), moq.Times.once());
+    await waitFor(() => expect(extractAllButton).toBeEnabled());
+
+    // Check that the mocked method was called with the expected arguments
+    expect(runIModelExtractionsMock).toHaveBeenCalledWith(iModels);
   });
 
   const assertHorizontalTiles = (horizontalTiles: HTMLElement[], mockMappings: MappingSingle[]) => {

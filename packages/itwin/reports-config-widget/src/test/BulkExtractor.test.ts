@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import BulkExtractor from "../widget/components/BulkExtractor";
+import { BulkExtractor } from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 import { assert } from "chai";
 import * as moq from "typemoq";
@@ -50,6 +50,8 @@ describe("BulkExtractor", () => {
   const mockApiConfig = {
     getAccessToken: async () => "mockAccessToken",
     baseUrl: "",
+    iTwinId: "",
+    iModelId: "",
   };
 
   it("should return status none for unknown iModel", async () => {

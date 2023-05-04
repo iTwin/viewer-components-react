@@ -15,7 +15,7 @@ export type ReportMappingAndMapping = ReportMapping & {
   iModelName: string;
 };
 
-export default class BulkExtractor {
+export class BulkExtractor {
   private _reportsClientApi: ReportsClient;
   private _extractionClientApi: ExtractionClient;
   private _accessToken: () => Promise<string>;
