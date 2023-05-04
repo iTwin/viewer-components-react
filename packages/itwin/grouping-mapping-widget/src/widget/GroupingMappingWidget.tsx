@@ -3,15 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type {
-  AbstractWidgetProps,
+  CommonWidgetProps,
   UiItemsProvider,
-} from "@itwin/appui-abstract";
+} from "@itwin/appui-react";
 import {
-  AbstractZoneLocation,
   StagePanelLocation,
   StagePanelSection,
-  StageUsage,
-} from "@itwin/appui-abstract";
+} from "@itwin/appui-react";
 import React from "react";
 import type { GroupingMappingProps } from "./components/GroupingMapping";
 import GroupingMapping from "./components/GroupingMapping";
@@ -23,19 +21,13 @@ export class GroupingMappingProvider implements UiItemsProvider {
 
   public provideWidgets(
     _stageId: string,
-    stageUsage: string,
+    _stageUsage: string,
     location: StagePanelLocation,
     section?: StagePanelSection,
-    zonelocation?: AbstractZoneLocation
-  ): ReadonlyArray<AbstractWidgetProps> {
-    const widgets: AbstractWidgetProps[] = [];
-    if (
-      (location === StagePanelLocation.Left &&
-        section === StagePanelSection.Start &&
-        stageUsage === StageUsage.General) ||
-      zonelocation === AbstractZoneLocation.CenterLeft
-    ) {
-      const GroupingMappingWidget: AbstractWidgetProps = {
+  ): ReadonlyArray<CommonWidgetProps> {
+    const widgets: CommonWidgetProps[] = [];
+    if (location === StagePanelLocation.Left && section === StagePanelSection.Start) {
+      const GroupingMappingWidget: CommonWidgetProps = {
         id: "GroupingMappingWidget",
         label: "Grouping & Mapping",
         getWidgetContent: () => {
