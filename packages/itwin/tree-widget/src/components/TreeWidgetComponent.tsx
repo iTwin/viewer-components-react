@@ -26,13 +26,22 @@ export interface TreeDefinition {
   shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
 }
 
-interface TreeWidgetComponentProps {
+export interface TreeWidgetComponentProps {
   trees: TreeDefinition[];
 }
 
 export function TreeWidgetComponent(props: TreeWidgetComponentProps) {
-  const { trees: treeDefinitions } = props;
-  const trees = useActiveTrees(treeDefinitions);
+  const imodel = useActiveIModelConnection();
+
+  if (!imodel)
+    return null;
+
+  return <TreeWidgetComponentContent {...props} imodel={imodel} />;
+}
+
+function TreeWidgetComponentContent(props: TreeWidgetComponentProps & { imodel: IModelConnection}) {
+  const { trees: treeDefinitions, imodel } = props;
+  const trees = useActiveTrees(treeDefinitions, imodel);
 
   return (
     <div className="tree-widget-visibility-widget">
@@ -41,17 +50,14 @@ export function TreeWidgetComponent(props: TreeWidgetComponentProps) {
   );
 }
 
-function useActiveTrees(treeDefinitions: TreeDefinition[]) {
+function useActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnection) {
   const [trees, setTrees] = React.useState<SelectableContentDefinition[]>();
-  const imodel = useActiveIModelConnection();
 
   React.useEffect(() => {
-    if (!imodel)
-      return;
-
     let disposed = false;
     (async () => {
       const visibleTrees = await getActiveTrees(treeDefinitions, imodel);
+      // istanbul ignore else
       if (!disposed) {
         setTrees(visibleTrees);
       }
