@@ -1,6 +1,13 @@
 # Change Log - @itwin/geo-tools-react
 
-This log was last generated on Wed, 02 Mar 2022 21:38:51 GMT and should not be manually modified.
+This log was last generated on Thu, 04 May 2023 23:59:19 GMT and should not be manually modified.
+
+## 4.1.0
+Thu, 04 May 2023 23:59:19 GMT
+
+### Minor changes
+
+- Updated to AppUI 4.0 and Presentation 4.0
 
 ## 0.2.1
 Wed, 02 Mar 2022 21:38:51 GMT

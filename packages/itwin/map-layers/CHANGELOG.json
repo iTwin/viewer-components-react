@@ -2,6 +2,26 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "version": "4.0.0",
+      "tag": "@itwin/map-layers_v4.0.0",
+      "date": "Thu, 04 May 2023 23:59:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "remove refs of $uicore-button-focus-boxshadow in maplayers scss files"
+          },
+          {
+            "comment": "Migrated UiItemsProviders to new API from @itwin/appui-react."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Updated to AppUI 4.0 and Presentation 4.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.6.0",
       "tag": "@itwin/map-layers_v3.6.0",
       "date": "Wed, 08 Feb 2023 14:58:40 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Thu, 27 Apr 2023 16:44:34 GMT and should not be manually modified.
+This log was last generated on Thu, 04 May 2023 23:59:19 GMT and should not be manually modified.
+
+## 0.15.1
+Thu, 04 May 2023 23:59:19 GMT
+
+### Patches
+
+- Resolved a bug that prevented Group Properties from being displayed when GroupPropertyAction was utilized without a viewer.
 
 ## 0.15.0
 Thu, 27 Apr 2023 16:44:34 GMT
