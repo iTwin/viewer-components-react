@@ -9,15 +9,8 @@ import { Measurement, MeasurementPickContext } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
 import { RadiusMeasurement, RadiusMeasurementSerializer } from "../../measurements/RadiusMeasurement";
 import { MeasureRadiusToolModel } from "../../toolmodels/MeasureRadiusToolModel";
-import { TestUtils } from "../TestUtils";
 
 describe("RadiusMeasurement tests", () => {
-
-  after(async () => {
-    await TestUtils.cleanup();
-  });
-
-
   it("Test serialization/clone/equals", async () => {
     const measure1 = RadiusMeasurement.create(Point3d.create(-1, 0, 0), Point3d.create(0, 1, 0), Point3d.create(1, 0, 0), WellKnownViewType.XSection);
     assert.instanceOf(measure1.serializer, RadiusMeasurementSerializer);

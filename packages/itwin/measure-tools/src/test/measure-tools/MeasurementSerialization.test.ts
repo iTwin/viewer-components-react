@@ -13,7 +13,6 @@ import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/A
 import type { DistanceMeasurementProps } from "../../measurements/DistanceMeasurement";
 import { DistanceMeasurement, DistanceMeasurementSerializer } from "../../measurements/DistanceMeasurement";
 import { LocationMeasurement, LocationMeasurementSerializer } from "../../measurements/LocationMeasurement";
-import { TestUtils } from "../TestUtils";
 
 function assertIsArrayWithCount(json: any, ofLength: number) {
   assert.isArray(json);
@@ -23,12 +22,6 @@ function assertIsArrayWithCount(json: any, ofLength: number) {
 }
 
 describe("Measurement Serialization tests", () => {
-
-  after(async () => {
-    await TestUtils.cleanup();
-  });
-
-
   it("Test serializer registration", () => {
     // Base types should have registered their serializers. And there is forced uniqueness based on names, once a serializer is added it cannot be dropped.
     assert.isDefined(Measurement.findSerializer(DistanceMeasurementSerializer.distanceMeasurementName));

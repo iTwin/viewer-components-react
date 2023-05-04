@@ -9,15 +9,8 @@ import { Measurement, MeasurementPickContext } from "../../api/Measurement";
 import { WellKnownViewType } from "../../api/MeasurementEnums";
 import { AreaMeasurement, AreaMeasurementSerializer } from "../../measurements/AreaMeasurement";
 import { MeasureAreaToolModel } from "../../toolmodels/MeasureAreaToolModel";
-import { TestUtils } from "../TestUtils";
 
 describe("AreaMeasurement tests", () => {
-
-  after(async () => {
-    await TestUtils.cleanup();
-  });
-
-
   it("Test serialization/clone/equals", async () => {
     const measure1 = AreaMeasurement.create([Point3d.create(0, 0, 0), Point3d.create(-1, 1, 0), Point3d.create(0, 2, 0)], WellKnownViewType.XSection);
     assert.instanceOf(measure1.serializer, AreaMeasurementSerializer);

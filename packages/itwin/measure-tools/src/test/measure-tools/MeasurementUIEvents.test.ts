@@ -9,15 +9,8 @@ import { MeasurementManager } from "../../api/MeasurementManager";
 import { MeasurementUIEvents } from "../../api/MeasurementUIEvents";
 import { AreaMeasurement } from "../../measurements/AreaMeasurement";
 import { DistanceMeasurement } from "../../measurements/DistanceMeasurement";
-import { TestUtils } from "../TestUtils";
 
 describe("MeasurementUIEvents tests", () => {
-
-  after(async () => {
-    await TestUtils.cleanup();
-  });
-
-
   it("Test isToggleMeasurementAxesButtonVisible", () => {
     const test1 = new DistanceMeasurement();
 
