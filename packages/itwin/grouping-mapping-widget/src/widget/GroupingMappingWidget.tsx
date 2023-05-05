@@ -2,8 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type {
+import {
   CommonWidgetProps,
+  StageUsage,
   UiItemsProvider,
 } from "@itwin/appui-react";
 import {
@@ -21,12 +22,15 @@ export class GroupingMappingProvider implements UiItemsProvider {
 
   public provideWidgets(
     _stageId: string,
-    _stageUsage: string,
+    stageUsage: string,
     location: StagePanelLocation,
     section?: StagePanelSection,
   ): ReadonlyArray<CommonWidgetProps> {
     const widgets: CommonWidgetProps[] = [];
-    if (location === StagePanelLocation.Left && section === StagePanelSection.Start) {
+    if (location === StagePanelLocation.Left &&
+        section === StagePanelSection.Start &&
+        stageUsage === StageUsage.General
+    ) {
       const GroupingMappingWidget: CommonWidgetProps = {
         id: "GroupingMappingWidget",
         label: "Grouping & Mapping",
