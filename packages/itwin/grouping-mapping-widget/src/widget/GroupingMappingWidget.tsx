@@ -2,14 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import {
+import type {
   CommonWidgetProps,
-  StageUsage,
   UiItemsProvider,
 } from "@itwin/appui-react";
 import {
   StagePanelLocation,
   StagePanelSection,
+  StageUsage,
 } from "@itwin/appui-react";
 import React from "react";
 import type { GroupingMappingProps } from "./components/GroupingMapping";
