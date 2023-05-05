@@ -55,7 +55,7 @@ describe("Measurement tests", () => {
     assert.isFalse(other.equals(other2));
     assert.isTrue(other.equals(other2, { ignoreViewTarget: true }));
 
-    // Test label equality here
+    // Test label equality
     other2.label = "Solution 42";
     assert.isFalse(other.equals(other2, { ignoreViewTarget: true }));
     assert.isTrue(other.equals(other2, { ignoreViewTarget: true, ignoreLabel: true }));
