@@ -19,11 +19,22 @@ import {
   CategoryInfo, CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories,
 } from "./CategoryVisibilityHandler";
 
+/**
+ * Props that get passed to [[CategoriesTreeComponent]] header button renderer.
+ * @see CategoriesTreeComponentProps.headerButtons
+ * @public
+ */
 export interface CategoriesTreeHeaderButtonProps extends TreeHeaderButtonProps {
+  /** A list of categories available in the iModel */
   categories: CategoryInfo[];
+  /** In case the tree is filtered, a list of filtered categories. */
   filteredCategories?: CategoryInfo[];
 }
 
+/**
+ * Props for [[CategoriesTreeComponent]].
+ * @public
+ */
 export interface CategoriesTreeComponentProps extends Omit<CategoryTreeProps,
 | "iModel"
 | "activeView"
@@ -35,10 +46,25 @@ export interface CategoriesTreeComponentProps extends Omit<CategoryTreeProps,
 | "categoryVisibilityHandler"
 | "viewManager"
 > {
+  /**
+   * Renderers of header buttons. Defaults to:
+   * ```ts
+   * [
+   *   CategoriesTreeComponent.ShowAllButton,
+   *   CategoriesTreeComponent.HideAllButton,
+   *   CategoriesTreeComponent.InvertAllButton,
+   * ]
+   * ```
+   */
   headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
 }
 
-export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
+/**
+ * A component that renders [[CategoriesTree]] and a header with filtering capabilities
+ * and header buttons.
+ * @public
+ */
+export const CategoriesTreeComponent = (props: CategoriesTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
 
@@ -49,12 +75,36 @@ export function CategoriesTreeComponent(props: CategoriesTreeComponentProps) {
   return (
     <CategoriesTreeComponentImpl {...props} iModel={iModel} viewport={viewport} />
   );
-}
+};
 
+/**
+ * Renders a "Show all" button that enables display of all categories and their subcategories.
+ * @public
+ */
 CategoriesTreeComponent.ShowAllButton = ShowAllButton;
+
+/**
+ * Renders a "Hide all" button that disables display of all categories.
+ * @public
+ */
 CategoriesTreeComponent.HideAllButton = HideAllButton;
+
+/**
+ * Renders an "Invert all" button that inverts display of all categories.
+ * @public
+ */
 CategoriesTreeComponent.InvertAllButton = InvertAllButton;
+
+/**
+ * Id of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * @public
+ */
 CategoriesTreeComponent.id = "categories-tree";
+
+/**
+ * Label of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * @public
+ */
 CategoriesTreeComponent.getLabel = () => TreeWidget.translate("categories");
 
 function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iModel: IModelConnection, viewport: ScreenViewport }) {

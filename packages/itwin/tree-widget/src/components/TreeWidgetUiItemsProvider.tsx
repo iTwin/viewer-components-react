@@ -10,14 +10,31 @@ import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeCom
 import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
 import { TreeDefinition, TreeWidgetComponent } from "./TreeWidgetComponent";
 
+/**
+ * Parameters for creating a [[TreeWidgetUiItemsProvider]].
+ * @public
+ */
 export interface TreeWidgetOptions {
+  /** The stage panel to place the widget in. Defaults to `StagePanelLocation.Right`. */
   defaultPanelLocation?: StagePanelLocation;
+  /** The stage panel section to place the widget in. Defaults to `StagePanelSection.Start`. */
   defaultPanelSection?: StagePanelSection;
+  /** Widget priority in the stage panel. */
   defaultTreeWidgetPriority?: number;
+  /** Trees to show in the widget. Defaults to [[ModelsTreeComponent]] and [[CategoriesTreeComponent]]. */
   trees?: TreeDefinition[];
 }
 
+/**
+ * Id of the tree widget created by [[TreeWidgetUiItemsProvider]].
+ * @public
+ */
 export const TreeWidgetId = "tree-widget-react:trees";
+
+/**
+ * A [[UiItemsProvider]] implementation that provides a [[TreeWidgetComponent]] into
+ * @public
+ */
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
   public readonly id = "TreeWidgetUiItemsProvider";
 

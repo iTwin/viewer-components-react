@@ -3,8 +3,9 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React, { useState } from "react";
-import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
+/** @internal */
 export interface SearchOptions {
   isFiltering: boolean;
   onFilterCancel: () => void;
@@ -21,6 +22,7 @@ interface TreeFilteringState {
   filteredProvider?: IPresentationTreeDataProvider;
 }
 
+/** @internal */
 export const useTreeFilteringState = () => {
   const [{ filterString, matchedResultCount, activeMatchIndex, filteredProvider }, setState] = useState<TreeFilteringState>({ filterString: "" });
 

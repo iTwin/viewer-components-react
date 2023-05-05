@@ -5,6 +5,7 @@
 
 export * from "./Common";
 export * from "./imodel-content-tree/IModelContentTree";
+export * from "./imodel-content-tree/IModelContentTreeComponent";
 export * from "./VisibilityTreeEventHandler";
 export * from "./VisibilityTreeRenderer";
 export * from "./category-tree/CategoriesTree";
