@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/map-layers",
       "comment": "\"Updated to itwin.js core packages to latest 4.0dev version.  Solved api changes\"",
-      "type": "minor"
+      "type": "none"
     }
   ],
   "packageName": "@itwin/map-layers"
