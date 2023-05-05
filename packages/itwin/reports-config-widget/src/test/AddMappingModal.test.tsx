@@ -262,8 +262,6 @@ describe("Add Mapping Modal", () => {
     const addButton = withinModal.getByRole("button", {
       name: /add/i,
     });
-    // // Add button should be disabled
-    // expect(addButton).toBeDisabled();
 
     await waitFor(() => screen.getByRole("row"));
 

@@ -165,6 +165,7 @@ export const AddMappingsModal = ({
           paginatorRenderer={LocalizedTablePaginator}
         />
       </div>
+      {/* Add button permanently enabled as a workaround to the warning stating that the table and parent component are being rendered at the same time. */}
       <ActionPanel
         actionLabel={ReportsConfigWidget.localization.getLocalizedString(
           "ReportsConfigWidget:Add"
