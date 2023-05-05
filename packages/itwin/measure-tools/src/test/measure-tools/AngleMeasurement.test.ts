@@ -59,6 +59,7 @@ describe("AngleMeasurement tests", () => {
     assert.isTrue(measure1.isDynamic);
 
     // Coverage of some App-oriented function
+    // random comment
     const pickContext = MeasurementPickContext.createFromSourceId("Invalid");
     assert.isFalse(measure3.testDecorationHit(pickContext));
     assert.isDefined(measure3.getDecorationGeometry(pickContext));
