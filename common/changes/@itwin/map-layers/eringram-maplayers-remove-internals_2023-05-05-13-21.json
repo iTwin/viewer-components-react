@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "\"Updated to itwin.js core packages to latest 4.0dev version.  Solved api changes\"",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
