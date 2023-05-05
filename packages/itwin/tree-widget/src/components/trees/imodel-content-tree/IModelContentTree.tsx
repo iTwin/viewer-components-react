@@ -16,6 +16,10 @@ import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
  */
 export const RULESET_IMODEL_CONTENT: Ruleset = require("./IModelContent.json"); // eslint-disable-line @typescript-eslint/no-var-requires
 
+/**
+ * Props for [[IModelContentTree]]
+ * @public
+ */
 export interface IModelContentTreeProps extends Omit<React.HTMLProps<HTMLDivElement>, "children"> {
   /** An IModel to pull data from */
   iModel: IModelConnection;
@@ -27,6 +31,11 @@ export interface IModelContentTreeProps extends Omit<React.HTMLProps<HTMLDivElem
   selectionMode?: SelectionMode;
 }
 
+/**
+ * A tree that shows all iModel content starting from the root Subject, then the hierarchy of child
+ * Subjects, their Models and Elements contained in those Models.
+ * @public
+ */
 export const IModelContentTree = (props: IModelContentTreeProps) => {
   const { iModel, className, width, height, ...divProps } = props;
 

@@ -4,14 +4,15 @@
 *--------------------------------------------------------------------------------------------*/
 /** @module SearchBox */
 
-import * as React from "react";
+import "./SearchBox.scss";
 import classnames from "classnames";
-import type { CommonProps } from "@itwin/core-react";
+import * as React from "react";
+import { CommonProps } from "@itwin/core-react";
 import { SvgChevronDown, SvgChevronUp, SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import "./SearchBox.scss";
 import { TreeWidget } from "../../TreeWidget";
 
+/** @internal */
 export interface SearchBoxProps extends CommonProps {
   /** Specifies whether search bar should be open */
   searchOpen: boolean;
@@ -36,6 +37,7 @@ export interface SearchBoxProps extends CommonProps {
   title?: string;
 }
 
+/** @internal */
 export function SearchBox(props: SearchBoxProps) {
   const { className, valueChangedDelay, style, onFilterStart, selectedIndex, resultCount, title,
     onSelectedChanged, onFilterClear, placeholder, searchOpen, onSearchOpen, onSearchClose } = props;

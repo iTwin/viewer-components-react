@@ -10,22 +10,36 @@ import { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
 import { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
+import { TreeWidget } from "../../../TreeWidget";
+import { TreeHeader, TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { ModelsTree, ModelsTreeProps } from "./ModelsTree";
-import { TreeWidget } from "../../../TreeWidget";
-import { TreeHeader, TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
 
+/**
+ * Information about a single Model.
+ * @public
+ */
 export interface ModelInfo {
   id: string;
   isPlanProjection?: boolean;
 }
 
+/**
+ * Props that get passed to [[ModelsTreeComponent]] header button renderer.
+ * @see ModelTreeComponentProps.headerButtons
+ * @public
+ */
 export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
+  /** A list of models available in the iModel. */
   models: ModelInfo[];
 }
 
+/**
+ * Props for [[ModelsTreeComponent]].
+ * @public
+ */
 export interface ModelTreeComponentProps extends Omit<ModelsTreeProps,
 | "iModel"
 | "activeView"
@@ -34,9 +48,26 @@ export interface ModelTreeComponentProps extends Omit<ModelsTreeProps,
 | "filterInfo"
 | "onFilterApplied"
 > {
+  /**
+   * Renderers of header buttons. Defaults to:
+   * ```ts
+   * [
+   *   ModelsTreeComponent.ShowAllButton,
+   *   ModelsTreeComponent.HideAllButton,
+   *   ModelsTreeComponent.InvertButton,
+   *   ModelsTreeComponent.View2DButton,
+   *   ModelsTreeComponent.View3DButton,
+   * ]
+   * ```
+   */
   headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
 }
 
+/**
+ * A component that renders [[ModelsTree]] and a header with filtering capabilities
+ * and header buttons.
+ * @public
+ */
 export const ModelsTreeComponent = (props: ModelTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
   const viewport = useActiveViewport();
@@ -49,12 +80,46 @@ export const ModelsTreeComponent = (props: ModelTreeComponentProps) => {
   );
 };
 
+/**
+ * Renders a "Show all" button that enables display of all models.
+ * @public
+ */
 ModelsTreeComponent.ShowAllButton = ShowAllButton;
+
+/**
+ * Renders a "Hide all" button that disables display of all models.
+ * @public
+ */
 ModelsTreeComponent.HideAllButton = HideAllButton;
+
+/**
+ * Renders an "Invert all" button that inverts display of all models.
+ * @public
+ */
 ModelsTreeComponent.InvertButton = InvertButton;
+
+/**
+ * Renders a "View 2D" button that enables display of all plan projection models and disables all others.
+ * @public
+ */
 ModelsTreeComponent.View2DButton = View2DButton;
+
+/**
+ * Renders a "View 3D" button that enables display of all non-plan projection models and disables all plan projection ones.
+ * @public
+ */
 ModelsTreeComponent.View3DButton = View3DButton;
+
+/**
+ * Id of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * @public
+ */
 ModelsTreeComponent.id = "models-tree";
+
+/**
+ * Label of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * @public
+ */
 ModelsTreeComponent.getLabel = () => TreeWidget.translate("models");
 
 function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IModelConnection, viewport: ScreenViewport }) {

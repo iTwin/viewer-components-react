@@ -11,13 +11,13 @@ import { ECClassGroupingNodeKey, GroupingNodeKey, Keys, KeySet, NodeKey } from "
 import { IFilteredPresentationTreeDataProvider, isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
+import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import { CachingElementIdsContainer } from "./Utils";
-import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 
 /**
- * Visibility tree node types.
- * @beta
+ * Models tree node types.
+ * @public
  */
 export enum ModelsTreeNodeType {
   Unknown,
@@ -30,13 +30,13 @@ export enum ModelsTreeNodeType {
 
 /**
  * Type definition of predicate used to decide if node can be selected
- * @beta
+ * @public
  */
 export type ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean;
 
 /**
  * Props for [[ModelsVisibilityHandler]]
- * @alpha
+ * @public
  */
 export interface ModelsVisibilityHandlerProps {
   rulesetId: string;
@@ -48,7 +48,7 @@ export interface ModelsVisibilityHandlerProps {
 
 /**
  * Visibility handler used by [[ModelsTree]] to control visibility of the tree items.
- * @alpha
+ * @public
  */
 export class ModelsVisibilityHandler implements IVisibilityHandler {
   private _props: ModelsVisibilityHandlerProps;
@@ -593,6 +593,11 @@ const createTooltip = (status: "visible" | "hidden" | "disabled", tooltipStringI
   return `${statusString}: ${tooltipString}`;
 };
 
+/**
+ * Enables display of all given models. Also enables display of all categories and clears always and
+ * never drawn lists in the viewport.
+ * @public
+ */
 export async function showAllModels(models: string[], viewport: Viewport) {
   await viewport.addViewedModels(models);
   viewport.clearNeverDrawn();
@@ -606,6 +611,10 @@ export async function showAllModels(models: string[], viewport: Viewport) {
   );
 }
 
+/**
+ * Disables display of all given models.
+ * @public
+ */
 export async function hideAllModels(models: string[], viewport: Viewport) {
   viewport.changeModelDisplay(
     models,
@@ -613,6 +622,10 @@ export async function hideAllModels(models: string[], viewport: Viewport) {
   );
 }
 
+/**
+ * Inverts display of all given models.
+ * @public
+ */
 export async function invertAllModels(models: string[], viewport: Viewport) {
   const notViewedModels: string[] = [];
   const viewedModels: string[] = [];
@@ -624,6 +637,10 @@ export async function invertAllModels(models: string[], viewport: Viewport) {
   viewport.changeModelDisplay(viewedModels, false);
 }
 
+/**
+ * Based on the value of `enable` argument, either enables or disables display of given models.
+ * @public
+ */
 export async function toggleModels(models: string[], enable: boolean, viewport: Viewport) {
   // istanbul ignore if
   if (!models)
@@ -634,6 +651,10 @@ export async function toggleModels(models: string[], enable: boolean, viewport: 
     await viewport.addViewedModels(models);
 }
 
+/**
+ * Checks if all given models are displayed in given viewport.
+ * @public
+ */
 export function areAllModelsVisible(models: string[], viewport: Viewport) {
   return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
 }

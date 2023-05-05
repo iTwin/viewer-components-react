@@ -68,7 +68,7 @@ export interface CategoryTreeProps {
 }
 
 /**
- * Tree which displays and manages categories contained in an iModel.
+ * Tree which displays and manages display of categories contained in an iModel.
  * @public
  */
 export function CategoryTree(props: CategoryTreeProps) {

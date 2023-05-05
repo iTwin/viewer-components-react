@@ -10,8 +10,16 @@ import { TreeWidget } from "../../../TreeWidget";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { IModelContentTree, IModelContentTreeProps } from "./IModelContentTree";
 
+/**
+ * Props for [[IModelContentTreeComponent]].
+ * @public
+ */
 export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iModel" | "width" | "height">;
 
+/**
+ * A component that renders [[IModelContentTree]]
+ * @public
+ */
 export const IModelContentTreeComponent = (props: IModelContentTreeComponentProps) => {
   const iModel = useActiveIModelConnection();
 
@@ -32,5 +40,14 @@ export const IModelContentTreeComponent = (props: IModelContentTreeComponentProp
   );
 };
 
+/**
+ * Id of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * @public
+ */
 IModelContentTreeComponent.id = "imodel-content-tree";
+
+/**
+ * Label of the component. May be used when a creating a [[TreeDefinition]] for [[TreeWidgetComponent]].
+ * @public
+ */
 IModelContentTreeComponent.getLabel = () => TreeWidget.translate("imodelContent");

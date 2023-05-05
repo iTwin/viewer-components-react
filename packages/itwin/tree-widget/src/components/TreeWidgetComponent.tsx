@@ -12,6 +12,10 @@ import { FillCentered } from "@itwin/core-react";
 import { ProgressLinear } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
 
+/**
+ * Definition of a tree component displayed in [[TreeWidgetComponent]]
+ * @public
+ */
 export interface TreeDefinition {
   /** Id of the tree */
   id: string;
@@ -26,10 +30,18 @@ export interface TreeDefinition {
   shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
 }
 
-interface TreeWidgetComponentProps {
+/**
+ * Props for [[TreeWidgetComponent]]
+ * @public
+ */
+export interface TreeWidgetComponentProps {
   trees: TreeDefinition[];
 }
 
+/**
+ * A component that renders a tree (combo box) selector and the selected tree component.
+ * @public
+ */
 export function TreeWidgetComponent(props: TreeWidgetComponentProps) {
   const { trees: treeDefinitions } = props;
   const trees = useActiveTrees(treeDefinitions);
