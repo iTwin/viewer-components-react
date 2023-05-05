@@ -32,7 +32,7 @@ export interface TreeWidgetOptions {
 export const TreeWidgetId = "tree-widget-react:trees";
 
 /**
- * A [[UiItemsProvider]] implementation that provides a [[TreeWidgetComponent]] into
+ * A [[UiItemsProvider]] implementation that provides a [[TreeWidgetComponent]] into a stage panel.
  * @public
  */
 export class TreeWidgetUiItemsProvider implements UiItemsProvider {
