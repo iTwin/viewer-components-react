@@ -2,13 +2,16 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { ITwin, ITwinSubClass, ITwinsAPIResponse, ITwinsAccessClient } from "@itwin/itwins-client";
+import type { ITwin, ITwinsAccessClient, ITwinsAPIResponse } from "@itwin/itwins-client";
+import { ITwinSubClass } from "@itwin/itwins-client";
 import { SvgCalendar, SvgList, SvgStarHollow } from "@itwin/itwinui-icons-react";
-import { Button, HorizontalTabs, Tab, Table, TablePaginator, TablePaginatorRendererProps, tableFilters } from "@itwin/itwinui-react";
+import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
+import { Button, HorizontalTabs, Tab, Table, tableFilters, TablePaginator } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { CreateTypeFromInterface } from "../utils";
+import type { CreateTypeFromInterface } from "../utils";
 import "./SelectITwin.scss";
-import { GetAccessTokenFn, useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useITwinsClient } from "./context/ITwinsClientContext";
 import { handleError } from "./utils";
 
@@ -143,7 +146,7 @@ const SelectITwin = ({
         isSortable
         isLoading={isLoading}
         onRowClick={(_, row) => {
-          onSelect(row.original!.id!);
+          onSelect(row.original.id!);
         }}
         paginatorRenderer={paginator}
       />

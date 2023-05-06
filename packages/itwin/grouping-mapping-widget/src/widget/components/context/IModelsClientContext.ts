@@ -2,9 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelsClient, IModelsClientOptions } from "@itwin/imodels-client-management";
+import type { IModelsClientOptions } from "@itwin/imodels-client-management";
+import { IModelsClient } from "@itwin/imodels-client-management";
 import { createContext, useContext } from "react";
-import { ClientPrefix } from "./GroupingApiConfigContext";
+import type { ClientPrefix } from "./GroupingApiConfigContext";
 
 const baseUrl: string = "https://api.bentley.com/imodels";
 
@@ -19,9 +20,9 @@ export const createIModelsClient = (prefix?: ClientPrefix): IModelsClient => {
   const url = prefixUrl(baseUrl, prefix);
   const options: IModelsClientOptions = {
     api: {
-      baseUrl: url
-    }
-  }
+      baseUrl: url,
+    },
+  };
   return new IModelsClient(options);
 };
 

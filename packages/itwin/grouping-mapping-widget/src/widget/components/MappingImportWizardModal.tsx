@@ -2,8 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { IModelsClient } from "@itwin/imodels-client-management";
-import { ITwinsAccessClient } from "@itwin/itwins-client";
+import type { IModelsClient } from "@itwin/imodels-client-management";
+import type { ITwinsAccessClient } from "@itwin/itwins-client";
 import type { StepProperties } from "@itwin/itwinui-react";
 import { Modal, Wizard } from "@itwin/itwinui-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -14,8 +14,8 @@ import SelectIModel from "./SelectIModel";
 import SelectITwin from "./SelectITwin";
 import SelectMappings from "./SelectMappings";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
-import { IModelsClientContext, createIModelsClient } from "./context/IModelsClientContext";
-import { ITwinsClientContext, createITwinsClient } from "./context/ITwinsClientContext";
+import { createIModelsClient, IModelsClientContext } from "./context/IModelsClientContext";
+import { createITwinsClient, ITwinsClientContext } from "./context/ITwinsClientContext";
 
 const defaultDisplayStrings = {
   mappings: "Mappings",
@@ -49,6 +49,7 @@ export const MappingImportWizardModal = ({
 
   useEffect(() => {
     setITwinsClient(createITwinsClient(prefix));
+    setIModelsClient(createIModelsClient(prefix));
   }, [prefix]);
 
   const displayStrings = React.useMemo(

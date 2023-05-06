@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { ITwinsAccessClient } from "@itwin/itwins-client";
 import { createContext, useContext } from "react";
-import { ClientPrefix } from "./GroupingApiConfigContext";
+import type { ClientPrefix } from "./GroupingApiConfigContext";
 
 const baseUrl: string = "https://api.bentley.com/itwins";
 

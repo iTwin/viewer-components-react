@@ -2,12 +2,14 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { EntityListIterator, IModel, IModelsClient } from "@itwin/imodels-client-management";
-import { Button, Table, TablePaginator, TablePaginatorRendererProps, tableFilters } from "@itwin/itwinui-react";
+import type { EntityListIterator, IModel, IModelsClient } from "@itwin/imodels-client-management";
+import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
+import { Button, Table, tableFilters, TablePaginator } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { CreateTypeFromInterface } from "../utils";
+import type { CreateTypeFromInterface } from "../utils";
 import "./SelectIModel.scss";
-import { GetAccessTokenFn, useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type { GetAccessTokenFn } from "./context/GroupingApiConfigContext";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { useIModelsClient } from "./context/IModelsClientContext";
 import { handleError } from "./utils";
 
@@ -32,17 +34,17 @@ const fetchIModels = async (
     const imodelIterator: EntityListIterator<IModel> = imodelsClient.iModels.getRepresentationList({
       authorization: async () => {
         const token = await getAccessToken();
-        const splitToken = token.split(' ');
+        const splitToken = token.split(" ");
         return {
           scheme: splitToken[0],
-          token: splitToken[1]
+          token: splitToken[1],
         };
       },
       urlParams: {
-        iTwinId: itwinId
-      }
+        iTwinId: itwinId,
+      },
     });
-    let imodels: IModel[] = [];
+    const imodels: IModel[] = [];
     for await (const imodel of imodelIterator) {
       imodels.push(imodel);
     }
@@ -75,7 +77,7 @@ const SelectIModel = ({
 
   useEffect(() => {
     void fetchIModels(setIModels, setIsLoading, getAccessToken, itwinId, imodelsClient);
-  }, [getAccessToken, imodelsClient, setIsLoading]);
+  }, [getAccessToken, imodelsClient, setIsLoading, itwinId]);
 
   const displayStrings = React.useMemo(
     () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
@@ -113,7 +115,6 @@ const SelectIModel = ({
     [pageSizeList]
   );
 
-
   return (
     <div className='gmw-select-imodel-table-container'>
       <Table<IIModelTyped>
@@ -124,7 +125,7 @@ const SelectIModel = ({
         isSortable
         isLoading={isLoading}
         onRowClick={(_, row) => {
-          onSelect(row.original!.id!);
+          onSelect(row.original.id);
         }}
         paginatorRenderer={paginator}
       />
