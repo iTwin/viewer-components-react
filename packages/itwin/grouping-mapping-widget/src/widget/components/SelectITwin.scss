@@ -4,30 +4,31 @@
 *--------------------------------------------------------------------------------------------*/
 @import '~@itwin/itwinui-css/scss/variables';
 
-.gmw-select-project-grid-container {
+.gmw-select-itwin-table-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   min-height: 0;
 
-  .gmw-search-input {
-    margin-left: auto;
-  }
-
-  .gmw-project-grid {
+  .gmw-itwin-table {
     overflow: auto;
     flex-grow: 1;
   }
 
-  .gmw-grid-holding-tab {
+  .gmw-table-holding-tab {
     display: flex;
     flex-direction: column;
     gap: $iui-baseline;
   }
 
-  .gmw-select-project-action-panel {
+  .gmw-select-itwin-action-panel {
     display: flex;
     justify-content: center;
     padding: $iui-baseline * 2 $iui-m $iui-baseline;
+  }
+
+  .gmw-select-itwin-table {
+    flex-grow: 1;
+    overflow: auto;
   }
 }

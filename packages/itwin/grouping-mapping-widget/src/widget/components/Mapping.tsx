@@ -39,6 +39,10 @@ export type IMappingTyped = CreateTypeFromInterface<Mapping>;
 
 const defaultDisplayStrings = {
   mappings: "Mappings",
+  itwins: "iTwins",
+  itwinNumber: "Number",
+  itwinName: "Name",
+  itwinStatus: "Status",
 };
 export interface MappingsProps {
   onClickAddMapping?: () => void;

@@ -2,18 +2,25 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { StepProperties } from "@itwin/itwinui-react";
 import { Modal, Wizard } from "@itwin/itwinui-react";
-import SelectProject from "./SelectProject";
 import "./MappingImportWizardModal.scss";
 import SelectIModel from "./SelectIModel";
 import SelectMappings from "./SelectMappings";
 import type { IMappingTyped } from "./Mapping";
 import ConfirmMappingImport from "./ConfirmMappingsImport";
+import { ITwinsClientContext, createITwinsClient } from "./context/ITwinsClientContext";
+import { ITwinsAccessClient } from "@itwin/itwins-client";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import SelectITwin from "./SelectITwin";
 
 const defaultDisplayStrings = {
   mappings: "Mappings",
+  itwins: "iTwins",
+  itwinNumber: "Number",
+  itwinName: "Name",
+  itwinStatus: "Status",
 };
 interface MappingImportWizardModalProps {
   show: boolean;
@@ -28,11 +35,18 @@ export const MappingImportWizardModal = ({
   onFinish,
   displayStrings: userDisplayStrings,
 }: MappingImportWizardModalProps) => {
+  const { prefix } = useGroupingMappingApiConfig();
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [itwinType, setITwinType] = useState<number>(0);
+  const [selectedITwinId, setSelectedITwinId] = useState<string>("");
   const [selectedIModelId, setSelectedIModelId] = useState<string>("");
   const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
   const [importing, setImporting] = useState<boolean>(false);
+  const [itwinsClient, setITwinsClient] = useState<ITwinsAccessClient>(createITwinsClient(prefix));
+
+  useEffect(() => {
+    setITwinsClient(createITwinsClient(prefix));
+  }, [prefix]);
 
   const displayStrings = React.useMemo(
     () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
@@ -41,12 +55,12 @@ export const MappingImportWizardModal = ({
 
   const steps = useRef<StepProperties[]>([
     {
-      name: "Select source project",
-      description: `Select the source project to bring your ${displayStrings.mappings} from.`,
+      name: "Select iTwin",
+      description: `Select the source iTwin to bring your ${displayStrings.mappings} from.`,
     },
     {
       name: "Select iModel",
-      description: "Select an iModel within the project you have selected.",
+      description: "Select an iModel within the iTwin you have selected.",
     },
     {
       name: `Select ${displayStrings.mappings}`,
@@ -91,18 +105,25 @@ export const MappingImportWizardModal = ({
           switch (currentStep) {
             case 0:
               return (
-                <SelectProject
-                  onSelect={(project) => {
-                    setSelectedProjectId(project.id);
-                    setCurrentStep(1);
-                  }}
-                  onCancel={onClose}
-                />
+                <ITwinsClientContext.Provider value={itwinsClient}>
+                  <div className="gmw-mappings-container">
+                    <SelectITwin
+                      onSelect={(itwinId) => {
+                        setSelectedITwinId(itwinId);
+                        setCurrentStep(1);
+                      }}
+                      onCancel={onClose}
+                      onChangeITwinType={setITwinType}
+                      displayStrings={displayStrings}
+                      defaultITwinType={itwinType}
+                    />
+                  </div>
+                </ITwinsClientContext.Provider>
               );
             case 1:
               return (
                 <SelectIModel
-                  projectId={selectedProjectId}
+                  projectId={selectedITwinId}
                   onSelect={(iModel) => {
                     setSelectedIModelId(iModel.id);
                     setCurrentStep(2);
