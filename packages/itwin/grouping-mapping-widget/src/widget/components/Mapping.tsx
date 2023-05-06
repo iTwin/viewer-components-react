@@ -43,6 +43,9 @@ const defaultDisplayStrings = {
   itwinNumber: "Number",
   itwinName: "Name",
   itwinStatus: "Status",
+  imodels: "iModels",
+  imodelName: "Name",
+  imodelDescription: "Description",
 };
 export interface MappingsProps {
   onClickAddMapping?: () => void;
