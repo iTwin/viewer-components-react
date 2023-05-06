@@ -135,21 +135,19 @@ const SelectITwin = ({
         type={"borderless"}
         contentClassName="gmw-table-holding-tab">
       </HorizontalTabs>
-      <div className="gmw-itwin-table">
-        <Table<IITwinTyped>
-          data={itwins}
-          columns={itwinsColumns}
-          className='gmw-select-itwin-table'
-          emptyTableContent={`No ${displayStrings.itwins} available.`}
-          isSortable
-          isLoading={isLoading}
-          onRowClick={(_, row) => {
-            onSelect(row.original!.id!);
-          }}
-          paginatorRenderer={paginator}
-        />
-      </div>
-      <div className="gmw-select-itwin-action-panel">
+      <Table<IITwinTyped>
+        data={itwins}
+        columns={itwinsColumns}
+        className='gmw-select-itwin-table'
+        emptyTableContent={`No ${displayStrings.itwins} available.`}
+        isSortable
+        isLoading={isLoading}
+        onRowClick={(_, row) => {
+          onSelect(row.original!.id!);
+        }}
+        paginatorRenderer={paginator}
+      />
+      <div className="gmw-import-action-panel">
         <Button onClick={onCancel}>Cancel</Button>
       </div>
     </div>

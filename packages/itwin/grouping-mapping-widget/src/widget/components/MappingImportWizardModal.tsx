@@ -2,18 +2,20 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useEffect, useRef, useState } from "react";
+import { IModelsClient } from "@itwin/imodels-client-management";
+import { ITwinsAccessClient } from "@itwin/itwins-client";
 import type { StepProperties } from "@itwin/itwinui-react";
 import { Modal, Wizard } from "@itwin/itwinui-react";
+import React, { useEffect, useRef, useState } from "react";
+import ConfirmMappingImport from "./ConfirmMappingsImport";
+import type { IMappingTyped } from "./Mapping";
 import "./MappingImportWizardModal.scss";
 import SelectIModel from "./SelectIModel";
-import SelectMappings from "./SelectMappings";
-import type { IMappingTyped } from "./Mapping";
-import ConfirmMappingImport from "./ConfirmMappingsImport";
-import { ITwinsClientContext, createITwinsClient } from "./context/ITwinsClientContext";
-import { ITwinsAccessClient } from "@itwin/itwins-client";
-import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import SelectITwin from "./SelectITwin";
+import SelectMappings from "./SelectMappings";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { IModelsClientContext, createIModelsClient } from "./context/IModelsClientContext";
+import { ITwinsClientContext, createITwinsClient } from "./context/ITwinsClientContext";
 
 const defaultDisplayStrings = {
   mappings: "Mappings",
@@ -43,6 +45,7 @@ export const MappingImportWizardModal = ({
   const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
   const [importing, setImporting] = useState<boolean>(false);
   const [itwinsClient, setITwinsClient] = useState<ITwinsAccessClient>(createITwinsClient(prefix));
+  const [imodelsClient, setIModelsClient] = useState<IModelsClient>(createIModelsClient(prefix));
 
   useEffect(() => {
     setITwinsClient(createITwinsClient(prefix));
@@ -106,7 +109,7 @@ export const MappingImportWizardModal = ({
             case 0:
               return (
                 <ITwinsClientContext.Provider value={itwinsClient}>
-                  <div className="gmw-mappings-container">
+                  <div className="gmw-table-container">
                     <SelectITwin
                       onSelect={(itwinId) => {
                         setSelectedITwinId(itwinId);
@@ -122,15 +125,19 @@ export const MappingImportWizardModal = ({
               );
             case 1:
               return (
-                <SelectIModel
-                  projectId={selectedITwinId}
-                  onSelect={(iModel) => {
-                    setSelectedIModelId(iModel.id);
-                    setCurrentStep(2);
-                  }}
-                  backFn={() => setCurrentStep(currentStep - 1)}
-                  onCancel={onClose}
-                />
+                <IModelsClientContext.Provider value={imodelsClient}>
+                  <div className="gmw-table-container">
+                    <SelectIModel
+                      itwinId={selectedITwinId}
+                      onSelect={(imodelId) => {
+                        setSelectedIModelId(imodelId);
+                        setCurrentStep(2);
+                      }}
+                      backFn={() => setCurrentStep(currentStep - 1)}
+                      onCancel={onClose}
+                    />
+                  </div>
+                </IModelsClientContext.Provider>
               );
             case 2:
             case 3:
@@ -139,7 +146,7 @@ export const MappingImportWizardModal = ({
                 <>
                   <div
                     style={{ display: currentStep === 2 ? "flex" : "none" }}
-                    className="gmw-mappings-container"
+                    className="gmw-mapping-container"
                   >
                     <SelectMappings
                       iModelId={selectedIModelId}
