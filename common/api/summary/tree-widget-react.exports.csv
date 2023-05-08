@@ -40,7 +40,7 @@ internal;SubjectModelIdsCache
 public;toggleModels(models: string[], enable: boolean, viewport: Viewport): Promise
 public;TreeDefinition
 public;TreeWidget
-public;TreeWidgetComponent(props: TreeWidgetComponentProps): JSX.Element
+public;TreeWidgetComponent(props: TreeWidgetComponentProps): JSX.Element | null
 public;TreeWidgetComponentProps
 public;TreeWidgetId = "tree-widget-react:trees"
 public;TreeWidgetOptions
