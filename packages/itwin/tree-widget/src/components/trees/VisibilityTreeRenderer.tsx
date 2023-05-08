@@ -14,7 +14,7 @@ import { VisibilityTreeFilterInfo } from "./Common";
 
 /**
  * Creates Visibility tree renderer which renders nodes with eye checkbox.
- * @alpha
+ * @public
  */
 export const useVisibilityTreeRenderer = (iconsEnabled: boolean, descriptionsEnabled: boolean) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -30,7 +30,7 @@ export const useVisibilityTreeRenderer = (iconsEnabled: boolean, descriptionsEna
 const imageLoader = new TreeImageLoader();
 /**
  * Creates node renderer which renders node with eye checkbox.
- * @alpha
+ * @public
  */
 export const createVisibilityTreeNodeRenderer = (iconsEnabled: boolean, descriptionEnabled: boolean) => {
   return (props: TreeNodeRendererProps) => ( // eslint-disable-line react/display-name
@@ -46,7 +46,7 @@ export const createVisibilityTreeNodeRenderer = (iconsEnabled: boolean, descript
 
 /**
  * Checkbox renderer that renders an eye.
- * @alpha
+ * @public
  */
 export const visibilityTreeNodeCheckboxRenderer = (props: NodeCheckboxRenderProps) => (
   <Checkbox
@@ -61,7 +61,7 @@ export const visibilityTreeNodeCheckboxRenderer = (props: NodeCheckboxRenderProp
 
 /**
  * Filters data provider used in supplied node loader and invokes onFilterApplied when filtering is completed.
- * @alpha
+ * @public
  */
 export const useVisibilityTreeFiltering = (
   nodeLoader: AbstractTreeNodeLoaderWithProvider<IPresentationTreeDataProvider>,
@@ -89,7 +89,7 @@ export const useVisibilityTreeFiltering = (
 
 /**
  * Properties for [[VisibilityTreeNoFilteredData]] component.
- * @alpha
+ * @public
  */
 export interface VisibilityTreeNoFilteredDataProps {
   title: string;
@@ -98,7 +98,7 @@ export interface VisibilityTreeNoFilteredDataProps {
 
 /**
  * Renders message that no nodes was found for filter.
- * @alpha
+ * @public
  */
 export function VisibilityTreeNoFilteredData(props: VisibilityTreeNoFilteredDataProps) {
   return (

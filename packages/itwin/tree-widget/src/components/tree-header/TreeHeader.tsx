@@ -11,10 +11,12 @@ import { SvgMore } from "@itwin/itwinui-icons-react";
 import { ButtonGroup, DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
 import { SearchBox, SearchBoxProps } from "./SearchBox";
 
+/** @internal */
 export interface TreeHeaderButtonProps {
   viewport: Viewport;
 }
 
+/** @internal */
 export interface TreeHeaderProps extends Omit<SearchBoxProps,
 | "onIconClick"
 | "valueChangedDelay"
@@ -26,6 +28,7 @@ export interface TreeHeaderProps extends Omit<SearchBoxProps,
   children?: React.ReactNode;
 }
 
+/** @internal */
 export function TreeHeader(props: TreeHeaderProps) {
   const { children, ...restProps } = props;
   const [searchOpen, setSearchOpen] = React.useState(false);

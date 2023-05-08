@@ -6,12 +6,12 @@
 import "./SearchBox.scss";
 import classnames from "classnames";
 import * as React from "react";
+import { CommonProps } from "@itwin/core-react";
 import { SvgChevronDown, SvgChevronUp, SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../TreeWidget";
 
-import type { CommonProps } from "@itwin/core-react";
-
+/** @internal */
 export interface SearchBoxProps extends CommonProps {
   /** Specifies whether search bar should be open */
   searchOpen: boolean;
@@ -33,6 +33,7 @@ export interface SearchBoxProps extends CommonProps {
   valueChangedDelay?: number;
 }
 
+/** @internal */
 export function SearchBox(props: SearchBoxProps) {
   const { className, valueChangedDelay = 500, style, onFilterStart, selectedIndex, resultCount,
     onSelectedChanged, onFilterClear, searchOpen, onSearchOpen, onSearchClose } = props;

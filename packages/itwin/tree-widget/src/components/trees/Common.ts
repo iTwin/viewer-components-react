@@ -5,7 +5,7 @@
 
 /**
  * An option of how class grouping should work in a component.
- * @beta
+ * @public
  */
 export enum ClassGroupingOption {
   /** Class grouping is disabled */
@@ -18,7 +18,7 @@ export enum ClassGroupingOption {
 
 /**
  * Data structure that describes info used to filter visibility tree.
- * @alpha
+ * @public
  */
 export interface VisibilityTreeFilterInfo {
   filter: string;

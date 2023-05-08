@@ -9,7 +9,9 @@ import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-r
 import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { useDisposable } from "@itwin/core-react";
 import { Ruleset } from "@itwin/presentation-common";
-import { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider, isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+import {
+  IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider, isPresentationTreeNodeItem, usePresentationTreeNodeLoader,
+} from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { ClassGroupingOption, VisibilityTreeFilterInfo } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
@@ -43,7 +45,6 @@ export interface ModelsTreeProps {
   selectionMode?: SelectionMode;
   /**
    * Predicate which indicates whether node can be selected or no
-   * @alpha
    */
   selectionPredicate?: ModelsTreeSelectionPredicate;
   /**
@@ -56,7 +57,6 @@ export interface ModelsTreeProps {
   rootElementRef?: React.Ref<HTMLDivElement>;
   /**
    * Information for tree filtering.
-   * @alpha
    */
   filterInfo?: VisibilityTreeFilterInfo;
   /**
@@ -65,7 +65,6 @@ export interface ModelsTreeProps {
   onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void;
   /**
    * Should the tree group displayed element nodes by class.
-   * @beta
    */
   enableElementsClassGrouping?: ClassGroupingOption;
   /**
@@ -75,7 +74,6 @@ export interface ModelsTreeProps {
   enableHierarchyAutoUpdate?: boolean;
   /**
    * Custom visibility handler.
-   * @alpha
    */
   modelsVisibilityHandler?: ModelsVisibilityHandler;
 }

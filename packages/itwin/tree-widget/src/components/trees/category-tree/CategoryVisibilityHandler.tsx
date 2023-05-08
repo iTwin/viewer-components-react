@@ -26,14 +26,17 @@ export function useCategories(viewManager: ViewManager, imodel: IModelConnection
 
 /**
  * Data structure that describes category.
- * @alpha
+ * @public
  */
 export interface CategoryInfo {
   categoryId: string;
   subCategoryIds?: string[];
 }
 
-/** @alpha */
+/**
+ * Params for creating a [[CategoryVisibilityHandler]].
+ * @public
+ */
 export interface CategoryVisibilityHandlerParams {
   viewManager: ViewManager;
   imodel: IModelConnection;
@@ -42,7 +45,11 @@ export interface CategoryVisibilityHandlerParams {
   allViewports?: boolean;
 }
 
-/** @alpha */
+/**
+ * An [[IVisibilityHandler]] implementation that knows how to determine and change visibility of categories
+ * and subcategories.
+ * @public
+ */
 export class CategoryVisibilityHandler implements IVisibilityHandler {
   private _viewManager: ViewManager;
   private _imodel: IModelConnection;
@@ -73,7 +80,7 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
   public getVisibilityStatus(node: TreeNodeItem,): VisibilityStatus {
     const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
     if (!nodeKey)
-      return { state: "hidden", isDisabled: true};
+      return { state: "hidden", isDisabled: true };
 
     const instanceId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
     return { state: node.parentId ? this.getSubCategoryVisibility(instanceId) : this.getCategoryVisibility(instanceId) };
@@ -160,6 +167,10 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
   }
 }
 
+/**
+ * Enable display of all given categories.
+ * @public
+ */
 export async function showAllCategories(categories: string[], viewport: Viewport) {
   await enableCategory(
     IModelApp.viewManager,
@@ -170,6 +181,10 @@ export async function showAllCategories(categories: string[], viewport: Viewport
   );
 }
 
+/**
+ * Disable display of all given categories.
+ * @public
+ */
 export async function hideAllCategories(categories: string[], viewport: Viewport) {
   await enableCategory(
     IModelApp.viewManager,
@@ -180,6 +195,10 @@ export async function hideAllCategories(categories: string[], viewport: Viewport
   );
 }
 
+/**
+ * Invert display of all given categories.
+ * @public
+ */
 export async function invertAllCategories(categories: CategoryInfo[], viewport: Viewport) {
   const enabled: string[] = [];
   const disabled: string[] = [];
@@ -195,7 +214,7 @@ export async function invertAllCategories(categories: CategoryInfo[], viewport: 
     if (category.subCategoryIds?.some((subCategory) => !viewport.isSubCategoryVisible(subCategory))) {
       for (const subCategory of category.subCategoryIds)
         viewport.isSubCategoryVisible(subCategory) ? enabledSubCategories.push(subCategory) : disabledSubCategories.push(subCategory);
-    } else{
+    } else {
       enabled.push(category.categoryId);
     }
   }

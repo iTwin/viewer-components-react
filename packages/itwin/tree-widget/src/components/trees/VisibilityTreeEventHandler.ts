@@ -22,7 +22,7 @@ import { isPromiseLike } from "../utils/IsPromiseLike";
 
 /**
  * Data structure that describes instance visibility status.
- * @alpha
+ * @public
  */
 export interface VisibilityStatus {
   state: "visible" | "partial" | "hidden";
@@ -32,13 +32,13 @@ export interface VisibilityStatus {
 
 /**
  * Type definition of visibility change event listener.
- * @alpha
+ * @public
  */
 export type VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map<string, VisibilityStatus>) => void;
 
 /**
  * Visibility handler used to change or get visibility of instances represented by the tree node.
- * @alpha
+ * @public
  */
 export interface IVisibilityHandler extends IDisposable {
   getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus>;
@@ -48,13 +48,13 @@ export interface IVisibilityHandler extends IDisposable {
 
 /**
  * Type definition of predicate used to decide if node can be selected.
- * @alpha
+ * @public
  */
 export type VisibilityTreeSelectionPredicate = (node: TreeNodeItem) => boolean;
 
 /**
  * Parameters for [[VisibilityTreeEventHandler]]
- * @alpha
+ * @public
  */
 export interface VisibilityTreeEventHandlerParams extends UnifiedSelectionTreeEventHandlerParams {
   visibilityHandler: IVisibilityHandler | undefined;
@@ -63,7 +63,7 @@ export interface VisibilityTreeEventHandlerParams extends UnifiedSelectionTreeEv
 
 /**
  * Base event handler for visibility tree.
- * @alpha
+ * @public
  */
 export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler {
   private _visibilityHandler: IVisibilityHandler | undefined;
