@@ -33,7 +33,7 @@ describe("<SearchBox />", () => {
   it("invokes 'onSearchOpen' when button is clicked while searchbox is closed", async () => {
     const spy = sinon.spy();
     const { getByRole } = render(<SearchBox {...defaultProps} searchOpen={false} onSearchOpen={spy} />);
-    const button = getByRole("button", { name: "Open" });
+    const button = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
     await userEvents.click(button);
     expect(spy).to.be.calledOnce;
   });
@@ -41,7 +41,7 @@ describe("<SearchBox />", () => {
   it("invokes 'onSearchClose' when button is clicked while searchbox is closed", async () => {
     const spy = sinon.spy();
     const { getByRole } = render(<SearchBox {...defaultProps} searchOpen={true} onSearchClose={spy} />);
-    const button = getByRole("button", { name: "Close" });
+    const button = getByRole("button", { name: TreeWidget.translate("searchBox.close") });
     await userEvents.click(button);
     expect(spy).to.be.calledOnce;
   });
@@ -78,13 +78,8 @@ describe("<SearchBox />", () => {
     await userEvents.type(input, "SearchString");
     await waitFor(() => expect(filterStartSpy).to.be.calledOnceWithExactly("SearchString"));
 
-    await userEvents.click(getByRole("button", {name: "Close"}));
+    await userEvents.click(getByRole("button", { name: TreeWidget.translate("searchBox.close") }));
     await waitFor(() => expect(filterClearSpy).to.be.calledOnce);
-  });
-
-  it("renders provided placeholder", async () => {
-    const { queryByPlaceholderText } = render(<SearchBox {...defaultProps} searchOpen={true} onFilterStart={() => {}} onFilterClear={() => {}} placeholder="TestPlaceholder" />);
-    await waitFor(() => expect(queryByPlaceholderText("TestPlaceholder")).to.not.be.null);
   });
 
   it("renders matches selector", async () => {
@@ -121,7 +116,7 @@ describe("<SearchBox />", () => {
       selectedIndex={5}
       resultCount={10}
     />);
-    const button = await waitFor(() => getByRole("button", {name: "Next"}));
+    const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("searchBox.next") }));
     await userEvents.click(button);
     expect(spy).to.be.calledOnceWithExactly(6);
   });
@@ -137,7 +132,7 @@ describe("<SearchBox />", () => {
       selectedIndex={10}
       resultCount={10}
     />);
-    const button = await waitFor(() => getByRole("button", {name: "Next"}));
+    const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("searchBox.next") }));
     await userEvents.click(button);
     expect(spy).to.not.be.called;
   });
@@ -153,7 +148,7 @@ describe("<SearchBox />", () => {
       selectedIndex={5}
       resultCount={10}
     />);
-    const button = await waitFor(() => getByRole("button", {name: "Previous"}));
+    const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("searchBox.previous") }));
     await userEvents.click(button);
     expect(spy).to.be.calledOnceWithExactly(4);
   });
@@ -169,7 +164,7 @@ describe("<SearchBox />", () => {
       selectedIndex={1}
       resultCount={10}
     />);
-    const button = await waitFor(() => getByRole("button", {name: "Previous"}));
+    const button = await waitFor(() => getByRole("button", { name: TreeWidget.translate("searchBox.previous") }));
     await userEvents.click(button);
     expect(spy).to.not.be.called;
   });

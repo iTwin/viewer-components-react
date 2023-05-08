@@ -1,6 +1,4 @@
 {
-  "searchForSomething": "Search for something",
-  "search": "Search...",
   "showAll": "Show All",
   "hideAll": "Hide All",
   "invert": "Invert",
@@ -50,5 +48,14 @@
     },
     "noModelFound": "No model found.",
     "noMatchingModelNames": "There are no model names matching your search."
+  },
+  "searchBox": {
+    "searchForSomething": "Search for something",
+    "search": "Search...",
+    "tree": "Tree search",
+    "open": "Open",
+    "close": "Close",
+    "next": "Next",
+    "previous": "Previous"
   }
 }

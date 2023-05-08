@@ -79,8 +79,6 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
   return (
     <>
       <TreeHeader
-        placeholder={TreeWidget.translate("search")}
-        title={TreeWidget.translate("searchForSomething")}
         onFilterClear={searchOptions.onFilterCancel}
         onFilterStart={searchOptions.onFilterStart}
         onSelectedChanged={searchOptions.onResultSelectedChanged}

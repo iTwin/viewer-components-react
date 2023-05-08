@@ -29,16 +29,13 @@ export interface SearchBoxProps extends CommonProps {
   selectedIndex?: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged: (index: number) => void;
-  /** Placeholder value to show in gray before anything is entered in */
-  placeholder?: string;
   /** Frequency to poll for changes in value */
   valueChangedDelay?: number;
-  title?: string;
 }
 
 export function SearchBox(props: SearchBoxProps) {
-  const { className, valueChangedDelay = 500, style, onFilterStart, selectedIndex, resultCount, title,
-    onSelectedChanged, onFilterClear, placeholder, searchOpen, onSearchOpen, onSearchClose } = props;
+  const { className, valueChangedDelay = 500, style, onFilterStart, selectedIndex, resultCount,
+    onSelectedChanged, onFilterClear, searchOpen, onSearchOpen, onSearchClose } = props;
   const [searchText, setSearchText] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -77,14 +74,12 @@ export function SearchBox(props: SearchBoxProps) {
   );
 
   return (
-    <div className={searchClassName} style={style} role="search" aria-label="Tree search">
+    <div className={searchClassName} style={style} role="search" aria-label={TreeWidget.translate("searchBox.tree")}>
       <input
         ref={inputRef}
         value={searchText}
         onChange={(e) => setSearchText(e.currentTarget.value)}
-        placeholder={
-          placeholder ? placeholder : TreeWidget.translate("searchbox.search")
-        }
+        placeholder={TreeWidget.translate("searchBox.search")}
         type="text"
         role="searchbox"
       />
@@ -93,8 +88,8 @@ export function SearchBox(props: SearchBoxProps) {
         size="small"
         styleType="borderless"
         onClick={toggleSearch}
-        title={!searchOpen ? title : undefined}
-        aria-label={searchOpen ? "Close" : "Open"}
+        title={!searchOpen ? TreeWidget.translate("searchBox.searchForSomething") : undefined}
+        aria-label={searchOpen ? TreeWidget.translate("searchBox.close") : TreeWidget.translate("searchBox.open")}
       >
         {searchOpen ? <SvgCloseSmall /> : <SvgSearch />}
       </IconButton>
@@ -136,7 +131,7 @@ function SearchResultStepper(props: SearchResultStepperProps) {
         size="small"
         styleType="borderless"
         onClick={handlePrevClick}
-        title="Previous"
+        title={TreeWidget.translate("searchBox.previous")}
       >
         <SvgChevronUp />
       </IconButton>
@@ -144,7 +139,7 @@ function SearchResultStepper(props: SearchResultStepperProps) {
         size="small"
         styleType="borderless"
         onClick={handleNextClick}
-        title="Next"
+        title={TreeWidget.translate("searchBox.next")}
       >
         <SvgChevronDown />
       </IconButton>

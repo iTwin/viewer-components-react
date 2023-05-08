@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { getClassName, UiError } from "@itwin/appui-abstract";
+import { UiError } from "@itwin/appui-abstract";
 import { IModelApp } from "@itwin/core-frontend";
 
 import type { Localization } from "@itwin/core-common";

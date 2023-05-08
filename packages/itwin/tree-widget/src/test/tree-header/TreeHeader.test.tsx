@@ -57,12 +57,12 @@ describe("<TreeHeader />", () => {
       </TreeHeader>
     );
 
-    const openButton = getByRole("button", { name: "Open" });
+    const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open")  });
     await userEvents.click(openButton);
 
     await waitFor(() => expect(container.querySelector(".tree-widget-searchbox.open")).to.not.be.null);
 
-    const closeButton = getByRole("button", { name: "Close" });
+    const closeButton = getByRole("button", { name: TreeWidget.translate("searchBox.close")  });
     await userEvents.click(closeButton);
 
     await waitFor(() => expect(container.querySelector(".tree-widget-searchbox.open")).to.be.null);
@@ -79,7 +79,7 @@ describe("<TreeHeader />", () => {
       </TreeHeader>
     );
 
-    expect(queryByRole("button", { name: "Button1"})).to.be.null;
-    expect(queryByRole("button", {name: "Button2"})).to.be.null;
+    expect(queryByRole("button", { name: "Button1" })).to.be.null;
+    expect(queryByRole("button", { name: "Button2" })).to.be.null;
   });
 });
