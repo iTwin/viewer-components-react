@@ -19,13 +19,13 @@ import { createITwinsClient, ITwinsClientContext } from "./context/ITwinsClientC
 
 const defaultDisplayStrings = {
   mappings: "Mappings",
-  itwins: "iTwins",
-  itwinNumber: "Number",
-  itwinName: "Name",
-  itwinStatus: "Status",
-  imodels: "iModels",
-  imodelName: "Name",
-  imodelDescription: "Description",
+  iTwins: "iTwins",
+  iTwinNumber: "Number",
+  iTwinName: "Name",
+  iTwinStatus: "Status",
+  iModels: "iModels",
+  iModelName: "Name",
+  iModelDescription: "Description",
 };
 interface MappingImportWizardModalProps {
   show: boolean;
@@ -42,13 +42,13 @@ export const MappingImportWizardModal = ({
 }: MappingImportWizardModalProps) => {
   const { prefix } = useGroupingMappingApiConfig();
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [itwinType, setITwinType] = useState<number>(0);
+  const [iTwinType, setITwinType] = useState<number>(0);
   const [selectedITwinId, setSelectedITwinId] = useState<string>("");
   const [selectedIModelId, setSelectedIModelId] = useState<string>("");
   const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
   const [importing, setImporting] = useState<boolean>(false);
-  const [itwinsClient, setITwinsClient] = useState<ITwinsAccessClient>(createITwinsClient(prefix));
-  const [imodelsClient, setIModelsClient] = useState<IModelsClient>(createIModelsClient(prefix));
+  const [iTwinsClient, setITwinsClient] = useState<ITwinsAccessClient>(createITwinsClient(prefix));
+  const [iModelsClient, setIModelsClient] = useState<IModelsClient>(createIModelsClient(prefix));
 
   useEffect(() => {
     setITwinsClient(createITwinsClient(prefix));
@@ -112,29 +112,29 @@ export const MappingImportWizardModal = ({
           switch (currentStep) {
             case 0:
               return (
-                <ITwinsClientContext.Provider value={itwinsClient}>
+                <ITwinsClientContext.Provider value={iTwinsClient}>
                   <div className="gmw-table-container">
                     <SelectITwin
-                      onSelect={(itwinId) => {
-                        setSelectedITwinId(itwinId);
+                      onSelect={(iTwinId) => {
+                        setSelectedITwinId(iTwinId);
                         setCurrentStep(1);
                       }}
                       onCancel={onClose}
                       onChangeITwinType={setITwinType}
                       displayStrings={displayStrings}
-                      defaultITwinType={itwinType}
+                      defaultITwinType={iTwinType}
                     />
                   </div>
                 </ITwinsClientContext.Provider>
               );
             case 1:
               return (
-                <IModelsClientContext.Provider value={imodelsClient}>
+                <IModelsClientContext.Provider value={iModelsClient}>
                   <div className="gmw-table-container">
                     <SelectIModel
-                      itwinId={selectedITwinId}
-                      onSelect={(imodelId) => {
-                        setSelectedIModelId(imodelId);
+                      iTwinId={selectedITwinId}
+                      onSelect={(iModelId) => {
+                        setSelectedIModelId(iModelId);
                         setCurrentStep(2);
                       }}
                       backFn={() => setCurrentStep(currentStep - 1)}
