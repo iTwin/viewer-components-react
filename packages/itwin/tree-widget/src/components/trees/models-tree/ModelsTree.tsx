@@ -8,7 +8,6 @@ import * as React from "react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { useDisposable } from "@itwin/core-react";
-import { Ruleset } from "@itwin/presentation-common";
 import {
   IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider, isPresentationTreeNodeItem, usePresentationTreeNodeLoader,
 } from "@itwin/presentation-components";
@@ -17,15 +16,9 @@ import { ClassGroupingOption, VisibilityTreeFilterInfo } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { useVisibilityTreeFiltering, useVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsTreeSelectionPredicate, ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
+import { createRuleset, createSearchRuleset } from "./Utils";
 
 const PAGING_SIZE = 20;
-
-/** @internal */
-export const RULESET_MODELS: Ruleset = require("./Hierarchy.json"); // eslint-disable-line @typescript-eslint/no-var-requires
-/** @internal */
-export const RULESET_MODELS_GROUPED_BY_CLASS: Ruleset = require("./Hierarchy.GroupedByClass.json"); // eslint-disable-line @typescript-eslint/no-var-requires
-
-const RULESET_MODELS_SEARCH: Ruleset = require("./ModelsTreeSearch.json"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 /** Props for [[ModelsTree]] component
  * @public
@@ -138,9 +131,10 @@ export function ModelsTree(props: ModelsTreeProps) {
 }
 
 function useModelsTreeNodeLoader(props: ModelsTreeProps) {
+  const groupElementsByClass = !!props.enableElementsClassGrouping;
   const rulesets = {
-    general: (!props.enableElementsClassGrouping) ? RULESET_MODELS : /* istanbul ignore next */ RULESET_MODELS_GROUPED_BY_CLASS,
-    search: RULESET_MODELS_SEARCH,
+    general: React.useMemo(() => createRuleset({ enableElementsClassGrouping: groupElementsByClass }), [groupElementsByClass]),
+    search: React.useMemo(() => createSearchRuleset(), []),
   };
 
   const { nodeLoader, onItemsRendered } = usePresentationTreeNodeLoader({
