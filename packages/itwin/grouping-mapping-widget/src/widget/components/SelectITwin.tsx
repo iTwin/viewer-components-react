@@ -31,8 +31,8 @@ const tabsWithIcons = [
 ];
 
 const fetchITwins = async (
-  setITwins: React.Dispatch<React.SetStateAction<ITwin[]>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setITwins: (iTwins: ITwin[]) => void,
+  setIsLoading: (isLoading: boolean) => void,
   getAccessToken: GetAccessTokenFn,
   iTwinsClient: ITwinsAccessClient,
   iTwinType: number,

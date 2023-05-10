@@ -22,8 +22,8 @@ const defaultDisplayStrings = {
 };
 
 const fetchIModels = async (
-  setIModels: React.Dispatch<React.SetStateAction<IModel[]>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setIModels: (iModels: IModel[]) => void,
+  setIsLoading: (isLoading: boolean) => void,
   getAccessToken: GetAccessTokenFn,
   iTwinId: string,
   iModelsClient: IModelsClient,
