@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/map-layers",
-      "comment": "\"Updated to itwin.js core packages to latest 4.0dev version.  Solved api changes\"",
+      "comment": "Update and react to iTwin.js Core 4.0",
       "type": "none"
     }
   ],
