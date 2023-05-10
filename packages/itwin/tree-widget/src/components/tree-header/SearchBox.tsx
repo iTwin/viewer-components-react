@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-/** @module SearchBox */
 
 import "./SearchBox.scss";
 import classnames from "classnames";
@@ -30,17 +29,14 @@ export interface SearchBoxProps extends CommonProps {
   selectedIndex?: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged: (index: number) => void;
-  /** placeholder value to show in gray before anything is entered in */
-  placeholder?: string;
-  /** frequency to poll for changes in value */
+  /** Frequency to poll for changes in value */
   valueChangedDelay?: number;
-  title?: string;
 }
 
 /** @internal */
 export function SearchBox(props: SearchBoxProps) {
-  const { className, valueChangedDelay, style, onFilterStart, selectedIndex, resultCount, title,
-    onSelectedChanged, onFilterClear, placeholder, searchOpen, onSearchOpen, onSearchClose } = props;
+  const { className, valueChangedDelay = 500, style, onFilterStart, selectedIndex, resultCount,
+    onSelectedChanged, onFilterClear, searchOpen, onSearchOpen, onSearchClose } = props;
   const [searchText, setSearchText] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -58,8 +54,8 @@ export function SearchBox(props: SearchBoxProps) {
   }, [searchText, valueChangedDelay, onFilterClear, onFilterStart]);
 
   React.useEffect(() => {
-    if (searchOpen) {
-      inputRef.current?.focus();
+    if (searchOpen && inputRef.current ) {
+      inputRef.current.focus();
     }
   }, [searchOpen]);
 
@@ -79,23 +75,22 @@ export function SearchBox(props: SearchBoxProps) {
   );
 
   return (
-    <div className={searchClassName} style={style}>
+    <div className={searchClassName} style={style} role="search" aria-label={TreeWidget.translate("searchBox.tree")}>
       <input
         ref={inputRef}
         value={searchText}
         onChange={(e) => setSearchText(e.currentTarget.value)}
-        onPaste={(e) => setSearchText(e.currentTarget.value)}
-        onCut={(e) => setSearchText(e.currentTarget.value)}
-        placeholder={
-          placeholder ? placeholder : TreeWidget.translate("searchbox.search")
-        }
+        placeholder={TreeWidget.translate("searchBox.search")}
+        type="text"
+        role="searchbox"
       />
       <SearchResultStepper selectedIndex={selectedIndex} total={resultCount} onStep={onSelectedChanged} />
       <IconButton
         size="small"
         styleType="borderless"
         onClick={toggleSearch}
-        title={!searchOpen ? title : undefined}
+        title={!searchOpen ? TreeWidget.translate("searchBox.searchForSomething") : undefined}
+        aria-label={searchOpen ? TreeWidget.translate("searchBox.close") : TreeWidget.translate("searchBox.open")}
       >
         {searchOpen ? <SvgCloseSmall /> : <SvgSearch />}
       </IconButton>
@@ -137,7 +132,7 @@ function SearchResultStepper(props: SearchResultStepperProps) {
         size="small"
         styleType="borderless"
         onClick={handlePrevClick}
-        title="Previous"
+        title={TreeWidget.translate("searchBox.previous")}
       >
         <SvgChevronUp />
       </IconButton>
@@ -145,7 +140,7 @@ function SearchResultStepper(props: SearchResultStepperProps) {
         size="small"
         styleType="borderless"
         onClick={handleNextClick}
-        title="Next"
+        title={TreeWidget.translate("searchBox.next")}
       >
         <SvgChevronDown />
       </IconButton>

@@ -103,13 +103,13 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     // (undocumented)
     enableSubCategory(key: string, enabled: boolean): void;
     // (undocumented)
-    getCategoryVisibility(id: string): "hidden" | "visible";
+    getCategoryVisibility(id: string): "visible" | "hidden";
     // (undocumented)
     static getInstanceIdFromTreeNodeKey(nodeKey: NodeKey): string;
     // (undocumented)
     getParent(key: string): CategoryInfo | undefined;
     // (undocumented)
-    getSubCategoryVisibility(id: string): "hidden" | "visible";
+    getSubCategoryVisibility(id: string): "visible" | "hidden";
     // (undocumented)
     getVisibilityStatus(node: TreeNodeItem): VisibilityStatus;
     // (undocumented)
@@ -350,15 +350,13 @@ export class TreeWidget {
     static get i18nNamespace(): string;
     static initialize(i18n?: Localization): Promise<void>;
     // (undocumented)
-    static loggerCategory(obj: any): string;
-    // (undocumented)
     static get packageName(): string;
     static terminate(): void;
     static translate(key: string | string[], options?: LocalizationOptions): string;
 }
 
 // @public
-export function TreeWidgetComponent(props: TreeWidgetComponentProps): JSX.Element;
+export function TreeWidgetComponent(props: TreeWidgetComponentProps): JSX.Element | null;
 
 // @public
 export interface TreeWidgetComponentProps {
