@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Update and react to iTwin.js Core 4.0",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
