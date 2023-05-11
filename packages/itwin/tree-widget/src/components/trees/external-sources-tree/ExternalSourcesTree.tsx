@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
+import * as React from "react";
 import { ControlledTree, DelayLoadedTreeNodeItem, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { IModelConnection } from "@itwin/core-frontend";
 import { Node, Ruleset } from "@itwin/presentation-common";

@@ -6,22 +6,20 @@
 import { expect } from "chai";
 import { join } from "path";
 import * as sinon from "sinon";
+import * as React from "react";
 import * as moq from "typemoq";
-import { PropertyRecord } from "@itwin/appui-abstract";
-import { TreeNodeItem } from "@itwin/components-react";
 import { Guid, Id64String } from "@itwin/core-bentley";
 import { BisCodeSpec, ElementProps, IModel } from "@itwin/core-common";
 import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
-import { KeySet, NodeKey } from "@itwin/presentation-common";
-import { PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { Presentation, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
+import { KeySet, LabelDefinition, Node, NodeKey } from "@itwin/presentation-common";
+import { Presentation, PresentationManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
   TestIModelBuilder,
 } from "@itwin/presentation-testing";
 import { render, waitFor } from "@testing-library/react";
-import { mockPresentationManager, TestUtils } from "../../TestUtils";
 import { ExternalSourcesTree, RULESET_EXTERNAL_SOURCES } from "../../../components/trees/external-sources-tree/ExternalSourcesTree";
+import { mockPresentationManager, TestUtils } from "../../TestUtils";
 
 describe("ExternalSourcesTree", () => {
 
@@ -41,6 +39,7 @@ describe("ExternalSourcesTree", () => {
 
     const imodelMock = moq.Mock.ofType<IModelConnection>();
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
+    let presentationManagerMock: moq.IMock<PresentationManager>;
 
     beforeEach(() => {
       imodelMock.reset();
@@ -52,7 +51,8 @@ describe("ExternalSourcesTree", () => {
       selectionManagerMock.setup((x) => x.getSelection(imodelMock.object, moq.It.isAny())).returns(() => new KeySet());
 
       const mocks = mockPresentationManager();
-      sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
+      presentationManagerMock = mocks.presentationManager;
+      sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
       sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
     });
 
@@ -60,39 +60,42 @@ describe("ExternalSourcesTree", () => {
       sinon.restore();
     });
 
+    let nodeKeysCounter = 0;
     const createInvalidNodeKey = (): NodeKey => {
-      return { type: "invalid", version: 0, pathFromRoot: [] };
+      return { type: "invalid", version: 0, pathFromRoot: [`${++nodeKeysCounter}`] };
     };
 
     describe("<ExternalSourcesTree />", () => {
-      beforeEach(() => {
-        sinon.stub(PresentationTreeDataProvider.prototype, "imodel").get(() => imodelMock.object);
-        sinon.stub(PresentationTreeDataProvider.prototype, "rulesetId").get(() => "");
-        sinon.stub(PresentationTreeDataProvider.prototype, "dispose");
-        sinon.stub(PresentationTreeDataProvider.prototype, "getFilteredNodePaths").resolves([]);
-        sinon.stub(PresentationTreeDataProvider.prototype, "getNodeKey").callsFake((node: any) => node.__key);
-        sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(0);
-        sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves([]);
-      });
 
-      const setupDataProvider = (nodes: TreeNodeItem[]) => {
-        (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
-        sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(nodes.length);
+      function setupHierarchy(nodes: Node[]) {
+        presentationManagerMock.setup(async (x) => x.getNodesAndCount(moq.It.isAny())).returns(async () => ({
+          count: nodes.length,
+          nodes,
+        }));
+      }
 
-        (PresentationTreeDataProvider.prototype.getNodes as any).restore();
-        sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").callsFake(
-          async () => nodes.map((n) => ({ __key: createInvalidNodeKey(), ...n })),
-        );
-      };
-
-      it("should have expected structure", async () => {
-        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node") }]);
-        const result = render(
+      it("should render hierarchy", async () => {
+        setupHierarchy([{
+          key: createInvalidNodeKey(),
+          label: LabelDefinition.fromLabelString("test-node-no-icon"), // eslint-disable-line @itwin/no-internal
+        }, {
+          key: createInvalidNodeKey(),
+          label: LabelDefinition.fromLabelString("test-node-with-icon"), // eslint-disable-line @itwin/no-internal
+          extendedData: {
+            imageId: "test-icon-id",
+          },
+        }]);
+        const { getByRole, getAllByRole, getByText } = render(
           <ExternalSourcesTree {...sizeProps} iModel={imodelMock.object} />,
         );
-        await waitFor(() => result.getByText("test-node"));
-        result.getByRole("tree");
-        result.getByRole("treeitem");
+        await waitFor(() => getByText("test-node-no-icon"));
+        getByRole("tree");
+        const treeItems = getAllByRole("treeitem");
+        expect(treeItems).to.have.lengthOf(2);
+        expect(treeItems[0]).to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-no-icon"]`))
+          .and.to.satisfy((item: HTMLElement) => !item.querySelector(`span.bui-webfont-icon`));
+        expect(treeItems[1]).to.satisfy((item: HTMLElement) => item.querySelector(`span[title="test-node-with-icon"]`))
+          .and.to.satisfy((item: HTMLElement) => item.querySelector(`span.bui-webfont-icon.test-icon-id`));
       });
     });
   });
