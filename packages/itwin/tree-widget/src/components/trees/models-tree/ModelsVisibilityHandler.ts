@@ -3,17 +3,22 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { TreeNodeItem } from "@itwin/components-react";
-import { BeEvent, Id64String } from "@itwin/core-bentley";
+import { BeEvent } from "@itwin/core-bentley";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
-import { IModelApp, IModelConnection, PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
-import { ECClassGroupingNodeKey, GroupingNodeKey, Keys, KeySet, NodeKey } from "@itwin/presentation-common";
-import { IFilteredPresentationTreeDataProvider, isPresentationTreeNodeItem } from "@itwin/presentation-components";
+import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { KeySet, NodeKey } from "@itwin/presentation-common";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { toggleAllCategories } from "../CategoriesVisibilityUtils";
-import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 import { CachingElementIdsContainer } from "./Utils";
+
+import type { TreeNodeItem } from "@itwin/components-react";
+import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { ECClassGroupingNodeKey, GroupingNodeKey, Keys} from "@itwin/presentation-common";
+import type { IFilteredPresentationTreeDataProvider} from "@itwin/presentation-components";
+import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
 /**
  * Models tree node types.

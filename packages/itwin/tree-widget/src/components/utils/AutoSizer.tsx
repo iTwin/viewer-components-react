@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { ResizableContainerObserver } from "@itwin/core-react";
 
 /** @internal */

@@ -3,15 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import * as moq from "typemoq";
-import { fireEvent, render, waitFor } from "@testing-library/react";
-import { CategoriesTreeComponent, CategoryInfo } from "../../../tree-widget-react";
-import { IModelApp, IModelConnection, NoRenderApp, Viewport } from "@itwin/core-frontend";
-import { mockViewport, TestUtils } from "../../TestUtils";
-import sinon from "sinon";
 import { expect } from "chai";
+import sinon from "sinon";
+import * as moq from "typemoq";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import * as categoriesVisibilityHandler from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import { CategoriesTreeComponent } from "../../../tree-widget-react";
+import { mockViewport, TestUtils } from "../../TestUtils";
+
+import type { CategoryInfo } from "../../../tree-widget-react";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 
 describe("<CategoriesTreeComponent />", () => {
   before(async () => {

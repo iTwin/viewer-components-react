@@ -5,27 +5,32 @@
 
 import { expect } from "chai";
 import { join } from "path";
-import * as React from "react";
-import * as sinon from "sinon";
+import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { TreeNodeItem } from "@itwin/components-react";
-import { BeEvent, Id64String } from "@itwin/core-bentley";
-import { IModelApp, IModelConnection, NoRenderApp, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
-import { ECInstancesNodeKey, KeySet, LabelDefinition, Node, NodePathElement, StandardNodeTypes } from "@itwin/presentation-common";
-import { PresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import { Presentation, RulesetVariablesManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
+import { BeEvent } from "@itwin/core-bentley";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { KeySet, LabelDefinition, StandardNodeTypes } from "@itwin/presentation-common";
+import { PresentationTreeDataProvider } from "@itwin/presentation-components";
+import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
-import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
-import { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 import {
   addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory,
 } from "../../IModelUtils";
 import { mockPresentationManager, mockViewport, TestUtils } from "../../TestUtils";
+
+import type { TreeNodeItem } from "@itwin/components-react";
+import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
+import type { ECInstancesNodeKey, Node, NodePathElement} from "@itwin/presentation-common";
+import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
+import type { RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
+import type { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 
 describe("CategoryTree", () => {
 

@@ -8,11 +8,12 @@ import * as moq from "typemoq";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
-import { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
 import { TreeWidget } from "../TreeWidget";
 
+import type { IModelConnection, PerModelCategoryVisibility, Viewport, ViewState } from "@itwin/core-frontend";
 import type { PresentationManager, RulesetVariablesManager } from "@itwin/presentation-frontend";
 import type { VariableValue } from "@itwin/presentation-common";
+
 export class TestUtils {
   private static _initialized = false;
 

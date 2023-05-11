@@ -5,11 +5,12 @@
 
 import "./SearchBox.scss";
 import classnames from "classnames";
-import * as React from "react";
-import { CommonProps } from "@itwin/core-react";
+import { useEffect, useRef, useState } from "react";
 import { SvgChevronDown, SvgChevronUp, SvgCloseSmall, SvgSearch } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../TreeWidget";
+
+import type { CommonProps } from "@itwin/core-react";
 
 /** @internal */
 export interface SearchBoxProps extends CommonProps {
@@ -37,10 +38,10 @@ export interface SearchBoxProps extends CommonProps {
 export function SearchBox(props: SearchBoxProps) {
   const { className, valueChangedDelay = 500, style, onFilterStart, selectedIndex, resultCount,
     onSelectedChanged, onFilterClear, searchOpen, onSearchOpen, onSearchClose } = props;
-  const [searchText, setSearchText] = React.useState("");
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [searchText, setSearchText] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!searchText) {
       onFilterClear();
       return;
@@ -53,7 +54,7 @@ export function SearchBox(props: SearchBoxProps) {
     return () => clearTimeout(timeoutId);
   }, [searchText, valueChangedDelay, onFilterClear, onFilterStart]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (searchOpen && inputRef.current ) {
       inputRef.current.focus();
     }

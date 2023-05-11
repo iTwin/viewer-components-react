@@ -3,15 +3,16 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
 import { expect } from "chai";
 import sinon from "sinon";
 import { EmptyLocalization } from "@itwin/core-common";
 import { Button } from "@itwin/itwinui-react";
 import { cleanup, render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
-import { TreeHeader, TreeHeaderProps } from "../../components/tree-header/TreeHeader";
+import { TreeHeader } from "../../components/tree-header/TreeHeader";
 import { TreeWidget } from "../../TreeWidget";
+
+import type { TreeHeaderProps } from "../../components/tree-header/TreeHeader";
 
 describe("<TreeHeader />", () => {
   const defaultProps: TreeHeaderProps = {

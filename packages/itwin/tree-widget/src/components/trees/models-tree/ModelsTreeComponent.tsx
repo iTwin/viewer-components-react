@@ -4,18 +4,21 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
-import { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
-import { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { Button, IconButton } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../../TreeWidget";
-import { TreeHeader, TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+import { TreeHeader } from "../../tree-header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
-import { ModelsTree, ModelsTreeProps } from "./ModelsTree";
+import { ModelsTree } from "./ModelsTree";
 import { areAllModelsVisible, hideAllModels, invertAllModels, showAllModels, toggleModels } from "./ModelsVisibilityHandler";
+
+import type { GeometricModel3dProps, ModelQueryParams } from "@itwin/core-common";
+import type { IModelConnection, ScreenViewport, Viewport } from "@itwin/core-frontend";
+import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+import type { ModelsTreeProps } from "./ModelsTree";
 
 /**
  * Information about a single Model.
@@ -167,9 +170,9 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
         {props.headerButtons
           ? props.headerButtons.map(
             (btn, index) =>
-              <React.Fragment key={index}>
+              <Fragment key={index}>
                 {btn({ viewport, models: availableModels })}
-              </React.Fragment>
+              </Fragment>
           )
           : [
             <ShowAllButton viewport={viewport} models={availableModels} key="show-all-btn" />,

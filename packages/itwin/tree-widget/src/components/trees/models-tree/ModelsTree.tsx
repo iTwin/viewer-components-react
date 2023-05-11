@@ -4,20 +4,22 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
-import * as React from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
-import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { useDisposable } from "@itwin/core-react";
-import { SingleSchemaClassSpecification } from "@itwin/presentation-common";
-import {
-  IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider, isPresentationTreeNodeItem, usePresentationTreeNodeLoader,
-} from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
-import { ClassGroupingOption, VisibilityTreeFilterInfo } from "../Common";
+import { ClassGroupingOption } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
 import { useVisibilityTreeFiltering, useVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
-import { ModelsTreeSelectionPredicate, ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
+import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { createRuleset, createSearchRuleset } from "./Utils";
+
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { SingleSchemaClassSpecification } from "@itwin/presentation-common";
+import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { VisibilityTreeFilterInfo } from "../Common";
+import type { ModelsTreeSelectionPredicate } from "./ModelsVisibilityHandler";
 
 const PAGING_SIZE = 20;
 
@@ -107,7 +109,7 @@ export function ModelsTree(props: ModelsTreeProps) {
     modelsVisibilityHandler,
     getFilteredDataProvider(filteredNodeLoader.dataProvider),
     props.enableHierarchyAutoUpdate);
-  const eventHandler = useDisposable(React.useCallback(() => new VisibilityTreeEventHandler({
+  const eventHandler = useDisposable(useCallback(() => new VisibilityTreeEventHandler({
     nodeLoader: filteredNodeLoader,
     visibilityHandler,
     collapsedChildrenDisposalEnabled: true,
@@ -120,7 +122,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
 
   // istanbul ignore next
-  const noFilteredDataRenderer = React.useCallback(() => {
+  const noFilteredDataRenderer = useCallback(() => {
     return <VisibilityTreeNoFilteredData
       title={TreeWidget.translate("modelTree.noModelFound")}
       message={TreeWidget.translate("modelTree.noMatchingModelNames")}
@@ -148,11 +150,11 @@ export function ModelsTree(props: ModelsTreeProps) {
 
 function useModelsTreeNodeLoader(props: ModelsTreeProps) {
   const rulesets = {
-    general: React.useMemo(() => createRuleset({
+    general: useMemo(() => createRuleset({
       enableElementsClassGrouping: !!props.hierarchyConfig?.enableElementsClassGrouping,
       elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
     }), [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification]),
-    search: React.useMemo(() => createSearchRuleset({
+    search: useMemo(() => createSearchRuleset({
       elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
     }), [props.hierarchyConfig?.elementClassSpecification]),
   };
@@ -188,9 +190,9 @@ function useVisibilityHandler(
   filteredDataProvider?: IFilteredPresentationTreeDataProvider,
   hierarchyAutoUpdateEnabled?: boolean,
 ) {
-  const subjectModelIdsCache = React.useMemo(() => new SubjectModelIdsCache(iModel), [iModel]);
+  const subjectModelIdsCache = useMemo(() => new SubjectModelIdsCache(iModel), [iModel]);
 
-  const defaultVisibilityHandler = useDisposable(React.useCallback(
+  const defaultVisibilityHandler = useDisposable(useCallback(
     () =>
       new ModelsVisibilityHandler({ rulesetId, viewport: activeView, hierarchyAutoUpdateEnabled, subjectModelIdsCache }),
     [rulesetId, activeView, subjectModelIdsCache, hierarchyAutoUpdateEnabled])
@@ -198,7 +200,7 @@ function useVisibilityHandler(
 
   const handler = visibilityHandler ?? defaultVisibilityHandler;
 
-  React.useEffect(() => {
+  useEffect(() => {
     handler && handler.setFilteredDataProvider(filteredDataProvider);
   }, [handler, filteredDataProvider]);
 

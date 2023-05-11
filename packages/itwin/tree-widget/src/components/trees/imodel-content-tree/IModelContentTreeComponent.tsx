@@ -4,11 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
-import React from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { TreeWidget } from "../../../TreeWidget";
 import { AutoSizer } from "../../utils/AutoSizer";
-import { IModelContentTree, IModelContentTreeProps } from "./IModelContentTree";
+import { IModelContentTree } from "./IModelContentTree";
+
+import type { IModelContentTreeProps } from "./IModelContentTree";
 
 /**
  * Props for [[IModelContentTreeComponent]].

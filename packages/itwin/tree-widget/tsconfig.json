@@ -1,11 +1,11 @@
 {
   "extends": "./node_modules/@itwin/build-tools/tsconfig-base.json",
   "compilerOptions": {
+    "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noImplicitOverride": false,
     "resolveJsonModule": true,
-
   },
   "include": ["src"]
 }

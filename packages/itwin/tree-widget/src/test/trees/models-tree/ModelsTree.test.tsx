@@ -5,28 +5,33 @@
 
 import { expect } from "chai";
 import { join } from "path";
-import * as React from "react";
-import * as sinon from "sinon";
+import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { SelectionMode, TreeNodeItem } from "@itwin/components-react";
+import { SelectionMode } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
-import { ECInstancesNodeKey, KeySet, LabelDefinition, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
+import { IModel } from "@itwin/core-common";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { KeySet, LabelDefinition } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { Presentation, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
+import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
-import { ModelsTreeNodeType, ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { createRuleset } from "../../../components/trees/models-tree/Utils";
-import { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
-import { IModel } from "@itwin/core-common";
+
+import type { TreeNodeItem } from "@itwin/components-react";
+import type { IModelConnection} from "@itwin/core-frontend";
+import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
+import type { SelectionManager } from "@itwin/presentation-frontend";
+import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 
 describe("ModelsTree", () => {
 

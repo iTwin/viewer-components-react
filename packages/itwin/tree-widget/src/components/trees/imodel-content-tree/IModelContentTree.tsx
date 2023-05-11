@@ -4,11 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 import classNames from "classnames";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { ControlledTree, SelectionMode, useTreeEventsHandler, useTreeModel } from "@itwin/components-react";
-import { IModelConnection } from "@itwin/core-frontend";
-import { Ruleset } from "@itwin/presentation-common";
 import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
+
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { Ruleset } from "@itwin/presentation-common";
 
 /**
  * Presentation rules used by IModelContentTree

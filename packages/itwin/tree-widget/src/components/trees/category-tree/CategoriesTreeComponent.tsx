@@ -4,20 +4,24 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
-import React, { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useActiveIModelConnection, useActiveViewport } from "@itwin/appui-react";
-import { IModelApp, IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { SvgVisibilityHalf, SvgVisibilityHide, SvgVisibilityShow } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
-import { IPresentationTreeDataProvider, isPresentationTreeNodeItem } from "@itwin/presentation-components";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
-import { TreeHeader, TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+import { TreeHeader } from "../../tree-header/TreeHeader";
 import { useTreeFilteringState } from "../../TreeFilteringState";
 import { AutoSizer } from "../../utils/AutoSizer";
-import { CategoryTree, CategoryTreeProps } from "./CategoriesTree";
-import {
-  CategoryInfo, CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories,
-} from "./CategoryVisibilityHandler";
+import { CategoryTree } from "./CategoriesTree";
+import { CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories } from "./CategoryVisibilityHandler";
+
+import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import type { IPresentationTreeDataProvider} from "@itwin/presentation-components";
+import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
+import type { CategoryTreeProps } from "./CategoriesTree";
+import type { CategoryInfo } from "./CategoryVisibilityHandler";
 
 /**
  * Props that get passed to [[CategoriesTreeComponent]] header button renderer.
@@ -138,9 +142,9 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
         {props.headerButtons
           ? props.headerButtons.map(
             (btn, index) =>
-              <React.Fragment key={index}>
+              <Fragment key={index}>
                 {btn({ viewport: props.viewport, categories, filteredCategories })}
-              </React.Fragment>
+              </Fragment>
           )
           : [
             <ShowAllButton viewport={props.viewport} categories={categories} filteredCategories={filteredCategories} key="show-all-btn" />,
