@@ -84,7 +84,7 @@ The component renders a tree that tries to replicate how a typical "Models" tree
 Typical usage:
 
 ```tsx
-import { ModelsTreeComponent } from "@itwin/tree-widget-react";
+import { ModelsTreeComponent, ClassGroupingOption } from "@itwin/tree-widget-react";
 import { SelectionMode } from "@itwin/components-react";
 ...
 function MyWidget() {
@@ -96,7 +96,9 @@ function MyWidget() {
         (props) => <MyCustomButton />,
       ]}
       selectionMode={SelectionMode.Extended}
-      enableElementsClassGrouping={true}
+      hierarchyConfig={{
+        enableElementsClassGrouping: ClassGroupingOption.Yes,
+      }}
     />
   );
 }

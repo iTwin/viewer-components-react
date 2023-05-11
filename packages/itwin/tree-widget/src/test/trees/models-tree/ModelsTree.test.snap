@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ModelsTree #integration does not show private categories with RULESET_MODELS 1`] = `
+exports[`ModelsTree #integration does not load private categories 1`] = `
 Array [
   Object {
     "autoExpand": true,
@@ -86,8 +86,8 @@ Array [
         "typename": "string",
       },
       "value": Object {
-        "displayValue": "ModelsTreeModels",
-        "value": "ModelsTreeModels",
+        "displayValue": "ModelsTree",
+        "value": "ModelsTree",
         "valueFormat": 0,
       },
     },
@@ -95,7 +95,7 @@ Array [
 ]
 `;
 
-exports[`ModelsTree #integration does not show private categories with RULESET_MODELS_GROUPED_BY_CLASS 1`] = `
+exports[`ModelsTree #integration groups elements by class 1`] = `
 Array [
   Object {
     "autoExpand": true,
@@ -108,7 +108,7 @@ Array [
                 "children": Array [
                   Object {
                     "extendedData": Object {
-                      "categoryId": "0x13",
+                      "categoryId": "0x12",
                       "modelId": "0x11",
                     },
                     "filtering": Object {
@@ -122,8 +122,8 @@ Array [
                         "typename": "string",
                       },
                       "value": Object {
-                        "displayValue": "Physical Object [0-L]",
-                        "value": "Physical Object [0-L]",
+                        "displayValue": "Physical Object [0-K]",
+                        "value": "Physical Object [0-K]",
                         "valueFormat": 0,
                       },
                     },
@@ -200,8 +200,103 @@ Array [
         "typename": "string",
       },
       "value": Object {
-        "displayValue": "ModelsTreeModelsGroupedByClass",
-        "value": "ModelsTreeModelsGroupedByClass",
+        "displayValue": "ModelsTree",
+        "value": "ModelsTree",
+        "valueFormat": 0,
+      },
+    },
+  },
+]
+`;
+
+exports[`ModelsTree #integration loads specified type of elements 1`] = `
+Array [
+  Object {
+    "autoExpand": true,
+    "children": Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "extendedData": Object {
+                  "categoryId": "0x12",
+                  "modelId": "0x11",
+                },
+                "filtering": Object {
+                  "descriptor": [Function],
+                },
+                "icon": "icon-item",
+                "label": PropertyRecord {
+                  "property": Object {
+                    "displayLabel": "Label",
+                    "name": "node_label",
+                    "typename": "string",
+                  },
+                  "value": Object {
+                    "displayValue": "Spatial Location [0-L]",
+                    "value": "Spatial Location [0-L]",
+                    "valueFormat": 0,
+                  },
+                },
+              },
+            ],
+            "extendedData": Object {
+              "isCategory": true,
+              "modelId": "0x11",
+            },
+            "hasChildren": true,
+            "icon": "icon-layers",
+            "label": PropertyRecord {
+              "property": Object {
+                "displayLabel": "Label",
+                "name": "node_label",
+                "typename": "string",
+              },
+              "value": Object {
+                "displayValue": "Test Spatial Category",
+                "value": "Test Spatial Category",
+                "valueFormat": 0,
+              },
+            },
+          },
+        ],
+        "extendedData": Object {
+          "isModel": true,
+        },
+        "filtering": Object {
+          "descriptor": [Function],
+        },
+        "hasChildren": true,
+        "icon": "icon-model",
+        "label": PropertyRecord {
+          "property": Object {
+            "displayLabel": "Label",
+            "name": "node_label",
+            "typename": "string",
+          },
+          "value": Object {
+            "displayValue": "TestPhysicalModel",
+            "value": "TestPhysicalModel",
+            "valueFormat": 0,
+          },
+        },
+      },
+    ],
+    "extendedData": Object {
+      "isSubject": true,
+    },
+    "hasChildren": true,
+    "icon": "icon-imodel-hollow-2",
+    "label": PropertyRecord {
+      "property": Object {
+        "displayLabel": "Label",
+        "name": "node_label",
+        "typename": "string",
+      },
+      "value": Object {
+        "displayValue": "ModelsTree",
+        "value": "ModelsTree",
         "valueFormat": 0,
       },
     },

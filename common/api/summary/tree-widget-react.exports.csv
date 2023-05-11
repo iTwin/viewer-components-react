@@ -1,6 +1,7 @@
 sep=;
 Release Tag;API Item
 public;areAllModelsVisible(models: string[], viewport: Viewport): boolean
+internal;CachingElementIdsContainer
 public;CategoriesTreeComponent:
 public;CategoriesTreeComponentProps 
 public;CategoriesTreeHeaderButtonProps 
@@ -10,6 +11,10 @@ public;CategoryTreeProps
 public;CategoryVisibilityHandler 
 public;CategoryVisibilityHandlerParams
 public;ClassGroupingOption
+internal;createRuleset(props: CreateRulesetProps): Ruleset
+internal;CreateRulesetProps = Omit
+internal;createSearchRuleset(props: CreateSearchRulesetProps): Ruleset
+internal;CreateSearchRulesetProps = Omit
 public;createVisibilityTreeNodeRenderer: (iconsEnabled: boolean, descriptionEnabled: boolean) => (props: TreeNodeRendererProps) => JSX.Element
 public;hideAllCategories(categories: string[], viewport: Viewport): Promise
 public;hideAllModels(models: string[], viewport: Viewport): Promise
@@ -24,6 +29,7 @@ public;ModelInfo
 public;ModelsTree(props: ModelsTreeProps): JSX.Element
 public;ModelsTreeComponent:
 public;ModelsTreeHeaderButtonProps 
+public;ModelsTreeHierarchyConfiguration
 public;ModelsTreeNodeType
 public;ModelsTreeProps
 public;ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean
@@ -32,8 +38,6 @@ public;ModelsVisibilityHandlerProps
 public;ModelTreeComponentProps 
 internal;RULESET_CATEGORIES: Ruleset
 internal;RULESET_IMODEL_CONTENT: Ruleset
-internal;RULESET_MODELS: Ruleset
-internal;RULESET_MODELS_GROUPED_BY_CLASS: Ruleset
 public;showAllCategories(categories: string[], viewport: Viewport): Promise
 public;showAllModels(models: string[], viewport: Viewport): Promise
 internal;SubjectModelIdsCache

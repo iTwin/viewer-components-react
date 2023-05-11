@@ -23,6 +23,7 @@ import * as React_2 from 'react';
 import { default as React_3 } from 'react';
 import { Ruleset } from '@itwin/presentation-common';
 import { SelectionMode as SelectionMode_2 } from '@itwin/components-react';
+import { SingleSchemaClassSpecification } from '@itwin/presentation-common';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import { Subscription } from '@itwin/components-react';
@@ -41,6 +42,13 @@ import { Widget } from '@itwin/appui-react';
 
 // @public
 export function areAllModelsVisible(models: string[], viewport: Viewport): boolean;
+
+// @internal (undocumented)
+export class CachingElementIdsContainer {
+    constructor(_generator: AsyncGenerator<Id64String>);
+    // (undocumented)
+    getElementIds(): AsyncGenerator<any, void, unknown>;
+}
 
 // @public
 export const CategoriesTreeComponent: {
@@ -137,6 +145,20 @@ export enum ClassGroupingOption {
     YesWithCounts = 2
 }
 
+// @internal (undocumented)
+export function createRuleset(props: CreateRulesetProps): Ruleset;
+
+// @internal (undocumented)
+export type CreateRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "enableElementsClassGrouping"> & {
+    enableElementsClassGrouping?: boolean;
+};
+
+// @internal (undocumented)
+export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset;
+
+// @internal (undocumented)
+export type CreateSearchRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "enableElementsClassGrouping">;
+
 // @public
 export const createVisibilityTreeNodeRenderer: (iconsEnabled: boolean, descriptionEnabled: boolean) => (props: TreeNodeRendererProps) => JSX.Element;
 
@@ -212,6 +234,12 @@ export interface ModelsTreeHeaderButtonProps extends TreeHeaderButtonProps {
 }
 
 // @public
+export interface ModelsTreeHierarchyConfiguration {
+    elementClassSpecification?: SingleSchemaClassSpecification;
+    enableElementsClassGrouping?: ClassGroupingOption;
+}
+
+// @public
 export enum ModelsTreeNodeType {
     // (undocumented)
     Category = 3,
@@ -230,11 +258,11 @@ export enum ModelsTreeNodeType {
 // @public
 export interface ModelsTreeProps {
     activeView: Viewport;
-    enableElementsClassGrouping?: ClassGroupingOption;
     // @alpha
     enableHierarchyAutoUpdate?: boolean;
     filterInfo?: VisibilityTreeFilterInfo;
     height: number;
+    hierarchyConfig?: ModelsTreeHierarchyConfiguration;
     iModel: IModelConnection;
     modelsVisibilityHandler?: ModelsVisibilityHandler;
     onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void;
@@ -313,12 +341,6 @@ export const RULESET_CATEGORIES: Ruleset;
 
 // @internal
 export const RULESET_IMODEL_CONTENT: Ruleset;
-
-// @internal (undocumented)
-export const RULESET_MODELS: Ruleset;
-
-// @internal (undocumented)
-export const RULESET_MODELS_GROUPED_BY_CLASS: Ruleset;
 
 // @public
 export function showAllCategories(categories: string[], viewport: Viewport): Promise<void>;

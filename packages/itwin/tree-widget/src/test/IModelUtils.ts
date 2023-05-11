@@ -4,7 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { Id64String } from "@itwin/core-bentley";
-import { BisCodeSpec, CategoryProps, Code, IModel, PhysicalElementProps, RelatedElementProps, SubCategoryProps } from "@itwin/core-common";
+import {
+  BisCodeSpec, CategoryProps, Code, GeometricElement3dProps, IModel, PhysicalElementProps, RelatedElementProps, SubCategoryProps,
+} from "@itwin/core-common";
 import { TestIModelBuilder } from "@itwin/presentation-testing";
 
 export function addSubject(builder: TestIModelBuilder, name: string, parentId = IModel.rootSubjectId) {
@@ -60,6 +62,16 @@ export function addPhysicalObject(builder: TestIModelBuilder, modelId: string, c
     code: elemCode,
   };
   return builder.insertElement(physicalObjectProps);
+}
+
+export function addSpatialLocationElement(builder: TestIModelBuilder, modelId: string, categoryId: string, elemCode = Code.createEmpty()) {
+  const props: GeometricElement3dProps = {
+    classFullName: "Generic:SpatialLocation",
+    model: modelId,
+    category: categoryId,
+    code: elemCode,
+  };
+  return builder.insertElement(props);
 }
 
 export function addDrawingCategory(builder: TestIModelBuilder, modelId: string, name: string, isPrivate?: boolean) {
