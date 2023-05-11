@@ -2,18 +2,30 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useRef, useState } from "react";
+import type { IModelsClient } from "@itwin/imodels-client-management";
+import type { ITwinsAccessClient } from "@itwin/itwins-client";
 import type { StepProperties } from "@itwin/itwinui-react";
 import { Modal, Wizard } from "@itwin/itwinui-react";
-import SelectProject from "./SelectProject";
+import React, { useEffect, useRef, useState } from "react";
+import ConfirmMappingImport from "./ConfirmMappingsImport";
+import type { IMappingTyped } from "./Mapping";
 import "./MappingImportWizardModal.scss";
 import SelectIModel from "./SelectIModel";
+import SelectITwin from "./SelectITwin";
 import SelectMappings from "./SelectMappings";
-import type { IMappingTyped } from "./Mapping";
-import ConfirmMappingImport from "./ConfirmMappingsImport";
+import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import { createIModelsClient, IModelsClientContext } from "./context/IModelsClientContext";
+import { createITwinsClient, ITwinsClientContext } from "./context/ITwinsClientContext";
 
 const defaultDisplayStrings = {
   mappings: "Mappings",
+  iTwins: "iTwins",
+  iTwinNumber: "Number",
+  iTwinName: "Name",
+  iTwinStatus: "Status",
+  iModels: "iModels",
+  iModelName: "Name",
+  iModelDescription: "Description",
 };
 interface MappingImportWizardModalProps {
   show: boolean;
@@ -28,11 +40,20 @@ export const MappingImportWizardModal = ({
   onFinish,
   displayStrings: userDisplayStrings,
 }: MappingImportWizardModalProps) => {
+  const { prefix } = useGroupingMappingApiConfig();
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [iTwinType, setITwinType] = useState<number>(0);
+  const [selectedITwinId, setSelectedITwinId] = useState<string>("");
   const [selectedIModelId, setSelectedIModelId] = useState<string>("");
   const [selectedMappings, setSelectedMappings] = useState<IMappingTyped[]>([]);
   const [importing, setImporting] = useState<boolean>(false);
+  const [iTwinsClient, setITwinsClient] = useState<ITwinsAccessClient>(createITwinsClient(prefix));
+  const [iModelsClient, setIModelsClient] = useState<IModelsClient>(createIModelsClient(prefix));
+
+  useEffect(() => {
+    setITwinsClient(createITwinsClient(prefix));
+    setIModelsClient(createIModelsClient(prefix));
+  }, [prefix]);
 
   const displayStrings = React.useMemo(
     () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
@@ -41,12 +62,12 @@ export const MappingImportWizardModal = ({
 
   const steps = useRef<StepProperties[]>([
     {
-      name: "Select source project",
-      description: `Select the source project to bring your ${displayStrings.mappings} from.`,
+      name: "Select iTwin",
+      description: `Select the source iTwin to bring your ${displayStrings.mappings} from.`,
     },
     {
       name: "Select iModel",
-      description: "Select an iModel within the project you have selected.",
+      description: "Select an iModel within the iTwin you have selected.",
     },
     {
       name: `Select ${displayStrings.mappings}`,
@@ -91,25 +112,36 @@ export const MappingImportWizardModal = ({
           switch (currentStep) {
             case 0:
               return (
-                <SelectProject
-                  onSelect={(project) => {
-                    setSelectedProjectId(project.id);
-                    setCurrentStep(1);
-                  }}
-                  onCancel={onClose}
-                />
+                <ITwinsClientContext.Provider value={iTwinsClient}>
+                  <div className="gmw-table-container">
+                    <SelectITwin
+                      onSelect={(iTwinId) => {
+                        setSelectedITwinId(iTwinId);
+                        setCurrentStep(1);
+                      }}
+                      onCancel={onClose}
+                      onChangeITwinType={setITwinType}
+                      displayStrings={displayStrings}
+                      defaultITwinType={iTwinType}
+                    />
+                  </div>
+                </ITwinsClientContext.Provider>
               );
             case 1:
               return (
-                <SelectIModel
-                  projectId={selectedProjectId}
-                  onSelect={(iModel) => {
-                    setSelectedIModelId(iModel.id);
-                    setCurrentStep(2);
-                  }}
-                  backFn={() => setCurrentStep(currentStep - 1)}
-                  onCancel={onClose}
-                />
+                <IModelsClientContext.Provider value={iModelsClient}>
+                  <div className="gmw-table-container">
+                    <SelectIModel
+                      iTwinId={selectedITwinId}
+                      onSelect={(iModelId) => {
+                        setSelectedIModelId(iModelId);
+                        setCurrentStep(2);
+                      }}
+                      backFn={() => setCurrentStep(currentStep - 1)}
+                      onCancel={onClose}
+                    />
+                  </div>
+                </IModelsClientContext.Provider>
               );
             case 2:
             case 3:
@@ -118,7 +150,7 @@ export const MappingImportWizardModal = ({
                 <>
                   <div
                     style={{ display: currentStep === 2 ? "flex" : "none" }}
-                    className="gmw-mappings-container"
+                    className="gmw-mapping-container"
                   >
                     <SelectMappings
                       iModelId={selectedIModelId}
