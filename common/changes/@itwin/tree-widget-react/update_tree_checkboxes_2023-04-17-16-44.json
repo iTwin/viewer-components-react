@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Updated trees to use visibility checkbox from `@itwin/itwinui-react`.",
+      "comment": "Trees: Updated trees to use visibility checkbox from `@itwin/itwinui-react`.",
       "type": "none"
     }
   ],
