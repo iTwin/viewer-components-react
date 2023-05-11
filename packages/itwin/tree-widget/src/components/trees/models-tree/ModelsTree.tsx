@@ -8,6 +8,7 @@ import * as React from "react";
 import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { IModelConnection, Viewport } from "@itwin/core-frontend";
 import { useDisposable } from "@itwin/core-react";
+import { SingleSchemaClassSpecification } from "@itwin/presentation-common";
 import {
   IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider, isPresentationTreeNodeItem, usePresentationTreeNodeLoader,
 } from "@itwin/presentation-components";
@@ -20,7 +21,22 @@ import { createRuleset, createSearchRuleset } from "./Utils";
 
 const PAGING_SIZE = 20;
 
-/** Props for [[ModelsTree]] component
+/**
+ * Props for configuring the hierarchy in [[ModelsTree]].
+ * @public
+ */
+export interface ModelsTreeHierarchyConfiguration {
+  /** Should the tree group displayed element nodes by class. Defaults to `ClassGroupingOption.No`. */
+  enableElementsClassGrouping?: ClassGroupingOption;
+  /**
+   * Defines the `bis.GeometricElement3d` sub-class that should be used to load element nodes.
+   * Defaults to `bis.GeometricElement3d`. It's expected for the given class to derive from it.
+   */
+  elementClassSpecification?: SingleSchemaClassSpecification;
+}
+
+/**
+ * Props for [[ModelsTree]] component
  * @public
  */
 export interface ModelsTreeProps {
@@ -57,9 +73,9 @@ export interface ModelsTreeProps {
    */
   onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void;
   /**
-   * Should the tree group displayed element nodes by class.
+   * Configuration options for the hierarchy loaded in the component.
    */
-  enableElementsClassGrouping?: ClassGroupingOption;
+  hierarchyConfig?: ModelsTreeHierarchyConfiguration;
   /**
    * Auto-update the hierarchy when data in the iModel changes.
    * @alpha
@@ -131,16 +147,20 @@ export function ModelsTree(props: ModelsTreeProps) {
 }
 
 function useModelsTreeNodeLoader(props: ModelsTreeProps) {
-  const groupElementsByClass = !!props.enableElementsClassGrouping;
   const rulesets = {
-    general: React.useMemo(() => createRuleset({ enableElementsClassGrouping: groupElementsByClass }), [groupElementsByClass]),
-    search: React.useMemo(() => createSearchRuleset(), []),
+    general: React.useMemo(() => createRuleset({
+      enableElementsClassGrouping: !!props.hierarchyConfig?.enableElementsClassGrouping,
+      elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
+    }), [props.hierarchyConfig?.enableElementsClassGrouping, props.hierarchyConfig?.elementClassSpecification]),
+    search: React.useMemo(() => createSearchRuleset({
+      elementClassSpecification: props.hierarchyConfig?.elementClassSpecification,
+    }), [props.hierarchyConfig?.elementClassSpecification]),
   };
 
   const { nodeLoader, onItemsRendered } = usePresentationTreeNodeLoader({
     imodel: props.iModel,
     ruleset: rulesets.general,
-    appendChildrenCountForGroupingNodes: (props.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts),
+    appendChildrenCountForGroupingNodes: (props.hierarchyConfig?.enableElementsClassGrouping === ClassGroupingOption.YesWithCounts),
     pagingSize: PAGING_SIZE,
     enableHierarchyAutoUpdate: props.enableHierarchyAutoUpdate,
   });

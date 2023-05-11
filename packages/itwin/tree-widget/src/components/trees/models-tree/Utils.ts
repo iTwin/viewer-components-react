@@ -5,6 +5,7 @@
 
 import type { Id64String } from "@itwin/core-bentley";
 import { Ruleset } from "@itwin/presentation-common";
+import { ModelsTreeHierarchyConfiguration } from "./ModelsTree";
 
 /** @internal */
 export class CachingElementIdsContainer {
@@ -28,13 +29,15 @@ export class CachingElementIdsContainer {
 }
 
 /** @internal */
-export interface CreateRulesetProps {
+export type CreateRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "enableElementsClassGrouping"> & {
   enableElementsClassGrouping?: boolean;
-}
+};
+
 /** @internal */
 export function createRuleset(props: CreateRulesetProps): Ruleset {
+  const elementClassSpecification = props.elementClassSpecification ?? { schemaName: "BisCore", className: "GeometricElement3d" };
   return {
-    id: "tree-widget-react/ModelsTree.GroupedByClass",
+    id: "tree-widget-react/ModelsTree",
     requiredSchemas: [
       {
         name: "BisCore",
@@ -153,7 +156,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
                 isRequired: true,
               },
             ],
-            instanceFilter: `(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x % x", partition.ECInstanceId)) AND NOT this.IsPrivate AND json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") = NULL AND json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") = NULL AND this.HasRelatedInstance("BisCore: ModelContainsElements", "Forward", "BisCore: GeometricElement3d")`,
+            instanceFilter: `(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)) AND NOT this.IsPrivate AND json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") = NULL AND json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") = NULL AND this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`,
             hasChildren: "Always",
             hideIfNoChildren: true,
             groupByClass: false,
@@ -185,7 +188,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
                 isRequired: true,
               },
             ],
-            instanceFilter: `(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x % x", partition.ECInstanceId)) AND NOT this.IsPrivate AND (json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") <> NULL OR json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") <> NULL) AND this.HasRelatedInstance("BisCore: ModelContainsElements", "Forward", "BisCore: GeometricElement3d")`,
+            instanceFilter: `(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)) AND NOT this.IsPrivate AND (json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") <> NULL OR json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") <> NULL) AND this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`,
             hasChildren: "Always",
             hideNodesInHierarchy: true,
             groupByClass: false,
@@ -216,7 +219,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
                 direction: "Backward",
               },
             ],
-            instanceFilter: `NOT this.IsPrivate AND this.HasRelatedInstance("BisCore: ModelContainsElements", "Forward", "BisCore: GeometricElement3d")`,
+            instanceFilter: `NOT this.IsPrivate AND this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`,
             hideNodesInHierarchy: true,
             groupByClass: false,
             groupByLabel: false,
@@ -245,10 +248,7 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
                     className: "ModelContainsElements",
                   },
                   direction: "Forward",
-                  targetClass: {
-                    schemaName: "BisCore",
-                    className: "GeometricElement3d",
-                  },
+                  targetClass: elementClassSpecification,
                 },
                 {
                   relationship: {
@@ -289,14 +289,11 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
                   className: "GeometricElement3dIsInCategory",
                 },
                 direction: "Backward",
-                targetClass: {
-                  schemaName: "BisCore",
-                  className: "GeometricElement3d",
-                },
+                targetClass: elementClassSpecification,
               },
             ],
             instanceFilter: `this.Model.Id = parent.parent.ECInstanceId ANDALSO this.Parent = NULL`,
-            groupByClass: props.enableElementsClassGrouping,
+            groupByClass: !!props.enableElementsClassGrouping,
             groupByLabel: false,
           },
         ],
@@ -323,13 +320,10 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
                   className: "ElementOwnsChildElements",
                 },
                 direction: "Forward",
-                targetClass: {
-                  schemaName: "BisCore",
-                  className: "GeometricElement3d",
-                },
+                targetClass: elementClassSpecification,
               },
             ],
-            groupByClass: props.enableElementsClassGrouping,
+            groupByClass: !!props.enableElementsClassGrouping,
             groupByLabel: false,
           },
         ],
@@ -420,7 +414,12 @@ export function createRuleset(props: CreateRulesetProps): Ruleset {
   };
 }
 
-export function createSearchRuleset(): Ruleset {
+/** @internal */
+export type CreateSearchRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "enableElementsClassGrouping">;
+
+/** @internal */
+export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset {
+  const elementClassSpecification = props.elementClassSpecification ?? { schemaName: "BisCore", className: "GeometricElement3d" };
   return {
     id: "tree-widget-react/ModelsTreeSearch",
     rules: [
@@ -549,7 +548,7 @@ export function createSearchRuleset(): Ruleset {
                 isRequired: true,
               },
             ],
-            instanceFilter: `(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)) AND NOT this.IsPrivate AND json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") = NULL AND json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") = NULL AND this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "BisCore:Element")`,
+            instanceFilter: `(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)) AND NOT this.IsPrivate AND json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") = NULL AND json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") = NULL AND this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`,
             groupByClass: false,
             groupByLabel: false,
           },
@@ -565,7 +564,7 @@ export function createSearchRuleset(): Ruleset {
       },
       {
         ruleType: "ChildNodes",
-        condition: "ParentNode.IsOfClass("Subject", "BisCore")",
+        condition: `ParentNode.IsOfClass("Subject", "BisCore")`,
         specifications: [
           {
             specType: "InstanceNodesOfSpecificClasses",
@@ -593,7 +592,7 @@ export function createSearchRuleset(): Ruleset {
                 isRequired: true,
               },
             ],
-            instanceFilter: `(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)) AND NOT this.IsPrivate AND (json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") <> NULL OR json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") <> NULL) AND this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "BisCore:Element")`,
+            instanceFilter: `(parent.ECInstanceId = partition.Parent.Id OR json_extract(parent.JsonProperties, "$.Subject.Model.TargetPartition") = printf("0x%x", partition.ECInstanceId)) AND NOT this.IsPrivate AND (json_extract(partition.JsonProperties, "$.PhysicalPartition.Model.Content") <> NULL OR json_extract(partition.JsonProperties, "$.GraphicalPartition3d.Model.Content") <> NULL) AND this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`,
             hideNodesInHierarchy: true,
             groupByClass: false,
             groupByLabel: false,
@@ -633,7 +632,7 @@ export function createSearchRuleset(): Ruleset {
                 },
               },
             ],
-            instanceFilter: `NOT this.IsPrivate AND this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "BisCore:Element")`,
+            instanceFilter: `NOT this.IsPrivate AND this.HasRelatedInstance("BisCore:ModelContainsElements", "Forward", "${elementClassSpecification.schemaName}:${elementClassSpecification.className}")`,
             groupByClass: false,
             groupByLabel: false,
           },

@@ -21,11 +21,12 @@ import {
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
 import { ModelsTreeNodeType, ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { createRuleset } from "../../../components/trees/models-tree/Utils";
 import { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-import { RULESET_MODELS, RULESET_MODELS_GROUPED_BY_CLASS } from "../../../tree-widget-react";
-import { addModel, addPartition, addPhysicalObject, addSpatialCategory } from "../../IModelUtils";
+import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
+import { IModel } from "@itwin/core-common";
 
 describe("ModelsTree", () => {
 
@@ -349,8 +350,8 @@ describe("ModelsTree", () => {
       await terminatePresentationTesting();
     });
 
-    it("does not show private categories with RULESET_MODELS", async () => {
-      const iModel: IModelConnection = await buildTestIModel("ModelsTreeModels", (builder) => {
+    it("does not load private categories", async () => {
+      const iModel: IModelConnection = await buildTestIModel("ModelsTree", (builder) => {
         const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
         const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
@@ -364,27 +365,38 @@ describe("ModelsTree", () => {
       });
 
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
-      const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_MODELS);
+      const hierarchy = await hierarchyBuilder.createHierarchy(createRuleset({}));
 
       expect(hierarchy).to.matchSnapshot();
     });
 
-    it("does not show private categories with RULESET_MODELS_GROUPED_BY_CLASS", async () => {
-      const iModel: IModelConnection = await buildTestIModel("ModelsTreeModelsGroupedByClass", (builder) => {
+    it("groups elements by class", async () => {
+      const iModel: IModelConnection = await buildTestIModel("ModelsTree", (builder) => {
         const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
-        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
         const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
-        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
-
-        const categoryId = addSpatialCategory(builder, definitionModelId, "Test Spatial Category");
+        const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
         addPhysicalObject(builder, modelId, categoryId);
-
-        const privateCategoryId = addSpatialCategory(builder, definitionModelId, "Private Test Spatial Category", true);
-        addPhysicalObject(builder, modelId, privateCategoryId);
       });
 
       const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
-      const hierarchy = await hierarchyBuilder.createHierarchy(RULESET_MODELS_GROUPED_BY_CLASS);
+      const hierarchy = await hierarchyBuilder.createHierarchy(createRuleset({ enableElementsClassGrouping: true }));
+
+      expect(hierarchy).to.matchSnapshot();
+    });
+
+    it("loads specified type of elements", async () => {
+      const iModel: IModelConnection = await buildTestIModel("ModelsTree", (builder) => {
+        const partitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestPhysicalModel");
+        const modelId = addModel(builder, "BisCore:PhysicalModel", partitionId);
+        const categoryId = addSpatialCategory(builder, IModel.dictionaryId, "Test Spatial Category");
+        addPhysicalObject(builder, modelId, categoryId);
+        addSpatialLocationElement(builder, modelId, categoryId);
+      });
+
+      const hierarchyBuilder = new HierarchyBuilder({ imodel: iModel });
+      const hierarchy = await hierarchyBuilder.createHierarchy(createRuleset({
+        elementClassSpecification: { schemaName: "BisCore", className: "SpatialLocationElement" },
+      }));
 
       expect(hierarchy).to.matchSnapshot();
     });
