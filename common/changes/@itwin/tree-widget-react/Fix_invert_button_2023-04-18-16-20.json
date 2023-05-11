@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Categories tree: fix invert button behavior. Previously, only categories were affected, now sub-categories will be affected as well.",
+      "comment": "Categories tree: Fix behavior of the Invert button. Previously, only categories were affected, now sub-categories are affected as well.",
       "type": "none"
     }
   ],

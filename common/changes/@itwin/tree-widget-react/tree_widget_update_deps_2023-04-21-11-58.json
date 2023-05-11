@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Removed usage of deprecated `@itwin/presentation-components` APIs",
+      "comment": "",
       "type": "none"
     }
   ],
