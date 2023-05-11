@@ -2,6 +2,23 @@
   "name": "@itwin/property-grid-react",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@itwin/property-grid-react_v0.10.0",
+      "date": "Tue, 02 May 2023 16:12:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make property grid column resizer more movable"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Updated to AppUI 4.0 and Presentation 4.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.0",
       "tag": "@itwin/property-grid-react_v0.9.0",
       "date": "Mon, 03 Apr 2023 15:34:07 GMT",

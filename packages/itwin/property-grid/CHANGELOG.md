@@ -1,6 +1,13 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Mon, 03 Apr 2023 15:34:07 GMT and should not be manually modified.
+This log was last generated on Tue, 02 May 2023 16:12:17 GMT and should not be manually modified.
+
+## 0.10.0
+Tue, 02 May 2023 16:12:17 GMT
+
+### Minor changes
+
+- Updated to AppUI 4.0 and Presentation 4.0
 
 ## 0.9.0
 Mon, 03 Apr 2023 15:34:07 GMT
@@ -221,10 +228,6 @@ Thu, 08 Jul 2021 20:22:14 GMT
 ### Breaking changes
 
 - Added support for FilteringPropertyDataProvider in PropertyGrid
-
-### Updates
-
-- add rebuild script
 
 ## 1.3.7
 Tue, 08 Jun 2021 21:23:59 GMT
