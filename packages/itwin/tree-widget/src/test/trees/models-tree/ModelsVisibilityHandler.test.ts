@@ -20,13 +20,13 @@ import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
 
-import type { Id64String} from "@itwin/core-bentley";
-import type { ECSqlReader} from "@itwin/core-common";
+import type { Id64String } from "@itwin/core-bentley";
+import type { ECSqlReader } from "@itwin/core-common";
 import type { IModelConnection, Viewport, ViewState, ViewState3d } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
-import type { ModelsVisibilityHandlerProps} from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import type { ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { ModelInfo } from "../../../tree-widget-react";
 
 describe("ModelsVisibilityHandler", () => {
@@ -97,7 +97,7 @@ describe("ModelsVisibilityHandler", () => {
 
   };
 
-  const modelsInfo: ModelInfo[] = [{ id: "ModelId1"}, { id: "ModelId2" }];
+  const modelsInfo: ModelInfo[] = [{ id: "ModelId1" }, { id: "ModelId2" }];
 
   describe("constructor", () => {
 

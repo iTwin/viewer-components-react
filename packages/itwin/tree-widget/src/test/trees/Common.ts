@@ -8,10 +8,10 @@ import { Id64 } from "@itwin/core-bentley";
 import { CheckBoxState } from "@itwin/core-react";
 import { StandardNodeTypes } from "@itwin/presentation-common";
 
-import type { PropertyDescription, PropertyValue} from "@itwin/appui-abstract";
+import type { PropertyDescription, PropertyValue } from "@itwin/appui-abstract";
 import type { TreeModelNode } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
-import type { ECClassGroupingNodeKey, ECInstancesNodeKey, InstanceKey} from "@itwin/presentation-common";
+import type { ECClassGroupingNodeKey, ECInstancesNodeKey, InstanceKey } from "@itwin/presentation-common";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
 
 export const createSimpleTreeModelNode = (id?: string): TreeModelNode => {

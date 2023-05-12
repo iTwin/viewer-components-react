@@ -71,7 +71,7 @@ describe("TreeWidgetUiItemsProvider", () => {
       getLabel: () => "Tree Label",
       render: () => <div>Tree Content</div>,
     }];
-    const provider = new TreeWidgetUiItemsProvider({trees});
+    const provider = new TreeWidgetUiItemsProvider({ trees });
     const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.Start);
     render(<>{widget.content}</>);
 

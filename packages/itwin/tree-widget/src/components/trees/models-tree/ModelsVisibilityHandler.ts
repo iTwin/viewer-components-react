@@ -16,8 +16,8 @@ import { CachingElementIdsContainer } from "./Utils";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
-import type { ECClassGroupingNodeKey, GroupingNodeKey, Keys} from "@itwin/presentation-common";
-import type { IFilteredPresentationTreeDataProvider} from "@itwin/presentation-components";
+import type { ECClassGroupingNodeKey, GroupingNodeKey, Keys } from "@itwin/presentation-common";
+import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
 /**

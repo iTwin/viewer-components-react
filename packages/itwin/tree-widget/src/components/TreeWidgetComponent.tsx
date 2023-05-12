@@ -11,7 +11,7 @@ import { FillCentered } from "@itwin/core-react";
 import { ProgressLinear } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
 
-import type { PropsWithChildren} from "react";
+import type { PropsWithChildren } from "react";
 import type { SelectableContentDefinition, SelectableContentProps } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 

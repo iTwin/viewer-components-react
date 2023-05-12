@@ -27,7 +27,7 @@ import { deepEquals, mockPresentationManager, mockViewport, TestUtils } from "..
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
 
 import type { TreeNodeItem } from "@itwin/components-react";
-import type { IModelConnection} from "@itwin/core-frontend";
+import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
 import type { SelectionManager } from "@itwin/presentation-frontend";
 import type { ModelsVisibilityHandler } from "../../../components/trees/models-tree/ModelsVisibilityHandler";

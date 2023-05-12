@@ -18,7 +18,7 @@ import { CategoryTree } from "./CategoriesTree";
 import { CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories } from "./CategoryVisibilityHandler";
 
 import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
-import type { IPresentationTreeDataProvider} from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { TreeHeaderButtonProps } from "../../tree-header/TreeHeader";
 import type { CategoryTreeProps } from "./CategoriesTree";
 import type { CategoryInfo } from "./CategoryVisibilityHandler";

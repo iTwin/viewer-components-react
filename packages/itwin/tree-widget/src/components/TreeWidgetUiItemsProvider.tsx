@@ -10,7 +10,7 @@ import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
 import { TreeWidgetComponent } from "./TreeWidgetComponent";
 
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
-import type { TreeDefinition} from "./TreeWidgetComponent";
+import type { TreeDefinition } from "./TreeWidgetComponent";
 
 /**
  * Parameters for creating a [[TreeWidgetUiItemsProvider]].

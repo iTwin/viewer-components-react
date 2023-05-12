@@ -17,11 +17,11 @@ import {
 } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import { mockViewport } from "../../TestUtils";
 
-import type { Id64String} from "@itwin/core-bentley";
+import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
-import type { ECInstancesNodeKey} from "@itwin/presentation-common";
+import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { CategoryInfo, CategoryVisibilityHandlerParams} from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import type { CategoryInfo, CategoryVisibilityHandlerParams } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 
 const createKey = (id: Id64String): ECInstancesNodeKey => {
   return {

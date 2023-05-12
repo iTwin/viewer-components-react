@@ -17,9 +17,9 @@ import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
 import type { Ruleset } from "@itwin/presentation-common";
-import type { IPresentationTreeDataProvider} from "@itwin/presentation-components";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { VisibilityTreeFilterInfo } from "../Common";
-import type { CategoryInfo} from "./CategoryVisibilityHandler";
+import type { CategoryInfo } from "./CategoryVisibilityHandler";
 
 const PAGING_SIZE = 20;
 

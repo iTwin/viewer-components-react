@@ -45,8 +45,8 @@ describe("<TreeHeader />", () => {
     );
 
     await waitFor(() => {
-      expect(queryByRole("button", {name: "Button1"})).to.not.be.null;
-      expect(queryByRole("button", {name: "Button2"})).to.not.be.null;
+      expect(queryByRole("button", { name: "Button1" })).to.not.be.null;
+      expect(queryByRole("button", { name: "Button2" })).to.not.be.null;
     });
   });
 

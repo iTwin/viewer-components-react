@@ -25,8 +25,8 @@ import { mockPresentationManager, TestUtils } from "../../TestUtils";
 
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
-import type { IModelConnection} from "@itwin/core-frontend";
-import type { ECInstancesNodeKey} from "@itwin/presentation-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 
 describe("IModelContentTree", () => {
 

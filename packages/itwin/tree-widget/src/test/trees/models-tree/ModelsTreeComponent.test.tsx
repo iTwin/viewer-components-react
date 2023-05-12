@@ -13,7 +13,7 @@ import * as modelsVisibilityHandler from "../../../components/trees/models-tree/
 import { ModelsTreeComponent } from "../../../tree-widget-react";
 import { mockViewport, TestUtils } from "../../TestUtils";
 
-import type { ModelInfo} from "../../../tree-widget-react";
+import type { ModelInfo } from "../../../tree-widget-react";
 import type { Viewport } from "@itwin/core-frontend";
 
 describe("<ModelsTreeComponent />", () => {
@@ -37,7 +37,7 @@ describe("<ModelsTreeComponent />", () => {
     vpMock = mockViewport();
   });
 
-  const models: ModelInfo[] = [{id: "testModelId1"}, {id: "testModelId2"}];
+  const models: ModelInfo[] = [{ id: "testModelId1" }, { id: "testModelId2" }];
 
   describe("models tree header buttons", () => {
 

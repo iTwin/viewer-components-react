@@ -10,8 +10,8 @@ import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-
 import { enableCategory, enableSubCategory, toggleAllCategories } from "../../components/trees/CategoriesVisibilityUtils";
 import { TestUtils } from "../TestUtils";
 
-import type { ECSqlReader} from "@itwin/core-common";
-import type { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState} from "@itwin/core-frontend";
+import type { ECSqlReader } from "@itwin/core-common";
+import type { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
 
 describe("CategoryVisibilityUtils", () => {
   before(async () => {

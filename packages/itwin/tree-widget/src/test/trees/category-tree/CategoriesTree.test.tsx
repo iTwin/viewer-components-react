@@ -26,7 +26,7 @@ import { mockPresentationManager, mockViewport, TestUtils } from "../../TestUtil
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
-import type { ECInstancesNodeKey, Node, NodePathElement} from "@itwin/presentation-common";
+import type { ECInstancesNodeKey, Node, NodePathElement } from "@itwin/presentation-common";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
 import type { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
