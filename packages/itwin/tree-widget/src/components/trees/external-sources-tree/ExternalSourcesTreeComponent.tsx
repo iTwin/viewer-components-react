@@ -4,11 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
-import * as React from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
 import { AutoSizer } from "../../utils/AutoSizer";
 import { ExternalSourcesTree } from "./ExternalSourcesTree";
-import { IModelConnection } from "@itwin/core-frontend";
+
+import type { IModelConnection } from "@itwin/core-frontend";
 
 /**
  * A component that displays an External Sources tree and any necessary "chrome".
