@@ -26,10 +26,8 @@ if (!process.env.IMJS_AUTH_CLIENT_REDIRECT_URI) {
 }
 
 ReactDOM.render(
-  <React.StrictMode>
     <BrowserRouter>
       <App />
-    </BrowserRouter>
-  </React.StrictMode>,
+    </BrowserRouter>,
   document.getElementById("root")
 );

@@ -15,50 +15,26 @@ import { PropertyGridManager } from "../PropertyGridManager";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 
+/** Props for `ElementList` component. */
 export interface ElementListProps {
-  iModelConnection: IModelConnection;
+  imodel: IModelConnection;
   instanceKeys: InstanceKey[];
   onBack: () => void;
-  /** should be memoized to prevent unnecessary updates */
   onSelect: (instanceKey: InstanceKey) => void;
   rootClassName?: string;
 }
 
-/** Gets labels from presentation layer, chunks up requests if necessary */
-export const getLabels = async (
-  labelsProvider: PresentationLabelsProvider,
-  instanceKeys: InstanceKey[]
-): Promise<string[]> => {
-  const chunkSize = 1000;
-  if (instanceKeys.length < chunkSize) {
-    return labelsProvider.getLabels(instanceKeys);
-  } else {
-    const labels: string[] = [];
-    for (let i = 0; i < instanceKeys.length; i += chunkSize) {
-      const end = Math.min(i + chunkSize, instanceKeys.length);
-      const chunk = instanceKeys.slice(i, end);
-      const currentLabels = await labelsProvider.getLabels(chunk);
-      labels.push(...currentLabels);
-    }
-    return labels;
-  }
-};
-
-/** Shows a list of elements to inspect properties for */
-export const ElementList = ({
-  iModelConnection,
+/** Shows a list of elements to inspect properties for. */
+export function ElementList({
+  imodel,
   instanceKeys,
   onBack,
   onSelect,
   rootClassName,
-}: ElementListProps) => {
+}: ElementListProps) {
   const [data, setData] = React.useState<string[]>();
 
-  const labelsProvider: PresentationLabelsProvider = React.useMemo(() => {
-    return new PresentationLabelsProvider({
-      imodel: iModelConnection,
-    });
-  }, [iModelConnection]);
+  const labelsProvider: PresentationLabelsProvider = React.useMemo(() => new PresentationLabelsProvider({ imodel }), [imodel]);
 
   React.useEffect(() => {
     const createLabels = async () => {
@@ -66,12 +42,7 @@ export const ElementList = ({
       setData(labels);
     };
 
-    createLabels().catch(() => {
-      Logger.logError(
-        "VCR:PropertyGridReact",
-        "ElementList: Failed to create labels"
-      );
-    });
+    createLabels().catch(() => { Logger.logError( "VCR:PropertyGridReact", "ElementList: Failed to create labels" ); });
   }, [labelsProvider, instanceKeys]);
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
@@ -86,7 +57,6 @@ export const ElementList = ({
           styleType="borderless"
           onClick={onBack}
           onKeyDown={onBack}
-          tabIndex={0}
           title={PropertyGridManager.translate("tools.backTooltip")}
         >
           <SvgProgressBackwardCircular />
@@ -110,4 +80,21 @@ export const ElementList = ({
       </div>
     </div>
   );
-};
+}
+
+/** Gets labels from presentation layer, chunks up requests if necessary */
+async function getLabels(labelsProvider: PresentationLabelsProvider, instanceKeys: InstanceKey[]): Promise<string[]> {
+  const chunkSize = 1000;
+  if (instanceKeys.length < chunkSize) {
+    return labelsProvider.getLabels(instanceKeys);
+  } else {
+    const labels: string[] = [];
+    for (let i = 0; i < instanceKeys.length; i += chunkSize) {
+      const end = Math.min(i + chunkSize, instanceKeys.length);
+      const chunk = instanceKeys.slice(i, end);
+      const currentLabels = await labelsProvider.getLabels(chunk);
+      labels.push(...currentLabels);
+    }
+    return labels;
+  }
+}
