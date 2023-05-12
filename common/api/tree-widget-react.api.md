@@ -6,39 +6,37 @@
 
 /// <reference types="react" />
 
-import { AbstractTreeNodeLoaderWithProvider } from '@itwin/components-react';
+import type { AbstractTreeNodeLoaderWithProvider } from '@itwin/components-react';
 import { BeEvent } from '@itwin/core-bentley';
-import { ECClassGroupingNodeKey } from '@itwin/presentation-common';
+import type { ECClassGroupingNodeKey } from '@itwin/presentation-common';
 import { HighlightableTreeProps } from '@itwin/components-react';
-import { Id64String } from '@itwin/core-bentley';
-import { IDisposable } from '@itwin/core-bentley';
-import { IFilteredPresentationTreeDataProvider } from '@itwin/presentation-components';
-import { IModelConnection } from '@itwin/core-frontend';
-import { IPresentationTreeDataProvider } from '@itwin/presentation-components';
+import type { Id64String } from '@itwin/core-bentley';
+import type { IDisposable } from '@itwin/core-bentley';
+import type { IFilteredPresentationTreeDataProvider } from '@itwin/presentation-components';
+import type { IModelConnection } from '@itwin/core-frontend';
+import type { IPresentationTreeDataProvider } from '@itwin/presentation-components';
 import type { Localization } from '@itwin/core-common';
 import type { LocalizationOptions } from '@itwin/core-i18n';
-import { NodeCheckboxRenderProps } from '@itwin/core-react';
+import type { NodeCheckboxRenderProps } from '@itwin/core-react';
 import { NodeKey } from '@itwin/presentation-common';
-import * as React_2 from 'react';
-import { default as React_3 } from 'react';
-import { Ruleset } from '@itwin/presentation-common';
+import type { Ruleset } from '@itwin/presentation-common';
 import { SelectionMode as SelectionMode_2 } from '@itwin/components-react';
-import { SingleSchemaClassSpecification } from '@itwin/presentation-common';
+import type { SingleSchemaClassSpecification } from '@itwin/presentation-common';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import { Subscription } from '@itwin/components-react';
-import { TreeCheckboxStateChangeEventArgs } from '@itwin/components-react';
-import { TreeNodeItem } from '@itwin/components-react';
-import { TreeNodeRendererProps } from '@itwin/components-react';
-import { TreeRendererProps } from '@itwin/components-react';
-import { TreeSelectionModificationEventArgs } from '@itwin/components-react';
-import { TreeSelectionReplacementEventArgs } from '@itwin/components-react';
-import { UiItemsProvider } from '@itwin/appui-react';
+import type { TreeCheckboxStateChangeEventArgs } from '@itwin/components-react';
+import type { TreeNodeItem } from '@itwin/components-react';
+import type { TreeNodeRendererProps } from '@itwin/components-react';
+import type { TreeRendererProps } from '@itwin/components-react';
+import type { TreeSelectionModificationEventArgs } from '@itwin/components-react';
+import type { TreeSelectionReplacementEventArgs } from '@itwin/components-react';
+import type { UiItemsProvider } from '@itwin/appui-react';
 import { UnifiedSelectionTreeEventHandler } from '@itwin/presentation-components';
-import { UnifiedSelectionTreeEventHandlerParams } from '@itwin/presentation-components';
-import { ViewManager } from '@itwin/core-frontend';
-import { Viewport } from '@itwin/core-frontend';
-import { Widget } from '@itwin/appui-react';
+import type { UnifiedSelectionTreeEventHandlerParams } from '@itwin/presentation-components';
+import type { ViewManager } from '@itwin/core-frontend';
+import type { Viewport } from '@itwin/core-frontend';
+import type { Widget } from '@itwin/appui-react';
 
 // @public
 export function areAllModelsVisible(models: string[], viewport: Viewport): boolean;
@@ -62,7 +60,7 @@ export const CategoriesTreeComponent: {
 
 // @public
 export interface CategoriesTreeComponentProps extends Omit<CategoryTreeProps, "iModel" | "activeView" | "width" | "height" | "filterInfo" | "onFilterApplied" | "categories" | "categoryVisibilityHandler" | "viewManager"> {
-    headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React_3.ReactNode>;
+    headerButtons?: Array<(props: CategoriesTreeHeaderButtonProps) => React.ReactNode>;
 }
 
 // @public
@@ -162,6 +160,23 @@ export type CreateSearchRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "e
 // @public
 export const createVisibilityTreeNodeRenderer: (iconsEnabled: boolean, descriptionEnabled: boolean) => (props: TreeNodeRendererProps) => JSX.Element;
 
+// @alpha
+export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element;
+
+// @alpha
+export const ExternalSourcesTreeComponent: {
+    (props: {}): JSX.Element | null;
+    id: string;
+    getLabel(): string;
+};
+
+// @alpha
+export interface ExternalSourcesTreeProps {
+    height: number;
+    iModel: IModelConnection;
+    width: number;
+}
+
 // @public
 export function hideAllCategories(categories: string[], viewport: Viewport): Promise<void>;
 
@@ -182,7 +197,7 @@ export const IModelContentTreeComponent: {
 export type IModelContentTreeComponentProps = Omit<IModelContentTreeProps, "iModel" | "width" | "height">;
 
 // @public
-export interface IModelContentTreeProps extends Omit<React_3.HTMLProps<HTMLDivElement>, "children"> {
+export interface IModelContentTreeProps extends Omit<React.HTMLProps<HTMLDivElement>, "children"> {
     height: number;
     iModel: IModelConnection;
     selectionMode?: SelectionMode_2;
@@ -266,7 +281,7 @@ export interface ModelsTreeProps {
     iModel: IModelConnection;
     modelsVisibilityHandler?: ModelsVisibilityHandler;
     onFilterApplied?: (filteredDataProvider: IPresentationTreeDataProvider, matchesCount: number) => void;
-    rootElementRef?: React_2.Ref<HTMLDivElement>;
+    rootElementRef?: React.Ref<HTMLDivElement>;
     selectionMode?: SelectionMode_2;
     selectionPredicate?: ModelsTreeSelectionPredicate;
     width: number;
@@ -333,11 +348,14 @@ export interface ModelsVisibilityHandlerProps {
 
 // @public
 export interface ModelTreeComponentProps extends Omit<ModelsTreeProps, "iModel" | "activeView" | "width" | "height" | "filterInfo" | "onFilterApplied"> {
-    headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React_3.ReactNode>;
+    headerButtons?: Array<(props: ModelsTreeHeaderButtonProps) => React.ReactNode>;
 }
 
 // @internal
 export const RULESET_CATEGORIES: Ruleset;
+
+// @internal
+export const RULESET_EXTERNAL_SOURCES: Ruleset;
 
 // @internal
 export const RULESET_IMODEL_CONTENT: Ruleset;
@@ -362,7 +380,7 @@ export function toggleModels(models: string[], enable: boolean, viewport: Viewpo
 export interface TreeDefinition {
     getLabel: () => string;
     id: string;
-    render: () => React_2.ReactNode;
+    render: () => React.ReactNode;
     shouldShow?: (imodel: IModelConnection) => Promise<boolean>;
 }
 

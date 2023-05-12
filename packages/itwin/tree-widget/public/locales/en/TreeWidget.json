@@ -10,6 +10,7 @@
   "models": "Models",
   "categories": "Categories",
   "imodelContent": "iModel Content",
+  "externalSources": "External Sources",
   "treeview": "Tree View",
   "noTrees": "There are no trees available for this iModel.",
   "categoriesTree": {
