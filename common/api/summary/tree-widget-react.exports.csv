@@ -16,6 +16,9 @@ internal;CreateRulesetProps = Omit
 internal;createSearchRuleset(props: CreateSearchRulesetProps): Ruleset
 internal;CreateSearchRulesetProps = Omit
 public;createVisibilityTreeNodeRenderer: (iconsEnabled: boolean, descriptionEnabled: boolean) => (props: TreeNodeRendererProps) => JSX.Element
+alpha;ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element
+alpha;ExternalSourcesTreeComponent:
+alpha;ExternalSourcesTreeProps
 public;hideAllCategories(categories: string[], viewport: Viewport): Promise
 public;hideAllModels(models: string[], viewport: Viewport): Promise
 public;IModelContentTree: (props: IModelContentTreeProps) => JSX.Element
@@ -37,6 +40,7 @@ public;ModelsVisibilityHandler
 public;ModelsVisibilityHandlerProps
 public;ModelTreeComponentProps 
 internal;RULESET_CATEGORIES: Ruleset
+internal;RULESET_EXTERNAL_SOURCES: Ruleset
 internal;RULESET_IMODEL_CONTENT: Ruleset
 public;showAllCategories(categories: string[], viewport: Viewport): Promise
 public;showAllModels(models: string[], viewport: Viewport): Promise
