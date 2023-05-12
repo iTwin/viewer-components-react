@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "Updating to core@4.0.0-dev.104",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/tree-widget-react"
+}
