@@ -99,6 +99,8 @@
     "cpx2": "^3.0.0",
     "deep-equal": "^1.0.0",
     "eslint": "^7.11.0",
+    "eslint-plugin-unused-imports": "^1.0.0",
+    "eslint-plugin-react": "^7.32.2",
     "jsdom": "^19.0.0",
     "jsdom-global": "3.0.2",
     "mocha": "^10.0.0",
