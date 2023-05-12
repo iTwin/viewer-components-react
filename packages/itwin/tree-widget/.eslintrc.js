@@ -5,7 +5,7 @@
 require("@rushstack/eslint-patch/modern-module-resolution");
 
 module.exports = {
-  plugins: ["@itwin"],
+  plugins: ["@itwin", "unused-imports"],
   extends: ["plugin:@itwin/ui", "plugin:react/jsx-runtime"],
   rules: {
     "@itwin/no-internal": ["error"],
@@ -16,6 +16,12 @@ module.exports = {
     "@typescript-eslint/consistent-type-imports": "error",
     "no-duplicate-imports": "off",
     "import/no-duplicates": "error",
-    "object-curly-spacing": ["error", "always"]
+    "object-curly-spacing": ["error", "always"],
+    "@typescript-eslint/no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "error",
+      { "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
+    ]
   },
 };
