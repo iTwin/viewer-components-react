@@ -5,12 +5,12 @@
 
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataChangeEvent } from "@itwin/components-react";
-import {  IModelApp, MapFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
+import {  IModelApp, MapFeatureInfo, MapLayerFeatureInfo, MapSubLayerFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
 import { MapFeatureInfoTool, MapFeatureInfoToolData  } from "@itwin/map-layers-formats";
 
 /**
  * Implementation of [IPropertyDataProvider] that uses an associative array.
- * @public
+ * @internal
  */
 
 class SimplePropertyData implements PropertyData {
@@ -20,6 +20,9 @@ class SimplePropertyData implements PropertyData {
   public records: { [categoryName: string]: PropertyRecord[] } = {};
 }
 
+/**
+ * @internal
+ */
 export class FeatureInfoDataProvider implements IPropertyDataProvider {
   private _detachActiveToolListener: VoidFunction|undefined;
   private readonly _detachToolAdminListener: VoidFunction;
@@ -66,49 +69,54 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
   private async setInfo(mapInfo?: MapFeatureInfo) {
     this._data = new SimplePropertyData();
 
-    if(mapInfo?.layerInfo) {
-
-      for (const curLayerInfo of mapInfo.layerInfo) {
+    if(mapInfo?.layerInfos) {
+      for (const curLayerInfo of mapInfo.layerInfos) {
         const layerCatIdx = this.findCategoryIndexByName(curLayerInfo.layerName);
         let nbRecords = 0;
+
         const layerCategory = (
           layerCatIdx === -1 ?
             { name: curLayerInfo.layerName, label: curLayerInfo.layerName, expand: true, childCategories: [] }
             : this._data.categories[layerCatIdx]);
 
-        if (curLayerInfo.info && !(curLayerInfo.info instanceof HTMLElement)) {
-        // This is not an HTMLElement, so iterate over each sub-layer info
-          for (const subLayerInfo of curLayerInfo.info) {
-            nbRecords++;
-            const subCatIdx = layerCategory.childCategories?.findIndex((testCategory: PropertyCategory) => {
-              return testCategory.name === subLayerInfo.subLayerName;
-            });
-            let subLayerCategory;
-            if (subCatIdx === -1) {
-              subLayerCategory = { name: subLayerInfo.subLayerName, label: subLayerInfo.subLayerName, expand: true };
-              this.addSubCategory(subLayerCategory.name);
-              layerCategory.childCategories?.push(subLayerCategory);
-            }
-            if (subLayerInfo.records) {
-              for (const record of subLayerInfo.records) {
-              // Always use the string value for now
-                this.addProperty(record, subLayerInfo.subLayerName);
+        if (curLayerInfo.subLayerInfos) {
+          for (const subLayerInfo of curLayerInfo.subLayerInfos) {
+            this.addSubLayerCategory(subLayerInfo, layerCategory);
 
+            // Add every feature records for this sub-layer
+            for (const feature of subLayerInfo.features) {
+              nbRecords++;
+              for (const record of feature.records) {
+                // Always use the string value for now
+                this.addProperty(record, subLayerInfo.subLayerName);
               }
             }
           }
           if (layerCatIdx === -1 && nbRecords > 0)
             this.addCategory(layerCategory);
-
         }
       }
     }
+
     this.onDataChanged.raiseEvent();
   }
 
+  public addSubLayerCategory(subLayerInfo: MapSubLayerFeatureInfo, layerCategory: PropertyCategory) {
+    const subCatIdx = layerCategory.childCategories?.findIndex((testCategory: PropertyCategory) => {
+      return testCategory.name === subLayerInfo.subLayerName;
+    });
+
+    let subLayerCategory;
+    if (subCatIdx === -1) {
+      subLayerCategory = { name: subLayerInfo.subLayerName, label: subLayerInfo.subLayerName, expand: true };
+      this.addSubCategory(subLayerCategory.name);
+      layerCategory.childCategories?.push(subLayerCategory);
+    }
+  }
   public addSubCategory(categoryName: string) {
     this._data.records[categoryName] = [];
   }
+
   public addCategory(category: PropertyCategory): number {
 
     const categoryIdx = this._data.categories.push(category) - 1;
