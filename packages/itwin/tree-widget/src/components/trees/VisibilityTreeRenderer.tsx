@@ -3,14 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import {
-  AbstractTreeNodeLoaderWithProvider, TreeImageLoader, TreeNodeRenderer, TreeNodeRendererProps, TreeRenderer, TreeRendererProps,
-} from "@itwin/components-react";
-import { NodeCheckboxRenderProps } from "@itwin/core-react";
+import { useCallback, useEffect } from "react";
+import { TreeImageLoader, TreeNodeRenderer, TreeRenderer } from "@itwin/components-react";
 import { Checkbox } from "@itwin/itwinui-react";
-import { IPresentationTreeDataProvider, useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
-import { VisibilityTreeFilterInfo } from "./Common";
+import { useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
+
+import type { AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps, TreeRendererProps } from "@itwin/components-react";
+import type { NodeCheckboxRenderProps } from "@itwin/core-react";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { VisibilityTreeFilterInfo } from "./Common";
 
 /**
  * Creates Visibility tree renderer which renders nodes with eye checkbox.
@@ -18,8 +19,8 @@ import { VisibilityTreeFilterInfo } from "./Common";
  */
 export const useVisibilityTreeRenderer = (iconsEnabled: boolean, descriptionsEnabled: boolean) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const nodeRenderer = React.useCallback(createVisibilityTreeNodeRenderer(iconsEnabled, descriptionsEnabled), [iconsEnabled, descriptionsEnabled]);
-  return React.useCallback((props: TreeRendererProps) => (
+  const nodeRenderer = useCallback(createVisibilityTreeNodeRenderer(iconsEnabled, descriptionsEnabled), [iconsEnabled, descriptionsEnabled]);
+  return useCallback((props: TreeRendererProps) => (
     <TreeRenderer
       {...props}
       nodeRenderer={nodeRenderer}
@@ -76,7 +77,7 @@ export const useVisibilityTreeFiltering = (
     nodeHighlightingProps,
   } = useControlledPresentationTreeFiltering({ nodeLoader, filter, activeMatchIndex });
 
-  React.useEffect(
+  useEffect(
     () => {
       if (filter && matchesCount !== undefined && filteredNodeLoader !== nodeLoader)
         onFilterApplied && onFilterApplied(filteredNodeLoader.dataProvider, matchesCount);

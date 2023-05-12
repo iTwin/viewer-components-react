@@ -3,14 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import { TreeNodeItem, useAsyncValue } from "@itwin/components-react";
+import { useMemo } from "react";
+import { useAsyncValue } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { IModelApp, IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
 import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport } from "../CategoriesVisibilityUtils";
-import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
+
+import type { TreeNodeItem } from "@itwin/components-react";
+import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
+import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
@@ -20,7 +23,7 @@ const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
  */
 export function useCategories(viewManager: ViewManager, imodel: IModelConnection, view?: Viewport) {
   const currentView = view || viewManager.getFirstOpenView();
-  const categoriesPromise = React.useMemo(async () => loadCategoriesFromViewport(imodel, currentView), [imodel, currentView]);
+  const categoriesPromise = useMemo(async () => loadCategoriesFromViewport(imodel, currentView), [imodel, currentView]);
   return useAsyncValue(categoriesPromise) ?? EMPTY_CATEGORIES_ARRAY;
 }
 

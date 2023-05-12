@@ -6,20 +6,25 @@
 import { expect } from "chai";
 import { join } from "path";
 import * as sinon from "sinon";
-import * as React from "react";
 import * as moq from "typemoq";
-import { Guid, Id64String } from "@itwin/core-bentley";
-import { BisCodeSpec, ElementProps, IModel } from "@itwin/core-common";
-import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
-import { KeySet, LabelDefinition, Node, NodeKey } from "@itwin/presentation-common";
-import { Presentation, PresentationManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
+import { Guid } from "@itwin/core-bentley";
+import { BisCodeSpec, IModel } from "@itwin/core-common";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { KeySet, LabelDefinition } from "@itwin/presentation-common";
+import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-  TestIModelBuilder,
 } from "@itwin/presentation-testing";
 import { render, waitFor } from "@testing-library/react";
 import { ExternalSourcesTree, RULESET_EXTERNAL_SOURCES } from "../../../components/trees/external-sources-tree/ExternalSourcesTree";
 import { mockPresentationManager, TestUtils } from "../../TestUtils";
+
+import type { Id64String } from "@itwin/core-bentley";
+import type { ElementProps } from "@itwin/core-common";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { Node, NodeKey } from "@itwin/presentation-common";
+import type { PresentationManager, SelectionManager } from "@itwin/presentation-frontend";
+import type { TestIModelBuilder } from "@itwin/presentation-testing";
 
 describe("ExternalSourcesTree", () => {
 

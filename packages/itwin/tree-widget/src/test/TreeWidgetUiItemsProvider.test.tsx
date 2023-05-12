@@ -4,15 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import React from "react";
 import sinon from "sinon";
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { render } from "@testing-library/react";
+import * as categoriesTreeComponents from "../components/trees/category-tree/CategoriesTreeComponent";
+import * as modelsTreeComponents from "../components/trees/models-tree/ModelsTreeComponent";
 import * as widgetComponent from "../components/TreeWidgetComponent";
 import { TreeWidgetUiItemsProvider } from "../components/TreeWidgetUiItemsProvider";
 import { TestUtils } from "./TestUtils";
-import * as modelsTreeComponents from "../components/trees/models-tree/ModelsTreeComponent";
-import * as categoriesTreeComponents from "../components/trees/category-tree/CategoriesTreeComponent";
 
 describe("TreeWidgetUiItemsProvider", () => {
   before(async () => {
@@ -72,7 +71,7 @@ describe("TreeWidgetUiItemsProvider", () => {
       getLabel: () => "Tree Label",
       render: () => <div>Tree Content</div>,
     }];
-    const provider = new TreeWidgetUiItemsProvider({trees});
+    const provider = new TreeWidgetUiItemsProvider({ trees });
     const [widget] = provider.provideWidgets("", StageUsage.General, StagePanelLocation.Right, StagePanelSection.Start);
     render(<>{widget.content}</>);
 

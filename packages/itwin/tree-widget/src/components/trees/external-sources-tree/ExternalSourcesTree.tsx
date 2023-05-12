@@ -4,12 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "../VisibilityTreeBase.scss";
-import * as React from "react";
-import { ControlledTree, DelayLoadedTreeNodeItem, SelectionMode, useTreeModel } from "@itwin/components-react";
-import { IModelConnection } from "@itwin/core-frontend";
-import { Node, Ruleset } from "@itwin/presentation-common";
+import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
 import { usePresentationTreeNodeLoader, useUnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
 import * as RULESET_EXTERNAL_SOURCES_IMPORT from "./ExternalSources.json";
+
+import type { DelayLoadedTreeNodeItem } from "@itwin/components-react";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { Node, Ruleset } from "@itwin/presentation-common";
 
 /**
  * Presentation rules used by ControlledCategoriesTree

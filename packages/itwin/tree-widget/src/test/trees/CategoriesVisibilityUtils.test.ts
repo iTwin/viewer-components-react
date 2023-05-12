@@ -3,14 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as sinon from "sinon";
+import sinon from "sinon";
 import * as moq from "typemoq";
-import { ECSqlReader, SubCategoryAppearance } from "@itwin/core-common";
-import {
-  IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState,
-} from "@itwin/core-frontend";
+import { SubCategoryAppearance } from "@itwin/core-common";
+import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
 import { enableCategory, enableSubCategory, toggleAllCategories } from "../../components/trees/CategoriesVisibilityUtils";
 import { TestUtils } from "../TestUtils";
+
+import type { ECSqlReader } from "@itwin/core-common";
+import type { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
 
 describe("CategoryVisibilityUtils", () => {
   before(async () => {

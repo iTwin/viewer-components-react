@@ -3,14 +3,15 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
 import { expect } from "chai";
 import sinon from "sinon";
 import { EmptyLocalization } from "@itwin/core-common";
 import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
-import { SearchBox, SearchBoxProps } from "../../components/tree-header/SearchBox";
+import { SearchBox } from "../../components/tree-header/SearchBox";
 import { TreeWidget } from "../../TreeWidget";
+
+import type { SearchBoxProps } from "../../components/tree-header/SearchBox";
 
 describe("<SearchBox />", () => {
   const defaultProps: SearchBoxProps = {

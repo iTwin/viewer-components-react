@@ -4,22 +4,30 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import * as sinon from "sinon";
+import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { BeEvent, Id64String, using } from "@itwin/core-bentley";
-import { ECSqlReader, QueryRowFormat } from "@itwin/core-common";
-import { IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility, Viewport, ViewState, ViewState3d } from "@itwin/core-frontend";
-import { ECInstancesNodeKey } from "@itwin/presentation-common";
-import { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import { IModelHierarchyChangeEventArgs, Presentation, PresentationManager } from "@itwin/presentation-frontend";
-import { areAllModelsVisible, hideAllModels, invertAllModels, ModelsVisibilityHandler, ModelsVisibilityHandlerProps, showAllModels, toggleModels } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { BeEvent, using } from "@itwin/core-bentley";
+import { QueryRowFormat } from "@itwin/core-common";
+import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { Presentation } from "@itwin/presentation-frontend";
+import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
+import {
+  areAllModelsVisible, hideAllModels, invertAllModels, ModelsVisibilityHandler, showAllModels, toggleModels,
+} from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { CachingElementIdsContainer } from "../../../components/trees/models-tree/Utils";
 import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
-import { ModelInfo } from "../../../tree-widget-react";
-import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
+
+import type { Id64String } from "@itwin/core-bentley";
+import type { ECSqlReader } from "@itwin/core-common";
+import type { IModelConnection, Viewport, ViewState, ViewState3d } from "@itwin/core-frontend";
+import type { ECInstancesNodeKey } from "@itwin/presentation-common";
+import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
+import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
+import type { ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import type { ModelInfo } from "../../../tree-widget-react";
 
 describe("ModelsVisibilityHandler", () => {
 
@@ -89,7 +97,7 @@ describe("ModelsVisibilityHandler", () => {
 
   };
 
-  const modelsInfo: ModelInfo[] = [{ id: "ModelId1"}, { id: "ModelId2" }];
+  const modelsInfo: ModelInfo[] = [{ id: "ModelId1" }, { id: "ModelId2" }];
 
   describe("constructor", () => {
 

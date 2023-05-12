@@ -3,16 +3,18 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import * as moq from "typemoq";
-import { fireEvent, render, waitFor } from "@testing-library/react";
-import { ModelInfo, ModelsTreeComponent } from "../../../tree-widget-react";
-import { IModelApp, NoRenderApp, Viewport } from "@itwin/core-frontend";
-import sinon from "sinon";
-import { mockViewport, TestUtils } from "../../TestUtils";
 import { expect } from "chai";
-import * as modelsVisibilityHandler from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import sinon from "sinon";
+import * as moq from "typemoq";
 import { BeEvent } from "@itwin/core-bentley";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { fireEvent, render, waitFor } from "@testing-library/react";
+import * as modelsVisibilityHandler from "../../../components/trees/models-tree/ModelsVisibilityHandler";
+import { ModelsTreeComponent } from "../../../tree-widget-react";
+import { mockViewport, TestUtils } from "../../TestUtils";
+
+import type { ModelInfo } from "../../../tree-widget-react";
+import type { Viewport } from "@itwin/core-frontend";
 
 describe("<ModelsTreeComponent />", () => {
 
@@ -35,7 +37,7 @@ describe("<ModelsTreeComponent />", () => {
     vpMock = mockViewport();
   });
 
-  const models: ModelInfo[] = [{id: "testModelId1"}, {id: "testModelId2"}];
+  const models: ModelInfo[] = [{ id: "testModelId1" }, { id: "testModelId2" }];
 
   describe("models tree header buttons", () => {
 

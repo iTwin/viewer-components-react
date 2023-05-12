@@ -3,11 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Id64String } from "@itwin/core-bentley";
-import {
-  BisCodeSpec, CategoryProps, Code, GeometricElement3dProps, IModel, PhysicalElementProps, RelatedElementProps, SubCategoryProps,
-} from "@itwin/core-common";
-import { TestIModelBuilder } from "@itwin/presentation-testing";
+import { BisCodeSpec, Code, IModel } from "@itwin/core-common";
+
+import type { Id64String } from "@itwin/core-bentley";
+import type { CategoryProps, GeometricElement3dProps, PhysicalElementProps, RelatedElementProps, SubCategoryProps } from "@itwin/core-common";
+import type { TestIModelBuilder } from "@itwin/presentation-testing";
 
 export function addSubject(builder: TestIModelBuilder, name: string, parentId = IModel.rootSubjectId) {
   const parentProps: RelatedElementProps = {

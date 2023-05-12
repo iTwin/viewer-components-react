@@ -4,22 +4,24 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import * as sinon from "sinon";
+import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import * as UiComponents from "@itwin/components-react";
-import { BeEvent, Id64String, using } from "@itwin/core-bentley";
-import {
-  IModelConnection, ViewManager, Viewport, ViewState,
-} from "@itwin/core-frontend";
-import { ECInstancesNodeKey, StandardNodeTypes } from "@itwin/presentation-common";
-import { PresentationTreeNodeItem } from "@itwin/presentation-components";
+import { BeEvent, using } from "@itwin/core-bentley";
+import { StandardNodeTypes } from "@itwin/presentation-common";
 import { renderHook } from "@testing-library/react-hooks";
-import {
-  CategoryInfo, CategoryVisibilityHandler, CategoryVisibilityHandlerParams, hideAllCategories, invertAllCategories, showAllCategories, useCategories,
-} from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
+import {
+  CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories,
+} from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 import { mockViewport } from "../../TestUtils";
+
+import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
+import type { ECInstancesNodeKey } from "@itwin/presentation-common";
+import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
+import type { CategoryInfo, CategoryVisibilityHandlerParams } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
 
 const createKey = (id: Id64String): ECInstancesNodeKey => {
   return {

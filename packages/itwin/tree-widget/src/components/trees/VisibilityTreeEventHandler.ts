@@ -11,14 +11,16 @@ import { EMPTY } from "rxjs/internal/observable/empty";
 import { from } from "rxjs/internal/observable/from";
 import { map } from "rxjs/internal/operators/map";
 import { mergeMap } from "rxjs/internal/operators/mergeMap";
-import {
+import { CheckBoxState } from "@itwin/core-react";
+import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
+import { isPromiseLike } from "../utils/IsPromiseLike";
+
+import type {
   CheckBoxInfo, CheckboxStateChange, TreeCheckboxStateChangeEventArgs, TreeModelNode, TreeNodeItem, TreeSelectionChange,
   TreeSelectionModificationEventArgs, TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
-import { BeEvent, IDisposable } from "@itwin/core-bentley";
-import { CheckBoxState } from "@itwin/core-react";
-import { UnifiedSelectionTreeEventHandler, UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
-import { isPromiseLike } from "../utils/IsPromiseLike";
+import type { BeEvent, IDisposable } from "@itwin/core-bentley";
+import type { UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
 
 /**
  * Data structure that describes instance visibility status.

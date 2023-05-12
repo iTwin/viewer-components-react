@@ -5,11 +5,13 @@
 
 import "./TreeHeader.scss";
 import classnames from "classnames";
-import * as React from "react";
-import { Viewport } from "@itwin/core-frontend";
+import { Children, useState } from "react";
 import { SvgMore } from "@itwin/itwinui-icons-react";
 import { ButtonGroup, DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
-import { SearchBox, SearchBoxProps } from "./SearchBox";
+import { SearchBox } from "./SearchBox";
+
+import type { Viewport } from "@itwin/core-frontend";
+import type { SearchBoxProps } from "./SearchBox";
 
 /** @internal */
 export interface TreeHeaderButtonProps {
@@ -31,7 +33,7 @@ export interface TreeHeaderProps extends Omit<SearchBoxProps,
 /** @internal */
 export function TreeHeader(props: TreeHeaderProps) {
   const { children, ...restProps } = props;
-  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <div className={classnames("tree-widget-search-bar", props.className)}>
@@ -65,7 +67,7 @@ function HeaderButtons(props: HeaderButtonsProps) {
       overflowButton={(overflowStart) => (
         <DropdownMenu
           menuItems={() =>
-            React.Children.toArray(props.children)
+            Children.toArray(props.children)
               .slice(overflowStart - 1)
               .map((btn, index) => <MenuItem key={index} className="search-bar-dropdown-menu-item">{btn}</MenuItem>)
           }

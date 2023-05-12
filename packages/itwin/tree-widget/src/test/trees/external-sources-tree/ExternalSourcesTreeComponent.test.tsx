@@ -5,7 +5,6 @@
 
 import { expect } from "chai";
 import * as sinon from "sinon";
-import * as React from "react";
 import { UiFramework } from "@itwin/appui-react";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
 import { render } from "@testing-library/react";

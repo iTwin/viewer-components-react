@@ -4,13 +4,16 @@
 *--------------------------------------------------------------------------------------------*/
 
 import "./TreeWidgetComponent.scss";
-import * as React from "react";
+import { useEffect, useState } from "react";
 import { useActiveIModelConnection } from "@itwin/appui-react";
-import { SelectableContent, SelectableContentDefinition, SelectableContentProps } from "@itwin/components-react";
-import { IModelConnection } from "@itwin/core-frontend";
+import { SelectableContent } from "@itwin/components-react";
 import { FillCentered } from "@itwin/core-react";
 import { ProgressLinear } from "@itwin/itwinui-react";
 import { TreeWidget } from "../TreeWidget";
+
+import type { PropsWithChildren } from "react";
+import type { SelectableContentDefinition, SelectableContentProps } from "@itwin/components-react";
+import type { IModelConnection } from "@itwin/core-frontend";
 
 /**
  * Definition of a tree component displayed in [[TreeWidgetComponent]]
@@ -63,9 +66,9 @@ function TreeWidgetComponentContent(props: TreeWidgetComponentProps & { imodel: 
 }
 
 function useActiveTrees(treeDefinitions: TreeDefinition[], imodel: IModelConnection) {
-  const [trees, setTrees] = React.useState<SelectableContentDefinition[]>();
+  const [trees, setTrees] = useState<SelectableContentDefinition[]>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     let disposed = false;
     (async () => {
       const visibleTrees = await getActiveTrees(treeDefinitions, imodel);
@@ -133,10 +136,10 @@ function getSelectableContentProps(trees?: SelectableContentDefinition[]): Selec
   };
 }
 
-function Delayed({ delay = 200, children }: React.PropsWithChildren<{ delay?: number }>) {
-  const [show, setShow] = React.useState(false);
+function Delayed({ delay = 200, children }: PropsWithChildren<{ delay?: number }>) {
+  const [show, setShow] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const id = setTimeout(() => { setShow(true); }, delay);
     return () => { clearTimeout(id); };
   }, [delay]);

@@ -3,12 +3,14 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import React from "react";
-import { StagePanelLocation, StagePanelSection, StageUsage, UiItemsProvider, Widget } from "@itwin/appui-react";
+import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
 import { TreeWidget } from "../TreeWidget";
 import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
 import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
-import { TreeDefinition, TreeWidgetComponent } from "./TreeWidgetComponent";
+import { TreeWidgetComponent } from "./TreeWidgetComponent";
+
+import type { UiItemsProvider, Widget } from "@itwin/appui-react";
+import type { TreeDefinition } from "./TreeWidgetComponent";
 
 /**
  * Parameters for creating a [[TreeWidgetUiItemsProvider]].

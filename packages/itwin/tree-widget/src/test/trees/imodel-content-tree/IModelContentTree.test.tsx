@@ -5,15 +5,12 @@
 
 import { expect } from "chai";
 import { join } from "path";
-import * as React from "react";
-import * as sinon from "sinon";
+import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { TreeNodeItem } from "@itwin/components-react";
-import { Id64String } from "@itwin/core-bentley";
 import { BisCodeSpec, IModel } from "@itwin/core-common";
-import { IModelApp, IModelConnection, NoRenderApp } from "@itwin/core-frontend";
-import { ECInstancesNodeKey, StandardNodeTypes } from "@itwin/presentation-common";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { StandardNodeTypes } from "@itwin/presentation-common";
 import { PresentationTreeDataProvider } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import {
@@ -25,6 +22,11 @@ import {
   addDocument, addDrawingCategory, addDrawingGraphic, addGroup, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubject,
 } from "../../IModelUtils";
 import { mockPresentationManager, TestUtils } from "../../TestUtils";
+
+import type { TreeNodeItem } from "@itwin/components-react";
+import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection } from "@itwin/core-frontend";
+import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 
 describe("IModelContentTree", () => {
 

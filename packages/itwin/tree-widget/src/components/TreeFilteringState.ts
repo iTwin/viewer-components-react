@@ -2,8 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import React, { useState } from "react";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+
+import { useCallback, useState } from "react";
+
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 /** @internal */
 export interface SearchOptions {
@@ -26,19 +28,19 @@ interface TreeFilteringState {
 export const useTreeFilteringState = () => {
   const [{ filterString, matchedResultCount, activeMatchIndex, filteredProvider }, setState] = useState<TreeFilteringState>({ filterString: "" });
 
-  const onFilterCancel = React.useCallback(() => {
+  const onFilterCancel = useCallback(() => {
     setState({ filterString: "" });
   }, []);
 
-  const onFilterStart = React.useCallback((newFilter: string) => {
+  const onFilterStart = useCallback((newFilter: string) => {
     setState({ filterString: newFilter });
   }, []);
 
-  const onResultSelectedChanged = React.useCallback((index: number) => {
+  const onResultSelectedChanged = useCallback((index: number) => {
     setState((prev) => ({ ...prev, activeMatchIndex: index }));
   }, []);
 
-  const onFilterApplied = React.useCallback((provider: IPresentationTreeDataProvider, matches: number) => {
+  const onFilterApplied = useCallback((provider: IPresentationTreeDataProvider, matches: number) => {
     setState((prev) => ({
       ...prev,
       activeMatchIndex: prev.activeMatchIndex === undefined ? 1 : Math.min(prev.activeMatchIndex, matches),

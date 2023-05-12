@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { Id64String } from "@itwin/core-bentley";
-import { Ruleset } from "@itwin/presentation-common";
-import { ModelsTreeHierarchyConfiguration } from "./ModelsTree";
+import type { Ruleset } from "@itwin/presentation-common";
+import type { ModelsTreeHierarchyConfiguration } from "./ModelsTree";
 
 /** @internal */
 export class CachingElementIdsContainer {

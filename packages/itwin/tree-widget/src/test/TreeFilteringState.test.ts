@@ -3,10 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+import { expect } from "chai";
 import { renderHook } from "@testing-library/react-hooks";
 import { useTreeFilteringState } from "../components/TreeFilteringState";
-import { expect } from "chai";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
 
 describe("useTreeFilteringState", () => {
   it("updates filterString when `onFilterStart` is called", () => {
