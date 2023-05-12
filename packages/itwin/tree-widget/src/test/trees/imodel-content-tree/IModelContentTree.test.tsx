@@ -7,12 +7,10 @@ import { expect } from "chai";
 import { join } from "path";
 import sinon from "sinon";
 import * as moq from "typemoq";
-import { PropertyRecord } from "@itwin/appui-abstract";
 import { BisCodeSpec, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { StandardNodeTypes } from "@itwin/presentation-common";
-import { PresentationTreeDataProvider } from "@itwin/presentation-components";
-import { Presentation } from "@itwin/presentation-frontend";
+import { LabelDefinition, Node, NodeKey } from "@itwin/presentation-common";
+import { Presentation, PresentationManager } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
@@ -23,10 +21,7 @@ import {
 } from "../../IModelUtils";
 import { mockPresentationManager, TestUtils } from "../../TestUtils";
 
-import type { TreeNodeItem } from "@itwin/components-react";
-import type { Id64String } from "@itwin/core-bentley";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 
 describe("IModelContentTree", () => {
 
@@ -45,49 +40,34 @@ describe("IModelContentTree", () => {
     });
 
     const imodelMock = moq.Mock.ofType<IModelConnection>();
+    let presentationManagerMock: moq.IMock<PresentationManager>;
 
     beforeEach(() => {
       imodelMock.reset();
       const mocks = mockPresentationManager();
-      sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
+      presentationManagerMock = mocks.presentationManager;
+      sinon.stub(Presentation, "presentation").get(() => presentationManagerMock.object);
     });
 
     afterEach(() => {
       sinon.restore();
     });
 
-    const createKey = (id: Id64String): ECInstancesNodeKey => {
-      return {
-        type: StandardNodeTypes.ECInstancesNode,
-        version: 0,
-        instanceKeys: [{ className: "MyDomain:SpatialCategory", id }],
-        pathFromRoot: [],
-      };
-    };
-
     describe("<IModelContentTree />", () => {
-      beforeEach(() => {
-        sinon.stub(PresentationTreeDataProvider.prototype, "imodel").get(() => imodelMock.object);
-        sinon.stub(PresentationTreeDataProvider.prototype, "rulesetId").get(() => "");
-        sinon.stub(PresentationTreeDataProvider.prototype, "dispose");
-        sinon.stub(PresentationTreeDataProvider.prototype, "getFilteredNodePaths").resolves([]);
-        sinon.stub(PresentationTreeDataProvider.prototype, "getNodeKey").callsFake((node: any) => node.__key);
-        sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(0);
-        sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").resolves([]);
-      });
-
-      const setupDataProvider = (nodes: TreeNodeItem[]) => {
-        (PresentationTreeDataProvider.prototype.getNodesCount as any).restore();
-        sinon.stub(PresentationTreeDataProvider.prototype, "getNodesCount").resolves(nodes.length);
-
-        (PresentationTreeDataProvider.prototype.getNodes as any).restore();
-        sinon.stub(PresentationTreeDataProvider.prototype, "getNodes").callsFake(
-          async () => nodes.map((n) => ({ __key: createKey(n.id), ...n })),
-        );
+      let nodeKeysCounter = 0;
+      const createInvalidNodeKey = (): NodeKey => {
+        return { type: "invalid", version: 0, pathFromRoot: [`${++nodeKeysCounter}`] };
       };
 
-      it("should have expected structure", async () => {
-        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node") }]);
+      function setupHierarchy(nodes: Node[]) {
+        presentationManagerMock.setup(async (x) => x.getNodesAndCount(moq.It.isAny())).returns(async () => ({
+          count: nodes.length,
+          nodes,
+        }));
+      }
+
+      it("should render hierarchy", async () => {
+        setupHierarchy([{ key: createInvalidNodeKey(), label: LabelDefinition.fromLabelString("test-node"), }]);
         const result = render(
           <IModelContentTree
             {...sizeProps}
