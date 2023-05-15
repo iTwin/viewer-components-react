@@ -6,7 +6,7 @@
 
 import * as React from "react";
 import { NumberInput } from "@itwin/core-react";
-import {  QuantityType, ViewState3d } from "@itwin/core-frontend";
+import { QuantityType, ViewState3d } from "@itwin/core-frontend";
 import { BackgroundMapProps, BackgroundMapSettings, PlanarClipMaskMode, PlanarClipMaskPriority, TerrainHeightOriginMode, TerrainProps } from "@itwin/core-common";
 import { useSourceMapContext } from "./MapLayerManager";
 import "./MapManagerSettings.scss";
@@ -49,7 +49,7 @@ function getHeightOriginModeFromKey(mode: string): TerrainHeightOriginMode {
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapManagerSettings() {
-  const { activeViewport} = useSourceMapContext();
+  const { activeViewport } = useSourceMapContext();
   const backgroundMapSettings = (activeViewport!.view as ViewState3d).getDisplayStyle3d().settings.backgroundMap;
 
   const [transparency, setTransparency] = React.useState(() =>
@@ -68,12 +68,10 @@ export function MapManagerSettings() {
 
   const updateTerrainSettings = React.useCallback((props: TerrainProps) => {
     activeViewport!.changeBackgroundMapProps({ terrainSettings: props });
-    activeViewport!.invalidateRenderPlan();
   }, [activeViewport]);
 
   const updateBackgroundMap = React.useCallback((props: BackgroundMapProps) => {
     activeViewport!.changeBackgroundMapProps(props);
-    activeViewport!.invalidateRenderPlan();
   }, [activeViewport]);
 
   const [heightOriginMode, setHeightOriginMode] = React.useState(() => getHeightOriginModeKey(terrainSettings.heightOriginMode));
@@ -99,8 +97,6 @@ export function MapManagerSettings() {
     if (option === MapMaskingOption.None) {
       activeViewport!.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.None } });
     }
-
-    activeViewport!.invalidateRenderPlan();
   }, [activeViewport, maskTransparency]);
 
   const [masking, setMasking] = React.useState(() => getMapMaskingFromBackgroundMapSetting(backgroundMapSettings));
@@ -132,14 +128,12 @@ export function MapManagerSettings() {
   const handleAlphaChange = React.useCallback((values: readonly number[]) => {
     const newTransparency = values[0] / 100;
     activeViewport!.changeBackgroundMapProps({ transparency: newTransparency });
-    activeViewport!.invalidateRenderPlan();
     setTransparency(newTransparency);
   }, [activeViewport]);
 
   const handleMaskTransparencyChange = React.useCallback((values: readonly number[]) => {
     const newTransparency = values[0] / 100;
     activeViewport!.changeBackgroundMapProps({ planarClipMask: { mode: PlanarClipMaskMode.Priority, priority: PlanarClipMaskPriority.BackgroundMap, transparency: newTransparency } });
-    activeViewport!.invalidateRenderPlan();
     setMaskTransparency(newTransparency);
   }, [activeViewport]);
 
@@ -225,7 +219,7 @@ export function MapManagerSettings() {
 
         <>
           <span className="map-manager-settings-label">{elevationOffsetLabel}</span>
-          <QuantityNumberInput disabled={applyTerrain} persistenceValue={groundBias} step={1} snap quantityType={QuantityType.LengthEngineering} onChange={handleElevationChange} onKeyDown={onKeyDown}/>
+          <QuantityNumberInput disabled={applyTerrain} persistenceValue={groundBias} step={1} snap quantityType={QuantityType.LengthEngineering} onChange={handleElevationChange} onKeyDown={onKeyDown} />
 
           <span className="map-manager-settings-label">{useDepthBufferLabel}</span>
           {/* eslint-disable-next-line deprecation/deprecation */}
@@ -244,11 +238,11 @@ export function MapManagerSettings() {
             <ToggleSwitch onChange={onToggleTerrain} checked={applyTerrain} />
 
             <span className="map-manager-settings-label">{modelHeightLabel}</span>
-            <QuantityNumberInput disabled={!applyTerrain} persistenceValue={terrainOrigin} snap quantityType={QuantityType.LengthEngineering} onChange={handleHeightOriginChange} onKeyDown={onKeyDown}/>
+            <QuantityNumberInput disabled={!applyTerrain} persistenceValue={terrainOrigin} snap quantityType={QuantityType.LengthEngineering} onChange={handleHeightOriginChange} onKeyDown={onKeyDown} />
 
             <span className="map-manager-settings-label">{heightOriginLabel}</span>
             {/* elevation correction component:  'popoverProps' is needed here otherwise selecting an option closes the menu popup.*/}
-            <Select popoverProps={{appendTo: "parent"}} options={terrainHeightOptions.current} disabled={!applyTerrain} value={heightOriginMode} onChange={handleElevationTypeSelected} size="small" />
+            <Select popoverProps={{ appendTo: "parent" }} options={terrainHeightOptions.current} disabled={!applyTerrain} value={heightOriginMode} onChange={handleElevationTypeSelected} size="small" />
 
             <span className="map-manager-settings-label">{exaggerationLabel}</span>
             <NumberInput value={exaggeration} disabled={!applyTerrain} onChange={handleExaggerationChange} onKeyDown={onKeyDown} />

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/map-layers",
-      "comment": "Migrated UiItemsProviders to new API from @itwin/appui-react.",
+      "comment": "Update and react to iTwin.js Core 4.0",
       "type": "none"
     }
   ],

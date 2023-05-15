@@ -2,16 +2,13 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
+import { MeasureTools } from "../MeasureTools";
 
-.gmw-select-mapping-container {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  min-height: 0;
+export class TestUtils {
 
-  .gmw-select-mapping-table {
-    overflow: auto;
-    flex-grow: 1;
+  /** Waits until all async operations finish */
+  public static async cleanup() {
+    MeasureTools.terminate();
+    return new Promise((resolve) => setTimeout(resolve));
   }
 }

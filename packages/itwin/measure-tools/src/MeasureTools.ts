@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import { IModelApp } from "@itwin/core-frontend";
 import { MeasureDistanceTool } from "./tools/MeasureDistanceTool";
@@ -96,5 +96,9 @@ export class MeasureTools {
     // Register measurement decoration
     MeasurementManager.instance.startDecorator();
     MeasureTools._isInitialized = true;
+  }
+  /** Unregisters internationalization service namespace and UiItemManager  */
+  public static terminate() {
+    IModelApp.localization.unregisterNamespace(MeasureTools._i18nNamespace);
   }
 }
