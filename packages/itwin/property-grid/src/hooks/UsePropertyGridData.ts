@@ -3,18 +3,31 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { PropertyRecord } from "@itwin/appui-abstract";
-import type { IPropertyDataProvider } from "@itwin/components-react";
 import { useEffect, useState } from "react";
 
-/** Returns className and label of instance that properties are currently loaded. */
-export function usePropertyGridItem(dataProvider: IPropertyDataProvider) {
+import type { PropertyRecord } from "@itwin/appui-abstract";
+import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
+
+export interface PropertyGridDataProps {
+  /** Callback that is invoked when property data changes. */
+  customOnDataChanged?: (dataProvider: IPresentationPropertyDataProvider) => Promise<void>;
+}
+
+/** Props for `usePropertyGridData` hook. */
+export interface UsePropertyGridDataProps extends PropertyGridDataProps {
+  dataProvider: IPresentationPropertyDataProvider;
+}
+
+/** Returns className and label of the instance that properties are currently loaded. */
+export function usePropertyGridData({ dataProvider, customOnDataChanged }: UsePropertyGridDataProps) {
   const [item, setItem] = useState<{className: string, label: PropertyRecord}>();
 
   useEffect(() => {
     const onDataChanged = async () => {
       const propertyData = await dataProvider.getData();
       setItem({ label: propertyData.label, className: propertyData.description ?? "" });
+
+      customOnDataChanged && await customOnDataChanged(dataProvider);
     };
 
     const removeListener = dataProvider.onDataChanged.addListener(onDataChanged);
@@ -23,7 +36,7 @@ export function usePropertyGridItem(dataProvider: IPropertyDataProvider) {
     return () => {
       removeListener();
     };
-  }, [dataProvider]);
+  }, [dataProvider, customOnDataChanged]);
 
-  return item;
+  return { item };
 }

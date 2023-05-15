@@ -19,13 +19,13 @@ export function SingleElementPropertyGrid({
   enableFavoriteProperties,
   enablePropertyGroupNesting,
   rulesetId,
-  dataProvider: propDataProvider,
+  createDataProvider,
   ...props
 }: SingleElementPropertyGridProps) {
   const dataProvider = useSingleElementDataProvider({
     imodel,
     instanceKey,
-    dataProvider: propDataProvider,
+    createDataProvider,
     enableFavoriteProperties,
     enablePropertyGroupNesting,
     rulesetId,

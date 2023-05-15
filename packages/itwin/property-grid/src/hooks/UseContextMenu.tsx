@@ -168,26 +168,14 @@ async function buildMenuItems({
 }: BuildMenuItemsProps) {
   const items: ContextMenuItemInfo[] = [];
   const propertyRecord = args.propertyRecord;
-  const field = await dataProvider.getFieldByPropertyDescription(
-    propertyRecord.property
-  );
+  const field = await dataProvider.getFieldByPropertyDescription(propertyRecord.property);
 
   if (enableFavoriteProperties && field) {
-    if (
-      Presentation.favoriteProperties.has(
-        field,
-        imodel,
-        favoritePropertiesScope ?? FavoritePropertiesScope.IModel
-      )
-    ) {
+    if (Presentation.favoriteProperties.has(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel)) {
       items.push({
         key: PropertyGridDefaultContextMenuKey.RemoveFavorite,
         onSelect: async () => {
-          await Presentation.favoriteProperties.remove(
-            field,
-            imodel,
-            favoritePropertiesScope ?? FavoritePropertiesScope.IModel
-          );
+          await Presentation.favoriteProperties.remove(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
         },
         title: PropertyGridManager.translate("context-menu.remove-favorite.description"),
         label: PropertyGridManager.translate("context-menu.remove-favorite.label"),
@@ -196,11 +184,7 @@ async function buildMenuItems({
       items.push({
         key: PropertyGridDefaultContextMenuKey.AddFavorite,
         onSelect: async () => {
-          await Presentation.favoriteProperties.add(
-            field,
-            imodel,
-            favoritePropertiesScope ?? FavoritePropertiesScope.IModel
-          );
+          await Presentation.favoriteProperties.add(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
         },
         title: PropertyGridManager.translate("context-menu.add-favorite.description"),
         label: PropertyGridManager.translate("context-menu.add-favorite.label"),
@@ -279,10 +263,7 @@ async function buildMenuItems({
   // Verify all existing options are valid, and if not remove them
   for (let i = items.length - 1; i >= 0; --i) {
     const item = items[i];
-    if (
-      item.isValid !== undefined &&
-      !item.isValid(args.propertyRecord, field)
-    ) {
+    if (item.isValid !== undefined && !item.isValid(args.propertyRecord, field) ) {
       items.splice(i, 1);
     }
   }

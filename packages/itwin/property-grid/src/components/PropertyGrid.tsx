@@ -11,6 +11,7 @@ import { PropertyGridContent } from "./PropertyGridContent";
 
 import type { DataProviderProps } from "../hooks/UseDataProvider";
 import type { PropertyGridContentProps } from "./PropertyGridContent";
+
 /** Props for `PropertyGrid` component. */
 export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider"> & DataProviderProps;
 
@@ -20,14 +21,14 @@ export function PropertyGrid({
   enableFavoriteProperties,
   enablePropertyGroupNesting,
   rulesetId,
-  dataProvider: propDataProvider,
+  createDataProvider,
   ...props
 }: PropertyGridProps) {
   const { dataProvider, isOverLimit } = useUnifiedSelectionDataProvider({
     imodel,
     enableFavoriteProperties,
     rulesetId,
-    dataProvider: propDataProvider,
+    createDataProvider,
     enablePropertyGroupNesting,
   });
 
