@@ -13,7 +13,7 @@ import type { InstanceKey } from "@itwin/presentation-common";
 
 /** Props for configuring data providers used by `PropertyGrid`. */
 export interface DataProviderProps {
-  /** Flag that specified whether properties favorite properties support should be enabled or not. */
+  /** Flag that specified whether data provider should create `Favorites` category. */
   enableFavoriteProperties?: boolean;
   /** Flag that specified whether nested property categories are enabled. */
   enablePropertyGroupNesting?: boolean;
