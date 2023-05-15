@@ -12,14 +12,14 @@ import {
 import { useDisposable } from "@itwin/core-react";
 
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import type { IPropertyDataProvider, PropertyCategory, PropertyData , PropertyDataFiltererBase, PropertyDataFilterResult, VirtualizedPropertyGridWithDataProviderProps } from "@itwin/components-react";
+import type { IPropertyDataFilterer, IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataFilterResult, VirtualizedPropertyGridWithDataProviderProps } from "@itwin/components-react";
 import type { IDisposable } from "@itwin/core-bentley";
 
 /**
  * Properties for rendering a `FilteringPropertyGrid`
  */
 export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
-  filterer: PropertyDataFiltererBase;
+  filterer: IPropertyDataFilterer;
   autoExpandChildCategories?: boolean;
 }
 
