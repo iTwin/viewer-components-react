@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Updating to core@4.0.0-dev.104",
+      "comment": "Updating to iTwin.js core 4.0.0",
       "type": "none"
     }
   ],

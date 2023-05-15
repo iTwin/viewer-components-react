@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/measure-tools-react",
-      "comment": "Updating to core@4.0.0-dev.104",
-      "type": "patch"
+      "comment": "Updating to iTwin.js core 4.0.0",
+      "type": "none"
     }
   ],
   "packageName": "@itwin/measure-tools-react"
