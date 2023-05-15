@@ -8,6 +8,7 @@ import { useDisposable } from "@itwin/core-react";
 import { PresentationPropertyDataProvider } from "@itwin/presentation-components";
 
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 
 /** Props for configuring default data provider used by `PropertyGrid` */
 export interface DefaultDataProviderProps {
@@ -22,7 +23,7 @@ export interface DefaultDataProviderProps {
 /** Props for providing custom data provider that will be used by `PropertyGrid` */
 export interface CustomDataProviderProps {
   /** Callback that creates custom data provider that should be used instead of default one. */
-  createDataProvider: (imodel: IModelConnection) => PresentationPropertyDataProvider;
+  createDataProvider: (imodel: IModelConnection) => IPresentationPropertyDataProvider;
 }
 
 /** Props for data provider used by `PropertyGrid`. */

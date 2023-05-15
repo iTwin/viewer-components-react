@@ -20,7 +20,7 @@ import { FilteringPropertyGrid } from "./FilteringPropertyGrid";
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
-import type { PresentationPropertyDataProvider } from "@itwin/presentation-components";
+import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
 import type { NullValueSettingProps } from "../hooks/UseNullValuesSetting";
@@ -29,7 +29,7 @@ import type { PropertyGridDataProps } from "../hooks/UsePropertyGridData";
 /** Base props for rendering `PropertyGridContent` component. */
 export interface BasePropertyGridContentProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
   imodel: IModelConnection;
-  dataProvider: PresentationPropertyDataProvider;
+  dataProvider: IPresentationPropertyDataProvider;
   rootClassName?: string;
   onBackButton?: () => void;
   headerContent?: JSX.Element;
