@@ -31,7 +31,7 @@ interface InstanceSelectionInfo {
    * while navigating through ancestors upwards.
   */
   previousKeys: InstanceKey[];
-  /** Specifies if it is possible to navigated from currently selected instance upwards */
+  /** Specifies if it is possible to navigate from currently selected instance upwards */
   canNavigateUp: boolean;
   /** Currently focused instance. */
   focusedInstanceKey: InstanceKey | undefined;
@@ -40,7 +40,7 @@ interface InstanceSelectionInfo {
 /**
  * Custom hook that tracks instances selected in `UnifiedSelection`. Additionally it implements these features:
  * - If single instance is selected `ancestorsNavigationProps` returned from this hook can be used to navigate through ancestors.
- *   It allows to navigate to the top most parent and navigate back to the starting instance. Navigating up and downs updates `UnifiedSelection.
+ *   It allows to navigate to the top most parent and navigate back to the starting instance. Navigating up and downs updates `UnifiedSelection`.
  * - Focus single instance until `UnifiedSelection` is changed.
  */
 export function useInstanceSelection({ imodel, enableAncestorNavigation }: InstanceSelectionProps) {

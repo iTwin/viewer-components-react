@@ -11,7 +11,7 @@ import type { IPropertyDataFilterer } from "@itwin/components-react";
 
 /** Props for `useNullValueSetting` hook. */
 export interface NullValueSettingProps {
-  /** Specified whether setting for showing/hiding null values in property grid should be persisted. */
+  /** Specifies whether setting for showing/hiding null values in property grid should be persisted. */
   persistNullValueToggle?: boolean;
 }
 
