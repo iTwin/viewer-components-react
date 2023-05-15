@@ -27,7 +27,7 @@ import type { NullValueSettingProps } from "../hooks/UseNullValuesSetting";
 import type { PropertyGridDataProps } from "../hooks/UsePropertyGridData";
 
 /** Base props for rendering `PropertyGridContent` component. */
-export interface BasePropertyGridContentProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
+export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
   imodel: IModelConnection;
   dataProvider: IPresentationPropertyDataProvider;
   rootClassName?: string;
@@ -36,7 +36,7 @@ export interface BasePropertyGridContentProps extends Omit<FilteringPropertyGrid
 }
 
 /** Props for `PropertyGridContent` component. */
-export type PropertyGridContentProps = BasePropertyGridContentProps & ContextMenuProps & NullValueSettingProps & PropertyGridDataProps;
+export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & NullValueSettingProps & PropertyGridDataProps;
 
 /** Component that renders property grid with header and context menu. */
 export function PropertyGridContent({
