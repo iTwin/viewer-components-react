@@ -116,6 +116,13 @@ describe("CategoryVisibilityHandler", () => {
       });
     });
 
+    it("does nothing if node is not PresentationTreeNodeItem", async () => {
+      await using(createHandler(), async (handler) => {
+        const enableCategorySpy = sinon.stub(handler, "enableCategory");
+        await handler.changeVisibility({} as UiComponents.TreeNodeItem, false);
+        expect(enableCategorySpy).to.not.be.called;
+      });
+    });
   });
 
   describe("getVisibilityStatus", () => {
@@ -136,6 +143,13 @@ describe("CategoryVisibilityHandler", () => {
       });
     });
 
+    it("returns disabled if node is not PresentationTreeNodeItem", () => {
+      using(createHandler({}), (handler) => {
+        const result = handler.getVisibilityStatus({} as UiComponents.TreeNodeItem);
+        expect(result.state).to.be.eq("hidden");
+        expect(result.isDisabled).to.be.true;
+      });
+    });
   });
 
   describe("getCategoryVisibility", () => {
@@ -332,6 +346,28 @@ describe("CategoryVisibilityHandler", () => {
       expect(enableCategorySpy.args[1][2].length).to.be.eq(0);
       expect(enableCategorySpy.args[1][3]).to.be.eq(true);
       expect(enableSubCategorySpy).to.not.be.called;
+    });
+  });
+
+  describe("enableCategory", () => {
+
+    it("calls expected function", async () => {
+      await using(createHandler(), async (handler) =>{
+        const enableCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableCategory");
+        await handler.enableCategory(categories.map((category) => category.categoryId), true);
+        expect(enableCategorySpy).to.be.calledWith(viewManagerMock.object, imodelMock.object, categories.map((category) => category.categoryId), true, false);
+      });
+    });
+  });
+
+  describe("enableSubCategory", () => {
+
+    it("calls expected function", () => {
+      using(createHandler(), (handler) => {
+        const enableSubCategorySpy = sinon.stub(categoriesVisibilityUtils, "enableSubCategory");
+        handler.enableSubCategory("subCategoryId", true);
+        expect(enableSubCategorySpy).to.be.calledWith(viewManagerMock.object, "subCategoryId", true, false);
+      });
     });
   });
 });

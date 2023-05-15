@@ -22,10 +22,13 @@ import { fireEvent, render, waitFor } from "@testing-library/react";
 import { ModelsTree } from "../../../components/trees/models-tree/ModelsTree";
 import { ModelsTreeNodeType } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { createRuleset } from "../../../components/trees/models-tree/Utils";
+import * as modelsTreeUtils from "../../../components/trees/models-tree/Utils";
 import { addModel, addPartition, addPhysicalObject, addSpatialCategory, addSpatialLocationElement } from "../../IModelUtils";
 import { deepEquals, mockPresentationManager, mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createKey, createModelNode, createSubjectNode } from "../Common";
+import { ClassGroupingOption } from "../../../components/trees/Common";
 
+import type { ModelsTreeHierarchyConfiguration } from "../../../components/trees/models-tree/ModelsTree";
 import type { TreeNodeItem } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey, Node, NodeKey, NodePathElement } from "@itwin/presentation-common";
@@ -404,6 +407,33 @@ describe("ModelsTree", () => {
       }));
 
       expect(hierarchy).to.matchSnapshot();
+    });
+
+    it("createRuleset uses hierarchyConfig from props when provided", async () => {
+      const visibilityChangeEvent = new BeEvent<VisibilityChangeListener>();
+      const visibilityHandlerMock = moq.Mock.ofType<ModelsVisibilityHandler>();
+      visibilityHandlerMock.setup((x) => x.onVisibilityChange).returns(() => visibilityChangeEvent);
+      const createRulesetSpy = sinon.stub(modelsTreeUtils, "createRuleset").returns({
+        id: "testRulesetId",
+        rules: [],
+      });
+      const hierarchyConfig: ModelsTreeHierarchyConfiguration = {
+        enableElementsClassGrouping: ClassGroupingOption.YesWithCounts,
+        elementClassSpecification: {
+          schemaName: "testSchemaName",
+          className: "testClassName",
+        },
+      };
+      render(
+        <ModelsTree
+          {...sizeProps}
+          iModel={imodelMock.object}
+          modelsVisibilityHandler={visibilityHandlerMock.object}
+          activeView={mockViewport().object}
+          hierarchyConfig={hierarchyConfig}
+        />
+      );
+      await waitFor(() => expect(createRulesetSpy).to.be.calledWith({ enableElementsClassGrouping: true, elementClassSpecification: { schemaName: "testSchemaName", className: "testClassName" } }));
     });
   });
 });
