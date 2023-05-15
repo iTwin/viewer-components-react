@@ -1092,7 +1092,7 @@ importers:
       '@itwin/presentation-components': ^4.0.0
       '@itwin/presentation-frontend': ^3.7.0
       '@itwin/webgl-compatibility': ^3.7.0
-      '@types/i18next': ^8.4.2
+      '@rushstack/eslint-patch': 1.2.0
       '@types/react': ^17.0.19
       '@types/react-dom': ^17.0.9
       '@types/react-redux': ^7.0.1
@@ -1101,11 +1101,12 @@ importers:
       classnames: ^2.3.1
       cpx2: ^3.0.0
       eslint: ^7.11.0
-      i18next: ^10.2.2
+      eslint-plugin-react: ^7.32.2
+      eslint-plugin-unused-imports: ^1.0.0
       react: ^17.0.2
       react-dom: ^17.0.2
       react-redux: ^7.2.0
-      redux: ^4.0.3
+      redux: ^4.1.0
       rimraf: ^3.0.2
       typescript: ~4.4.0
     dependencies:
@@ -1113,12 +1114,10 @@ importers:
       '@itwin/itwinui-react': 2.7.0_react-dom@17.0.2+react@17.0.2
       '@itwin/itwinui-variables': 2.0.0
       classnames: 2.3.1
-      i18next: 10.6.0
-      redux: 4.1.2
     devDependencies:
       '@itwin/appui-abstract': 3.7.0_@itwin+core-bentley@3.7.0
       '@itwin/appui-layout-react': 4.0.0_40c6c086cf61f6d24dd477810300c0e0
-      '@itwin/appui-react': 4.0.0_ebdccb27fd9d969048ba2be7dbbafddc
+      '@itwin/appui-react': 4.0.0_deeb40e3aa7610a362ec7afd0c3fe32b
       '@itwin/build-tools': 3.7.0
       '@itwin/components-react': 4.0.0_40c6c086cf61f6d24dd477810300c0e0
       '@itwin/core-bentley': 3.7.0
@@ -1137,7 +1136,7 @@ importers:
       '@itwin/presentation-components': 4.0.0_c01bc625780c771139f70ce8674a72c3
       '@itwin/presentation-frontend': 3.7.0_3df2ddb6f779a099b187706b89336d9d
       '@itwin/webgl-compatibility': 3.7.0
-      '@types/i18next': 8.4.6
+      '@rushstack/eslint-patch': 1.2.0
       '@types/react': 17.0.44
       '@types/react-dom': 17.0.15
       '@types/react-redux': 7.1.23
@@ -1145,9 +1144,12 @@ importers:
       '@typescript-eslint/parser': 5.19.0_eslint@7.32.0+typescript@4.4.4
       cpx2: 3.0.2
       eslint: 7.32.0
+      eslint-plugin-react: 7.32.2_eslint@7.32.0
+      eslint-plugin-unused-imports: 1.1.5_5d2865250479a29d8cdea08dacebb052
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
+      redux: 4.2.1
       rimraf: 3.0.2
       typescript: 4.4.4
 
@@ -4566,7 +4568,7 @@ packages:
       rxjs: 6.6.7
     dev: true
 
-  /@itwin/appui-react/4.0.0_ebdccb27fd9d969048ba2be7dbbafddc:
+  /@itwin/appui-react/4.0.0_deeb40e3aa7610a362ec7afd0c3fe32b:
     resolution: {integrity: sha512-4X3v8K1Nr3RwjuI9sszv9fSbr86dS8cWxhtu+i3lTyDJT+vgt3+KEHbC/eBKOeqsJxIcYg3tB3UH+WrfedltqA==}
     peerDependencies:
       '@itwin/appui-abstract': '>=3.7.0'
@@ -4607,7 +4609,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
-      redux: 4.1.2
+      redux: 4.2.1
       rxjs: 6.6.7
     dev: true
 
@@ -5385,7 +5387,7 @@ packages:
       '@itwin/object-storage-core': 1.6.0
       flatbuffers: 1.12.0
       js-base64: 3.7.2
-      semver: 7.4.0
+      semver: 7.5.0
     transitivePeerDependencies:
       - debug
     dev: false
@@ -8791,7 +8793,6 @@ packages:
 
   /@rushstack/eslint-patch/1.2.0:
     resolution: {integrity: sha512-sXo/qW2/pAcmT43VoRKOJbDOfV3cYpq3szSVfIThQXNt+E4DfKj361vaAt3c88U5tPUxzEswam7GW48PJqtKAg==}
-    dev: false
 
   /@rushstack/node-core-library/3.45.5:
     resolution: {integrity: sha512-KbN7Hp9vH3bD3YJfv6RnVtzzTAwGYIBl7y2HQLY4WEQqRbvE3LgI78W9l9X+cTAXCX//p0EeoiUYNTFdqJrMZg==}
@@ -14725,6 +14726,26 @@ packages:
       - supports-color
       - typescript
     dev: false
+
+  /eslint-plugin-unused-imports/1.1.5_5d2865250479a29d8cdea08dacebb052:
+    resolution: {integrity: sha512-TeV8l8zkLQrq9LBeYFCQmYVIXMjfHgdRQLw7dEZp4ZB3PeR10Y5Uif11heCsHRmhdRIYMoewr1d9ouUHLbLHew==}
+    engines: {node: ^10.12.0 || >=12.0.0}
+    peerDependencies:
+      '@typescript-eslint/eslint-plugin': ^4.14.2
+      eslint: ^6.0.0 || ^7.0.0
+    peerDependenciesMeta:
+      '@typescript-eslint/eslint-plugin':
+        optional: true
+    dependencies:
+      '@typescript-eslint/eslint-plugin': 5.19.0_b7395fa40fa1e8c5dfd8e4cf5188e7c1
+      eslint: 7.32.0
+      eslint-rule-composer: 0.3.0
+    dev: true
+
+  /eslint-rule-composer/0.3.0:
+    resolution: {integrity: sha512-bt+Sh8CtDmn2OajxvNO+BX7Wn4CIWMpTRm3MaiKPCQcnnlm0CS2mhui6QaoeQugs+3Kj2ESKEEGJUdVafwhiCg==}
+    engines: {node: '>=4.0.0'}
+    dev: true
 
   /eslint-scope/5.1.1:
     resolution: {integrity: sha512-2NxwbF/hZ0KpepYN0cNbo+FN6XoK7GaHlQhgx/hIZl6Va0bF45RQOOwhLIy8lQDbuCiadSLCBnH2CFYquit5bw==}
@@ -25032,7 +25053,7 @@ packages:
     resolution: {directory: ../../packages/itwin/map-layers, type: directory}
     id: file:../../packages/itwin/map-layers
     name: '@itwin/map-layers'
-    version: 4.0.0
+    version: 5.0.0-dev.1
     peerDependencies:
       '@itwin/appui-abstract': ^4.0.0-dev.95
       '@itwin/appui-layout-react': ^4.0.0
