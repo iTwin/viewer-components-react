@@ -25,8 +25,8 @@ import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { CategoriesTreeHeaderButtonProps, CategoryInfo } from "../../../tree-widget-react";
 import type { TreeHeaderProps } from "../../../components/tree-header/TreeHeader";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import type { ECSqlReader } from "@itwin/core-common";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
+import type { TreeNodeItem } from "@itwin/components-react";
 
 describe("<CategoriesTreeComponent />", () => {
   before(async () => {
@@ -54,7 +54,6 @@ describe("<CategoriesTreeComponent />", () => {
   afterEach(() => {
     imodelMock.reset();
     sinon.restore();
-    Presentation.terminate();
   });
 
   const createKey = (id: Id64String): ECInstancesNodeKey => {
@@ -71,23 +70,6 @@ describe("<CategoriesTreeComponent />", () => {
     subCategoryIds: ["SubCategoryId1", "SubCategoryId2"],
   }];
 
-  const categoryNodes: PresentationTreeNodeItem[]  = [
-    {
-      key: createKey(categories[0].categoryId),
-      id: categories[0].categoryId,
-      label: PropertyRecord.fromString("category-node"),
-      autoExpand: true,
-      hasChildren: true,
-    } as PresentationTreeNodeItem,
-    {
-      key: createKey(categories[0].categoryId),
-      id: categories[0].categoryId,
-      label: PropertyRecord.fromString("category-node"),
-      autoExpand: true,
-      hasChildren: false,
-    } as PresentationTreeNodeItem,
-  ];
-
   const filteredCategories: CategoryInfo[] = [{
     categoryId: "FilteredCategoryId",
     subCategoryIds: ["FilteredSubCategoryId1", "FilteredSubCategoryId2"],
@@ -103,11 +85,11 @@ describe("<CategoriesTreeComponent />", () => {
 
   const iModel = {
     createQueryReader: () => ({
-      toArray: async () => Promise.resolve([]),
-    }) as unknown as ECSqlReader,
+      toArray: async () => [],
+    }),
     categories: {
-      getCategoryInfo: async () => Promise.resolve(new Map<Id64String, IModelConnection.Categories.CategoryInfo>()),
-    } as unknown as IModelConnection.Categories,
+      getCategoryInfo: async () => new Map<Id64String, IModelConnection.Categories.CategoryInfo>(),
+    },
   } as unknown as IModelConnection;
 
   describe("<CategoriesTreeComponent />", () => {
@@ -179,37 +161,40 @@ describe("<CategoriesTreeComponent />", () => {
           />
         );
         await waitFor(() => expect(categoryTreeSpy).to.be.called);
-        categoryTreeSpy.args[0][0].onFilterApplied!({ getNodes: async () =>
-          [
-            { id: "nodeId1" },
-            { id: "nodeId2" },
-            {
-              key: createKey(categories[0].categoryId),
-              id: categories[0].categoryId,
-              label: PropertyRecord.fromString("category-node"),
-              autoExpand: true,
+        categoryTreeSpy.args[0][0].onFilterApplied!({ getNodes: async (parent?: TreeNodeItem) =>{
+          if (parent?.id === "category-with-children") {
+            return [{
+              key: createKey("subcategory"),
+              id: "subcategory",
+              label: PropertyRecord.fromString("subcategory-node"),
               hasChildren: false,
-            } as PresentationTreeNodeItem,
-          ],
-        } as unknown as IFilteredPresentationTreeDataProvider, 0);
-        await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: CategoriesTreeHeaderButtonProps) => props.filteredCategories !== undefined && props.filteredCategories.length === 1 && props.filteredCategories[0].categoryId === "CategoryId")));
-      });
+            } as PresentationTreeNodeItem];
+          }
 
-      it("filteredCategories returns filteredCategories with filteredSubcategories when nodes are PresentationTreeNodeItem", async () => {
-        const categoryTreeSpy = sinon.stub(categoryTree, "CategoryTree").returns(<></>);
-        const spy = sinon.stub().returns(<></>);
-        render(
-          <CategoriesTreeComponent
-            headerButtons={[spy]}
-          />
-        );
-        await waitFor(() => expect(categoryTreeSpy).to.be.called);
-        categoryTreeSpy.args[0][0].onFilterApplied!({ getNodes: async () => categoryNodes } as unknown as IFilteredPresentationTreeDataProvider, 0);
+          return [{
+            id:"non-presentation-node",
+          },
+          {
+            key: createKey("category-with-children"),
+            id: "category-with-children",
+            label: PropertyRecord.fromString("CategoryWithChildren"),
+            hasChildren: true,
+          },
+          {
+            key: createKey("category-without-children"),
+            id: "category-without-children",
+            label: PropertyRecord.fromString("CategoryWithoutChildren"),
+            hasChildren: false,
+          }];
+        } } as unknown as IFilteredPresentationTreeDataProvider, 0);
         await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: CategoriesTreeHeaderButtonProps) => (
           props.filteredCategories !== undefined
           && props.filteredCategories.length === 2
-          && props.filteredCategories[0].subCategoryIds!.length === 2
-          && props.filteredCategories[1].subCategoryIds!.length === 0))
+          && props.filteredCategories[0].categoryId === "category-with-children"
+          && props.filteredCategories[0].subCategoryIds?.length === 1
+          && props.filteredCategories[0].subCategoryIds[0] === "subcategory"
+          && props.filteredCategories[1].categoryId === "category-without-children"
+          && props.filteredCategories[1].subCategoryIds?.length === 0))
         ));
       });
     });

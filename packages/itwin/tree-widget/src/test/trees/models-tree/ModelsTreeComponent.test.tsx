@@ -20,7 +20,6 @@ import { Children } from "react";
 import type { ModelInfo, ModelsTreeHeaderButtonProps } from "../../../tree-widget-react";
 import type { IModelConnection, Viewport } from "@itwin/core-frontend";
 import type { TreeHeaderProps } from "../../../components/tree-header/TreeHeader";
-import type { ModelProps } from "@itwin/core-common";
 
 describe("<ModelsTreeComponent />", () => {
 
@@ -96,14 +95,14 @@ describe("<ModelsTreeComponent />", () => {
     it("renders button with available models", async () => {
       const iModel = {
         models: {
-          queryProps: () => Promise.resolve([{
+          queryProps: async () => [{
             id: "testIdFromQueryModels",
             modeledElement: {
               id: "id",
             },
             classFullName: "className",
-          }]) as unknown as ModelProps[],
-        } as unknown as IModelConnection.Models,
+          }],
+        },
       } as unknown as IModelConnection;
       const spy = sinon.stub().returns(<></>);
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
@@ -121,7 +120,7 @@ describe("<ModelsTreeComponent />", () => {
       const spy = sinon.stub().returns(<></>);
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
-      sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
+      sinon.stub(UiFramework, "getIModelConnection").returns({ queryProps: sinon.fake.throws("err") } as unknown as IModelConnection);
       render(
         <ModelsTreeComponent
           headerButtons={[spy]}

@@ -24,7 +24,7 @@ import { StandardNodeTypes } from "@itwin/presentation-common";
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECSqlReader } from "@itwin/core-common";
 import type { IModelConnection, Viewport, ViewState, ViewState3d } from "@itwin/core-frontend";
-import type { ECClassGroupingNodeKey, ECInstancesNodeKey } from "@itwin/presentation-common";
+import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
 import type { TreeNodeItem } from "@itwin/components-react";
@@ -125,41 +125,38 @@ describe("ModelsVisibilityHandler", () => {
 
   it("getNodeType", () => {
     expect(ModelsVisibilityHandler.getNodeType({} as TreeNodeItem)).to.be.eq(ModelsTreeNodeType.Unknown);
-    const node = {
+    const instanceNode = {
+      key: {
+        type: StandardNodeTypes.ECInstancesNode,
+        version: 0,
+        pathFromRoot: [],
+        instanceKeys: [{ className: "MyDomain:SpatialCategory", id: "testInstanceId" }],
+      },
+      id: "testId",
+      label: PropertyRecord.fromString("category-node"),
+      autoExpand: true,
+      hasChildren: true,
+    } as PresentationTreeNodeItem;
+    expect(ModelsVisibilityHandler.getNodeType(instanceNode)).to.be.eq(ModelsTreeNodeType.Unknown);
+    const groupingNode = {
+      ...instanceNode,
       key: {
         type: StandardNodeTypes.ECClassGroupingNode,
         version: 0,
         pathFromRoot: [],
         className: "testClassName",
         groupedInstancesCount: 0,
-      } as ECClassGroupingNodeKey,
-      id: "testId",
-      label: PropertyRecord.fromString("category-node"),
-      autoExpand: true,
-      hasChildren: true,
-    } as PresentationTreeNodeItem;
-    expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Grouping);
-    node.key = {
-      type: StandardNodeTypes.ECInstancesNode,
-      version: 0,
-      instanceKeys: [{ className: "MyDomain:SpatialCategory", id: "testInstanceId" }],
-      pathFromRoot: [],
+      },
     };
-    expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Unknown);
-    node.extendedData = {
-      isSubject: true,
-    };
-    expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Subject);
-    node.extendedData = {
-      isModel: true,
-    };
-    expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Model);
-    node.extendedData = {
-      isCategory: true,
-    };
-    expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Category);
-    node.extendedData = {};
-    expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Element);
+    expect(ModelsVisibilityHandler.getNodeType(groupingNode)).to.be.eq(ModelsTreeNodeType.Grouping);
+    const subjectNode = { ...instanceNode, extendedData: { isSubject: true } };
+    expect(ModelsVisibilityHandler.getNodeType(subjectNode)).to.be.eq(ModelsTreeNodeType.Subject);
+    const modelNode = { ...instanceNode, extendedData: { isModel: true } };
+    expect(ModelsVisibilityHandler.getNodeType(modelNode)).to.be.eq(ModelsTreeNodeType.Model);
+    const categoryNode = { ...instanceNode, extendedData: { isCategory: true } };
+    expect(ModelsVisibilityHandler.getNodeType(categoryNode)).to.be.eq(ModelsTreeNodeType.Category);
+    const elementNode = { ...instanceNode, extendedData: { isElement: true } };
+    expect(ModelsVisibilityHandler.getNodeType(elementNode)).to.be.eq(ModelsTreeNodeType.Element);
   });
 
   describe("dispose", () => {
