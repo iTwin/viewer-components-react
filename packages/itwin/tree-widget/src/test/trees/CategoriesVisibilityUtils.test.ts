@@ -12,7 +12,7 @@ import { TestUtils } from "../TestUtils";
 import { expect } from "chai";
 
 import type { ECSqlReader } from "@itwin/core-common";
-import { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
+import type { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
 import type { Id64String } from "@itwin/core-bentley";
 
 describe("CategoryVisibilityUtils", () => {

@@ -9,7 +9,7 @@
     "@itwin/appui-react": "^4.0.0-dev.15",
     "@itwin/breakdown-trees-react": "workspace:*",
     "@itwin/browser-authorization": "^0.8.0",
-    "@itwin/components-react": "workspace:*",
+    "@itwin/components-react": "^4.0.0-dev.15",
     "@itwin/core-bentley": "^3.7.1",
     "@itwin/core-common": "^3.7.1",
     "@itwin/core-frontend": "^3.7.1",

@@ -103,10 +103,10 @@ describe("<CategoriesTreeComponent />", () => {
 
   const iModel = {
     createQueryReader: () => ({
-      toArray: () => Promise.resolve([]),
+      toArray: async () => Promise.resolve([]),
     }) as unknown as ECSqlReader,
     categories: {
-      getCategoryInfo: () => Promise.resolve(new Map<Id64String, IModelConnection.Categories.CategoryInfo>()),
+      getCategoryInfo: async () => Promise.resolve(new Map<Id64String, IModelConnection.Categories.CategoryInfo>()),
     } as unknown as IModelConnection.Categories,
   } as unknown as IModelConnection;
 
@@ -155,7 +155,7 @@ describe("<CategoriesTreeComponent />", () => {
         sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
         sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
         sinon.stub(categoryVisibilityHandler, "useCategories").returns([]);
-      })
+      });
 
       it("renders buttons with empty `filteredCategories` list if filtered data provider does not have nodes", async () => {
         const categoryTreeSpy = sinon.stub(categoryTree, "CategoryTree").returns(<></>);
@@ -190,7 +190,7 @@ describe("<CategoriesTreeComponent />", () => {
               autoExpand: true,
               hasChildren: false,
             } as PresentationTreeNodeItem,
-          ]
+          ],
         } as unknown as IFilteredPresentationTreeDataProvider, 0);
         await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: CategoriesTreeHeaderButtonProps) => props.filteredCategories !== undefined && props.filteredCategories.length === 1 && props.filteredCategories[0].categoryId === "CategoryId")));
       });
