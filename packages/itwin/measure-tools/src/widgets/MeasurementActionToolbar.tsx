@@ -7,9 +7,8 @@ import * as React from "react";
 import type { XAndY } from "@itwin/core-geometry";
 import { Point2d } from "@itwin/core-geometry";
 import { RelativePosition } from "@itwin/appui-abstract";
-import type { ItemProps } from "@itwin/appui-react";
-import { ActionButtonItemDef, ActionItemButton, CursorInformation, CursorPopupManager } from "@itwin/appui-react";
-import { Direction } from "@itwin/components-react";
+import type { ItemProps, ToolbarActionItem } from "@itwin/appui-react";
+import { ActionButtonItemDef, CursorInformation, CursorPopupManager, ToolbarItemUtilities, ToolbarOrientation, ToolbarUsage } from "@itwin/appui-react";
 import { FeatureTracking, MeasureToolsFeatures } from "../api/FeatureTracking";
 import type { Measurement, MeasurementPickContext } from "../api/Measurement";
 import { MeasurementManager } from "../api/MeasurementManager";
@@ -435,18 +434,14 @@ export class MeasurementActionToolbar {
   }
 
   private static buildToolbar(measurements: Measurement[], actionItemList: MeasurementActionItemDef[]): React.ReactNode {
+    const toolItems: ToolbarActionItem[] = actionItemList.map((itemDef: MeasurementActionItemDef, index) => {
+      itemDef.measurements = measurements;
+      return ToolbarItemUtilities.createActionItem(itemDef.id, index * 10, itemDef.iconSpec, itemDef.label, itemDef.execute);
+    });
     return <PopupToolbar
-      expandsTo={Direction.Bottom}
-      onClose={() => MeasurementActionToolbar.closeToolbar(true)}
-      items={
-        <>
-          {
-            actionItemList.map((itemDef: MeasurementActionItemDef) => {
-              itemDef.measurements = measurements;
-              return <ActionItemButton key={itemDef.id} actionItem={itemDef} />;
-            })
-          }
-        </>}
+      items={toolItems}
+      usage={ToolbarUsage.ContentManipulation}
+      orientation={ToolbarOrientation.Horizontal}
     />;
   }
 }

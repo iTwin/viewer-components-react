@@ -6,7 +6,9 @@ import { FeatureOverrideType } from "@itwin/core-common";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { Group } from "@itwin/insights-client";
 import { toaster } from "@itwin/itwinui-react";
-import { clearEmphasizedOverriddenElements, emphasizeElements, getHiliteIds, hideElements, hideElementsByQuery, overrideElements, zoomToElements } from "./viewerUtils";
+import { KeySet } from "@itwin/presentation-common";
+import type { QueryCacheItem } from "./context/GroupHilitedElementsContext";
+import { clearEmphasizedOverriddenElements, emphasizeElements, getHiliteIds, hideElements, overrideElements, zoomToElements } from "./viewerUtils";
 
 const goldenAngle = 180 * (3 - Math.sqrt(5));
 
@@ -17,94 +19,114 @@ export const getGroupColor = function (index: number) {
 export const getHiliteIdsFromGroups = async (
   iModelConnection: IModelConnection,
   groups: Group[],
-  hilitedElementsQueryCache: React.MutableRefObject<Map<string, string[]>>
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
 ) => {
-  let allIds: string[] = [];
+  const distinctQueries = new Set<string>();
+  const promises: Promise<{ ids: string[] }>[] = [];
   for (const group of groups) {
-    const query = group.query;
-    let currentIds: string[] = [];
-    if (hilitedElementsQueryCache.current.has(query)) {
-      currentIds = hilitedElementsQueryCache.current.get(query) ?? [];
-    } else {
-      try {
-        const queryRowCount = await iModelConnection.queryRowCount(query);
-        if (queryRowCount === 0) {
-          toaster.warning(
-            `${group.groupName}'s query is valid but produced no results.`
-          );
-        }
-        currentIds = await getHiliteIds(query, iModelConnection);
-        hilitedElementsQueryCache.current.set(query, currentIds);
-      } catch {
-        toaster.negative(
-          `Could not hide/show ${group.groupName}. Query could not be resolved.`
-        );
-      }
+    if (!distinctQueries.has(group.query)) {
+      distinctQueries.add(group.query);
+      promises.push(getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache));
     }
-    allIds = allIds.concat(currentIds);
   }
+  const results = await Promise.all(promises);
+  const allIds = results.flatMap((result) => result.ids);
   return allIds;
 };
 
 export const hideGroups = async (
   iModelConnection: IModelConnection,
   viewGroups: Group[],
-  hilitedElementsQueryCache: React.MutableRefObject<Map<string, string[]>>
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
 ) => {
+  const distinctQueries = new Set<string>();
+  const promises: Promise<void>[] = [];
+
   for (const viewGroup of viewGroups) {
-    const query = viewGroup.query;
-    if (hilitedElementsQueryCache.current.has(query)) {
-      const hilitedIds = hilitedElementsQueryCache.current.get(query) ?? [];
-      hideElements(hilitedIds);
-    } else {
-      try {
-        const queryRowCount = await iModelConnection.queryRowCount(query);
-        if (queryRowCount === 0) {
-          toaster.warning(
-            `${viewGroup.groupName}'s query is valid but produced no results.`
-          );
-        }
-        const hiliteIds = await hideElementsByQuery(
-          query,
-          iModelConnection,
-          false
-        );
-        hilitedElementsQueryCache.current.set(query, hiliteIds);
-      } catch {
-        toaster.negative(
-          `Could not hide/show ${viewGroup.groupName}. Query could not be resolved.`
-        );
-      }
+    if (!distinctQueries.has(viewGroup.query)) {
+      distinctQueries.add(viewGroup.query);
+      promises.push(hideGroup(iModelConnection, viewGroup, hilitedElementsQueryCache));
     }
   }
+  await Promise.all(promises);
+};
+
+export const hideGroup = async (
+  iModelConnection: IModelConnection,
+  viewGroup: Group,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
+) => {
+  const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, viewGroup, hilitedElementsQueryCache);
+  hideElements(result.ids);
+};
+
+const processGroupVisualization = async (
+  iModelConnection: IModelConnection,
+  group: Group,
+  hiddenGroupsIds: Set<string>,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
+  doEmphasizeElements: boolean,
+  groupColor: string
+) => {
+  const result = await getHiliteIdsAndKeysetFromGroup(iModelConnection, group, hilitedElementsQueryCache);
+  const hilitedIds = result.ids;
+  overrideElements(hilitedIds, groupColor, FeatureOverrideType.ColorAndAlpha);
+
+  doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
+
+  return hiddenGroupsIds.has(group.id) ? [] : hilitedIds;
 };
 
 export const visualizeGroupColors = async (
   iModelConnection: IModelConnection,
   groups: Group[],
-  viewGroups: Group[],
-  hiddenGroupsIds: string[],
-  hilitedElementsQueryCache: React.MutableRefObject<Map<string, string[]>>,
+  hiddenGroupsIds: Set<string>,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>,
   doEmphasizeElements: boolean = true
 ) => {
   clearEmphasizedOverriddenElements();
-  let allIds: string[] = [];
-  for (const group of viewGroups) {
-    const index =
-      viewGroups.length > groups.length
-        ? viewGroups.findIndex((g) => g.id === group.id)
-        : groups.findIndex((g) => g.id === group.id);
-    const hilitedIds = await getHiliteIdsFromGroups(iModelConnection, [group], hilitedElementsQueryCache);
-    overrideElements(
-      hilitedIds,
-      getGroupColor(index),
-      FeatureOverrideType.ColorAndAlpha,
-    );
-    doEmphasizeElements && emphasizeElements(hilitedIds, undefined);
-    if (!hiddenGroupsIds.includes(group.id)) {
-      allIds = allIds.concat(hilitedIds);
-    }
-  }
+
+  const allIdsPromises = groups.map(async (group, index) =>
+    processGroupVisualization(
+      iModelConnection,
+      group,
+      hiddenGroupsIds,
+      hilitedElementsQueryCache,
+      doEmphasizeElements,
+      getGroupColor(index)
+    )
+  );
+
+  const allIdsArrays = await Promise.all(allIdsPromises);
+  const allIds = allIdsArrays.flat();
 
   await zoomToElements(allIds);
+};
+
+export const getHiliteIdsAndKeysetFromGroup = async (
+  iModelConnection: IModelConnection,
+  group: Group,
+  hilitedElementsQueryCache: React.MutableRefObject<Map<string, QueryCacheItem>>
+) => {
+  const query = group.query;
+  if (hilitedElementsQueryCache.current.has(query)) {
+    return hilitedElementsQueryCache.current.get(query) ?? ({ keySet: new KeySet(), ids: [] });
+  }
+  try {
+    const queryRowCount = await iModelConnection.queryRowCount(query);
+    if (queryRowCount === 0) {
+      toaster.warning(
+        `${group.groupName}'s query is valid but produced no results.`
+      );
+    }
+    const result = await getHiliteIds(query, iModelConnection);
+    hilitedElementsQueryCache.current.set(query, result);
+    return result;
+  } catch {
+    toaster.negative(
+      `Query could not be resolved.`
+    );
+    return ({ keySet: new KeySet(), ids: [] });
+  }
+
 };

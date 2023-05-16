@@ -2,404 +2,120 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import type { IModelConnection } from "@itwin/core-frontend";
-import { Presentation } from "@itwin/presentation-frontend";
-import { useActiveIModelConnection } from "@itwin/appui-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-
-import { WidgetHeader } from "./utils";
-import {
-  clearEmphasizedOverriddenElements,
-  manufactureKeys,
-  visualizeElements,
-  visualizeElementsByKeys,
-  zoomToElements,
-} from "./viewerUtils";
-import type { IGroupTyped } from "./Grouping";
+import React, { useMemo } from "react";
 import "./PropertyMenu.scss";
-import GroupPropertyAction from "./GroupPropertyAction";
-import CalculatedPropertyAction from "./CalculatedPropertyAction";
-import type { IGroupPropertyTyped } from "./GroupPropertyTable";
-import GroupPropertyTable from "./GroupPropertyTable";
-import type {
-  ICalculatedPropertyTyped,
-} from "./CalculatedPropertyTable";
-import CalculatedPropertyTable from "./CalculatedPropertyTable";
-import {
-  IconButton,
-  InformationPanel,
-  InformationPanelBody,
-  InformationPanelHeader,
-  InformationPanelWrapper,
-  LabeledTextarea,
-  ProgressRadial,
-  Text,
-  toaster,
-} from "@itwin/itwinui-react";
-import type { CellProps } from "react-table";
-import type {
-  ICustomCalculationTyped,
-} from "./CustomCalculationTable";
-import CustomCalculationTable from "./CustomCalculationTable";
-import CustomCalculationAction from "./CustomCalculationAction";
-import { KeySet } from "@itwin/presentation-common";
-import { SvgProperties } from "@itwin/itwinui-icons-react";
-import type { PossibleDataType, PropertyMap } from "../../formula/Types";
+import { GroupPropertyTable } from "./GroupPropertyTable";
 import { useCombinedFetchRefresh } from "../hooks/useFetchData";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
+import type { CalculatedProperty, CustomCalculation, Group, GroupProperty, Mapping } from "@itwin/insights-client";
+import { usePropertiesContext } from "./context/PropertiesContext";
+import { CalculatedPropertyTable } from "./CalculatedPropertyTable";
+import { CustomCalculationTable } from "./CustomCalculationTable";
 
-interface PropertyModifyProps {
-  iModelId: string;
-  mappingId: string;
-  group: IGroupTyped;
-  goBack: () => Promise<void>;
+export interface PropertyMenuProps {
+  mapping: Mapping;
+  group: Group;
+  onClickAddGroupProperty?: () => void;
+  onClickModifyGroupProperty?: (groupProperty: GroupProperty) => void;
+  onClickAddCalculatedProperty?: () => void;
+  onClickModifyCalculatedProperty?: (calculatedProperty: CalculatedProperty) => void;
+  onClickAddCustomCalculationProperty?: () => void;
+  onClickModifyCustomCalculation?: (customCalculation: CustomCalculation) => void;
   hideGroupProps?: boolean;
   hideCalculatedProps?: boolean;
   hideCustomCalculationProps?: boolean;
 }
 
-export enum PropertyMenuView {
-  DEFAULT = "default",
-  ADD_GROUP_PROPERTY = "add_group_property",
-  MODIFY_GROUP_PROPERTY = "modify_group_property",
-  ADD_CALCULATED_PROPERTY = "add_calculated_property",
-  MODIFY_CALCULATED_PROPERTY = "modify_calculated_property",
-  ADD_CUSTOM_CALCULATION = "add_custom_calculation",
-  MODIFY_CUSTOM_CALCULATION = "modify_custom_calculation",
-}
-
-const stringToPossibleDataType = (str?: string): PossibleDataType => {
-  if (!str)
-    return "Undefined";
-
-  switch (str.toLowerCase()) {
-    case "double":
-    case "number": return "Number";
-    case "string": return "String";
-    case "boolean": return "Boolean";
-    default: return "Undefined";
-  }
-};
-
-const convertToPropertyMap = (
-  groupProperties: IGroupPropertyTyped[],
-  calculatedProperties: ICalculatedPropertyTyped[],
-  customCalculations: ICustomCalculationTyped[],
-  selectedPropertyName?: string
-): PropertyMap => {
-  const map: PropertyMap = {};
-  const selectedLowerName = selectedPropertyName?.toLowerCase();
-
-  groupProperties.forEach((p) => {
-    const lowerName = p.propertyName?.toLowerCase();
-    if (lowerName && lowerName !== selectedLowerName)
-      map[lowerName] = stringToPossibleDataType(p.dataType);
-  });
-
-  calculatedProperties.forEach((p) => {
-    const lowerName = p.propertyName?.toLowerCase();
-    if (lowerName)
-      map[lowerName] = "Number";
-  });
-
-  customCalculations.forEach((p) => {
-    const lowerName = p.propertyName?.toLowerCase();
-    if (lowerName && lowerName !== selectedLowerName)
-      map[lowerName] = stringToPossibleDataType(p.dataType);
-  });
-
-  return map;
-};
-
 export const PropertyMenu = ({
-  iModelId,
-  mappingId,
+  mapping,
   group,
-  goBack,
+  onClickAddGroupProperty,
+  onClickModifyGroupProperty,
+  onClickAddCalculatedProperty,
+  onClickModifyCalculatedProperty,
+  onClickAddCustomCalculationProperty,
+  onClickModifyCustomCalculation,
   hideGroupProps = false,
   hideCalculatedProps = false,
   hideCustomCalculationProps = false,
-}: PropertyModifyProps) => {
+}: PropertyMenuProps) => {
   const groupId = group.id;
-
-  const { getAccessToken } = useGroupingMappingApiConfig();
+  const mappingId = mapping.id;
+  const { getAccessToken, iModelId } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
-
-  const iModelConnection = useActiveIModelConnection() as IModelConnection;
-  const [propertyMenuView, setPropertyMenuView] = useState<PropertyMenuView>(
-    PropertyMenuView.DEFAULT,
-  );
-  const [selectedGroupProperty, setSelectedGroupProperty] =
-    useState<IGroupPropertyTyped | undefined>(undefined);
-  const [selectedCalculatedProperty, setSelectedCalculatedProperty] =
-    useState<ICalculatedPropertyTyped | undefined>(undefined);
-  const [selectedCustomCalculation, setSelectedCustomCalculation] =
-    useState<ICustomCalculationTyped | undefined>(undefined);
-  const [isInformationPanelOpen, setIsInformationPanelOpen] =
-    useState<boolean>(false);
-  const [resolvedHiliteIds, setResolvedHiliteIds] = useState<string[]>([]);
-  const [keySet, setKeySet] = useState<KeySet>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const {
+    groupProperties,
+    setGroupProperties,
+    calculatedProperties,
+    setCalculatedProperties,
+    customCalculationProperties,
+    setCustomCalculationProperties,
+  } = usePropertiesContext();
 
   const fetchGroupProperties = useMemo(
     () => {
-      return async () => mappingClient.getGroupProperties((await getAccessToken()), iModelId, mappingId, groupId);
+      return async () => mappingClient.getGroupProperties(await getAccessToken(), iModelId, mappingId, groupId);
     },
     [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
-  const { isLoading: isLoadingGroupProperties, data: groupProperties, refreshData: refreshGroupProperties } =
-    useCombinedFetchRefresh<IGroupPropertyTyped>(fetchGroupProperties);
+  const { isLoading: isLoadingGroupProperties, refreshData: refreshGroupProperties } =
+    useCombinedFetchRefresh<GroupProperty>(fetchGroupProperties, setGroupProperties);
 
   const fetchCalculatedProperties = useMemo(
     () => {
-      return async () => mappingClient.getCalculatedProperties((await getAccessToken()), iModelId, mappingId, groupId);
+      return async () => mappingClient.getCalculatedProperties(await getAccessToken(), iModelId, mappingId, groupId);
     },
     [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
-  const { isLoading: isLoadingCalculatedProperties, data: calculatedProperties, refreshData: refreshCalculatedProperties } =
-    useCombinedFetchRefresh<ICalculatedPropertyTyped>(fetchCalculatedProperties);
+  const { isLoading: isLoadingCalculatedProperties, refreshData: refreshCalculatedProperties } =
+    useCombinedFetchRefresh<CalculatedProperty>(fetchCalculatedProperties, setCalculatedProperties);
 
   const fetchCustomCalculations = useMemo(
     () => {
-      return async () => mappingClient.getCustomCalculations((await getAccessToken()), iModelId, mappingId, groupId);
+      return async () => mappingClient.getCustomCalculations(await getAccessToken(), iModelId, mappingId, groupId);
     },
     [getAccessToken, mappingClient, iModelId, mappingId, groupId],
   );
-  const { isLoading: isLoadingCustomCalculations, data: customCalculations, refreshData: refreshCustomCalculations } =
-    useCombinedFetchRefresh<ICustomCalculationTyped>(fetchCustomCalculations);
+  const { isLoading: isLoadingCustomCalculations, refreshData: refreshCustomCalculations } =
+    useCombinedFetchRefresh<CustomCalculation>(fetchCustomCalculations, setCustomCalculationProperties);
 
-  useEffect(() => {
-    const initialize = async () => {
-      try {
-        const query = group.query;
-        const queryRowCount = await iModelConnection.queryRowCount(query);
-        if (queryRowCount === 0) {
-          toaster.warning("The query is valid but produced no results.");
-          await goBack();
-        }
-        const keys = await manufactureKeys(query, iModelConnection);
-        setKeySet(keys);
-        Presentation.selection.clearSelection(
-          "GroupingMappingWidget",
-          iModelConnection,
-        );
-        clearEmphasizedOverriddenElements();
-        const resolvedIds = await visualizeElementsByKeys(keys, "red");
-        await zoomToElements(resolvedIds);
-        setResolvedHiliteIds(resolvedIds);
-        setIsLoading(false);
-      } catch {
-        toaster.negative(`Could not load ${group.groupName}.`);
-        await goBack();
-      }
-    };
-    void initialize();
-  }, [iModelConnection, group.query, goBack, group.groupName]);
-
-  const onGroupPropertyModify = useCallback(
-    (value: CellProps<IGroupPropertyTyped>) => {
-      setSelectedGroupProperty(value.row.original);
-      setPropertyMenuView(PropertyMenuView.MODIFY_GROUP_PROPERTY);
-    },
-    [],
+  return (
+    <div className='gmw-property-menu-wrapper'>
+      {!hideGroupProps && (
+        <GroupPropertyTable
+          iModelId={iModelId}
+          mappingId={mappingId}
+          groupId={groupId}
+          onClickAdd={onClickAddGroupProperty}
+          onClickModify={onClickModifyGroupProperty}
+          isLoading={isLoadingGroupProperties}
+          groupProperties={groupProperties ?? []}
+          refresh={refreshGroupProperties}
+        />
+      )}
+      {!hideCalculatedProps && (
+        <CalculatedPropertyTable
+          mappingId={mappingId}
+          groupId={groupId}
+          onClickAdd={onClickAddCalculatedProperty}
+          onClickModify={onClickModifyCalculatedProperty}
+          isLoading={isLoadingCalculatedProperties}
+          calculatedProperties={calculatedProperties ?? []}
+          refresh={refreshCalculatedProperties}
+        />
+      )}
+      {!hideCustomCalculationProps && (
+        <CustomCalculationTable
+          mappingId={mappingId}
+          groupId={groupId}
+          onClickAdd={onClickAddCustomCalculationProperty}
+          onClickModify={onClickModifyCustomCalculation}
+          isLoading={isLoadingCustomCalculations}
+          customCalculations={customCalculationProperties ?? []}
+          refresh={refreshCustomCalculations}
+        />
+      )}
+    </div>
   );
-
-  const onCalculatedPropertyModify = useCallback(
-    (value: CellProps<ICalculatedPropertyTyped>) => {
-      setSelectedCalculatedProperty(value.row.original);
-      setPropertyMenuView(PropertyMenuView.MODIFY_CALCULATED_PROPERTY);
-    },
-    [],
-  );
-
-  const onCustomCalculationModify = useCallback(
-    (value: CellProps<ICustomCalculationTyped>) => {
-      setSelectedCustomCalculation(value.row.original);
-      setPropertyMenuView(PropertyMenuView.MODIFY_CUSTOM_CALCULATION);
-    },
-    [],
-  );
-
-  const groupPropertyReturn = useCallback(async (modified: boolean) => {
-    setPropertyMenuView(PropertyMenuView.DEFAULT);
-    modified && await refreshGroupProperties();
-  }, [refreshGroupProperties]);
-
-  const calculatedPropertyReturn = useCallback(async (modified: boolean) => {
-    visualizeElements(resolvedHiliteIds, "red");
-    await zoomToElements(resolvedHiliteIds);
-    setPropertyMenuView(PropertyMenuView.DEFAULT);
-    modified && await refreshCalculatedProperties();
-  }, [resolvedHiliteIds, refreshCalculatedProperties]);
-
-  const customCalculationReturn = useCallback(async (modified: boolean) => {
-    setPropertyMenuView(PropertyMenuView.DEFAULT);
-    modified && await refreshCustomCalculations();
-  }, [refreshCustomCalculations]);
-
-  if (isLoading) {
-    return (
-      <div className='gmw-loading-overlay'>
-        <Text>Loading Group</Text>
-        <ProgressRadial indeterminate />
-        <Text>Please wait...</Text>
-      </div>
-    );
-  }
-
-  switch (propertyMenuView) {
-    case PropertyMenuView.ADD_GROUP_PROPERTY:
-      return (
-        <GroupPropertyAction
-          iModelId={iModelId}
-          mappingId={mappingId}
-          groupId={groupId}
-          keySet={keySet ?? new KeySet()}
-          returnFn={groupPropertyReturn}
-        />
-      );
-    case PropertyMenuView.MODIFY_GROUP_PROPERTY:
-      return (
-        <GroupPropertyAction
-          iModelId={iModelId}
-          mappingId={mappingId}
-          groupId={groupId}
-          keySet={keySet ?? new KeySet()}
-          groupPropertyId={selectedGroupProperty?.id ?? ""}
-          groupPropertyName={selectedGroupProperty?.propertyName ?? ""}
-          returnFn={groupPropertyReturn}
-        />
-      );
-    case PropertyMenuView.ADD_CALCULATED_PROPERTY:
-      return (
-        <CalculatedPropertyAction
-          iModelId={iModelId}
-          mappingId={mappingId}
-          groupId={groupId}
-          ids={resolvedHiliteIds}
-          returnFn={calculatedPropertyReturn}
-        />
-      );
-    case PropertyMenuView.MODIFY_CALCULATED_PROPERTY:
-      return (
-        <CalculatedPropertyAction
-          iModelId={iModelId}
-          mappingId={mappingId}
-          groupId={groupId}
-          property={selectedCalculatedProperty}
-          ids={resolvedHiliteIds}
-          returnFn={calculatedPropertyReturn}
-        />
-      );
-    case PropertyMenuView.ADD_CUSTOM_CALCULATION:
-      return (
-        <CustomCalculationAction
-          iModelId={iModelId}
-          mappingId={mappingId}
-          groupId={groupId}
-          properties={convertToPropertyMap(groupProperties, calculatedProperties, customCalculations)}
-          returnFn={customCalculationReturn}
-        />
-      );
-    case PropertyMenuView.MODIFY_CUSTOM_CALCULATION:
-      return (
-        <CustomCalculationAction
-          iModelId={iModelId}
-          mappingId={mappingId}
-          groupId={groupId}
-          properties={convertToPropertyMap(groupProperties, calculatedProperties, customCalculations, selectedCustomCalculation?.propertyName)}
-          customCalculation={selectedCustomCalculation}
-          returnFn={customCalculationReturn}
-        />
-      );
-    default:
-      return (
-        <InformationPanelWrapper className='gmw-property-menu-wrapper'>
-          <div className='gmw-property-header'>
-            <WidgetHeader
-              title={`${group.groupName}`}
-              returnFn={goBack}
-            />
-            <IconButton
-              styleType='borderless'
-              onClick={() => setIsInformationPanelOpen(true)}
-            >
-              <SvgProperties />
-            </IconButton>
-          </div>
-          <div className='gmw-property-menu-container'>
-            {!hideGroupProps && (
-              <div className='gmw-property-table'>
-                <GroupPropertyTable
-                  iModelId={iModelId}
-                  mappingId={mappingId}
-                  groupId={groupId}
-                  onGroupPropertyModify={onGroupPropertyModify}
-                  setSelectedGroupProperty={setSelectedGroupProperty}
-                  setGroupModifyView={setPropertyMenuView}
-                  isLoadingGroupProperties={isLoadingGroupProperties}
-                  groupProperties={groupProperties}
-                  refreshGroupProperties={refreshGroupProperties}
-                  selectedGroupProperty={selectedGroupProperty}
-                />
-              </div>
-            )}
-
-            {!hideCalculatedProps && (
-              <div className='gmw-property-table'>
-                <CalculatedPropertyTable
-                  iModelId={iModelId}
-                  mappingId={mappingId}
-                  groupId={groupId}
-                  onCalculatedPropertyModify={onCalculatedPropertyModify}
-                  setSelectedCalculatedProperty={setSelectedCalculatedProperty}
-                  setGroupModifyView={setPropertyMenuView}
-                  isLoadingCalculatedProperties={isLoadingCalculatedProperties}
-                  calculatedProperties={calculatedProperties}
-                  refreshCalculatedProperties={refreshCalculatedProperties}
-                  selectedCalculatedProperty={selectedCalculatedProperty}
-                />
-              </div>
-            )}
-            {!hideCustomCalculationProps && (
-              <div className='gmw-property-table'>
-                <CustomCalculationTable
-                  iModelId={iModelId}
-                  mappingId={mappingId}
-                  groupId={groupId}
-                  onCustomCalculationModify={onCustomCalculationModify}
-                  setSelectedCustomCalculation={setSelectedCustomCalculation}
-                  setGroupModifyView={setPropertyMenuView}
-                  isLoadingCustomCalculations={isLoadingCustomCalculations}
-                  customCalculations={customCalculations}
-                  refreshCustomCalculations={refreshCustomCalculations}
-                  selectedCustomCalculation={selectedCustomCalculation}
-                />
-              </div>
-            )}
-          </div>
-          <InformationPanel
-            className='gmw-information-panel'
-            isOpen={isInformationPanelOpen}
-          >
-            <InformationPanelHeader
-              onClose={() => setIsInformationPanelOpen(false)}
-            >
-              <Text variant='subheading'>{`${group.groupName} Information`}</Text>
-            </InformationPanelHeader>
-            <InformationPanelBody>
-              <div className='gmw-information-body'>
-                <LabeledTextarea
-                  label='Query'
-                  rows={15}
-                  readOnly
-                  defaultValue={group.query}
-                />
-              </div>
-            </InformationPanelBody>
-          </InformationPanel>
-        </InformationPanelWrapper>
-      );
-  }
 };

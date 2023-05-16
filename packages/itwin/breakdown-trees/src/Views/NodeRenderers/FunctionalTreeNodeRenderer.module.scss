@@ -3,27 +3,28 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "~@itwin/core-react/lib/esm/core-react/index";
 .treeNodeLabel {
-  height: $uicore-l;
-  line-height: $uicore-font-size-small;
+  height: var(--iui-size-l);
+  line-height: var(--iui-font-size-0);
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
+
 .treeNodeWrapper {
   display: flex;
-  flex: $uicore-xxs;
+  flex: var(--iui-size-3xs);
   flex-direction: row;
+
   .treeNode {
     display: flex;
-    flex: 1$uicore-xxs;
+    flex: var(--iui-size-3xs);
     flex-direction: column;
   }
 }
 
 .withCheckbox {
-  > .contents {
+  >.contents {
     padding-left: 31px;
   }
 }

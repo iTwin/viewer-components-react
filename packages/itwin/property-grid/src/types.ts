@@ -15,14 +15,12 @@ import type {
 import type { ContextMenuItemProps, Orientation } from "@itwin/core-react";
 import type { FavoritePropertiesScope } from "@itwin/presentation-frontend";
 import type {
-  AbstractZoneLocation,
   PropertyRecord,
-  StagePanelLocation,
-  StagePanelSection,
 } from "@itwin/appui-abstract";
-import type React from "react";
+import type { StagePanelLocation, StagePanelSection } from "@itwin/appui-react";
 
-export type ContextMenuItemInfo = ContextMenuItemProps & React.Attributes & {
+export type ContextMenuItemInfo = ContextMenuItemProps & {
+  key?: string | number;
   label: string;
   isValid?: (record: PropertyRecord, field?: Field) => boolean;
   forcePosition?: number;
@@ -43,6 +41,7 @@ export interface PropertyGridProps {
     dataProvider: IPresentationPropertyDataProvider
   ) => Promise<void>;
   actionButtonRenderers?: ActionButtonRenderer[];
+  actionButtonsWidth?: number;
   enableCopyingPropertyText?: boolean;
   enableNullValueToggle?: boolean;
   enableAncestorNavigation?: boolean;
@@ -60,8 +59,6 @@ export interface PropertyGridProps {
   dataProvider?: PresentationPropertyDataProvider;
   onBackButton?: () => void;
   disableUnifiedSelection?: boolean;
-  // eslint-disable-next-line deprecation/deprecation
-  defaultZoneLocation?: AbstractZoneLocation;
   /** If true, expands child categories (true by default)  */
   autoExpandChildCategories?: boolean;
   headerContent?: JSX.Element;

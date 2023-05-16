@@ -68,7 +68,10 @@ const SelectMappings = ({
     void fetchMappings(setMappings, iModelId, setIsLoading, getAccessToken, mappingClient);
   }, [getAccessToken, mappingClient, iModelId, setIsLoading]);
 
-  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
+  const displayStrings = React.useMemo(
+    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
+    [userDisplayStrings]
+  );
 
   const mappingsColumns = useMemo(
     () => [

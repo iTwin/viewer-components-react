@@ -13,4 +13,3 @@ export * from "./category-tree/CategoryVisibilityHandler";
 export * from "./models-tree/ModelsTree";
 export * from "./models-tree/ModelsTreeComponent";
 export * from "./models-tree/ModelsVisibilityHandler";
-export * from "./spatial-tree/SpatialTreeComponent";

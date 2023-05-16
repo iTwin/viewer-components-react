@@ -14,10 +14,10 @@ export const isiOsDevice = (): boolean => {
   ];
 
   let iOS = false;
-  if (window.navigator.platform !== undefined) {
+  if (window.navigator.platform !== undefined) { // eslint-disable-line deprecation/deprecation
     if (
       iDevices.find(
-        (device: string) => device.indexOf(window.navigator.platform) !== -1
+        (device: string) => device.indexOf(window.navigator.platform) !== -1 // eslint-disable-line deprecation/deprecation
       )
     ) {
       iOS = true;
@@ -37,7 +37,7 @@ const copyToClipboardWin = (info: string) => {
     document.removeEventListener("copy", listener);
   };
   document.addEventListener("copy", listener);
-  document.execCommand("copy");
+  document.execCommand("copy"); // eslint-disable-line deprecation/deprecation
 };
 
 const copyToClipboardiOS = (info: string) => {
@@ -60,7 +60,7 @@ const copyToClipboardiOS = (info: string) => {
 
   el.setSelectionRange(0, 999999);
 
-  document.execCommand("copy");
+  document.execCommand("copy"); // eslint-disable-line deprecation/deprecation
   document.body.removeChild(el);
 };
 

@@ -1,6 +1,6 @@
 {
   "name": "@itwin/tree-widget-react",
-  "version": "0.7.2",
+  "version": "0.9.0",
   "description": "Tree Widget React",
   "keywords": [
     "Bentley",
@@ -37,8 +37,9 @@
     "rebuild": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@itwin/itwinui-icons-react": "^1.8.0",
-    "@itwin/itwinui-react": "^1.40.1",
+    "@itwin/itwinui-icons-react": "^2.1.0",
+    "@itwin/itwinui-react": "^2.7.0",
+    "@itwin/itwinui-variables": "^2.0.0",
     "classnames": "^2.3.1",
     "i18next": "^10.2.2",
     "react-redux": "^7.2.0",
@@ -46,34 +47,38 @@
     "rxjs": "^6.6.2"
   },
   "devDependencies": {
-    "@itwin/appui-abstract": "~3.6.0",
-    "@itwin/appui-layout-react": "~3.6.0",
-    "@itwin/appui-react": "~3.6.0",
-    "@itwin/build-tools": "~3.6.0",
-    "@itwin/components-react": "~3.6.0",
-    "@itwin/core-bentley": "~3.6.0",
-    "@itwin/core-common": "~3.6.0",
-    "@itwin/core-frontend": "~3.6.0",
-    "@itwin/core-geometry": "~3.6.0",
-    "@itwin/core-i18n": "~3.6.0",
-    "@itwin/core-markup": "~3.6.0",
-    "@itwin/core-orbitgt": "~3.6.0",
-    "@itwin/core-quantity": "~3.6.0",
-    "@itwin/core-react": "~3.6.0",
-    "@itwin/eslint-plugin": "~3.6.0",
-    "@itwin/imodel-components-react": "~3.6.0",
-    "@itwin/presentation-common": "~3.6.0",
-    "@itwin/presentation-components": "~3.6.0",
-    "@itwin/presentation-frontend": "~3.6.0",
-    "@itwin/presentation-testing": "~3.6.0",
-    "@itwin/webgl-compatibility": "~3.6.0",
+    "@itwin/appui-abstract": "^3.7.0",
+    "@itwin/appui-layout-react": "^4.0.0",
+    "@itwin/appui-react": "^4.0.0",
+    "@itwin/build-tools": "^3.7.0",
+    "@itwin/components-react": "^4.0.0",
+    "@itwin/core-backend": "^3.7.0",
+    "@itwin/core-bentley": "^3.7.0",
+    "@itwin/core-common": "^3.7.0",
+    "@itwin/core-frontend": "^3.7.0",
+    "@itwin/core-geometry": "^3.7.0",
+    "@itwin/core-i18n": "^3.7.0",
+    "@itwin/core-markup": "^3.7.0",
+    "@itwin/core-orbitgt": "^3.7.0",
+    "@itwin/core-quantity": "^3.7.0",
+    "@itwin/core-react": "^4.0.0",
+    "@itwin/core-telemetry": "^3.7.0",
+    "@itwin/ecschema-metadata": "^3.7.0",
+    "@itwin/eslint-plugin": "^3.7.0",
+    "@itwin/imodel-components-react": "^4.0.0",
+    "@itwin/presentation-backend": "^3.7.0",
+    "@itwin/presentation-common": "^3.7.0",
+    "@itwin/presentation-components": "^4.0.0",
+    "@itwin/presentation-frontend": "^3.7.0",
+    "@itwin/presentation-testing": "^4.0.0",
+    "@itwin/webgl-compatibility": "^3.7.0",
     "@testing-library/react": "^12.0.0",
     "@testing-library/react-hooks": "^7.0.2",
     "@types/chai": "4.3.1",
     "@types/chai-jest-snapshot": "^1.3.4",
     "@types/deep-equal": "^1.0.1",
     "@types/i18next": "^8.4.2",
-    "@types/jsdom-global": "^3.0.4",
+    "@types/jsdom-global": "3.0.2",
     "@types/mocha": "^8.2.2",
     "@types/react": "^17.0.19",
     "@types/react-dom": "^17.0.9",
@@ -100,13 +105,32 @@
     "xmlhttprequest": "^1.8.0"
   },
   "peerDependencies": {
-    "@itwin/appui-abstract": "^3.6.0",
-    "@itwin/appui-react": "^3.6.0",
-    "@itwin/components-react": "^3.6.0",
-    "@itwin/core-frontend": "^3.6.0",
-    "@itwin/core-react": "^3.6.0",
-    "@itwin/presentation-components": "^3.6.0",
+    "@itwin/appui-abstract": "^3.7.0",
+    "@itwin/appui-react": "^4.0.0",
+    "@itwin/components-react": "^4.0.0",
+    "@itwin/core-frontend": "^3.7.0",
+    "@itwin/core-react": "^4.0.0",
+    "@itwin/presentation-components": "^4.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
+  },
+  "eslintConfig": {
+    "plugins": [
+      "@itwin"
+    ],
+    "extends": [
+      "plugin:@itwin/ui"
+    ],
+    "rules": {
+      "@itwin/no-internal": [
+        "error"
+      ],
+      "@typescript-eslint/no-floating-promises": [
+        "error",
+        {
+          "ignoreIIFE": true
+        }
+      ]
+    }
   }
 }

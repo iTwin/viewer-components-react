@@ -210,10 +210,12 @@ Array [
 `;
 
 exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
-<body>
+<body
+  class="iui-root"
+>
   <div>
     <div
-      class="tree-widget-models-tree"
+      class="tree-widget-visibility-tree-base"
     >
       <div
         class="core-tree components-controlledTree components-smallEditor-host"
@@ -232,6 +234,7 @@ exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
               style="position: absolute; left: 0px; top: 0px; height: 25px; width: 100%;"
             >
               <div
+                aria-selected="false"
                 class="core-tree-node with-checkbox"
                 data-testid="tree-node"
                 role="treeitem"
@@ -242,20 +245,10 @@ exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
                   data-testid="tree-node-contents"
                   style="margin-left: 24px;"
                 >
-                  <label
-                    class="core-image-checkbox"
-                  >
-                    <input
-                      type="checkbox"
-                    />
-                    <span
-                      class="image"
-                    >
-                      <i
-                        class="icon icon-visibility-hide-2"
-                      />
-                    </span>
-                  </label>
+                  <input
+                    class="iui-checkbox iui-checkbox-visibility visibility-tree-checkbox"
+                    type="checkbox"
+                  />
                   <div
                     class="core-tree-node-icon"
                   />

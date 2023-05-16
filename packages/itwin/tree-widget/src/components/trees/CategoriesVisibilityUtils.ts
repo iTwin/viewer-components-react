@@ -5,7 +5,7 @@
 
 import { QueryRowFormat } from "@itwin/core-common";
 import { IModelConnection, PerModelCategoryVisibility, ViewManager, Viewport } from "@itwin/core-frontend";
-import { CategoryInfo  } from "./category-tree/CategoryVisibilityHandler";
+import { CategoryInfo } from "./category-tree/CategoryVisibilityHandler";
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
@@ -18,10 +18,11 @@ export async function toggleAllCategories(viewManager: ViewManager, imodel: IMod
   const activeView = viewport ?? viewManager.getFirstOpenView();
   const ids = await getCategories(imodel, activeView);
 
-  // istanbul ignore else
-  if (ids.length > 0) {
-    enableCategory(viewManager, imodel, ids, display, forAllViewports ?? false);
-  }
+  // istanbul ignore if
+  if (ids.length === 0)
+    return;
+
+  await enableCategory(viewManager, imodel, ids, display, forAllViewports ?? false);
 }
 
 /**
@@ -34,11 +35,11 @@ export async function getCategories(imodel: IModelConnection, viewport?: Viewpor
 }
 
 /** Changes category display in the viewport */
-export function enableCategory(viewManager: ViewManager, imodel: IModelConnection, ids: string[], enabled: boolean, forAllViewports: boolean, enableAllSubCategories = true) {
+export async function enableCategory(viewManager: ViewManager, imodel: IModelConnection, ids: string[], enabled: boolean, forAllViewports: boolean, enableAllSubCategories = true) {
   if (!viewManager.selectedView)
     return;
 
-  const updateViewport = (vp: Viewport) => {
+  const updateViewport = async (vp: Viewport) => {
     // Only act on viewports that are both 3D or both 2D. Important if we have multiple viewports opened and we
     // are using 'allViewports' property
     if (viewManager.selectedView && viewManager.selectedView.view.is3d() === vp.view.is3d()) {
@@ -55,12 +56,8 @@ export function enableCategory(viewManager: ViewManager, imodel: IModelConnectio
 
       // changeCategoryDisplay only enables subcategories, it does not disabled them. So we must do that ourselves.
       if (false === enabled) {
-        ids.forEach((id) => {
-          const subCategoryIds = imodel.subcategories.getSubCategories(id);
-          // istanbul ignore else
-          if (subCategoryIds) {
-            subCategoryIds.forEach((subCategoryId) => enableSubCategory(viewManager, subCategoryId, false, forAllViewports));
-          }
+        (await imodel.categories.getCategoryInfo(ids)).forEach((categoryInfo) => {
+          categoryInfo.subCategories.forEach((value) => enableSubCategory(viewManager, value.id, false, forAllViewports));
         });
       }
     }
@@ -69,10 +66,10 @@ export function enableCategory(viewManager: ViewManager, imodel: IModelConnectio
   // This property let us act on all viewports or just on the selected one, configurable by the app
   if (forAllViewports) {
     for (const viewport of viewManager) {
-      updateViewport(viewport);
+      await updateViewport(viewport);
     }
   } else {
-    updateViewport(viewManager.selectedView);
+    await updateViewport(viewManager.selectedView);
   }
 }
 
@@ -108,19 +105,16 @@ export async function loadCategoriesFromViewport(iModel?: IModelConnection, vp?:
   const selectUsedSpatialCategoryIds = "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement3d WHERE Category.Id IN (SELECT ECInstanceId from BisCore.SpatialCategory)";
   const selectUsedDrawingCategoryIds = "SELECT DISTINCT Category.Id as id from BisCore.GeometricElement2d WHERE Model.Id=? AND Category.Id IN (SELECT ECInstanceId from BisCore.DrawingCategory)";
   const ecsql = vp.view.is3d() ? selectUsedSpatialCategoryIds : selectUsedDrawingCategoryIds;
-  const ecsql2 = `SELECT ECInstanceId as id, UserLabel as label, CodeValue as code FROM ${vp.view.is3d() ? "BisCore.SpatialCategory" : "BisCore.DrawingCategory"} WHERE ECInstanceId IN (${ecsql})`;
+  const ecsql2 = `SELECT ECInstanceId as id FROM ${vp.view.is3d() ? "BisCore.SpatialCategory" : "BisCore.DrawingCategory"} WHERE ECInstanceId IN (${ecsql})`;
 
-  const categories: CategoryInfo [] = [];
+  const categories: CategoryInfo[] = [];
 
   // istanbul ignore else
   if (iModel) {
-    const rowIterator = iModel.query(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
-    // istanbul ignore next
-    for await (const row of rowIterator) {
-      const subCategoryIds = iModel.subcategories.getSubCategories(row.id);
-      categories.push({ categoryId: row.id, subCategoryIds: (subCategoryIds) ? [...subCategoryIds] : undefined });
-    }
+    const rows = await iModel.createQueryReader(ecsql2, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames }).toArray();
+    (await iModel.categories.getCategoryInfo(rows.map((row) => row.id))).forEach((val) => {
+      categories.push({ categoryId: val.id, subCategoryIds: val.subCategories.size ? [...val.subCategories.keys()] : undefined });
+    });
   }
-
   return categories;
 }

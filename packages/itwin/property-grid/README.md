@@ -37,16 +37,28 @@ interface PropertyGridProps {
   isOrientationFixed?: boolean;
   enableFavoriteProperties?: boolean;
   favoritePropertiesScope?: FavoritePropertiesScope;
+  customOnDataChanged?: (
+    dataProvider: IPresentationPropertyDataProvider
+  ) => Promise<void>;
+  actionButtonRenderers?: ActionButtonRenderer[];
+  actionButtonsWidth?: number;
   enableCopyingPropertyText?: boolean;
   enableNullValueToggle?: boolean;
+  enableAncestorNavigation?: boolean;
+  persistNullValueToggle?: boolean;
+  defaultPanelLocation?: StagePanelLocation;
+  defaultPanelSection?: StagePanelSection;
+  defaultPanelWidgetPriority?: number;
   enablePropertyGroupNesting?: boolean;
   additionalContextMenuOptions?: ContextMenuItemInfo[];
+  defaultContextMenuOptions?: Map<PropertyGridDefaultContextMenuKey, Partial<ContextMenuItemInfo>>;
   rulesetId?: string;
   rootClassName?: string;
   dataProvider?: PresentationPropertyDataProvider;
-  onInfoButton?: () => void;
   onBackButton?: () => void;
   disableUnifiedSelection?: boolean;
+  autoExpandChildCategories?: boolean;
+  headerContent?: JSX.Element;
 }
 ```
 

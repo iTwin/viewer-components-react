@@ -2,9 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/core-react/lib/cjs/core-react/style/themecolors";
 
-@mixin tree-widget-visibility-tree-base {
+.tree-widget-visibility-tree-base {
   height: 100%;
   width: 100%;
   display: flex;
@@ -13,15 +12,18 @@
 
   .core-tree-node.with-checkbox {
     >.contents {
-      padding-left: 31px;
+      padding-left: var(--iui-size-xl);
     }
   }
 
-  .contents > .core-image-checkbox {
+  .contents > .visibility-tree-checkbox {
     position: absolute;
     top: unset;
     left: 5px;
-    margin: -2px 0px 0px 5px;
+
+    &:hover, &:disabled {
+      background-color: transparent;
+    }
   }
 
   .filteredTreeOverlay {
@@ -31,7 +33,7 @@
     width: 100%;
     height: 100%;
     z-index: 9999;
-    background-color: rgba(255, 255, 255, .8);
+    background-color: hsl(var(--iui-color-background) / var(--iui-opacity-2));
   }
 
   .components-tree-errormessage {
@@ -42,7 +44,7 @@
     text-align: center;
     transform: translate(-50%, -50%);
     font-style: italic;
-    color: $buic-foreground-muted;
+    color: var(--iui-color-text-muted);
 
     .errormessage-header {
       display: block;

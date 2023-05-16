@@ -34,7 +34,10 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
   const [validator, showValidationMessage] = useValidator();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const displayStrings = { ...defaultDisplayStrings, ...userDisplayStrings };
+  const displayStrings = React.useMemo(
+    () => ({ ...defaultDisplayStrings, ...userDisplayStrings }),
+    [userDisplayStrings]
+  );
 
   const onSave = async () => {
     try {

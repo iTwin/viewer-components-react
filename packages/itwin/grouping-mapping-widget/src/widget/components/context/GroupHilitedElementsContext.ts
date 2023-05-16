@@ -5,20 +5,24 @@
 import * as React from "react";
 import type { MutableRefObject } from "react";
 import type { Group } from "@itwin/insights-client";
-
+import type { KeySet } from "@itwin/presentation-common";
+export interface QueryCacheItem {
+  keySet: KeySet;
+  ids: string[];
+}
 export interface GroupHilitedElements {
-  hilitedElementsQueryCache: MutableRefObject<Map<string, string[]>>;
-  hiddenGroupsIds: string[];
+  hilitedElementsQueryCache: MutableRefObject<Map<string, QueryCacheItem>>;
+  hiddenGroupsIds: Set<string>;
   showGroupColor: boolean;
   groups: Group[];
   setGroups: (groups: Group[]) => void;
-  setHiddenGroupsIds: (hiddenGroupIds: string[]) => void;
+  setHiddenGroupsIds: (hiddenGroupIds: Set<string>) => void;
   setShowGroupColor: (showGroupColor: boolean | ((showGroupColor: boolean) => boolean)) => void;
 }
 
 export const GroupHilitedElementsContext = React.createContext<GroupHilitedElements>({
   hilitedElementsQueryCache: { current: new Map() },
-  hiddenGroupsIds: [],
+  hiddenGroupsIds: new Set(),
   showGroupColor: false,
   groups: [],
   setGroups: () => { },

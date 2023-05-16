@@ -2,16 +2,22 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+
 import "./PropertyGrid.scss";
+import React, { useCallback, useMemo } from "react";
+import { PropertyValueFormat } from "@itwin/appui-abstract";
+import {
+  FilteredType, FilteringPropertyDataProvider, PropertyDataChangeEvent, PropertyRecordDataFiltererBase, VirtualizedPropertyGridWithDataProvider,
+} from "@itwin/components-react";
+import { FillCentered, useDisposable } from "@itwin/core-react";
+import { usePropertyDataProviderWithUnifiedSelection } from "@itwin/presentation-components";
+import { PropertyGridManager } from "../PropertyGridManager";
+
 import type { IDisposable } from "@itwin/core-bentley";
 import type {
   IPresentationPropertyDataProvider,
 } from "@itwin/presentation-components";
-import {
-  usePropertyDataProviderWithUnifiedSelection,
-} from "@itwin/presentation-components";
 import type { PropertyRecord } from "@itwin/appui-abstract";
-import { PropertyValueFormat } from "@itwin/appui-abstract";
 import type {
   IPropertyDataProvider,
   PropertyCategory,
@@ -20,17 +26,6 @@ import type {
   PropertyDataFilterResult,
   VirtualizedPropertyGridWithDataProviderProps,
 } from "@itwin/components-react";
-import {
-  FilteredType,
-  FilteringPropertyDataProvider,
-  PropertyDataChangeEvent,
-  PropertyRecordDataFiltererBase,
-  VirtualizedPropertyGridWithDataProvider,
-} from "@itwin/components-react";
-import { FillCentered, useDisposable } from "@itwin/core-react";
-
-import { PropertyGridManager } from "../PropertyGridManager";
-import React, { useCallback, useMemo } from "react";
 
 /**
  * Placeholder filter
@@ -80,8 +75,8 @@ type CustomPropertyDataProvider<TPropertyData> = IDisposable &
 Omit<IPropertyDataProvider, "getData"> & {
   getData: () => Promise<TPropertyData>;
 };
-class AutoExpandingPropertyFilterDataProvider<TPropertyData extends PropertyData>
-implements IPropertyDataProvider, IDisposable {
+
+class AutoExpandingPropertyFilterDataProvider<TPropertyData extends PropertyData> implements IPropertyDataProvider, IDisposable {
   public onDataChanged = new PropertyDataChangeEvent();
   private _removeListener: () => void;
   private _autoExpandChildCategories = true;
@@ -182,6 +177,9 @@ export const FilteringPropertyGrid = (
     <>
       <VirtualizedPropertyGridWithDataProvider
         {...props}
+        minLabelWidth={10}
+        minValueWidth={10}
+        actionButtonWidth={props.actionButtonWidth ?? props.actionButtonRenderers ? undefined : 0}
         dataProvider={autoExpandingFilteringDataProvider}
       />
     </>

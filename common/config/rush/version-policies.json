@@ -1,8 +1,7 @@
 [
   {
     "policyName": "deprecated",
-    "definitionName": "individualVersion",
-    "exemptFromRushChange": true
+    "definitionName": "individualVersion"
   },
   {
     "policyName": "itwin-tree-widget",
@@ -26,8 +25,9 @@
   },
   {
     "policyName": "itwin-geo-tools",
-    "definitionName": "individualVersion",
-    "lockedMajor": 0
+    "definitionName": "lockStepVersion",
+    "version": "0.3.0-dev.6",
+    "nextBump": "prerelease"
   },
   {
     "policyName": "itwin-breakdown-trees",
@@ -62,7 +62,7 @@
   {
     "policyName": "itwin-map-layers",
     "definitionName": "lockStepVersion",
-    "version": "4.0.0-dev.45",
+    "version": "4.0.0-dev.51",
     "nextBump": "prerelease"
   }
 ]

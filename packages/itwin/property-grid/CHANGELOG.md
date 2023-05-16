@@ -1,6 +1,20 @@
 # Change Log - @itwin/property-grid-react
 
-This log was last generated on Thu, 04 Aug 2022 20:07:49 GMT and should not be manually modified.
+This log was last generated on Tue, 02 May 2023 16:12:17 GMT and should not be manually modified.
+
+## 0.10.0
+Tue, 02 May 2023 16:12:17 GMT
+
+### Minor changes
+
+- Updated to AppUI 4.0 and Presentation 4.0
+
+## 0.9.0
+Mon, 03 Apr 2023 15:34:07 GMT
+
+### Minor changes
+
+- Updated dependencies: `itwinjs-core@3.7`, `appui@4.0`, `presentation-components@4.0`, `itwinui@2.0`.
 
 ## 0.8.1
 Thu, 04 Aug 2022 20:07:49 GMT

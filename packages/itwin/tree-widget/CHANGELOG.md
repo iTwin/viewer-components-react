@@ -1,6 +1,25 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Fri, 24 Mar 2023 10:46:34 GMT and should not be manually modified.
+This log was last generated on Tue, 02 May 2023 16:12:17 GMT and should not be manually modified.
+
+## 0.9.0
+Tue, 02 May 2023 16:12:17 GMT
+
+### Minor changes
+
+- Updated to AppUI 4.0 and Presentation 4.0
+
+## 0.8.0
+Mon, 03 Apr 2023 15:34:07 GMT
+
+### Minor changes
+
+- Removed `SpatialTree` and related components in favor of the ones in `@itwin/breakdown-trees-react`
+- Updated dependencies (`itwinui@2`, `appui@4`, `presentation-components@4`, `itwinjs-core@3.7`)
+
+### Patches
+
+- Use iTwin UI components instead of custom ones and CSS variables from `@itwin/itwinui-variables` instead of `@itwin/core-react`
 
 ## 0.7.2
 Fri, 24 Mar 2023 10:46:34 GMT

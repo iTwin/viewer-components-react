@@ -3,9 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { renderToStaticMarkup } from "react-dom/server";
-import type { KeySet } from "@itwin/presentation-common";
 import { PropertyValueFormat } from "@itwin/presentation-common";
-import { useActiveIModelConnection } from "@itwin/appui-react";
 import type { SelectOption } from "@itwin/itwinui-react";
 import {
   Alert,
@@ -24,12 +22,13 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
-import { handleError, WidgetHeader } from "./utils";
+import { handleError } from "./utils";
 import { useMappingClient } from "./context/MappingClientContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 import { HorizontalTile } from "./HorizontalTile";
 import { DataType, QuantityType } from "@itwin/insights-client";
 import type {
+  Group,
   GroupProperty,
   GroupPropertyCreate,
 } from "@itwin/insights-client";
@@ -66,15 +65,14 @@ import {
   fetchPresentationDescriptor,
   findProperties,
 } from "./GroupPropertyUtils";
+import { manufactureKeys } from "./viewerUtils";
 
 export interface GroupPropertyActionProps {
-  iModelId: string;
   mappingId: string;
-  groupId: string;
-  groupPropertyId?: string;
-  groupPropertyName?: string;
-  keySet: KeySet;
-  returnFn: (modified: boolean) => Promise<void>;
+  group: Group;
+  groupProperty?: GroupProperty;
+  onSaveSuccess: () => void;
+  onClickCancel?: () => void;
 }
 
 export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
@@ -88,17 +86,14 @@ export const quantityTypesSelectionOptions: SelectOption<QuantityType>[] = [
   { value: QuantityType.Undefined, label: "No Quantity Type" },
 ];
 
-const GroupPropertyAction = ({
-  iModelId,
+export const GroupPropertyAction = ({
   mappingId,
-  groupId,
-  groupPropertyId,
-  groupPropertyName,
-  keySet,
-  returnFn,
+  group,
+  groupProperty,
+  onSaveSuccess,
+  onClickCancel,
 }: GroupPropertyActionProps) => {
-  const iModelConnection = useActiveIModelConnection();
-  const { getAccessToken } = useGroupingMappingApiConfig();
+  const { getAccessToken, iModelId, iModelConnection } = useGroupingMappingApiConfig();
   const mappingClient = useMappingClient();
   const [propertyName, setPropertyName] = useState<string>("");
   const [dataType, setDataType] = useState<DataType>(DataType.Undefined);
@@ -151,13 +146,21 @@ const GroupPropertyAction = ({
     [activeSearchInput, propertiesMetaData]
   );
 
+  const reset = useCallback(() => {
+    setPropertyName("");
+    setDataType(DataType.Undefined);
+    setSelectedProperties([]);
+  }, []);
+
   useEffect(() => {
     const generateProperties = async () => {
       setIsLoading(true);
 
       if (!iModelConnection) return;
 
-      const descriptor = await fetchPresentationDescriptor(iModelConnection, keySet);
+      const result = await manufactureKeys(group.query, iModelConnection);
+
+      const descriptor = await fetchPresentationDescriptor(iModelConnection, result);
 
       // Only allow primitives and structs
       const propertyFields =
@@ -171,7 +174,7 @@ const GroupPropertyAction = ({
 
       setPropertiesMetaData(propertiesMetaData);
 
-      if (groupPropertyId) {
+      if (groupProperty) {
         const accessToken = await getAccessToken();
         let response: GroupProperty | undefined;
         try {
@@ -179,8 +182,8 @@ const GroupPropertyAction = ({
             accessToken,
             iModelId,
             mappingId,
-            groupId,
-            groupPropertyId
+            group.id,
+            groupProperty.id
           );
 
           setPropertyName(response.propertyName);
@@ -200,7 +203,7 @@ const GroupPropertyAction = ({
       setIsLoading(false);
     };
     void generateProperties();
-  }, [getAccessToken, mappingClient, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
+  }, [getAccessToken, mappingClient, iModelConnection, iModelId, groupProperty, mappingId, group]);
 
   const onSave = async () => {
     if (!validator.allValid()) {
@@ -210,31 +213,33 @@ const GroupPropertyAction = ({
     try {
       setIsLoading(true);
       const accessToken = await getAccessToken();
-      const groupProperty: GroupPropertyCreate = {
+      const newGroupProperty: GroupPropertyCreate = {
         propertyName,
         dataType,
         quantityType,
         ecProperties: selectedProperties.map((p) => convertToECProperties(p)).flat(),
       };
-      groupPropertyId
+      groupProperty
         ? await mappingClient.updateGroupProperty(
           accessToken,
           iModelId,
           mappingId,
-          groupId,
-          groupPropertyId,
-          groupProperty
+          group.id,
+          groupProperty.id,
+          newGroupProperty
         )
         : await mappingClient.createGroupProperty(
           accessToken,
           iModelId,
           mappingId,
-          groupId,
-          groupProperty
+          group.id,
+          newGroupProperty
         );
-      await returnFn(true);
+      onSaveSuccess();
+      reset();
     } catch (error: any) {
       handleError(error.status);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -265,10 +270,6 @@ const GroupPropertyAction = ({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <WidgetHeader
-        title={groupPropertyName ?? "Add Property"}
-        returnFn={async () => returnFn(false)}
-      />
       <div className='gmw-group-property-action-container'>
         <Fieldset disabled={isLoading} className='gmw-property-options' legend='Property Details'>
           <Small className='gmw-field-legend'>
@@ -366,10 +367,10 @@ const GroupPropertyAction = ({
       </div>
       <ActionPanel
         onSave={onSave}
-        onCancel={async () => returnFn(false)}
+        onCancel={onClickCancel}
         isLoading={isLoading}
         isSavingDisabled={
-          selectedProperties.length === 0 || !propertyName || !dataType
+          selectedProperties.length === 0 || !propertyName || dataType === DataType.Undefined
         }
       />
       <Modal
@@ -524,6 +525,4 @@ const GroupPropertyAction = ({
     </DndContext>
   );
 };
-
-export default GroupPropertyAction;
 

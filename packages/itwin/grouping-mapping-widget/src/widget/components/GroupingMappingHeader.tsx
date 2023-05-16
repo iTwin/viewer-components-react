@@ -4,22 +4,26 @@
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
 import type { Route } from "./GroupingMapping";
-import { WidgetHeader } from "./utils";
+import { RouteStep } from "./GroupingMapping";
+import { WidgetHeader } from "./WidgetHeader";
 
 export const GroupingMappingHeader = ({
-  routingHistory,
   goBack,
   currentRoute,
 }: {
-  routingHistory: Route[];
   goBack: () => void;
   currentRoute: Route;
 }) => {
+  const shouldDisableReturnFn =
+    currentRoute.step === RouteStep.Mappings ||
+    currentRoute.step === RouteStep.MappingsAction ||
+    currentRoute.step === RouteStep.GroupAction ||
+    currentRoute.step === RouteStep.PropertyAction ||
+    currentRoute.step === RouteStep.CalculatedPropertyAction ||
+    currentRoute.step === RouteStep.CustomCalculationPropertyAction;
   return (
     <WidgetHeader
-      returnFn={
-        routingHistory.length > 1 ? goBack : undefined
-      }
+      returnFn={shouldDisableReturnFn ? undefined : goBack}
       title={currentRoute.title}
     />
   );

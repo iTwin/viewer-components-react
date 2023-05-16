@@ -38,12 +38,12 @@ describe("TreeNodeFunctionalityMapper", () => {
     const ifcWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.IfcWall, "0x3")]);
     const obdWallNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.OBDWall, "0x4")]);
     const unrelatedNodeKey = FunctionalityProviderTestUtils.createClassNodeKey([], [FunctionalityProviderTestUtils.createECInstanceKey(MockClassNames.UnrelatedClass, "0x5")]);
-    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.GroupNode }))).returns((_item: TreeNodeItem): GroupingNodeKey => groupNodeKey);
-    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.DoorNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => doorNodeKey);
-    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.WindowNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => windowNodeKey);
-    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey);
-    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.OBDWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => obdWallNodeKey);
-    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.UnrelatedNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => unrelatedNodeKey);
+    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.GroupNode }))).returns((_item: TreeNodeItem): GroupingNodeKey => groupNodeKey); // eslint-disable-line deprecation/deprecation
+    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.DoorNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => doorNodeKey); // eslint-disable-line deprecation/deprecation
+    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.WindowNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => windowNodeKey); // eslint-disable-line deprecation/deprecation
+    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.IfcWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => ifcWallNodeKey); // eslint-disable-line deprecation/deprecation
+    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.OBDWallNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => obdWallNodeKey); // eslint-disable-line deprecation/deprecation
+    dataProviderMock.setup((x) => x.getNodeKey(moq.It.isObjectWith<TreeNodeItem>({ id: MockStrings.UnrelatedNode }))).returns((_item: TreeNodeItem): ECInstancesNodeKey => unrelatedNodeKey); // eslint-disable-line deprecation/deprecation
     dataProviderMock.setup((x) => x.imodel).returns(() => connection.object);
 
     iModelReadRPCInterfaceMock.setup(async (x) => x.getClassHierarchy(moq.It.isAny(), MockClassNames.IfcWall)).returns(async () => Promise.resolve([MockClassNames.IfcWall, MockClassNames.BaseWall, MockClassNames.PhysicalElement]));

@@ -8,6 +8,7 @@ import { TreeNodeItem, useAsyncValue } from "@itwin/components-react";
 import { BeEvent } from "@itwin/core-bentley";
 import { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
 import { NodeKey } from "@itwin/presentation-common";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { enableCategory, enableSubCategory, loadCategoriesFromViewport } from "../CategoriesVisibilityUtils";
 import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
 
@@ -73,12 +74,20 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
 
   public onVisibilityChange = new BeEvent<VisibilityChangeListener>();
 
-  public getVisibilityStatus(node: TreeNodeItem, nodeKey: NodeKey): VisibilityStatus {
+  public getVisibilityStatus(node: TreeNodeItem,): VisibilityStatus {
+    const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
+    if (!nodeKey)
+      return { state: "hidden", isDisabled: true};
+
     const instanceId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
     return { state: node.parentId ? this.getSubCategoryVisibility(instanceId) : this.getCategoryVisibility(instanceId) };
   }
 
-  public async changeVisibility(node: TreeNodeItem, nodeKey: NodeKey, shouldDisplay: boolean): Promise<void> {
+  public async changeVisibility(node: TreeNodeItem, shouldDisplay: boolean): Promise<void> {
+    const nodeKey = isPresentationTreeNodeItem(node) ? node.key : undefined;
+    if (!nodeKey)
+      return;
+
     // handle subcategory visibility change
     if (node.parentId) {
       const childId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
@@ -87,14 +96,14 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
 
       // make sure parent category is enabled
       if (shouldDisplay && parentId)
-        this.enableCategory([parentId], true, false);
+        await this.enableCategory([parentId], true, false);
 
       this.enableSubCategory(childId, shouldDisplay);
       return;
     }
 
     const instanceId = CategoryVisibilityHandler.getInstanceIdFromTreeNodeKey(nodeKey);
-    this.enableCategory([instanceId], shouldDisplay, true);
+    await this.enableCategory([instanceId], shouldDisplay, true);
   }
 
   public getSubCategoryVisibility(id: string) {
@@ -148,8 +157,8 @@ export class CategoryVisibilityHandler implements IVisibilityHandler {
     return (NodeKey.isInstancesNodeKey(nodeKey) && nodeKey.instanceKeys.length > 0) ? nodeKey.instanceKeys[0].id : /* istanbul ignore next */ "";
   }
 
-  public enableCategory(ids: string[], enabled: boolean, enableAllSubCategories = true) {
-    enableCategory(this._viewManager, this._imodel, ids, enabled, this._useAllViewports, enableAllSubCategories);
+  public async enableCategory(ids: string[], enabled: boolean, enableAllSubCategories = true) {
+    await enableCategory(this._viewManager, this._imodel, ids, enabled, this._useAllViewports, enableAllSubCategories);
   }
 
   public enableSubCategory(key: string, enabled: boolean) {
