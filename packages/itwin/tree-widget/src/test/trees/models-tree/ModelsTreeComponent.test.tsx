@@ -120,7 +120,11 @@ describe("<ModelsTreeComponent />", () => {
       const spy = sinon.stub().returns(<></>);
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
-      sinon.stub(UiFramework, "getIModelConnection").returns({ queryProps: sinon.fake.throws("err") } as unknown as IModelConnection);
+      sinon.stub(UiFramework, "getIModelConnection").returns({
+        models: {
+          queryProps: () => { throw new Error(); },
+        },
+      } as unknown as IModelConnection);
       render(
         <ModelsTreeComponent
           headerButtons={[spy]}
