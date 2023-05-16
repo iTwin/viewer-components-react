@@ -107,7 +107,7 @@ describe("CategoryVisibilityUtils", () => {
 
     it("calls enableCategory with false when forAllViewports is undefined", async () => {
       const selectedViewMock1 = moq.Mock.ofType<ScreenViewport>();
-      viewManagerMock.setup((x) => x[Symbol.iterator]()).returns(function*() { yield selectedViewMock1.object; yield selectedViewMock1.object; });
+      viewManagerMock.setup((x) => x[Symbol.iterator]()).returns(function*() { yield selectedViewMock1.object; });
       await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object);
       selectedViewMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.once());
       selectedViewMock1.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.never());
