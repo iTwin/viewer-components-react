@@ -10,47 +10,19 @@ import { PresentationPropertyDataProvider } from "@itwin/presentation-components
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 
-/** Props for configuring default data provider used by `PropertyGrid` */
-export interface DefaultDataProviderProps {
-  /** Flag that specified whether data provider should create `Favorites` category. */
-  enableFavoriteProperties?: boolean;
-  /** Flag that specified whether nested property categories are enabled. */
-  enablePropertyGroupNesting?: boolean;
-  /** Id of ruleset that should be used when pulling data. */
-  rulesetId?: string;
-}
-
-/** Props for providing custom data provider that will be used by `PropertyGrid` */
-export interface CustomDataProviderProps {
+/** Props for data provider used by `PropertyGrid` */
+export interface DataProviderProps {
   /** Callback that creates custom data provider that should be used instead of default one. */
-  createDataProvider: (imodel: IModelConnection) => IPresentationPropertyDataProvider;
+  createDataProvider?: (imodel: IModelConnection) => IPresentationPropertyDataProvider;
 }
 
-/** Props for data provider used by `PropertyGrid`. */
-export type DataProviderProps = DefaultDataProviderProps | CustomDataProviderProps;
-
-/** Custom hook that creates default data provider. */
-export function useDefaultDataProvider({ imodel, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting }: DefaultDataProviderProps & { imodel: IModelConnection }) {
-  return useDisposable(useCallback(
-    () => {
-      const dp = new PresentationPropertyDataProvider({
-        imodel,
-        ruleset: rulesetId,
-        disableFavoritesCategory: !enableFavoriteProperties,
-      });
-
-      dp.pagingSize = 50;
-      dp.isNestedPropertyCategoryGroupingEnabled = !!enablePropertyGroupNesting;
-      return dp;
-    },
-    [imodel, rulesetId, enableFavoriteProperties, enablePropertyGroupNesting])
+/** Custom hook that creates data provider. */
+export function useDataProvider({ imodel, createDataProvider }: DataProviderProps & { imodel: IModelConnection }) {
+  return useDisposable(
+    useCallback(
+      () => createDataProvider ? createDataProvider(imodel) : new PresentationPropertyDataProvider({ imodel }),
+      [imodel, createDataProvider]
+    )
   );
 }
 
-/** Custom hook that creates custom data provider. */
-export function useCustomDataProvider({ imodel, createDataProvider }: CustomDataProviderProps & { imodel: IModelConnection }) {
-  return useDisposable(useCallback(
-    () => createDataProvider(imodel),
-    [createDataProvider, imodel])
-  );
-}
