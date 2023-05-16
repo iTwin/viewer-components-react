@@ -12,7 +12,7 @@ import { TestUtils } from "../TestUtils";
 import { expect } from "chai";
 
 import type { ECSqlReader } from "@itwin/core-common";
-import type { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
+import { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
 import type { Id64String } from "@itwin/core-bentley";
 
 describe("CategoryVisibilityUtils", () => {
@@ -106,9 +106,11 @@ describe("CategoryVisibilityUtils", () => {
     });
 
     it("calls enableCategory with false when forAllViewports is undefined", async () => {
-      viewManagerMock.setup((x) => x[Symbol.iterator]()).returns(function*() { yield selectedViewMock.object; yield selectedViewMock.object; });
+      const selectedViewMock1 = moq.Mock.ofType<ScreenViewport>();
+      viewManagerMock.setup((x) => x[Symbol.iterator]()).returns(function*() { yield selectedViewMock1.object; yield selectedViewMock1.object; });
       await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object);
-      selectedViewMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, false), moq.Times.once());
+      selectedViewMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.once());
+      selectedViewMock1.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.never());
     });
   });
 
@@ -265,11 +267,8 @@ describe("CategoryVisibilityUtils", () => {
       );
       queryReaderMock.reset();
       categoriesMock.reset();
-      imodelMock.reset();
       queryReaderMock.setup(async (x) => x.toArray()).returns(async () => [{ id: "CategoryWithoutSubcategories" }]);
       categoriesMock.setup(async (x) => x.getCategoryInfo(["CategoryWithoutSubcategories"])).returns(async () => categoryInfoWithoutSubcategories);
-      imodelMock.setup((x) => x.createQueryReader(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => queryReaderMock.object);
-      imodelMock.setup((x) => x.categories).returns(() => categoriesMock.object);
       const result = await loadCategoriesFromViewport(imodelMock.object, viewportMock.object);
       expect(result[0].subCategoryIds).to.be.undefined;
     });

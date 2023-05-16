@@ -56,18 +56,22 @@ describe("<ModelsTreeComponent />", () => {
 
   it("returns null if iModel is undefined", () => {
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => ({} as Viewport));
+    const modelsTreeSpy = sinon.stub(modelsTree, "ModelsTree");
     const result = render(
       <ModelsTreeComponent />
     );
     expect(result.container.children).to.be.empty;
+    expect(modelsTreeSpy).to.not.be.called;
   });
 
   it("returns null if viewport is undefined", () => {
     sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
+    const modelsTreeSpy = sinon.stub(modelsTree, "ModelsTree");
     const result = render(
       <ModelsTreeComponent />
     );
     expect(result.container.children).to.be.empty;
+    expect(modelsTreeSpy).to.not.be.called;
   });
 
   it("returns ModelsTreeComponentImpl when iModel and viewport are defined", async () => {
@@ -92,13 +96,13 @@ describe("<ModelsTreeComponent />", () => {
     it("sets available models", async () => {
       const iModel = {
         models: {
-          queryProps: sinon.fake.returns(new Promise<ModelProps[]>((resolve) => resolve([{
+          queryProps: () => Promise.resolve([{
             id: "testIdFromQueryModels",
             modeledElement: {
               id: "id",
             },
             classFullName: "className",
-          }]))),
+          }]) as unknown as ModelProps[],
         } as unknown as IModelConnection.Models,
       } as unknown as IModelConnection;
       const spy = sinon.stub().returns(<></>);
@@ -150,6 +154,7 @@ describe("<ModelsTreeComponent />", () => {
         />
       );
       expect(treewHeaderSpy).to.be.calledWith(sinon.match((props: TreeHeaderProps) => Children.count(props.children) === 1 ));
+      expect(spy).to.be.called;
     });
 
     describe("<ShowAllButton />", () => {

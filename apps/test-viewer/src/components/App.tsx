@@ -23,7 +23,7 @@ export function App() {
 
 function Main() {
   const { state } = useAuthorizationContext();
-
+  globalThis.IMJS_URL_PREFIX = "qa-";
   return (
     <div className="viewer-container">
       {state === AuthorizationState.Pending

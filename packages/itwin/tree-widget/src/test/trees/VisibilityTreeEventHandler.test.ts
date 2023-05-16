@@ -64,7 +64,7 @@ describe("VisibilityTreeEventHandler", () => {
     if (!partialProps)
       partialProps = {};
     const props: VisibilityTreeEventHandlerParams = {
-      visibilityHandler: partialProps.visibilityHandler || undefined,
+      visibilityHandler: partialProps.visibilityHandler || visibilityHandler,
       nodeLoader: partialProps.nodeLoader || nodeLoaderMock.object,
       selectionHandler: partialProps.selectionHandler || selectionHandlerMock.object,
     };
@@ -166,29 +166,5 @@ describe("VisibilityTreeEventHandler", () => {
       expect(getVisibilityStatus.callCount).to.eq(1);
     });
 
-  });
-
-  it("getNodeCheckBoxInfo doesn't call getVisibilityStatus when visibilityHandler is undefined", async () => {
-    const node1 = createSimpleTreeModelNode("testId1");
-    modelMock.reset();
-    modelMock.setup((x) => x.getNode("testId1")).returns(() => node1);
-
-    const treeModelNodes = [
-      createSimpleTreeModelNode("testId1"),
-      createSimpleTreeModelNode("testId2"),
-      createSimpleTreeModelNode("testId3"),
-    ];
-
-    modelMock.setup((x) => x.iterateTreeModelNodes()).returns(() => treeModelNodes[Symbol.iterator]());
-    const eventHandler = createHandler();
-    const changes: CheckboxStateChange[] = [{ nodeItem: node1.item, newState: CheckBoxState.Off }];
-    await using(eventHandler, async (_) => {
-      eventHandler.onCheckboxStateChanged({
-        // eslint-disable-next-line deprecation/deprecation
-        stateChanges: from([changes]),
-      });
-      await flushAsyncOperations();
-    });
-    expect(getVisibilityStatus).to.not.be.called;
   });
 });

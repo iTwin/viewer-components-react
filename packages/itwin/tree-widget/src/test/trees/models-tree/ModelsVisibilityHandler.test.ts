@@ -19,7 +19,7 @@ import { CachingElementIdsContainer } from "../../../components/trees/models-tre
 import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
-import { NodeKey, StandardNodeTypes } from "@itwin/presentation-common";
+import { ECClassGroupingNodeKey, StandardNodeTypes } from "@itwin/presentation-common";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECSqlReader } from "@itwin/core-common";
@@ -125,32 +125,40 @@ describe("ModelsVisibilityHandler", () => {
 
   it("getNodeType", () => {
     expect(ModelsVisibilityHandler.getNodeType({} as TreeNodeItem)).to.be.eq(ModelsTreeNodeType.Unknown);
-    const isClassGroupingNodeKeySpy = sinon.stub(NodeKey, "isClassGroupingNodeKey").returns(true);
     const node = {
       key: {
-        type: StandardNodeTypes.ECInstancesNode,
+        type: StandardNodeTypes.ECClassGroupingNode,
         version: 0,
-        instanceKeys: [{ className: "MyDomain:SpatialCategory", id: "testInstanceId" }],
         pathFromRoot: [],
-      },
+        className: "testClassName",
+        groupedInstancesCount: 0,
+      } as ECClassGroupingNodeKey,
       id: "testId",
       label: PropertyRecord.fromString("category-node"),
       autoExpand: true,
       hasChildren: true,
     } as PresentationTreeNodeItem;
     expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Grouping);
-    isClassGroupingNodeKeySpy.returns(false);
+    node.key = {
+      type: StandardNodeTypes.ECInstancesNode,
+      version: 0,
+      instanceKeys: [{ className: "MyDomain:SpatialCategory", id: "testInstanceId" }],
+      pathFromRoot: [],
+    };
     expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Unknown);
-    node.extendedData = {};
-    const isSubjectNodeSpy = sinon.stub(ModelsVisibilityHandler, "isSubjectNode").returns(true);
+    node.extendedData = {
+      isSubject: true,
+    };
     expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Subject);
-    isSubjectNodeSpy.returns(false);
-    const isModelNodeSpy = sinon.stub(ModelsVisibilityHandler, "isModelNode").returns(true);
+    node.extendedData = {
+      isModel: true,
+    };
     expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Model);
-    isModelNodeSpy.returns(false);
-    const isCategoryNodeSpy = sinon.stub(ModelsVisibilityHandler, "isCategoryNode").returns(true);
+    node.extendedData = {
+      isCategory: true,
+    };
     expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Category);
-    isCategoryNodeSpy.returns(false);
+    node.extendedData = {};
     expect(ModelsVisibilityHandler.getNodeType(node)).to.be.eq(ModelsTreeNodeType.Element);
   });
 
