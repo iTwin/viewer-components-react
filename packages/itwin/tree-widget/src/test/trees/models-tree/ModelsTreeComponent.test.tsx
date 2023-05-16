@@ -74,7 +74,7 @@ describe("<ModelsTreeComponent />", () => {
     expect(modelsTreeSpy).to.not.be.called;
   });
 
-  it("returns ModelsTreeComponentImpl when iModel and viewport are defined", async () => {
+  it("renders `ModelsTree` when iModel and viewport are defined", async () => {
     const modelsTreeSpy = sinon.stub(modelsTree, "ModelsTree").returns(<></>);
     sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
     sinon.stub(UiFramework, "getIModelConnection").returns({} as IModelConnection);
@@ -91,9 +91,9 @@ describe("<ModelsTreeComponent />", () => {
     expect(translateSpy).to.be.calledWith("models");
   });
 
-  describe("queryModels", () => {
+  describe("available models", () => {
 
-    it("sets available models", async () => {
+    it("renders button with available models", async () => {
       const iModel = {
         models: {
           queryProps: () => Promise.resolve([{
@@ -117,7 +117,7 @@ describe("<ModelsTreeComponent />", () => {
       await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: ModelsTreeHeaderButtonProps) => (props.models.length === 1 && props.models[0].id === "testIdFromQueryModels"))));
     });
 
-    it("returns empty array when quryProps throws error", async () => {
+    it("renders button with empty available models list if error if thrown while querying available models", async () => {
       const spy = sinon.stub().returns(<></>);
       sinon.stub(modelsTree, "ModelsTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
@@ -131,7 +131,7 @@ describe("<ModelsTreeComponent />", () => {
     });
   });
 
-  describe("models tree header buttons", () => {
+  describe("header buttons", () => {
 
     it("renders default tree header buttons", () => {
       const treewHeaderSpy = sinon.stub(treeHeader, "TreeHeader").returns(<></>);
