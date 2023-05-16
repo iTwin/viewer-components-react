@@ -61,12 +61,12 @@ function getMapLayerSettingsFromViewport(viewport: Viewport, getBackgroundMap: b
 
   const layers = new Array<StyleMapLayerSettings>();
 
-  const displayStyleLayers = (getBackgroundMap ? displayStyle.backgroundMapLayers : displayStyle.overlayMapLayers);
+  const displayStyleLayers = (getBackgroundMap ? displayStyle.settings.mapImagery.backgroundLayers : displayStyle.settings.mapImagery.overlayLayers);
   for (let layerIndex = 0; layerIndex < displayStyleLayers.length; layerIndex++) {
     const layerSettings = displayStyleLayers[layerIndex];
     const isOverlay = !getBackgroundMap;
-    const layerProvider = viewport.getMapLayerImageryProvider(layerIndex, isOverlay);
-    const treeVisibility = viewport.getMapLayerScaleRangeVisibility(layerIndex, isOverlay);
+    const layerProvider = viewport.getMapLayerImageryProvider({index: layerIndex, isOverlay});
+    const treeVisibility = viewport.getMapLayerScaleRangeVisibility({index: layerIndex, isOverlay});
     const popSubLayers = populateSubLayers && (layerSettings instanceof ImageMapLayerSettings);
     layers.push({
       visible: layerSettings.visible,
@@ -162,11 +162,11 @@ export function MapLayerManager(props: MapLayerManagerProps) {
           return undefined;
 
         return array.map((curStyledLayer) => {
-          const foundScaleRangeVisibility = layerIndexes.find((layerIdx)=> layerIdx.index === curStyledLayer.layerIndex && layerIdx.isOverlay === curStyledLayer.isOverlay);
+          const foundScaleRangeVisibility = layerIndexes.find((layerIdx) => layerIdx.index === curStyledLayer.layerIndex && layerIdx.isOverlay === curStyledLayer.isOverlay);
           if (undefined === foundScaleRangeVisibility)
             return curStyledLayer;
           else
-            return {...curStyledLayer, treeVisibility:foundScaleRangeVisibility.visibility};
+            return { ...curStyledLayer, treeVisibility: foundScaleRangeVisibility.visibility };
         });
 
       };
@@ -234,7 +234,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
       const iModel = IModelApp.viewManager.selectedView ? IModelApp.viewManager.selectedView.iModel : undefined;
       try {
-        const preferenceSources = ( iModel?.iTwinId === undefined
+        const preferenceSources = (iModel?.iTwinId === undefined
           ? []
           : await MapLayerPreferences.getSources(iModel?.iTwinId, iModel?.iModelId)
         );
@@ -335,10 +335,10 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
     switch (action) {
       case "delete":
-        activeViewport.displayStyle.detachMapLayerByIndex(indexInDisplayStyle, mapLayerSettings.isOverlay);
+        activeViewport.displayStyle.detachMapLayerByIndex({index: indexInDisplayStyle, isOverlay: mapLayerSettings.isOverlay});
         break;
       case "zoom-to-layer":
-        activeViewport.displayStyle.viewMapLayerRange(indexInDisplayStyle, mapLayerSettings.isOverlay, activeViewport).then((status) => {
+        activeViewport.viewMapLayerRange({index: indexInDisplayStyle, isOverlay: mapLayerSettings.isOverlay}, activeViewport).then((status) => {
           if (!status) {
             const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.NoRangeDefined");
             IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, `${msg} [${mapLayerSettings.name}]`));
@@ -346,7 +346,6 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         }).catch((_error) => { });
         break;
     }
-    activeViewport.invalidateRenderPlan();
 
     // force UI to update
     loadMapLayerSettingsFromViewport(activeViewport);
@@ -360,8 +359,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
       const indexInDisplayStyle = displayStyle.findMapLayerIndexByNameAndSource(mapLayerSettings.name, mapLayerSettings.source, mapLayerSettings.isOverlay);
       if (-1 !== indexInDisplayStyle) {
         // update the display style
-        displayStyle.changeMapLayerProps({ visible: isVisible }, indexInDisplayStyle, mapLayerSettings.isOverlay);
-        activeViewport.invalidateRenderPlan();
+        displayStyle.changeMapLayerProps({ visible: isVisible }, {index: indexInDisplayStyle, isOverlay: mapLayerSettings.isOverlay});
 
         // force UI to update
         loadMapLayerSettingsFromViewport(activeViewport);
@@ -417,22 +415,22 @@ export function MapLayerManager(props: MapLayerManagerProps) {
 
     if (destination.droppableId !== source.droppableId) {
       // see if we moved from "overlayMapLayers" to "backgroundMapLayers" or vice-versa
-      const settings = activeViewport.displayStyle.mapLayerAtIndex(fromIndexInDisplayStyle, fromMapLayer.isOverlay);
+      const settings = activeViewport.displayStyle.mapLayerAtIndex({index: fromIndexInDisplayStyle, isOverlay: fromMapLayer.isOverlay});
       if (settings) {
-        activeViewport.displayStyle.detachMapLayerByIndex(fromIndexInDisplayStyle, fromMapLayer.isOverlay);
+        activeViewport.displayStyle.detachMapLayerByIndex({index: fromIndexInDisplayStyle, isOverlay: fromMapLayer.isOverlay});
 
         // Manually reverse index when moved from one section to the other
         if (fromMapLayer.isOverlay && backgroundMapLayers) {
-          toIndexInDisplayStyle = displayStyle.backgroundMapLayers.length - destination.index;
+          toIndexInDisplayStyle = displayStyle.settings.mapImagery.backgroundLayers.length - destination.index;
         } else if (!fromMapLayer.isOverlay && overlayMapLayers) {
           toIndexInDisplayStyle = overlayMapLayers.length - destination.index;
         }
 
-        activeViewport.displayStyle.attachMapLayer({settings, isOverlay:!fromMapLayer.isOverlay, insertIndex:toIndexInDisplayStyle});
+        activeViewport.displayStyle.attachMapLayer({ settings, mapLayerIndex: {isOverlay: !fromMapLayer.isOverlay, index: toIndexInDisplayStyle} });
       }
     } else {
       if (undefined === destination.index) {
-        displayStyle.moveMapLayerToBottom(fromIndexInDisplayStyle, destination.droppableId === "overlayMapLayers");
+        displayStyle.moveMapLayerToBottom({index: fromIndexInDisplayStyle, isOverlay: destination.droppableId === "overlayMapLayers"});
       } else {
         if (toMapLayer) {
           if (toIndexInDisplayStyle !== -1)
@@ -440,9 +438,8 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         }
       }
     }
-
-    // apply display style change to view
-    activeViewport.invalidateRenderPlan();
+    // Note: display style change is automatically applied to view via DisplayStyleState._synchBackgroundMapImagery()
+    // So no need to call Viewport.invalidateRenderPlan() here
 
     // force UI to update
     loadMapLayerSettingsFromViewport(activeViewport);
@@ -470,7 +467,7 @@ export function MapLayerManager(props: MapLayerManagerProps) {
         <span className="map-manager-header-label">{baseMapPanelLabel}</span>
         <div className="map-manager-header-buttons-group">
           <ToggleSwitch className="map-manager-toggle" checked={backgroundMapVisible} onChange={handleMapLayersToggle} />
-          <MapLayerSettingsPopupButton disabled={!backgroundMapVisible}/>
+          <MapLayerSettingsPopupButton disabled={!backgroundMapVisible} />
         </div>
       </div>
 

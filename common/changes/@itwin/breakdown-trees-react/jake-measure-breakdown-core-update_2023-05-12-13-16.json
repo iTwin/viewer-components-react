@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/breakdown-trees-react",
+      "comment": "Updating to iTwin.js core 4.0.0",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/breakdown-trees-react"
+}
