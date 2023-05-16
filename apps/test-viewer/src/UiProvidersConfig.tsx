@@ -11,6 +11,7 @@ import { SampleSpatialTree } from "./components/SampleSpatialTree";
 import { DefaultMapFeatureInfoTool, FeatureInfoUiItemsProvider, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
+import { Orientation } from "@itwin/core-react";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -74,7 +75,17 @@ const configuredUiItems = new Map<string, UiItem>([
     "property-grid",
     {
       initialize: async () => PropertyGridManager.initialize(),
-      createUiItemsProviders: () => [new PropertyGridUiItemsProvider()],
+      createUiItemsProviders: () => [new PropertyGridUiItemsProvider({
+        propertyGridProps: {
+          enableAncestorNavigation: true,
+          autoExpandChildCategories: true,
+          enableCopyingPropertyText: true,
+          enableFavoriteProperties: true,
+          enableNullValueToggle: true,
+          enablePropertyGroupNesting: true,
+          orientation: Orientation.Horizontal
+        }
+      })],
     }
   ],
   [
