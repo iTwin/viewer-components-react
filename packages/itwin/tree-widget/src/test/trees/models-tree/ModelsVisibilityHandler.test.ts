@@ -1025,7 +1025,7 @@ describe("ModelsVisibilityHandler", () => {
       });
     });
 
-    it("returns hidden state if node is not PresentationTreeNodeItem", async () => {
+    it("does nothing when node is not PresentationTreeNodeItem", async () => {
       const vpMock = mockViewport();
       vpMock.setup(async (x) => x.addViewedModels(moq.It.isAny())).verifiable(moq.Times.never());
 

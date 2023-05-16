@@ -130,7 +130,7 @@ describe("<CategoriesTreeComponent />", () => {
       expect(result.container.children).to.be.empty;
     });
 
-    it("returns CategoriesTreeComponentImpl when iModel and viewport are defined", async () => {
+    it("renders `CategoryTree` when iModel and viewport are defined", async () => {
       const categoryTreeSpy = sinon.stub(categoryTree, "CategoryTree").returns(<></>);
       sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
       sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
@@ -147,9 +147,9 @@ describe("<CategoriesTreeComponent />", () => {
       expect(translateSpy).to.be.calledWith("categories");
     });
 
-    describe("getFilteredCategories", () => {
+    describe("filtered tree", () => {
 
-      it("filteredCategories is not undefined when filteredProvider is called", async () => {
+      it("renders buttons with empty `filteredCategories` list if filtered data provider does not have nodes", async () => {
         sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
         sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
         sinon.stub(categoryVisibilityHandler, "useCategories").returns([]);
@@ -165,7 +165,7 @@ describe("<CategoriesTreeComponent />", () => {
         await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: CategoriesTreeHeaderButtonProps) => props.filteredCategories !== undefined)));
       });
 
-      it("filteredCategories return empty filteredCategories array when nodes are not PresentationTreeNodeItem", async () => {
+      it("renders buttons with empty `filteredCategories` list if filtered data provider returns not `PresentationTreeNodeItem`", async () => {
         sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
         sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
         sinon.stub(categoryVisibilityHandler, "useCategories").returns([]);
@@ -181,7 +181,7 @@ describe("<CategoriesTreeComponent />", () => {
         await waitFor(() => expect(spy).to.be.calledWith(sinon.match((props: CategoriesTreeHeaderButtonProps) => props.filteredCategories !== undefined && props.filteredCategories.length === 0)));
       });
 
-      it("filteredCategories returns filteredCategories when nodes are PresentationTreeNodeItem", async () => {
+      it("renders buttons with `filteredCategories` list containing categories from filtered data provider", async () => {
         sinon.stub(IModelApp.viewManager, "selectedView").get(() => viewport);
         sinon.stub(UiFramework, "getIModelConnection").returns(iModel);
         sinon.stub(categoryVisibilityHandler, "useCategories").returns([]);
@@ -220,7 +220,7 @@ describe("<CategoriesTreeComponent />", () => {
     });
   });
 
-  describe("categories tree header buttons", () => {
+  describe("header buttons", () => {
 
     it("renders default tree header buttons", () => {
       const treewHeaderSpy = sinon.stub(treeHeader, "TreeHeader").returns(<></>);
