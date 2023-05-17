@@ -342,25 +342,25 @@ importers:
 
   ../../packages/itwin/geo-tools:
     specifiers:
-      '@itwin/appui-abstract': ^4.0.0-dev.95
+      '@itwin/appui-abstract': ^4.0.0-dev.104
       '@itwin/appui-layout-react': ^4.0.0
       '@itwin/appui-react': ^4.0.0
-      '@itwin/build-tools': ^4.0.0-dev.95
+      '@itwin/build-tools': ^4.0.0-dev.104
       '@itwin/components-react': ^4.0.0
-      '@itwin/core-bentley': ^4.0.0-dev.95
-      '@itwin/core-common': ^4.0.0-dev.95
-      '@itwin/core-frontend': ^4.0.0-dev.95
-      '@itwin/core-geometry': ^4.0.0-dev.95
-      '@itwin/core-i18n': ^4.0.0-dev.95
-      '@itwin/core-markup': ^4.0.0-dev.95
-      '@itwin/core-orbitgt': ^4.0.0-dev.95
-      '@itwin/core-quantity': ^4.0.0-dev.95
+      '@itwin/core-bentley': ^4.0.0-dev.104
+      '@itwin/core-common': ^4.0.0-dev.104
+      '@itwin/core-frontend': ^4.0.0-dev.104
+      '@itwin/core-geometry': ^4.0.0-dev.104
+      '@itwin/core-i18n': ^4.0.0-dev.104
+      '@itwin/core-markup': ^4.0.0-dev.104
+      '@itwin/core-orbitgt': ^4.0.0-dev.104
+      '@itwin/core-quantity': ^4.0.0-dev.104
       '@itwin/core-react': ^4.0.0
-      '@itwin/core-telemetry': ^4.0.0-dev.95
+      '@itwin/core-telemetry': ^4.0.0-dev.104
       '@itwin/eslint-plugin': ^4.0.0-dev.38
       '@itwin/imodel-components-react': ^4.0.0
       '@itwin/itwinui-icons-react': ^2.1.0
-      '@itwin/webgl-compatibility': ^4.0.0-dev.95
+      '@itwin/webgl-compatibility': ^4.0.0-dev.104
       '@testing-library/react': ^8.0.1
       '@testing-library/react-hooks': ^3.2.1
       '@types/chai': ^4.1.4
@@ -378,7 +378,7 @@ importers:
       chai-as-promised: ^7
       chai-jest-snapshot: ^2.0.0
       chai-spies: 1.0.0
-      cpx2: ^3.0.0
+      cpx2: ^4.2.2
       enzyme: ^3.4.0
       enzyme-to-json: ^3.3.4
       eslint: ^7.11.0
@@ -443,7 +443,7 @@ importers:
       chai-as-promised: 7.1.1_chai@4.3.6
       chai-jest-snapshot: 2.0.0_chai@4.3.6
       chai-spies: 1.0.0_chai@4.3.6
-      cpx2: 3.0.2
+      cpx2: 4.2.3
       enzyme: 3.11.0
       enzyme-to-json: 3.6.2_enzyme@3.11.0
       eslint: 7.32.0
@@ -13343,6 +13343,28 @@ packages:
       - supports-color
     dev: true
 
+  /cpx2/4.2.3:
+    resolution: {integrity: sha512-UM7Iza+OM8FZ2ntTml/mdb3RmSLK5I2DqFqDdMihlGyKZCAAnDP++H973Oyc/2TQpEMtg5JHeRNfewclE330EA==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dependencies:
+      debounce: 1.2.1
+      debug: 4.3.4
+      duplexer: 0.1.2
+      fs-extra: 11.1.1
+      glob-gitignore: 1.0.14
+      glob2base: 0.0.12
+      ignore: 5.2.0
+      minimatch: 8.0.4
+      p-map: 4.0.0
+      resolve: 1.22.2
+      safe-buffer: 5.2.1
+      shell-quote: 1.8.0
+      subarg: 1.0.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /cross-fetch/3.1.5:
     resolution: {integrity: sha512-lvb1SBsI0Z7GDwmuid+mU3kWVBwTVUbe7S0H52yaaAdQOXq2YktTCZdlAcNKFzE6QtRz0snpw9bNiPeOIkkQvw==}
     dependencies:
@@ -15943,6 +15965,15 @@ packages:
       graceful-fs: 4.2.10
       jsonfile: 6.1.0
       universalify: 2.0.0
+
+  /fs-extra/11.1.1:
+    resolution: {integrity: sha512-MGIE4HOvQCeUCzmlHs0vXpih4ysz4wg9qiSAu6cd42lVwPbTM1TjV7RusoyQqMmk/95gdQZX72u+YW+c3eEpFQ==}
+    engines: {node: '>=14.14'}
+    dependencies:
+      graceful-fs: 4.2.10
+      jsonfile: 6.1.0
+      universalify: 2.0.0
+    dev: true
 
   /fs-extra/3.0.1:
     resolution: {integrity: sha512-V3Z3WZWVUYd8hoCL5xfXJCaHWYzmtwW5XWYSlLgERi8PWd8bx1kUHUk8L1BT57e49oKnDDD180mjfrHc1yA9rg==}
@@ -19221,6 +19252,13 @@ packages:
   /minimatch/7.4.6:
     resolution: {integrity: sha512-sBz8G/YjVniEz6lKPNpKxXwazJe4c19fEfV2GDMX6AjFz+MX9uDWIZW8XreVhkFW3fkIdTv/gxWr/Kks5FFAVw==}
     engines: {node: '>=10'}
+    dependencies:
+      brace-expansion: 2.0.1
+    dev: true
+
+  /minimatch/8.0.4:
+    resolution: {integrity: sha512-W0Wvr9HyFXZRGIDgCicunpQ299OKXs9RgZfaukz4qAW/pJhcpUfupc9c+OObPOFueNy8VSrZgEmDtk6Kh4WzDA==}
+    engines: {node: '>=16 || 14 >=14.17'}
     dependencies:
       brace-expansion: 2.0.1
     dev: true
@@ -25398,13 +25436,13 @@ packages:
     name: '@itwin/geo-tools-react'
     version: 5.0.0-dev.1
     peerDependencies:
-      '@itwin/appui-abstract': ^4.0.0-dev.95
+      '@itwin/appui-abstract': ^4.0.0-dev.104
       '@itwin/appui-react': ^4.0.0
       '@itwin/components-react': ^4.0.0
-      '@itwin/core-bentley': ^4.0.0-dev.95
-      '@itwin/core-common': ^4.0.0-dev.95
-      '@itwin/core-frontend': ^4.0.0-dev.95
-      '@itwin/core-geometry': ^4.0.0-dev.95
+      '@itwin/core-bentley': ^4.0.0-dev.104
+      '@itwin/core-common': ^4.0.0-dev.104
+      '@itwin/core-frontend': ^4.0.0-dev.104
+      '@itwin/core-geometry': ^4.0.0-dev.104
       '@itwin/core-react': ^4.0.0
       react: ^17.0.2
       react-dom: ^17.0.2
