@@ -27,8 +27,9 @@
   },
   {
     "policyName": "itwin-geo-tools",
-    "definitionName": "individualVersion",
-    "lockedMajor": 4
+    "definitionName": "lockStepVersion",
+    "version": "5.0.0-dev.1",
+    "nextBump": "prerelease"
   },
   {
     "policyName": "itwin-breakdown-trees",
