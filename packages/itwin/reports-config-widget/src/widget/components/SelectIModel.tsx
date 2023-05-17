@@ -37,26 +37,20 @@ const fetchIModels = async (
 };
 
 interface SelectedIModelProps {
-  selectedIModelId: string;
-  setSelectedIModelId: React.Dispatch<React.SetStateAction<string>>;
+  selectedIModelId?: string;
+  setSelectedIModelId: (iModelId: string) => void;
 }
 
 export const SelectIModel = ({
   selectedIModelId,
   setSelectedIModelId,
 }: SelectedIModelProps) => {
-  const { iTwinId, iModelId, getAccessToken, iModelsClient } = useReportsConfigApi();
+  const { iTwinId, getAccessToken, iModelsClient } = useReportsConfigApi();
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
 
   useEffect(() => {
     void fetchIModels(setIModels, iTwinId, iModelsClient, getAccessToken);
   }, [getAccessToken, iModelsClient, iTwinId, setIModels]);
-
-  useEffect(() => {
-    if (iModels.length > 0) {
-      setSelectedIModelId(iModelId);
-    }
-  }, [iModelId, iModels, setSelectedIModelId]);
 
   const iModelOptions = useMemo(() => {
     return iModels.map((iModel) => ({

@@ -45,6 +45,7 @@ export interface AddMappingsModalProps {
   existingMappings: ReportMappingAndMapping[];
   show: boolean;
   onClose: () => Promise<void>;
+  defaultIModelId?: string;
 }
 
 export const AddMappingsModal = ({
@@ -52,10 +53,11 @@ export const AddMappingsModal = ({
   existingMappings,
   show,
   onClose,
+  defaultIModelId,
 }: AddMappingsModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const selectedMappings = useRef<Mapping[]>([]);
-  const [selectedIModelId, setSelectediModelId] = useState<string>("");
+  const [selectedIModelId, setSelectediModelId] = useState<string | undefined>(defaultIModelId);
   const [mappings, setMappings] = useState<Mapping[]>([]);
   const { getAccessToken, mappingsClient, reportsClient } = useReportsConfigApi();
 

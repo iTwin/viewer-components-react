@@ -13,7 +13,6 @@ export type GetAccessTokenFn = () => Promise<AccessToken>;
 export interface ReportsConfigApiProps {
   getAccessToken: GetAccessTokenFn;
   iTwinId: string;
-  iModelId: string;
   baseUrl: string;
   reportsClient: ReportsClient;
   mappingsClient: MappingsClient;
@@ -23,7 +22,6 @@ export interface ReportsConfigApiProps {
 export const ReportsConfigApiContext = createContext<ReportsConfigApiProps>({
   getAccessToken: async () => "",
   iTwinId: "",
-  iModelId: "",
   baseUrl: "",
   reportsClient: new ReportsClient(),
   mappingsClient: new MappingsClient(),

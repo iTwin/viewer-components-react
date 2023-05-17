@@ -13,13 +13,13 @@ export const mockAccessToken = async () => "Bearer eyJhbGci";
 interface WrapperProps {
   children?: React.ReactNode;
 }
+export const mockITwinId: string = "mockiTwinId";
 
 function render(ui: React.ReactElement, contextProps?: Partial<ReportsConfigContextProps>, { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (
     <ReportsConfigContext
       getAccessToken={mockAccessToken}
-      iTwinId={contextProps?.iTwinId ?? "mockiTwinId"}
-      iModelId={contextProps?.iModelId ?? "mockiModelId"}
+      iTwinId={contextProps?.iTwinId ?? mockITwinId}
       bulkExtractor={contextProps?.bulkExtractor}
       {...contextProps}
     >

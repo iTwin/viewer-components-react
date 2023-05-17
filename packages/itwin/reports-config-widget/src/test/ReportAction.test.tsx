@@ -19,9 +19,6 @@ import type { Report } from "@itwin/insights-client";
 import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 import { EmptyLocalization } from "@itwin/core-common";
 
-const mockITwinId = faker.datatype.uuid();
-const mockIModelId = faker.datatype.uuid();
-
 const server = setupServer();
 
 beforeAll(async () => {
@@ -40,7 +37,7 @@ describe("Reports Action", () => {
   it("required fields should be filled out", async () => {
     const mockReturnFn = jest.fn();
 
-    render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { iModelId: mockIModelId, iTwinId: mockITwinId });
+    render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -77,7 +74,7 @@ describe("Reports Action", () => {
     const mockReturnFn = jest.fn();
 
     const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { iModelId: mockIModelId, iTwinId: mockITwinId });
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -114,7 +111,7 @@ describe("Reports Action", () => {
     const mockReturnFn = jest.fn();
 
     const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { iModelId: mockIModelId, iTwinId: mockITwinId }
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
     );
 
     const addButton = screen.getByRole("button", {
@@ -136,7 +133,7 @@ describe("Reports Action", () => {
     const mockReturnFn = jest.fn();
 
     const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { iModelId: mockIModelId, iTwinId: mockITwinId }
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
     );
 
     const addButton = screen.getByRole("button", {
@@ -158,7 +155,7 @@ describe("Reports Action", () => {
     const mockReturnFn = jest.fn();
 
     const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { iModelId: mockIModelId, iTwinId: mockITwinId }
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
     );
 
     const addButton = screen.getByRole("button", {
@@ -182,7 +179,7 @@ describe("Reports Action", () => {
     const mockReturnFn = jest.fn();
 
     const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { iModelId: mockIModelId, iTwinId: mockITwinId }
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
     );
 
     const addButton = screen.getByRole("button", {

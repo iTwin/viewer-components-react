@@ -23,7 +23,6 @@ export interface ReportsConfigContextProps {
   getAccessToken?: GetAccessTokenFn;
   baseUrl?: string;
   iTwinId: string;
-  iModelId: string;
   bulkExtractor?: BulkExtractor;
   reportsClient?: ReportsClient;
   mappingsClient?: MappingsClient;
@@ -51,7 +50,6 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
     getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
     baseUrl: reportsBaseUrl(),
     iTwinId: props.iTwinId,
-    iModelId: props.iModelId,
     reportsClient: props.reportsClient ?? new ReportsClient(reportsBaseUrl()),
     mappingsClient: props.mappingsClient ?? new MappingsClient(reportsBaseUrl()),
     iModelsClient: props.iModelsClient ?? new IModelsClient(iModelClientOptions),
@@ -81,12 +79,11 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
       getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
       baseUrl: props.baseUrl || REPORTS_CONFIG_BASE_URL,
       iTwinId: props.iTwinId,
-      iModelId: props.iModelId,
       reportsClient: props.reportsClient ?? new ReportsClient(reportsBaseUrl()),
       mappingsClient: props.mappingsClient ?? new MappingsClient(reportsBaseUrl()),
       iModelsClient: props.iModelsClient ?? new IModelsClient(iModelClientOptions),
     }));
-  }, [props.getAccessToken, props.baseUrl, props.iTwinId, props.iModelId, props.reportsClient, props.mappingsClient, props.iModelsClient, reportsBaseUrl, iModelClientOptions]);
+  }, [props.getAccessToken, props.baseUrl, props.iTwinId, props.reportsClient, props.mappingsClient, props.iModelsClient, reportsBaseUrl, iModelClientOptions]);
 
   return (
     <ReportsConfigApiContext.Provider value={apiConfig}>

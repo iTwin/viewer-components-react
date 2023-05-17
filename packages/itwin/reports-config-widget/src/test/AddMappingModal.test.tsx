@@ -251,7 +251,8 @@ describe("Add Mapping Modal", () => {
         reportId={mockReportId}
         existingMappings={mockReportMappingsAndMappings}
         onClose={jest.fn()}
-      />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object }
+        defaultIModelId={mockIModelId1}
+      />, { iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object }
     );
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();

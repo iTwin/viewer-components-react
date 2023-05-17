@@ -7,6 +7,7 @@ import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import {
   act,
+  mockITwinId,
   render,
   screen,
   waitFor,
@@ -22,7 +23,6 @@ import type {
 } from "@itwin/insights-client";
 import {
   ExtractionClient,
-
   ReportsClient,
 } from "@itwin/insights-client";
 import { ReportMappings } from "../widget/components/ReportMappings";
@@ -34,7 +34,6 @@ import { Text } from "@itwin/itwinui-react";
 import { EmptyLocalization } from "@itwin/core-common";
 import type { AddMappingsModalProps } from "../widget/components/AddMappingsModal";
 
-const mockITwinId = "mockITwinId";
 // Lets work with two iModels for now.
 const mockIModelId1 = "mockIModelId1";
 const mockIModelId2 = "mockIModelId2";
@@ -255,7 +254,7 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
+    render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -270,7 +269,7 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -316,7 +315,7 @@ describe("Report Mappings View", () => {
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -342,7 +341,7 @@ describe("Report Mappings View", () => {
   });
 
   it("odata feed url", async () => {
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -377,7 +376,7 @@ describe("Report Mappings View", () => {
 
     const runIModelExtractionsMock = jest.spyOn(bulkExtractor, "runIModelExtractions").mockImplementation(async () => Promise.resolve());
 
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object, bulkExtractor });
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object, bulkExtractor });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 

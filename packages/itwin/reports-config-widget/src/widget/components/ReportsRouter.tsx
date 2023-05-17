@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import { useActiveIModelConnection } from "@itwin/appui-react";
 import React from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { ReportAction } from "./ReportAction";
@@ -21,6 +22,7 @@ export const ReportsRouter = ({
 }) => {
   goBack;
   const { report } = currentRoute.reportsRoutingFields;
+  const iModelId = useActiveIModelConnection()?.iModelId ?? "";
   switch (currentRoute.step) {
     case RouteStep.ReportsList:
       return (
@@ -55,7 +57,7 @@ export const ReportsRouter = ({
       return <ReportAction report={report} onClickCancel={goBack} onSaveSuccess={goBack} />;
     case RouteStep.ReportMappings:
       if (!report) return null;
-      return <ReportMappings report={report} onClickClose={goBack} />;
+      return <ReportMappings report={report} onClickClose={goBack} defaultIModelId={iModelId} />;
     default:
       return null;
   }

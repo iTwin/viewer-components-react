@@ -41,7 +41,6 @@ const ReportsContainer = ({
     { step: RouteStep.ReportsList, title: "iTwin Reports", reportsRoutingFields: {} },
   ]);
   const currentRoute = routingHistory[routingHistory.length - 1];
-  const iModelId = useActiveIModelConnection()?.iModelId ?? "";
   const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
   const navigateTo = useCallback((toRoute: (prev: Route | undefined) => Route) => {
     setRoutingHistory((r) => [...r, toRoute(r[r.length - 1])]);
@@ -54,7 +53,7 @@ const ReportsContainer = ({
   }, [routingHistory]);
 
   return (
-    <ReportsConfigContext getAccessToken={getAccessToken} baseUrl={baseUrl} iTwinId={iTwinId} iModelId={iModelId}>
+    <ReportsConfigContext getAccessToken={getAccessToken} baseUrl={baseUrl} iTwinId={iTwinId}>
       <div className="rcw-reports-container">
         <ReportsHeader
           goBack={goBack}

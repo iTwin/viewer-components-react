@@ -110,9 +110,10 @@ const fetchReportMappings = async (
 export interface ReportMappingsProps {
   report: Report;
   onClickClose: () => void;
+  defaultIModelId?: string;
 }
 
-export const ReportMappings = ({ report, onClickClose }: ReportMappingsProps) => {
+export const ReportMappings = ({ report, onClickClose, defaultIModelId }: ReportMappingsProps) => {
   const { getAccessToken, reportsClient, iModelsClient, mappingsClient, baseUrl } = useReportsConfigApi();
   const [showDeleteModal, setShowDeleteModal] = useState<ReportMappingAndMapping | undefined>(undefined);
   const [showAddMapping, setShowAddMapping] = useState<boolean>(false);
@@ -278,6 +279,7 @@ export const ReportMappings = ({ report, onClickClose }: ReportMappingsProps) =>
         reportId={report.id}
         existingMappings={reportMappings}
         onClose={onAddMappingsModalClose}
+        defaultIModelId={defaultIModelId}
       />
       <DeleteModal
         entityName={showDeleteModal?.mappingName ?? ""}
