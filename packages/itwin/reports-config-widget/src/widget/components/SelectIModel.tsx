@@ -15,7 +15,7 @@ import {
 import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
-import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { useReportsConfigApi } from "../context/ReportsConfigApiContext";
 import "./SelectIModel.scss";
 
 const fetchIModels = async (
@@ -45,7 +45,7 @@ export const SelectIModel = ({
   selectedIModelId,
   setSelectedIModelId,
 }: SelectedIModelProps) => {
-  const { iTwinId, iModelId, getAccessToken, iModelsClient } = useReportsApiConfig();
+  const { iTwinId, iModelId, getAccessToken, iModelsClient } = useReportsConfigApi();
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
 
   useEffect(() => {

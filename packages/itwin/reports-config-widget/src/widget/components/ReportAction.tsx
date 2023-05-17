@@ -12,7 +12,7 @@ import {
 } from "./utils";
 import "./ReportAction.scss";
 import type { Report } from "@itwin/insights-client";
-import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { useReportsConfigApi } from "../context/ReportsConfigApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
 export interface ReportActionProps {
@@ -22,7 +22,7 @@ export interface ReportActionProps {
 }
 
 export const ReportAction = ({ report, onSaveSuccess, onClickCancel }: ReportActionProps) => {
-  const { iTwinId, getAccessToken, reportsClient } = useReportsApiConfig();
+  const { iTwinId, getAccessToken, reportsClient } = useReportsConfigApi();
   const [values, setValues] = useState({
     name: report?.displayName ?? "",
     description: report?.description ?? "",

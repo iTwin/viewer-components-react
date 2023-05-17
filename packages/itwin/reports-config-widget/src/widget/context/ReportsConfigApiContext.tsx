@@ -10,7 +10,7 @@ import { createContext } from "react";
 
 export type GetAccessTokenFn = () => Promise<AccessToken>;
 
-export interface ReportsApiConfig {
+export interface ReportsConfigApiProps {
   getAccessToken: GetAccessTokenFn;
   iTwinId: string;
   iModelId: string;
@@ -20,7 +20,7 @@ export interface ReportsApiConfig {
   iModelsClient: IModelsClient;
 }
 
-export const ReportsApiConfigContext = createContext<ReportsApiConfig>({
+export const ReportsConfigApiContext = createContext<ReportsConfigApiProps>({
   getAccessToken: async () => "",
   iTwinId: "",
   iModelId: "",
@@ -30,11 +30,11 @@ export const ReportsApiConfigContext = createContext<ReportsApiConfig>({
   iModelsClient: new IModelsClient(),
 });
 
-export const useReportsApiConfig = () => {
-  const context = React.useContext(ReportsApiConfigContext);
+export const useReportsConfigApi = () => {
+  const context = React.useContext(ReportsConfigApiContext);
   if (!context) {
     throw new Error(
-      "useApiConfig should be used within a ReportsApiConfigContext provider"
+      "useReportsConfigApi should be used within a ReportsConfigApiContext provider"
     );
   }
   return context;

@@ -16,7 +16,7 @@ import DeleteModal from "./DeleteModal";
 import type { Report, ReportsClient } from "@itwin/insights-client";
 import { ReportHorizontalTile } from "./ReportHorizontalTile";
 import { SearchBar } from "./SearchBar";
-import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { useReportsConfigApi } from "../context/ReportsConfigApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import type { AccessToken } from "@itwin/core-bentley";
 import { BeEvent } from "@itwin/core-bentley";
@@ -55,7 +55,7 @@ export const Reports = ({
   onClickReportModify,
   onClickReportTitle,
 }: ReportsProps) => {
-  const { iTwinId, getAccessToken, reportsClient } = useReportsApiConfig();
+  const { iTwinId, getAccessToken, reportsClient } = useReportsConfigApi();
   const { bulkExtractor } = useBulkExtractor();
   const [showDeleteModal, setShowDeleteModal] = useState<Report | undefined>(
     undefined

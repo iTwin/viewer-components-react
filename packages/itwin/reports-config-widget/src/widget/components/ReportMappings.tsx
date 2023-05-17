@@ -35,7 +35,7 @@ import type {
 } from "@itwin/imodels-client-management";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import { SearchBar } from "./SearchBar";
-import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { useReportsConfigApi } from "../context/ReportsConfigApiContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { ReportMappingHorizontalTile } from "./ReportMappingHorizontalTile";
 import type { AccessToken } from "@itwin/core-bentley";
@@ -113,7 +113,7 @@ export interface ReportMappingsProps {
 }
 
 export const ReportMappings = ({ report, onClickClose }: ReportMappingsProps) => {
-  const { getAccessToken, reportsClient, iModelsClient, mappingsClient, baseUrl } = useReportsApiConfig();
+  const { getAccessToken, reportsClient, iModelsClient, mappingsClient, baseUrl } = useReportsConfigApi();
   const [showDeleteModal, setShowDeleteModal] = useState<ReportMappingAndMapping | undefined>(undefined);
   const [showAddMapping, setShowAddMapping] = useState<boolean>(false);
   const { bulkExtractor } = useBulkExtractor();

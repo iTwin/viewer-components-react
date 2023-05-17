@@ -11,9 +11,9 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BulkExtractorContext } from "../context/BulkExtractorContext";
 import type {
   GetAccessTokenFn,
-  ReportsApiConfig,
-} from "../context/ReportsApiConfigContext";
-import { ReportsApiConfigContext } from "../context/ReportsApiConfigContext";
+  ReportsConfigApiProps,
+} from "../context/ReportsConfigApiContext";
+import { ReportsConfigApiContext } from "../context/ReportsConfigApiContext";
 import { REPORTS_CONFIG_BASE_URL } from "../ReportsConfigUiProvider";
 import { BulkExtractor } from "./BulkExtractor";
 import { FailedExtractionToast, SuccessfulExtractionToast } from "./ExtractionToast";
@@ -47,7 +47,7 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
     props.extractionClient ?? new ExtractionClient(reportsBaseUrl())
   );
 
-  const [apiConfig, setApiConfig] = useState<ReportsApiConfig>({
+  const [apiConfig, setApiConfig] = useState<ReportsConfigApiProps>({
     getAccessToken: props.getAccessToken ?? authorizationClientGetAccessToken,
     baseUrl: reportsBaseUrl(),
     iTwinId: props.iTwinId,
@@ -89,10 +89,10 @@ export const ReportsConfigContext = (props: ReportsConfigContextProps) => {
   }, [props.getAccessToken, props.baseUrl, props.iTwinId, props.iModelId, props.reportsClient, props.mappingsClient, props.iModelsClient, reportsBaseUrl, iModelClientOptions]);
 
   return (
-    <ReportsApiConfigContext.Provider value={apiConfig}>
+    <ReportsConfigApiContext.Provider value={apiConfig}>
       <BulkExtractorContext.Provider value={bulkExtractor}>
         {props.children}
       </BulkExtractorContext.Provider>
-    </ReportsApiConfigContext.Provider>
+    </ReportsConfigApiContext.Provider>
   );
 };
