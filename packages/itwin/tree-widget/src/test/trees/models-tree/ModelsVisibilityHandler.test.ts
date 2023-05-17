@@ -13,12 +13,13 @@ import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-
 import { Presentation } from "@itwin/presentation-frontend";
 import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
 import {
-  areAllModelsVisible, hideAllModels, invertAllModels, ModelsVisibilityHandler, showAllModels, toggleModels,
+  areAllModelsVisible, hideAllModels, invertAllModels, ModelsTreeNodeType, ModelsVisibilityHandler, showAllModels, toggleModels,
 } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import { CachingElementIdsContainer } from "../../../components/trees/models-tree/Utils";
 import { isPromiseLike } from "../../../components/utils/IsPromiseLike";
 import { mockViewport, TestUtils } from "../../TestUtils";
 import { createCategoryNode, createElementClassGroupingNode, createElementNode, createModelNode, createSubjectNode } from "../Common";
+import { StandardNodeTypes } from "@itwin/presentation-common";
 
 import type { Id64String } from "@itwin/core-bentley";
 import type { ECSqlReader } from "@itwin/core-common";
@@ -26,6 +27,7 @@ import type { IModelConnection, Viewport, ViewState, ViewState3d } from "@itwin/
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { IFilteredPresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
 import type { IModelHierarchyChangeEventArgs, PresentationManager } from "@itwin/presentation-frontend";
+import type { TreeNodeItem } from "@itwin/components-react";
 import type { ModelsVisibilityHandlerProps } from "../../../components/trees/models-tree/ModelsVisibilityHandler";
 import type { ModelInfo } from "../../../tree-widget-react";
 
@@ -121,6 +123,42 @@ describe("ModelsVisibilityHandler", () => {
     });
   });
 
+  it("getNodeType", () => {
+    expect(ModelsVisibilityHandler.getNodeType({} as TreeNodeItem)).to.be.eq(ModelsTreeNodeType.Unknown);
+    const instanceNode = {
+      key: {
+        type: StandardNodeTypes.ECInstancesNode,
+        version: 0,
+        pathFromRoot: [],
+        instanceKeys: [{ className: "MyDomain:SpatialCategory", id: "testInstanceId" }],
+      },
+      id: "testId",
+      label: PropertyRecord.fromString("category-node"),
+      autoExpand: true,
+      hasChildren: true,
+    } as PresentationTreeNodeItem;
+    expect(ModelsVisibilityHandler.getNodeType(instanceNode)).to.be.eq(ModelsTreeNodeType.Unknown);
+    const groupingNode = {
+      ...instanceNode,
+      key: {
+        type: StandardNodeTypes.ECClassGroupingNode,
+        version: 0,
+        pathFromRoot: [],
+        className: "testClassName",
+        groupedInstancesCount: 0,
+      },
+    };
+    expect(ModelsVisibilityHandler.getNodeType(groupingNode)).to.be.eq(ModelsTreeNodeType.Grouping);
+    const subjectNode = { ...instanceNode, extendedData: { isSubject: true } };
+    expect(ModelsVisibilityHandler.getNodeType(subjectNode)).to.be.eq(ModelsTreeNodeType.Subject);
+    const modelNode = { ...instanceNode, extendedData: { isModel: true } };
+    expect(ModelsVisibilityHandler.getNodeType(modelNode)).to.be.eq(ModelsTreeNodeType.Model);
+    const categoryNode = { ...instanceNode, extendedData: { isCategory: true } };
+    expect(ModelsVisibilityHandler.getNodeType(categoryNode)).to.be.eq(ModelsTreeNodeType.Category);
+    const elementNode = { ...instanceNode, extendedData: { isElement: true } };
+    expect(ModelsVisibilityHandler.getNodeType(elementNode)).to.be.eq(ModelsTreeNodeType.Element);
+  });
+
   describe("dispose", () => {
 
     it("should unsubscribe from viewport change events", () => {
@@ -144,7 +182,7 @@ describe("ModelsVisibilityHandler", () => {
 
   });
 
-  describe("getDisplayStatus", () => {
+  describe("getVisibilityStatus", () => {
 
     it("returns disabled when node is not an instance node", async () => {
       const node: PresentationTreeNodeItem = {
@@ -163,6 +201,14 @@ describe("ModelsVisibilityHandler", () => {
         const result = handler.getVisibilityStatus(node);
         expect(isPromiseLike(result)).to.be.false;
         expect(result).to.include({ state: "hidden", isDisabled: true });
+      });
+    });
+
+    it("returns disabled if node is not PresentationTreeNodeItem", async () => {
+      await using(createHandler({}), async (handler) => {
+        const result = await handler.getVisibilityStatus({} as TreeNodeItem);
+        expect(result.state).to.be.eq("hidden");
+        expect(result.isDisabled).to.be.true;
       });
     });
 
@@ -980,6 +1026,16 @@ describe("ModelsVisibilityHandler", () => {
 
       await using(createHandler({ viewport: vpMock.object }), async (handler) => {
         await handler.changeVisibility(node, true);
+        vpMock.verifyAll();
+      });
+    });
+
+    it("does nothing when node is not PresentationTreeNodeItem", async () => {
+      const vpMock = mockViewport();
+      vpMock.setup(async (x) => x.addViewedModels(moq.It.isAny())).verifiable(moq.Times.never());
+
+      await using(createHandler({ viewport: vpMock.object }), async (handler) => {
+        await handler.changeVisibility({} as TreeNodeItem, false);
         vpMock.verifyAll();
       });
     });

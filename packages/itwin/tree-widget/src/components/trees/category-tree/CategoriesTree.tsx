@@ -135,7 +135,7 @@ function useCategoryVisibilityHandler(viewManager: ViewManager, imodel: IModelCo
       new CategoryVisibilityHandler({ viewManager, imodel, categories, activeView, allViewports }),
     [viewManager, imodel, categories, activeView, allViewports]),
   );
-  // istanbul ignore if
+  // istanbul ignore next
   return visibilityHandler ?? defaultVisibilityHandler;
 }
 

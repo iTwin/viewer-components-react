@@ -130,33 +130,28 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
 
   const { viewport, iModel } = props;
 
-  const { searchOptions, filterString, onFilterApplied } =
-    useTreeFilteringState();
+  const { searchOptions, filterString, onFilterApplied } = useTreeFilteringState();
 
-  const queryModels = useCallback(async (
-    vp: Viewport | undefined
-  ): Promise<ModelInfo[]> => {
-    if (vp === undefined) return [];
-
+  const queryModels = useCallback(async (): Promise<ModelInfo[]> => {
     const queryParams: ModelQueryParams = {
       from: "BisCore.GeometricModel3d",
       wantPrivate: false,
     };
-    const modelProps = await iModel.models.queryProps(queryParams) ?? [];
+    const modelProps = await iModel.models.queryProps(queryParams);
     return modelProps
       .map(({ id, isPlanProjection }: GeometricModel3dProps) => ({ id, isPlanProjection }))
       .filter(({ id }) => id) as ModelInfo[];
   }, [iModel]);
 
   useEffect(() => {
-    queryModels(viewport)
+    queryModels()
       .then((modelInfos: ModelInfo[]) => {
         setAvailableModels(modelInfos);
       })
       .catch((_e) => {
         setAvailableModels([]);
       });
-  }, [queryModels, viewport]);
+  }, [queryModels]);
 
   return (
     <>

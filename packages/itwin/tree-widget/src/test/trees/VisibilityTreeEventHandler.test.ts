@@ -64,7 +64,7 @@ describe("VisibilityTreeEventHandler", () => {
     if (!partialProps)
       partialProps = {};
     const props: VisibilityTreeEventHandlerParams = {
-      visibilityHandler: partialProps.visibilityHandler || undefined,
+      visibilityHandler: partialProps.visibilityHandler || visibilityHandler,
       nodeLoader: partialProps.nodeLoader || nodeLoaderMock.object,
       selectionHandler: partialProps.selectionHandler || selectionHandlerMock.object,
     };

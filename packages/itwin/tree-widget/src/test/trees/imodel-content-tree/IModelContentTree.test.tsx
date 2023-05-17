@@ -9,8 +9,8 @@ import sinon from "sinon";
 import * as moq from "typemoq";
 import { BisCodeSpec, IModel } from "@itwin/core-common";
 import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
-import { LabelDefinition, Node, NodeKey } from "@itwin/presentation-common";
-import { Presentation, PresentationManager } from "@itwin/presentation-frontend";
+import { LabelDefinition } from "@itwin/presentation-common";
+import { Presentation } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
 } from "@itwin/presentation-testing";
@@ -21,7 +21,9 @@ import {
 } from "../../IModelUtils";
 import { mockPresentationManager, TestUtils } from "../../TestUtils";
 
+import type { PresentationManager } from "@itwin/presentation-frontend";
 import type { IModelConnection } from "@itwin/core-frontend";
+import type { Node, NodeKey } from "@itwin/presentation-common";
 
 describe("IModelContentTree", () => {
 
@@ -67,7 +69,7 @@ describe("IModelContentTree", () => {
       }
 
       it("should render hierarchy", async () => {
-        setupHierarchy([{ key: createInvalidNodeKey(), label: LabelDefinition.fromLabelString("test-node"), }]);
+        setupHierarchy([{ key: createInvalidNodeKey(), label: LabelDefinition.fromLabelString("test-node") }]);
         const result = render(
           <IModelContentTree
             {...sizeProps}
