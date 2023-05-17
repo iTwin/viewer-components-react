@@ -1,9 +1,10 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { Button } from "@itwin/itwinui-react";
 import * as React from "react";
+import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import "./ActionPanel.scss";
 import { LoadingSpinner } from "./utils";
 
@@ -34,15 +35,18 @@ const ActionPanel = ({
       >
         {actionLabel}
       </Button>
-      {onCancel && <Button
-        styleType='default'
-        type='button'
-        id='cancel'
-        onClick={onCancel}
-        disabled={isCancelDisabled || isLoading}
-      >
-        Cancel
-      </Button>}
+      {onCancel && (
+        <Button
+          styleType="default"
+          type="button"
+          onClick={onCancel}
+          disabled={isCancelDisabled || isLoading}
+        >
+          {ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:Cancel"
+          )}
+        </Button>
+      )}
     </div>
   );
 };

@@ -26,14 +26,13 @@ import {
 } from "./utils";
 import "./ReportMappings.scss";
 import DeleteModal from "./DeleteModal";
-import type { Report, ReportMapping } from "@itwin/insights-client";
-import { MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
+import type { MappingsClient, Report, ReportMapping, ReportsClient } from "@itwin/insights-client";
+import { REPORTING_BASE_PATH } from "@itwin/insights-client";
 import { AddMappingsModal } from "./AddMappingsModal";
 import type {
   GetSingleIModelParams,
-  IModelsClientOptions,
+  IModelsClient,
 } from "@itwin/imodels-client-management";
-import { Constants, IModelsClient } from "@itwin/imodels-client-management";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import { SearchBar } from "./SearchBar";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
@@ -54,28 +53,19 @@ export type ReportMappingAndMapping = ReportMappingType & {
 const fetchReportMappings = async (
   setReportMappings: (mappings: ReportMappingAndMapping[]) => void,
   reportId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  baseUrl: string,
+  setIsLoading: (isLoading: boolean) => void,
+  reportsClient: ReportsClient,
+  mappingsClient: MappingsClient,
+  iModelsClient: IModelsClient,
   getAccessToken: () => Promise<AccessToken>
 ) => {
   try {
     setIsLoading(true);
-    const reportsClientApi = new ReportsClient(
-      generateUrl(REPORTING_BASE_PATH, baseUrl)
-    );
-    const mappingsClientApi = new MappingsClient(
-      generateUrl(REPORTING_BASE_PATH, baseUrl)
-    );
     const accessToken = await getAccessToken();
-    const reportMappings = await reportsClientApi.getReportMappings(
+    const reportMappings = await reportsClient.getReportMappings(
       accessToken,
       reportId
     );
-    const iModelClientOptions: IModelsClientOptions = {
-      api: { baseUrl: generateUrl(Constants.api.baseUrl, baseUrl) },
-    };
-
-    const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
     const authorization =
       AccessTokenAdapter.toAuthorizationCallback(accessToken);
     const iModelNames = new Map<string, string>();
@@ -84,7 +74,7 @@ const fetchReportMappings = async (
     for (const reportMapping of reportMappings) {
       const iModelId = reportMapping.imodelId;
       let iModelName = "";
-      const mapping = await mappingsClientApi.getMapping(
+      const mapping = await mappingsClient.getMapping(
         accessToken,
         iModelId,
         reportMapping.mappingId
@@ -123,7 +113,7 @@ export interface ReportMappingsProps {
 }
 
 export const ReportMappings = ({ report, onClickClose }: ReportMappingsProps) => {
-  const { getAccessToken, baseUrl } = useReportsApiConfig();
+  const { getAccessToken, reportsClient, iModelsClient, mappingsClient, baseUrl } = useReportsApiConfig();
   const [showDeleteModal, setShowDeleteModal] = useState<ReportMappingAndMapping | undefined>(undefined);
   const [showAddMapping, setShowAddMapping] = useState<boolean>(false);
   const { bulkExtractor } = useBulkExtractor();
@@ -141,10 +131,12 @@ export const ReportMappings = ({ report, onClickClose }: ReportMappingsProps) =>
       setReportMappings,
       report.id,
       setIsLoading,
-      baseUrl,
+      reportsClient,
+      mappingsClient,
+      iModelsClient,
       getAccessToken
     );
-  }, [baseUrl, getAccessToken, report.id, setIsLoading]);
+  }, [getAccessToken, iModelsClient, mappingsClient, report.id, reportsClient, setIsLoading]);
 
   useEffect(() => {
     if (!bulkExtractor) return;
@@ -156,10 +148,12 @@ export const ReportMappings = ({ report, onClickClose }: ReportMappingsProps) =>
       setReportMappings,
       report.id,
       setIsLoading,
-      baseUrl,
+      reportsClient,
+      mappingsClient,
+      iModelsClient,
       getAccessToken
     );
-  }, [baseUrl, getAccessToken, report.id]);
+  }, [getAccessToken, iModelsClient, mappingsClient, report.id, reportsClient]);
 
   const odataFeedUrl = `${generateUrl(
     REPORTING_BASE_PATH,
@@ -288,11 +282,8 @@ export const ReportMappings = ({ report, onClickClose }: ReportMappingsProps) =>
       <DeleteModal
         entityName={showDeleteModal?.mappingName ?? ""}
         onDelete={async () => {
-          const reportsClientApi = new ReportsClient(
-            generateUrl(REPORTING_BASE_PATH, baseUrl)
-          );
           const accessToken = await getAccessToken();
-          await reportsClientApi.deleteReportMapping(
+          await reportsClient.deleteReportMapping(
             accessToken,
             report.id,
             showDeleteModal?.mappingId ?? ""

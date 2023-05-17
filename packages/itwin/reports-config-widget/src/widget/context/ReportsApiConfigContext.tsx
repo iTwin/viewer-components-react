@@ -3,6 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type { AccessToken } from "@itwin/core-bentley";
+import { IModelsClient } from "@itwin/imodels-client-management";
+import { MappingsClient, ReportsClient } from "@itwin/insights-client";
 import * as React from "react";
 import { createContext } from "react";
 
@@ -13,13 +15,19 @@ export interface ReportsApiConfig {
   iTwinId: string;
   iModelId: string;
   baseUrl: string;
+  reportsClient: ReportsClient;
+  mappingsClient: MappingsClient;
+  iModelsClient: IModelsClient;
 }
 
 export const ReportsApiConfigContext = createContext<ReportsApiConfig>({
   getAccessToken: async () => "",
-  baseUrl: "",
   iTwinId: "",
   iModelId: "",
+  baseUrl: "",
+  reportsClient: new ReportsClient(),
+  mappingsClient: new MappingsClient(),
+  iModelsClient: new IModelsClient(),
 });
 
 export const useReportsApiConfig = () => {

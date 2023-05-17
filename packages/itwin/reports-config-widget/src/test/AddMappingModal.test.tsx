@@ -14,11 +14,13 @@ import {
 } from "./test-utils";
 import * as moq from "typemoq";
 import type {
+  MappingsClient,
   MappingSingle,
   ReportMappingCollection,
+  ReportsClient,
 } from "@itwin/insights-client";
 import type { ReportMappingAndMapping } from "../widget/components/ReportMappings";
-import type { IModelOperations, OperationOptions } from "@itwin/imodels-client-management";
+import type { GetSingleIModelParams, IModelOperations, IModelsClient, OperationOptions } from "@itwin/imodels-client-management";
 import { IModelState } from "@itwin/imodels-client-management";
 import { AddMappingsModal } from "../widget/components/AddMappingsModal";
 import { EmptyLocalization } from "@itwin/core-common";
@@ -202,13 +204,8 @@ const mockReportMappingsAndMappingsFactory = (mockMappings: MappingSingle[], rep
   return reportMappingsAndMapping;
 };
 
-const mockIModelsClient = moq.Mock.ofType<IModelOperations<OperationOptions>>();
-
 jest.mock("@itwin/imodels-client-management", () => ({
   ...jest.requireActual("@itwin/imodels-client-management"),
-  IModelsClient: jest.fn().mockImplementation(() => ({
-    iModels: mockIModelsClient.object,
-  })),
   toArray: jest.fn().mockImplementation(async () => {
     return mockProjectIModels.iModels;
   }),
@@ -217,19 +214,22 @@ jest.mock("@itwin/imodels-client-management", () => ({
 const mockGetMappings = jest.fn();
 const mockCreateReportMapping = jest.fn();
 
-jest.mock("@itwin/insights-client", () => ({
-  ...jest.requireActual("@itwin/insights-client"),
-  MappingsClient: jest.fn().mockImplementation(() => ({
-    getMappings: mockGetMappings,
-  })),
-  ReportsClient: jest.fn().mockImplementation(() => ({
-    createReportMapping: mockCreateReportMapping,
-  })),
-}));
+const mockIModelsClient = moq.Mock.ofType<IModelsClient>();
+const mockIModelsClientOperations = moq.Mock.ofType<IModelOperations<OperationOptions>>();
+const mockReportsClient = moq.Mock.ofType<ReportsClient>();
+const mockMappingsClient = moq.Mock.ofType<MappingsClient>();
 
 beforeAll(async () => {
   const localization = new EmptyLocalization();
   await ReportsConfigWidget.initialize(localization);
+  mockIModelsClientOperations.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
+    .returns(async () => mockIModelsResponse[0].iModel);
+  mockIModelsClientOperations.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
+    .returns(async () => mockIModelsResponse[1].iModel);
+  mockIModelsClient.setup((x) => x.iModels)
+    .returns(() => mockIModelsClientOperations.object);
+  mockReportsClient.setup(async (x) => x.createReportMapping(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(mockCreateReportMapping);
+  mockMappingsClient.setup(async (x) => x.getMappings(moq.It.isAny(), moq.It.isAny())).returns(mockGetMappings);
 });
 
 afterEach(() => {
@@ -251,7 +251,7 @@ describe("Add Mapping Modal", () => {
         reportId={mockReportId}
         existingMappings={mockReportMappingsAndMappings}
         onClose={jest.fn()}
-      />, { iModelId: mockIModelId1, iTwinId: mockITwinId }
+      />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object }
     );
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();

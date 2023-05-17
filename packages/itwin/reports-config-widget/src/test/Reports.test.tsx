@@ -43,10 +43,6 @@ const reportsFactory = (): ReportCollection => ({
   },
 });
 
-jest.mock("../widget/components/ReportMappings", () => ({
-  ReportMappings: () => "MockReportMappings",
-}));
-
 const server = setupServer();
 
 beforeAll(async () => {
@@ -238,7 +234,8 @@ describe("Reports View", () => {
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const searchButton = within(screen.getByTestId(/rcw-search-bar/i)).getByTestId(/rcw-search-button-closed/i);
+    const searchButton = screen.getByTestId(/rcw-search-button/i);
+
     await user.click(searchButton);
     const searchInput = screen.getByRole("textbox", {
       name: /search\-textbox/i,

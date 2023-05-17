@@ -6,12 +6,10 @@ import type { AccessToken } from "@itwin/core-bentley";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import type {
   GetIModelListParams,
-  IModelsClientOptions,
+  IModelsClient,
   MinimalIModel,
 } from "@itwin/imodels-client-management";
 import {
-  Constants,
-  IModelsClient,
   toArray,
 } from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
@@ -19,19 +17,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import "./SelectIModel.scss";
-import { generateUrl } from "./utils";
 
 const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
   iTwinId: string,
-  baseUrl: string,
+  iModelsClient: IModelsClient,
   getAccessToken: () => Promise<AccessToken>
 ) => {
-  const iModelClientOptions: IModelsClientOptions = {
-    api: { baseUrl: generateUrl(Constants.api.baseUrl, baseUrl) },
-  };
-
-  const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
   const accessToken = await getAccessToken();
   const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
   const getiModelListParams: GetIModelListParams = {
@@ -53,12 +45,12 @@ export const SelectIModel = ({
   selectedIModelId,
   setSelectedIModelId,
 }: SelectedIModelProps) => {
-  const { iTwinId, iModelId, getAccessToken, baseUrl } = useReportsApiConfig();
+  const { iTwinId, iModelId, getAccessToken, iModelsClient } = useReportsApiConfig();
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
 
   useEffect(() => {
-    void fetchIModels(setIModels, iTwinId, baseUrl, getAccessToken);
-  }, [baseUrl, getAccessToken, iTwinId, setIModels]);
+    void fetchIModels(setIModels, iTwinId, iModelsClient, getAccessToken);
+  }, [getAccessToken, iModelsClient, iTwinId, setIModels]);
 
   useEffect(() => {
     if (iModels.length > 0) {

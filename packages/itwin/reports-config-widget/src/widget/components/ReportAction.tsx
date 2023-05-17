@@ -7,13 +7,11 @@ import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
 import {
-  generateUrl,
   handleError,
   handleInputChange,
 } from "./utils";
 import "./ReportAction.scss";
 import type { Report } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 
@@ -24,7 +22,7 @@ export interface ReportActionProps {
 }
 
 export const ReportAction = ({ report, onSaveSuccess, onClickCancel }: ReportActionProps) => {
-  const { iTwinId, getAccessToken, baseUrl } = useReportsApiConfig();
+  const { iTwinId, getAccessToken, reportsClient } = useReportsApiConfig();
   const [values, setValues] = useState({
     name: report?.displayName ?? "",
     description: report?.description ?? "",
@@ -39,16 +37,13 @@ export const ReportAction = ({ report, onSaveSuccess, onClickCancel }: ReportAct
         return;
       }
       setIsLoading(true);
-      const reportsClientApi = new ReportsClient(
-        generateUrl(REPORTING_BASE_PATH, baseUrl)
-      );
       const accessToken = await getAccessToken();
       report
-        ? await reportsClientApi.updateReport(accessToken, report.id ?? "", {
+        ? await reportsClient.updateReport(accessToken, report.id ?? "", {
           displayName: values.name,
           description: values.description,
         })
-        : await reportsClientApi.createReport(accessToken, {
+        : await reportsClient.createReport(accessToken, {
           displayName: values.name,
           description: values.description,
           projectId: iTwinId,

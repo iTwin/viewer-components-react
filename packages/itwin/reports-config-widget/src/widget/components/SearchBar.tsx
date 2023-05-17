@@ -20,9 +20,21 @@ export const SearchBar = ({
   disabled,
 }: SearchBarProps) => {
   const [searchBarOpen, setSearchBarOpened] = useState<boolean>(false);
+  const [searchBarClosing, setSearchBarClosing] = useState<boolean>(false);
 
   return searchBarOpen || searchValue ? (
-    <div className="rcw-search-button">
+    <div className="rcw-search-button"
+      style={{
+        animation: searchBarClosing ? "rcw-shrink .5s" : "rcw-expand .5s",
+      }}
+      onAnimationEnd={() => {
+        if (searchBarClosing) {
+          setSearchBarClosing(false);
+          setSearchBarOpened(false);
+          setSearchValue("");
+        }
+      }}
+    >
       <LabeledInput
         aria-label="search-textbox"
         placeholder={ReportsConfigWidget.localization.getLocalizedString(
@@ -30,7 +42,7 @@ export const SearchBar = ({
         )}
         svgIcon={
           <IconButton
-            onClick={() => setSearchBarOpened(false)}
+            onClick={() => setSearchBarClosing(true)}
             styleType="borderless"
           >
             <SvgCloseSmall />
@@ -43,10 +55,8 @@ export const SearchBar = ({
       />
     </div>
   ) : (
-    <div className="rcw-search-button" >
-      <IconButton styleType="borderless" onClick={() => setSearchBarOpened(true)} data-testid="rcw-search-button-closed">
-        <SvgSearch />
-      </IconButton>
-    </div>
+    <IconButton styleType="borderless" data-testid="rcw-search-button" onClick={() => setSearchBarOpened(true)}>
+      <SvgSearch />
+    </IconButton>
   );
 };

@@ -5,8 +5,8 @@
 import * as React from "react";
 import { render as rtlRender } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReportsConfigContextProps } from "../widget/components/ReportsConfigContext";
 import { ReportsConfigContext } from "../widget/components/ReportsConfigContext";
-import type { BulkExtractor } from "../widget/components/BulkExtractor";
 
 export const mockAccessToken = async () => "Bearer eyJhbGci";
 
@@ -14,13 +14,14 @@ interface WrapperProps {
   children?: React.ReactNode;
 }
 
-function render(ui: React.ReactElement, contextProps?: { iModelId?: string, iTwinId?: string, bulkExtractor?: BulkExtractor }, { ...options } = {}) {
+function render(ui: React.ReactElement, contextProps?: Partial<ReportsConfigContextProps>, { ...options } = {}) {
   const Wrapper = ({ children }: WrapperProps) => (
     <ReportsConfigContext
       getAccessToken={mockAccessToken}
       iTwinId={contextProps?.iTwinId ?? "mockiTwinId"}
       iModelId={contextProps?.iModelId ?? "mockiModelId"}
       bulkExtractor={contextProps?.bulkExtractor}
+      {...contextProps}
     >
       {children}
     </ReportsConfigContext>

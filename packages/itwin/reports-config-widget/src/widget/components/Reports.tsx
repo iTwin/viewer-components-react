@@ -8,14 +8,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "./utils";
 import {
   EmptyMessage,
-  generateUrl,
   handleError,
   LoadingOverlay,
 } from "./utils";
 import "./Reports.scss";
 import DeleteModal from "./DeleteModal";
-import type { Report } from "@itwin/insights-client";
-import { REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
+import type { Report, ReportsClient } from "@itwin/insights-client";
 import { ReportHorizontalTile } from "./ReportHorizontalTile";
 import { SearchBar } from "./SearchBar";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
@@ -27,20 +25,17 @@ import { useBulkExtractor } from "../context/BulkExtractorContext";
 export type ReportType = CreateTypeFromInterface<Report>;
 
 const fetchReports = async (
-  setReports: React.Dispatch<React.SetStateAction<Report[]>>,
+  setReports: (reports: Report[]) => void,
   iTwinId: string | undefined,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  baseUrl: string,
+  setIsLoading: (isLoading: boolean) => void,
+  reportsClient: ReportsClient,
   getAccessToken: () => Promise<AccessToken>
 ) => {
   try {
     if (!iTwinId) return;
     setIsLoading(true);
-    const reportsClientApi = new ReportsClient(
-      generateUrl(REPORTING_BASE_PATH, baseUrl)
-    );
     const accessToken = await getAccessToken();
-    const reports = await reportsClientApi.getReports(accessToken, iTwinId);
+    const reports = await reportsClient.getReports(accessToken, iTwinId);
     setReports(reports ?? []);
   } catch (error: any) {
     handleError(error.status);
@@ -60,7 +55,7 @@ export const Reports = ({
   onClickReportModify,
   onClickReportTitle,
 }: ReportsProps) => {
-  const { iTwinId, getAccessToken, baseUrl } = useReportsApiConfig();
+  const { iTwinId, getAccessToken, reportsClient } = useReportsApiConfig();
   const { bulkExtractor } = useBulkExtractor();
   const [showDeleteModal, setShowDeleteModal] = useState<Report | undefined>(
     undefined
@@ -79,20 +74,20 @@ export const Reports = ({
       setReports,
       iTwinId,
       setIsLoading,
-      baseUrl,
+      reportsClient,
       getAccessToken
     );
-  }, [baseUrl, getAccessToken, iTwinId, setIsLoading]);
+  }, [getAccessToken, iTwinId, reportsClient, setIsLoading]);
 
   const refresh = useCallback(async () => {
     await fetchReports(
       setReports,
       iTwinId,
       setIsLoading,
-      baseUrl,
+      reportsClient,
       getAccessToken
     );
-  }, [baseUrl, getAccessToken, iTwinId]);
+  }, [getAccessToken, iTwinId, reportsClient]);
 
   const filteredReports = useMemo(
     () =>
@@ -212,11 +207,8 @@ export const Reports = ({
         entityName={showDeleteModal?.displayName}
         onClose={() => setShowDeleteModal(undefined)}
         onDelete={async () => {
-          const reportsClientApi = new ReportsClient(
-            generateUrl(REPORTING_BASE_PATH, baseUrl)
-          );
           const accessToken = await getAccessToken();
-          await reportsClientApi.deleteReport(
+          await reportsClient.deleteReport(
             accessToken,
             showDeleteModal?.id ?? ""
           );

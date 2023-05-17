@@ -4,8 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { Modal, Table, tableFilters } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Mapping } from "@itwin/insights-client";
-import { MappingsClient, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
+import type { Mapping, MappingsClient } from "@itwin/insights-client";
 import ActionPanel from "./ActionPanel";
 import "./AddMappingsModal.scss";
 import { LocalizedTablePaginator } from "./LocalizedTablePaginator";
@@ -13,26 +12,23 @@ import type { ReportMappingAndMapping } from "./ReportMappings";
 import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
 import { SelectIModel } from "./SelectIModel";
 import type { CreateTypeFromInterface } from "./utils";
-import { generateUrl, handleError } from "./utils";
+import { handleError } from "./utils";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
 import type { AccessToken } from "@itwin/core-bentley";
 
 export type MappingType = CreateTypeFromInterface<Mapping>;
 
 const fetchMappings = async (
-  setMappings: React.Dispatch<React.SetStateAction<Mapping[]>>,
+  setMappings: (mappings: Mapping[]) => void,
   iModelId: string,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  baseUrl: string,
+  setIsLoading: (isLoading: boolean) => void,
+  mappingsClient: MappingsClient,
   getAccessToken: () => Promise<AccessToken>
 ) => {
   try {
     setIsLoading(true);
-    const mappingsClientApi = new MappingsClient(
-      generateUrl(REPORTING_BASE_PATH, baseUrl)
-    );
     const accessToken = await getAccessToken();
-    const mappings = await mappingsClientApi.getMappings(
+    const mappings = await mappingsClient.getMappings(
       accessToken,
       iModelId
     );
@@ -61,7 +57,7 @@ export const AddMappingsModal = ({
   const selectedMappings = useRef<Mapping[]>([]);
   const [selectedIModelId, setSelectediModelId] = useState<string>("");
   const [mappings, setMappings] = useState<Mapping[]>([]);
-  const { getAccessToken, baseUrl } = useReportsApiConfig();
+  const { getAccessToken, mappingsClient, reportsClient } = useReportsApiConfig();
 
   useEffect(() => {
     if (selectedIModelId) {
@@ -69,11 +65,11 @@ export const AddMappingsModal = ({
         setMappings,
         selectedIModelId,
         setIsLoading,
-        baseUrl,
+        mappingsClient,
         getAccessToken
       );
     }
-  }, [baseUrl, getAccessToken, selectedIModelId, setIsLoading]);
+  }, [getAccessToken, mappingsClient, selectedIModelId, setIsLoading]);
 
   const mappingsColumns = useMemo(
     () => [
@@ -106,12 +102,9 @@ export const AddMappingsModal = ({
     try {
       if (!selectedIModelId) return;
       setIsLoading(true);
-      const reportsClientApi = new ReportsClient(
-        generateUrl(REPORTING_BASE_PATH, baseUrl)
-      );
       const accessToken = await getAccessToken();
       for (const mapping of selectedMappings.current) {
-        await reportsClientApi.createReportMapping(accessToken, reportId, {
+        await reportsClient.createReportMapping(accessToken, reportId, {
           imodelId: selectedIModelId,
           mappingId: mapping.id,
         });

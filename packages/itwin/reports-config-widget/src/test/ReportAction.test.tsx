@@ -22,10 +22,6 @@ import { EmptyLocalization } from "@itwin/core-common";
 const mockITwinId = faker.datatype.uuid();
 const mockIModelId = faker.datatype.uuid();
 
-jest.mock("../widget/components/ReportMappings", () => ({
-  ReportMappings: () => "MockReportMappings",
-}));
-
 const server = setupServer();
 
 beforeAll(async () => {

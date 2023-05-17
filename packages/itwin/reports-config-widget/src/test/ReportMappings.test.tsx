@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import React from "react";
-import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import {
@@ -16,26 +15,31 @@ import {
 } from "./test-utils";
 import * as moq from "typemoq";
 import type {
+  MappingsClient,
   MappingSingle,
   Report,
   ReportMappingCollection,
 } from "@itwin/insights-client";
+import {
+  ExtractionClient,
+
+  ReportsClient,
+} from "@itwin/insights-client";
 import { ReportMappings } from "../widget/components/ReportMappings";
-import type { GetSingleIModelParams, IModelOperations, OperationOptions } from "@itwin/imodels-client-management";
+import type { GetSingleIModelParams, IModelOperations, IModelsClient, OperationOptions } from "@itwin/imodels-client-management";
 import { IModelState } from "@itwin/imodels-client-management";
 import { BulkExtractor } from "../widget/components/BulkExtractor";
 import type { ReportMappingHorizontalTileProps } from "../widget/components/ReportMappingHorizontalTile";
 import { Text } from "@itwin/itwinui-react";
 import { EmptyLocalization } from "@itwin/core-common";
 import type { AddMappingsModalProps } from "../widget/components/AddMappingsModal";
-import type { ReportsApiConfig } from "../widget/context/ReportsApiConfigContext";
 
-const mockITwinId = faker.datatype.uuid();
+const mockITwinId = "mockITwinId";
 // Lets work with two iModels for now.
-const mockIModelId1 = faker.datatype.uuid();
-const mockIModelId2 = faker.datatype.uuid();
+const mockIModelId1 = "mockIModelId1";
+const mockIModelId2 = "mockIModelId2";
 
-const mockReportId = faker.datatype.uuid();
+const mockReportId = "mockReportId";
 
 const mockIModelsResponse = [
   {
@@ -117,7 +121,7 @@ const mockReportMappingsFactory = (): ReportMappingCollection => {
     mappings: [
       {
         reportId: mockReportId,
-        mappingId: faker.datatype.uuid(),
+        mappingId: "mockMappingId1",
         imodelId: mockIModelId1,
         _links: {
           report: {
@@ -133,7 +137,7 @@ const mockReportMappingsFactory = (): ReportMappingCollection => {
       },
       {
         reportId: mockReportId,
-        mappingId: faker.datatype.uuid(),
+        mappingId: "mockMappingId2",
         imodelId: mockIModelId2,
         _links: {
           report: {
@@ -184,8 +188,6 @@ const mockMappingsFactory = (
   return mockMappings;
 };
 
-const mockIModelsClient = moq.Mock.ofType<IModelOperations<OperationOptions>>();
-
 jest.mock("../widget/components/Constants.ts", () => ({
   STATUS_CHECK_INTERVAL: 10,
 }));
@@ -210,9 +212,7 @@ jest.mock("../widget/components/AddMappingsModal", () => ({
 
 jest.mock("@itwin/imodels-client-management", () => ({
   ...jest.requireActual("@itwin/imodels-client-management"),
-  IModelsClient: jest.fn().mockImplementation(() => ({
-    iModels: mockIModelsClient.object,
-  })),
+
   toArray: jest.fn().mockImplementation(async () => {
     return mockProjectIModels.iModels;
   }),
@@ -221,31 +221,30 @@ jest.mock("@itwin/imodels-client-management", () => ({
 const mockGetMapping = jest.fn();
 const mockGetMappings = jest.fn();
 const mockGetReportMappings = jest.fn();
-const mockDeleteReportMapping = jest.fn();
 
-jest.mock("@itwin/insights-client", () => ({
-  ...jest.requireActual("@itwin/insights-client"),
-  MappingsClient: jest.fn().mockImplementation(() => ({
-    getMapping: mockGetMapping,
-    getMappings: mockGetMappings,
-  })),
-  ReportsClient: jest.fn().mockImplementation(() => ({
-    getReportMappings: mockGetReportMappings,
-    deleteReportMapping: mockDeleteReportMapping,
-  })),
-}));
+const mockIModelsClient = moq.Mock.ofType<IModelsClient>();
+const mockIModelsClientOperations = moq.Mock.ofType<IModelOperations<OperationOptions>>();
+const mockReportsClient = moq.Mock.ofType<ReportsClient>();
+const mockMappingsClient = moq.Mock.ofType<MappingsClient>();
 
 beforeAll(async () => {
   const localization = new EmptyLocalization();
   await ReportsConfigWidget.initialize(localization);
+  mockIModelsClientOperations.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
+    .returns(async () => mockIModelsResponse[0].iModel);
+  mockIModelsClientOperations.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
+    .returns(async () => mockIModelsResponse[1].iModel);
+  mockIModelsClient.setup((x) => x.iModels)
+    .returns(() => mockIModelsClientOperations.object);
+  mockReportsClient.setup(async (x) => x.getReportMappings(moq.It.isAny(), moq.It.isAny())).returns(mockGetReportMappings);
+  mockMappingsClient.setup(async (x) => x.getMappings(moq.It.isAny(), moq.It.isAny())).returns(mockGetMappings);
+  mockMappingsClient.setup(async (x) => x.getMapping(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(mockGetMapping);
 });
 
 afterEach(() => {
   mockGetMapping.mockReset();
   mockGetMappings.mockReset();
   mockGetReportMappings.mockReset();
-  mockDeleteReportMapping.mockReset();
-  mockIModelsClient.reset();
 });
 
 describe("Report Mappings View", () => {
@@ -253,16 +252,10 @@ describe("Report Mappings View", () => {
     const mockReportMappings = mockReportMappingsFactory();
     const mockMappings = mockMappingsFactory(mockReportMappings);
 
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
-      .returns(async () => mockIModelsResponse[0].iModel);
-
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
-      .returns(async () => mockIModelsResponse[1].iModel);
-
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId });
+    render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -274,21 +267,14 @@ describe("Report Mappings View", () => {
     const mockReportMappings = mockReportMappingsFactory();
     const mockMappings = mockMappingsFactory(mockReportMappings);
 
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
-      .returns(async () => mockIModelsResponse[0].iModel);
-
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
-      .returns(async () => mockIModelsResponse[1].iModel);
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    const { user } = render(
-      <ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId }
-    );
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
-    const searchButton = within(screen.getByTestId(/rcw-search-bar/i)).getByTestId(/rcw-search-button-closed/i);
+    const searchButton = screen.getByTestId(/rcw-search-button/i);
 
     await user.click(searchButton);
     const searchInput = screen.getByRole("textbox", {
@@ -327,18 +313,10 @@ describe("Report Mappings View", () => {
     const mockReportMappings = mockReportMappingsFactory();
     const mockMappings = mockMappingsFactory(mockReportMappings);
 
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
-      .returns(async () => mockIModelsResponse[0].iModel);
-
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
-      .returns(async () => mockIModelsResponse[1].iModel);
-
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
-    const { user } = render(
-      <ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId }
-    );
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -364,9 +342,7 @@ describe("Report Mappings View", () => {
   });
 
   it("odata feed url", async () => {
-    const { user } = render(
-      <ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId }
-    );
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
@@ -392,29 +368,16 @@ describe("Report Mappings View", () => {
     const mockReportMappings = mockReportMappingsFactory();
     const mockMappings = mockMappingsFactory(mockReportMappings);
 
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId1 })))
-      .returns(async () => mockIModelsResponse[0].iModel);
-
-    mockIModelsClient.setup(async (x) => x.getSingle(moq.It.isObjectWith<GetSingleIModelParams>({ iModelId: mockIModelId2 })))
-      .returns(async () => mockIModelsResponse[1].iModel);
-
     mockGetMapping.mockReturnValueOnce(mockMappings[0].mapping).mockReturnValueOnce(mockMappings[1].mapping);
     mockGetReportMappings.mockReturnValueOnce(mockReportMappings.mappings);
 
     const iModels = mockIModelsResponse.map((iModel) => iModel.iModel.id);
 
-    const mockApiConfig: ReportsApiConfig = {
-      getAccessToken: jest.fn().mockResolvedValue("mockAccessToken"),
-      iTwinId: mockIModelId1,
-      iModelId: mockIModelId1,
-      baseUrl: "mockBaseUrl",
-    };
-
-    const bulkExtractor = new BulkExtractor(mockApiConfig, jest.fn, jest.fn);
+    const bulkExtractor = new BulkExtractor(new ReportsClient(), new ExtractionClient(), jest.fn().mockResolvedValue("mockAccessToken"), jest.fn, jest.fn);
 
     const runIModelExtractionsMock = jest.spyOn(bulkExtractor, "runIModelExtractions").mockImplementation(async () => Promise.resolve());
 
-    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, bulkExtractor });
+    const { user } = render(<ReportMappings report={mockReport} onClickClose={jest.fn()} />, { iModelId: mockIModelId1, iTwinId: mockITwinId, reportsClient: mockReportsClient.object, mappingsClient: mockMappingsClient.object, iModelsClient: mockIModelsClient.object, bulkExtractor });
 
     await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
 
