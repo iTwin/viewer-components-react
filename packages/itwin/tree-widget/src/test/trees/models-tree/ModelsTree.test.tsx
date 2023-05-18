@@ -121,6 +121,22 @@ describe("ModelsTree", () => {
         expect(result.baseElement).to.matchSnapshot();
       });
 
+      it("renders root node without expansion toggle", async () => {
+        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true }]);
+        visibilityHandlerMock.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "hidden" }));
+        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock.object} activeView={mockViewport().object} />);
+        const node = await waitFor(() => result.getByTestId("tree-node"), { container: result.container });
+        expect(node.className.includes("disable-expander")).to.be.true;
+      });
+
+      it("renders node with expansion toggle if node has parent", async () => {
+        setupDataProvider([{ id: "test", label: PropertyRecord.fromString("test-node"), isCheckboxVisible: true, parentId: "parent" }]);
+        visibilityHandlerMock.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "hidden" }));
+        const result = render(<ModelsTree {...sizeProps} iModel={imodelMock.object} modelsVisibilityHandler={visibilityHandlerMock.object} activeView={mockViewport().object} />);
+        const node = await waitFor(() => result.getByTestId("tree-node"), { container: result.container });
+        expect(node.className.includes("disable-expander")).to.be.false;
+      });
+
       it("renders nodes as unchecked when they're not displayed", async () => {
         setupDataProviderForEachNodeType();
         visibilityHandlerMock.setup((x) => x.getVisibilityStatus(moq.It.isAny())).returns(() => ({ state: "hidden" }));

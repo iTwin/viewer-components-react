@@ -10,9 +10,19 @@
   flex-direction: column;
   position: relative;
 
-  .core-tree-node.with-checkbox {
-    >.contents {
-      padding-left: var(--iui-size-xl);
+  .core-tree-node {
+    &.with-checkbox {
+      >.contents {
+        padding-left: var(--iui-size-xl);
+      }
+    }
+
+    &.disable-expander {
+      >.contents {
+        >.core-tree-expansionToggle {
+          display: none;
+        }
+      }
     }
   }
 

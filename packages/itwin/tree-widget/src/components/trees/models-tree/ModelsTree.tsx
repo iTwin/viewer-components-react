@@ -5,13 +5,13 @@
 
 import "../VisibilityTreeBase.scss";
 import { useCallback, useEffect, useMemo } from "react";
-import { ControlledTree, SelectionMode, useTreeModel } from "@itwin/components-react";
+import { ControlledTree, SelectionMode, TreeRenderer, useTreeModel } from "@itwin/components-react";
 import { useDisposable } from "@itwin/core-react";
 import { isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { TreeWidget } from "../../../TreeWidget";
 import { ClassGroupingOption } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
-import { useVisibilityTreeFiltering, useVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { createVisibilityTreeNodeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { createRuleset, createSearchRuleset } from "./Utils";
 
@@ -20,6 +20,7 @@ import type { SingleSchemaClassSpecification } from "@itwin/presentation-common"
 import type { IFilteredPresentationTreeDataProvider, IPresentationTreeDataProvider } from "@itwin/presentation-components";
 import type { VisibilityTreeFilterInfo } from "../Common";
 import type { ModelsTreeSelectionPredicate } from "./ModelsVisibilityHandler";
+import type { TreeNodeRendererProps, TreeRendererProps } from "@itwin/components-react";
 
 const PAGING_SIZE = 20;
 
@@ -117,7 +118,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   }), [filteredNodeLoader, visibilityHandler, selectionPredicate]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
-  const treeRenderer = useVisibilityTreeRenderer(true, false);
+  const treeRenderer = useModelsTreeRenderer();
 
   const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
 
@@ -214,4 +215,17 @@ const isFilteredDataProvider = (dataProvider: IPresentationTreeDataProvider | IF
 
 const getFilteredDataProvider = (dataProvider: IPresentationTreeDataProvider | IFilteredPresentationTreeDataProvider): IFilteredPresentationTreeDataProvider | undefined => {
   return isFilteredDataProvider(dataProvider) ? dataProvider : undefined;
+};
+
+const useModelsTreeRenderer = () => {
+  const nodeRenderer = (props: TreeNodeRendererProps) => (
+    createVisibilityTreeNodeRenderer(true, false)({ ...props, className: props.node.item.parentId === undefined ? "disable-expander": undefined })
+  );
+
+  return (props: TreeRendererProps) => ( // eslint-disable-line react/display-name
+    <TreeRenderer
+      {...props}
+      nodeRenderer={nodeRenderer}
+    />
+  );
 };
