@@ -95,7 +95,6 @@ export function CategoryTree(props: CategoryTreeProps) {
   const eventHandler = useDisposable(useCallback(() => new VisibilityTreeEventHandler({
     nodeLoader: filteredNodeLoader,
     visibilityHandler,
-    collapsedChildrenDisposalEnabled: true,
   }), [filteredNodeLoader, visibilityHandler]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);

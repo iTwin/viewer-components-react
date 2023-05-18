@@ -46,7 +46,7 @@ export const IModelContentTree = (props: IModelContentTreeProps) => {
     pagingSize: 20,
     appendChildrenCountForGroupingNodes: true,
   });
-  const eventHandler = useTreeEventsHandler(useMemo(() => ({ nodeLoader, modelSource: nodeLoader.modelSource, collapsedChildrenDisposalEnabled: true }), [nodeLoader]));
+  const eventHandler = useTreeEventsHandler(useMemo(() => ({ nodeLoader, modelSource: nodeLoader.modelSource }), [nodeLoader]));
 
   const treeModel = useTreeModel(nodeLoader.modelSource);
 

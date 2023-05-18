@@ -112,7 +112,6 @@ export function ModelsTree(props: ModelsTreeProps) {
   const eventHandler = useDisposable(useCallback(() => new VisibilityTreeEventHandler({
     nodeLoader: filteredNodeLoader,
     visibilityHandler,
-    collapsedChildrenDisposalEnabled: true,
     selectionPredicate: (node) => !selectionPredicate || !isPresentationTreeNodeItem(node) ? true : selectionPredicate(node.key, ModelsVisibilityHandler.getNodeType(node)),
   }), [filteredNodeLoader, visibilityHandler, selectionPredicate]));
 
