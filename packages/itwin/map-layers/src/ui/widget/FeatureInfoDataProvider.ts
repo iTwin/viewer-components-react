@@ -5,7 +5,7 @@
 
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { IPropertyDataProvider, PropertyCategory, PropertyData, PropertyDataChangeEvent } from "@itwin/components-react";
-import {  IModelApp, MapFeatureInfo, MapLayerFeatureInfo, MapSubLayerFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
+import {  IModelApp, MapFeatureInfo, MapLayerFeatureInfo, MapLayerFeatureRecord, MapSubLayerFeatureInfo, StartOrResume, Tool } from "@itwin/core-frontend";
 import { MapFeatureInfoTool, MapFeatureInfoToolData  } from "@itwin/map-layers-formats";
 
 /**
@@ -86,9 +86,9 @@ export class FeatureInfoDataProvider implements IPropertyDataProvider {
             // Add every feature records for this sub-layer
             for (const feature of subLayerInfo.features) {
               nbRecords++;
-              for (const record of feature.records) {
+              for (const attribute of feature.attributes) {
                 // Always use the string value for now
-                this.addProperty(record, subLayerInfo.subLayerName);
+                this.addProperty(MapLayerFeatureRecord.createRecordFromAttribute(attribute), subLayerInfo.subLayerName);
               }
             }
           }

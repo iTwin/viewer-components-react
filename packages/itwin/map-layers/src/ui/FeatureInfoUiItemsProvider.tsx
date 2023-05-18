@@ -15,8 +15,8 @@ export const getMapFeatureInfoToolItemDef = (): ToolItemDef =>
   new ToolItemDef({
     toolId: MapFeatureInfoTool.toolId,
     iconSpec: MapFeatureInfoTool.iconSpec,
-    // label: () => DefaultMapFeatureInfoTool.flyover,
-    // description: () => DefaultMapFeatureInfoTool.description,
+    label: () => MapFeatureInfoTool.flyover,
+    description: () => MapFeatureInfoTool.description,
     execute: async () => { await IModelApp.tools.run(MapFeatureInfoTool.toolId); },
   });
 
@@ -38,7 +38,6 @@ export class FeatureInfoUiItemsProvider implements UiItemsProvider { // eslint-d
       toolbarUsage === ToolbarUsage.ContentManipulation &&
       toolbarOrientation === ToolbarOrientation.Vertical
     ) {
-      MapFeatureInfoTool.register(MapLayersUI.localizationNamespace);
       return [
         ToolbarHelper.createToolbarItemFromItemDef(60, getMapFeatureInfoToolItemDef()),
       ];
