@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "Keep child nodes state the same after parent node re-expanding.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/tree-widget-react"
+}
