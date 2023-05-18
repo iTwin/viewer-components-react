@@ -217,12 +217,12 @@ const getFilteredDataProvider = (dataProvider: IPresentationTreeDataProvider | I
   return isFilteredDataProvider(dataProvider) ? dataProvider : undefined;
 };
 
-const useModelsTreeRenderer = () => {
+function getModelsTreeRenderer() {
   const nodeRenderer = (props: TreeNodeRendererProps) => (
-    createVisibilityTreeNodeRenderer(true, false)({ ...props, className: props.node.item.parentId === undefined ? "disable-expander": undefined })
+    createVisibilityTreeNodeRenderer(true, false)({ ...props, className: props.node.parentId === undefined ? "disable-expander": undefined })
   );
 
-  return (props: TreeRendererProps) => ( // eslint-disable-line react/display-name
+  return function ModelsTreeRenderer(props: TreeRendererProps) {
     <TreeRenderer
       {...props}
       nodeRenderer={nodeRenderer}
