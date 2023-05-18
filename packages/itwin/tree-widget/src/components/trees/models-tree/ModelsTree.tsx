@@ -118,7 +118,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   }), [filteredNodeLoader, visibilityHandler, selectionPredicate]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
-  const treeRenderer = useModelsTreeRenderer();
+  const treeRenderer = getModelsTreeRenderer();
 
   const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
 
@@ -223,9 +223,11 @@ function getModelsTreeRenderer() {
   );
 
   return function ModelsTreeRenderer(props: TreeRendererProps) {
-    <TreeRenderer
-      {...props}
-      nodeRenderer={nodeRenderer}
-    />
-  );
-};
+    return (
+      <TreeRenderer
+        {...props}
+        nodeRenderer={nodeRenderer}
+      />
+    );
+  };
+}
