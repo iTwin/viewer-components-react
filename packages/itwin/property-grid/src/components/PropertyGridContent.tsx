@@ -42,13 +42,8 @@ export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMen
 export function PropertyGridContent({
   dataProvider,
   imodel,
-  enableFavoriteProperties,
-  favoritePropertiesScope,
-  enableCopyingPropertyText,
-  enableNullValueToggle,
+  contextMenuItemProviders,
   persistNullValueToggle,
-  additionalContextMenuOptions,
-  defaultContextMenuOptions,
   customOnDataChanged,
   rootClassName,
   onBackButton,
@@ -62,12 +57,7 @@ export function PropertyGridContent({
     imodel,
     setShowNullValues,
     showNullValues,
-    additionalContextMenuOptions,
-    defaultContextMenuOptions,
-    enableCopyingPropertyText,
-    enableFavoriteProperties,
-    enableNullValueToggle,
-    favoritePropertiesScope,
+    contextMenuItemProviders,
   });
 
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
