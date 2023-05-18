@@ -6,7 +6,6 @@ import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
-import { setupServer } from "msw/node";
 import {
   render,
   screen,
@@ -14,24 +13,14 @@ import {
 } from "./test-utils";
 import { ReportAction } from "../widget/components/ReportAction";
 import userEvent from "@testing-library/user-event";
-import { rest } from "msw";
-import type { Report } from "@itwin/insights-client";
-import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
 import { EmptyLocalization } from "@itwin/core-common";
-
-const server = setupServer();
+import type { Report } from "@itwin/insights-client";
+import { ReportsClient } from "@itwin/insights-client";
 
 beforeAll(async () => {
   const localization = new EmptyLocalization();
   await ReportsConfigWidget.initialize(localization);
-  server.listen();
 });
-
-afterAll(() => {
-  server.close();
-});
-
-afterEach(() => server.resetHandlers());
 
 describe("Reports Action", () => {
   it("required fields should be filled out", async () => {
@@ -51,6 +40,7 @@ describe("Reports Action", () => {
   });
 
   it("should be able to add report", async () => {
+    const mockReturnFn = jest.fn();
     const mockReport: Report = {
       id: faker.datatype.uuid(),
       displayName: "mOcKRePoRt1",
@@ -62,19 +52,15 @@ describe("Reports Action", () => {
         },
       },
     };
-    server.use(
-      rest.post(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
-        async (_req, res, ctx) => {
-          return res(ctx.delay(400), ctx.status(200), ctx.json(mockReport));
-        }
-      )
+
+    const reportsClient = new ReportsClient();
+
+    jest.spyOn(reportsClient, "createReport").mockImplementation(async () =>
+      new Promise((resolve) => setTimeout(() => { resolve(mockReport); }, 100))
     );
 
-    const mockReturnFn = jest.fn();
-
     const { user } = render(
-      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { reportsClient });
 
     const addButton = screen.getByRole("button", {
       name: /add/i,

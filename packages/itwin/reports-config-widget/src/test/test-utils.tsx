@@ -20,7 +20,6 @@ function render(ui: React.ReactElement, contextProps?: Partial<ReportsConfigCont
     <ReportsConfigContext
       getAccessToken={mockAccessToken}
       iTwinId={contextProps?.iTwinId ?? mockITwinId}
-      bulkExtractor={contextProps?.bulkExtractor}
       {...contextProps}
     >
       {children}

@@ -49,6 +49,10 @@ export const ReportAction = ({ report, onSaveSuccess, onClickCancel }: ReportAct
           projectId: iTwinId,
         });
       onSaveSuccess();
+      setValues({
+        name: report?.displayName ?? "",
+        description: report?.description ?? "",
+      });
     } catch (error: any) {
       handleError(error.status);
       setIsLoading(false);
