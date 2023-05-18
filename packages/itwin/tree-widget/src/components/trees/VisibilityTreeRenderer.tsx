@@ -7,6 +7,7 @@ import { useCallback, useEffect } from "react";
 import { TreeImageLoader, TreeNodeRenderer, TreeRenderer } from "@itwin/components-react";
 import { Checkbox } from "@itwin/itwinui-react";
 import { useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
+import classNames from "classnames";
 
 import type { AbstractTreeNodeLoaderWithProvider, TreeNodeRendererProps, TreeRendererProps } from "@itwin/components-react";
 import type { NodeCheckboxRenderProps } from "@itwin/core-react";
@@ -40,7 +41,7 @@ export const createVisibilityTreeNodeRenderer = (iconsEnabled: boolean, descript
       checkboxRenderer={visibilityTreeNodeCheckboxRenderer}
       descriptionEnabled={descriptionEnabled}
       imageLoader={iconsEnabled ? imageLoader : undefined}
-      className="with-checkbox"
+      className={classNames("with-checkbox", props.className)}
     />
   );
 };

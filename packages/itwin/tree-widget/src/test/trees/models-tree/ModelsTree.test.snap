@@ -330,7 +330,7 @@ exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
             >
               <div
                 aria-selected="false"
-                class="core-tree-node with-checkbox"
+                class="core-tree-node with-checkbox disable-expander"
                 data-testid="tree-node"
                 role="treeitem"
                 tabindex="-1"
