@@ -20,7 +20,6 @@ export const ReportsRouter = ({
   navigateTo: (toRoute: (prev: Route | undefined) => Route) => void;
   goBack: () => void;
 }) => {
-  goBack;
   const { report } = currentRoute.reportsRoutingFields;
   const iModelId = useActiveIModelConnection()?.iModelId ?? "";
   switch (currentRoute.step) {
