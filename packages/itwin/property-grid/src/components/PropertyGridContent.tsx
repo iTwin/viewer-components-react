@@ -41,31 +41,19 @@ export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMen
 export function PropertyGridContent({
   dataProvider,
   imodel,
-  enableFavoriteProperties,
-  favoritePropertiesScope,
-  enableCopyingPropertyText,
-  enableNullValueToggle,
+  contextMenuItemProviders,
   persistNullValueToggle,
-  additionalContextMenuOptions,
-  defaultContextMenuOptions,
   rootClassName,
   onBackButton,
   headerContent,
   ...props
 }: PropertyGridContentProps) {
   const { item } = usePropertyGridData({ dataProvider });
-  const { showNullValues, setShowNullValues, filterer } = useNullValueSetting({ persistNullValueToggle });
+  const { filterer } = useNullValueSetting({ persistNullValueToggle });
   const { renderContextMenu, onPropertyContextMenu } = useContextMenu({
     dataProvider,
     imodel,
-    setShowNullValues,
-    showNullValues,
-    additionalContextMenuOptions,
-    defaultContextMenuOptions,
-    enableCopyingPropertyText,
-    enableFavoriteProperties,
-    enableNullValueToggle,
-    favoritePropertiesScope,
+    contextMenuItemProviders,
   });
 
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
