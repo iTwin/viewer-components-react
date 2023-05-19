@@ -51,12 +51,10 @@ export function PropertyGridContent({
   ...props
 }: PropertyGridContentProps) {
   const { item } = usePropertyGridData({ dataProvider, customOnDataChanged });
-  const { showNullValues, setShowNullValues, filterer } = useNullValueSetting({ persistNullValueToggle });
+  const { filterer } = useNullValueSetting({ persistNullValueToggle });
   const { renderContextMenu, onPropertyContextMenu } = useContextMenu({
     dataProvider,
     imodel,
-    setShowNullValues,
-    showNullValues,
     contextMenuItemProviders,
   });
 

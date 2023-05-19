@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { useState } from "react";
+import { assert } from "@itwin/core-bentley";
 import { ContextMenuItem, GlobalContextMenu } from "@itwin/core-react";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import { copyToClipboard } from "../api/WebUtilities";
@@ -19,8 +20,6 @@ export enum PropertyGridDefaultContextMenuKey {
   RemoveFavorite = "remove-favorite",
   AddFavorite = "add-favorite",
   CopyText = "copy-text",
-  HideNull = "hide-null",
-  ShowNull = "show-null",
 }
 
 /** Data structure that defined single context menu item. */
@@ -29,6 +28,7 @@ export interface ContextMenuItemDefinition {
   label: string;
   title?: string;
   execute: () => void;
+  hidden?: boolean;
 }
 
 /** Context provided to menu items for performing actions and determining if item should be shown. */
@@ -41,14 +41,10 @@ export interface MenuItemContext {
   record: PropertyRecord;
   /** Field for which context menu is opened. */
   field: Field | undefined;
-  /** Specified whether `null` values are shown in property grid. */
-  showNullValues: boolean;
-  /** Callback that changes whether property grid should show `null` values or not. */
-  setShowNullValues: (values: boolean) => Promise<void>;
 }
 
 /** Type definition for context menu item provider. */
-export type ContextMenuItemProvider = (context: MenuItemContext) => ContextMenuItemDefinition | undefined;
+export type ContextMenuItemProvider = (context: MenuItemContext) => ContextMenuItemDefinition;
 
 /** Props for configuring property grid context menu. */
 export interface ContextMenuProps {
@@ -60,8 +56,6 @@ export interface ContextMenuProps {
 export interface UseContentMenuProps extends ContextMenuProps {
   imodel: IModelConnection;
   dataProvider: IPresentationPropertyDataProvider;
-  showNullValues: boolean;
-  setShowNullValues: (values: boolean) => Promise<void>;
 }
 
 interface ContextMenuDefinition {
@@ -74,8 +68,6 @@ export function useContextMenu({
   dataProvider,
   imodel,
   contextMenuItemProviders,
-  setShowNullValues,
-  showNullValues,
 }: UseContentMenuProps) {
   const [contextMenu, setContextMenu] = useState<ContextMenuDefinition>();
 
@@ -83,9 +75,7 @@ export function useContextMenu({
     args.event.persist();
 
     const field = await dataProvider.getFieldByPropertyDescription(args.propertyRecord.property);
-    const items = (contextMenuItemProviders ?? [])
-      .map((provider) => provider({ imodel, dataProvider, record: args.propertyRecord, field, showNullValues, setShowNullValues }))
-      .filter((item): item is ContextMenuItemDefinition => item !== undefined);
+    const items = (contextMenuItemProviders ?? []).map((provider) => provider({ imodel, dataProvider, record: args.propertyRecord, field }));
 
     setContextMenu(
       items.length > 0
@@ -110,6 +100,7 @@ export function useContextMenu({
           setContextMenu(undefined);
         }}
         title={item.title}
+        hidden={item.hidden}
       >
         {item.label}
       </ContextMenuItem>
@@ -141,87 +132,43 @@ export function useContextMenu({
 
 export function createAddFavoritePropertyItemProvider(favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemProvider {
   return ({ field, imodel }: MenuItemContext) => {
-    if (!field || Presentation.favoriteProperties.has(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel)) {
-      return undefined;
-    }
-
-    return defaultContextMenuItemDefinitions.getAddFavoritePropertyItem(field, imodel, favoritePropertiesScope);
+    const hidden = !field || Presentation.favoriteProperties.has(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
+    return {
+      key: PropertyGridDefaultContextMenuKey.AddFavorite,
+      execute: async () => {
+        assert(field !== undefined);
+        await Presentation.favoriteProperties.add(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
+      },
+      title: PropertyGridManager.translate("context-menu.add-favorite.description"),
+      label: PropertyGridManager.translate("context-menu.add-favorite.label"),
+      hidden,
+    };
   };
 }
 
 export function createRemoveFavoritePropertyItemProvider(favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemProvider {
   return ({ field, imodel }: MenuItemContext) => {
-    if (!field || !Presentation.favoriteProperties.has(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel)) {
-      return undefined;
-    }
-
-    return defaultContextMenuItemDefinitions.getRemoveFavoritePropertyItem(field, imodel, favoritePropertiesScope);
+    const hidden = !field || !Presentation.favoriteProperties.has(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
+    return {
+      key: PropertyGridDefaultContextMenuKey.RemoveFavorite,
+      execute: async () => {
+        assert(field !== undefined);
+        await Presentation.favoriteProperties.remove(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
+      },
+      title: PropertyGridManager.translate("context-menu.remove-favorite.description"),
+      label: PropertyGridManager.translate("context-menu.remove-favorite.label"),
+      hidden,
+    };
   };
 }
 
 export function createCopyPropertyTextItemProvider(): ContextMenuItemProvider {
-  return ({ record }: MenuItemContext) => defaultContextMenuItemDefinitions.getCopyPropertyTextItem(record);
-}
-
-export function createShowNullValuesItemProvider(): ContextMenuItemProvider {
-  return ({ showNullValues, setShowNullValues }: MenuItemContext) => {
-    if (showNullValues) {
-      return undefined;
-    }
-
-    return defaultContextMenuItemDefinitions.getShowNullValuesItem(setShowNullValues);
-  };
-}
-
-export function createHideNullValuesItemProvider(): ContextMenuItemProvider {
-  return ({ showNullValues, setShowNullValues }: MenuItemContext) => {
-    if (!showNullValues) {
-      return undefined;
-    }
-
-    return defaultContextMenuItemDefinitions.getHideNullValuesItem(setShowNullValues);
-  };
-}
-
-export const defaultContextMenuItemDefinitions = {
-  getAddFavoritePropertyItem: (field: Field, imodel: IModelConnection, favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemDefinition => ({
-    key: PropertyGridDefaultContextMenuKey.AddFavorite,
-    execute: async () => {
-      await Presentation.favoriteProperties.add(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
-    },
-    title: PropertyGridManager.translate("context-menu.add-favorite.description"),
-    label: PropertyGridManager.translate("context-menu.add-favorite.label"),
-  }),
-  getRemoveFavoritePropertyItem: (field: Field, imodel: IModelConnection, favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemDefinition => ({
-    key: PropertyGridDefaultContextMenuKey.RemoveFavorite,
-    execute: async () => {
-      await Presentation.favoriteProperties.remove(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
-    },
-    title: PropertyGridManager.translate("context-menu.remove-favorite.description"),
-    label: PropertyGridManager.translate("context-menu.remove-favorite.label"),
-  }),
-  getCopyPropertyTextItem: (record: PropertyRecord): ContextMenuItemDefinition => ({
+  return ({ record }: MenuItemContext) => ({
     key: PropertyGridDefaultContextMenuKey.CopyText,
     execute: () => {
       record.description && copyToClipboard(record.description);
     },
     title: PropertyGridManager.translate("context-menu.copy-text.description"),
     label: PropertyGridManager.translate("context-menu.copy-text.label"),
-  }),
-  getShowNullValuesItem: (setShowNullValues: (value: boolean) => void): ContextMenuItemDefinition => ({
-    key: PropertyGridDefaultContextMenuKey.ShowNull,
-    execute: () => {
-      setShowNullValues(true);
-    },
-    title: PropertyGridManager.translate("context-menu.show-null.description"),
-    label: PropertyGridManager.translate("context-menu.show-null.label"),
-  }),
-  getHideNullValuesItem: (setShowNullValues: (value: boolean) => void): ContextMenuItemDefinition => ({
-    key: PropertyGridDefaultContextMenuKey.HideNull,
-    execute: () => {
-      setShowNullValues(false);
-    },
-    title: PropertyGridManager.translate("context-menu.hide-null.description"),
-    label: PropertyGridManager.translate("context-menu.hide-null.label"),
-  }),
-};
+  });
+}
