@@ -11,7 +11,6 @@ import { SampleSpatialTree } from "./components/SampleSpatialTree";
 import { DefaultMapFeatureInfoTool, FeatureInfoUiItemsProvider, MapLayersUI, MapLayersUiItemsProvider } from "@itwin/map-layers";
 import { GeoTools, GeoToolsAddressSearchProvider } from "@itwin/geo-tools-react";
 import { MapLayersFormats } from "@itwin/map-layers-formats";
-import { MapLayersPrefBrowserStorage } from "./components/MapLayersPrefBrowserStorage";
 
 export interface UiProvidersConfig {
   initialize: () => Promise<void>;
@@ -93,7 +92,7 @@ const configuredUiItems = new Map<string, UiItem>([
     {
       initialize: async () => {
         await MapLayersFormats.initialize();
-        await MapLayersUI.initialize({ iTwinConfig: new MapLayersPrefBrowserStorage() });
+        await MapLayersUI.initialize();
       },
       createUiItemsProviders: () => [
         new MapLayersUiItemsProvider(),
