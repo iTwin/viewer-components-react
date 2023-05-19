@@ -47,6 +47,7 @@ export interface MenuItemContext {
   setShowNullValues: (values: boolean) => Promise<void>;
 }
 
+/** Type definition for context menu item provider. */
 export type ContextMenuItemProvider = (context: MenuItemContext) => ContextMenuItemDefinition | undefined;
 
 /** Props for configuring property grid context menu. */
