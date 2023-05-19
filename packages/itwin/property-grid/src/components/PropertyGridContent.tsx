@@ -24,7 +24,6 @@ import type { IPresentationPropertyDataProvider } from "@itwin/presentation-comp
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
 import type { NullValueSettingProps } from "../hooks/UseNullValuesSetting";
-import type { PropertyGridDataProps } from "../hooks/UsePropertyGridData";
 
 /** Base props for rendering `PropertyGridContent` component. */
 export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
@@ -36,7 +35,7 @@ export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGrid
 }
 
 /** Props for `PropertyGridContent` component. */
-export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & NullValueSettingProps & PropertyGridDataProps;
+export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & NullValueSettingProps;
 
 /** Component that renders property grid with header and context menu. */
 export function PropertyGridContent({
@@ -44,13 +43,12 @@ export function PropertyGridContent({
   imodel,
   contextMenuItemProviders,
   persistNullValueToggle,
-  customOnDataChanged,
   rootClassName,
   onBackButton,
   headerContent,
   ...props
 }: PropertyGridContentProps) {
-  const { item } = usePropertyGridData({ dataProvider, customOnDataChanged });
+  const { item } = usePropertyGridData({ dataProvider });
   const { filterer } = useNullValueSetting({ persistNullValueToggle });
   const { renderContextMenu, onPropertyContextMenu } = useContextMenu({
     dataProvider,
