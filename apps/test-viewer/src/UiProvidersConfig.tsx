@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { UiItemsProvider } from "@itwin/appui-react";
 import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
-import { PropertyGridManager, PropertyGridUiItemsProvider } from "@itwin/property-grid-react";
+import { PropertyGridManager, PropertyGridUiItemsProvider, createAddFavoritePropertyItemProvider, createCopyPropertyTextItemProvider, createHideNullValuesItemProvider, createRemoveFavoritePropertyItemProvider, createShowNullValuesItemProvider } from "@itwin/property-grid-react";
 import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
@@ -79,11 +79,13 @@ const configuredUiItems = new Map<string, UiItem>([
         propertyGridProps: {
           enableAncestorNavigation: true,
           autoExpandChildCategories: true,
-          enableCopyingPropertyText: true,
-          enableFavoriteProperties: true,
-          enableNullValueToggle: true,
-          enablePropertyGroupNesting: true,
-          orientation: Orientation.Horizontal
+          contextMenuItemProviders: [
+            createAddFavoritePropertyItemProvider(),
+            createRemoveFavoritePropertyItemProvider(),
+            createShowNullValuesItemProvider(),
+            createHideNullValuesItemProvider(),
+            createCopyPropertyTextItemProvider(),
+          ],
         }
       })],
     }
