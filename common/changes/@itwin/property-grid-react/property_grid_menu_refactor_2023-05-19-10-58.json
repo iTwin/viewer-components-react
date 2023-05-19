@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "**BREAKING** Removed properties used for enabling/disabling context menu items in favor of `ContextMenuItemProvider` list that is now used to populate context menu.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
