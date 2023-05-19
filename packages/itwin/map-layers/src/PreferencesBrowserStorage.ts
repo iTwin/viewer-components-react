@@ -102,14 +102,14 @@ export class PreferencesBrowserStorage implements UserPreferencesAccess {
         return;
     }
 
-    const itemKey = this.getStorageItemKey(arg);
-    if (!Object.keys(map).includes(itemKey)) {
+    const prefKey = PreferencesBrowserStorage.getPreferenceKey(arg);
+    if (!Object.keys(map).includes(prefKey)) {
       if (this._options?.throwOnDeleteMissingKey)
         throw "Could not find key from storage."
       else
         return;
     }
-    delete map[itemKey];
+    delete map[prefKey];
     window.localStorage.setItem(this.getStorageItemKey(arg), JSON.stringify(map));
   }
 
