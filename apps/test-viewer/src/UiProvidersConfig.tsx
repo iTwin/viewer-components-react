@@ -82,7 +82,6 @@ const configuredUiItems = new Map<string, UiItem>([
           enableCopyingPropertyText: true,
           enableFavoriteProperties: true,
           enableNullValueToggle: true,
-          enablePropertyGroupNesting: true,
           orientation: Orientation.Horizontal
         }
       })],
