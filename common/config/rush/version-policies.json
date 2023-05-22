@@ -10,9 +10,8 @@
   },
   {
     "policyName": "itwin-property-grid",
-    "definitionName": "lockStepVersion",
-    "version": "0.11.0-dev.0",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 0
   },
   {
     "policyName": "itwin-measure-tools",
