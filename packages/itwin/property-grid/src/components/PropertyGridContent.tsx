@@ -11,8 +11,8 @@ import { ResizableContainerObserver } from "@itwin/core-react";
 import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { useContextMenu } from "../hooks/UseContextMenu";
+import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
 import { useNullValueSetting } from "../hooks/UseNullValuesSetting";
-import { usePropertyGridData } from "../hooks/UsePropertyGridData";
 import { useSelectedItemsNum } from "../hooks/UseSelectedItemsCount";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { FilteringPropertyGrid } from "./FilteringPropertyGrid";
@@ -57,7 +57,7 @@ export function PropertyGridContent({
   headerContent,
   ...props
 }: PropertyGridContentProps) {
-  const { item } = usePropertyGridData({ dataProvider });
+  const { item } = useLoadedInstanceInfo({ dataProvider });
   const { filterer } = useNullValueSetting({ persistNullValueToggle });
   const { renderContextMenu, onPropertyContextMenu } = useContextMenu({
     dataProvider,

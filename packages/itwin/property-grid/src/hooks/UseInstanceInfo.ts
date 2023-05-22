@@ -9,10 +9,10 @@ import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 
 /**
- * Props for `usePropertyGridData` hook.
+ * Props for `useLoadedInstanceInfo` hook.
  * @internal
  */
-export interface UsePropertyGridDataProps {
+export interface UseLoadedInstanceInfoProps {
   dataProvider: IPresentationPropertyDataProvider;
 }
 
@@ -20,7 +20,7 @@ export interface UsePropertyGridDataProps {
  * Returns class name and label of the instance which properties are currently shown.
  * @internal
  */
-export function usePropertyGridData({ dataProvider }: UsePropertyGridDataProps) {
+export function useLoadedInstanceInfo({ dataProvider }: UseLoadedInstanceInfoProps) {
   const [item, setItem] = useState<{className: string, label: PropertyRecord}>();
 
   useEffect(() => {
