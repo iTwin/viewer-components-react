@@ -17,7 +17,7 @@ const PropertyGridSelectionScope = "Property Grid";
  * @public
  */
 export interface AncestorNavigationProps {
-  /** Enables navigation through instance ancetors. */
+  /** Enables navigation through instance ancestors. */
   enableAncestorNavigation?: boolean;
 }
 

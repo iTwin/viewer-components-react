@@ -19,7 +19,7 @@ export interface NullValueSettingProps {
 }
 
 /**
- * Custom hook that track setting for showing/hiding null values in property grid.
+ * Custom hook for tracking of "show/hide null values" setting in property grid.
  * @internal
  */
 export function useNullValueSetting({ persistNullValueToggle }: NullValueSettingProps) {
