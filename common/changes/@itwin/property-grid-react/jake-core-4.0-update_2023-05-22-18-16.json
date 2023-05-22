@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/property-grid-react",
+      "comment": "Updated to iTwin.js Core 4.0 release",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/property-grid-react"
+}
