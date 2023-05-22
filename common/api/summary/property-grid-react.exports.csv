@@ -1,0 +1,38 @@
+sep=;
+Release Tag;API Item
+public;AncestorNavigationProps
+public;ContextMenuItemDefinition
+public;ContextMenuItemProvider = (context: MenuItemContext) => ContextMenuItemDefinition
+public;ContextMenuProps
+public;createAddFavoritePropertyItemProvider(favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemProvider
+public;createCopyPropertyTextItemProvider(): ContextMenuItemProvider
+public;createRemoveFavoritePropertyItemProvider(favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemProvider
+public;DataProviderProps
+internal;FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element
+public;FilteringPropertyGridProps 
+internal;InstanceSelectionProps 
+public;MenuItemContext
+public;MultiElementPropertyGrid({ enableAncestorNavigation, ...props }: MultiElementPropertyGridProps): JSX.Element
+public;MultiElementPropertyGridProps = Omit
+internal;NonEmptyValuesPropertyDataFilterer 
+internal;NoopPropertyDataFilterer 
+public;NullValueSettingProps
+public;PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element
+public;PropertyGridComponent(props: PropertyGridComponentProps): JSX.Element | null
+public;PropertyGridComponentId = "vcr:PropertyGridComponent"
+public;PropertyGridComponentProps = Omit
+internal;PropertyGridContent({ dataProvider, imodel, contextMenuItemProviders, persistNullValueToggle, rootClassName, onBackButton, headerContent, ...props }: PropertyGridContentProps): JSX.Element
+public;PropertyGridContentBaseProps 
+public;PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & NullValueSettingProps
+public;PropertyGridManager
+public;PropertyGridProps = Omit
+public;PropertyGridUiItemsProvider 
+public;PropertyGridUiItemsProviderProps
+public;SingleElementDataProviderProps 
+public;SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps): JSX.Element
+public;SingleElementPropertyGridProps = Omit
+internal;UseContentMenuProps 
+internal;useContextMenu({ dataProvider, imodel, contextMenuItemProviders }: UseContentMenuProps):
+internal;useDataProvider({ imodel, createDataProvider }: DataProviderProps &
+internal;useInstanceSelection({ imodel, enableAncestorNavigation }: InstanceSelectionProps):
+internal;useNullValueSetting({ persistNullValueToggle }: NullValueSettingProps):

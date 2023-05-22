@@ -10,14 +10,25 @@ import { PropertyGridManager } from "./PropertyGridManager";
 import type { UiItemsProvider, Widget } from "@itwin/appui-react";
 import type { PropertyGridComponentProps } from "./PropertyGridComponent";
 
+/**
+ * Props for creating `PropertyGridUiItemsProvider`.
+ * @public
+ */
 export interface PropertyGridUiItemsProviderProps {
+  /** The stage panel to place the widget in. Defaults to `StagePanelLocation.Right`. */
   defaultPanelLocation?: StagePanelLocation;
+  /** The stage panel section to place the widget in. Defaults to `StagePanelSection.End`. */
   defaultPanelSection?: StagePanelSection;
+  /** Widget priority in the stage panel. */
   defaultPanelWidgetPriority?: number;
+  /** Props for configuring `PropertyGridComponent` shown in the widget. */
   propertyGridProps?: PropertyGridComponentProps;
 }
 
-/** Provides the property grid widget to zone 9 */
+/**
+ * A `UiItemsProvider` implementation that provides a `PropertyGridComponent` into a stage panel.
+ * @public
+ */
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
   public readonly id = "PropertyGridUiItemsProvider";
 

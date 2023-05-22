@@ -9,7 +9,10 @@ const PROPERTY_GRID_NAMESPACE = "PropertyGridPreferences";
 const PROPERTY_GRID_SHOWNULL_KEY = "showNullValues";
 const LOGGER_CATEGORY = "PropertyGrid";
 
-// Get showNullValues toggle from UserPreferences (corresponds to hide / show empty fields)
+/**
+ * Get showNullValues toggle from UserPreferences (corresponds to hide / show empty fields)
+ * @internal
+ */
 export const getShowNullValuesPreference = async () => {
   const userPrefs = IModelApp.userPreferences;
   if (userPrefs) {
@@ -33,7 +36,10 @@ export const getShowNullValuesPreference = async () => {
   return true; // Default to showing empty fields
 };
 
-// Save showNullValues toggle to UserPreferences (corresponds to hide / show empty fields)
+/**
+ * Save showNullValues toggle to UserPreferences (corresponds to hide / show empty fields)
+ * @internal
+ */
 export const saveShowNullValuesPreference = async (value: boolean) => {
   const userPrefs = IModelApp.userPreferences;
   if (userPrefs) {

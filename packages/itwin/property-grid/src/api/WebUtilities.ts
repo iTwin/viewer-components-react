@@ -3,7 +3,10 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-/** Class for browser utilities, like copy to clipboard */
+/**
+ * Class for browser utilities, like copy to clipboard.
+ * @internal
+ */
 export const isiOsDevice = (): boolean => {
   const iDevices = [
     "iPad Simulator",
@@ -64,7 +67,10 @@ const copyToClipboardiOS = (info: string) => {
   document.body.removeChild(el);
 };
 
-/** Copies a string to the clipboard. Works in iOS as well */
+/**
+ * Copies a string to the clipboard. Works in iOS as well
+ * @internal
+ */
 export const copyToClipboard = (data: string) => {
   if (isiOsDevice()) {
     copyToClipboardiOS(data);

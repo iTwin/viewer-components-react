@@ -12,12 +12,19 @@ import type { InstanceKey, KeySet } from "@itwin/presentation-common";
 
 const PropertyGridSelectionScope = "Property Grid";
 
-/** Props for configuring ancestors navigation. */
+/**
+ * Props for configuring ancestors navigation.
+ * @public
+ */
 export interface AncestorNavigationProps {
+  /** Enables navigation through instance ancetors. */
   enableAncestorNavigation?: boolean;
 }
 
-/** Props for `useInstanceSelection` hook. */
+/**
+ * Props for `useInstanceSelection` hook.
+ * @internal
+ */
 export interface InstanceSelectionProps extends AncestorNavigationProps {
   imodel: IModelConnection;
 }
@@ -42,6 +49,7 @@ interface InstanceSelectionInfo {
  * - If single instance is selected `ancestorsNavigationProps` returned from this hook can be used to navigate through ancestors.
  *   It allows to navigate to the top most parent and navigate back to the starting instance. Navigating up and downs updates `UnifiedSelection`.
  * - Focus single instance until `UnifiedSelection` is changed.
+ * @internal
  */
 export function useInstanceSelection({ imodel, enableAncestorNavigation }: InstanceSelectionProps) {
   const [{ selectedKeys, previousKeys, canNavigateUp, focusedInstanceKey }, setInfo] = useState<InstanceSelectionInfo>({

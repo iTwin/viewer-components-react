@@ -14,10 +14,16 @@ import type { IModelConnection } from "@itwin/core-frontend";
 import type { DataProviderProps } from "../hooks/UseDataProvider";
 import type { PropertyGridContentProps } from "./PropertyGridContent";
 
-/** Props for `PropertyGrid` component. */
+/**
+ * Props for `PropertyGrid` component.
+ * @public
+ */
 export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider"> & DataProviderProps;
 
-/** Component that renders property grid for instances in `UnifiedSelection`. */
+/**
+ * Component that renders property grid for instances in `UnifiedSelection`.
+ * @public
+ */
 export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps) {
   const { dataProvider, isOverLimit } = useUnifiedSelectionDataProvider({ imodel: props.imodel, createDataProvider });
 

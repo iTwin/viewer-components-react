@@ -8,12 +8,18 @@ import { useEffect, useState } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 
-/** Props for `usePropertyGridData` hook. */
+/**
+ * Props for `usePropertyGridData` hook.
+ * @internal
+ */
 export interface UsePropertyGridDataProps {
   dataProvider: IPresentationPropertyDataProvider;
 }
 
-/** Returns className and label of the instance that properties are currently loaded. */
+/**
+ * Returns class name and label of the instance which properties are currently shown.
+ * @internal
+ */
 export function usePropertyGridData({ dataProvider }: UsePropertyGridDataProps) {
   const [item, setItem] = useState<{className: string, label: PropertyRecord}>();
 

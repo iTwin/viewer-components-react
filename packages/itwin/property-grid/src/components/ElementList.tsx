@@ -15,7 +15,10 @@ import { PropertyGridManager } from "../PropertyGridManager";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
 
-/** Props for `ElementList` component. */
+/**
+ * Props for `ElementList` component.
+ * @internal
+ */
 export interface ElementListProps {
   imodel: IModelConnection;
   instanceKeys: InstanceKey[];
@@ -24,7 +27,10 @@ export interface ElementListProps {
   rootClassName?: string;
 }
 
-/** Shows a list of elements to inspect properties for. */
+/**
+ * Shows a list of elements to inspect properties for.
+ * @internal
+ */
 export function ElementList({
   imodel,
   instanceKeys,
