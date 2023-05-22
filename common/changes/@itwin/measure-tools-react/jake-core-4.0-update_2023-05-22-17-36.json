@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/measure-tools-react",
+      "comment": "Updated to iTwin.js Core 4.0 release",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/measure-tools-react"
+}
