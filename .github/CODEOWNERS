@@ -12,8 +12,10 @@
 
 /apps/test-viewer  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 
-/packages/itwin/property-grid  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation @JoeZman
-/common/changes/@itwin/property-grid-react  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation @JoeZman
+/packages/itwin/property-grid  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
+/common/changes/@itwin/property-grid-react  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
+/common/api/summary/property-grid-react.exports.csv @itwin/itwinjs-core-presentation
+/common/api/property-grid-react.api.md @itwin/itwinjs-core-presentation
 
 /packages/itwin/tree-widget  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation
 /common/changes/@itwin/tree-widget-react  @itwin/viewer-components-reviewers @itwin/itwinjs-core-presentation

@@ -16,22 +16,27 @@ import type { IPresentationPropertyDataProvider } from "@itwin/presentation-comp
 import type { PropertyGridContextMenuArgs } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 
-export enum PropertyGridDefaultContextMenuKey {
-  RemoveFavorite = "remove-favorite",
-  AddFavorite = "add-favorite",
-  CopyText = "copy-text",
-}
-
-/** Data structure that defined single context menu item. */
+/**
+ * Data structure that defined single context menu item.
+ * @public
+ */
 export interface ContextMenuItemDefinition {
+  /** Unique key of the context menu item. */
   key: string;
+  /** Label of the context menu item. */
   label: string;
+  /** Description of the context menu item. */
   title?: string;
+  /** Callback that is invoked when context menu item is clicked. */
   execute: () => void;
+  /** Specifies whether context menu item should be hidden. */
   hidden?: boolean;
 }
 
-/** Context provided to menu items for performing actions and determining if item should be shown. */
+/**
+ * Context provided to menu items for performing actions and determining if item should be shown.
+ * @public
+ */
 export interface MenuItemContext {
   /** iModelConnection used by property grid. */
   imodel: IModelConnection;
@@ -43,16 +48,25 @@ export interface MenuItemContext {
   field: Field | undefined;
 }
 
-/** Type definition for context menu item provider. */
+/**
+ * Type definition for context menu item provider.
+ * @public
+ */
 export type ContextMenuItemProvider = (context: MenuItemContext) => ContextMenuItemDefinition;
 
-/** Props for configuring property grid context menu. */
+/**
+ * Props for configuring property grid context menu.
+ * @public
+ */
 export interface ContextMenuProps {
   /** List of providers used to populate context menu for current property. */
   contextMenuItemProviders?: ContextMenuItemProvider[];
 }
 
-/** Props for `useContextMenu` hook. */
+/**
+ * Props for `useContextMenu` hook.
+ * @internal
+ */
 export interface UseContentMenuProps extends ContextMenuProps {
   imodel: IModelConnection;
   dataProvider: IPresentationPropertyDataProvider;
@@ -63,12 +77,11 @@ interface ContextMenuDefinition {
   menuItems: ContextMenuItemDefinition[];
 }
 
-/** Custom hook for rendering property grid context menu. */
-export function useContextMenu({
-  dataProvider,
-  imodel,
-  contextMenuItemProviders,
-}: UseContentMenuProps) {
+/**
+ * Custom hook for rendering property grid context menu.
+ * @internal
+ */
+export function useContextMenu({ dataProvider, imodel, contextMenuItemProviders }: UseContentMenuProps) {
   const [contextMenu, setContextMenu] = useState<ContextMenuDefinition>();
 
   const onPropertyContextMenu = async (args: PropertyGridContextMenuArgs) => {
@@ -130,11 +143,15 @@ export function useContextMenu({
   };
 }
 
+/**
+ * Creates provider for `Add Favorite` context menu item.
+ * @public
+ */
 export function createAddFavoritePropertyItemProvider(favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemProvider {
   return ({ field, imodel }: MenuItemContext) => {
     const hidden = !field || Presentation.favoriteProperties.has(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
     return {
-      key: PropertyGridDefaultContextMenuKey.AddFavorite,
+      key: "add-favorite",
       execute: async () => {
         assert(field !== undefined);
         await Presentation.favoriteProperties.add(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
@@ -146,11 +163,15 @@ export function createAddFavoritePropertyItemProvider(favoritePropertiesScope?: 
   };
 }
 
+/**
+ * Creates provider for `Remove Favorite` context menu item.
+ * @public
+ */
 export function createRemoveFavoritePropertyItemProvider(favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemProvider {
   return ({ field, imodel }: MenuItemContext) => {
     const hidden = !field || !Presentation.favoriteProperties.has(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
     return {
-      key: PropertyGridDefaultContextMenuKey.RemoveFavorite,
+      key: "remove-favorite",
       execute: async () => {
         assert(field !== undefined);
         await Presentation.favoriteProperties.remove(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
@@ -162,9 +183,13 @@ export function createRemoveFavoritePropertyItemProvider(favoritePropertiesScope
   };
 }
 
+/**
+ * Creates provider for `Copy Text` context menu item.
+ * @public
+ */
 export function createCopyPropertyTextItemProvider(): ContextMenuItemProvider {
   return ({ record }: MenuItemContext) => ({
-    key: PropertyGridDefaultContextMenuKey.CopyText,
+    key: "copy-text",
     execute: () => {
       record.description && copyToClipboard(record.description);
     },

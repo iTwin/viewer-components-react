@@ -13,16 +13,25 @@ import type { InstanceKey } from "@itwin/presentation-common";
 import type { PropertyGridContentProps } from "./PropertyGridContent";
 import type {  DataProviderProps } from "../hooks/UseDataProvider";
 
-/** Props for data provider used by `SingleElementPropertyGrid. */
+/**
+ * Props for data provider used by `SingleElementPropertyGrid`.
+ * @public
+ */
 export interface SingleElementDataProviderProps extends DataProviderProps {
   /** Key of the instance which data should be loaded. */
   instanceKey: InstanceKey;
 }
 
-/** Props for `SingleElementPropertyGrid` component. */
+/**
+ * Props for `SingleElementPropertyGrid` component.
+ * @public
+ */
 export type SingleElementPropertyGridProps = Omit<PropertyGridContentProps, "dataProvider"> & SingleElementDataProviderProps;
 
-/** Component that renders property grid for single element. */
+/**
+ * Component that renders property grid for single instance.
+ * @public
+ */
 export function SingleElementPropertyGrid({ instanceKey, createDataProvider, ...props }: SingleElementPropertyGridProps) {
   const dataProvider = useSingleElementDataProvider({ imodel: props.imodel, instanceKey, createDataProvider  });
 

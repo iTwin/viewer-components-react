@@ -26,13 +26,17 @@ enum MultiElementPropertyContent {
   SingleElementPropertyGrid = 2,
 }
 
-/** Prop for `MultiElementPropertyGrid` component. */
+/**
+ * Props for `MultiElementPropertyGrid` component.
+ * @public
+ */
 export type MultiElementPropertyGridProps = Omit<PropertyGridProps, "headerContent" | "onBackButton"> & AncestorNavigationProps;
 
 /**
- * Component that renders property grid for instance in `UnifiedSelection`.
+ * Component that renders property grid for instances in `UnifiedSelection`.
  * - If multiple instances are selected list containing select instances can be opened that allows to check properties of specific instance.
  * - If single instance is selected navigation through it's ancestors can be enabled.
+ * @public
  */
 export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }: MultiElementPropertyGridProps) {
   const {

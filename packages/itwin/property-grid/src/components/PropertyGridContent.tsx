@@ -11,8 +11,8 @@ import { ResizableContainerObserver } from "@itwin/core-react";
 import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
 import { IconButton } from "@itwin/itwinui-react";
 import { useContextMenu } from "../hooks/UseContextMenu";
+import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
 import { useNullValueSetting } from "../hooks/UseNullValuesSetting";
-import { usePropertyGridData } from "../hooks/UsePropertyGridData";
 import { useSelectedItemsNum } from "../hooks/UseSelectedItemsCount";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { FilteringPropertyGrid } from "./FilteringPropertyGrid";
@@ -25,7 +25,10 @@ import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
 import type { NullValueSettingProps } from "../hooks/UseNullValuesSetting";
 
-/** Base props for rendering `PropertyGridContent` component. */
+/**
+ * Base props for rendering `PropertyGridContent` component.
+ * @public
+ */
 export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
   imodel: IModelConnection;
   dataProvider: IPresentationPropertyDataProvider;
@@ -34,10 +37,16 @@ export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGrid
   headerContent?: JSX.Element;
 }
 
-/** Props for `PropertyGridContent` component. */
+/**
+ * Props for `PropertyGridContent` component.
+ * @public
+ */
 export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & NullValueSettingProps;
 
-/** Component that renders property grid with header and context menu. */
+/**
+ * Component that renders property grid with header and context menu.
+ * @internal
+ */
 export function PropertyGridContent({
   dataProvider,
   imodel,
@@ -48,7 +57,7 @@ export function PropertyGridContent({
   headerContent,
   ...props
 }: PropertyGridContentProps) {
-  const { item } = usePropertyGridData({ dataProvider });
+  const { item } = useLoadedInstanceInfo({ dataProvider });
   const { filterer } = useNullValueSetting({ persistNullValueToggle });
   const { renderContextMenu, onPropertyContextMenu } = useContextMenu({
     dataProvider,

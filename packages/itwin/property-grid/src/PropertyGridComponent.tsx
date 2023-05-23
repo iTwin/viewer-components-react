@@ -11,12 +11,22 @@ import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid"
 
 import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid";
 
+/**
+ * Id of the property grid widget created by `PropertyGridUiItemsProvider`.
+ * @public
+ */
 export const PropertyGridComponentId = "vcr:PropertyGridComponent";
 
-/** Props for `PropertyGridComponent` component. */
+/**
+ * Props for `PropertyGridComponent`.
+ * @public
+ */
 export type PropertyGridComponentProps = Omit<MultiElementPropertyGridProps, "imodel">;
 
-/** Component that renders `MultiElementPropertyGrid` if there is active iModel connection. */
+/**
+ * Component that renders `MultiElementPropertyGrid` if there is active iModel connection.
+ * @public
+ */
 export function PropertyGridComponent(props: PropertyGridComponentProps) {
   const imodel = useActiveIModelConnection();
   if (!imodel) {
@@ -26,7 +36,7 @@ export function PropertyGridComponent(props: PropertyGridComponentProps) {
   return <PropertyGridComponentContent {...props} imodel={imodel} />;
 }
 
-/** Component that renders `MultiElementPropertyGrid`. */
+/** Component that renders `MultiElementPropertyGrid` an hides/shows widget based on `UnifiedSelection`. */
 function PropertyGridComponentContent(props: MultiElementPropertyGridProps) {
   const widgetDef = useSpecificWidgetDef(PropertyGridComponentId);
 

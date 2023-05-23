@@ -30,6 +30,7 @@
     "copy:cjs": "cpx \"./src/**/*.scss\" ./lib/cjs",
     "copy:esm": "cpx \"./src/**/*.scss\" ./lib/esm",
     "cover": "",
+    "extract-api": "betools extract-api --entry=property-grid-react",
     "lint": "eslint -f visualstudio \"./src/**/*.{ts,tsx}\" 1>&2",
     "lint:fix": "npm run lint -- --fix",
     "pseudolocalize": "betools pseudolocalize --englishDir ./public/locales/en --out ./lib/public/locales/en-PSEUDO",

@@ -9,13 +9,19 @@ import { NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "..
 
 import type { IPropertyDataFilterer } from "@itwin/components-react";
 
-/** Props for `useNullValueSetting` hook. */
+/**
+ * Props for `useNullValueSetting` hook.
+ * @public
+ */
 export interface NullValueSettingProps {
   /** Specifies whether setting for showing/hiding null values in property grid should be persisted. */
   persistNullValueToggle?: boolean;
 }
 
-/** Custom hook that track setting for showing/hiding null values in property grid. */
+/**
+ * Custom hook for tracking of "show/hide null values" setting in property grid.
+ * @internal
+ */
 export function useNullValueSetting({ persistNullValueToggle }: NullValueSettingProps) {
   const [{ showNullValues, filterer }, setShowNullValues] = useState<{ showNullValues: boolean, filterer: IPropertyDataFilterer }>({ showNullValues: true, filterer: new NoopPropertyDataFilterer() });
 

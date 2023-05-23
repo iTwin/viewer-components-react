@@ -16,7 +16,8 @@ import type { IPropertyDataFilterer, IPropertyDataProvider, PropertyCategory, Pr
 import type { IDisposable } from "@itwin/core-bentley";
 
 /**
- * Properties for rendering a `FilteringPropertyGrid`
+ * Properties for rendering a `FilteringPropertyGrid`.
+ * @public
  */
 export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithDataProviderProps {
   filterer: IPropertyDataFilterer;
@@ -24,7 +25,8 @@ export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithD
 }
 
 /**
- * Creates a filtered data provider before rendering a `VirtualizedPropertyGridWithDataProvider`
+ * Creates a filtered data provider before rendering a `VirtualizedPropertyGridWithDataProvider`.
+ * @internal
  */
 export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps) {
   const filteringDataProvider = useDisposable(useCallback(
@@ -49,7 +51,8 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
 }
 
 /**
- * Placeholder filter
+ * Filterer that does nothing.
+ * @internal
  */
 export class NoopPropertyDataFilterer extends PropertyRecordDataFiltererBase {
   public get isActive() {
@@ -61,7 +64,8 @@ export class NoopPropertyDataFilterer extends PropertyRecordDataFiltererBase {
 }
 
 /**
- * Filter that hides empty property data
+ * Filter that hides empty property data.
+ * @internal
  */
 export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFiltererBase {
   public get isActive() {
