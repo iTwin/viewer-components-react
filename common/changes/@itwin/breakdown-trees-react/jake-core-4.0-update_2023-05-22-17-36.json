@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/breakdown-trees-react",
+      "comment": "",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/breakdown-trees-react"
+}
