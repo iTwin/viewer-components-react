@@ -2,12 +2,12 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { ExtractionClient, ExtractorState, REPORTING_BASE_PATH, ReportsClient } from "@itwin/insights-client";
-import type { ReportMapping } from "@itwin/insights-client";
-import { generateUrl, handleError } from "./utils";
-import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { ExtractorState } from "@itwin/insights-client";
+import type { ExtractionClient, ReportMapping, ReportsClient } from "@itwin/insights-client";
+import { handleError } from "./utils";
 import { ExtractionStates } from "./ExtractionStatus";
 import { STATUS_CHECK_INTERVAL } from "./Constants";
+import type { AccessToken } from "@itwin/core-bentley";
 
 export type ReportMappingAndMapping = ReportMapping & {
   mappingName: string;
@@ -15,7 +15,7 @@ export type ReportMappingAndMapping = ReportMapping & {
   iModelName: string;
 };
 
-export default class BulkExtractor {
+export class BulkExtractor {
   private _reportsClientApi: ReportsClient;
   private _extractionClientApi: ExtractionClient;
   private _accessToken: () => Promise<string>;
@@ -31,14 +31,15 @@ export default class BulkExtractor {
   private _iModels: string[] = [];
 
   constructor(
-    apiConfig: ReportsApiConfig,
+    reportsClient: ReportsClient,
+    extractionClient: ExtractionClient,
+    getAccessToken: () => Promise<AccessToken>,
     successfulExtractionToast: (iModelName: string, odataFeedUrl: string) => void,
     failedExtractionToast: (iModelName: string) => void,
   ) {
-    const url = generateUrl(REPORTING_BASE_PATH, apiConfig.baseUrl);
-    this._reportsClientApi = new ReportsClient(url);
-    this._extractionClientApi = new ExtractionClient(url);
-    this._accessToken = apiConfig.getAccessToken;
+    this._reportsClientApi = reportsClient;
+    this._extractionClientApi = extractionClient;
+    this._accessToken = getAccessToken;
     this._successfulExtractionToast = successfulExtractionToast;
     this._failedExtractionToast = failedExtractionToast;
   }
