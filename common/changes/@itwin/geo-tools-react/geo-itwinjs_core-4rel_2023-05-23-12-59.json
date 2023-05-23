@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/geo-tools-react",
+      "comment": "Updated to itwinjs-core packages 4.0 official release",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/geo-tools-react"
+}
