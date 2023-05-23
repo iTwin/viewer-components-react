@@ -5,97 +5,28 @@
 import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
-import type {
-  IModelConnection,
-  SelectionSet,
-  SelectionSetEvent,
-} from "@itwin/core-frontend";
-import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
-import { setupServer } from "msw/node";
 import {
   render,
   screen,
-  TestUtils,
   waitForElementToBeRemoved,
 } from "./test-utils";
-import ReportAction from "../widget/components/ReportAction";
+import { ReportAction } from "../widget/components/ReportAction";
 import userEvent from "@testing-library/user-event";
-import { rest } from "msw";
-import type { Report } from "@itwin/insights-client";
-import * as moq from "typemoq";
-import { REPORTS_CONFIG_BASE_URL } from "../widget/ReportsConfigUiProvider";
-import type {
-  SelectionManager,
-  SelectionScopesManager,
-} from "@itwin/presentation-frontend";
-import {
-  Presentation,
-  SelectionChangeEvent,
-} from "@itwin/presentation-frontend";
-import type { BeEvent } from "@itwin/core-bentley";
 import { EmptyLocalization } from "@itwin/core-common";
-
-const mockITwinId = faker.datatype.uuid();
-const mockIModelId = faker.datatype.uuid();
-
-const connectionMock = moq.Mock.ofType<IModelConnection>();
-const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
-const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
-
-jest.mock("../widget/components/ReportMappings", () => ({
-  ReportMappings: () => "MockReportMappings",
-}));
-
-jest.mock("@itwin/appui-react", () => ({
-  ...jest.requireActual("@itwin/appui-react"),
-  useActiveIModelConnection: () => connectionMock.object,
-}));
-
-const server = setupServer();
+import type { Report } from "@itwin/insights-client";
+import { ReportsClient } from "@itwin/insights-client";
 
 beforeAll(async () => {
-  await NoRenderApp.startup({localization: new EmptyLocalization()});
-  await Presentation.initialize();
-  const selectionSet = moq.Mock.ofType<SelectionSet>();
-  const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
-  selectionSet.setup((x) => x.elements).returns(() => new Set([]));
-  selectionSet.setup((x) => x.onChanged).returns(() => onChanged.object);
-  connectionMock
-    .setup((x) => x.selectionSet)
-    .returns(() => selectionSet.object);
-  connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId);
-  connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
-
-  selectionManagerMock
-    .setup((x) => x.selectionChange)
-    .returns(() => new SelectionChangeEvent());
-
-  selectionScopesManagerMock
-    .setup(async (x) => x.getSelectionScopes(connectionMock.object))
-    .returns(async () => []);
-  selectionManagerMock
-    .setup((x) => x.scopes)
-    .returns(() => selectionScopesManagerMock.object);
-
-  Presentation.setSelectionManager(selectionManagerMock.object);
-  await TestUtils.initializeUiFramework(connectionMock.object);
-  await ReportsConfigWidget.initialize();
-  server.listen();
+  const localization = new EmptyLocalization();
+  await ReportsConfigWidget.initialize(localization);
 });
-
-afterAll(() => {
-  TestUtils.terminateUiFramework();
-  server.close();
-});
-
-afterEach(() => server.resetHandlers());
 
 describe("Reports Action", () => {
   it("required fields should be filled out", async () => {
     const mockReturnFn = jest.fn();
 
-    render(<ReportAction iTwinId={mockITwinId} returnFn={mockReturnFn} />);
+    render(<ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />);
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -109,6 +40,7 @@ describe("Reports Action", () => {
   });
 
   it("should be able to add report", async () => {
+    const mockReturnFn = jest.fn();
     const mockReport: Report = {
       id: faker.datatype.uuid(),
       displayName: "mOcKRePoRt1",
@@ -120,20 +52,15 @@ describe("Reports Action", () => {
         },
       },
     };
-    server.use(
-      rest.post(
-        `${REPORTS_CONFIG_BASE_URL}/insights/reporting/reports`,
-        async (_req, res, ctx) => {
-          return res(ctx.delay(400), ctx.status(200), ctx.json(mockReport));
-        }
-      )
-    );
 
-    const mockReturnFn = jest.fn();
+    const reportsClient = new ReportsClient();
+
+    jest.spyOn(reportsClient, "createReport").mockImplementation(async () =>
+      new Promise((resolve) => setTimeout(() => { resolve(mockReport); }, 100))
+    );
 
     const { user } = render(
-      <ReportAction iTwinId={mockITwinId} returnFn={mockReturnFn} />
-    );
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />, { reportsClient });
 
     const addButton = screen.getByRole("button", {
       name: /add/i,
@@ -170,7 +97,7 @@ describe("Reports Action", () => {
     const mockReturnFn = jest.fn();
 
     const { user } = render(
-      <ReportAction iTwinId={mockITwinId} returnFn={mockReturnFn} />
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
     );
 
     const addButton = screen.getByRole("button", {
@@ -192,7 +119,7 @@ describe("Reports Action", () => {
     const mockReturnFn = jest.fn();
 
     const { user } = render(
-      <ReportAction iTwinId={mockITwinId} returnFn={mockReturnFn} />
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
     );
 
     const addButton = screen.getByRole("button", {
@@ -214,7 +141,7 @@ describe("Reports Action", () => {
     const mockReturnFn = jest.fn();
 
     const { user } = render(
-      <ReportAction iTwinId={mockITwinId} returnFn={mockReturnFn} />
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
     );
 
     const addButton = screen.getByRole("button", {
@@ -238,7 +165,7 @@ describe("Reports Action", () => {
     const mockReturnFn = jest.fn();
 
     const { user } = render(
-      <ReportAction iTwinId={mockITwinId} returnFn={mockReturnFn} />
+      <ReportAction onClickCancel={jest.fn()} onSaveSuccess={mockReturnFn} />
     );
 
     const addButton = screen.getByRole("button", {

@@ -52,10 +52,10 @@ export const SearchBar = ({
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
         disabled={disabled}
-      />{" "}
+      />
     </div>
   ) : (
-    <IconButton styleType="borderless" onClick={() => setSearchBarOpened(true)}>
+    <IconButton styleType="borderless" data-testid="rcw-search-button" onClick={() => setSearchBarOpened(true)}>
       <SvgSearch />
     </IconButton>
   );
