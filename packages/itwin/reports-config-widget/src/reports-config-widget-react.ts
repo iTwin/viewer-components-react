@@ -5,3 +5,9 @@
 /** UI Provider for iTwin Viewer Applications */
 export * from "./widget/ReportsConfigUiProvider";
 export * from "./ReportsConfigWidget";
+
+export { Reports, ReportsProps } from "./widget/components/Reports";
+export { ReportMappings, ReportMappingsProps } from "./widget/components/ReportMappings";
+export { ReportsConfigContext, ReportsConfigContextProps } from "./widget/components/ReportsConfigContext";
+export { ReportAction, ReportActionProps } from "./widget/components/ReportAction";
+export { BulkExtractor } from "./widget/components/BulkExtractor";

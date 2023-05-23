@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/reports-config-widget-react",
+      "comment": "Added a ReportsConfigContext component to manage the configuration of the Reports API, including token retrieval, baseURL, iTwinId, iModelId, and bulk extraction.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@itwin/reports-config-widget-react"
+}

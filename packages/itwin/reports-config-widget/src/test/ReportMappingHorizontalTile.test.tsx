@@ -5,18 +5,11 @@
 import React from "react";
 import faker from "@faker-js/faker";
 import "@testing-library/jest-dom";
-import type {
-  IModelConnection,
-  SelectionSet,
-  SelectionSetEvent,
-} from "@itwin/core-frontend";
-import { NoRenderApp } from "@itwin/core-frontend";
 import { ReportsConfigWidget } from "../ReportsConfigWidget";
 import {
   fireEvent,
   render,
   screen,
-  TestUtils,
   waitFor,
   within,
 } from "./test-utils";
@@ -28,19 +21,11 @@ import type {
 import type { ReportMappingAndMapping } from "../widget/components/ReportMappings";
 import type { GetSingleIModelParams, IModelOperations, OperationOptions } from "@itwin/imodels-client-management";
 import { IModelState } from "@itwin/imodels-client-management";
-import type {
-  SelectionManager,
-  SelectionScopesManager,
-} from "@itwin/presentation-frontend";
-import {
-  Presentation,
-  SelectionChangeEvent,
-} from "@itwin/presentation-frontend";
 import { BeEvent } from "@itwin/core-bentley";
-import type BulkExtractor from "../widget/components/BulkExtractor";
 import { ExtractionStates } from "../widget/components/ExtractionStatus";
 import { ReportMappingHorizontalTile } from "../widget/components/ReportMappingHorizontalTile";
 import { EmptyLocalization } from "@itwin/core-common";
+import type { BulkExtractor } from "../widget/components/BulkExtractor";
 
 const mockITwinId = faker.datatype.uuid();
 // Lets work with two iModels for now.
@@ -202,54 +187,18 @@ const mockReportMappingsAndMappingsFactory = (): ReportMappingAndMapping[] => {
   return reportMappingsAndMapping;
 };
 
-const connectionMock = moq.Mock.ofType<IModelConnection>();
 const mockBulkExtractor = moq.Mock.ofType<BulkExtractor>();
-const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
-const selectionScopesManagerMock = moq.Mock.ofType<SelectionScopesManager>();
 const mockIModelsClient = moq.Mock.ofType<IModelOperations<OperationOptions>>();
 
 jest.mock("../widget/components/Constants.ts", () => ({
   STATUS_CHECK_INTERVAL: 10,
 }));
 
-jest.mock("@itwin/appui-react", () => ({
-  ...jest.requireActual("@itwin/appui-react"),
-  useActiveIModelConnection: () => connectionMock.object,
-}));
-
 const mockOdataFeedUrl = "mockOdataFeedUrl";
 
 beforeAll(async () => {
-  await NoRenderApp.startup({localization: new EmptyLocalization()});
-  await Presentation.initialize();
-  const selectionSet = moq.Mock.ofType<SelectionSet>();
-  const onChanged = moq.Mock.ofType<BeEvent<(ev: SelectionSetEvent) => void>>();
-  selectionSet.setup((x) => x.elements).returns(() => new Set([]));
-  selectionSet.setup((x) => x.onChanged).returns(() => onChanged.object);
-  connectionMock
-    .setup((x) => x.selectionSet)
-    .returns(() => selectionSet.object);
-  connectionMock.setup((x) => x.iModelId).returns(() => mockIModelId1);
-  connectionMock.setup((x) => x.iTwinId).returns(() => mockITwinId);
-
-  selectionManagerMock
-    .setup((x) => x.selectionChange)
-    .returns(() => new SelectionChangeEvent());
-
-  selectionScopesManagerMock
-    .setup(async (x) => x.getSelectionScopes(connectionMock.object))
-    .returns(async () => []);
-  selectionManagerMock
-    .setup((x) => x.scopes)
-    .returns(() => selectionScopesManagerMock.object);
-
-  Presentation.setSelectionManager(selectionManagerMock.object);
-  await TestUtils.initializeUiFramework(connectionMock.object);
-  await ReportsConfigWidget.initialize();
-});
-
-afterAll(() => {
-  TestUtils.terminateUiFramework();
+  const localization = new EmptyLocalization();
+  await ReportsConfigWidget.initialize(localization);
 });
 
 afterEach(() => {
