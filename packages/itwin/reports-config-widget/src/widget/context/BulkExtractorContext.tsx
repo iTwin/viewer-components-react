@@ -5,22 +5,21 @@
 import type { AccessToken } from "@itwin/core-bentley";
 import * as React from "react";
 import { createContext } from "react";
+import type { BulkExtractor } from "../components/BulkExtractor";
 
-export interface ReportsApiConfig {
-  getAccessToken: () => Promise<AccessToken>;
-  baseUrl: string;
+export type GetAccessTokenFn = () => Promise<AccessToken>;
+
+export interface BulkExtractorContextProps {
+  bulkExtractor?: BulkExtractor;
 }
 
-export const ReportsApiConfigContext = createContext<ReportsApiConfig>({
-  getAccessToken: async () => "",
-  baseUrl: "",
-});
+export const BulkExtractorContext = createContext<BulkExtractorContextProps>({});
 
-export const useReportsApiConfig = () => {
-  const context = React.useContext(ReportsApiConfigContext);
+export const useBulkExtractor = () => {
+  const context = React.useContext(BulkExtractorContext);
   if (!context) {
     throw new Error(
-      "useApiConfig should be used within a ReportsApiConfigContext provider"
+      "useBulkExtractor should be used within a BulkExtractorContext provider"
     );
   }
   return context;

@@ -42,7 +42,16 @@ export function Viewer() {
       }}
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
-
+      backendConfiguration={{
+        defaultBackend: {
+          config: {
+            info: {
+              title: "imodel/rpc",
+              version: "v4",
+            },
+          },
+        },
+      }}
     />
   );
 }

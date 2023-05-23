@@ -2,9 +2,8 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useCallback, useEffect, useRef, useState } from "react";
-import React from "react";
-import type BulkExtractor from "./BulkExtractor";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import type { BulkExtractor } from "./BulkExtractor";
 import { ExtractionStates, ExtractionStatus } from "./ExtractionStatus";
 import type { BeEvent } from "@itwin/core-bentley";
 import { STATUS_CHECK_INTERVAL } from "./Constants";
