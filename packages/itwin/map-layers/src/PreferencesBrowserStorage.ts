@@ -49,11 +49,11 @@ export class PreferencesBrowserStorage implements UserPreferencesAccess {
   private getStorageItemKey(arg: ITwinIdArg) {
     const itwinIdStr = arg.iTwinId ? `.${arg.iTwinId}` : "";
     const imodelIdStr = arg.iModelId ? `.${arg.iModelId}` : "";
-    return `${this._storageItemKeyPrefix}${itwinIdStr}${imodelIdStr}`
+    return `${this._storageItemKeyPrefix}${itwinIdStr}${imodelIdStr}`;
   }
 
   private static getPreferenceKey(arg: PreferenceKeyArg) {
-    const nsStr = arg.namespace ? `${arg.namespace}.` : ""
+    const nsStr = arg.namespace ? `${arg.namespace}.` : "";
     return `${nsStr}${arg.key}`;
   }
 
@@ -63,7 +63,7 @@ export class PreferencesBrowserStorage implements UserPreferencesAccess {
     let map: KeyContentProps = {};
     const itemStr = storage.getItem(this.getStorageItemKey(arg));
     if (itemStr === null) {
-      return undefined
+      return undefined;
     }
     if (!itemStr || itemStr === "{}")
       return map;
@@ -73,22 +73,21 @@ export class PreferencesBrowserStorage implements UserPreferencesAccess {
   }
 
   public async get(arg: PreferenceKeyArg & ITwinIdArg) {
-    let map = this.loadFromStorage(arg);
-    if (map == undefined)
+    const map = this.loadFromStorage(arg);
+    if (map === undefined)
       return undefined;
 
     if (arg.key) {
       if (!Object.keys(map).includes(arg.key))
-        return undefined
+        return undefined;
 
-      const nsStr = arg.namespace ? `${arg.namespace}.` : ""
+      const nsStr = arg.namespace ? `${arg.namespace}.` : "";
       const prefKey = `${nsStr}${arg.key}`;
       return [map[prefKey]];
-    }
-    else {  // No key provided, return all objects
+    } else {  // No key provided, return all objects
       const values = [];
-      for (const [key, value] of Object.entries(map))
-        values.push(value)
+      for (const [_key, value] of Object.entries(map))
+        values.push(value);
       return values;
     }
   }
@@ -97,7 +96,7 @@ export class PreferencesBrowserStorage implements UserPreferencesAccess {
     const map = this.loadFromStorage(arg);
     if (map === undefined) {
       if (this._options?.throwOnDeleteMissingKey)
-        throw "Could not find key from storage."
+        throw new Error("Could not find key from storage.");
       else
         return;
     }
@@ -105,7 +104,7 @@ export class PreferencesBrowserStorage implements UserPreferencesAccess {
     const prefKey = PreferencesBrowserStorage.getPreferenceKey(arg);
     if (!Object.keys(map).includes(prefKey)) {
       if (this._options?.throwOnDeleteMissingKey)
-        throw "Could not find key from storage."
+        throw Error("Could not find key from storage.");
       else
         return;
     }
@@ -115,7 +114,7 @@ export class PreferencesBrowserStorage implements UserPreferencesAccess {
 
   public async save(arg: PreferenceArg & ITwinIdArg) {
     let map = this.loadFromStorage(arg);
-    if (map == undefined)
+    if (map === undefined)
       map = {};
 
     map[PreferencesBrowserStorage.getPreferenceKey(arg)] = arg.content;
