@@ -15,12 +15,43 @@ import type { IPresentationTreeDataProvider } from "@itwin/presentation-componen
 import type { VisibilityTreeFilterInfo } from "./Common";
 
 /**
+ * Props for visibility tree node renderer.
+ * @public
+ */
+export interface visibilityTreeRendererProps {
+  /**
+   * Specifies whether the icon at the left of the node label should be rendered.
+   */
+  iconsEnabled: boolean;
+  /**
+   * Specifies whether node description should be enabled.
+   */
+  descriptionEnabled: boolean;
+  /**
+   * Defines the size in pixels of how much the node label should be pushed to the right from the checkbox.
+   * Default value is 20.
+   */
+  levelOffset?: number;
+  /**
+   * Defines the size in pixels of how much the leaf node label should be pushed to the right from the checkbox.
+   * @note This value applies only to the leaf nodes.
+   * Default value is 24.
+   */
+  expansionToggleWidth?: number;
+  /**
+   * Specifies whether the root node be expanded at all times.
+   * Default value is false.
+   */
+  disableRootNodeCollapse?: boolean;
+}
+
+/**
  * Creates Visibility tree renderer which renders nodes with eye checkbox.
  * @public
  */
-export const useVisibilityTreeRenderer = (iconsEnabled: boolean, descriptionsEnabled: boolean) => {
+export const useVisibilityTreeRenderer = (visibilityTreeRendererProps: visibilityTreeRendererProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const nodeRenderer = useCallback(createVisibilityTreeNodeRenderer(iconsEnabled, descriptionsEnabled), [iconsEnabled, descriptionsEnabled]);
+  const nodeRenderer = useCallback(createVisibilityTreeNodeRenderer(visibilityTreeRendererProps), [visibilityTreeRendererProps]);
   return useCallback((props: TreeRendererProps) => (
     <TreeRenderer
       {...props}
@@ -30,18 +61,24 @@ export const useVisibilityTreeRenderer = (iconsEnabled: boolean, descriptionsEna
 };
 
 const imageLoader = new TreeImageLoader();
+
 /**
  * Creates node renderer which renders node with eye checkbox.
  * @public
  */
-export const createVisibilityTreeNodeRenderer = (iconsEnabled: boolean, descriptionEnabled: boolean) => {
-  return (props: TreeNodeRendererProps) => ( // eslint-disable-line react/display-name
+export const createVisibilityTreeNodeRenderer = ({ levelOffset = 20, expansionToggleWidth = 24, disableRootNodeCollapse = false, ...props }: visibilityTreeRendererProps) => {
+  return (treeNodeProps: TreeNodeRendererProps) => ( // eslint-disable-line react/display-name
     <TreeNodeRenderer
-      {...props}
-      checkboxRenderer={visibilityTreeNodeCheckboxRenderer}
-      descriptionEnabled={descriptionEnabled}
-      imageLoader={iconsEnabled ? imageLoader : undefined}
-      className={classNames("with-checkbox", props.className)}
+      {...treeNodeProps}
+      node={{ ...treeNodeProps.node, depth: 0, numChildren: 1 }}
+      checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
+        <div className="checkboxWrapper" style={{ marginRight: `${treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? expansionToggleWidth : 0)}px` }}>
+          <VisibilityTreeNodeCheckboxRenderer { ...checkboxProps }/>
+        </div>
+      )}
+      descriptionEnabled={props.descriptionEnabled}
+      imageLoader={props.iconsEnabled ? imageLoader : undefined}
+      className={classNames("with-checkbox", (treeNodeProps.node.numChildren === 0 || (disableRootNodeCollapse && treeNodeProps.node.parentId === undefined)) && "disable-expander", treeNodeProps.className)}
     />
   );
 };
@@ -50,12 +87,12 @@ export const createVisibilityTreeNodeRenderer = (iconsEnabled: boolean, descript
  * Checkbox renderer that renders an eye.
  * @public
  */
-export const visibilityTreeNodeCheckboxRenderer = (props: NodeCheckboxRenderProps) => (
+export const VisibilityTreeNodeCheckboxRenderer = (props: NodeCheckboxRenderProps) => (
   <Checkbox
     className="visibility-tree-checkbox"
     variant="eyeball"
     checked={props.checked}
-    onChange={(e) => { props.onChange(e.currentTarget.checked); }}
+    onChange={(e) => props.onChange(e.currentTarget.checked)}
     disabled={props.disabled}
     title={props.title}
   />

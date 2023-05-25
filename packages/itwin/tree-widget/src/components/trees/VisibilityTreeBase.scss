@@ -10,10 +10,15 @@
   flex-direction: column;
   position: relative;
 
+  .ReactWindow__VariableSizeList {
+    >div {
+      width: max-content !important; // to override inline class
+    }
+  }
   .core-tree-node {
     &.with-checkbox {
       >.contents {
-        padding-left: var(--iui-size-xl);
+        padding-left: calc(var(--iui-size-3xs) / 2);
       }
     }
 
@@ -26,13 +31,34 @@
     }
   }
 
-  .contents > .visibility-tree-checkbox {
-    position: absolute;
-    top: unset;
-    left: 5px;
+  .contents {
+    &:hover {
+      > .checkboxWrapper {
+        background-color: var(--iui-color-background-hover);
+      }
+    }
 
-    &:hover, &:disabled {
-      background-color: transparent;
+    > .checkboxWrapper {
+      height: var(--iui-size-l);
+      width: var(--iui-size-l);
+      position: sticky;
+      order: -1;
+      left: 0;
+      background-color: var(--iui-color-background);
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .visibility-tree-checkbox {
+        &:disabled {
+          background-color: var(--iui-color-background);
+        }
+
+        &:hover {
+          background-color: var(--iui-color-background-hover);
+        }
+      }
     }
   }
 
