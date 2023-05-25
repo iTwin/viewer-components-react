@@ -3,6 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-div[data-item-id='measure-tools-property-widget'] {
+.measure-tools-property-widget-container {
+  width: 100%;
+  height: 100%;
   padding: 0 8px;
 }
