@@ -31,9 +31,7 @@ export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps
     return (
       <FillCentered style={{ flexDirection: "column" }}>
         <div className="property-grid-react-filtering-pg-label">
-          {PropertyGridManager.translate(
-            "context-menu.selection.too-many-elements-selected"
-          )}
+          {PropertyGridManager.translate("selection.too-many-elements-selected")}
         </div>
       </FillCentered>
     );

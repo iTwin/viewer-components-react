@@ -3,11 +3,21 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
+// istanbul ignore file
+
 /**
- * Class for browser utilities, like copy to clipboard.
+ * Copies a string to the clipboard. Works in iOS as well
  * @internal
  */
-export const isiOsDevice = (): boolean => {
+export const copyToClipboard = (data: string) => {
+  if (isiOsDevice()) {
+    copyToClipboardiOS(data);
+  } else {
+    copyToClipboardWin(data);
+  }
+};
+
+function isiOsDevice(): boolean {
   const iDevices = [
     "iPad Simulator",
     "iPhone Simulator",
@@ -27,7 +37,7 @@ export const isiOsDevice = (): boolean => {
     }
   }
   return iOS;
-};
+}
 
 const copyToClipboardWin = (info: string) => {
   const listener = (e: ClipboardEvent) => {
@@ -65,16 +75,4 @@ const copyToClipboardiOS = (info: string) => {
 
   document.execCommand("copy"); // eslint-disable-line deprecation/deprecation
   document.body.removeChild(el);
-};
-
-/**
- * Copies a string to the clipboard. Works in iOS as well
- * @internal
- */
-export const copyToClipboard = (data: string) => {
-  if (isiOsDevice()) {
-    copyToClipboardiOS(data);
-  } else {
-    copyToClipboardWin(data);
-  }
 };

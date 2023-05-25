@@ -6,7 +6,6 @@
 import "./ElementList.scss";
 import classnames from "classnames";
 import * as React from "react";
-import { Logger } from "@itwin/core-bentley";
 import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
 import { IconButton, MenuItem } from "@itwin/itwinui-react";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
@@ -48,7 +47,7 @@ export function ElementList({
       setData(labels);
     };
 
-    createLabels().catch(() => { Logger.logError( "VCR:PropertyGridReact", "ElementList: Failed to create labels" ); });
+    void createLabels();
   }, [labelsProvider, instanceKeys]);
 
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
@@ -63,7 +62,7 @@ export function ElementList({
           styleType="borderless"
           onClick={onBack}
           onKeyDown={onBack}
-          title={PropertyGridManager.translate("tools.backTooltip")}
+          title={PropertyGridManager.translate("header.back")}
         >
           <SvgProgressBackwardCircular />
         </IconButton>

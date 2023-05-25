@@ -37,13 +37,21 @@ export function FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildC
     [filterer, dataProvider, autoExpandChildCategories]
   ));
 
+  // in order to allow resize values column fully we need to override default width reserved for action buttons.
+  // istanbul ignore next
+  const actionButtonWidth = props.actionButtonWidth !== undefined
+    ? props.actionButtonWidth
+    : props.actionButtonRenderers !== undefined
+      ? undefined
+      : 0;
+
   return (
     <>
       <VirtualizedPropertyGridWithDataProvider
         {...props}
         minLabelWidth={10}
         minValueWidth={10}
-        actionButtonWidth={props.actionButtonWidth ?? props.actionButtonRenderers ? undefined : 0}
+        actionButtonWidth={actionButtonWidth}
         dataProvider={filteringDataProvider}
       />
     </>
@@ -58,6 +66,7 @@ export class NoopPropertyDataFilterer extends PropertyRecordDataFiltererBase {
   public get isActive() {
     return false;
   }
+  // istanbul ignore next
   public async recordMatchesFilter(): Promise<PropertyDataFilterResult> {
     return { matchesFilter: true };
   }
@@ -74,25 +83,23 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
   public async recordMatchesFilter(
     node: PropertyRecord
   ): Promise<PropertyDataFilterResult> {
-    if (node.value.valueFormat === PropertyValueFormat.Primitive) {
-      return {
-        filteredTypes: [FilteredType.Value],
-        matchesFilter: !!node.value.displayValue,
-      };
+    switch(node.value.valueFormat) {
+      case PropertyValueFormat.Primitive:
+        return {
+          filteredTypes: [FilteredType.Value],
+          matchesFilter: !!node.value.displayValue,
+        };
+      case PropertyValueFormat.Array:
+        return {
+          filteredTypes: [FilteredType.Value],
+          matchesFilter: node.value.items.length > 0,
+        };
+      case PropertyValueFormat.Struct:
+        return {
+          filteredTypes: [FilteredType.Value],
+          matchesFilter: Object.keys(node.value.members).length > 0,
+        };
     }
-    if (node.value.valueFormat === PropertyValueFormat.Array) {
-      return {
-        filteredTypes: [FilteredType.Value],
-        matchesFilter: node.value.items.length > 0,
-      };
-    }
-    if (node.value.valueFormat === PropertyValueFormat.Struct) {
-      return {
-        filteredTypes: [FilteredType.Value],
-        matchesFilter: Object.keys(node.value.members).length > 0,
-      };
-    }
-    return { matchesFilter: false };
   }
 }
 
@@ -105,6 +112,7 @@ class AutoExpandingPropertyFilterDataProvider implements IPropertyDataProvider, 
     private _wrapped: FilteringPropertyDataProvider,
     autoExpandChildCategories?: boolean,
   ) {
+    // istanbul ignore next
     this._removeListener = this._wrapped.onDataChanged.addListener(() => this.onDataChanged.raiseEvent());
     if (undefined !== autoExpandChildCategories) {
       this._autoExpandChildCategories = autoExpandChildCategories;

@@ -28,7 +28,7 @@ export interface ContextMenuItemDefinition {
   /** Description of the context menu item. */
   title?: string;
   /** Callback that is invoked when context menu item is clicked. */
-  execute: () => void;
+  execute: () => Promise<void>;
   /** Specifies whether context menu item should be hidden. */
   hidden?: boolean;
 }
@@ -109,7 +109,7 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItemProviders 
       <ContextMenuItem
         key={item.key}
         onSelect={() => {
-          item.execute();
+          void item.execute();
           setContextMenu(undefined);
         }}
         title={item.title}
@@ -190,7 +190,7 @@ export function createRemoveFavoritePropertyItemProvider(favoritePropertiesScope
 export function createCopyPropertyTextItemProvider(): ContextMenuItemProvider {
   return ({ record }: MenuItemContext) => ({
     key: "copy-text",
-    execute: () => {
+    execute: async () => {
       record.description && copyToClipboard(record.description);
     },
     title: PropertyGridManager.translate("context-menu.copy-text.description"),

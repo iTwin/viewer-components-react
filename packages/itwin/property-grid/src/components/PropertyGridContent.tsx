@@ -13,9 +13,8 @@ import { IconButton } from "@itwin/itwinui-react";
 import { useContextMenu } from "../hooks/UseContextMenu";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
 import { useNullValueSetting } from "../hooks/UseNullValuesSetting";
-import { useSelectedItemsNum } from "../hooks/UseSelectedItemsCount";
 import { PropertyGridManager } from "../PropertyGridManager";
-import { FilteringPropertyGrid } from "./FilteringPropertyGrid";
+import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "./FilteringPropertyGrid";
 
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
@@ -58,12 +57,13 @@ export function PropertyGridContent({
   ...props
 }: PropertyGridContentProps) {
   const { item } = useLoadedInstanceInfo({ dataProvider });
-  const { filterer } = useNullValueSetting({ persistNullValueToggle });
+  const { showNullValues } = useNullValueSetting({ persistNullValueToggle });
   const { renderContextMenu, onPropertyContextMenu } = useContextMenu({
     dataProvider,
     imodel,
     contextMenuItemProviders,
   });
+  const filterer = useFilterer({ showNullValues });
 
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const handleResize = useCallback((w: number, h: number) => {
@@ -72,7 +72,7 @@ export function PropertyGridContent({
 
   return (
     <div className={classnames("property-grid-widget-container", rootClassName)}>
-      <Header imodel={imodel} headerContent={headerContent} item={item} onBackButtonClick={onBackButton} />
+      <Header headerContent={headerContent} item={item} onBackButtonClick={onBackButton} />
       <div className={"property-grid-container"}>
         <ResizableContainerObserver onResize={handleResize}>
           <FilteringPropertyGrid
@@ -93,15 +93,13 @@ export function PropertyGridContent({
 }
 
 interface HeaderProps {
-  imodel: IModelConnection;
   headerContent?: ReactNode;
   item?: { className: string, label: PropertyRecord };
   onBackButtonClick?: () => void;
 }
 
-function Header({ imodel, item, headerContent, onBackButtonClick }: HeaderProps) {
-  const numItemsSelected = useSelectedItemsNum(imodel);
-  if (numItemsSelected === undefined || numItemsSelected === 0) {
+function Header({ item, headerContent, onBackButtonClick }: HeaderProps) {
+  if (!item) {
     return null;
   }
 
@@ -113,19 +111,37 @@ function Header({ imodel, item, headerContent, onBackButtonClick }: HeaderProps)
           styleType="borderless"
           onClick={onBackButtonClick}
           onKeyDown={onBackButtonClick}
-          tabIndex={0}
-          title={PropertyGridManager.translate("tools.backTooltip")}
+          title={PropertyGridManager.translate("header.back")}
         >
           <SvgProgressBackwardCircular />
         </IconButton>
       )}
       <div className="property-grid-react-panel-label-and-class">
         <div className="property-grid-react-panel-label">
-          {item?.label && PropertyValueRendererManager.defaultManager.render(item?.label)}
+          {item.label && PropertyValueRendererManager.defaultManager.render(item.label)}
         </div>
-        <div className="property-grid-react-panel-class">{item?.className}</div>
+        <div className="property-grid-react-panel-class">{item.className}</div>
       </div>
       {headerContent}
     </div>
   );
+}
+
+interface UseFiltererProps {
+  showNullValues: boolean;
+}
+
+function useFilterer({ showNullValues }: UseFiltererProps) {
+  const [defaultFilterers] = useState(() => ({
+    noop: new NoopPropertyDataFilterer(),
+    nonEmpty: new NonEmptyValuesPropertyDataFilterer(),
+  }));
+
+  // TODO: figure out a way to toggle this. https://github.com/iTwin/viewer-components-react/issues/499
+  // istanbul ignore if
+  if (!showNullValues) {
+    return defaultFilterers.nonEmpty;
+  }
+
+  return defaultFilterers.noop;
 }

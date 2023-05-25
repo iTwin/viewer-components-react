@@ -5,9 +5,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getShowNullValuesPreference, saveShowNullValuesPreference } from "../api/ShowNullValuesPreferenceClient";
-import { NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "../components/FilteringPropertyGrid";
-
-import type { IPropertyDataFilterer } from "@itwin/components-react";
 
 /**
  * Props for `useNullValueSetting` hook.
@@ -23,14 +20,14 @@ export interface NullValueSettingProps {
  * @internal
  */
 export function useNullValueSetting({ persistNullValueToggle }: NullValueSettingProps) {
-  const [{ showNullValues, filterer }, setShowNullValues] = useState<{ showNullValues: boolean, filterer: IPropertyDataFilterer }>({ showNullValues: true, filterer: new NoopPropertyDataFilterer() });
+  const [showNullValues, setShowNullValues] = useState(true);
 
   // If persisting hide/show empty values, get the preference
   useEffect(() => {
     const setDefaultShowNullValues = async () => {
       if (persistNullValueToggle) {
         const res = await getShowNullValuesPreference();
-        setShowNullValues({ showNullValues: res, filterer: res ? new NoopPropertyDataFilterer() : new NonEmptyValuesPropertyDataFilterer() });
+        setShowNullValues(res);
       }
     };
 
@@ -39,8 +36,7 @@ export function useNullValueSetting({ persistNullValueToggle }: NullValueSetting
 
   // Fcn for updating toggle for Hide / Show Empty Fields menu options
   const updateShowNullValues = useCallback(async (value: boolean) => {
-    // Update filter and reset context menu
-    setShowNullValues({ showNullValues: value, filterer: value ? new NoopPropertyDataFilterer() : new NonEmptyValuesPropertyDataFilterer() });
+    setShowNullValues(value);
 
     // Persist hide/show value
     if (persistNullValueToggle) {
@@ -50,7 +46,6 @@ export function useNullValueSetting({ persistNullValueToggle }: NullValueSetting
 
   return {
     showNullValues,
-    filterer,
     setShowNullValues: updateShowNullValues,
   };
 }
