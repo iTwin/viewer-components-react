@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/tree-widget-react",
+      "comment": "**BREAKING** Make eye checkboxes static on horizontal scroll, decrease whitespace size between node label and eye checkbox, `useVisibilityTreeRenderer` and `createVisibilityTreeNodeRenderer` now can take three new arguments - `levelfOffset`, `leafNodeOffset` and `disableRootNodeCollapse`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@itwin/tree-widget-react"
+}

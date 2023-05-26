@@ -363,7 +363,7 @@ exports[`ModelsTree #unit <ModelsTree /> should match snapshot 1`] = `
                     </i>
                   </div>
                   <div
-                    class="checkboxWrapper"
+                    class="visibility-tree-checkbox-container"
                     style="margin-right: 24px;"
                   >
                     <input

@@ -18,7 +18,7 @@ import type { VisibilityTreeFilterInfo } from "./Common";
  * Props for visibility tree node renderer.
  * @public
  */
-export interface visibilityTreeRendererProps {
+export interface VisibilityTreeRendererProps {
   /**
    * Specifies whether the icon at the left of the node label should be rendered.
    */
@@ -29,15 +29,15 @@ export interface visibilityTreeRendererProps {
   descriptionEnabled: boolean;
   /**
    * Defines the offset in pixels of how much each hierarchy level should be offset to the right from the checkbox.
-   * Default value is 20.
+   * Defaults to `20`.
    */
   levelOffset?: number;
   /**
    * Defines the size in pixels of how much the leaf node label should be pushed to the right from the checkbox.
    * @note This value applies only to the leaf nodes.
-   * Default value is 24.
+   * Defaults to `24`.
    */
-  expansionToggleWidth?: number;
+  leafNodeOffset?: number;
   /**
    * Specifies whether the root node be expanded at all times.
    * Defaults to `false`.
@@ -49,7 +49,7 @@ export interface visibilityTreeRendererProps {
  * Creates Visibility tree renderer which renders nodes with eye checkbox.
  * @public
  */
-export const useVisibilityTreeRenderer = (visibilityTreeRendererProps: visibilityTreeRendererProps) => {
+export const useVisibilityTreeRenderer = (visibilityTreeRendererProps: VisibilityTreeRendererProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const nodeRenderer = useCallback(createVisibilityTreeNodeRenderer(visibilityTreeRendererProps), [visibilityTreeRendererProps]);
   return useCallback((props: TreeRendererProps) => (
@@ -66,28 +66,31 @@ const imageLoader = new TreeImageLoader();
  * Creates node renderer which renders node with eye checkbox.
  * @public
  */
-export const createVisibilityTreeNodeRenderer = ({ levelOffset = 20, expansionToggleWidth = 24, disableRootNodeCollapse = false, ...props }: visibilityTreeRendererProps) => {
-  return (treeNodeProps: TreeNodeRendererProps) => ( // eslint-disable-line react/display-name
-    <TreeNodeRenderer
-      {...treeNodeProps}
-      node={{ ...treeNodeProps.node, depth: 0, numChildren: 1 }}
-      checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
-        <div className="checkboxWrapper" style={{ marginRight: `${treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? expansionToggleWidth : 0)}px` }}>
-          <VisibilityTreeNodeCheckboxRenderer { ...checkboxProps }/>
-        </div>
-      )}
-      descriptionEnabled={props.descriptionEnabled}
-      imageLoader={props.iconsEnabled ? imageLoader : undefined}
-      className={classNames("with-checkbox", (treeNodeProps.node.numChildren === 0 || (disableRootNodeCollapse && treeNodeProps.node.parentId === undefined)) && "disable-expander", treeNodeProps.className)}
-    />
-  );
+export const createVisibilityTreeNodeRenderer = ({ levelOffset = 20, leafNodeOffset = 24, disableRootNodeCollapse = false, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => {
+  return function VisibilityTreeNodeRenderer(treeNodeProps: TreeNodeRendererProps) {
+    const nodeOffset = treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? leafNodeOffset : 0);
+    return (
+      <TreeNodeRenderer
+        {...treeNodeProps}
+        node={{ ...treeNodeProps.node, depth: 0, numChildren: 1 }}
+        checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
+          <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
+            <VisibilityTreeNodeCheckbox { ...checkboxProps }/>
+          </div>
+        )}
+        descriptionEnabled={descriptionEnabled}
+        imageLoader={iconsEnabled ? imageLoader : undefined}
+        className={classNames("with-checkbox", (treeNodeProps.node.numChildren === 0 || (disableRootNodeCollapse && treeNodeProps.node.parentId === undefined)) && "disable-expander", treeNodeProps.className)}
+      />
+    );
+  };
 };
 
 /**
  * Checkbox renderer that renders an eye.
  * @public
  */
-export const VisibilityTreeNodeCheckboxRenderer = (props: NodeCheckboxRenderProps) => (
+export const VisibilityTreeNodeCheckbox = (props: NodeCheckboxRenderProps) => (
   <Checkbox
     className="visibility-tree-checkbox"
     variant="eyeball"

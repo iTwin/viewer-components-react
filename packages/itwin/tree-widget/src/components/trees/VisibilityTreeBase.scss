@@ -12,7 +12,7 @@
 
   .ReactWindow__VariableSizeList {
     >div {
-      width: max-content !important; // to override inline class
+      min-width: max-content !important; // to override inline class
     }
   }
   .core-tree-node {
@@ -29,16 +29,24 @@
         }
       }
     }
+
+    &.is-selected {
+      >.contents {
+        >.visibility-tree-checkbox-container {
+          background-color: var(--iui-color-background-accent-muted)
+        }
+      }
+    }
   }
 
   .contents {
     &:hover {
-      > .checkboxWrapper {
+      > .visibility-tree-checkbox-container {
         background-color: var(--iui-color-background-hover);
       }
     }
 
-    > .checkboxWrapper {
+    > .visibility-tree-checkbox-container {
       height: var(--iui-size-l);
       width: var(--iui-size-l);
       position: sticky;
@@ -87,5 +95,4 @@
       font-weight: bold;
     }
   }
-
 }
