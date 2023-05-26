@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { TreeImageLoader, TreeNodeRenderer, TreeRenderer } from "@itwin/components-react";
 import { Checkbox } from "@itwin/itwinui-react";
 import { useControlledPresentationTreeFiltering } from "@itwin/presentation-components";
@@ -49,15 +49,16 @@ export interface VisibilityTreeRendererProps {
  * Creates Visibility tree renderer which renders nodes with eye checkbox.
  * @public
  */
-export const useVisibilityTreeRenderer = (visibilityTreeRendererProps: VisibilityTreeRendererProps) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const nodeRenderer = useCallback(createVisibilityTreeNodeRenderer(visibilityTreeRendererProps), [visibilityTreeRendererProps]);
-  return useCallback((props: TreeRendererProps) => (
-    <TreeRenderer
-      {...props}
-      nodeRenderer={nodeRenderer}
-    />
-  ), [nodeRenderer]);
+export const createVisibilityTreeRenderer = (visibilityTreeRendererProps: VisibilityTreeRendererProps) => {
+  const nodeRenderer = createVisibilityTreeNodeRenderer(visibilityTreeRendererProps);
+  return function VisibilityTreeRenderer(props: TreeRendererProps) {
+    return (
+      <TreeRenderer
+        {...props}
+        nodeRenderer={nodeRenderer}
+      />
+    );
+  };
 };
 
 const imageLoader = new TreeImageLoader();
@@ -72,7 +73,7 @@ export const createVisibilityTreeNodeRenderer = ({ levelOffset = 20, expansionTo
     return (
       <TreeNodeRenderer
         {...treeNodeProps}
-        node={{ ...treeNodeProps.node, depth: 0, numChildren: 1 }}
+        node={{ ...treeNodeProps.node, depth: 0, numChildren: 1 }} // if we want to disable TreeNodeRenderer style calculations for tree nodes, we need to override these values.
         checkboxRenderer={(checkboxProps: NodeCheckboxRenderProps) => (
           <div className="visibility-tree-checkbox-container" style={{ marginRight: `${nodeOffset}px` }}>
             <VisibilityTreeNodeCheckbox { ...checkboxProps }/>

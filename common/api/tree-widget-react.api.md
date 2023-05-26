@@ -160,6 +160,9 @@ export type CreateSearchRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "e
 // @public
 export const createVisibilityTreeNodeRenderer: ({ levelOffset, expansionToggleWidth, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => (treeNodeProps: TreeNodeRendererProps) => JSX.Element;
 
+// @public
+export const createVisibilityTreeRenderer: (visibilityTreeRendererProps: VisibilityTreeRendererProps) => (props: TreeRendererProps) => JSX.Element;
+
 // @alpha
 export function ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element;
 
@@ -433,9 +436,6 @@ export const useVisibilityTreeFiltering: (nodeLoader: AbstractTreeNodeLoaderWith
     isFiltering: boolean;
     nodeHighlightingProps: HighlightableTreeProps | undefined;
 };
-
-// @public
-export const useVisibilityTreeRenderer: (visibilityTreeRendererProps: VisibilityTreeRendererProps) => (props: TreeRendererProps) => JSX.Element;
 
 // @public
 export type VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map<string, VisibilityStatus>) => void;

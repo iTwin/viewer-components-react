@@ -68,7 +68,7 @@ While we expect this package to be mostly used with [AppUI](https://github.com/i
 
 - Visibility tree components help you build trees that look and feel like [Models](#models-tree) and [Categories](#categories-tree) trees, letting you control display of elements in the hierarchy.
 
-  - `useVisibilityTreeRenderer` returns a tree renderer that renders nodes with "eye" checkboxes. Its building blocks:
+  - `createVisibilityTreeRenderer` returns a tree renderer that renders nodes with "eye" checkboxes. Its building blocks:
     - `createVisibilityTreeNodeRenderer`
     - `VisibilityTreeNodeCheckbox`
   - `useVisibilityTreeFiltering` is used to filter the hierarchy.

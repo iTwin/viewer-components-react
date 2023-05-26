@@ -11,7 +11,7 @@ import { isPresentationTreeNodeItem, usePresentationTreeNodeLoader } from "@itwi
 import { TreeWidget } from "../../../TreeWidget";
 import { ClassGroupingOption } from "../Common";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
-import { useVisibilityTreeFiltering, useVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { ModelsVisibilityHandler, SubjectModelIdsCache } from "./ModelsVisibilityHandler";
 import { createRuleset, createSearchRuleset } from "./Utils";
 
@@ -116,7 +116,7 @@ export function ModelsTree(props: ModelsTreeProps) {
   }), [filteredNodeLoader, visibilityHandler, selectionPredicate]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
-  const treeRenderer = useVisibilityTreeRenderer({ iconsEnabled: true, descriptionEnabled: false, levelOffset: 10, disableRootNodeCollapse: true });
+  const treeRenderer = createVisibilityTreeRenderer({ iconsEnabled: true, descriptionEnabled: false, levelOffset: 10, disableRootNodeCollapse: true });
 
   const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
 
