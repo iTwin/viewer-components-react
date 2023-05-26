@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import type {
-  CommonWidgetProps,
   UiItemsProvider,
+  Widget,
 } from "@itwin/appui-react";
 import {
   StagePanelLocation,
@@ -25,18 +25,16 @@ export class GroupingMappingProvider implements UiItemsProvider {
     stageUsage: string,
     location: StagePanelLocation,
     section?: StagePanelSection,
-  ): ReadonlyArray<CommonWidgetProps> {
-    const widgets: CommonWidgetProps[] = [];
+  ): ReadonlyArray<Widget> {
+    const widgets: Widget[] = [];
     if (location === StagePanelLocation.Left &&
         section === StagePanelSection.Start &&
         stageUsage === StageUsage.General
     ) {
-      const GroupingMappingWidget: CommonWidgetProps = {
+      const GroupingMappingWidget: Widget = {
         id: "GroupingMappingWidget",
         label: "Grouping & Mapping",
-        getWidgetContent: () => {
-          return <GroupingMapping {...this._props} />;
-        },
+        content: <GroupingMapping {...this._props} />,
       };
 
       widgets.push(GroupingMappingWidget);

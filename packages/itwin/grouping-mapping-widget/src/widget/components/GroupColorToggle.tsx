@@ -13,7 +13,7 @@ import { useGroupHilitedElementsContext } from "./context/GroupHilitedElementsCo
 import { usePropertiesContext } from "./context/PropertiesContext";
 import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext";
 
-export interface GroupColorToggleProps extends Partial<ToggleSwitchProps> {
+export type GroupColorToggleProps = Partial<ToggleSwitchProps> & {
   color: string;
   group: Group;
 }
