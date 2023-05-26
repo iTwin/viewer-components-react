@@ -26,7 +26,7 @@ describe("PropertyGridManager", () => {
     expect(registerStub).to.be.calledOnce;
   });
 
-  it("uses localization from IModelApp", async () => {
+  it("uses localization from `IModelApp`", async () => {
     const localization = new EmptyLocalization();
     const registerStub = sinon.stub(localization, "registerNamespace");
     sinon.stub(IModelApp, "localization").get(() => localization);
@@ -47,16 +47,18 @@ describe("PropertyGridManager", () => {
     expect(unregisterStub).to.be.calledOnce;
   });
 
-  it("`translate` translates string", async () => {
-    const localization = new EmptyLocalization();
-    const getLocalizedStringStub = sinon.stub(localization, "getLocalizedString").returns("testString");
-    await PropertyGridManager.initialize(localization);
+  describe("translate", () => {
+    it("translates string", async () => {
+      const localization = new EmptyLocalization();
+      const getLocalizedStringStub = sinon.stub(localization, "getLocalizedString").returns("testString");
+      await PropertyGridManager.initialize(localization);
 
-    expect(PropertyGridManager.translate("testKey")).to.be.eq("testString");
-    expect(getLocalizedStringStub).to.be.calledOnceWith(`${PropertyGridManager.i18nNamespace}:testKey`);
-  });
+      expect(PropertyGridManager.translate("testKey")).to.be.eq("testString");
+      expect(getLocalizedStringStub).to.be.calledOnceWith(`${PropertyGridManager.i18nNamespace}:testKey`);
+    });
 
-  it("`translate` throws if not initialized", () => {
-    expect(() => PropertyGridManager.translate("test")).to.throw();
-  });
+    it("throws if not initialized", () => {
+      expect(() => PropertyGridManager.translate("test")).to.throw();
+    });
+  });    
 });

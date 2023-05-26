@@ -46,7 +46,7 @@ describe("<MultiElementPropertGrid />", () => {
     getLabelsStub.reset();
   });
 
-  it("renders single instance properties", async () => {
+  it("renders properties for a single instance", async () => {
     setupMultiInstanceData([{
       key: { id: "0x1", className: "TestClass" },
       value: "Test-Value",
@@ -61,7 +61,7 @@ describe("<MultiElementPropertGrid />", () => {
     await waitFor(() => getByText("Test-Value"));
   });
 
-  it("renders mutliple instances properties", async () => {
+  it("renders properties for multiple instances", async () => {
     setupMultiInstanceData([{
       key: { id: "0x1", className: "TestClass" },
       value: "Test-Value-1",
@@ -200,7 +200,7 @@ describe("<MultiElementPropertGrid />", () => {
     await waitFor(() => getByText("MultiInstances"));
   });
 
-  it("go backs to multi element property grid after selection changes", async () => {
+  it("goes back to multi element property grid after selection changes", async () => {
     const instancekeys = [{ id: "0x1", className: "TestClass" }, { id: "0x2", className: "TestClass" }];
     const expectedLabels = instancekeys.map(buildLabel);
 

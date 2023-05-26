@@ -28,7 +28,7 @@ describe("useDataProvider", () => {
 
   it("creates default provider", async () => {
     const { result } = renderHook(useDataProvider, { initialProps: { imodel } });
-    expect(result.current).to.be.instanceOf(PresentationPropertyDataProvider);
+    expect(result.current).to.be.instanceOf(PresentationPropertyDataProvider).and.not.be.instanceOf(CustomProvider);
   });
 
   it("creates custom provider", async () => {

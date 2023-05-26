@@ -126,7 +126,7 @@ describe("useContextMenu", () => {
     // find item
     await waitFor(() => getByText("Test Item"));
 
-    // click item
+    // simulate "escape" press
     await userEvents.keyboard("{Escape}");
 
     // wait for item to disappear

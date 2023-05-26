@@ -41,7 +41,7 @@ describe("PropertyGridComponent", () => {
     expect(container.children).to.be.empty;
   });
 
-  it("renders MultiElementPropertyGrid for active imodel", async () => {
+  it("renders `MultiElementPropertyGrid` for active imodel", async () => {
     UiFramework.setIModelConnection(imodel);
     const { getByText } = render(<PropertyGridComponent />);
     await waitFor(() => getByText("MultiElementPropertyGrid"));

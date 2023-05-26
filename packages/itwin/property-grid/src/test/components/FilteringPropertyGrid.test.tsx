@@ -74,7 +74,7 @@ describe("<FilteringPropertyGrid />", () => {
     expect(queryByText("Child Prop")).to.not.be.null;
   });
 
-  it("doesn't auto expands child categories when disabled", async () => {
+  it("doesn't auto expand child categories when disabled", async () => {
     const filterer = new NoopPropertyDataFilterer();
 
     const { getByText, queryByText } = render(
@@ -92,8 +92,8 @@ describe("<FilteringPropertyGrid />", () => {
     expect(queryByText("Child Prop")).to.be.null;
   });
 
-  describe("with `NonEmptyValuesPropertyDataFilterer` filters out", () => {
-    it("null primitive properties", async () => {
+  describe("with `NonEmptyValuesPropertyDataFilterer`", () => {
+    it("filters out `null` primitive properties", async () => {
       const filterer = new NonEmptyValuesPropertyDataFilterer();
 
       const { getByText, queryByText } = render(
@@ -109,7 +109,7 @@ describe("<FilteringPropertyGrid />", () => {
       expect(queryByText("Null Prop")).to.be.null;
     });
 
-    it ("empty array properties", async () => {
+    it("filters out empty array properties", async () => {
       const filterer = new NonEmptyValuesPropertyDataFilterer();
       const dataProvider = {
         onDataChanged: new PropertyDataChangeEvent(),
@@ -157,7 +157,7 @@ describe("<FilteringPropertyGrid />", () => {
       expect(queryByText("Empty Prop")).to.be.null;
     });
 
-    it ("empty struct properties", async () => {
+    it("filters out empty struct properties", async () => {
       const filterer = new NonEmptyValuesPropertyDataFilterer();
       const dataProvider = {
         onDataChanged: new PropertyDataChangeEvent(),
