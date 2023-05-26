@@ -72,7 +72,7 @@ describe("VisibilityTreeRenderer", () => {
       expect((renderedLeafNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("44px");
     });
 
-    it("disables expander for root node when disableRootNodeCollapse is set to true", async () => {
+    it("disables expander for root node when `disableRootNodeCollapse` is set to true", async () => {
       const { getByTestId, ...result } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, disableRootNodeCollapse: true })({ node: rootNode, treeActions: {} as TreeActions }));
       const renderedRootNode = await waitFor(() => getByTestId("tree-node"));
       expect(renderedRootNode.className.includes("disable-expander")).to.be.eq(true);
@@ -87,7 +87,7 @@ describe("VisibilityTreeRenderer", () => {
       expect(renderedLeafNode.className.includes("disable-expander")).to.be.eq(true);
     });
 
-    it("renders nodes with custom levelOffset and expansionToggleWidth values", async () => {
+    it("renders nodes with custom `levelOffset` and `expansionToggleWidth` values", async () => {
       const { getByTestId, ...result } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10, expansionToggleWidth: 12 })({ node: rootNode, treeActions: {} as TreeActions }));
       const renderedRootNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedRootNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("0px");
