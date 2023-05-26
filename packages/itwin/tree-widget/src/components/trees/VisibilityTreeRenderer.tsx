@@ -33,11 +33,11 @@ export interface VisibilityTreeRendererProps {
    */
   levelOffset?: number;
   /**
-   * Defines the size in pixels of how much the leaf node label should be pushed to the right from the checkbox.
+   * Defines the size in pixels of the expansion toggle. It is used to keep same hierarchy nodes with children and nodes without children in the same line.
    * @note This value applies only to the leaf nodes.
    * Defaults to `24`.
    */
-  leafNodeOffset?: number;
+  expansionToggleWidth?: number;
   /**
    * Specifies whether the root node be expanded at all times.
    * Defaults to `false`.
@@ -66,9 +66,9 @@ const imageLoader = new TreeImageLoader();
  * Creates node renderer which renders node with eye checkbox.
  * @public
  */
-export const createVisibilityTreeNodeRenderer = ({ levelOffset = 20, leafNodeOffset = 24, disableRootNodeCollapse = false, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => {
+export const createVisibilityTreeNodeRenderer = ({ levelOffset = 20, expansionToggleWidth = 24, disableRootNodeCollapse = false, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => {
   return function VisibilityTreeNodeRenderer(treeNodeProps: TreeNodeRendererProps) {
-    const nodeOffset = treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? leafNodeOffset : 0);
+    const nodeOffset = treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? expansionToggleWidth : 0);
     return (
       <TreeNodeRenderer
         {...treeNodeProps}

@@ -15,7 +15,7 @@ internal;createRuleset(props: CreateRulesetProps): Ruleset
 internal;CreateRulesetProps = Omit
 internal;createSearchRuleset(props: CreateSearchRulesetProps): Ruleset
 internal;CreateSearchRulesetProps = Omit
-public;createVisibilityTreeNodeRenderer: ({ levelOffset, leafNodeOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => (treeNodeProps: TreeNodeRendererProps) => JSX.Element
+public;createVisibilityTreeNodeRenderer: ({ levelOffset, expansionToggleWidth, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => (treeNodeProps: TreeNodeRendererProps) => JSX.Element
 alpha;ExternalSourcesTree(props: ExternalSourcesTreeProps): JSX.Element
 alpha;ExternalSourcesTreeComponent:
 alpha;ExternalSourcesTreeProps
