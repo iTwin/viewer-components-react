@@ -28,7 +28,7 @@ export interface visibilityTreeRendererProps {
    */
   descriptionEnabled: boolean;
   /**
-   * Defines the size in pixels of how much the node label should be pushed to the right from the checkbox.
+   * Defines the offset in pixels of how much each hierarchy level should be offset to the right from the checkbox.
    * Default value is 20.
    */
   levelOffset?: number;
@@ -40,7 +40,7 @@ export interface visibilityTreeRendererProps {
   expansionToggleWidth?: number;
   /**
    * Specifies whether the root node be expanded at all times.
-   * Default value is false.
+   * Defaults to `false`.
    */
   disableRootNodeCollapse?: boolean;
 }
