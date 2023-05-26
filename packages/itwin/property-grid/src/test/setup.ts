@@ -17,7 +17,6 @@ import sinonChai from "sinon-chai";
 jsdomGlobal();
 
 // setup chai
-chai.should();
 chai.use(sinonChai);
 
 // needed for context menu to work in tests

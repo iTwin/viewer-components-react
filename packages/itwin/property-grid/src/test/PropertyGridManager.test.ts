@@ -60,5 +60,5 @@ describe("PropertyGridManager", () => {
     it("throws if not initialized", () => {
       expect(() => PropertyGridManager.translate("test")).to.throw();
     });
-  });    
+  });
 });

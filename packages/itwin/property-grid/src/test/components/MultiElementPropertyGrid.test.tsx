@@ -52,13 +52,15 @@ describe("<MultiElementPropertGrid />", () => {
       value: "Test-Value",
     }]);
 
-    const { getByText } = render(
+    const { getByText, queryByRole } = render(
       <MultiElementPropertyGrid
         imodel={imodel}
       />
     );
 
     await waitFor(() => getByText("Test-Value"));
+    // verify button for opening element list is not rendered
+    expect(queryByRole("button", { name: "element-list.title" })).to.be.null;
   });
 
   it("renders properties for multiple instances", async () => {
@@ -79,29 +81,6 @@ describe("<MultiElementPropertGrid />", () => {
     await waitFor(() => getByText("MultiInstances"));
     // verify button for opening element list is rendered
     expect(queryByRole("button", { name: "element-list.title" })).to.not.be.null;
-  });
-
-  it("renders element list", async () => {
-    const instancekeys = [{ id: "0x1", className: "TestClass" }, { id: "0x2", className: "TestClass" }];
-    const expectedLabels = instancekeys.map(buildLabel);
-
-    setupMultiInstanceData(instancekeys.map((key, i) => ({ key, value: `Test-Value-${i}` })));
-    getLabelsStub.callsFake(async (keys) => keys.map(buildLabel));
-
-    const { getByText, getByRole } = render(
-      <MultiElementPropertyGrid
-        imodel={imodel}
-      />
-    );
-
-    await waitFor(() => getByText("MultiInstances"));
-    const button = getByRole("button", { name: "element-list.title" });
-
-    await userEvents.click(button);
-    // verify element list is rendered
-    for (const expected of expectedLabels) {
-      await waitFor(() => getByText(expected));
-    }
   });
 
   it("renders element list", async () => {

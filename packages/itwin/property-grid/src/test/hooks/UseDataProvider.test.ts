@@ -32,7 +32,6 @@ describe("useDataProvider", () => {
   });
 
   it("creates custom provider", async () => {
-
     const { result } = renderHook(useDataProvider, { initialProps: { imodel, createDataProvider: () => new CustomProvider({ imodel }) } });
     expect(result.current).to.be.instanceOf(CustomProvider);
   });
