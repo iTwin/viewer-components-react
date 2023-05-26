@@ -158,7 +158,7 @@ export function createSearchRuleset(props: CreateSearchRulesetProps): Ruleset;
 export type CreateSearchRulesetProps = Omit<ModelsTreeHierarchyConfiguration, "enableElementsClassGrouping">;
 
 // @public
-export const createVisibilityTreeNodeRenderer: ({ levelOffset, expansionToggleWidth, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => (treeNodeProps: TreeNodeRendererProps) => JSX.Element;
+export const createVisibilityTreeNodeRenderer: ({ levelOffset, disableRootNodeCollapse, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => (treeNodeProps: TreeNodeRendererProps) => JSX.Element;
 
 // @public
 export const createVisibilityTreeRenderer: (visibilityTreeRendererProps: VisibilityTreeRendererProps) => (props: TreeRendererProps) => JSX.Element;
@@ -497,7 +497,6 @@ export interface VisibilityTreeNoFilteredDataProps {
 export interface VisibilityTreeRendererProps {
     descriptionEnabled: boolean;
     disableRootNodeCollapse?: boolean;
-    expansionToggleWidth?: number;
     iconsEnabled: boolean;
     levelOffset?: number;
 }

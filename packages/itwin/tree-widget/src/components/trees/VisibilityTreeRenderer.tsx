@@ -15,6 +15,14 @@ import type { IPresentationTreeDataProvider } from "@itwin/presentation-componen
 import type { VisibilityTreeFilterInfo } from "./Common";
 
 /**
+ * This constant is taken from `@itwin/core-react`.
+ * Defines the size in pixels of the expansion toggle.
+ * It is used to keep same hierarchy nodes with children and nodes without children in the same line.
+ * @note This value applies only to the leaf nodes.
+ */
+const EXPANSION_TOGGLE_WIDTH = 24;
+
+/**
  * Props for visibility tree node renderer.
  * @public
  */
@@ -32,12 +40,6 @@ export interface VisibilityTreeRendererProps {
    * Defaults to `20`.
    */
   levelOffset?: number;
-  /**
-   * Defines the size in pixels of the expansion toggle. It is used to keep same hierarchy nodes with children and nodes without children in the same line.
-   * @note This value applies only to the leaf nodes.
-   * Defaults to `24`.
-   */
-  expansionToggleWidth?: number;
   /**
    * Specifies whether the root node be expanded at all times.
    * Defaults to `false`.
@@ -67,9 +69,9 @@ const imageLoader = new TreeImageLoader();
  * Creates node renderer which renders node with eye checkbox.
  * @public
  */
-export const createVisibilityTreeNodeRenderer = ({ levelOffset = 20, expansionToggleWidth = 24, disableRootNodeCollapse = false, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => {
+export const createVisibilityTreeNodeRenderer = ({ levelOffset = 20, disableRootNodeCollapse = false, descriptionEnabled, iconsEnabled }: VisibilityTreeRendererProps) => {
   return function VisibilityTreeNodeRenderer(treeNodeProps: TreeNodeRendererProps) {
-    const nodeOffset = treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? expansionToggleWidth : 0);
+    const nodeOffset = treeNodeProps.node.depth * levelOffset + (treeNodeProps.node.numChildren === 0 ? EXPANSION_TOGGLE_WIDTH : 0);
     return (
       <TreeNodeRenderer
         {...treeNodeProps}

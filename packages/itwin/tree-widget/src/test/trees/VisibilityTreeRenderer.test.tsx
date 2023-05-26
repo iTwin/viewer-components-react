@@ -87,18 +87,18 @@ describe("VisibilityTreeRenderer", () => {
       expect(renderedLeafNode.className.includes("disable-expander")).to.be.eq(true);
     });
 
-    it("renders nodes with custom `levelOffset` and `expansionToggleWidth` values", async () => {
-      const { getByTestId, ...result } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10, expansionToggleWidth: 12 })({ node: rootNode, treeActions: {} as TreeActions }));
+    it("renders nodes with custom `levelOffset` value", async () => {
+      const { getByTestId, ...result } = render(createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10 })({ node: rootNode, treeActions: {} as TreeActions }));
       const renderedRootNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedRootNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("0px");
 
-      result.rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10, expansionToggleWidth: 12 })({ node: middleNode, treeActions: {} as TreeActions })));
+      result.rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10 })({ node: middleNode, treeActions: {} as TreeActions })));
       const renderedMiddleNode = await waitFor(() => getByTestId("tree-node-contents"));
       expect((renderedMiddleNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("10px");
 
-      result.rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10, expansionToggleWidth: 12 })({ node: leafNode, treeActions: {} as TreeActions })));
+      result.rerender((createVisibilityTreeNodeRenderer({ iconsEnabled: false, descriptionEnabled: false, levelOffset: 10 })({ node: leafNode, treeActions: {} as TreeActions })));
       const renderedLeafNode = await waitFor(() => getByTestId("tree-node-contents"));
-      expect((renderedLeafNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("22px");
+      expect((renderedLeafNode.children[1] as HTMLDivElement).style.marginRight).to.be.eq("34px");
     });
   });
 });
