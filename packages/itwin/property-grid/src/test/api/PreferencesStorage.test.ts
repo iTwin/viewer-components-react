@@ -44,14 +44,14 @@ describe("DefaultPreferencesStorage", () => {
   });
 
   describe("set", () => {
-    it("saves value in `IModelApp.UserPreferences`", async () => {
+    it("saves value in `IModelApp.userPreferences`", async () => {
       await storage.set("test-key", "test-value");
       expect(imodelUserPreferences.save).to.be.calledWith(
         sinon.match((props: PreferenceArg) =>  props.key === "test-key" && props.content === "test-value")
       );
     });
 
-    it("logs error if `IModelApp.UserPreferences.save` throws" , async () => {
+    it("logs error if `IModelApp.userPreferences.save` throws" , async () => {
       imodelUserPreferences.save.throws(new Error("Invalid Key"));
       await storage.set("test-key", "test-value");
       expect(loggerStub).to.be.calledWith("PropertyGrid", sinon.match("Invalid Key"));
@@ -59,12 +59,12 @@ describe("DefaultPreferencesStorage", () => {
   });
 
   describe("get", () => {
-    it("gets value from `IModelApp.UserPreferences`", async () => {
+    it("gets value from `IModelApp.userPreferences`", async () => {
       imodelUserPreferences.get.resolves("test-value");
       expect(await storage.get("test-key")).to.be.eq("test-value");
     });
 
-    it("logs error if `IModelApp.UserPreferences.get` throws" , async () => {
+    it("logs error if `IModelApp.userPreferences.get` throws" , async () => {
       imodelUserPreferences.get.throws(new Error("Invalid Key"));
       await storage.get("test-key");
       expect(loggerStub).to.be.calledWith("PropertyGrid", sinon.match("Invalid Key"));
