@@ -6,12 +6,12 @@
 import "./TreeHeader.scss";
 import classnames from "classnames";
 import { Children, useState } from "react";
-import { SvgMore } from "@itwin/itwinui-icons-react";
-import { ButtonGroup, DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
-import { SearchBox } from "./SearchBox";
+import { SvgCaretDownSmall, SvgCaretUpSmall, SvgMore } from "@itwin/itwinui-icons-react";
+import { ButtonGroup, Divider, DropdownMenu, IconButton, MenuItem, SearchBox } from "@itwin/itwinui-react";
+import { TreeWidget } from "../../TreeWidget";
 
 import type { Viewport } from "@itwin/core-frontend";
-import type { SearchBoxProps } from "./SearchBox";
+import type { CommonProps } from "@itwin/core-react";
 
 /** @internal */
 export interface TreeHeaderButtonProps {
@@ -19,33 +19,53 @@ export interface TreeHeaderButtonProps {
 }
 
 /** @internal */
-export interface TreeHeaderProps extends Omit<SearchBoxProps,
-| "onIconClick"
-| "valueChangedDelay"
-| "searchOpen"
-| "onSearchOpen"
-| "onSearchClose"
-> {
+export interface TreeHeaderProps extends CommonProps {
+  /** Filtering is cleared after everything's loaded */
+  onFilterStart: (newFilter: string) => void;
+  /** listens for onClick event for Clear (x) icon */
+  onFilterClear: () => void;
+  /** Total number of results/entries */
+  resultCount?: number;
+  /** Current selected result index */
+  selectedIndex?: number;
+  /** Callback to currently selected result/entry change */
+  onSelectedChanged: (index: number) => void;
   /** Header buttons */
   children?: React.ReactNode;
 }
 
 /** @internal */
 export function TreeHeader(props: TreeHeaderProps) {
-  const { children, ...restProps } = props;
-  const [searchOpen, setSearchOpen] = useState(false);
-
+  const { onFilterStart, onFilterClear, resultCount, selectedIndex, onSelectedChanged, children, className } = props;
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   return (
-    <div className={classnames("tree-widget-search-bar", props.className)}>
-      <HeaderButtons contracted={searchOpen}>{children}</HeaderButtons>
-      <div className="search-bar-search-container">
-        <SearchBox
-          {...restProps}
-          searchOpen={searchOpen}
-          onSearchOpen={() => setSearchOpen(true)}
-          onSearchClose={() => setSearchOpen(false)}
-        />
-      </div>
+    <div className={classnames("tree-widget-tree-header", className)}>
+      <HeaderButtons contracted={isSearchOpen}>
+        {children}
+      </HeaderButtons>
+      <SearchBox expandable onExpand={() => setIsSearchOpen(true)} onCollapse={() => setIsSearchOpen(false)} className={classnames("tree-widget-search-bar", !isSearchOpen && "contracted")}>
+        <SearchBox.CollapsedState>
+          <SearchBox.ExpandButton title={TreeWidget.translate("searchBox.searchForSomething")} aria-label={TreeWidget.translate("searchBox.open")} size="small"/>
+        </SearchBox.CollapsedState>
+        <SearchBox.ExpandedState >
+          <SearchBox.Input placeholder={TreeWidget.translate("searchBox.search")} onChange={(e) => e.currentTarget.value ? onFilterStart(e.currentTarget.value) : onFilterClear()} className="search-input"/>
+          {resultCount ? <span className="searchbox-stepping-count">{`${selectedIndex ?? 1}/${resultCount}`}</span> : undefined}
+          <Divider orientation="vertical" />
+          <SearchBox.Button title={TreeWidget.translate("searchBox.previous")} size="small" onClick={() => {
+            if (selectedIndex && resultCount && selectedIndex > 1)
+              onSelectedChanged(selectedIndex - 1);
+          }}>
+            <SvgCaretUpSmall />
+          </SearchBox.Button>
+          <SearchBox.Button title={TreeWidget.translate("searchBox.next")} size="small" onClick={() => {
+            if (selectedIndex && resultCount && selectedIndex < resultCount)
+              onSelectedChanged(selectedIndex + 1);
+          }}>
+            <SvgCaretDownSmall />
+          </SearchBox.Button>
+          <SearchBox.CollapseButton onClick={onFilterClear} size="small" aria-label={TreeWidget.translate("searchBox.close")} />
+        </SearchBox.ExpandedState>
+      </SearchBox>
     </div>
   );
 }
@@ -68,7 +88,7 @@ function HeaderButtons(props: HeaderButtonsProps) {
         <DropdownMenu
           menuItems={() =>
             Children.toArray(props.children)
-              .slice(overflowStart - 1)
+              .slice(overflowStart === 0 ? overflowStart : overflowStart - 1)
               .map((btn, index) => <MenuItem key={index} className="search-bar-dropdown-menu-item">{btn}</MenuItem>)
           }
           className="search-bar-dropdown-container"
