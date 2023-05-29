@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { useCallback, useEffect, useState } from "react";
-import { getShowNullValuesPreference, saveShowNullValuesPreference } from "../api/ShowNullValuesPreferenceClient";
+import { usePreferencesContext } from "../PropertyGridPreferencesContext";
 
 /**
  * Props for `useNullValueSetting` hook.
@@ -21,6 +21,7 @@ export interface NullValueSettingProps {
  */
 export function useNullValueSetting({ persistNullValueToggle }: NullValueSettingProps) {
   const [showNullValues, setShowNullValues] = useState(true);
+  const { getShowNullValuesPreference, setShowNullValuesPreference } = useNullValueStorage();
 
   // If persisting hide/show empty values, get the preference
   useEffect(() => {
@@ -32,7 +33,7 @@ export function useNullValueSetting({ persistNullValueToggle }: NullValueSetting
     };
 
     void setDefaultShowNullValues();
-  }, [persistNullValueToggle]);
+  }, [persistNullValueToggle, getShowNullValuesPreference]);
 
   // Fcn for updating toggle for Hide / Show Empty Fields menu options
   const updateShowNullValues = useCallback(async (value: boolean) => {
@@ -40,12 +41,36 @@ export function useNullValueSetting({ persistNullValueToggle }: NullValueSetting
 
     // Persist hide/show value
     if (persistNullValueToggle) {
-      await saveShowNullValuesPreference(value);
+      await setShowNullValuesPreference(value);
     }
-  }, [persistNullValueToggle]);
+  }, [persistNullValueToggle, setShowNullValuesPreference]);
 
   return {
     showNullValues,
     setShowNullValues: updateShowNullValues,
+  };
+}
+
+const SHOWNULL_KEY = "showNullValues";
+
+function useNullValueStorage() {
+  const { storage } = usePreferencesContext();
+
+  const getShowNullValuesPreference = useCallback(async () => {
+    const serializedValue = await storage.get(SHOWNULL_KEY);
+    if (serializedValue !== undefined) {
+      return JSON.parse(serializedValue);
+    }
+    // default to `true`
+    return true;
+  }, [storage]);
+
+  const setShowNullValuesPreference = useCallback(async (value: boolean) => {
+    await storage.set(SHOWNULL_KEY, JSON.stringify(value));
+  }, [storage]);
+
+  return {
+    getShowNullValuesPreference,
+    setShowNullValuesPreference,
   };
 }

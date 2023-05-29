@@ -7,8 +7,10 @@ import { useEffect } from "react";
 import { useActiveIModelConnection, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
 import { Presentation } from "@itwin/presentation-frontend";
 import { MultiElementPropertyGrid } from "./components/MultiElementPropertyGrid";
+import { PreferencesContextProvider } from "./PropertyGridPreferencesContext";
 
 import type { MultiElementPropertyGridProps } from "./components/MultiElementPropertyGrid";
+import type { PreferencesStorage } from "./api/PreferencesStorage";
 
 /**
  * Id of the property grid widget created by `PropertyGridUiItemsProvider`.
@@ -20,19 +22,27 @@ export const PropertyGridComponentId = "vcr:PropertyGridComponent";
  * Props for `PropertyGridComponent`.
  * @public
  */
-export type PropertyGridComponentProps = Omit<MultiElementPropertyGridProps, "imodel">;
+export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel"> {
+  /**
+   * Custom storage that should be used for persisting preferences.
+   * Defaults to `DefaultPreferencesStorage` that uses `IModelApp.UserPreferences`.
+   */
+  preferencesStorage?: PreferencesStorage;
+}
 
 /**
  * Component that renders `MultiElementPropertyGrid` if there is active iModel connection.
  * @public
  */
-export function PropertyGridComponent(props: PropertyGridComponentProps) {
+export function PropertyGridComponent({ preferencesStorage, ...props }: PropertyGridComponentProps) {
   const imodel = useActiveIModelConnection();
   if (!imodel) {
     return null;
   }
 
-  return <PropertyGridComponentContent {...props} imodel={imodel} />;
+  return <PreferencesContextProvider storage={preferencesStorage}>
+    <PropertyGridComponentContent {...props} imodel={imodel} />
+  </PreferencesContextProvider>;
 }
 
 /** Component that renders `MultiElementPropertyGrid` an hides/shows widget based on `UnifiedSelection`. */
