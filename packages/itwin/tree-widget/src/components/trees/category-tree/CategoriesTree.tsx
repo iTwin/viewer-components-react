@@ -12,7 +12,7 @@ import { usePresentationTreeNodeLoader } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
 import { VisibilityTreeEventHandler } from "../VisibilityTreeEventHandler";
-import { useVisibilityTreeFiltering, useVisibilityTreeRenderer, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
+import { createVisibilityTreeRenderer, useVisibilityTreeFiltering, VisibilityTreeNoFilteredData } from "../VisibilityTreeRenderer";
 import { CategoryVisibilityHandler } from "./CategoryVisibilityHandler";
 
 import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
@@ -98,7 +98,7 @@ export function CategoryTree(props: CategoryTreeProps) {
   }), [filteredNodeLoader, visibilityHandler]));
 
   const treeModel = useTreeModel(filteredNodeLoader.modelSource);
-  const treeRenderer = useVisibilityTreeRenderer(false, true);
+  const treeRenderer = createVisibilityTreeRenderer({ iconsEnabled: false, descriptionEnabled: true, levelOffset: 10 });
   const overlay = isFiltering ? <div className="filteredTreeOverlay" /> : undefined;
   const filterApplied = filteredNodeLoader !== nodeLoader;
 
