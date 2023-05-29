@@ -9,6 +9,9 @@ const PROPERTY_GRID_NAMESPACE = "PropertyGridPreferences";
 const PROPERTY_GRID_SHOWNULL_KEY = "showNullValues";
 const LOGGER_CATEGORY = "PropertyGrid";
 
+// Ignore from coverage until https://github.com/iTwin/viewer-components-react/issues/504
+// istanbul ignore file
+
 /**
  * Get showNullValues toggle from UserPreferences (corresponds to hide / show empty fields)
  * @internal

@@ -62,6 +62,7 @@ export function useInstanceSelection({ imodel, enableAncestorNavigation }: Insta
   useEffect(() => {
     const onSelectionChange = async (eventSource?: string) => {
       // do not handle selection event that were caused by this hook.
+      // istanbul ignore if
       if (eventSource === PropertyGridSelectionScope) {
         return;
       }
@@ -85,6 +86,7 @@ export function useInstanceSelection({ imodel, enableAncestorNavigation }: Insta
 
     const removePresentationListener = Presentation.selection.selectionChange.addListener(async (args) => onSelectionChange(args.source));
     // if the frontstage changes and a selection set is already active we need to resync this widget's state with that selection
+    // istanbul ignore next
     const removeFrontstageReadyListener = UiFramework.frontstages.onFrontstageReadyEvent.addListener(async () => onSelectionChange());
     return () => {
       removePresentationListener();

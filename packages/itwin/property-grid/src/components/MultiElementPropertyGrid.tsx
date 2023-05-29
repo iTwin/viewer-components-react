@@ -147,7 +147,7 @@ function AncestryNavigation({ navigationEnabled, navigateUp, navigateDown, canNa
     <IconButton
       size="small"
       styleType="borderless"
-      title={PropertyGridManager.translate("tools.navigateUpTooltip")}
+      title={PropertyGridManager.translate("header.navigateUp")}
       onClick={navigateUp}
       disabled={!canNavigateUp}
     >
@@ -156,7 +156,7 @@ function AncestryNavigation({ navigationEnabled, navigateUp, navigateDown, canNa
     <IconButton
       size="small"
       styleType="borderless"
-      title={PropertyGridManager.translate("tools.navigateDownTooltip")}
+      title={PropertyGridManager.translate("header.navigateDown")}
       onClick={navigateDown}
       disabled={!canNavigateDown}
     >

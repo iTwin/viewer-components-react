@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "@itwin/itwinui-variables";
 import { useEffect } from "react";
 import { useActiveIModelConnection, useSpecificWidgetDef, WidgetState } from "@itwin/appui-react";
 import { Presentation } from "@itwin/presentation-frontend";
