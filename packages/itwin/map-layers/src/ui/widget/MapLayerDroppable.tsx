@@ -21,7 +21,7 @@ import { MapLayerSettingsMenu } from "./MapLayerSettingsMenu";
 import { MapUrlDialog } from "./MapUrlDialog";
 import "./MapLayerManager.scss";
 import { MapLayersUI } from "../../mapLayers";
-import { ImageMapLayerSettings } from "@itwin/core-common";
+import { ImageMapLayerSettings, SubLayerId } from "@itwin/core-common";
 
 /** @internal */
 interface MapLayerDroppableProps {
@@ -48,6 +48,12 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
   const [dropLayerLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.DropLayerLabel"));
   const [outOfRangeTitle] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:Widget.layerOutOfRange"));
 
+  const onSubLayerStateChange = (activeLayer: StyleMapLayerSettings, subLayerId: SubLayerId, isSelected: boolean) => {
+    const mapLayerStyleIdx =  props.activeViewport.displayStyle.findMapLayerIndexByNameAndSource(activeLayer.name, activeLayer.source, activeLayer.isOverlay);
+    if (mapLayerStyleIdx !== -1 && activeLayer.subLayers)
+      props.activeViewport.displayStyle.changeMapSubLayerProps({ visible: isSelected }, subLayerId, { index: mapLayerStyleIdx, isOverlay: activeLayer.isOverlay });
+  };
+
   const renderItem: DraggableChildrenFn = (dragProvided, _, rubric) => {
     assert(props.layersList !== undefined);
     const activeLayer = props.layersList[rubric.source.index];
@@ -62,8 +68,8 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
           <Icon iconSpec={activeLayer.visible ? "icon-visibility" : "icon-visibility-hide-2"} />
         </Button>
         {/* Label */}
-        <span className={props.disabled||outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
-          title = {outOfRange ? outOfRangeTitle : undefined }
+        <span className={props.disabled || outOfRange ? "map-manager-item-label-disabled" : "map-manager-item-label"}
+          title={outOfRange ? outOfRangeTitle : undefined}
           {...dragProvided.dragHandleProps}
 
         >
@@ -71,7 +77,11 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         </span>
         <div className="map-manager-item-sub-layer-container">
           {activeLayer.subLayers && activeLayer.subLayers.length > 1 &&
-            <SubLayersPopupButton mapLayerSettings={activeLayer} activeViewport={props.activeViewport} />
+            <SubLayersPopupButton
+              subLayers={props.activeViewport ? activeLayer.subLayers : undefined}
+              singleVisibleSubLayer={activeLayer.provider?.mutualExclusiveSubLayer}
+              // singleVisibleSubLayer={true}
+              onSubLayerStateChange={(subLayerId: SubLayerId, isSelected: boolean) => { onSubLayerStateChange(activeLayer, subLayerId, isSelected); }} />
           }
         </div>
         {activeLayer.provider?.status === MapLayerImageryProviderStatus.RequireAuth &&
@@ -82,7 +92,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             onClick={() => {
               const indexInDisplayStyle = props.activeViewport?.displayStyle.findMapLayerIndexByNameAndSource(activeLayer.name, activeLayer.source, activeLayer.isOverlay);
               if (indexInDisplayStyle !== undefined && indexInDisplayStyle >= 0) {
-                const layerSettings = props.activeViewport.displayStyle.mapLayerAtIndex({index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay});
+                const layerSettings = props.activeViewport.displayStyle.mapLayerAtIndex({ index: indexInDisplayStyle, isOverlay: activeLayer.isOverlay });
                 if (layerSettings instanceof ImageMapLayerSettings) {
                   UiFramework.dialogs.modal.open(<MapUrlDialog activeViewport={props.activeViewport}
                     isOverlay={props.isOverlay}
