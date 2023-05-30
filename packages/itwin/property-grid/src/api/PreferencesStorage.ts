@@ -18,8 +18,8 @@ export interface PreferencesStorage {
 }
 
 /**
- * Default storage used by `PropertyGridComponent` to persist preferences. It defaults to using `IModelApp.UserPreferences`
- * and persisting preferences under `PropertyGridPreferences` namespace.
+ * Default storage used by `PropertyGridComponent` to persist preferences. It uses `IModelApp.userPreferences`
+ * and, by default, persists preferences under `PropertyGridPreferences` namespace.
  * @public
  */
 export class IModelAppUserPreferencesStorage implements PreferencesStorage {

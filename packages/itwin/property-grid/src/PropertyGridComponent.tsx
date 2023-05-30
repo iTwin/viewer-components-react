@@ -25,7 +25,7 @@ export const PropertyGridComponentId = "vcr:PropertyGridComponent";
 export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel"> {
   /**
    * Custom storage that should be used for persisting preferences.
-   * Defaults to `DefaultPreferencesStorage` that uses `IModelApp.UserPreferences`.
+   * Defaults to `DefaultPreferencesStorage` that uses `IModelApp.userPreferences`.
    */
   preferencesStorage?: PreferencesStorage;
 }
