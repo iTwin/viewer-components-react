@@ -86,25 +86,28 @@ describe("<TreeHeader />", () => {
     it("opens and closes search box", async () => {
       sinon.stub(TreeWidget, "translate").callsFake((key) => key === "searchBox.close" ? "searchBox close button" : "");
 
-      const { getByRole, container } = render(
+      const { getByRole, queryByRole } = render(
         <TreeHeader {...defaultProps} />
       );
 
-      const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open")  });
+      const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
 
-      await waitFor(() => expect(container.querySelector("[aria-label=\"searchBox close button\"]")).to.not.be.null);
+      await waitFor(() => expect(queryByRole("button", { name: TreeWidget.translate("searchBox.close") })).to.not.be.null);
 
       const closeButton = getByRole("button", { name: TreeWidget.translate("searchBox.close") });
       await userEvents.click(closeButton);
 
-      await waitFor(() => expect(container.querySelector("[aria-label=\"searchBox close button\"]")).to.be.null);
+      await waitFor(() => expect(queryByRole("button", { name: TreeWidget.translate("searchBox.close") })).to.be.null);
     });
 
     it("invokes 'onFilterStart' when text is entered", async () => {
       const spy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} onFilterStart={spy} />
+        <TreeHeader
+          {...defaultProps}
+          onFilterStart={spy}
+        />
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
@@ -118,7 +121,11 @@ describe("<TreeHeader />", () => {
       const filterStartSpy = sinon.spy();
       const filterClearSpy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} onFilterStart={filterStartSpy} onFilterClear={filterClearSpy} />
+        <TreeHeader
+          {...defaultProps}
+          onFilterStart={filterStartSpy}
+          onFilterClear={filterClearSpy}
+        />
       );
       filterClearSpy.resetHistory();
 
@@ -137,7 +144,11 @@ describe("<TreeHeader />", () => {
       const filterStartSpy = sinon.spy();
       const filterClearSpy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} onFilterStart={filterStartSpy} onFilterClear={filterClearSpy} />
+        <TreeHeader
+          {...defaultProps}
+          onFilterStart={filterStartSpy}
+          onFilterClear={filterClearSpy}
+        />
       );
       filterClearSpy.resetHistory();
 
@@ -154,7 +165,11 @@ describe("<TreeHeader />", () => {
 
     it("renders matches selector", async () => {
       const { getByRole, queryByText } = render(
-        <TreeHeader {...defaultProps} resultCount={10} selectedIndex={5} />
+        <TreeHeader
+          {...defaultProps}
+          resultCount={10}
+          selectedIndex={5}
+        />
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
@@ -164,7 +179,10 @@ describe("<TreeHeader />", () => {
 
     it("defaults to first match if `selectedIndex` is `undefined`", async () => {
       const { getByRole, queryByText } = render(
-        <TreeHeader {...defaultProps} resultCount={10} />
+        <TreeHeader
+          {...defaultProps}
+          resultCount={10}
+        />
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
@@ -174,7 +192,12 @@ describe("<TreeHeader />", () => {
     it("invokes `onSelectedChanged` when 'Next' button is clicked", async () => {
       const spy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} onSelectedChanged={spy} selectedIndex={5} resultCount={10} />
+        <TreeHeader
+          {...defaultProps}
+          onSelectedChanged={spy}
+          selectedIndex={5}
+          resultCount={10}
+        />
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
@@ -187,7 +210,12 @@ describe("<TreeHeader />", () => {
     it("does not invoke `onSelectedChanged` when 'Next' button is clicked on last index", async () => {
       const spy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} onSelectedChanged={spy} selectedIndex={10} resultCount={10} />
+        <TreeHeader
+          {...defaultProps}
+          onSelectedChanged={spy}
+          selectedIndex={10}
+          resultCount={10}
+        />
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
@@ -200,7 +228,12 @@ describe("<TreeHeader />", () => {
     it("invokes `onSelectedChanged` when 'Previous' button is clicked", async () => {
       const spy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} onSelectedChanged={spy} selectedIndex={5} resultCount={10} />
+        <TreeHeader
+          {...defaultProps}
+          onSelectedChanged={spy}
+          selectedIndex={5}
+          resultCount={10}
+        />
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);
@@ -213,7 +246,12 @@ describe("<TreeHeader />", () => {
     it("does not invoke `onSelectedChanged` when 'Previous' button is clicked on first index", async () => {
       const spy = sinon.spy();
       const { getByRole } = render(
-        <TreeHeader {...defaultProps} onSelectedChanged={spy} selectedIndex={1} resultCount={10} />
+        <TreeHeader
+          {...defaultProps}
+          onSelectedChanged={spy}
+          selectedIndex={1}
+          resultCount={10}
+        />
       );
       const openButton = getByRole("button", { name: TreeWidget.translate("searchBox.open") });
       await userEvents.click(openButton);

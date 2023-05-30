@@ -43,27 +43,37 @@ export function TreeHeader(props: TreeHeaderProps) {
       <HeaderButtons contracted={isSearchOpen}>
         {children}
       </HeaderButtons>
-      <SearchBox expandable onExpand={() => setIsSearchOpen(true)} onCollapse={() => setIsSearchOpen(false)} className={classnames("tree-widget-search-bar", !isSearchOpen && "contracted")}>
+      <SearchBox
+        expandable
+        onExpand={() => setIsSearchOpen(true)}
+        onCollapse={() => setIsSearchOpen(false)}
+        className={classnames("tree-widget-search-bar", !isSearchOpen && "contracted")}
+      >
         <SearchBox.CollapsedState>
-          <SearchBox.ExpandButton title={TreeWidget.translate("searchBox.searchForSomething")} aria-label={TreeWidget.translate("searchBox.open")} size="small"/>
+          <SearchBox.ExpandButton
+            title={TreeWidget.translate("searchBox.searchForSomething")}
+            aria-label={TreeWidget.translate("searchBox.open")}
+            size="small"
+          />
         </SearchBox.CollapsedState>
         <SearchBox.ExpandedState >
-          <SearchBox.Input placeholder={TreeWidget.translate("searchBox.search")} onChange={(e) => e.currentTarget.value ? onFilterStart(e.currentTarget.value) : onFilterClear()} className="search-input"/>
-          {resultCount ? <span className="searchbox-stepping-count">{`${selectedIndex ?? 1}/${resultCount}`}</span> : undefined}
-          <Divider orientation="vertical" />
-          <SearchBox.Button title={TreeWidget.translate("searchBox.previous")} size="small" onClick={() => {
-            if (selectedIndex && resultCount && selectedIndex > 1)
-              onSelectedChanged(selectedIndex - 1);
-          }}>
-            <SvgCaretUpSmall />
-          </SearchBox.Button>
-          <SearchBox.Button title={TreeWidget.translate("searchBox.next")} size="small" onClick={() => {
-            if (selectedIndex && resultCount && selectedIndex < resultCount)
-              onSelectedChanged(selectedIndex + 1);
-          }}>
-            <SvgCaretDownSmall />
-          </SearchBox.Button>
-          <SearchBox.CollapseButton onClick={onFilterClear} size="small" aria-label={TreeWidget.translate("searchBox.close")} />
+          <SearchBox.Input
+            placeholder={TreeWidget.translate("searchBox.search")}
+            onChange={(e) => e.currentTarget.value ? onFilterStart(e.currentTarget.value) : onFilterClear()}
+            className="search-input"
+          />
+          {resultCount
+            ? <SearchResultStepper
+              selectedIndex={selectedIndex}
+              total={resultCount}
+              onStep={onSelectedChanged}
+            />
+            : undefined}
+          <SearchBox.CollapseButton
+            onClick={onFilterClear}
+            size="small"
+            aria-label={TreeWidget.translate("searchBox.close")}
+          />
         </SearchBox.ExpandedState>
       </SearchBox>
     </div>
@@ -101,5 +111,41 @@ function HeaderButtons(props: HeaderButtonsProps) {
     >
       {props.children}
     </ButtonGroup>
+  );
+}
+
+interface SearchResultStepperProps {
+  total: number;
+  onStep: (newIndex: number) => void;
+  selectedIndex?: number;
+}
+
+function SearchResultStepper(props: SearchResultStepperProps) {
+  const { selectedIndex = 1, total, onStep } = props;
+  return (
+    <>
+      <span className="searchbox-stepping-count">{`${selectedIndex}/${total}`}</span>
+      <Divider orientation="vertical" />
+      <SearchBox.Button
+        title={TreeWidget.translate("searchBox.previous")}
+        size="small"
+        onClick={() => {
+          if (selectedIndex > 1)
+            onStep(selectedIndex - 1);
+        }}
+      >
+        <SvgCaretUpSmall />
+      </SearchBox.Button>
+      <SearchBox.Button
+        title={TreeWidget.translate("searchBox.next")}
+        size="small"
+        onClick={() => {
+          if (selectedIndex < total)
+            onStep(selectedIndex + 1);
+        }}
+      >
+        <SvgCaretDownSmall />
+      </SearchBox.Button>
+    </>
   );
 }
