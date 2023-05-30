@@ -389,7 +389,11 @@ export const GroupPropertyAction = ({
           gutterSize={2}
           gutter={() => {
             // Expects HTMLElement
-            const dragHangle = renderToStaticMarkup(<div className="gmw-gutter-drag-icon"><SvgMoreVerticalSmall /></div>);
+            const dragHangle = renderToStaticMarkup(
+              <div className="gmw-gutter-drag-icon iui-svg-icon" data-iui-icon-size="l">
+                <SvgMoreVerticalSmall />
+              </div>
+            );
             const gutter = document.createElement("div");
             gutter.className = `gmw-gutter`;
             gutter.innerHTML = dragHangle;
@@ -519,7 +523,11 @@ export const GroupPropertyAction = ({
                 styleType="borderless">
                 <SvgRemove />
               </IconButton>}
-            dragHandle={<div className="gmw-drag-icon" ><SvgDragHandleVertical /></div>}
+            dragHandle={
+              <div className="gmw-drag-icon iui-svg-icon" data-iui-icon-size="l">
+                <SvgDragHandleVertical />
+              </div>
+            }
           /> : null}
       </DragOverlay>
     </DndContext>

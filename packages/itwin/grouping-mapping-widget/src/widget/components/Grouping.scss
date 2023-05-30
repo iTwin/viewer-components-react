@@ -2,25 +2,24 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .gmw-groups-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  padding: $iui-baseline $iui-m;
+  padding: var(--iui-size-s) var(--iui-size-m);
   min-height: 0;
 
   .gmw-toolbar {
     display: flex;
     justify-content: space-between;
-    gap: $iui-s;
-    border-bottom: 1px solid var(--iui-color-background-4);
-    padding-bottom: $iui-baseline;
+    gap: var(--iui-size-xs);
+    border-bottom: 1px solid var(--iui-color-background);
+    padding-bottom: var(--iui-size-s);
     flex-wrap: wrap;
 
     .gmw-toolbar-buttons {
-      margin-right: $iui-sm;
+      margin-right: var(--iui-size-s);
       margin-left: auto;
       flex-wrap: wrap;
     }
@@ -30,18 +29,18 @@
     display: flex;
     flex-direction: column;
     overflow-y: overlay;
-    gap: $iui-s;
-    margin-top: $iui-s;
+    gap: var(--iui-size-xs);
+    margin-top: var(--iui-size-xs);
   }
 
   .gmw-menu-item {
-    padding-left: $iui-component-padding-horizontal;
+    padding-left: var(--iui-size-s);
   }
 }
 
 .gmw-nest-menu-item {
   width: 100%;
   justify-content: flex-start;
-  padding: 0 $iui-component-padding-horizontal;
-  gap: $iui-s;
+  padding: 0 var(--iui-size-s);
+  gap: var(--iui-size-xs);
 }

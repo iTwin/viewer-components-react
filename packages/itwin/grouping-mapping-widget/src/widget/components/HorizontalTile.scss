@@ -2,23 +2,20 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
-@import "~@itwin/itwinui-css/scss/icon/index";
 
 .gmw-horizontal-tile {
   &-container {
     display: flex;
     justify-content: space-between;
     border-radius: 5px;
-    background-color: var(--iui-color-background-2);
-    min-height: $iui-baseline * 4;
-    padding: 5.5px $iui-s;
+    background-color: var(--iui-color-background-backdrop);
+    min-height: calc(var(--iui-size-s) * 4);
+    padding: 5.5px var(--iui-size-xs);
 
     .gmw-body-container {
       display: flex;
       min-width: 0;
       .gmw-drag-icon {
-        @include iui-icons-large();
         justify-content: center;
         height: 100%;
       }
@@ -38,19 +35,21 @@
       margin-left: 0;
       align-self: center;
       min-width: 36px;
-      margin-right: $iui-xs;
+      margin-right: var(--iui-size-2xs);
       flex-shrink: 0;
     }
   }
 
   &-selected {
-    @include themed {
-      border: 1px solid t(iui-color-foreground-primary);
-      background: linear-gradient(
-          rgba(t(iui-color-foreground-primary-rgb), t(iui-opacity-6)),
-          rgba(t(iui-color-foreground-primary-rgb), t(iui-opacity-6))
-        ),
-        linear-gradient(t(iui-color-background-1), t(iui-color-background-1));
-    }
+    border: 1px solid var(--iui-color-border-accent);
+    background: 
+      linear-gradient(
+        hsl(var(--iui-color-accent-hsl) / var(--iui-opacity-6)),
+        hsl(var(--iui-color-accent-hsl) / var(--iui-opacity-6))
+      ),
+      linear-gradient(
+        var(--iui-color-background),
+        var(--iui-color-background)
+      );
   }
 }

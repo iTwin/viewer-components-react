@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .gmw-group-mapping-container {
   position: absolute;
@@ -10,12 +9,12 @@
   left: 0;
   display: flex;
   flex-direction: column;
-  padding: $iui-baseline $iui-m;
+  padding: var(--iui-size-s) var(--iui-size-m);
   box-sizing: border-box;
   height: 100%;
   overflow: auto;
 }
 
 .gmw-field-legend {
-  color: $iui-color-system-gray;
+  color: darkgray;
 }

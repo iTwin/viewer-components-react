@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .gmw-hide {
   display: none;
@@ -10,7 +9,7 @@
 .gmw-query-builder-container {
   display: flex;
   flex-direction: column;
-  gap: $iui-baseline;
+  gap: var(--iui-size-s);
   flex-grow: 1;
   min-width: 0;
   min-height: 0;

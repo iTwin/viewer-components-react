@@ -46,7 +46,13 @@ const SortableHorizontalTile = ({ id, ...props }: SortableHorizontalTileProps) =
     >
       <HorizontalTile
         dragHandle={
-          <div className="gmw-drag-icon" style={{ cursor: "grab" }} title="Drag & Drop" {...listeners}>
+          <div 
+            className="gmw-drag-icon iui-svg-icon"
+            data-iui-icon-size="l"
+            style={{ cursor: "grab" }}
+            title="Drag & Drop"
+            {...listeners}
+          >
             <SvgDragHandleVertical />
           </div>
         }

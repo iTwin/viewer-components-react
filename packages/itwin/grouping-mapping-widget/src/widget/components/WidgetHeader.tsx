@@ -22,7 +22,8 @@ export const WidgetHeader = ({
     <div className='gmw-widget-header-container'>
       {returnFn && (
         <div
-          className={disabled ? "gmw-chevron-disabled" : "gmw-chevron"}
+          className={`${disabled ? "gmw-chevron-disabled" : "gmw-chevron"} iui-svg-icon`}
+          data-iui-icon-size="l"
           onClick={disabled ? undefined : returnFn}
         >
           <SvgChevronLeft />
