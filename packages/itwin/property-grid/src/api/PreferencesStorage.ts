@@ -22,12 +22,12 @@ export interface PreferencesStorage {
  * and persisting preferences under `PropertyGridPreferences` namespace.
  * @public
  */
-export class DefaultPreferencesStorage implements PreferencesStorage {
+export class IModelAppUserPreferencesStorage implements PreferencesStorage {
   constructor(private _nameSpace = PROPERTY_GRID_NAMESPACE) {}
 
   public async set(key: string, value: string): Promise<void> {
-    // istanbul ignore if
     if (!IModelApp.userPreferences) {
+      Logger.logError(LOGGER_CATEGORY, `Cannot save user preference ${key} because 'IModelApp.userPreferences' not defined.`);
       return;
     }
 
@@ -40,12 +40,13 @@ export class DefaultPreferencesStorage implements PreferencesStorage {
         key,
       });
     } catch (error) {
-      Logger.logError(LOGGER_CATEGORY, `error saving showNullValues user preference: ${error}`);
+      Logger.logError(LOGGER_CATEGORY, `Error saving ${key} user preference: ${error}`);
     }
   }
 
   public async get(key: string): Promise<string | undefined> {
     if (!IModelApp.userPreferences) {
+      Logger.logError(LOGGER_CATEGORY, `Cannot get persisted user preference ${key} because 'IModelApp.userPreferences' not defined.`);
       return undefined;
     }
 
@@ -57,7 +58,7 @@ export class DefaultPreferencesStorage implements PreferencesStorage {
         key,
       });
     } catch (error) {
-      Logger.logError(LOGGER_CATEGORY, `error saving showNullValues user preference: ${error}`);
+      Logger.logError(LOGGER_CATEGORY, `Error getting ${key} user preference: ${error}`);
     }
     return undefined;
   }

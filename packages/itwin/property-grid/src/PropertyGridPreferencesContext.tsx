@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { createContext, useContext, useState } from "react";
-import { DefaultPreferencesStorage } from "./api/PreferencesStorage";
+import { IModelAppUserPreferencesStorage } from "./api/PreferencesStorage";
 
 import type { PropsWithChildren } from "react";
 import type { PreferencesStorage } from "./api/PreferencesStorage";
@@ -14,7 +14,7 @@ export interface PreferencesContext {
   storage: PreferencesStorage;
 }
 
-const preferencesContext = createContext<PreferencesContext>({ storage: new DefaultPreferencesStorage() });
+const preferencesContext = createContext<PreferencesContext>({ storage: new IModelAppUserPreferencesStorage() });
 
 /** @internal */
 export interface PreferencesContextProviderProps {
@@ -24,7 +24,7 @@ export interface PreferencesContextProviderProps {
 /** @internal */
 export function PreferencesContextProvider({ storage, children }: PropsWithChildren<PreferencesContextProviderProps>) {
   const [contextValue] = useState(() => ({
-    storage: storage ?? new DefaultPreferencesStorage(),
+    storage: storage ?? new IModelAppUserPreferencesStorage(),
   }));
 
   return <preferencesContext.Provider value={contextValue}>

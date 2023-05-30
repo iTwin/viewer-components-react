@@ -7,12 +7,12 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { Logger } from "@itwin/core-bentley";
 import { IModelApp } from "@itwin/core-frontend";
-import { DefaultPreferencesStorage } from "../../property-grid-react";
+import { IModelAppUserPreferencesStorage } from "../../property-grid-react";
 import { createFunctionStub } from "../TestUtils";
 
 import type { PreferenceArg, UserPreferencesAccess } from "@itwin/core-frontend";
 
-describe("DefaultPreferencesStorage", () => {
+describe("IModelAppUserPreferencesStorage", () => {
   const imodelUserPreferences = {
     save: createFunctionStub<UserPreferencesAccess["save"]>(),
     get: createFunctionStub<UserPreferencesAccess["get"]>(),
@@ -20,7 +20,7 @@ describe("DefaultPreferencesStorage", () => {
 
   let userPreferencesStub: sinon.SinonStub;
   let loggerStub: sinon.SinonStub;
-  let storage: DefaultPreferencesStorage;
+  let storage: IModelAppUserPreferencesStorage;
 
   before(() => {
     userPreferencesStub = sinon.stub(IModelApp, "userPreferences");
@@ -33,7 +33,7 @@ describe("DefaultPreferencesStorage", () => {
 
   beforeEach(() => {
     userPreferencesStub.get(() => imodelUserPreferences);
-    storage = new DefaultPreferencesStorage();
+    storage = new IModelAppUserPreferencesStorage();
   });
 
   afterEach(() => {
@@ -56,6 +56,13 @@ describe("DefaultPreferencesStorage", () => {
       await storage.set("test-key", "test-value");
       expect(loggerStub).to.be.calledWith("PropertyGrid", sinon.match("Invalid Key"));
     });
+
+    it("logs error if `IModelApp.userPreferences` not defined", async () => {
+      userPreferencesStub.reset();
+      userPreferencesStub.get(() => undefined);
+      await storage.set("test-key", "test-value");
+      expect(loggerStub).to.be.calledWith("PropertyGrid", sinon.match("'IModelApp.userPreferences' not defined"));
+    });
   });
 
   describe("get", () => {
@@ -70,10 +77,11 @@ describe("DefaultPreferencesStorage", () => {
       expect(loggerStub).to.be.calledWith("PropertyGrid", sinon.match("Invalid Key"));
     });
 
-    it("returns `undefined` if `IModelApp.userPreferences` not defined", async () => {
+    it("logs error if `IModelApp.userPreferences` not defined", async () => {
       userPreferencesStub.reset();
       userPreferencesStub.get(() => undefined);
       expect(await storage.get("test-key")).to.be.undefined;
+      expect(loggerStub).to.be.calledWith("PropertyGrid", sinon.match("'IModelApp.userPreferences' not defined"));
     });
   });
 });
