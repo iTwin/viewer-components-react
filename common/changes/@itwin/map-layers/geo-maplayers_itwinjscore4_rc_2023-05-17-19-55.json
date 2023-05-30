@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/map-layers",
-      "comment": "",
+      "comment": "Updated itwinjs-core to latest RC version.",
       "type": "none"
     }
   ],

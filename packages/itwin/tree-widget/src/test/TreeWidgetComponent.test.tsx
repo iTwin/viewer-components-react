@@ -4,18 +4,19 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { expect } from "chai";
-import sinon from "sinon";
 import { UiFramework } from "@itwin/appui-react";
 import { BeEvent } from "@itwin/core-bentley";
-import { cleanup, render, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { TreeWidgetComponent } from "../tree-widget-react";
 import { TreeWidget } from "../TreeWidget";
-import { TestUtils } from "./TestUtils";
+import { stubCancelAnimationFrame, TestUtils } from "./TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeDefinition } from "../tree-widget-react";
 
 describe("<TreeWidgetComponent />", () => {
+  stubCancelAnimationFrame();
+
   before(async () => {
     await TestUtils.initialize();
   });
@@ -31,12 +32,6 @@ describe("<TreeWidgetComponent />", () => {
         onChanged: new BeEvent(),
       },
     } as IModelConnection);
-  });
-
-  afterEach(() => {
-    global.cancelAnimationFrame = sinon.stub();
-    cleanup();
-    delete (global as any).cancelAnimationFrame;
   });
 
   it("renders nothing if there is no active imodel connection", () => {

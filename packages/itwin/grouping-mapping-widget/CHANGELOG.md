@@ -1,6 +1,34 @@
 # Change Log - @itwin/grouping-mapping-widget
 
-This log was last generated on Mon, 24 Apr 2023 19:57:10 GMT and should not be manually modified.
+This log was last generated on Mon, 15 May 2023 16:32:30 GMT and should not be manually modified.
+
+## 0.16.0
+Mon, 15 May 2023 16:32:30 GMT
+
+### Minor changes
+
+- Refactored Copy Mapping modal UI to remove dependency on @itwin/imodel-browser-react. The widget now additionally requires the `itwins:read` scope to support the changes. 
+- @itwin/grouping-mapping-widget updated to itwinjs 3.7.4.
+
+## 0.15.1
+Thu, 04 May 2023 23:59:19 GMT
+
+### Patches
+
+- Resolved a bug that prevented Group Properties from being displayed when GroupPropertyAction was utilized without a viewer.
+
+## 0.15.0
+Thu, 27 Apr 2023 16:44:34 GMT
+
+### Minor changes
+
+- Added ability to provide an iModelConnection.
+- Added shouldVisualize prop to GroupAction which enables or disables visualization.
+
+### Patches
+
+- Fixed a bug in both Mapping and Groupings components where the title remained clickable even when onClickTitle was undefined. The title is now no longer clickable in such cases.
+- Fixed Group By not visualizing queries.
 
 ## 0.14.0
 Mon, 24 Apr 2023 19:57:10 GMT

@@ -116,6 +116,9 @@ describe("ExternalSourcesTree", () => {
           },
         },
         testOutputDir: join(__dirname, "output"),
+        backendHostProps: {
+          cacheDir: join(__dirname, "cache"),
+        },
       });
     });
 

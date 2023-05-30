@@ -1,17 +1,18 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Wed, 08 Feb 2023 14:58:40 GMT and should not be manually modified.
+This log was last generated on Thu, 04 May 2023 23:59:19 GMT and should not be manually modified.
+
+## 4.0.0
+Thu, 04 May 2023 23:59:19 GMT
+
+### Minor changes
+
+- Updated to AppUI 4.0 and Presentation 4.0
 
 ## 3.6.0
 Wed, 08 Feb 2023 14:58:40 GMT
 
-### Updates
-
-- Allow map-layer requiring authentication to be correctly initialized after a saved view restore.
-- Added support for new viewport event (onMapLayerScaleRangeVisibilityChanged)
-- Improved map-layer coordinate systems validation and error reporting.
-- Fix Map Layers widget not updating after an iModel gets geolocated.
--  Use EmptyLocalization for localization in tests to increase test performance
+_Version update only_
 
 ## 3.5.6
 Fri, 24 Feb 2023 16:02:47 GMT
@@ -46,10 +47,7 @@ _Version update only_
 ## 3.5.0
 Wed, 07 Dec 2022 19:12:37 GMT
 
-### Updates
-
-- MapLayers widget's preferences UI now support edit,delete buttons without having an iModel ID. Also fix an issue with edit.
-- Unpin classnames package
+_Version update only_
 
 ## 3.4.7
 Wed, 30 Nov 2022 14:28:19 GMT
@@ -89,11 +87,7 @@ _Version update only_
 ## 3.4.0
 Thu, 13 Oct 2022 20:24:47 GMT
 
-### Updates
-
-- Disable map-layers widget when the background map setting is off in the current view settings.
-- Maplayers widget now correctly rerefresh its state whenever the application switches between different viewports.
-- Updated Node types declaration to support latest v16
+_Version update only_
 
 ## 3.3.5
 Tue, 27 Sep 2022 11:50:59 GMT
@@ -123,11 +117,7 @@ _Version update only_
 ## 3.3.0
 Thu, 18 Aug 2022 19:08:02 GMT
 
-### Updates
-
-- upgrade mocha to version 10.0.0
-- Fixed FeatureInfo provider registration when Map Layers Widget is initialized.
-- Update iTwinUI-react to 1.38.1
+_Version update only_
 
 ## 3.2.9
 Fri, 26 Aug 2022 14:21:40 GMT
@@ -152,10 +142,7 @@ _Version update only_
 ## 3.2.5
 Wed, 13 Jul 2022 15:45:53 GMT
 
-### Updates
-
-- Use a different resize observer technique to ensure the controlled tree in map suplayer popup is properly sized.
-- Turned ON Popup's 'repositionOnResize' property for MapLayerSettingsMenu.
+_Version update only_
 
 ## 3.2.4
 Tue, 21 Jun 2022 18:06:33 GMT
@@ -165,9 +152,7 @@ _Version update only_
 ## 3.2.3
 Fri, 17 Jun 2022 15:18:39 GMT
 
-### Updates
-
-- Made public MapLayers related objects, methods.
+_Version update only_
 
 ## 3.2.2
 Fri, 10 Jun 2022 16:11:37 GMT
@@ -182,12 +167,7 @@ _Version update only_
 ## 3.2.0
 Fri, 20 May 2022 13:10:54 GMT
 
-### Updates
-
-- maplayers widget has been updated to support OAuth2: if needed, a popup window will be displayed to trigger the external OAuth process. When process completes, the focus returns to the map-layers widget and layer is ready to be added/displayed.
-- Use iTwinUI-react components to get consistent styling. Alos fixed bug with elevation correction control.
-- Fix a display issue with background color's ColorPicker where part of the dialog was missing.
-- Add ability to pass parameters to UiItemsManager when loading items provider to specify what stages allow the provider to supply items.
+_Version update only_
 
 ## 3.1.3
 Fri, 15 Apr 2022 13:49:25 GMT
@@ -202,26 +182,12 @@ _Version update only_
 ## 3.1.1
 Thu, 31 Mar 2022 15:55:48 GMT
 
-### Updates
-
-- Adjusted the map-layers package's peer dependencies to no longer lock down core packages.
+_Version update only_
 
 ## 3.1.0
 Tue, 29 Mar 2022 20:53:47 GMT
 
-### Updates
-
-- Add support for map layers using model geometry.
-- User Preferences is now supported for Blank Connection configurations.
-- Fixed issue that would close the new maplayer dialog when a new layer type was picked.
-- Fix 'ResizeObserver loop limit exceeded' error in MapLayers widget
-- Added FeatureInfo Widget.
-- Bug fix: Right click on the new map layer dialog would close it.
-- Refactored MapLayersUI initialization, and will always use UiProviders
-- Fix style on select
-- Update to itwinui-css version "0.44.0".
-- Update to @itwin/itwinui-react: 1.32.0
-- Update to latest itwinui-react - requires new compile option allowSyntheticDefaultImports=true.
+_Version update only_
 
 ## 3.0.3
 Fri, 25 Mar 2022 15:10:02 GMT
@@ -241,33 +207,7 @@ _Version update only_
 ## 3.0.0
 Mon, 24 Jan 2022 14:00:52 GMT
 
-### Updates
-
-- Upgrade target to ES2019 and deliver both a CommonJs and ESModule version of package
-- Layers could not be added through MapLayers widget when UserPreferences was not set. Fix various issues related to user preferences.
-- Fixed various CSS issues in map-layers widget after recent UI framework changes.
-- No longer display username/password fields by default in the custom map layers dialog: If validation fails and reports authentication is needed, we then ask end-user for credentials.
-- Use QuantityNumericInput for 'Elevation Offset' and 'Model Height' fields instead of hardcoded units.
-- Migrated from Toggle to ToggleSwitch component in map-layers widget
-- rename contextId -> iTwinId
-- Unregister maplayers itemsProvider and widget control on terminate.
-- Now use 'DisplayStyleState.backgroundMapBase' instead of 'DisplayStyleState.changeBaseMapProps' to update the mapImagery.
-- use new @itwin package names
-- rename to @itwin/map-layers
-- remove ClientRequestContext and its subclasses
-- Replace usage of I18N with generic Localization interface.
--  Renamed an iModel's parent container to iTwin
-- Ignore lint warning for deprecated class
-- Upgraded itwinui-react to 1.16.2. Fixed editor sizes.
-- Update to latest itwinui-react
-- Incorporating iTwinUI-CSS and iTwinUI-React into iModel.js
-- Update to React 17.
-- Created imodel-components folder & package and moved color, lineweight, navigationaids, quantity, timeline & viewport. Deprecated MessageSeverity in ui-core & added it ui-abstract. Added MessagePresenter interface to ui-abstract.
-- Replace deprecated ThemedSelect component with iTwinUI-react Select component.
-- Remove itwinUi css overrides.
-- Replaced ui-core Slider with one from iTwinUi-react.
-- Update to latest types/react package
-- Lock down and update version numbers so docs will build.
+_Version update only_
 
 ## 2.19.28
 Wed, 12 Jan 2022 14:52:38 GMT
@@ -292,9 +232,7 @@ _Version update only_
 ## 2.19.24
 Mon, 29 Nov 2021 18:44:31 GMT
 
-### Updates
-
-- Fixed UI spacing issues in map-layers widget.
+_Version update only_
 
 ## 2.19.23
 Mon, 22 Nov 2021 20:41:40 GMT
@@ -314,16 +252,12 @@ _Version update only_
 ## 2.19.20
 Fri, 29 Oct 2021 16:14:22 GMT
 
-### Updates
-
-- Added Mask transparency to map-layers widget.
+_Version update only_
 
 ## 2.19.19
 Mon, 25 Oct 2021 16:16:25 GMT
 
-### Updates
-
-- Drop unnecessary dep on @bentley/react-scripts
+_Version update only_
 
 ## 2.19.18
 Thu, 21 Oct 2021 20:59:44 GMT
@@ -463,13 +397,7 @@ _Version update only_
 ## 2.17.0
 Mon, 28 Jun 2021 16:20:11 GMT
 
-### Updates
-
--  Allow saved map-layer definition to be edited.
-- Made MaplayerSource independent from MapLayerProps.
-- MapManagerSettings UI Refresh. Added tests.
-- Fixed typo in activeViewport.view.isSpatialView: it should be invoked as a method and not a property.
-- Fixed a bug where an elevation offset value of 0 could not be in the UI.
+_Version update only_
 
 ## 2.16.10
 Thu, 22 Jul 2021 20:23:45 GMT
@@ -524,12 +452,7 @@ _Version update only_
 ## 2.16.0
 Mon, 24 May 2021 15:58:39 GMT
 
-### Updates
-
-- Fix 'npm run cover' that would never complete.
-- Exposed the map masking option in the map layers settings UI.
-- Move map tile trees to Viewport to handle synching correctly
-- Update to latest classnames package
+_Version update only_
 
 ## 2.15.6
 Wed, 26 May 2021 15:55:19 GMT
@@ -564,10 +487,7 @@ _Version update only_
 ## 2.15.0
 Fri, 30 Apr 2021 12:36:58 GMT
 
-### Updates
-
-- Allow saved map layer definition to be deleted from setting service.
-- Fixed typo in the message when the iModel is not geolocated.
+_Version update only_
 
 ## 2.14.4
 Thu, 22 Apr 2021 21:07:33 GMT
@@ -592,18 +512,12 @@ _Version update only_
 ## 2.14.0
 Fri, 02 Apr 2021 13:18:42 GMT
 
-### Updates
-
-- WMS/WMTS layers will now provide feedback to end-user when an unauthorized error is returned by server. Enabled tests in map-layers extensions.
+_Version update only_
 
 ## 2.13.0
 Tue, 09 Mar 2021 20:28:13 GMT
 
-### Updates
-
-- Restored base layer visibility button in map manager.
-- Updated to use TypeScript 4.1
-- begin rename project from iModel.js to iTwin.js
+_Version update only_
 
 ## 2.12.3
 Mon, 08 Mar 2021 15:32:00 GMT
@@ -623,10 +537,7 @@ _Version update only_
 ## 2.12.0
 Thu, 18 Feb 2021 22:10:13 GMT
 
-### Updates
-
-- Provide default props to map-layers widget when used as an extension.
-- ArcGIS token-based authentification support: MapLayerManager now monitor provider status and display a warning icon when there is a authentifiation error while loading tiles.  User is allowed to provide credentials without the need to fully re-attach the layer.  Invalid credentials feedback is now provided.  It is now possible to save an ArcGIS layer requiring authentification in the settings service, althoug redentials wont be persisted.
+_Version update only_
 
 ## 2.11.2
 Thu, 18 Feb 2021 02:50:59 GMT
@@ -641,11 +552,7 @@ _Version update only_
 ## 2.11.0
 Thu, 28 Jan 2021 13:39:27 GMT
 
-### Updates
-
-- Refreshed MapLayerManager UI. Fixed minor issues with layer dragging order.  Code refactoring.
-- Correctly handle WMTS layers (only one layer can be visible at a time)
-- Lock react-select to 3.1.0 and @types/react-select to 3.0.26 until we can fix compile errors for later versions.
+_Version update only_
 
 ## 2.10.3
 Fri, 08 Jan 2021 18:34:03 GMT
@@ -660,16 +567,12 @@ _Version update only_
 ## 2.10.1
 Tue, 22 Dec 2020 00:53:38 GMT
 
-### Updates
-
-- Correctly handle WMTS layers (only one layer can be visible at a time)
+_Version update only_
 
 ## 2.10.0
 Fri, 18 Dec 2020 18:24:01 GMT
 
-### Updates
-
-- Move dependencies to peerDependencies
+_Version update only_
 
 ## 2.9.9
 Sun, 13 Dec 2020 19:00:03 GMT
@@ -729,10 +632,7 @@ _Version update only_
 ## 2.8.0
 Fri, 23 Oct 2020 17:04:02 GMT
 
-### Updates
-
-- Introduced the concept of named/unamed groups and made sure the SubLayers tree view remained consistent with the display (i.e disabling children of non-visible unnamed groups)
-- Added optional wms autentication
+_Version update only_
 
 ## 2.7.6
 Wed, 11 Nov 2020 16:28:23 GMT
@@ -767,13 +667,7 @@ _Version update only_
 ## 2.7.0
 Fri, 02 Oct 2020 18:03:32 GMT
 
-### Updates
-
-- Modify MapUrlDialog to handle MapLayerSettingsService
-- Fix background color of bgmap visibility button.
-- Added switches to turn on and off the WMS feature of the map layer widget
-- Made transparent the visibility button of Mapmanager
-- Added optional wms autentication
+_Version update only_
 
 ## 2.6.5
 Sat, 26 Sep 2020 16:06:34 GMT
@@ -803,9 +697,7 @@ _Version update only_
 ## 2.6.0
 Thu, 17 Sep 2020 13:16:12 GMT
 
-### Updates
-
-- Moved ESLint configuration to a plugin
+_Version update only_
 
 ## 2.5.5
 Wed, 02 Sep 2020 17:42:23 GMT
@@ -815,9 +707,7 @@ _Version update only_
 ## 2.5.4
 Fri, 28 Aug 2020 15:34:15 GMT
 
-### Updates
-
-- Add Locatable toggle, updated icon for transparency button, add visibilty toggle for 'Base Layer'
+_Version update only_
 
 ## 2.5.3
 Wed, 26 Aug 2020 11:46:00 GMT
@@ -837,18 +727,12 @@ _Version update only_
 ## 2.5.0
 Thu, 20 Aug 2020 20:57:10 GMT
 
-### Updates
-
-- lock down @types/react version at 16.9.43 to prevent build error from csstype dependency
-- Add MapLayersWidgetControl that can be used to specify widget in UI 1.0 FrontstageDef.
-- Switch to ESLint
+_Version update only_
 
 ## 2.4.2
 Fri, 14 Aug 2020 16:34:09 GMT
 
-### Updates
-
-- Add MapLayersWidgetControl that can be used to specify widget in UI 1.0 FrontstageDef.
+_Version update only_
 
 ## 2.4.1
 Fri, 07 Aug 2020 19:57:43 GMT
@@ -858,7 +742,5 @@ _Version update only_
 ## 2.4.0
 Tue, 28 Jul 2020 16:26:24 GMT
 
-### Updates
-
-- Add map-layer extension that can also be used as a package. Adds 'Map Layers' widget.
+_Initial release_
 

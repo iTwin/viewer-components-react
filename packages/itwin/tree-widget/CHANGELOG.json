@@ -2,6 +2,41 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@itwin/tree-widget-react_v0.10.0",
+      "date": "Tue, 23 May 2023 13:16:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Updating to iTwin.js core 4.0.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.0",
+      "tag": "@itwin/tree-widget-react_v0.9.0",
+      "date": "Tue, 02 May 2023 16:12:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "updating to core@3.7.0 and appui@4.0.0"
+          },
+          {
+            "comment": "Removed usage of deprecated `@itwin/presentation-components` APIs"
+          },
+          {
+            "comment": "Updated trees to use visibility checkbox from `@itwin/itwinui-react`."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Updated to AppUI 4.0 and Presentation 4.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.0",
       "tag": "@itwin/tree-widget-react_v0.8.0",
       "date": "Mon, 03 Apr 2023 15:34:07 GMT",

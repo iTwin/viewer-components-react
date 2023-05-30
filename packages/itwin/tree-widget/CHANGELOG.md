@@ -1,6 +1,18 @@
 # Change Log - @itwin/tree-widget-react
 
-This log was last generated on Mon, 03 Apr 2023 15:34:07 GMT and should not be manually modified.
+This log was last generated on Tue, 23 May 2023 13:16:11 GMT and should not be manually modified.
+
+## 0.10.0
+Tue, 23 May 2023 13:16:11 GMT
+
+_Version update only_
+
+## 0.9.0
+Tue, 02 May 2023 16:12:17 GMT
+
+### Minor changes
+
+- Updated to AppUI 4.0 and Presentation 4.0
 
 ## 0.8.0
 Mon, 03 Apr 2023 15:34:07 GMT
@@ -213,10 +225,6 @@ Tue, 13 Jul 2021 17:43:28 GMT
 ### Minor changes
 
 - Added a UiProvider that implements the existing tree widget
-
-### Updates
-
-- add rebuild script
 
 ## 1.3.1
 Tue, 08 Jun 2021 21:23:59 GMT

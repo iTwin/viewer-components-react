@@ -11,7 +11,14 @@
   margin-top: $iui-baseline * 2;
   flex-grow: 1;
   min-height: 0;
-  .gmw-mappings-container {
+
+  .gmw-table-container {
+    display: flex;
+    flex-grow: 1;
+    min-height: 0;
+  }
+
+  .gmw-mapping-container {
     flex-grow: 1;
     min-height: 0;
   }

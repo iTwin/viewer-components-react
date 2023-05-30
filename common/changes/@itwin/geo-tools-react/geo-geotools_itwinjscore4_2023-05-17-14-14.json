@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@itwin/geo-tools-react",
-      "comment": "",
+      "comment": "Updated to iTwin.js Core 4.0",
       "type": "none"
     }
   ],

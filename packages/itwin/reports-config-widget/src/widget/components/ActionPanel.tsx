@@ -11,7 +11,7 @@ import { LoadingSpinner } from "./utils";
 export interface ActionPanelProps {
   actionLabel: string;
   onAction: () => Promise<void>;
-  onCancel: () => void;
+  onCancel?: () => void;
   isCancelDisabled?: boolean;
   isSavingDisabled?: boolean;
   isLoading?: boolean;
@@ -35,16 +35,18 @@ const ActionPanel = ({
       >
         {actionLabel}
       </Button>
-      <Button
-        styleType="default"
-        type="button"
-        onClick={onCancel}
-        disabled={isCancelDisabled || isLoading}
-      >
-        {ReportsConfigWidget.localization.getLocalizedString(
-          "ReportsConfigWidget:Cancel"
-        )}
-      </Button>
+      {onCancel && (
+        <Button
+          styleType="default"
+          type="button"
+          onClick={onCancel}
+          disabled={isCancelDisabled || isLoading}
+        >
+          {ReportsConfigWidget.localization.getLocalizedString(
+            "ReportsConfigWidget:Cancel"
+          )}
+        </Button>
+      )}
     </div>
   );
 };

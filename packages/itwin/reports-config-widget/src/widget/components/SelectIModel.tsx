@@ -2,37 +2,29 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { useActiveIModelConnection } from "@itwin/appui-react";
+import type { AccessToken } from "@itwin/core-bentley";
 import { AccessTokenAdapter } from "@itwin/imodels-access-frontend";
 import type {
   GetIModelListParams,
-  IModelsClientOptions,
+  IModelsClient,
   MinimalIModel,
 } from "@itwin/imodels-client-management";
 import {
-  Constants,
-  IModelsClient,
   toArray,
 } from "@itwin/imodels-client-management";
 import { ComboBox, Label } from "@itwin/itwinui-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { ReportsConfigWidget } from "../../ReportsConfigWidget";
-import type { ReportsApiConfig } from "../context/ReportsApiConfigContext";
-import { useReportsApiConfig } from "../context/ReportsApiConfigContext";
+import { useReportsConfigApi } from "../context/ReportsConfigApiContext";
 import "./SelectIModel.scss";
-import { generateUrl } from "./utils";
 
 const fetchIModels = async (
   setiModels: React.Dispatch<React.SetStateAction<MinimalIModel[]>>,
   iTwinId: string,
-  apiContext: ReportsApiConfig
+  iModelsClient: IModelsClient,
+  getAccessToken: () => Promise<AccessToken>
 ) => {
-  const iModelClientOptions: IModelsClientOptions = {
-    api: { baseUrl: generateUrl(Constants.api.baseUrl, apiContext.baseUrl) },
-  };
-
-  const iModelsClient: IModelsClient = new IModelsClient(iModelClientOptions);
-  const accessToken = await apiContext.getAccessToken();
+  const accessToken = await getAccessToken();
   const authorization = AccessTokenAdapter.toAuthorizationCallback(accessToken);
   const getiModelListParams: GetIModelListParams = {
     urlParams: { projectId: iTwinId },
@@ -45,30 +37,20 @@ const fetchIModels = async (
 };
 
 interface SelectedIModelProps {
-  selectedIModelId: string;
-  setSelectedIModelId: React.Dispatch<React.SetStateAction<string>>;
+  selectedIModelId?: string;
+  setSelectedIModelId: (iModelId: string) => void;
 }
 
 export const SelectIModel = ({
   selectedIModelId,
   setSelectedIModelId,
 }: SelectedIModelProps) => {
-  const apiConfig = useReportsApiConfig();
-  const iModelId = useActiveIModelConnection()?.iModelId ?? "";
-  const iTwinId = useActiveIModelConnection()?.iTwinId ?? "";
+  const { iTwinId, getAccessToken, iModelsClient } = useReportsConfigApi();
   const [iModels, setIModels] = useState<MinimalIModel[]>([]);
 
   useEffect(() => {
-    if (iModelId && iTwinId) {
-      void fetchIModels(setIModels, iTwinId, apiConfig);
-    }
-  }, [apiConfig, setIModels, iModelId, iTwinId]);
-
-  useEffect(() => {
-    if (iModelId && iModels.length > 0) {
-      setSelectedIModelId(iModelId);
-    }
-  }, [iModelId, iModels, setSelectedIModelId]);
+    void fetchIModels(setIModels, iTwinId, iModelsClient, getAccessToken);
+  }, [getAccessToken, iModelsClient, iTwinId, setIModels]);
 
   const iModelOptions = useMemo(() => {
     return iModels.map((iModel) => ({

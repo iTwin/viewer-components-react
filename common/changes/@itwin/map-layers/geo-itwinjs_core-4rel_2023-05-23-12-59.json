@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@itwin/map-layers",
-      "comment": "remove refs of $uicore-button-focus-boxshadow in maplayers scss files",
-      "type": "none"
+      "comment": "",
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/map-layers"
