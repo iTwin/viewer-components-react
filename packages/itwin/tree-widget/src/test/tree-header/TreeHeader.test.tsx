@@ -84,8 +84,6 @@ describe("<TreeHeader />", () => {
 
   describe("search box", () => {
     it("opens and closes search box", async () => {
-      sinon.stub(TreeWidget, "translate").callsFake((key) => key === "searchBox.close" ? "searchBox close button" : "");
-
       const { getByRole, queryByRole } = render(
         <TreeHeader {...defaultProps} />
       );

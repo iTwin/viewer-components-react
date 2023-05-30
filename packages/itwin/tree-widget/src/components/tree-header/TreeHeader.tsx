@@ -62,13 +62,11 @@ export function TreeHeader(props: TreeHeaderProps) {
             onChange={(e) => e.currentTarget.value ? onFilterStart(e.currentTarget.value) : onFilterClear()}
             className="search-input"
           />
-          {resultCount
-            ? <SearchResultStepper
-              selectedIndex={selectedIndex}
-              total={resultCount}
-              onStep={onSelectedChanged}
-            />
-            : undefined}
+          <SearchResultStepper
+            selectedIndex={selectedIndex}
+            total={resultCount}
+            onStep={onSelectedChanged}
+          />
           <SearchBox.CollapseButton
             onClick={onFilterClear}
             size="small"
@@ -115,13 +113,16 @@ function HeaderButtons(props: HeaderButtonsProps) {
 }
 
 interface SearchResultStepperProps {
-  total: number;
+  total?: number;
   onStep: (newIndex: number) => void;
   selectedIndex?: number;
 }
 
 function SearchResultStepper(props: SearchResultStepperProps) {
   const { selectedIndex = 1, total, onStep } = props;
+  if (!total)
+    return null;
+
   return (
     <>
       <span className="searchbox-stepping-count">{`${selectedIndex}/${total}`}</span>
