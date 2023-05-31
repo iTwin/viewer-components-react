@@ -9,7 +9,7 @@ import { BeEvent } from "@itwin/core-bentley";
 import { render, waitFor } from "@testing-library/react";
 import { TreeWidgetComponent } from "../tree-widget-react";
 import { TreeWidget } from "../TreeWidget";
-import { stubCancelAnimationFrame, TestUtils } from "./TestUtils";
+import { createResolvablePromise, stubCancelAnimationFrame, TestUtils } from "./TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { TreeDefinition } from "../tree-widget-react";
@@ -106,9 +106,3 @@ describe("<TreeWidgetComponent />", () => {
     await waitFor(() => expect(queryByText("Tree Content 1")).to.not.be.null);
   });
 });
-
-function createResolvablePromise<T>() {
-  let resolve: (value: T) => void = () => {};
-  const promise = new Promise<T>((resolvePromise) => {resolve = resolvePromise;});
-  return { promise, resolve };
-}

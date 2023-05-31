@@ -7,17 +7,19 @@ import { expect } from "chai";
 import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import * as UiComponents from "@itwin/components-react";
 import { BeEvent, using } from "@itwin/core-bentley";
 import { StandardNodeTypes } from "@itwin/presentation-common";
+import { waitFor } from "@testing-library/react";
 import { renderHook } from "@testing-library/react-hooks";
 import * as categoriesVisibilityUtils from "../../../components/trees/CategoriesVisibilityUtils";
 import {
   CategoryVisibilityHandler, hideAllCategories, invertAllCategories, showAllCategories, useCategories,
 } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
-import { mockViewport } from "../../TestUtils";
+import { createResolvablePromise, mockViewport } from "../../TestUtils";
 
 import type { Id64String } from "@itwin/core-bentley";
+import type { ECSqlReader } from "@itwin/core-common";
+import type { TreeNodeItem } from "@itwin/components-react";
 import type { IModelConnection, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
 import type { ECInstancesNodeKey } from "@itwin/presentation-common";
 import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
@@ -119,7 +121,7 @@ describe("CategoryVisibilityHandler", () => {
     it("does nothing if node is not PresentationTreeNodeItem", async () => {
       await using(createHandler(), async (handler) => {
         const enableCategorySpy = sinon.stub(handler, "enableCategory");
-        await handler.changeVisibility({} as UiComponents.TreeNodeItem, false);
+        await handler.changeVisibility({} as TreeNodeItem, false);
         expect(enableCategorySpy).to.not.be.called;
       });
     });
@@ -145,7 +147,7 @@ describe("CategoryVisibilityHandler", () => {
 
     it("returns disabled if node is not PresentationTreeNodeItem", () => {
       using(createHandler({}), (handler) => {
-        const result = handler.getVisibilityStatus({} as UiComponents.TreeNodeItem);
+        const result = handler.getVisibilityStatus({} as TreeNodeItem);
         expect(result.state).to.be.eq("hidden");
         expect(result.isDisabled).to.be.true;
       });
@@ -373,24 +375,65 @@ describe("CategoryVisibilityHandler", () => {
 });
 
 describe("useCategories", () => {
-
-  afterEach(() => {
-    sinon.restore();
-  });
-
   it("returns empty array while categories load", async () => {
-    sinon.stub(UiComponents, "useAsyncValue").returns(undefined);
+    const categoryId = "test-category-id";
+    const categoryInfo: Map<Id64String, IModelConnection.Categories.CategoryInfo> = new Map(
+      [
+        [categoryId, { id: categoryId, subCategories: new Map() } ],
+      ]
+    );
+
+    const { promise, resolve } = createResolvablePromise<Array<{ id: string}>>();
+    const queryReader = {
+      toArray: async () => promise,
+    } as ECSqlReader;
+    const viewport = {
+      view: {
+        is3d: () => true,
+      },
+    } as unknown as Viewport;
 
     const imodelMock = moq.Mock.ofType<IModelConnection>();
+    const categoriesMock = moq.Mock.ofType<IModelConnection.Categories>();
     const viewManagerMock = moq.Mock.ofType<ViewManager>();
-    const { result, rerender } = renderHook(() => useCategories(viewManagerMock.object, imodelMock.object));
 
-    const initialResult = result.current;
-    expect(initialResult).to.deep.eq([]);
+    imodelMock.setup((x) => x.createQueryReader(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => queryReader);
+    imodelMock.setup((x) => x.categories).returns(() => categoriesMock.object);
+    categoriesMock.setup(async (x) => x.getCategoryInfo([categoryId])).returns(async () => categoryInfo);
 
-    rerender();
-    const resultAfterRerender = result.current;
-    expect(resultAfterRerender).to.eq(initialResult);
+    const { result } = renderHook(() => useCategories(viewManagerMock.object, imodelMock.object, viewport));
+
+    expect(result.current).to.deep.eq([]);
+
+    resolve([{ id: categoryId }]);
+
+    await waitFor(() => {
+      expect(result.current).to.have.lengthOf(1);
+    });
   });
 
+  it("returns empty array if there is no viewport", async () => {
+    const categoryId = "test-category-id";
+    const categoryInfo: Map<Id64String, IModelConnection.Categories.CategoryInfo> = new Map(
+      [
+        [categoryId, { id: categoryId, subCategories: new Map() } ],
+      ]
+    );
+
+    const queryReader = {
+      toArray: async () => [{ id: categoryId }],
+    } as ECSqlReader;
+
+    const imodelMock = moq.Mock.ofType<IModelConnection>();
+    const categoriesMock = moq.Mock.ofType<IModelConnection.Categories>();
+    const viewManagerMock = moq.Mock.ofType<ViewManager>();
+
+    imodelMock.setup((x) => x.createQueryReader(moq.It.isAny(), moq.It.isAny(), moq.It.isAny())).returns(() => queryReader);
+    imodelMock.setup((x) => x.categories).returns(() => categoriesMock.object);
+    categoriesMock.setup(async (x) => x.getCategoryInfo([categoryId])).returns(async () => categoryInfo);
+
+    const { result } = renderHook(() => useCategories(viewManagerMock.object, imodelMock.object));
+
+    expect(result.current).to.deep.eq([]);
+  });
 });
