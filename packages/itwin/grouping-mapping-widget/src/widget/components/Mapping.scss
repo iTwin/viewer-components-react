@@ -14,8 +14,8 @@
     display: flex;
     justify-content: space-between;
     gap: var(--iui-size-xs);
-    border-bottom: 1px solid var(--iui-color-background);
-    padding-bottom: var(-iui-size-s);
+    border-bottom: 1px solid var(--iui-color-border-subtle);
+    padding-bottom: var(--iui-size-s);
     flex-wrap: wrap;
 
     .gmw-button-spacing {
