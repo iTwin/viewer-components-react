@@ -59,7 +59,7 @@ const configuredUiItems = new Map<string, UiItem>([
         await BreakdownTrees.initialize();
         await TreeWidget.initialize();
       },
-      createUiItemsProvider: () => new TreeWidgetUiItemsProvider({
+      createUiItemsProviders: () => [new TreeWidgetUiItemsProvider({
         trees: [{
           id: ModelsTreeComponent.id,
           getLabel: ModelsTreeComponent.getLabel,
@@ -75,7 +75,7 @@ const configuredUiItems = new Map<string, UiItem>([
             <SampleSpatialTree />
           ),
         }]
-      }),
+      })],
     },
   ],
   [

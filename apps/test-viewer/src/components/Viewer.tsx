@@ -42,6 +42,7 @@ export function Viewer() {
       }}
       mapLayerOptions={{ BingMaps: { key: "key", value: ApiKeys.BingMapsKey } }}
       tileAdmin={{ cesiumIonKey: ApiKeys.CesiumKey }}
+      theme="os"
       backendConfiguration={{
         defaultBackend: {
           config: {

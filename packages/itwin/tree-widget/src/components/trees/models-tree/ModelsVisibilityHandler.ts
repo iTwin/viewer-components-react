@@ -189,7 +189,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return this.getSubjectDisplayStatus(ids);
 
     const children = await provider.getNodes(node);
-    const childrenDisplayStatuses = await Promise.all(children.map((childNode) => this.getVisibilityStatus(childNode)));
+    const childrenDisplayStatuses = await Promise.all(children.map(async (childNode) => this.getVisibilityStatus(childNode)));
     if (childrenDisplayStatuses.some((status) => status.state === "visible"))
       return { state: "visible", tooltip: createTooltip("visible", "subject.atLeastOneModelVisible") };
     return { state: "hidden", tooltip: createTooltip("hidden", "subject.allModelsHidden") };

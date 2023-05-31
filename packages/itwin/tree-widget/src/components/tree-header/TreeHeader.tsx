@@ -7,7 +7,7 @@ import "./TreeHeader.scss";
 import classnames from "classnames";
 import { Children, useState } from "react";
 import { SvgCaretDownSmall, SvgCaretUpSmall, SvgMore } from "@itwin/itwinui-icons-react";
-import { ButtonGroup, Divider, DropdownMenu, IconButton, MenuItem, SearchBox } from "@itwin/itwinui-react";
+import { ButtonGroup, Divider, DropdownMenu, IconButton, SearchBox } from "@itwin/itwinui-react";
 import { TreeWidget } from "../../TreeWidget";
 
 import type { Viewport } from "@itwin/core-frontend";
@@ -47,7 +47,7 @@ export function TreeHeader(props: TreeHeaderProps) {
         expandable
         onExpand={() => setIsSearchOpen(true)}
         onCollapse={() => setIsSearchOpen(false)}
-        className={classnames("tree-widget-search-bar", !isSearchOpen && "contracted")}
+        className={classnames("tree-widget-search-box", !isSearchOpen && "contracted")}
       >
         <SearchBox.CollapsedState>
           <SearchBox.ExpandButton
@@ -85,7 +85,7 @@ interface HeaderButtonsProps {
 
 function HeaderButtons(props: HeaderButtonsProps) {
   const className = classnames(
-    "search-bar-button-container",
+    "button-container",
     props.contracted && "contracted",
   );
 
@@ -97,9 +97,9 @@ function HeaderButtons(props: HeaderButtonsProps) {
           menuItems={() =>
             Children.toArray(props.children)
               .slice(overflowStart === 0 ? overflowStart : overflowStart - 1)
-              .map((btn, index) => <MenuItem key={index} className="search-bar-dropdown-menu-item">{btn}</MenuItem>)
+              .map((btn, index) => <li key={index} className="dropdown-item" role="menuitem">{btn}</li>)
           }
-          className="search-bar-dropdown-container"
+          className="tree-header-button-dropdown-container"
         >
           <IconButton styleType="borderless" size="small">
             <SvgMore />
