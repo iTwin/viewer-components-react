@@ -6,7 +6,7 @@
   {
     "policyName": "itwin-tree-widget",
     "definitionName": "individualVersion",
-    "lockedMajor": 0
+    "lockedMajor": 1
   },
   {
     "policyName": "itwin-property-grid",
