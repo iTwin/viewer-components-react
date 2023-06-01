@@ -3,22 +3,22 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "**BREAKING** Trees: Make eye checkboxes static on horizontal scroll.",
-      "type": "none"
+      "type": "major"
     },
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Trees: Decrease whitespace size between the node label and eye checkbox.",
-      "type": "none"
+      "type": "minor"
     },
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "**BREAKING** `useVisibilityTreeRenderer` and `createVisibilityTreeNodeRenderer` now can take a `props` object of type `VisibilityTreeRendererProps`. It contains two new configuration options: `levelOffset`, and `disableRootNodeCollapse`.",
-      "type": "none"
+      "type": "major"
     },
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "**BREAKING** Rename `useVisibilityTreeRenderer` to `createVisibilityTreeRenderer`.",
-      "type": "none"
+      "type": "major"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

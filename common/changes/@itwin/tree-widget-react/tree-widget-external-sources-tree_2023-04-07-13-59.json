@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "**BREAKING** `IVisibilityHandler`: Methods `getVisibilityStatus` and `changeVisibility` don't take `NodeKey` argument anymore.",
-      "type": "minor"
+      "type": "major"
     },
     {
       "packageName": "@itwin/tree-widget-react",
