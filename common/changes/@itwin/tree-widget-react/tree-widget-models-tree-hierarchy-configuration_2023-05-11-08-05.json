@@ -7,7 +7,7 @@
     },
     {
       "packageName": "@itwin/tree-widget-react",
-      "comment": "Models Tree: Added an option to specialize the class of geometric elements loaded into the hierarchy (see `ModelsTreeHierarchyConfiguration.elementClassSpecification`)",
+      "comment": "Models tree: Added an option to specialize the class of geometric elements loaded into the hierarchy (see `ModelsTreeHierarchyConfiguration.elementClassSpecification`)",
       "type": "minor"
     }
   ],
