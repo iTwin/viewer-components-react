@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/breakdown-trees-react",
+      "comment": "Update to latest `@itwin/tree-widget-react`",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/breakdown-trees-react"
+}
