@@ -154,7 +154,7 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
   }, [queryModels]);
 
   return (
-    <>
+    <div className="tree-widget-tree-with-header">
       <TreeHeader
         onFilterClear={searchOptions.onFilterCancel}
         onFilterStart={searchOptions.onFilterStart}
@@ -178,20 +178,22 @@ function ModelsTreeComponentImpl(props: ModelTreeComponentProps & { iModel: IMod
           ]
         }
       </TreeHeader>
-      <AutoSizer>
-        {({ width, height }) => (
-          <ModelsTree
-            {...props}
-            iModel={iModel}
-            activeView={viewport}
-            width={width}
-            height={height}
-            filterInfo={{ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }}
-            onFilterApplied={onFilterApplied}
-          />
-        )}
-      </AutoSizer>
-    </>
+      <div className="tree-widget-tree-content">
+        <AutoSizer>
+          {({ width, height }) => (
+            <ModelsTree
+              {...props}
+              iModel={iModel}
+              activeView={viewport}
+              width={width}
+              height={height}
+              filterInfo={{ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }}
+              onFilterApplied={onFilterApplied}
+            />
+          )}
+        </AutoSizer>
+      </div>
+    </div>
   );
 }
 

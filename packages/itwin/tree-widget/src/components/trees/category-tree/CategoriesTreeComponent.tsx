@@ -131,7 +131,7 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
   }, [filteredProvider]);
 
   return (
-    <>
+    <div className="tree-widget-tree-with-header">
       <TreeHeader
         onFilterClear={searchOptions.onFilterCancel}
         onFilterStart={searchOptions.onFilterStart}
@@ -153,20 +153,22 @@ function CategoriesTreeComponentImpl(props: CategoriesTreeComponentProps & { iMo
           ]
         }
       </TreeHeader>
-      <AutoSizer>
-        {({ width, height }) => (
-          <CategoryTree
-            {...props}
-            categories={categories}
-            width={width}
-            height={height}
-            filterInfo={{ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }}
-            onFilterApplied={onFilterApplied}
-            activeView={props.viewport}
-          />
-        )}
-      </AutoSizer>
-    </>
+      <div className="tree-widget-tree-content">
+        <AutoSizer>
+          {({ width, height }) => (
+            <CategoryTree
+              {...props}
+              categories={categories}
+              width={width}
+              height={height}
+              filterInfo={{ filter: filterString, activeMatchIndex: searchOptions.activeMatchIndex }}
+              onFilterApplied={onFilterApplied}
+              activeView={props.viewport}
+            />
+          )}
+        </AutoSizer>
+      </div>
+    </div>
   );
 }
 
