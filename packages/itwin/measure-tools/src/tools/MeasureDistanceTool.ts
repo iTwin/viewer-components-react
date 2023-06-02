@@ -23,10 +23,11 @@ import { MeasurementViewTarget } from "../api/MeasurementViewTarget";
 import type { DistanceMeasurement } from "../measurements/DistanceMeasurement";
 import { MeasureTools } from "../MeasureTools";
 import { MeasureDistanceToolModel } from "../toolmodels/MeasureDistanceToolModel";
+import { TransformHelper } from "../api/TransformHelper";
 
 export class MeasureDistanceTool extends MeasurementToolBase<
-DistanceMeasurement,
-MeasureDistanceToolModel
+  DistanceMeasurement,
+  MeasureDistanceToolModel
 > {
   public static override toolId = "MeasureTools.MeasureDistance";
   public static override iconSpec = "icon-measure-distance";
@@ -107,6 +108,11 @@ MeasureDistanceToolModel
       MeasureDistanceToolModel.State.SetEndPoint !== this.toolModel.currentState
     )
       return;
+
+    if (!this.toolModel.isValueTransformInitialized) {
+      this.toolModel.valueTransform = await TransformHelper.getSheetToWorldTransform(ev, this.iModel);
+    }
+
     const type = MeasurementViewTarget.classifyViewport(ev.viewport);
     this.toolModel.setEndPoint(type, ev.point, true);
     ev.viewport.invalidateDecorations();

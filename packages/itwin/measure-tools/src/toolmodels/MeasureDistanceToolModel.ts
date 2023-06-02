@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import type { Point3d } from "@itwin/core-geometry";
+import type { Point3d, Transform } from "@itwin/core-geometry";
 import { MeasurementPreferences } from "../api/MeasurementPreferences";
 import { MeasurementToolModel } from "../api/MeasurementToolModel";
 import { DistanceMeasurement } from "../measurements/DistanceMeasurement";
@@ -27,6 +27,15 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
   }
 
   public get currentState(): State { return this._currentState; }
+
+  public get isValueTransformInitialized(): boolean {
+    return (this._currentMeasurement?.valueTransform !== undefined);
+  }
+
+  public set valueTransform(transform: Transform | undefined) {
+    if (this._currentMeasurement)
+      this._currentMeasurement.valueTransform = transform;
+  }
 
   public override get dynamicMeasurement(): DistanceMeasurement | undefined { return this._currentMeasurement; }
 

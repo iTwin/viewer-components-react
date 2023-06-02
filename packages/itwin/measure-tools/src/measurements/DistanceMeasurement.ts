@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import type { Id64String } from "@itwin/core-bentley";
-import type { XYAndZ, XYZProps } from "@itwin/core-geometry";
+import type { Transform, XYAndZ, XYZProps } from "@itwin/core-geometry";
 import { Geometry, Range1d } from "@itwin/core-geometry";
 import {
   IModelJson,
@@ -43,6 +43,7 @@ import type { MeasurementProps } from "../api/MeasurementProps";
 import { MeasurementSelectionSet } from "../api/MeasurementSelectionSet";
 import { TextMarker } from "../api/TextMarker";
 import { MeasureTools } from "../MeasureTools";
+import { TransformHelper } from "../api/TransformHelper";
 
 /**
  * Props for serializing a [[DistanceMeasurement]].
@@ -51,6 +52,7 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   startPoint: XYZProps;
   endPoint: XYZProps;
   showAxes?: boolean;
+  valueTransform?: Transform;
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -99,6 +101,9 @@ export class DistanceMeasurement extends Measurement {
   private _isDynamic: boolean; // No serialize
   private _textMarker?: TextMarker; // No serialize
 
+  // Transform applied to tooltip and measurement values without affecting the visual
+  private _valueTransform?: Transform;
+
   private _runRiseAxes: DistanceMeasurement[]; // No serialize.
   private _textStyleOverride?: WellKnownTextStyleType; // No serialize.
   private _graphicStyleOverride?: WellKnownGraphicStyleType; // No serialize.
@@ -137,6 +142,14 @@ export class DistanceMeasurement extends Measurement {
     );
   }
 
+  public set valueTransform(transform: Transform | undefined) {
+    this._valueTransform = transform;
+  }
+
+  public get valueTransform(): Transform | undefined {
+    return this._valueTransform;
+  }
+
   constructor(props?: DistanceMeasurementProps) {
     super();
 
@@ -145,6 +158,7 @@ export class DistanceMeasurement extends Measurement {
     this._isDynamic = false;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
+    this._valueTransform = props?.valueTransform;
 
     if (props) this.readFromJSON(props);
 
@@ -433,16 +447,19 @@ export class DistanceMeasurement extends Measurement {
       await IModelApp.quantityFormatter.getFormatterSpecByQuantityType(
         QuantityType.LengthEngineering
       );
-    const distance = this._startPoint.distance(this._endPoint);
+
+    const [startPoint, endPoint] = TransformHelper.applyTransform(this._valueTransform, this._startPoint, this._endPoint);
+
+    const distance = startPoint.distance(endPoint);
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
       distance,
       lengthSpec
     );
 
     const midPoint = Point3d.createAdd2Scaled(
-      this._startPoint,
+      startPoint,
       0.5,
-      this._endPoint,
+      endPoint,
       0.5
     );
     const styleTheme = StyleSet.getOrDefault(this.activeStyle);
@@ -474,15 +491,17 @@ export class DistanceMeasurement extends Measurement {
         QuantityType.LengthEngineering
       );
 
-    const distance = this._startPoint.distance(this._endPoint);
-    const run = this._startPoint.distanceXY(this._endPoint);
-    const rise = this._endPoint.z - this._startPoint.z;
-    const slope = 0.0 < run ? (100 * rise) / run : 0.0;
-    const dx = Math.abs(this._endPoint.x - this._startPoint.x);
-    const dy = Math.abs(this._endPoint.y - this._startPoint.y);
+    const [startPoint, endPoint] = TransformHelper.applyTransform(this._valueTransform, this._startPoint, this._endPoint);
 
-    const adjustedStart = this.adjustPointForGlobalOrigin(this._startPoint);
-    const adjustedEnd = this.adjustPointForGlobalOrigin(this._endPoint);
+    const distance = startPoint.distance(endPoint);
+    const run = startPoint.distanceXY(endPoint);
+    const rise = endPoint.z - startPoint.z;
+    const slope = 0.0 < run ? (100 * rise) / run : 0.0;
+    const dx = Math.abs(endPoint.x - startPoint.x);
+    const dy = Math.abs(endPoint.y - startPoint.y);
+
+    const adjustedStart = this.adjustPointForGlobalOrigin(startPoint);
+    const adjustedEnd = this.adjustPointForGlobalOrigin(endPoint);
 
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
       distance,
@@ -656,11 +675,12 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.showAxes = this._showAxes;
   }
 
-  public static create(start: Point3d, end: Point3d, viewType?: string) {
+  public static create(start: Point3d, end: Point3d, viewType?: string, valueTransform?: Transform) {
     // Don't ned to serialize the points, will just work as is
     const measurement = new DistanceMeasurement({
       startPoint: start,
       endPoint: end,
+      valueTransform,
     });
     if (viewType) measurement.viewTarget.include(viewType);
 
