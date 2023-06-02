@@ -24,6 +24,15 @@ $default-font-size: --iui-font-size-1;
   padding: 0;
 }
 
+.map-layer-source-url-subLayers {
+
+  height: 200px;
+  width: 500px;
+  // height: calc(100% - 40px);
+  // width: calc(100% - 40px);
+  // border: 1px solid #ccc;
+  // border-radius: 16px
+}
 .map-layer-source-url {
 
   height: 100%;

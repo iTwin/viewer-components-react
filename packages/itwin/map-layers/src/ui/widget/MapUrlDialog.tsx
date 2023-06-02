@@ -6,8 +6,8 @@
 
 import { DialogButtonType, SpecialKey } from "@itwin/appui-abstract";
 import { UiFramework } from "@itwin/appui-react";
-import { Button, Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
-import { ImageMapLayerProps } from "@itwin/core-common";
+import { Button, Checkbox, Input, InputGroup, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
+import { ImageMapLayerProps, ImageMapLayerSettings, MapLayerSettings, MapSubLayerProps } from "@itwin/core-common";
 import {
   IModelApp, MapLayerAccessClient, MapLayerSource,
   MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority, ScreenViewport,
@@ -20,6 +20,8 @@ import { MapTypesOptions } from "../Interfaces";
 import "./MapUrlDialog.scss";
 import { BeEvent, Guid } from "@itwin/core-bentley";
 import { SelectMapFormat } from "./SelectMapFormat";
+import { SubLayersTree } from "./SubLayersTree";
+import { title } from "process";
 
 export const MAP_TYPES = {
   wms: "WMS",
@@ -29,6 +31,7 @@ export const MAP_TYPES = {
   arcGisFeature: "ArcGISFeature",
 };
 
+export type LayerCreationMode = "single"|"multiple";
 interface MapUrlDialogProps {
   activeViewport?: ScreenViewport;
   isOverlay: boolean;
@@ -102,6 +105,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const [userNameLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:AuthenticationInputs.Username"));
   const [userNameRequiredLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:AuthenticationInputs.UsernameRequired"));
   const [settingsStorage, setSettingsStorageRadio] = React.useState("iTwin");
+  const [layerCreationMode, setLayerCreationMode] = React.useState<LayerCreationMode>("single");
   const [oauthProcessSucceeded, setOAuthProcessSucceeded] = React.useState<undefined | boolean>(undefined);
   const [showOauthPopup, setShowOauthPopup] = React.useState(false);
   const [externalLoginUrl, setExternalLoginUrl] = React.useState<string | undefined>();
@@ -110,6 +114,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const [isAccessClientInitialized, setAccessClientInitialized] = React.useState(false);
 
   const [mapType, setMapType] = React.useState(getFormatFromProps() ?? "ArcGIS");
+  const [subLayers, setSubLayers] = React.useState<MapSubLayerProps[] | undefined>();
 
   // 'isMounted' is used to prevent any async operation once the hook has been
   // unloaded.  Otherwise we get a 'Can't perform a React state update on an unmounted component.' warning in the console.
@@ -218,14 +223,14 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     // This calls invalidateRenderPlan()
     vp.displayStyle.changeMapLayerProps({
       subLayers: validation.subLayers,
-    }, {index: layerRequiringCredentialsIdx, isOverlay});
-    vp.displayStyle.changeMapLayerCredentials({index: layerRequiringCredentialsIdx, isOverlay}, source.userName, source.password);
+    }, { index: layerRequiringCredentialsIdx, isOverlay });
+    vp.displayStyle.changeMapLayerCredentials({ index: layerRequiringCredentialsIdx, isOverlay }, source.userName, source.password);
 
     // Either initial attach/initialize failed or the layer failed to load at least one tile
     // because of an invalid token; in both cases tile tree needs to be fully reset
-    const provider = vp.getMapLayerImageryProvider({index: layerRequiringCredentialsIdx, isOverlay});
+    const provider = vp.getMapLayerImageryProvider({ index: layerRequiringCredentialsIdx, isOverlay });
     provider?.resetStatus();
-    vp.resetMapLayer({index: layerRequiringCredentialsIdx, isOverlay});
+    vp.resetMapLayer({ index: layerRequiringCredentialsIdx, isOverlay });
 
     // This handler will close the layer source handler, and therefore the MapUrl dialog.
     // don't call it if the dialog needs to remains open.
@@ -250,33 +255,54 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       if (vp.iModel.iTwinId && !(await MapLayerPreferences.storeSource(source, vp.iModel.iTwinId, vp.iModel.iModelId, storeOnIModel))) {
         const msgError = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerPreferencesStoreFailed");
         IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msgError));
-	    }
+      }
     }
 
     // Some sources have a single non-visible sub-layer (i.e. ArcGIS World Topo Map); to avoid having a layer with no content (and no way to change the sub-layer visibility)
     // we force the sub-layer visibility to ON.
-    let subLayers = validation.subLayers;
-    if (validation.subLayers && validation.subLayers.length === 1 && validation.subLayers[0].visible === false) {
-      subLayers = [{...validation.subLayers[0], visible: true}];
+    let tmpSubLayers:MapSubLayerProps[] = [];
+    if (subLayers && layerCreationMode === "multiple")
+      tmpSubLayers = subLayers.filter((sl)=>sl.visible);
+    else
+      tmpSubLayers = validation.subLayers ?? [];
+
+    if (tmpSubLayers && tmpSubLayers.length === 1 && tmpSubLayers[0].visible === false) {
+      tmpSubLayers[0].visible = true;
     }
-    const settings = source.toLayerSettings(subLayers);
-    if (settings) {
-      vp.displayStyle.attachMapLayer({settings, mapLayerIndex: {index: -1, isOverlay}});
+
+      if (layerCreationMode === "multiple") {
+        for (const subLayer of tmpSubLayers) {
+            const settings = ImageMapLayerSettings.fromJSON ({
+              formatId: source.formatId,
+              name: subLayer.name,
+              url: source.url,
+              subLayers: [{name:subLayer.name, id: subLayer.id, visible: subLayer.visible, title: subLayer.title}]
+            });
+            vp.displayStyle.attachMapLayer({ settings, mapLayerIndex: { index: -1, isOverlay } });
+        }
+      } else {
+        const settings = source.toLayerSettings(tmpSubLayers);
+        if (settings)
+          vp.displayStyle.attachMapLayer({ settings, mapLayerIndex: { index: -1, isOverlay } });
+          else {
+            const msgError = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerLayerSettingsConversionError");
+            const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.MapLayerAttachError", { error: msgError, sourceUrl: source.url });
+            IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
+          }
+      }
+
 
       const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerAttached", { sourceName: source.name, sourceUrl: source.url });
       IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
-    } else {
-      const msgError = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerLayerSettingsConversionError");
-      const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.MapLayerAttachError", { error: msgError, sourceUrl: source.url });
-      IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
-    }
 
+
+    // This handler will close the layer source handler, and therefore the MapUrl dialog.
     // This handler will close the layer source handler, and therefore the MapUrl dialog.
     // don't call it if the dialog needs to remains open.
     onOkResult();
 
     return true;
-  }, [hasImodelContext, isOverlay, onOkResult, props?.activeViewport, props.layerRequiringCredentials, settingsStorage, settingsStorageDisabled]);
+  }, [hasImodelContext, isOverlay, onOkResult, props?.activeViewport, props.layerRequiringCredentials, settingsStorage, settingsStorageDisabled, subLayers, layerCreationMode]);
 
   // Validate the layer source and attempt to attach (or update) the layer.
   // Returns true if no further input is needed from end-user (i.e. close the dialog)
@@ -285,7 +311,13 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       const validation = await source.validateSource(true);
 
       if (validation.status === MapLayerSourceStatus.Valid) {
-        if (layerRequiringCredentialsIdx === undefined) {
+        if (validation.subLayers && validation.subLayers.length > 1
+          && source.formatId === "WMS"    // We should have flag from validation
+          && subLayers === undefined
+        ) {
+          setSubLayers(validation.subLayers);
+          return false;
+        } else if (layerRequiringCredentialsIdx === undefined) {
           return await doAttach(source, validation);
         } else {
           return await updateAttachedLayer(source, validation);
@@ -311,7 +343,7 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       return true;
     }
 
-  }, [updateAuthState, doAttach, layerRequiringCredentialsIdx, updateAttachedLayer]);
+  }, [updateAuthState, doAttach, layerRequiringCredentialsIdx, updateAttachedLayer, subLayers]);
 
   const onNameChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setMapName(event.target.value);
@@ -320,6 +352,10 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const onRadioChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSettingsStorageRadio(event.target.value);
   }, [setSettingsStorageRadio]);
+
+  const onLayerCreationModeChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setLayerCreationMode(event.target.value as LayerCreationMode);
+  }, [setLayerCreationMode]);
 
   const onUrlChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setMapUrl(event.target.value);
@@ -568,6 +604,28 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     return node;
   }
 
+  function renderSublayersPanel(): React.ReactNode {
+
+        if (subLayers !== undefined) {
+          return (
+            <div>
+              <div>
+                <InputGroup label='Layer Creation Mode' displayStyle="inline" >
+                <Radio name='layerCreationMode' label="Single" value='single' onChange={onLayerCreationModeChange} checked={layerCreationMode === "single"}/>
+                <Radio name='layerCreationMode' label="Multiple" value='multiple' onChange={onLayerCreationModeChange} checked={layerCreationMode === "multiple"}/>
+                </InputGroup>
+              </div>
+              <div className="map-layer-source-url-subLayers">
+                <SubLayersTree subLayers={subLayers} />
+              </div>
+            </div>
+            );
+        } else {
+          return (<span className="map-layer-source-placeholder">&nbsp;</span>);
+        }
+
+  }
+
   // Use a hook to display the popup.
   // The display of the popup is controlled by the 'showOauthPopup' state variable.
   useCrossOriginPopup(showOauthPopup, externalLoginUrl, externalLoginTitle, 450, 450, handleOAuthPopupClose);
@@ -658,6 +716,9 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             <ProgressLinear indeterminate />
           </div>
         }
+
+
+        {renderSublayersPanel()}
       </Dialog>
     </div >
   );
