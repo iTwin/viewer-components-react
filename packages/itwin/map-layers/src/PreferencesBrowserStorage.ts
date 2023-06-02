@@ -22,9 +22,9 @@ export interface PreferencesBrowserStorageOptions {
 
 /** User preferences implementation using browser's local storage.
   * It creates storage item key in the form of:
-  *     <storageItemKeyPrefix>.<project_guid?>.<imodel_guid?>
+  *     <storageItemKeyPrefix>.<itwin_guid?>.<imodel_guid?>
   *
-  * <project_guid> and <imodel_guid> being optional.
+  * <itwin_guid> and <imodel_guid> being optional.
   *
   * Each entry in the storage is a serialized JSON of the following index signature:
   * {
