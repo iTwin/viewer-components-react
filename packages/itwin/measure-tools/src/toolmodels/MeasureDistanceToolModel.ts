@@ -20,6 +20,7 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
   private _currentState: State;
   private _currentViewportType?: string;
   private _currentMeasurement?: DistanceMeasurement;
+  private _enableTransform = false;
 
   constructor() {
     super();
@@ -35,6 +36,14 @@ export class MeasureDistanceToolModel extends MeasurementToolModel<DistanceMeasu
   public set valueTransform(transform: Transform | undefined) {
     if (this._currentMeasurement)
       this._currentMeasurement.valueTransform = transform;
+  }
+
+  public set enableTransform(enable: boolean) {
+    this._enableTransform = enable;
+  }
+
+  public get enableTransform(): boolean {
+    return this._enableTransform;
   }
 
   public override get dynamicMeasurement(): DistanceMeasurement | undefined { return this._currentMeasurement; }

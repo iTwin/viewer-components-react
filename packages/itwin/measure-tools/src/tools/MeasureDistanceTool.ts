@@ -52,8 +52,9 @@ export class MeasureDistanceTool extends MeasurementToolBase<
     return MeasureToolsFeatures.Tools_MeasureDistance;
   }
 
-  constructor() {
+  constructor(enableTransform = false) {
     super();
+    this.toolModel.enableTransform = enableTransform;
   }
 
   public async onRestartTool(): Promise<void> {
@@ -109,7 +110,7 @@ export class MeasureDistanceTool extends MeasurementToolBase<
     )
       return;
 
-    if (!this.toolModel.isValueTransformInitialized) {
+    if (!this.toolModel.isValueTransformInitialized && this.toolModel.enableTransform) {
       this.toolModel.valueTransform = await TransformHelper.getSheetToWorldTransform(ev, this.iModel);
     }
 
