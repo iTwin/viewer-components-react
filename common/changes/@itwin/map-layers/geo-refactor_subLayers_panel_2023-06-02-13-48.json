@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Refactored SubLayers tree panel and made it independent from viewport",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
