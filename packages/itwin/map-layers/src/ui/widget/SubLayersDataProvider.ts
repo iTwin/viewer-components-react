@@ -7,18 +7,15 @@ import { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
 import { PropertyRecord } from "@itwin/appui-abstract";
 import { DelayLoadedTreeNodeItem, ITreeDataProvider, TreeNodeItem } from "@itwin/components-react";
 import { CheckBoxState } from "@itwin/core-react";
-import { StyleMapLayerSettings } from "../Interfaces";
 
 /**
  * Data provider that returns some fake nodes to show in tree.
  */
 export class SubLayersDataProvider implements ITreeDataProvider {
   private readonly _nodeMap = new Map<string, TreeNodeItem[]>();
-  private readonly _mapLayer: StyleMapLayerSettings;
 
-  constructor(mapLayer: StyleMapLayerSettings) {
-    this._mapLayer = mapLayer;
-    this.loadNodes(mapLayer.subLayers);
+  constructor(subLayers: MapSubLayerProps[]) {
+    this.loadNodes(subLayers);
   }
 
   public static isUnnamedGroup(subLayer: MapSubLayerProps | undefined): boolean {
