@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { StagePanelLocation, StagePanelSection, StageUsage } from "@itwin/appui-react";
+import { SvgHierarchyTree } from "@itwin/itwinui-icons-react";
 import { TreeWidget } from "../TreeWidget";
 import { CategoriesTreeComponent } from "./trees/category-tree/CategoriesTreeComponent";
 import { ModelsTreeComponent } from "./trees/models-tree/ModelsTreeComponent";
@@ -72,7 +73,7 @@ export class TreeWidgetUiItemsProvider implements UiItemsProvider {
       id: TreeWidgetId,
       label: TreeWidget.translate("treeview"),
       content: <TreeWidgetComponent trees={trees} />,
-      icon: "icon-hierarchy-tree",
+      icon: <SvgHierarchyTree />,
       priority: this._treeWidgetOptions?.defaultTreeWidgetPriority,
     }];
   }
