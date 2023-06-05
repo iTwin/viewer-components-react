@@ -3,12 +3,12 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "**BREAKING** `IVisibilityHandler`: Methods `getVisibilityStatus` and `changeVisibility` don't take `NodeKey` argument anymore.",
-      "type": "major"
+      "type": "none"
     },
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "External sources tree: Add `ExternalSourcesTreeComponent` (currently `@alpha`).",
-      "type": "patch"
+      "type": "none"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Bump dependencies",
-      "type": "patch"
+      "type": "none"
     }
   ],
   "packageName": "@itwin/tree-widget-react"

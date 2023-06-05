@@ -3,12 +3,12 @@
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "**BREAKING** Models tree: `ModelsTreeProps.enableElementsClassGrouping` has been moved to `ModelsTreeProps.hierarchyConfig.enableElementsClassGrouping`.",
-      "type": "major"
+      "type": "none"
     },
     {
       "packageName": "@itwin/tree-widget-react",
       "comment": "Models tree: Added an option to specialize the class of geometric elements loaded into the hierarchy (see `ModelsTreeHierarchyConfiguration.elementClassSpecification`)",
-      "type": "minor"
+      "type": "none"
     }
   ],
   "packageName": "@itwin/tree-widget-react"
