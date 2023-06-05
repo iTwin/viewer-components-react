@@ -37,7 +37,7 @@ export class TransformHelper {
     const drawingIds = await TransformHelper.queryAttachedDrawings(connection, ev.viewport.view.id);
     const boundingBoxes = await TransformHelper.queryBoundingBoxes(connection, drawingIds);
     const correctDrawingId = TransformHelper.getCorrectDrawingForPosition(boundingBoxes, ev.point);
-    const matrix = await TransformHelper.querySheetToSpatialTransform(connection, correctDrawingId ? correctDrawingId : drawingIds[0].id);
+    const matrix = await TransformHelper.querySheetToSpatialTransform(connection, correctDrawingId ? correctDrawingId : drawingIds[0].id) ?? Transform.createIdentity();
     return matrix;
   }
 
