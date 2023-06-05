@@ -52,7 +52,7 @@ export interface DistanceMeasurementProps extends MeasurementProps {
   startPoint: XYZProps;
   endPoint: XYZProps;
   showAxes?: boolean;
-  valueTransform?: Transform;
+  sheetTransform?: Transform;
 }
 
 /** Serializer for a [[DistanceMeasurement]]. */
@@ -102,7 +102,7 @@ export class DistanceMeasurement extends Measurement {
   private _textMarker?: TextMarker; // No serialize
 
   // Transform applied to tooltip and measurement values without affecting the visual
-  private _valueTransform?: Transform;
+  private _sheetTransform?: Transform;
 
   private _runRiseAxes: DistanceMeasurement[]; // No serialize.
   private _textStyleOverride?: WellKnownTextStyleType; // No serialize.
@@ -142,12 +142,12 @@ export class DistanceMeasurement extends Measurement {
     );
   }
 
-  public set valueTransform(transform: Transform | undefined) {
-    this._valueTransform = transform;
+  public set sheetTransform(transform: Transform | undefined) {
+    this._sheetTransform = transform;
   }
 
-  public get valueTransform(): Transform | undefined {
-    return this._valueTransform;
+  public get sheetTransform(): Transform | undefined {
+    return this._sheetTransform;
   }
 
   constructor(props?: DistanceMeasurementProps) {
@@ -158,7 +158,7 @@ export class DistanceMeasurement extends Measurement {
     this._isDynamic = false;
     this._showAxes = MeasurementPreferences.current.displayMeasurementAxes;
     this._runRiseAxes = [];
-    this._valueTransform = props?.valueTransform;
+    this._sheetTransform = props?.sheetTransform;
 
     if (props) this.readFromJSON(props);
 
@@ -448,7 +448,7 @@ export class DistanceMeasurement extends Measurement {
         QuantityType.LengthEngineering
       );
 
-    const [startPoint, endPoint] = TransformHelper.applyTransform(this._valueTransform, this._startPoint, this._endPoint);
+    const [startPoint, endPoint] = TransformHelper.applyTransform(this._sheetTransform, this._startPoint, this._endPoint);
 
     const distance = startPoint.distance(endPoint);
     const fDistance = IModelApp.quantityFormatter.formatQuantity(
@@ -491,7 +491,7 @@ export class DistanceMeasurement extends Measurement {
         QuantityType.LengthEngineering
       );
 
-    const [startPoint, endPoint] = TransformHelper.applyTransform(this._valueTransform, this._startPoint, this._endPoint);
+    const [startPoint, endPoint] = TransformHelper.applyTransform(this._sheetTransform, this._startPoint, this._endPoint);
 
     const distance = startPoint.distance(endPoint);
     const run = startPoint.distanceXY(endPoint);
@@ -675,12 +675,12 @@ export class DistanceMeasurement extends Measurement {
     jsonDist.showAxes = this._showAxes;
   }
 
-  public static create(start: Point3d, end: Point3d, viewType?: string, valueTransform?: Transform) {
+  public static create(start: Point3d, end: Point3d, viewType?: string, sheetTransform?: Transform) {
     // Don't ned to serialize the points, will just work as is
     const measurement = new DistanceMeasurement({
       startPoint: start,
       endPoint: end,
-      valueTransform,
+      sheetTransform,
     });
     if (viewType) measurement.viewTarget.include(viewType);
 

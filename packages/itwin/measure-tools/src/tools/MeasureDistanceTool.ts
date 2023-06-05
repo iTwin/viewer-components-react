@@ -52,9 +52,9 @@ export class MeasureDistanceTool extends MeasurementToolBase<
     return MeasureToolsFeatures.Tools_MeasureDistance;
   }
 
-  constructor(enableTransform = false) {
+  constructor(enableSheetTransform = false) {
     super();
-    this.toolModel.enableTransform = enableTransform;
+    this.toolModel.enableSheetTransform = enableSheetTransform;
   }
 
   public async onRestartTool(): Promise<void> {
@@ -110,8 +110,8 @@ export class MeasureDistanceTool extends MeasurementToolBase<
     )
       return;
 
-    if (!this.toolModel.isValueTransformInitialized && this.toolModel.enableTransform) {
-      this.toolModel.valueTransform = await TransformHelper.getSheetToWorldTransform(ev, this.iModel);
+    if (!this.toolModel.isSheetTransformInitialized && this.toolModel.enableSheetTransform) {
+      this.toolModel.sheetTransform = await TransformHelper.getSheetToWorldTransform(ev, this.iModel);
     }
 
     const type = MeasurementViewTarget.classifyViewport(ev.viewport);
