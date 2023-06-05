@@ -1,6 +1,6 @@
 {
   "$schema": "../../../../node_modules/@itwin/presentation-common/Ruleset.schema.json",
-  "id": "ExternalSources",
+  "id": "tree-widget-react/ExternalSources",
   "requiredSchemas": [
     {
       "name": "BisCore",
