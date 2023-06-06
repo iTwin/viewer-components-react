@@ -7,7 +7,7 @@ import {
   LabeledInput,
   LabeledSelect,
   LabeledTextarea,
-  Small,
+  Text,
 } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useState } from "react";
 import ActionPanel from "./ActionPanel";
@@ -198,9 +198,9 @@ export const CustomCalculationAction = ({
     <>
       <div className='gmw-custom-calculation-action-container'>
         <Fieldset legend='Custom Calculation Details' className='gmw-details-form'>
-          <Small className='gmw-field-legend'>
+          <Text variant='small' as='small' className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
-          </Small>
+          </Text>
           <LabeledInput
             value={propertyName}
             required

@@ -3,13 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
-import type {
-  SelectOption,
-} from "@itwin/itwinui-react";
 import {
   Fieldset,
   MenuItem,
-  Small,
+  SelectOption,
+  Text,
   ToggleSwitch,
 } from "@itwin/itwinui-react";
 import React, { useEffect, useState } from "react";
@@ -169,9 +167,9 @@ export const CalculatedPropertyActionWithVisuals = ({
       <div className='gmw-calculated-properties-action-container'>
         <Fieldset legend='Calculated Property Details' className='gmw-details-form'>
           <div className='gmw-field-legend-container'>
-            <Small className='gmw-field-legend'>
+            <Text variant='small' as='small' className='gmw-field-legend'>
               Asterisk * indicates mandatory fields.
-            </Small>
+            </Text>
             <ToggleSwitch
               label='Visualize Dimensions'
               labelPosition='left'

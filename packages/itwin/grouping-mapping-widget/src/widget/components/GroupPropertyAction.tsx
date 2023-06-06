@@ -15,7 +15,6 @@ import {
   LabeledSelect,
   Modal,
   ModalButtonBar,
-  Small,
   Surface,
   Text,
 } from "@itwin/itwinui-react";
@@ -272,9 +271,9 @@ export const GroupPropertyAction = ({
     >
       <div className='gmw-group-property-action-container'>
         <Fieldset disabled={isLoading} className='gmw-property-options' legend='Property Details'>
-          <Small className='gmw-field-legend'>
+          <Text variant='small' as='small' className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
-          </Small>
+          </Text>
           <LabeledInput
             id='propertyName'
             label='Property Name'
