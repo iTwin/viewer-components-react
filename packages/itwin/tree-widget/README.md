@@ -4,7 +4,7 @@ Copyright © Bentley Systems, Incorporated. All rights reserved.
 
 The `@itwin/tree-widget-react` package provides React components to build a widget with tree components' selector, along with all the building blocks that can be used individually.
 
-![Widget example](./media/widget.png)
+![Widget example](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/tree-widget/media/widget.png)
 
 ## Usage
 
@@ -79,7 +79,7 @@ While we expect this package to be mostly used with [AppUI](https://github.com/i
 
 The component renders a tree that tries to replicate how a typical "Models" tree of the iModel would look like in the source application. There's also a header that renders models search box and various visibility control buttons.
 
-![Models tree example](./media/models-tree.png)
+![Models tree example](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/tree-widget/media/models-tree.png)
 
 Typical usage:
 
@@ -121,7 +121,7 @@ Available header buttons:
 
 The component, based on the active view, renders a hierarchy of either spatial (3d) or drawing (2d) categories. The hierarchy consists of two levels - the category (spatial or drawing) and its sub-categories. There's also a header that renders categories search box and various visibility control buttons.
 
-![Categories tree example](./media/categories-tree.png)
+![Categories tree example](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/tree-widget/media/categories-tree.png)
 
 Typical usage:
 
@@ -163,7 +163,7 @@ The component renders a similar hierarchy to [Models tree](#models-tree), but wi
 
 In general, the component is expected to be used by advanced users to inspect contents of the iModel.
 
-![IModel content tree example](./media/imodel-content-tree.png)
+![IModel content tree example](https://github.com/iTwin/viewer-components-react/blob/master/packages/itwin/tree-widget/media/imodel-content-tree.png)
 
 Typical usage:
 
