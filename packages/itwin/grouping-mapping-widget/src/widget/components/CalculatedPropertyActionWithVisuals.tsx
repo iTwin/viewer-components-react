@@ -3,10 +3,12 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { IModelApp } from "@itwin/core-frontend";
+import type {
+  SelectOption,
+} from "@itwin/itwinui-react";
 import {
   Fieldset,
   MenuItem,
-  SelectOption,
   Text,
   ToggleSwitch,
 } from "@itwin/itwinui-react";

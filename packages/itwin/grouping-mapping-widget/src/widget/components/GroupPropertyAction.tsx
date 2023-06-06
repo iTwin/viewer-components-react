@@ -4,11 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 import { renderToStaticMarkup } from "react-dom/server";
 import { PropertyValueFormat } from "@itwin/presentation-common";
-import { Icon, SelectOption } from "@itwin/itwinui-react";
+import type { SelectOption } from "@itwin/itwinui-react";
 import {
   Alert,
   Button,
   Fieldset,
+  Icon,
   IconButton,
   Label,
   LabeledInput,

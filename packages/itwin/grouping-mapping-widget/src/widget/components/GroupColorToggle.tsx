@@ -16,7 +16,7 @@ import { useGroupingMappingApiConfig } from "./context/GroupingApiConfigContext"
 export type GroupColorToggleProps = Partial<ToggleSwitchProps> & {
   color: string;
   group: Group;
-}
+};
 
 export const GroupColorToggle = ({
   color,

@@ -5,8 +5,8 @@
 import type { ITwin, ITwinsAccessClient, ITwinsAPIResponse } from "@itwin/itwins-client";
 import { ITwinSubClass } from "@itwin/itwins-client";
 import { SvgCalendar, SvgList, SvgStarHollow } from "@itwin/itwinui-icons-react";
-import { TablePaginatorRendererProps } from "@itwin/itwinui-react";
-import { Button, Tab, Tabs, Table, tableFilters, TablePaginator } from "@itwin/itwinui-react";
+import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
+import { Button, Tab, Table, tableFilters, TablePaginator, Tabs } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import "./SelectITwin.scss";
