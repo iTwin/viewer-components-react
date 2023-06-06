@@ -5,8 +5,8 @@
 import type { ITwin, ITwinsAccessClient, ITwinsAPIResponse } from "@itwin/itwins-client";
 import { ITwinSubClass } from "@itwin/itwins-client";
 import { SvgCalendar, SvgList, SvgStarHollow } from "@itwin/itwinui-icons-react";
-import type { TablePaginatorRendererProps } from "@itwin/itwinui-react";
-import { Button, HorizontalTabs, Tab, Table, tableFilters, TablePaginator } from "@itwin/itwinui-react";
+import { TablePaginatorRendererProps } from "@itwin/itwinui-react";
+import { Button, Tab, Tabs, Table, tableFilters, TablePaginator } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import "./SelectITwin.scss";
@@ -128,7 +128,8 @@ const SelectITwin = ({
 
   return (
     <div className="gmw-select-itwin-table-container">
-      <HorizontalTabs
+      <Tabs
+        orientation="horizontal"
         labels={tabsWithIcons}
         onTabSelected={(type) => {
           onChangeITwinType(type);
@@ -137,7 +138,7 @@ const SelectITwin = ({
         activeIndex={iTwinType}
         type={"borderless"}
         contentClassName="gmw-table-holding-tab">
-      </HorizontalTabs>
+      </Tabs>
       <Table<IITwinTyped>
         data={iTwins}
         columns={iTwinsColumns}
