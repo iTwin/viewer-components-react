@@ -3,14 +3,17 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as sinon from "sinon";
+import sinon from "sinon";
 import * as moq from "typemoq";
-import { ECSqlReader, SubCategoryAppearance } from "@itwin/core-common";
-import {
-  IModelApp, IModelConnection, NoRenderApp, PerModelCategoryVisibility, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState,
-} from "@itwin/core-frontend";
-import { enableCategory, enableSubCategory, toggleAllCategories } from "../../components/trees/CategoriesVisibilityUtils";
+import { SubCategoryAppearance } from "@itwin/core-common";
+import { IModelApp, NoRenderApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { enableCategory, enableSubCategory, loadCategoriesFromViewport, toggleAllCategories } from "../../components/trees/CategoriesVisibilityUtils";
 import { TestUtils } from "../TestUtils";
+import { expect } from "chai";
+
+import type { ECSqlReader } from "@itwin/core-common";
+import type { IModelConnection, ScreenViewport, SpatialViewState, ViewManager, Viewport, ViewState } from "@itwin/core-frontend";
+import type { Id64String } from "@itwin/core-bentley";
 
 describe("CategoryVisibilityUtils", () => {
   before(async () => {
@@ -100,6 +103,14 @@ describe("CategoryVisibilityUtils", () => {
     it("disables all categories", async () => {
       await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object, false);
       selectedViewMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, moq.It.isAny()), moq.Times.once());
+    });
+
+    it("calls enableCategory with false when forAllViewports is undefined", async () => {
+      const selectedViewMock1 = moq.Mock.ofType<ScreenViewport>();
+      viewManagerMock.setup((x) => x[Symbol.iterator]()).returns(function*() { yield selectedViewMock1.object; });
+      await toggleAllCategories(viewManagerMock.object, imodelMock.object, false, viewportMock.object);
+      selectedViewMock.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.once());
+      selectedViewMock1.verify((x) => x.changeCategoryDisplay(["CategoryId"], false, true), moq.Times.never());
     });
   });
 
@@ -240,6 +251,26 @@ describe("CategoryVisibilityUtils", () => {
       enableSubCategory(viewManagerMock.object, "SubCategoryId", false, true);
       viewManagerMock.verifyAll();
       otherViewMock.verify((x) => x.changeSubCategoryDisplay("SubCategoryId", false), moq.Times.never());
+    });
+  });
+
+  describe("loadCategoriesFromViewport", () => {
+    it("loadCategoriesFromViewport sets subCategories as undefined when subCategories size is 0", async () => {
+      const categoryInfoWithoutSubcategories: Map<Id64String, IModelConnection.Categories.CategoryInfo> = new Map(
+        [[
+          categoryId,
+          {
+            id: categoryId,
+            subCategories: new Map(),
+          },
+        ]]
+      );
+      queryReaderMock.reset();
+      categoriesMock.reset();
+      queryReaderMock.setup(async (x) => x.toArray()).returns(async () => [{ id: "CategoryWithoutSubcategories" }]);
+      categoriesMock.setup(async (x) => x.getCategoryInfo(["CategoryWithoutSubcategories"])).returns(async () => categoryInfoWithoutSubcategories);
+      const result = await loadCategoriesFromViewport(imodelMock.object, viewportMock.object);
+      expect(result[0].subCategoryIds).to.be.undefined;
     });
   });
 });

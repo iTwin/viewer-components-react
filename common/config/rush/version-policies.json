@@ -5,8 +5,9 @@
   },
   {
     "policyName": "itwin-tree-widget",
-    "definitionName": "individualVersion",
-    "lockedMajor": 0
+    "definitionName": "lockStepVersion",
+    "version": "1.0.0-dev",
+    "nextBump": "prerelease"
   },
   {
     "policyName": "itwin-property-grid",

@@ -1,6 +1,4 @@
 {
-  "searchForSomething": "Search for something",
-  "search": "Search...",
   "showAll": "Show All",
   "hideAll": "Hide All",
   "invert": "Invert",
@@ -11,8 +9,10 @@
   "learnMore": "Learn more",
   "models": "Models",
   "categories": "Categories",
-  "containment": "Spatial Containment",
+  "imodelContent": "iModel Content",
+  "externalSources": "External Sources",
   "treeview": "Tree View",
+  "noTrees": "There are no trees available for this iModel.",
   "categoriesTree": {
     "noCategoryFound": "No category found.",
     "noMatchingCategoryNames": "There are no category names matching your search."
@@ -49,5 +49,14 @@
     },
     "noModelFound": "No model found.",
     "noMatchingModelNames": "There are no model names matching your search."
+  },
+  "searchBox": {
+    "searchForSomething": "Search for something",
+    "search": "Search...",
+    "tree": "Tree search",
+    "open": "Open",
+    "close": "Close",
+    "next": "Next",
+    "previous": "Previous"
   }
 }

@@ -2,60 +2,177 @@
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
 
-The tree-widget-react package provides React components to access Models and Categories within an iModel via a UiProvider, `TreeWidgetUiItemsProvider`.
+The `@itwin/tree-widget-react` package provides React components to build a widget with tree components' selector, along with all the building blocks that can be used individually.
 
-The package also provides the underlying component, `TreeWidgetComponent`, which you can wrap within your own custom UiProvider and pass in your own custom trees to display.
+![Widget example](./media/widget.png)
 
 ## Usage
 
-### What to add in your iTwin AppUI based application
+Typically, the package is used with an [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based application, but the building blocks may as well be used with any other iTwin.js React app.
 
-With a few short lines, you can add the tree widget to your app.
-
-#### Call TreeWidget.initialize() **_before_** making use of the provided Tree Widget Provider
+In any case, **before** using any APIs or components delivered with the package, it needs to be initialized:
 
 ```ts
+import { IModelApp } from "@itwin/core-frontend";
 import { TreeWidget } from "@itwin/tree-widget-react";
 ...
 await TreeWidget.initialize(IModelApp.localization);
 ```
 
-#### Register Tree Widget Provider
+In [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) based applications widgets are typically provided using `UiItemsProvider` implementations. The `@itwin/tree-widget-react` package delivers `TreeWidgetUiItemsProvider` that can be used to add the tree widget to UI:
 
 ```ts
-import { UiItemsManager } from "@itwin/appui-abstract";
+import { UiItemsManager } from "@itwin/appui-react";
 import { TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
 ...
 UiItemsManager.register(
-  new TreeWidgetUiItemsProvider({ ...TreeWidgetOptions })
+  new TreeWidgetUiItemsProvider()
 );
 ```
 
-### Additional trees avaialable
+The above example uses default widget parameters and results in a component similar to the one visible at the top of this README. Customization is also possible:
 
-#### IModelContentTree
+```ts
+import { UiItemsManager } from "@itwin/appui-react";
+import { TreeWidgetUiItemsProvider, ModelsTreeComponent } from "@itwin/tree-widget-react";
+...
+UiItemsManager.register(
+  new TreeWidgetUiItemsProvider({
+    // defaults to `StagePanelLocation.Right`
+    defaultPanelLocation: StagePanelLocation.Left,
+    // defaults to `StagePanelSection.Start`
+    defaultPanelSection: StagePanelSection.End,
+    // defaults to whatever the default `Widget.priority` in AppUI is
+    defaultTreeWidgetPriority: 1000,
+    // defaults to `ModelsTreeComponent` and `CategoriesTreeComponent`
+    trees: [{
+        id: ModelsTreeComponent.id,
+        getLabel: ModelsTreeComponent.getLabel,
+        render: () => <ModelsTreeComponent />,
+    }, {
+        id: "my-tree-id",
+        getLabel: "My Custom Tree",
+        render: () => <>This is my custom tree.</>,
+    }];
+  })
+);
+```
 
-Component that displays a hierarchy with content of a given `IModelConnection`.
+As seen in the above code snippet, `TreeWidgetUiItemsProvider` takes a list of trees that are displayed in the widget. This package delivers a number of tree components for everyone's use (see below), but providing custom trees is also an option.
 
-##### Resulting hierarchy
+## Components
 
-- Root Subject
-  - Child Subjects
-    - Target Model
-      - Spatial Categories of top-assemblies in the Model (if model is a GeometricModel3d)
-        - Top-assemblies in the model and category
-          - Child elements of the assembly
-      - Drawing Categories of top-assemblies in the Model (if model is a GeometricModel2d)
-        - Top-assemblies in the model and category
-          - Child elements of the assembly
-      - Top-assemblies in the Model (if model is neither GeometricModel3d nor GeometricModel2d)
-        - Child elements of the assembly
+While we expect this package to be mostly used with [AppUI](https://github.com/iTwin/appui/tree/master/ui/appui-react) and widget created through `TreeWidgetUiItemsProvider`, the package delivers components used within the widget to meet other use cases:
 
-In addition, for every modeled element we show content of the model as children for the element's node.
+- `TreeWidgetComponent` renders a tree selector and selected tree (based on the `trees` prop).
 
-More details about Subjects and Models can be found here:
+- Visibility tree components help you build trees that look and feel like [Models](#models-tree) and [Categories](#categories-tree) trees, letting you control display of elements in the hierarchy.
 
-- <https://www.imodeljs.org/bis/intro/information-hierarchy/>
-- <https://www.imodeljs.org/bis/intro/organizing-models-and-elements/>
+  - `createVisibilityTreeRenderer` returns a tree renderer that renders nodes with "eye" checkboxes. Its building blocks:
+    - `createVisibilityTreeNodeRenderer`
+    - `VisibilityTreeNodeCheckbox`
+  - `useVisibilityTreeFiltering` is used to filter the hierarchy.
+  - `VisibilityTreeNoFilteredData` is used to render a "no results" when filtering.
+  - `VisibilityTreeEventHandler` is an extension of [UnifiedSelectionTreeEventHandler](https://www.itwinjs.org/reference/presentation-components/tree/unifiedselectiontreeeventhandler/), that additionally handles checkbox events and calls provided `IVisibilityHandler` to get/set display of the elements in the hierarchy.
 
-More details about the hierarchy can be found in the [presentation ruleset JSON file](./src/components/rulesets/IModelContent.json).
+### Models tree
+
+The component renders a tree that tries to replicate how a typical "Models" tree of the iModel would look like in the source application. There's also a header that renders models search box and various visibility control buttons.
+
+![Models tree example](./media/models-tree.png)
+
+Typical usage:
+
+```tsx
+import { ModelsTreeComponent, ClassGroupingOption } from "@itwin/tree-widget-react";
+import { SelectionMode } from "@itwin/components-react";
+...
+function MyWidget() {
+  return (
+    <ModelsTreeComponent
+      headerButtons={[
+        (props) => <ModelsTreeComponent.ShowAllButton {...props} />,
+        (props) => <ModelsTreeComponent.HideAllButton {...props} />,
+        (props) => <MyCustomButton />,
+      ]}
+      selectionMode={SelectionMode.Extended}
+      hierarchyConfig={{
+        enableElementsClassGrouping: ClassGroupingOption.Yes,
+      }}
+    />
+  );
+}
+```
+
+Available header buttons:
+
+- `ModelsTreeComponent.ShowAllButton` makes everything in the iModel displayed.
+- `ModelsTreeComponent.HideAllButton` makes everything in the iModel hidden by turning off all models.
+- `ModelsTreeComponent.InvertButton` inverts display of all models.
+- `ModelsTreeComponent.View2DButton` toggles plan projection models' display.
+- `ModelsTreeComponent.View3DButton` toggles non-plan projection models' display.
+
+`ModelsTreeComponent` building blocks:
+
+- `ModelsTree` renders the tree without the header.
+- `ModelsVisibilityHandler` knows how to get and control display of various concepts displayed in the Models tree: Subjects, Models, Categories, Elements.
+
+### Categories tree
+
+The component, based on the active view, renders a hierarchy of either spatial (3d) or drawing (2d) categories. The hierarchy consists of two levels - the category (spatial or drawing) and its sub-categories. There's also a header that renders categories search box and various visibility control buttons.
+
+![Categories tree example](./media/categories-tree.png)
+
+Typical usage:
+
+```tsx
+import { CategoriesTreeComponent } from "@itwin/tree-widget-react";
+...
+function MyWidget() {
+  return (
+    <CategoriesTreeComponent
+      headerButtons={[
+        (props) => <CategoriesTreeComponent.ShowAllButton {...props} />,
+        (props) => <CategoriesTreeComponent.HideAllButton {...props} />,
+        (props) => <MyCustomButton />,
+      ]}
+    />
+  );
+}
+```
+
+Available header buttons:
+
+- `ModelsTreeComponent.ShowAllButton` makes all categories and their subcategories displayed.
+- `ModelsTreeComponent.HideAllButton` makes all categories hidden.
+- `ModelsTreeComponent.InvertButton` inverts display of all categories.
+
+`CategoriesTreeComponent` building blocks:
+
+- `CategoryTree` renders the tree without the header.
+- `CategoryVisibilityHandler` knows how to get and control display of Categories and SubCategories.
+
+### IModel content tree
+
+The component renders a similar hierarchy to [Models tree](#models-tree), but with the following changes:
+
+- Only the hierarchy, without a header is rendered.
+- Visibility control is not allowed.
+- There's less hiding of `Subject` and `Model` nodes.
+- Show not only geometric, but all Models.
+
+In general, the component is expected to be used by advanced users to inspect contents of the iModel.
+
+![IModel content tree example](./media/imodel-content-tree.png)
+
+Typical usage:
+
+```tsx
+import { IModelContentTreeComponent } from "@itwin/tree-widget-react";
+...
+function MyWidget() {
+  return (
+    <IModelContentTreeComponent />
+  );
+}
+```
