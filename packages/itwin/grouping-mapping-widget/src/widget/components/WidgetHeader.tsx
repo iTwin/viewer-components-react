@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { SvgChevronLeft } from "@itwin/itwinui-icons-react";
-import { Text } from "@itwin/itwinui-react";
+import { Icon, Text } from "@itwin/itwinui-react";
 import "./WidgetHeader.scss";
 import React from "react";
 
@@ -21,13 +21,13 @@ export const WidgetHeader = ({
   return (
     <div className='gmw-widget-header-container'>
       {returnFn && (
-        <div
-          className={`${disabled ? "gmw-chevron-disabled" : "gmw-chevron"} iui-svg-icon`}
-          data-iui-icon-size="l"
+        <Icon
+          className={`${disabled ? "gmw-chevron-disabled" : "gmw-chevron"}`}
+          size="large"
           onClick={disabled ? undefined : returnFn}
         >
           <SvgChevronLeft />
-        </div>
+        </Icon>
       )}
       <Text className='gmw-title' variant='title'>
         {title}

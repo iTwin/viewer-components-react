@@ -16,6 +16,8 @@
       display: flex;
       min-width: 0;
       .gmw-drag-icon {
+        display: flex;
+        align-items: center;
         justify-content: center;
         height: 100%;
       }

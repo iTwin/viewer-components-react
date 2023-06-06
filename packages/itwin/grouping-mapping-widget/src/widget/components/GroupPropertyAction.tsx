@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { renderToStaticMarkup } from "react-dom/server";
 import { PropertyValueFormat } from "@itwin/presentation-common";
-import type { SelectOption } from "@itwin/itwinui-react";
+import { Icon, SelectOption } from "@itwin/itwinui-react";
 import {
   Alert,
   Button,
@@ -390,9 +390,9 @@ export const GroupPropertyAction = ({
           gutter={() => {
             // Expects HTMLElement
             const dragHangle = renderToStaticMarkup(
-              <div className="gmw-gutter-drag-icon iui-svg-icon" data-iui-icon-size="l">
+              <Icon className="gmw-gutter-drag-icon" size="large">
                 <SvgMoreVerticalSmall />
-              </div>
+              </Icon>
             );
             const gutter = document.createElement("div");
             gutter.className = `gmw-gutter`;
@@ -524,9 +524,9 @@ export const GroupPropertyAction = ({
                 <SvgRemove />
               </IconButton>}
             dragHandle={
-              <div className="gmw-drag-icon iui-svg-icon" data-iui-icon-size="l">
+              <Icon className="gmw-drag-icon" size="large">
                 <SvgDragHandleVertical />
-              </div>
+              </Icon>
             }
           /> : null}
       </DragOverlay>
