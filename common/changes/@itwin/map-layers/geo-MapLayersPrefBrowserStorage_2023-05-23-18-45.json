@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@itwin/map-layers",
+      "comment": "Fix an issue with MapLayerPreferences that would not save with the proper key with replacing an existing source. Also also added MapLayersPrefBrowserStorage as a simple/testing implementation of UserPreferencesAccess.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@itwin/map-layers"
+}
