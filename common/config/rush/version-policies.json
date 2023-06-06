@@ -6,7 +6,7 @@
   {
     "policyName": "itwin-tree-widget",
     "definitionName": "lockStepVersion",
-    "version": "1.0.0-dev.0",
+    "version": "1.0.0-dev.1",
     "nextBump": "prerelease"
   },
   {
