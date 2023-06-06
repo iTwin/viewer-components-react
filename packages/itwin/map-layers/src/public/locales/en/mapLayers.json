@@ -45,6 +45,7 @@
     "RemoveLayerDefError": "Could not delete map layer definition: {{layerName}}",
     "RemoveLayerDefSuccess": "Successfully deleted map layer definition: {{layerName}}",
     "SearchPlaceholder": "Search...",
+    "SelectLayersToCreate": "Select layers to be created",
     "StoreOnModelSettings": "Store on Model Settings",
     "StoreOnITwinSettings": "Store on iTwin Settings",
     "TechPreviewBadgeTooltip": "Technology preview",

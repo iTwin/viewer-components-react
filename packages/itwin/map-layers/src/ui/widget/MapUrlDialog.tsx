@@ -35,7 +35,7 @@ export type LayerCreationMode = "single"|"multiple";
 interface MapUrlDialogProps {
   activeViewport?: ScreenViewport;
   isOverlay: boolean;
-  onOkResult: () => void;
+  onOkResult: (result?: MapLayerAttachResult) => void;
   onCancelResult?: () => void;
   mapTypesOptions?: MapTypesOptions;
 
@@ -44,6 +44,13 @@ interface MapUrlDialogProps {
 
   mapLayerSourceToEdit?: MapLayerSource;
 }
+
+export interface MapLayerAttachResult {
+  source: MapLayerSource,
+  validation: MapLayerSourceValidation,
+  attached: boolean
+  needsFeatureSelection?: boolean;
+};
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapUrlDialog(props: MapUrlDialogProps) {
@@ -240,13 +247,13 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   }, [isOverlay, layerRequiringCredentialsIdx, onOkResult, props.activeViewport]);
 
   // Returns true if no further input is needed from end-user.
-  const doAttach = React.useCallback(async (source: MapLayerSource, validation: MapLayerSourceValidation): Promise<boolean> => {
+  const doAttach = React.useCallback(async (source: MapLayerSource, validation: MapLayerSourceValidation) => {
     const vp = props?.activeViewport;
     if (vp === undefined || source === undefined) {
       const error = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachMissingViewOrSource");
       const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceUrl: source.url });
       IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
-      return true;
+      return;
     }
 
     // Update service settings if storage is available and we are not prompting user for credentials
@@ -296,51 +303,30 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
 
 
-    // This handler will close the layer source handler, and therefore the MapUrl dialog.
-    // This handler will close the layer source handler, and therefore the MapUrl dialog.
-    // don't call it if the dialog needs to remains open.
-    onOkResult();
-
-    return true;
   }, [hasImodelContext, isOverlay, onOkResult, props?.activeViewport, props.layerRequiringCredentials, settingsStorage, settingsStorageDisabled, subLayers, layerCreationMode]);
 
   // Validate the layer source and attempt to attach (or update) the layer.
   // Returns true if no further input is needed from end-user (i.e. close the dialog)
-  const attemptAttachSource = React.useCallback(async (source: MapLayerSource): Promise<boolean> => {
-    try {
-      const validation = await source.validateSource(true);
+  const attemptAttachSource = React.useCallback(async (source: MapLayerSource): Promise<MapLayerAttachResult> => {
+    const validation = await source.validateSource(true);
 
-      if (validation.status === MapLayerSourceStatus.Valid) {
-        if (validation.subLayers && validation.subLayers.length > 1
-          && source.formatId === "WMS"    // We should have flag from validation
-          && subLayers === undefined
-        ) {
-          setSubLayers(validation.subLayers);
-          return false;
-        } else if (layerRequiringCredentialsIdx === undefined) {
-          return await doAttach(source, validation);
-        } else {
-          return await updateAttachedLayer(source, validation);
-        }
-      } else if (validation.status === MapLayerSourceStatus.InvalidCoordinateSystem) {
-        const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.InvalidCoordinateSystem");
-        IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
-        return true;
+    if (validation.status === MapLayerSourceStatus.Valid) {
+      if (validation.subLayers && validation.subLayers.length > 1
+        && source.formatId === "WMS"    // We should have flag from validation
+        && subLayers === undefined
+      ) {
+        return {source, validation, needsFeatureSelection:true, attached: false};
+        //setSubLayers(validation.subLayers);
+        //return false;
+      } else if (layerRequiringCredentialsIdx === undefined) {
+        await doAttach(source, validation);
+        return {source, validation, attached: true}
       } else {
-        const authNeeded = await updateAuthState(source, validation);
-        if (authNeeded) {
-          return false;
-        } else {
-          const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.ValidationError");
-          IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, `${msg} ${source.url}`));
-          return true;
-        }
+        const attached = await updateAttachedLayer(source, validation);
+        return {source, validation, attached};
       }
-
-    } catch (error) {
-      const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceUrl: source.url });
-      IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
-      return true;
+    } else {
+      return {source, validation, attached: false};
     }
 
   }, [updateAuthState, doAttach, layerRequiringCredentialsIdx, updateAttachedLayer, subLayers]);
@@ -417,21 +403,35 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
 
     // Attach source asynchronously.
     void (async () => {
+
       try {
-        const closeDialog = await attemptAttachSource(source);
+        const result = await attemptAttachSource(source);
+
         if (isMounted.current) {
           setLayerAttachPending(false);
         }
 
         // In theory the modal dialog should always get closed by the parent
         // AttachLayerPanel's 'onOkResult' handler.  We close it here just in case.
-        if (closeDialog) {
-          UiFramework.dialogs.modal.close();
-          onOkResult();
+        if (result.attached || result.needsFeatureSelection) {
+          // UiFramework.dialogs.modal.close();
+          onOkResult(result);
+        } else if (result.validation?.status === MapLayerSourceStatus.InvalidCoordinateSystem) {
+          const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.InvalidCoordinateSystem");
+          IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
+          onOkResult(result);
+        } else {
+          const authNeeded = await updateAuthState(source, result.validation);
+          if (!authNeeded)  {
+            const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.ValidationError");
+            IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, `${msg} ${source.url}`));
+            onOkResult(result);
+          }
         }
-      } catch (_error) {
+      } catch (error) {
+        const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceUrl: source.url });
+        IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
         onOkResult();
-        UiFramework.dialogs.modal.close();
       }
     })();
 

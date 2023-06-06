@@ -8,11 +8,12 @@ import { RelativePosition } from "@itwin/appui-abstract";
 import * as UiCore from "@itwin/core-react";
 import { UiFramework } from "@itwin/appui-react";
 import { useSourceMapContext } from "./MapLayerManager";
-import { MapUrlDialog } from "./MapUrlDialog";
+import { MapLayerAttachResult, MapUrlDialog } from "./MapUrlDialog";
 import { ConfirmMessageDialog } from "./ConfirmMessageDialog";
 import { Button, Input } from "@itwin/itwinui-react";
 import { MapLayerPreferences } from "../../MapLayerPreferences";
 import { MapLayersUI } from "../../mapLayers";
+import { MapSelectFeaturesDialog } from "./MapSelectFeaturesDialog";
 
 // cSpell:ignore droppable Sublayer
 
@@ -88,13 +89,17 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     return false;
   }, [backgroundLayers, overlayLayers]);
 
-  const handleModalUrlDialogOk = React.useCallback((action: LayerAction) => {
+  const handleModalUrlDialogOk = React.useCallback((action: LayerAction, attachResult?: MapLayerAttachResult) => {
+    UiFramework.dialogs.modal.close();
     if (LayerAction.Attached === action) {
-      // close popup and refresh UI
-      onLayerAttached();
+      if (attachResult?.needsFeatureSelection && attachResult.validation.subLayers) {
+        UiFramework.dialogs.modal.open(<MapSelectFeaturesDialog source={attachResult.source} subLayers={attachResult.validation.subLayers}/>);
+      } else {
+        onLayerAttached(); // close popup and refresh UI
+        resumeOutsideClick();
+      }
     }
 
-    resumeOutsideClick();
   }, [onLayerAttached, resumeOutsideClick]);
 
   const handleModalUrlDialogCancel = React.useCallback(() => {
@@ -145,7 +150,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
                     activeViewport={activeViewport}
                     isOverlay={isOverlay}
                     layerRequiringCredentials={mapLayerSettings.toJSON()}
-                    onOkResult={() => handleModalUrlDialogOk(LayerAction.Attached)}
+                    onOkResult={(attachResult?:MapLayerAttachResult) => handleModalUrlDialogOk(LayerAction.Attached, attachResult)}
                     onCancelResult={handleModalUrlDialogCancel}
                     mapTypesOptions={mapTypesOptions} />
                 );
@@ -196,7 +201,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     UiFramework.dialogs.modal.open(<MapUrlDialog
       activeViewport={activeViewport}
       isOverlay={isOverlay}
-      onOkResult={() => handleModalUrlDialogOk(LayerAction.Attached)}
+      onOkResult={(result?:MapLayerAttachResult) => handleModalUrlDialogOk(LayerAction.Attached, result)}
       onCancelResult={handleModalUrlDialogCancel}
       mapTypesOptions={mapTypesOptions} />);
     if (onHandleOutsideClick) {
@@ -289,7 +294,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
       activeViewport={activeViewport}
       isOverlay={isOverlay}
       mapLayerSourceToEdit={matchingSource}
-      onOkResult={() => handleModalUrlDialogOk(LayerAction.Edited)}
+      onOkResult={(result?:MapLayerAttachResult) => handleModalUrlDialogOk(LayerAction.Edited, result)}
       onCancelResult={handleModalUrlDialogCancel}
       mapTypesOptions={mapTypesOptions} />);
 
@@ -473,6 +478,7 @@ export function AttachLayerPopupButton(props: AttachLayerPopupButtonProps) {
         position={RelativePosition.BottomRight}
         onClose={handleClosePopup}
         onOutsideClick={onHandleOutsideClick}
+        closeOnWheel={false}
         target={buttonRef.current}
         closeOnEnter={false}
         closeOnContextMenu={false}
