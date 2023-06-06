@@ -195,7 +195,7 @@ export const GroupsVisualization = ({
   ].flat(), [groups, hideSingleGroupWrapper, isLoadingQuery, showGroup, showGroupColor]);
 
   return (
-    <div className="groups-vis-container">
+    <div className="gmw-groups-vis-container">
       <GroupVisualizationActions
         isLoadingQuery={isLoadingQuery}
         showAll={showAll}

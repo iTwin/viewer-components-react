@@ -2,6 +2,18 @@
   "name": "@itwin/geo-tools-react",
   "entries": [
     {
+      "version": "5.0.0",
+      "tag": "@itwin/geo-tools-react_v5.0.0",
+      "date": "Tue, 06 Jun 2023 10:57:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Updated to iTwin.js Core 4.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.0",
       "tag": "@itwin/geo-tools-react_v4.1.0",
       "date": "Thu, 04 May 2023 23:59:19 GMT",

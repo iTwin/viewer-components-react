@@ -5,18 +5,18 @@
 
 import { expect } from "chai";
 import { EMPTY, from, Subject } from "rxjs";
-import * as sinon from "sinon";
+import sinon from "sinon";
 import * as moq from "typemoq";
-import { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange, TreeModel, TreeModelChanges, TreeModelSource } from "@itwin/components-react";
 import { BeEvent, BeUiEvent, using } from "@itwin/core-bentley";
 import { CheckBoxState } from "@itwin/core-react";
-import { IPresentationTreeDataProvider } from "@itwin/presentation-components";
-import { SelectionHandler } from "@itwin/presentation-frontend";
-import {
-  IVisibilityHandler, VisibilityChangeListener, VisibilityStatus, VisibilityTreeEventHandler, VisibilityTreeEventHandlerParams,
-} from "../../components/trees/VisibilityTreeEventHandler";
+import { VisibilityTreeEventHandler } from "../../components/trees/VisibilityTreeEventHandler";
 import { flushAsyncOperations } from "../TestUtils";
 import { createSimpleTreeModelNode } from "./Common";
+
+import type { AbstractTreeNodeLoaderWithProvider, CheckboxStateChange, TreeModel, TreeModelChanges, TreeModelSource } from "@itwin/components-react";
+import type { IPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { SelectionHandler } from "@itwin/presentation-frontend";
+import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus, VisibilityTreeEventHandlerParams } from "../../components/trees/VisibilityTreeEventHandler";
 
 describe("VisibilityTreeEventHandler", () => {
   const modelSourceMock = moq.Mock.ofType<TreeModelSource>();
@@ -64,7 +64,7 @@ describe("VisibilityTreeEventHandler", () => {
     if (!partialProps)
       partialProps = {};
     const props: VisibilityTreeEventHandlerParams = {
-      visibilityHandler: partialProps.visibilityHandler || undefined,
+      visibilityHandler: partialProps.visibilityHandler || visibilityHandler,
       nodeLoader: partialProps.nodeLoader || nodeLoaderMock.object,
       selectionHandler: partialProps.selectionHandler || selectionHandlerMock.object,
     };

@@ -80,7 +80,6 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
             <SubLayersPopupButton
               subLayers={props.activeViewport ? activeLayer.subLayers : undefined}
               singleVisibleSubLayer={activeLayer.provider?.mutualExclusiveSubLayer}
-              // singleVisibleSubLayer={true}
               onSubLayerStateChange={(subLayerId: SubLayerId, isSelected: boolean) => { onSubLayerStateChange(activeLayer, subLayerId, isSelected); }} />
           }
         </div>
