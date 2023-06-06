@@ -7,22 +7,23 @@
  */
 
 import { Observable } from "rxjs";
-import { EMPTY } from "rxjs/internal/observable/empty";
 import { from } from "rxjs/internal/observable/from";
 import { map } from "rxjs/internal/operators/map";
 import { mergeMap } from "rxjs/internal/operators/mergeMap";
-import {
+import { CheckBoxState } from "@itwin/core-react";
+import { UnifiedSelectionTreeEventHandler } from "@itwin/presentation-components";
+import { isPromiseLike } from "../utils/IsPromiseLike";
+
+import type {
   CheckBoxInfo, CheckboxStateChange, TreeCheckboxStateChangeEventArgs, TreeModelNode, TreeNodeItem, TreeSelectionChange,
   TreeSelectionModificationEventArgs, TreeSelectionReplacementEventArgs,
 } from "@itwin/components-react";
-import { BeEvent, IDisposable } from "@itwin/core-bentley";
-import { CheckBoxState } from "@itwin/core-react";
-import { UnifiedSelectionTreeEventHandler, UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
-import { isPromiseLike } from "../utils/IsPromiseLike";
+import type { BeEvent, IDisposable } from "@itwin/core-bentley";
+import type { UnifiedSelectionTreeEventHandlerParams } from "@itwin/presentation-components";
 
 /**
  * Data structure that describes instance visibility status.
- * @alpha
+ * @public
  */
 export interface VisibilityStatus {
   state: "visible" | "partial" | "hidden";
@@ -32,13 +33,13 @@ export interface VisibilityStatus {
 
 /**
  * Type definition of visibility change event listener.
- * @alpha
+ * @public
  */
 export type VisibilityChangeListener = (nodeIds?: string[], visibilityStatus?: Map<string, VisibilityStatus>) => void;
 
 /**
  * Visibility handler used to change or get visibility of instances represented by the tree node.
- * @alpha
+ * @public
  */
 export interface IVisibilityHandler extends IDisposable {
   getVisibilityStatus(node: TreeNodeItem): VisibilityStatus | Promise<VisibilityStatus>;
@@ -48,25 +49,25 @@ export interface IVisibilityHandler extends IDisposable {
 
 /**
  * Type definition of predicate used to decide if node can be selected.
- * @alpha
+ * @public
  */
 export type VisibilityTreeSelectionPredicate = (node: TreeNodeItem) => boolean;
 
 /**
  * Parameters for [[VisibilityTreeEventHandler]]
- * @alpha
+ * @public
  */
 export interface VisibilityTreeEventHandlerParams extends UnifiedSelectionTreeEventHandlerParams {
-  visibilityHandler: IVisibilityHandler | undefined;
+  visibilityHandler: IVisibilityHandler;
   selectionPredicate?: VisibilityTreeSelectionPredicate;
 }
 
 /**
  * Base event handler for visibility tree.
- * @alpha
+ * @public
  */
 export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler {
-  private _visibilityHandler: IVisibilityHandler | undefined;
+  private _visibilityHandler: IVisibilityHandler;
   private _selectionPredicate?: VisibilityTreeSelectionPredicate;
   private _listeners = new Array<() => void>();
   private _isChangingVisibility: boolean;
@@ -76,15 +77,11 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
     this._visibilityHandler = params.visibilityHandler;
     this._selectionPredicate = params.selectionPredicate;
     this._isChangingVisibility = false;
-
-    if (this._visibilityHandler) {
-      this._listeners.push(this._visibilityHandler.onVisibilityChange.addListener(async (nodeIds, visibilityStatus) => {
-        if (this._isChangingVisibility)
-          return;
-        void this.updateCheckboxes(nodeIds, visibilityStatus);
-      }));
-    }
-
+    this._listeners.push(this._visibilityHandler.onVisibilityChange.addListener(async (nodeIds, visibilityStatus) => {
+      if (this._isChangingVisibility)
+        return;
+      void this.updateCheckboxes(nodeIds, visibilityStatus);
+    }));
     this._listeners.push(this.modelSource.onModelChanged.addListener(async ([_, changes]) => {
       void this.updateCheckboxes([...changes.addedNodeIds, ...changes.modifiedNodeIds]);
     }));
@@ -132,9 +129,6 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
       this._isChangingVisibility = false;
       void this.updateCheckboxes();
     };
-    // istanbul ignore if
-    if (!this._visibilityHandler)
-      return undefined;
 
     // eslint-disable-next-line deprecation/deprecation
     from(event.stateChanges)
@@ -156,9 +150,6 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
       .pipe(
         // eslint-disable-next-line deprecation/deprecation
         mergeMap(({ nodeItem, newState }) => {
-          // istanbul ignore if
-          if (!this._visibilityHandler)
-            return EMPTY;
           this._isChangingVisibility = true;
           // eslint-disable-next-line deprecation/deprecation
           return from(this._visibilityHandler.changeVisibility(nodeItem, newState === CheckBoxState.On));
@@ -210,9 +201,6 @@ export class VisibilityTreeEventHandler extends UnifiedSelectionTreeEventHandler
   }
 
   private async getNodeCheckBoxInfo(node: TreeModelNode, visibilityStatus?: Map<string, VisibilityStatus>): Promise<CheckBoxInfo> {
-    if (!this._visibilityHandler)
-      return { ...node.checkbox, isVisible: false };
-
     const result = visibilityStatus?.get(node.id) ?? this._visibilityHandler.getVisibilityStatus(node.item);
 
     if (isPromiseLike(result))

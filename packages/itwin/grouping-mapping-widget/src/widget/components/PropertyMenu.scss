@@ -8,4 +8,5 @@
   flex-direction: column;
   flex-grow: 1;
   gap: calc(var(--iui-size-s) * 2);
+  overflow: auto;
 }

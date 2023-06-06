@@ -3,30 +3,34 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
 import { expect } from "chai";
 import { join } from "path";
-import * as sinon from "sinon";
+import sinon from "sinon";
 import * as moq from "typemoq";
 import { PropertyRecord } from "@itwin/appui-abstract";
-import { TreeNodeItem } from "@itwin/components-react";
-import { BeEvent, Id64String } from "@itwin/core-bentley";
-import {
-  BisCodeSpec, CategoryProps, Code, ElementProps, IModel, ModelProps, PhysicalElementProps, RelatedElement, RelatedElementProps, SubCategoryProps,
-} from "@itwin/core-common";
-import { IModelApp, IModelConnection, NoRenderApp, ScreenViewport, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
-import { ECInstancesNodeKey, KeySet, LabelDefinition, Node, NodePathElement, StandardNodeTypes } from "@itwin/presentation-common";
-import { PresentationTreeDataProvider, PresentationTreeNodeItem } from "@itwin/presentation-components";
-import { Presentation, RulesetVariablesManager, SelectionChangeEvent, SelectionManager } from "@itwin/presentation-frontend";
+import { BeEvent } from "@itwin/core-bentley";
+import { IModelApp, NoRenderApp } from "@itwin/core-frontend";
+import { KeySet, LabelDefinition, StandardNodeTypes } from "@itwin/presentation-common";
+import { PresentationTreeDataProvider } from "@itwin/presentation-components";
+import { Presentation, SelectionChangeEvent } from "@itwin/presentation-frontend";
 import {
   buildTestIModel, HierarchyBuilder, HierarchyCacheMode, initialize as initializePresentationTesting, terminate as terminatePresentationTesting,
-  TestIModelBuilder,
 } from "@itwin/presentation-testing";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { CategoryTree, RULESET_CATEGORIES } from "../../../components/trees/category-tree/CategoriesTree";
-import { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
-import { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
-import { mockPresentationManager, TestUtils } from "../../TestUtils";
+import {
+  addDrawingCategory, addDrawingGraphic, addModel, addPartition, addPhysicalObject, addSpatialCategory, addSubCategory,
+} from "../../IModelUtils";
+import { mockPresentationManager, mockViewport, TestUtils } from "../../TestUtils";
+
+import type { TreeNodeItem } from "@itwin/components-react";
+import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection, SpatialViewState, ViewManager, Viewport } from "@itwin/core-frontend";
+import type { ECInstancesNodeKey, Node, NodePathElement } from "@itwin/presentation-common";
+import type { PresentationTreeNodeItem } from "@itwin/presentation-components";
+import type { RulesetVariablesManager, SelectionManager } from "@itwin/presentation-frontend";
+import type { CategoryVisibilityHandler } from "../../../components/trees/category-tree/CategoryVisibilityHandler";
+import type { VisibilityChangeListener } from "../../../components/trees/VisibilityTreeEventHandler";
 
 describe("CategoryTree", () => {
 
@@ -47,7 +51,7 @@ describe("CategoryTree", () => {
     const imodelMock = moq.Mock.ofType<IModelConnection>();
     const selectionManagerMock = moq.Mock.ofType<SelectionManager>();
     let rulesetVariablesMock: moq.IMock<RulesetVariablesManager>;
-    const viewportMock = moq.Mock.ofType<Viewport>();
+    let viewportMock = moq.Mock.ofType<Viewport>();
     const viewStateMock = moq.Mock.ofType<SpatialViewState>();
     const viewManagerMock = moq.Mock.ofType<ViewManager>();
 
@@ -68,7 +72,7 @@ describe("CategoryTree", () => {
       sinon.stub(Presentation, "presentation").get(() => mocks.presentationManager.object);
       sinon.stub(Presentation, "selection").get(() => selectionManagerMock.object);
 
-      viewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
+      viewportMock = mockViewport();
       // TODO: remove this eslint rule when tree-widget uses itwinjs-core 4.0.0 version
       viewStateMock.setup((x) => x.is3d()).returns(() => true); // eslint-disable-line @itwin/no-internal
     });
@@ -144,25 +148,10 @@ describe("CategoryTree", () => {
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
+            activeView={viewportMock.object}
           />,
         );
         await waitFor(() => result.getByText("test-node"));
-      });
-
-      it("takes open view from viewManager", async () => {
-        const screenViewportMock = moq.Mock.ofType<ScreenViewport>();
-        screenViewportMock.setup((x) => x.view).returns(() => viewStateMock.object);
-        viewManagerMock.setup((x) => x.getFirstOpenView()).returns(() => screenViewportMock.object);
-        render(
-          <CategoryTree
-            {...sizeProps}
-            categories={[]}
-            viewManager={viewManagerMock.object}
-            iModel={imodelMock.object}
-            categoryVisibilityHandler={visibilityHandler.object}
-          />,
-        );
-        viewManagerMock.verify((x) => x.getFirstOpenView(), moq.Times.once());
       });
 
       it("sets ruleset variable 'ViewType' to '3d'", async () => {
@@ -175,7 +164,7 @@ describe("CategoryTree", () => {
             categories={[]}
             viewManager={viewManagerMock.object}
             iModel={imodelMock.object}
-            activeView={viewportMock.object}
+            activeView={mockViewport({ viewState: viewStateMock.object }).object}
             categoryVisibilityHandler={visibilityHandler.object}
           />,
         );
@@ -365,6 +354,7 @@ describe("CategoryTree", () => {
               iModel={imodelMock.object}
               categoryVisibilityHandler={visibilityHandler.object}
               filterInfo={{ filter: "filtered-node", activeMatchIndex: 0 }}
+              activeView={mockViewport().object}
             />,
           );
           await result.findByText("filtered-node");
@@ -390,6 +380,7 @@ describe("CategoryTree", () => {
               categoryVisibilityHandler={visibilityHandler.object}
               filterInfo={{ filter: "filtered-node", activeMatchIndex: 0 }}
               onFilterApplied={spy}
+              activeView={mockViewport().object}
             />,
           );
           await result.findByText("filtered-node");
@@ -405,6 +396,7 @@ describe("CategoryTree", () => {
             iModel={imodelMock.object}
             categoryVisibilityHandler={visibilityHandler.object}
             filterInfo={{ filter: "filtered-node1", activeMatchIndex: 0 }}
+            activeView={mockViewport().object}
           />);
 
           await waitFor(() => result.getByText("categoriesTree.noCategoryFound"));
@@ -436,10 +428,10 @@ describe("CategoryTree", () => {
 
     it("does not show private 3d categories with RULESET_CATEGORIES", async () => {
       const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", (builder) => {
-        const physicalPartitionId = addPartition("BisCore:PhysicalPartition", builder, "TestDrawingModel");
-        const definitionPartitionId = addPartition("BisCore:DefinitionPartition", builder, "TestDefinitionModel");
-        const physicalModelId = addModel("BisCore:PhysicalModel", builder, physicalPartitionId);
-        const definitionModelId = addModel("BisCore:DefinitionModel", builder, definitionPartitionId);
+        const physicalPartitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestDrawingModel");
+        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
+        const physicalModelId = addModel(builder, "BisCore:PhysicalModel", physicalPartitionId);
+        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
 
         const categoryId = addSpatialCategory(builder, definitionModelId, "Test SpatialCategory");
         addPhysicalObject(builder, physicalModelId, categoryId);
@@ -460,10 +452,10 @@ describe("CategoryTree", () => {
 
     it("does not show private 3d subCategories with RULESET_CATEGORIES", async () => {
       const iModel: IModelConnection = await buildTestIModel("CategoriesTree3d", (builder) => {
-        const physicalPartitionId = addPartition("BisCore:PhysicalPartition", builder, "TestDrawingModel");
-        const definitionPartitionId = addPartition("BisCore:DefinitionPartition", builder, "TestDefinitionModel");
-        const physicalModelId = addModel("BisCore:PhysicalModel", builder, physicalPartitionId);
-        const definitionModelId = addModel("BisCore:DefinitionModel", builder, definitionPartitionId);
+        const physicalPartitionId = addPartition(builder, "BisCore:PhysicalPartition", "TestDrawingModel");
+        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
+        const physicalModelId = addModel(builder, "BisCore:PhysicalModel", physicalPartitionId);
+        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
 
         const categoryId = addSpatialCategory(builder, definitionModelId, "Test SpatialCategory");
         addPhysicalObject(builder, physicalModelId, categoryId);
@@ -482,10 +474,10 @@ describe("CategoryTree", () => {
 
     it("does not show private 2d categories with RULESET_CATEGORIES", async () => {
       const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", (builder) => {
-        const drawingPartitionId = addPartition("BisCore:Drawing", builder, "TestDrawingModel");
-        const definitionPartitionId = addPartition("BisCore:DefinitionPartition", builder, "TestDefinitionModel");
-        const drawingModelId = addModel("BisCore:DrawingModel", builder, drawingPartitionId);
-        const definitionModelId = addModel("BisCore:DefinitionModel", builder, definitionPartitionId);
+        const drawingPartitionId = addPartition(builder, "BisCore:Drawing", "TestDrawingModel");
+        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
+        const drawingModelId = addModel(builder, "BisCore:DrawingModel", drawingPartitionId);
+        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
 
         const categoryId = addDrawingCategory(builder, definitionModelId, "Test Drawing Category");
         addDrawingGraphic(builder, drawingModelId, categoryId);
@@ -504,10 +496,10 @@ describe("CategoryTree", () => {
 
     it("does not show private 2d subCategories with RULESET_CATEGORIES", async () => {
       const iModel: IModelConnection = await buildTestIModel("CategoriesTree2d", (builder) => {
-        const drawingPartitionId = addPartition("BisCore:Drawing", builder, "TestDrawingModel");
-        const definitionPartitionId = addPartition("BisCore:DefinitionPartition", builder, "TestDefinitionModel");
-        const drawingModelId = addModel("BisCore:DrawingModel", builder, drawingPartitionId);
-        const definitionModelId = addModel("BisCore:DefinitionModel", builder, definitionPartitionId);
+        const drawingPartitionId = addPartition(builder, "BisCore:Drawing", "TestDrawingModel");
+        const definitionPartitionId = addPartition(builder, "BisCore:DefinitionPartition", "TestDefinitionModel");
+        const drawingModelId = addModel(builder, "BisCore:DrawingModel", drawingPartitionId);
+        const definitionModelId = addModel(builder, "BisCore:DefinitionModel", definitionPartitionId);
 
         const categoryId = addDrawingCategory(builder, definitionModelId, "Test Drawing Category");
         addDrawingGraphic(builder, drawingModelId, categoryId);
@@ -523,80 +515,5 @@ describe("CategoryTree", () => {
 
       expect(hierarchy).to.matchSnapshot();
     });
-
-    const addPartition = (classFullName: string, builder: TestIModelBuilder, name: string, parentId = IModel.rootSubjectId) => {
-      const parentProps: RelatedElementProps = {
-        relClassName: "BisCore:SubjectOwnsPartitionElements",
-        id: parentId,
-      };
-
-      const partitionProps: ElementProps = {
-        classFullName,
-        model: IModel.repositoryModelId,
-        parent: parentProps,
-        code: builder.createCode(parentId, BisCodeSpec.informationPartitionElement, name),
-      };
-      return builder.insertElement(partitionProps);
-    };
-
-    const addModel = (classFullName: string, builder: TestIModelBuilder, partitionId: string) => {
-      const modelProps: ModelProps = {
-        modeledElement: new RelatedElement({ id: partitionId }),
-        classFullName,
-        isPrivate: false,
-      };
-      return builder.insertModel(modelProps);
-    };
-
-    const addSpatialCategory = (builder: TestIModelBuilder, modelId: string, name: string, isPrivate?: boolean) => {
-      const spatialCategoryProps: CategoryProps = {
-        classFullName: "BisCore:SpatialCategory",
-        model: modelId,
-        code: builder.createCode(modelId, BisCodeSpec.spatialCategory, name),
-        isPrivate,
-      };
-      return builder.insertElement(spatialCategoryProps);
-    };
-
-    const addPhysicalObject = (builder: TestIModelBuilder, modelId: string, categoryId: string, elemCode = Code.createEmpty()) => {
-      const physicalObjectProps: PhysicalElementProps = {
-        classFullName: "Generic:PhysicalObject",
-        model: modelId,
-        category: categoryId,
-        code: elemCode,
-      };
-      builder.insertElement(physicalObjectProps);
-    };
-
-    const addDrawingCategory = (builder: TestIModelBuilder, modelId: string, name: string, isPrivate?: boolean) => {
-      const spatialCategoryProps: CategoryProps = {
-        classFullName: "BisCore:DrawingCategory",
-        model: modelId,
-        code: builder.createCode(modelId, BisCodeSpec.drawingCategory, name),
-        isPrivate,
-      };
-      return builder.insertElement(spatialCategoryProps);
-    };
-
-    const addDrawingGraphic = (builder: TestIModelBuilder, modelId: string, categoryId: string, elemCode = Code.createEmpty()) => {
-      const physicalObjectProps: PhysicalElementProps = {
-        classFullName: "BisCore:DrawingGraphic",
-        model: modelId,
-        category: categoryId,
-        code: elemCode,
-      };
-      builder.insertElement(physicalObjectProps);
-    };
-
-    const addSubCategory = (builder: TestIModelBuilder, modelId: string, parentId: string, name: string, isPrivate?: boolean) => {
-      const subCategoryProps: SubCategoryProps = {
-        classFullName: "BisCore:SubCategory",
-        parent: { id: parentId, relClassName: "BisCore:CategoryOwnsSubCategories" },
-        model: modelId,
-        code: builder.createCode(parentId, BisCodeSpec.subCategory, name),
-        isPrivate,
-      };
-      return builder.insertElement(subCategoryProps);
-    };
   });
 });
