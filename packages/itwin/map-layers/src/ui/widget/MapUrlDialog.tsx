@@ -5,7 +5,6 @@
 // cSpell:ignore Modeless WMTS
 
 import { DialogButtonType, SpecialKey } from "@itwin/appui-abstract";
-import { UiFramework } from "@itwin/appui-react";
 import { Button, Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
 import { ImageMapLayerProps } from "@itwin/core-common";
 import {
@@ -33,7 +32,7 @@ export type LayerCreationMode = "single"|"multiple";
 interface MapUrlDialogProps {
   activeViewport?: ScreenViewport;
   isOverlay: boolean;
-  onOkResult: (result?: MapLayerAttachResult) => void;
+  onOkResult: (result?: SourceState) => void;
   onCancelResult?: () => void;
   mapTypesOptions?: MapTypesOptions;
 
@@ -43,16 +42,14 @@ interface MapUrlDialogProps {
   mapLayerSourceToEdit?: MapLayerSource;
 }
 
-export interface MapLayerAttachResult {
+export interface SourceState {
   source: MapLayerSource;
   validation: MapLayerSourceValidation;
-  attached: boolean;
-  needsFeatureSelection?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapUrlDialog(props: MapUrlDialogProps) {
-  const { isOverlay, onOkResult, mapTypesOptions } = props;
+  const { onOkResult, mapTypesOptions } = props;
 
   const getMapUrlFromProps = React.useCallback(() => {
     if (props.mapLayerSourceToEdit) {
@@ -136,29 +133,11 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     && props?.activeViewport?.iModel?.iModelId !== undefined
     && props?.activeViewport.iModel.iModelId !== Guid.empty);
 
-  // Even though the settings storage is available,
-  // we don't always want to enable it in the UI.
-  const [settingsStorageDisabled] = React.useState(!isSettingsStorageAvailable || props.mapLayerSourceToEdit !== undefined || props.layerRequiringCredentials !== undefined);
-
-  const [layerRequiringCredentialsIdx] = React.useState((): number | undefined => {
-    if (props.layerRequiringCredentials === undefined || !props.layerRequiringCredentials.name || !props.layerRequiringCredentials.url) {
-      return undefined;
-    }
-
-    const indexInDisplayStyle = props.activeViewport?.displayStyle.findMapLayerIndexByNameAndSource(props.layerRequiringCredentials.name, props.layerRequiringCredentials.url, isOverlay);
-    if (indexInDisplayStyle === undefined || indexInDisplayStyle < 0) {
-      return undefined;
-    } else {
-      return indexInDisplayStyle;
-    }
-  });
-
   const handleCancel = React.useCallback(() => {
     if (props.onCancelResult) {
       props.onCancelResult();
       return;
     }
-    UiFramework.dialogs.modal.close();
   }, [props]);
 
   const onUsernameChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -213,96 +192,6 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
     return sourceRequireAuth || invalidCredentials;
   }, [accessClient, invalidCredentialsProvided]);
 
-  const updateAttachedLayer = React.useCallback(async (source: MapLayerSource, validation: MapLayerSourceValidation) => {
-    const vp = props?.activeViewport;
-    if (vp === undefined || source === undefined || layerRequiringCredentialsIdx === undefined) {
-      const error = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachMissingViewOrSource");
-      const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceUrl: source.url });
-      IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
-      return true;
-    }
-
-    // Layer is already attached,
-    // This calls invalidateRenderPlan()
-    vp.displayStyle.changeMapLayerProps({
-      subLayers: validation.subLayers,
-    }, { index: layerRequiringCredentialsIdx, isOverlay });
-    vp.displayStyle.changeMapLayerCredentials({ index: layerRequiringCredentialsIdx, isOverlay }, source.userName, source.password);
-
-    // Either initial attach/initialize failed or the layer failed to load at least one tile
-    // because of an invalid token; in both cases tile tree needs to be fully reset
-    const provider = vp.getMapLayerImageryProvider({ index: layerRequiringCredentialsIdx, isOverlay });
-    provider?.resetStatus();
-    vp.resetMapLayer({ index: layerRequiringCredentialsIdx, isOverlay });
-
-    // This handler will close the layer source handler, and therefore the MapUrl dialog.
-    // don't call it if the dialog needs to remains open.
-    onOkResult();
-
-    return true;
-  }, [isOverlay, layerRequiringCredentialsIdx, onOkResult, props.activeViewport]);
-
-  // Returns true if no further input is needed from end-user.
-  const doAttach = React.useCallback(async (source: MapLayerSource, validation: MapLayerSourceValidation) => {
-    const vp = props?.activeViewport;
-    if (vp === undefined || source === undefined) {
-      const error = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachMissingViewOrSource");
-      const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceUrl: source.url });
-      IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
-      return;
-    }
-
-    // Update service settings if storage is available and we are not prompting user for credentials
-    if (!settingsStorageDisabled && !props.layerRequiringCredentials) {
-      const storeOnIModel = (hasImodelContext ? "Model" === settingsStorage : undefined);
-      if (vp.iModel.iTwinId && !(await MapLayerPreferences.storeSource(source, vp.iModel.iTwinId, vp.iModel.iModelId, storeOnIModel))) {
-        const msgError = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerPreferencesStoreFailed");
-        IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msgError));
-      }
-    }
-
-    // Some sources have a single non-visible sub-layer (i.e. ArcGIS World Topo Map); to avoid having a layer with no content (and no way to change the sub-layer visibility)
-    // we force the sub-layer visibility to ON.
-    let subLayers = validation.subLayers;
-    if (validation.subLayers && validation.subLayers.length === 1 && validation.subLayers[0].visible === false) {
-      subLayers = [{...validation.subLayers[0], visible: true}];
-    }
-
-    const settings = source.toLayerSettings(subLayers);
-    if (settings) {
-      vp.displayStyle.attachMapLayer({ settings, mapLayerIndex: { index: -1, isOverlay } });
-    } else {
-      const msgError = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerLayerSettingsConversionError");
-      const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.MapLayerAttachError", { error: msgError, sourceUrl: source.url });
-      IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
-    }
-
-    const message = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerAttached", { sourceName: source.name, sourceUrl: source.url });
-    IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, message));
-  }, [hasImodelContext, isOverlay, props?.activeViewport, props.layerRequiringCredentials, settingsStorage, settingsStorageDisabled]);
-
-  // Validate the layer source and attempt to attach (or update) the layer.
-  // Returns true if no further input is needed from end-user (i.e. close the dialog)
-  const attemptAttachSource = React.useCallback(async (source: MapLayerSource): Promise<MapLayerAttachResult> => {
-    const validation = await source.validateSource(true);
-    if (validation.status === MapLayerSourceStatus.Valid) {
-      if (validation.subLayers && validation.subLayers.length > 1
-        && source.formatId === "WMS"    // We should have flag from validation
-      ) {
-        return {source, validation, needsFeatureSelection:true, attached: false};
-      } else if (layerRequiringCredentialsIdx === undefined) {
-        await doAttach(source, validation);
-        return {source, validation, attached: true};
-      } else {
-        const attached = await updateAttachedLayer(source, validation);
-        return {source, validation, attached};
-      }
-    } else {
-      return {source, validation, attached: false};
-    }
-
-  }, [doAttach, layerRequiringCredentialsIdx, updateAttachedLayer]);
-
   const onNameChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setMapName(event.target.value);
   }, [setMapName]);
@@ -337,14 +226,12 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
   const handleOk = React.useCallback(() => {
     const source = createSource();
     if (source === undefined || props.mapLayerSourceToEdit) {
-
-      UiFramework.dialogs.modal.close();
       onOkResult();
 
       if (source === undefined) {
         // Close the dialog and inform end user something went wrong.
         const msgError = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerLayerSourceCreationFailed");
-        const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error: msgError, sourceUrl: mapUrl });
+        const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error: msgError, sourceName: mapName });
         IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
         return;
       }
@@ -367,43 +254,49 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
       }
     }
 
-    setLayerAttachPending(true);
-
     // Attach source asynchronously.
     void (async () => {
 
       try {
-        const result = await attemptAttachSource(source);
+        setLayerAttachPending(true);
+        const validation = await source.validateSource(true);
 
         if (isMounted.current) {
           setLayerAttachPending(false);
         }
 
-        // In theory the modal dialog should always get closed by the parent
-        // AttachLayerPanel's 'onOkResult' handler.  We close it here just in case.
-        if (result.attached || result.needsFeatureSelection) {
-          // UiFramework.dialogs.modal.close();
-          onOkResult(result);
-        } else if (result.validation?.status === MapLayerSourceStatus.InvalidCoordinateSystem) {
+        if (validation.status === MapLayerSourceStatus.Valid) {
+          // Update service settings if storage is available and we are not prompting user for credentials
+          if (isSettingsStorageAvailable && !props.layerRequiringCredentials) {
+            const storeOnIModel = (hasImodelContext ? "Model" === settingsStorage : undefined);
+            const vp = props.activeViewport;
+            if (vp?.iModel.iTwinId && !(await MapLayerPreferences.storeSource(source, vp.iModel.iTwinId, vp.iModel.iModelId, storeOnIModel))) {
+              const msgError = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerPreferencesStoreFailed");
+              IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msgError));
+            }
+          }
+
+          onOkResult({source, validation});
+        } else if (validation.status === MapLayerSourceStatus.InvalidCoordinateSystem) {
           const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.InvalidCoordinateSystem");
           IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
-          onOkResult(result);
+          onOkResult({source, validation});
         } else {
-          const authNeeded = await updateAuthState(source, result.validation);
+          const authNeeded = await updateAuthState(source, validation);
           if (!authNeeded)  {
             const msg = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.ValidationError");
             IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, `${msg} ${source.url}`));
-            onOkResult(result);
+            onOkResult({source, validation});
           }
         }
       } catch (error) {
-        const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceUrl: source.url });
+        const msg = MapLayersUI.localization.getLocalizedString("mapLayers:Messages.MapLayerAttachError", { error, sourceName: source.name });
         IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Error, msg));
         onOkResult();
       }
     })();
 
-  }, [createSource, props.mapLayerSourceToEdit, props.activeViewport, onOkResult, mapUrl, isSettingsStorageAvailable, attemptAttachSource, updateAuthState]);
+  }, [createSource, mapName, props.mapLayerSourceToEdit, props.activeViewport, onOkResult, isSettingsStorageAvailable, updateAuthState, hasImodelContext, props.layerRequiringCredentials, settingsStorage]);
 
   React.useEffect(() => {
     const handleOAuthProcessEnd = (success: boolean, _state: any) => {
@@ -636,20 +529,21 @@ export function MapUrlDialog(props: MapUrlDialogProps) {
             }
 
             {/* Store settings options, not shown when editing a layer */}
-            {isSettingsStorageAvailable &&
-              <div title={settingsStorageDisabled ? noSaveSettingsWarning : ""}>
-                {hasImodelContext &&
-                  <div>
-                    <Radio disabled={settingsStorageDisabled}
-                      name="settingsStorage" value="iTwin"
-                      label={iTwinSettingsLabel} checked={settingsStorage === "iTwin"}
-                      onChange={onRadioChange} />
-                    <Radio disabled={settingsStorageDisabled}
-                      name="settingsStorage" value="Model"
-                      label={modelSettingsLabel} checked={settingsStorage === "Model"}
-                      onChange={onRadioChange} />
-                  </div>}
-              </div>}
+            {!props.layerRequiringCredentials
+            && !props.mapLayerSourceToEdit
+            && <div title={!isSettingsStorageAvailable ? noSaveSettingsWarning : ""}>
+              {hasImodelContext &&
+                <div>
+                  <Radio disabled={!isSettingsStorageAvailable}
+                    name="settingsStorage" value="iTwin"
+                    label={iTwinSettingsLabel} checked={settingsStorage === "iTwin"}
+                    onChange={onRadioChange} />
+                  <Radio disabled={!isSettingsStorageAvailable}
+                    name="settingsStorage" value="Model"
+                    label={modelSettingsLabel} checked={settingsStorage === "Model"}
+                    onChange={onRadioChange} />
+                </div>}
+            </div>}
           </div>
         </div>
 

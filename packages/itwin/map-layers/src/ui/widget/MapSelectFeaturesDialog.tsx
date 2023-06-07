@@ -58,7 +58,7 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         footerStyle={{ paddingBottom: "10px", paddingRight: "10px" }}
         trapFocus={false}
       >
-        <div className="map-layer-source-url-subLayers"><SubLayersTree checkboxStyle="standard" subLayers={subLayers} /></div>
+        <div className="map-layer-source-url-subLayers"><SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} /></div>
       </Dialog>
     </div >
   );

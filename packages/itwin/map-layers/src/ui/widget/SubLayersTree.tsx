@@ -13,7 +13,7 @@ import { MapSubLayerProps, SubLayerId } from "@itwin/core-common";
 import { CheckBoxState, ImageCheckBox, NodeCheckboxRenderProps, useDisposable, WebFontIcon } from "@itwin/core-react";
 import { Button, Input } from "@itwin/itwinui-react";
 import * as React from "react";
-import { SubLayersDataProvider } from "./SubLayersDataProvider";
+import { SubLayersDataProvider, SubLayersTreeExpandMode } from "./SubLayersDataProvider";
 import "./SubLayersTree.scss";
 import { MapLayersUI } from "../../mapLayers";
 
@@ -99,9 +99,11 @@ export function SubLayersPanel(props: SubLayersPanelProps) {
 
 export interface SubLayersTreeProps {
   checkboxStyle: "standard" | "eye";
+  expandMode: SubLayersTreeExpandMode;
   subLayers: MapSubLayerProps[];
   singleVisibleSubLayer?: boolean;
   onSubLayerStateChange?: OnSubLayerStateChangeType;
+
 }
 /**
  * Tree Control that displays sub-layer hierarchy
@@ -119,7 +121,7 @@ export function SubLayersTree(props: SubLayersTreeProps) {
 
   // create data provider to get some nodes to show in tree
   // `React.useMemo' is used avoid creating new object on each render cycle
-  const dataProvider = React.useMemo(() => new SubLayersDataProvider(subLayers), [subLayers]);
+  const dataProvider = React.useMemo(() => new SubLayersDataProvider(subLayers, props.expandMode), [subLayers, props.expandMode]);
 
   const {
     modelSource,
