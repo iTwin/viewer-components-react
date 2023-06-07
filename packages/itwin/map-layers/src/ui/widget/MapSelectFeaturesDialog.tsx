@@ -4,11 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { Input, LabeledInput, ProgressLinear, Radio } from "@itwin/itwinui-react";
 import { Dialog } from "@itwin/core-react";
 import * as React from "react";
 import "./MapUrlDialog.scss";
-import { SelectMapFormat } from "./SelectMapFormat" ;
+
 import { DialogButtonType } from "@itwin/appui-abstract";
 import { MapLayersUI } from "../../mapLayers";
 import { MapLayerSource } from "@itwin/core-frontend";
@@ -16,18 +15,23 @@ import { MapSubLayerProps } from "@itwin/core-common";
 import { SubLayersTree } from "./SubLayersTree";
 
 export interface MapSelectFeaturesProps {
-source: MapLayerSource,
-subLayers: MapSubLayerProps[]
+  source: MapLayerSource;
+  subLayers: MapSubLayerProps[];
+  handleOk: (subLayers: MapSubLayerProps[]) => void;
+  handleCancel: () => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
+  const [subLayers] = React.useState(props.subLayers);
 
   const handleOk = React.useCallback(() => {
-  }, []);
+    props.handleOk(subLayers);
+  }, [props, subLayers]);
 
   const handleCancel = React.useCallback(() => {
-  }, []);
+    props.handleCancel();
+  }, [props]);
 
   const buttonCluster = React.useMemo(() => [
     { type: DialogButtonType.OK, onClick: handleOk},
@@ -54,7 +58,7 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         footerStyle={{ paddingBottom: "10px", paddingRight: "10px" }}
         trapFocus={false}
       >
-        <div className="map-layer-source-url-subLayers"><SubLayersTree subLayers={props.subLayers} /></div>
+        <div className="map-layer-source-url-subLayers"><SubLayersTree checkboxStyle="standard" subLayers={subLayers} /></div>
       </Dialog>
     </div >
   );

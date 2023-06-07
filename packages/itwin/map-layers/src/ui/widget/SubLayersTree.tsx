@@ -98,6 +98,7 @@ export function SubLayersPanel(props: SubLayersPanelProps) {
 }
 
 export interface SubLayersTreeProps {
+  checkboxStyle: "standard" | "eye";
   subLayers: MapSubLayerProps[];
   singleVisibleSubLayer?: boolean;
   onSubLayerStateChange?: OnSubLayerStateChangeType;
@@ -109,6 +110,7 @@ export interface SubLayersTreeProps {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function SubLayersTree(props: SubLayersTreeProps) {
 
+  // const [subLayers] = React.useState<MapSubLayerProps[] | undefined>();
   const [placeholderLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.SearchPlaceholder"));
   const [allOnLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.AllOn"));
   const [allOffLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.AllOff"));
@@ -167,20 +169,21 @@ export function SubLayersTree(props: SubLayersTreeProps) {
       >
         {props.singleVisibleSubLayer ? undefined : [
           <Button size="small" styleType="borderless" key="show-all-btn" title={allOnLabel} onClick={async () => changeAll(true)}>
-            <WebFontIcon iconName="icon-visibility" />
+            <WebFontIcon iconName={props.checkboxStyle === "eye" ? "icon-visibility" : "icon-checkbox-select" } />
           </Button>,
           <Button size="small" styleType="borderless" key="hide-all-btn" title={allOffLabel} onClick={async () => changeAll(false)}>
-            <WebFontIcon iconName="icon-visibility-hide-2" />
+            <WebFontIcon iconName={props.checkboxStyle === "eye" ? "icon-visibility-hide-2" : "icon-checkbox-deselect" } />
           </Button>,
         ]}
       </Toolbar>
       <div ref={containerRef} className="map-manager-sublayer-tree-content">
-        {width !== undefined && height !== undefined && <ControlledTree
+        {width !== undefined && height !== undefined
+        && <ControlledTree
           nodeLoader={nodeLoader}
           selectionMode={SelectionMode.None}
           eventsHandler={eventHandler}
           model={treeModel}
-          treeRenderer={nodeWithEyeCheckboxTreeRenderer}
+          treeRenderer={props.checkboxStyle === "eye" ? nodeWithEyeCheckboxTreeRenderer : undefined}
           nodeHighlightingProps={nodeHighlightingProps}
           width={width}
           height={height}

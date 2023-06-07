@@ -78,6 +78,7 @@ export function MapLayerDroppable(props: MapLayerDroppableProps) {
         <div className="map-manager-item-sub-layer-container">
           {activeLayer.subLayers && activeLayer.subLayers.length > 1 &&
             <SubLayersPopupButton
+              checkboxStyle="eye"
               subLayers={props.activeViewport ? activeLayer.subLayers : undefined}
               singleVisibleSubLayer={activeLayer.provider?.mutualExclusiveSubLayer}
               onSubLayerStateChange={(subLayerId: SubLayerId, isSelected: boolean) => { onSubLayerStateChange(activeLayer, subLayerId, isSelected); }} />
