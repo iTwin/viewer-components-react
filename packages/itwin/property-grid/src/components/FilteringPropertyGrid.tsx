@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./PropertyGrid.scss";
 import { useCallback } from "react";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import {
