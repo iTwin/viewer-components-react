@@ -11,7 +11,6 @@ import { PreferencesContextProvider } from "../../PropertyGridPreferencesContext
 import { createFunctionStub } from "../TestUtils";
 
 import type { PreferencesContextProviderProps } from "../../PropertyGridPreferencesContext";
-import type { NullValueSettingProps } from "../../hooks/UseNullValuesSetting";
 import type { PreferencesStorage } from "../../property-grid-react";
 
 function renderWithContext(element: JSX.Element, contextProps: Partial<PreferencesContextProviderProps>) {
@@ -20,11 +19,11 @@ function renderWithContext(element: JSX.Element, contextProps: Partial<Preferenc
   </PreferencesContextProvider>);
 }
 
-function TestComponent(useNullValueSettingProps: NullValueSettingProps) {
-  const { showNullValues, setShowNullValues } = useNullValueSetting(useNullValueSettingProps);
+function TestComponent({ persistOnClick }: { persistOnClick?: boolean }) {
+  const { showNullValues, setShowNullValues } = useNullValueSetting();
 
   const toggleShowNullValues = async () => {
-    await setShowNullValues(!showNullValues);
+    await setShowNullValues(!showNullValues, { persist: persistOnClick });
   };
 
   return <button onClick={toggleShowNullValues}>
@@ -69,7 +68,7 @@ describe("useNullValuesSetting", () => {
       storage.get.resolves(JSON.stringify(false));
 
       const { getByRole } = renderWithContext(
-        <TestComponent persistNullValueToggle={true} />,
+        <TestComponent />,
         { storage }
       );
 
@@ -80,7 +79,7 @@ describe("useNullValuesSetting", () => {
       storage.get.resolves(undefined);
 
       const { getByRole } = renderWithContext(
-        <TestComponent persistNullValueToggle={true} />,
+        <TestComponent />,
         { storage }
       );
 
@@ -91,7 +90,7 @@ describe("useNullValuesSetting", () => {
       storage.get.resolves(JSON.stringify(false));
 
       const { getByRole } = renderWithContext(
-        <TestComponent persistNullValueToggle={true} />,
+        <TestComponent persistOnClick={true} />,
         { storage }
       );
 

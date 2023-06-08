@@ -25,7 +25,10 @@
     "copy-text": {
       "label": "Copy Text",
       "description": "Copy text of this property"
-    },
+    }
+  },
+  "settings": {
+    "label": "Settings",
     "hide-null": {
       "label": "Hide Empty Values",
       "description": "Hide properties with empty values"

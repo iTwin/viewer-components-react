@@ -38,6 +38,7 @@ describe("<PropertyGridContent />", () => {
         records: {
           ["test-category"]: [
             createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Prop Value", displayValue: "Prop Value" }, { name: "test-prop", displayLabel: "Test Prop" }),
+            createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: undefined }, { name: "null-prop", displayLabel: "Null Prop" }),
           ],
         },
       };
@@ -73,5 +74,66 @@ describe("<PropertyGridContent />", () => {
     const backButton = getByRole("button", { name: "header.back" });
     await userEvents.click(backButton);
     expect(onBackClickSpy).to.be.calledOnce;
+  });
+
+  it("renders header with settings dropdown", async () => {
+    const imodel = {} as IModelConnection;
+    const spy = sinon.spy();
+
+    const { getByText, getByRole } = render(
+      <PropertyGridContent
+        dataProvider={provider}
+        imodel={imodel}
+        settingProviders={[
+          () => [{
+            id: "test-setting",
+            label: "Test Setting",
+            action: spy,
+          }],
+        ]}
+      />
+    );
+
+    const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
+    await userEvents.click(settingsButton);
+
+    const setting = await waitFor(() => getByText("Test Setting"));
+    await userEvents.click(setting);
+
+    expect(spy).to.be.calledOnce;
+  });
+
+  it("allows filtering out empty values", async () => {
+    const imodel = {} as IModelConnection;
+
+    const { getByText, getByRole, queryByText } = render(
+      <PropertyGridContent
+        dataProvider={provider}
+        imodel={imodel}
+        settingProviders={[
+          (context) => [{
+            id: "test-setting",
+            label: "Test Setting",
+            action: async () => context.nullValueSetting.setShowNullValues(false),
+          }],
+        ]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(queryByText("Test Prop")).to.not.be.null;
+      expect(queryByText("Null Prop")).to.not.be.null;
+    });
+
+    const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
+    await userEvents.click(settingsButton);
+
+    const setting = await waitFor(() => getByText("Test Setting"));
+    await userEvents.click(setting);
+
+    await waitFor(() => {
+      expect(queryByText("Test Prop")).to.not.be.null;
+      expect(queryByText("Null Prop")).to.be.null;
+    });
   });
 });

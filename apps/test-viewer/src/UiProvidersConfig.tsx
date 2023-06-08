@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { UiItemsProvider } from "@itwin/appui-react";
 import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
-import { PropertyGridManager, PropertyGridUiItemsProvider, createAddFavoritePropertyItemProvider, createCopyPropertyTextItemProvider, createRemoveFavoritePropertyItemProvider } from "@itwin/property-grid-react";
+import { PropertyGridManager, PropertyGridUiItemsProvider, createAddFavoritePropertyItemProvider, createCopyPropertyTextItemProvider, createRemoveFavoritePropertyItemProvider, createShowNullValuesSettingProvider } from "@itwin/property-grid-react";
 import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
@@ -83,6 +83,9 @@ const configuredUiItems = new Map<string, UiItem>([
             createRemoveFavoritePropertyItemProvider(),
             createCopyPropertyTextItemProvider(),
           ],
+          settingProviders: [
+            createShowNullValuesSettingProvider(true),
+          ]
         }
       })],
     }

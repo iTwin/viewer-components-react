@@ -7,43 +7,41 @@ import { useCallback, useEffect, useState } from "react";
 import { usePreferencesContext } from "../PropertyGridPreferencesContext";
 
 /**
- * Props for `useNullValueSetting` hook.
+ * Definition of `null` values setting state.
  * @public
  */
-export interface NullValueSettingProps {
-  /** Specifies whether setting for showing/hiding null values in property grid should be persisted. */
-  persistNullValueToggle?: boolean;
+export interface NullValueSetting {
+  /** Specifies whether `null` values are shown. */
+  showNullValues: boolean;
+  /** Callback for changing `showNullValues` values. */
+  setShowNullValues: (value: boolean, options?: { persist?: boolean }) => Promise<void>;
 }
 
 /**
  * Custom hook for tracking of "show/hide null values" setting in property grid.
  * @internal
  */
-export function useNullValueSetting({ persistNullValueToggle }: NullValueSettingProps) {
+export function useNullValueSetting(): NullValueSetting {
   const [showNullValues, setShowNullValues] = useState(true);
   const { getShowNullValuesPreference, setShowNullValuesPreference } = useNullValueStorage();
 
-  // If persisting hide/show empty values, get the preference
+  // Get value from preferences storage
   useEffect(() => {
-    const setDefaultShowNullValues = async () => {
-      if (persistNullValueToggle) {
-        const res = await getShowNullValuesPreference();
-        setShowNullValues(res);
-      }
-    };
+    void (async () => {
+      const res = await getShowNullValuesPreference();
+      setShowNullValues(res);
+    })();
+  }, [getShowNullValuesPreference]);
 
-    void setDefaultShowNullValues();
-  }, [persistNullValueToggle, getShowNullValuesPreference]);
-
-  // Fcn for updating toggle for Hide / Show Empty Fields menu options
-  const updateShowNullValues = useCallback(async (value: boolean) => {
+  // Function for updating Hide / Show Empty Fields setting
+  const updateShowNullValues = useCallback(async (value: boolean, options?: { persist?: boolean }) => {
     setShowNullValues(value);
 
     // Persist hide/show value
-    if (persistNullValueToggle) {
+    if (options?.persist) {
       await setShowNullValuesPreference(value);
     }
-  }, [persistNullValueToggle, setShowNullValuesPreference]);
+  }, [setShowNullValuesPreference]);
 
   return {
     showNullValues,
