@@ -259,13 +259,8 @@ $default-font-size: --iui-font-size-1;
   .map-layer-source-item-warnMessage-icon {
     background-color: transparent;
     border: none;
-    color: $buic-foreground-warning;
+    color: var(--iui-color-icon-warning);
     background-color: transparent;
-
-    &:hover {
-      color: $hovered-icon-color;
-    }
-
     &:focus {
       outline: none;
       box-shadow: rgba(var(--iui-color-border-accent), var(--iui-opacity-4)) 0px 0px 0px 2px;
