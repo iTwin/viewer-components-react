@@ -89,7 +89,7 @@ export function SettingsDropdownMenu({ settingProviders, dataProvider, showNullV
   ));
 
   return <DropdownMenu menuItems={menuItems}>
-    <IconButton styleType="borderless" title={PropertyGridManager.translate("settings.label")}>
+    <IconButton styleType="borderless" size="small" title={PropertyGridManager.translate("settings.label")}>
       <SvgMoreVertical />
     </IconButton>
   </DropdownMenu>;

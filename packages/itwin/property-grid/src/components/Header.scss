@@ -3,10 +3,13 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "~@itwin/core-react/lib/cjs/core-react/index";
+.property-grid-react-panel-header {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: calc(var(--iui-size-l) * 2);
 
-.property-grid-react-filtering-pg-label {
-  @include uicore-text;
-  text-align: center;
-  padding: 0 var(--iui-size-m);
+  .property-grid-react-header-back-button {
+    margin-right: var(--iui-size-xs);
+  }
 }

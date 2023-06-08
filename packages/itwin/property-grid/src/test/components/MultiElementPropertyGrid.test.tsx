@@ -166,16 +166,17 @@ describe("<MultiElementPropertGrid />", () => {
     await waitFor(() => getByText("Test-Value-2"));
 
     // navigate back to element list
-    const propertyGridBackButton = container.querySelector<HTMLButtonElement>(".property-grid-react-panel-header #property-grid-react-element-list-back-btn");
-    expect(propertyGridBackButton).to.not.be.null;
-    await userEvents.click(propertyGridBackButton!);
+    const singleElementGrid = container.querySelector<HTMLButtonElement>(".property-grid-react-single-element-property-grid");
+    expect(singleElementGrid).to.not.be.null;
+    const singleElementBackButton = getByRoleRTL(singleElementGrid!, "button", { name: "header.back"  });
+    await userEvents.click(singleElementBackButton);
     await waitFor(() => getByText(expectedLabels[0]));
 
     // navigate back to multi instances properties grid
     const elementList = container.querySelector<HTMLDivElement>(".property-grid-react-element-list");
     expect(element).to.not.be.null;
-    const singleElementBackButton = getByRoleRTL(elementList!, "button", { name: "header.back"  });
-    await userEvents.click(singleElementBackButton);
+    const elementListBackButton = getByRoleRTL(elementList!, "button", { name: "header.back"  });
+    await userEvents.click(elementListBackButton);
     await waitFor(() => getByText("MultiInstances"));
   });
 

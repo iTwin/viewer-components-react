@@ -30,7 +30,7 @@ enum MultiElementPropertyContent {
  * Props for `MultiElementPropertyGrid` component.
  * @public
  */
-export type MultiElementPropertyGridProps = Omit<PropertyGridProps, "headerContent" | "onBackButton"> & AncestorNavigationProps;
+export type MultiElementPropertyGridProps = Omit<PropertyGridProps, "headerControls" | "onBackButton"> & AncestorNavigationProps;
 
 /**
  * Component that renders property grid for instances in `UnifiedSelection`.
@@ -57,7 +57,7 @@ export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }:
     });
   }, []);
 
-  const onInfoButton = () => {
+  const openElementList = () => {
     setContent(MultiElementPropertyContent.ElementList);
   };
 
@@ -65,21 +65,14 @@ export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }:
   const items = [
     <PropertyGridComponent
       {...props}
-      headerContent={
-        moreThanOneElement
-          ?
-          <IconButton
-            className="property-grid-react-multi-select-icon"
-            size="small"
-            styleType="borderless"
-            onClick={onInfoButton}
-            onKeyDown={onInfoButton}
-            title={PropertyGridManager.translate("element-list.title")}
-          >
-            <SvgPropertiesList />
-          </IconButton>
-          : <AncestryNavigation {...ancestorsNavigationProps} />
+      headerControls={
+        <HeaderControls
+          multipleElementsSelected={moreThanOneElement}
+          onElementListButtonClick={openElementList}
+          ancestorsNavigationProps={ancestorsNavigationProps}
+        />
       }
+      className={classnames("property-grid-react-property-grid", props.className)}
       key={"PropertyGrid"}
     />,
     <ElementListComponent
@@ -92,7 +85,7 @@ export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }:
         setContent(MultiElementPropertyContent.SingleElementPropertyGrid);
         focusInstance(instanceKey);
       }}
-      rootClassName={props.rootClassName}
+      className={classnames("property-grid-react-element-list", props.className)}
       key={"ElementList"}
     />,
     <SingleElementGrid
@@ -101,6 +94,7 @@ export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }:
       onBackButton={() => {
         setContent(MultiElementPropertyContent.ElementList);
       }}
+      className={classnames("property-grid-react-single-element-property-grid", props.className)}
       key={"SingleElementPropertyGrid"}
     />,
   ];
@@ -120,6 +114,33 @@ export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }:
       </div>
     </div>
   );
+}
+
+interface HeaderControlsProps {
+  multipleElementsSelected: boolean;
+  ancestorsNavigationProps: AncestorsNavigationProps;
+  onElementListButtonClick: () => void;
+}
+
+function HeaderControls({
+  multipleElementsSelected,
+  ancestorsNavigationProps,
+  onElementListButtonClick,
+}: HeaderControlsProps) {
+  if (!multipleElementsSelected) {
+    return <AncestryNavigation {...ancestorsNavigationProps} />;
+  }
+
+  return <IconButton
+    className="property-grid-react-multi-select-icon"
+    size="small"
+    styleType="borderless"
+    onClick={onElementListButtonClick}
+    onKeyDown={onElementListButtonClick}
+    title={PropertyGridManager.translate("element-list.title")}
+  >
+    <SvgPropertiesList />
+  </IconButton>;
 }
 
 function SingleElementGrid({ instanceKey, ...props }: Omit<SingleElementPropertyGridProps, "instanceKey"> & {instanceKey: InstanceKey | undefined}) {
