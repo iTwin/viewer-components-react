@@ -3,7 +3,7 @@
     {
       "packageName": "@itwin/grouping-mapping-widget",
       "comment": "New version of the package targeting iTwin.js 4.x and iTwinUI 2.x!",
-      "type": "major"
+      "type": "minor"
     }
   ],
   "packageName": "@itwin/grouping-mapping-widget"
