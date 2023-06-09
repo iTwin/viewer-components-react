@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import type { ReactNode } from "react";
 import React from "react";
-import { Text } from "@itwin/itwinui-react";
+import { Anchor, Text } from "@itwin/itwinui-react";
 import "./HorizontalTile.scss";
 import classNames from "classnames";
 
@@ -27,7 +27,12 @@ export const HorizontalTile = (props: HorizontalTileProps) => {
       <div className="gmw-body-container">
         {props.dragHandle}
         <div className="gmw-body">
-          <Text className={classNames("gmw-body-text", { "iui-anchor": !!props.onClickTitle })} onClick={props.onClickTitle} variant="body" title={props.titleTooltip}>{props.title}</Text>
+          {!!props.onClickTitle &&
+            <Anchor className="gmw-body-text" onClick={props.onClickTitle} title={props.titleTooltip}>{props.title}</Anchor>
+          }
+          {!props.onClickTitle &&
+            <Text className="gmw-body-text" variant="body" title={props.titleTooltip}>{props.title}</Text>
+          }
           {props.subText && <Text className="gmw-body-text" isMuted={true} title={props.subtextToolTip} variant="small">{props.subText}</Text>}
         </div>
       </div>

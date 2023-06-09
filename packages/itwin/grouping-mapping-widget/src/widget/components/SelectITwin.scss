@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
 
 .gmw-select-itwin-table-container {
   display: flex;
@@ -13,7 +12,7 @@
   .gmw-table-holding-tab {
     display: flex;
     flex-direction: column;
-    gap: $iui-baseline;
+    gap: var(--iui-size-s);
   }
 
   .gmw-select-itwin-table {
