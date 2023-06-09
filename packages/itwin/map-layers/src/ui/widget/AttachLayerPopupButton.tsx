@@ -142,6 +142,15 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     resumeOutsideClick();
   }, [activeViewport, backgroundLayers, isOverlay, onLayerAttached, overlayLayers, resumeOutsideClick]);
 
+  const handleSelectFeaturesCancel = React.useCallback( () => {
+    if (isMounted.current) {
+      setLoading(false);
+    }
+    resumeOutsideClick();
+    UiFramework.dialogs.modal.close();
+
+  }, [resumeOutsideClick, setLoading]);
+
   const handleSelectFeaturesOk = React.useCallback((source: MapLayerSource, sourceSubLayers: MapSubLayerProps[], selectedSubLayers: MapSubLayerProps[] ) => {
     // keep only visible subLayers
     const visibleSubLayers = selectedSubLayers.filter((value) => value.visible);
@@ -168,7 +177,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
         UiFramework.dialogs.modal.open(
           <MapSelectFeaturesDialog
             handleOk={(subLayers) => {handleSelectFeaturesOk(sourceState.source, sourceState.validation.subLayers!, subLayers);}}
-            handleCancel={() => {UiFramework.dialogs.modal.close();}}
+            handleCancel={handleSelectFeaturesCancel}
             source={sourceState.source}
             subLayers={clonedSubLayers}/>);
       } else {
@@ -178,7 +187,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
       resumeOutsideClick();
     }
 
-  }, [attachLayer, handleSelectFeaturesOk, resumeOutsideClick]);
+  }, [attachLayer, handleSelectFeaturesCancel, handleSelectFeaturesOk, resumeOutsideClick]);
 
   const handleModalUrlDialogCancel = React.useCallback(() => {
     // close popup and refresh UI
@@ -205,11 +214,12 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           if (sourceValidation.status === MapLayerSourceStatus.Valid || sourceValidation.status === MapLayerSourceStatus.RequireAuth) {
             if (sourceValidation.status === MapLayerSourceStatus.Valid) {
               if (mapLayerSettings.formatId === "WMS" && sourceValidation.subLayers !== undefined) { // TODO, replace this with a flag in MapLayerSourceStatus
+              // if (mapLayerSettings.formatId === "xyz" && sourceValidation.subLayers !== undefined) { // TODO, replace this with a flag in MapLayerSourceStatus
                 const clonedSubLayers = sourceValidation.subLayers.map((value: MapSubLayerProps) => {return {...value, visible: true};});
                 UiFramework.dialogs.modal.open(
                   <MapSelectFeaturesDialog
                     handleOk={(subLayers) => {handleSelectFeaturesOk(mapLayerSettings, sourceValidation.subLayers!, subLayers);}}
-                    handleCancel={() => {UiFramework.dialogs.modal.close();}}
+                    handleCancel={handleSelectFeaturesCancel}
                     source={mapLayerSettings}
                     subLayers={clonedSubLayers} />);
                 if (onHandleOutsideClick) {
@@ -256,7 +266,9 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     if (isMounted.current) {
       setLayerNameToAdd(undefined);
     }
-  }, [attachLayer, setLayerNameToAdd, layerNameToAdd, activeViewport, sources, backgroundLayers, isOverlay, overlayLayers, onLayerAttached, handleModalUrlDialogOk, handleSelectFeaturesOk, mapTypesOptions, handleModalUrlDialogCancel, onHandleOutsideClick]);
+  }, [attachLayer, setLayerNameToAdd, layerNameToAdd, activeViewport, sources, backgroundLayers, isOverlay, overlayLayers,
+    onLayerAttached, handleModalUrlDialogOk, handleSelectFeaturesCancel, handleSelectFeaturesOk, mapTypesOptions,
+    handleModalUrlDialogCancel, onHandleOutsideClick]);
 
   const options = React.useMemo(() => sources, [sources]);
 

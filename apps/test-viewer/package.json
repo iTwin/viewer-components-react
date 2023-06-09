@@ -27,6 +27,7 @@
     "@itwin/imodel-components-react": "^4.1.0",
     "@itwin/itwinui-react": "^2.7.0",
     "@itwin/map-layers-formats": "^4.0.0",
+    "@itwin/map-layers-auth": "^4.0.0",
     "@itwin/presentation-common": "^4.0.0",
     "@itwin/presentation-components": "^4.0.0",
     "@itwin/presentation-frontend": "^4.0.0",

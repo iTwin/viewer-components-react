@@ -274,8 +274,7 @@ $default-font-size: --iui-font-size-1;
 }
 
 .map-manager-sublayer-panel {
-  width: 400px;
-  height: 400px;
+  width: 400px;     // Ideally I would let the popup's content drives the width, unfortunately without an explicit width, the popup location is not consistent.
   color: $buic-foreground-body;
   font-size: $default-font-size;
   padding: 4px;

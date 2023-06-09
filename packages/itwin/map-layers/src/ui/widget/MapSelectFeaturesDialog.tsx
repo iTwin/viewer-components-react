@@ -6,7 +6,7 @@
 
 import { Dialog } from "@itwin/core-react";
 import * as React from "react";
-import "./MapUrlDialog.scss";
+import "./MapSelectFeaturesDialog.scss";
 
 import { DialogButtonType } from "@itwin/appui-abstract";
 import { MapLayersUI } from "../../mapLayers";
@@ -20,6 +20,7 @@ export interface MapSelectFeaturesProps {
   handleOk: (subLayers: MapSubLayerProps[]) => void;
   handleCancel: () => void;
 }
+const minHeight = 250;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
@@ -43,7 +44,7 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
   return (
     <div ref={dialogContainer}>
       <Dialog
-        className="map-layer-url-dialog"
+        className="map-layer-select-features-dialog"
         title={dialogTitle}
         opened={true}
         resizable={true}
@@ -52,13 +53,13 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         buttonCluster={buttonCluster}
         onClose={handleCancel}
         onEscape={handleCancel}
-        minHeight={120}
+        minHeight={minHeight}
         maxWidth={600}
         titleStyle={{ paddingLeft: "10px" }}
         footerStyle={{ paddingBottom: "10px", paddingRight: "10px" }}
         trapFocus={false}
       >
-        <div className="map-layer-source-url-subLayers"><SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} /></div>
+        <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} />
       </Dialog>
     </div >
   );

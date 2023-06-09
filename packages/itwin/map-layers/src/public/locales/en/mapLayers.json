@@ -121,6 +121,7 @@
     "AllOn": "Turn on all Sub-layers",
     "AllOff": "Turn off all Sub-layers",
     "Hide": "Hide Sub-layers",
+    "NoResults": "No Results",
     "NoSubLayers": "No Sub-layers Available",
     "SearchPlaceholder": "Search...",
     "Show": "Show Sub-layers"
