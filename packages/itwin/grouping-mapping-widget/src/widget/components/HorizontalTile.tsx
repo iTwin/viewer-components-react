@@ -27,10 +27,10 @@ export const HorizontalTile = (props: HorizontalTileProps) => {
       <div className="gmw-body-container">
         {props.dragHandle}
         <div className="gmw-body">
-          { !!props.onClickTitle &&
-            <Anchor as='button' onClick={props.onClickTitle} title={props.titleTooltip}>{props.title}</Anchor>
+          {!!props.onClickTitle &&
+            <Anchor className="gmw-body-text" onClick={props.onClickTitle} title={props.titleTooltip}>{props.title}</Anchor>
           }
-          { !props.onClickTitle &&
+          {!props.onClickTitle &&
             <Text className="gmw-body-text" variant="body" title={props.titleTooltip}>{props.title}</Text>
           }
           {props.subText && <Text className="gmw-body-text" isMuted={true} title={props.subtextToolTip} variant="small">{props.subText}</Text>}
