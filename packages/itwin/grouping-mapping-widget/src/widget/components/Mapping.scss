@@ -2,38 +2,32 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .gmw-mappings-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  padding: $iui-baseline $iui-m;
   min-height: 0;
 
   .gmw-table-toolbar {
     display: flex;
     justify-content: space-between;
-    gap: $iui-s;
-    border-bottom: 1px solid var(--iui-color-background-4);
-    padding-bottom: $iui-baseline;
+    gap: var(--iui-size-xs);
+    border-bottom: 1px solid var(--iui-color-border-subtle);
+    padding-bottom: var(--iui-size-s);
     flex-wrap: wrap;
 
     .gmw-button-spacing {
       display: flex;
-      gap: $iui-s;
+      gap: var(--iui-size-xs);
     }
-  }
-
-  button {
-    align-self: flex-start;
   }
 
   .gmw-mappings-list {
     display: flex;
     flex-direction: column;
     overflow-y: overlay;
-    gap: $iui-s;
-    margin-top: $iui-s;
+    gap: var(--iui-size-xs);
+    margin-top: var(--iui-size-xs);
   }
 }

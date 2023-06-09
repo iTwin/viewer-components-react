@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { Fieldset, LabeledInput, Small, ToggleSwitch } from "@itwin/itwinui-react";
+import { Fieldset, LabeledInput, Text, ToggleSwitch } from "@itwin/itwinui-react";
 import React, { useState } from "react";
 import ActionPanel from "./ActionPanel";
 import useValidator, { NAME_REQUIREMENTS } from "../hooks/useValidator";
@@ -75,9 +75,9 @@ export const MappingAction = ({ mapping, onSaveSuccess, onClickCancel, displaySt
     <>
       <div className='gmw-details-form-container'>
         <Fieldset legend={displayStrings.mappingDetails} className='gmw-details-form'>
-          <Small className='gmw-field-legend'>
+          <Text variant='small' as='small' className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
-          </Small>
+          </Text>
           <LabeledInput
             id='name'
             name='name'

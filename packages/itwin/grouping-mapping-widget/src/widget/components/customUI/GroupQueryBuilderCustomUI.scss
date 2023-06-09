@@ -2,7 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .gmw-select-query-generator-container {
   display: flex;
@@ -27,6 +26,6 @@
   .gmw-select-reset-button {
     display: flex;
     justify-content: right;
-    margin-top: $iui-baseline;
+    margin-top: var(--iui-size-s);
   }
 }
