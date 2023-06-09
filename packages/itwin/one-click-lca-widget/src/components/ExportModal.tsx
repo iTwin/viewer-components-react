@@ -142,7 +142,7 @@ const ExportModal = (props: ExportProps) => {
   );
 
   const signin = useCallback(
-    async (e) => {
+    async (e: any) => {
       e.preventDefault();
       startSigningIn(true);
       try {

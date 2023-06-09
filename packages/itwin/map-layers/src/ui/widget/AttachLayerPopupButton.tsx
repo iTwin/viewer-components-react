@@ -126,7 +126,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
                 const settings = mapLayerSettings.toLayerSettings(subLayers);
 
                 if (settings) {
-                  activeViewport.displayStyle.attachMapLayer({ settings, mapLayerIndex: {index: -1, isOverlay} });
+                  activeViewport.displayStyle.attachMapLayer({ settings, mapLayerIndex: { index: -1, isOverlay } });
 
                   const msg = IModelApp.localization.getLocalizedString("mapLayers:Messages.MapLayerAttached", { sourceName: settings.name, sourceUrl: settings.url });
                   IModelApp.notifications.outputMessage(new NotifyMessageDetails(OutputMessagePriority.Info, msg));
@@ -249,7 +249,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
   /*
    Handle Remove layer button clicked
    */
-  const onItemRemoveButtonClicked = React.useCallback((source, event) => {
+  const onItemRemoveButtonClicked = React.useCallback((source: MapLayerSource, event: any) => {
     event.stopPropagation();  // We don't want the owning ListBox to react on mouse click.
 
     const layerName = source.name;
@@ -275,7 +275,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
   /*
  Handle Edit layer button clicked
  */
-  const onItemEditButtonClicked = React.useCallback((event) => {
+  const onItemEditButtonClicked = React.useCallback((event: any) => {
     event.stopPropagation();  // We don't want the owning ListBox to react on mouse click.
 
     const targetLayerName = event?.currentTarget?.parentNode?.dataset?.value;

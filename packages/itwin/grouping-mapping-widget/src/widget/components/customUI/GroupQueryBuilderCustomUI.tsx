@@ -89,7 +89,7 @@ export const GroupQueryBuilderCustomUI = ({
       );
   };
 
-  const resize = useCallback((width, height) => setSize({ width, height }), []);
+  const resize = useCallback((width: number, height: number) => setSize({ width, height }), []);
 
   const propertyContextValues = useMemo(
     () => ({

@@ -29,6 +29,7 @@ export interface PopupProps extends CommonProps {
   onOpen?: () => void;
   /** Function called when the popup is closed */
   onClose?: () => void;
+  children?: React.ReactNode;
 }
 
 interface PopupState {

@@ -44,6 +44,7 @@ export interface SearchBarProps extends CommonProps {
   resultCount: number;
   /** Callback to currently selected result/entry change */
   onSelectedChanged: (index: number) => void;
+  children?: React.ReactNode;
 }
 
 interface SearchBarState {
