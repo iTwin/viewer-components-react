@@ -2,12 +2,11 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
 
 .gmw-actions {
   display: flex;
   flex-direction: row;
   .gmw-action-dropdown {
-    width: $iui-3xl + $iui-xl;
+    width: calc(var(--iui-size-3xl) + var(--iui-size-xl));
   }
 }

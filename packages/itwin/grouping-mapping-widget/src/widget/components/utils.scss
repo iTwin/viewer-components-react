@@ -2,9 +2,6 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import "~@itwin/itwinui-css/scss/variables";
-@import "~@itwin/itwinui-css/scss/icon/index";
-@import "~@itwin/itwinui-css/scss/button/index";
 
 .gmw-loading-spinner {
   display: flex;
@@ -16,6 +13,6 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  gap: $iui-baseline;
+  gap: var(--iui-size-s);
   height: 100%;
 }

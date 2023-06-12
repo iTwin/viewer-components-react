@@ -3,25 +3,22 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { ScreenViewport } from "@itwin/core-frontend";
+
 import { RelativePosition } from "@itwin/appui-abstract";
 import { OutsideClickEvent, Popup, useOnOutsideClick, WebFontIcon } from "@itwin/core-react";
-import { SubLayersPanel } from "./SubLayersTree";
-import { StyleMapLayerSettings } from "../Interfaces";
+import { SubLayersPanel, SubLayersPanelProps } from "./SubLayersTree";
 import { MapLayersUI } from "../../mapLayers";
 import { Button } from "@itwin/itwinui-react";
 
 // cSpell:ignore droppable Sublayer
 
 /** @internal */
-export interface SubLayersPopupButtonProps {
-  mapLayerSettings: StyleMapLayerSettings;
-  activeViewport: ScreenViewport;
-}
+
+export type SubLayersPopupButtonProps = SubLayersPanelProps;
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function SubLayersPopupButton({ mapLayerSettings, activeViewport }: SubLayersPopupButtonProps) {
+export function SubLayersPopupButton(props: SubLayersPopupButtonProps) {
 
   const [showSubLayersLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.Show"));
   const [hideSubLayersLabel] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:SubLayers.Hide"));
@@ -57,7 +54,7 @@ export function SubLayersPopupButton({ mapLayerSettings, activeViewport }: SubLa
       >
         <div className="map-transparency-popup-panel">
           <div ref={panelRef} className="map-manager-sublayer-panel">
-            <SubLayersPanel mapLayer={mapLayerSettings} viewport={activeViewport} />
+            <SubLayersPanel {...props} />
           </div>
         </div>
       </Popup >

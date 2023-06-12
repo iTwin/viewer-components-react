@@ -14,16 +14,11 @@
 
   .components-selectable-content {
     flex: 1;
+    overflow: hidden;
   }
 
   .components-selectable-content-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: var(--iui-size-2xs);
-
-    .uicore-reactSelectTop {
-      flex: 1;
-    }
+    padding-bottom: var(--iui-size-2xs);
   }
 
   .components-selectable-content-wrapper {
@@ -32,25 +27,10 @@
     flex-grow: 1;
     height: 100%;
   }
-
-  .visibility-tree-toolbar {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: var(--iui-size-2xs);
-
-    .tree-toolbar-searchbox {
-      margin-left: auto;
-
-      .components-filtering-input {
-        margin: 0;
-      }
-    }
-  }
 }
 
 .tree-widget-select {
-  margin-bottom: var(--iui-size-2xs);
+  padding-bottom: var(--iui-size-2xs);
 }
 
 .tree-widget-tree-container {
@@ -60,5 +40,5 @@
 }
 
 .tree-widget-search-bar {
-  margin-bottom: var(--iui-size-2xs);
+  padding-bottom: var(--iui-size-2xs);
 }

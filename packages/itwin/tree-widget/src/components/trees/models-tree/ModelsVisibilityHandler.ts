@@ -3,20 +3,26 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { TreeNodeItem } from "@itwin/components-react";
-import { BeEvent, Id64String } from "@itwin/core-bentley";
+import { BeEvent } from "@itwin/core-bentley";
 import { QueryBinder, QueryRowFormat } from "@itwin/core-common";
-import { IModelConnection, PerModelCategoryVisibility, Viewport } from "@itwin/core-frontend";
-import { ECClassGroupingNodeKey, GroupingNodeKey, Keys, KeySet, NodeKey } from "@itwin/presentation-common";
-import { IFilteredPresentationTreeDataProvider, isPresentationTreeNodeItem } from "@itwin/presentation-components";
+import { IModelApp, PerModelCategoryVisibility } from "@itwin/core-frontend";
+import { KeySet, NodeKey } from "@itwin/presentation-common";
+import { isPresentationTreeNodeItem } from "@itwin/presentation-components";
 import { Presentation } from "@itwin/presentation-frontend";
 import { TreeWidget } from "../../../TreeWidget";
-import { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
+import { toggleAllCategories } from "../CategoriesVisibilityUtils";
 import { CachingElementIdsContainer } from "./Utils";
 
+import type { TreeNodeItem } from "@itwin/components-react";
+import type { Id64String } from "@itwin/core-bentley";
+import type { IModelConnection, Viewport } from "@itwin/core-frontend";
+import type { ECClassGroupingNodeKey, GroupingNodeKey, Keys } from "@itwin/presentation-common";
+import type { IFilteredPresentationTreeDataProvider } from "@itwin/presentation-components";
+import type { IVisibilityHandler, VisibilityChangeListener, VisibilityStatus } from "../VisibilityTreeEventHandler";
+
 /**
- * Visibility tree node types.
- * @beta
+ * Models tree node types.
+ * @public
  */
 export enum ModelsTreeNodeType {
   Unknown,
@@ -29,13 +35,13 @@ export enum ModelsTreeNodeType {
 
 /**
  * Type definition of predicate used to decide if node can be selected
- * @beta
+ * @public
  */
 export type ModelsTreeSelectionPredicate = (key: NodeKey, type: ModelsTreeNodeType) => boolean;
 
 /**
  * Props for [[ModelsVisibilityHandler]]
- * @alpha
+ * @public
  */
 export interface ModelsVisibilityHandlerProps {
   rulesetId: string;
@@ -47,7 +53,7 @@ export interface ModelsVisibilityHandlerProps {
 
 /**
  * Visibility handler used by [[ModelsTree]] to control visibility of the tree items.
- * @alpha
+ * @public
  */
 export class ModelsVisibilityHandler implements IVisibilityHandler {
   private _props: ModelsVisibilityHandlerProps;
@@ -103,9 +109,11 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
   public static isSubjectNode(node: TreeNodeItem) {
     return node.extendedData && node.extendedData.isSubject;
   }
+
   public static isModelNode(node: TreeNodeItem) {
     return node.extendedData && node.extendedData.isModel;
   }
+
   public static isCategoryNode(node: TreeNodeItem) {
     return node.extendedData && node.extendedData.isCategory;
   }
@@ -181,7 +189,7 @@ export class ModelsVisibilityHandler implements IVisibilityHandler {
       return this.getSubjectDisplayStatus(ids);
 
     const children = await provider.getNodes(node);
-    const childrenDisplayStatuses = await Promise.all(children.map((childNode) => this.getVisibilityStatus(childNode)));
+    const childrenDisplayStatuses = await Promise.all(children.map(async (childNode) => this.getVisibilityStatus(childNode)));
     if (childrenDisplayStatuses.some((status) => status.state === "visible"))
       return { state: "visible", tooltip: createTooltip("visible", "subject.atLeastOneModelVisible") };
     return { state: "hidden", tooltip: createTooltip("hidden", "subject.allModelsHidden") };
@@ -589,3 +597,69 @@ const createTooltip = (status: "visible" | "hidden" | "disabled", tooltipStringI
   const tooltipString = TreeWidget.translate(tooltipStringId);
   return `${statusString}: ${tooltipString}`;
 };
+
+/**
+ * Enables display of all given models. Also enables display of all categories and clears always and
+ * never drawn lists in the viewport.
+ * @public
+ */
+export async function showAllModels(models: string[], viewport: Viewport) {
+  await viewport.addViewedModels(models);
+  viewport.clearNeverDrawn();
+  viewport.clearAlwaysDrawn();
+  await toggleAllCategories(
+    IModelApp.viewManager,
+    viewport.iModel,
+    true,
+    viewport,
+    false,
+  );
+}
+
+/**
+ * Disables display of all given models.
+ * @public
+ */
+export async function hideAllModels(models: string[], viewport: Viewport) {
+  viewport.changeModelDisplay(
+    models,
+    false
+  );
+}
+
+/**
+ * Inverts display of all given models.
+ * @public
+ */
+export async function invertAllModels(models: string[], viewport: Viewport) {
+  const notViewedModels: string[] = [];
+  const viewedModels: string[] = [];
+  models.forEach((modelId) => {
+    if (viewport.viewsModel(modelId)) viewedModels.push(modelId);
+    else notViewedModels.push(modelId);
+  });
+  await viewport.addViewedModels(notViewedModels);
+  viewport.changeModelDisplay(viewedModels, false);
+}
+
+/**
+ * Based on the value of `enable` argument, either enables or disables display of given models.
+ * @public
+ */
+export async function toggleModels(models: string[], enable: boolean, viewport: Viewport) {
+  // istanbul ignore if
+  if (!models)
+    return;
+  if (enable)
+    viewport.changeModelDisplay(models, false);
+  else
+    await viewport.addViewedModels(models);
+}
+
+/**
+ * Checks if all given models are displayed in given viewport.
+ * @public
+ */
+export function areAllModelsVisible(models: string[], viewport: Viewport) {
+  return models.length !== 0 ? models.every((id) => viewport.viewsModel(id)) : false;
+}

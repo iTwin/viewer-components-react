@@ -5,7 +5,8 @@
 import type { IModelsClient } from "@itwin/imodels-client-management";
 import type { ITwinsAccessClient } from "@itwin/itwins-client";
 import type { StepProperties } from "@itwin/itwinui-react";
-import { Modal, Wizard } from "@itwin/itwinui-react";
+import { Stepper } from "@itwin/itwinui-react";
+import { Modal } from "@itwin/itwinui-react";
 import React, { useEffect, useRef, useState } from "react";
 import ConfirmMappingImport from "./ConfirmMappingsImport";
 import type { IMappingTyped } from "./Mapping";
@@ -100,7 +101,7 @@ export const MappingImportWizardModal = ({
       }}
     >
       <div className='gmw-import-wizard-body-container'>
-        <Wizard
+        <Stepper
           currentStep={currentStep}
           steps={steps.current}
           onStepClick={

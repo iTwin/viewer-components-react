@@ -9,13 +9,13 @@ import {
   Alert,
   Button,
   Fieldset,
+  Icon,
   IconButton,
   Label,
   LabeledInput,
   LabeledSelect,
   Modal,
   ModalButtonBar,
-  Small,
   Surface,
   Text,
 } from "@itwin/itwinui-react";
@@ -272,9 +272,9 @@ export const GroupPropertyAction = ({
     >
       <div className='gmw-group-property-action-container'>
         <Fieldset disabled={isLoading} className='gmw-property-options' legend='Property Details'>
-          <Small className='gmw-field-legend'>
+          <Text variant='small' as='small' className='gmw-field-legend'>
             Asterisk * indicates mandatory fields.
-          </Small>
+          </Text>
           <LabeledInput
             id='propertyName'
             label='Property Name'
@@ -389,7 +389,11 @@ export const GroupPropertyAction = ({
           gutterSize={2}
           gutter={() => {
             // Expects HTMLElement
-            const dragHangle = renderToStaticMarkup(<div className="gmw-gutter-drag-icon"><SvgMoreVerticalSmall /></div>);
+            const dragHangle = renderToStaticMarkup(
+              <Icon className="gmw-gutter-drag-icon" size="large">
+                <SvgMoreVerticalSmall />
+              </Icon>
+            );
             const gutter = document.createElement("div");
             gutter.className = `gmw-gutter`;
             gutter.innerHTML = dragHangle;
@@ -519,7 +523,11 @@ export const GroupPropertyAction = ({
                 styleType="borderless">
                 <SvgRemove />
               </IconButton>}
-            dragHandle={<div className="gmw-drag-icon" ><SvgDragHandleVertical /></div>}
+            dragHandle={
+              <Icon className="gmw-drag-icon" size="large">
+                <SvgDragHandleVertical />
+              </Icon>
+            }
           /> : null}
       </DragOverlay>
     </DndContext>

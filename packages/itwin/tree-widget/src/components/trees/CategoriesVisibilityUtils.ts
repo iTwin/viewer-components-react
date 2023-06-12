@@ -4,14 +4,16 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { QueryRowFormat } from "@itwin/core-common";
-import { IModelConnection, PerModelCategoryVisibility, ViewManager, Viewport } from "@itwin/core-frontend";
-import { CategoryInfo } from "./category-tree/CategoryVisibilityHandler";
+import { PerModelCategoryVisibility } from "@itwin/core-frontend";
+
+import type { IModelConnection, ViewManager, Viewport } from "@itwin/core-frontend";
+import type { CategoryInfo } from "./category-tree/CategoryVisibilityHandler";
 
 const EMPTY_CATEGORIES_ARRAY: CategoryInfo[] = [];
 
 /**
  * Toggles visibility of categories to show or hide.
- * @alpha
+ * @internal
  */
 export async function toggleAllCategories(viewManager: ViewManager, imodel: IModelConnection, display: boolean, viewport?: Viewport, forAllViewports?: boolean) {
   // istanbul ignore next
@@ -27,14 +29,17 @@ export async function toggleAllCategories(viewManager: ViewManager, imodel: IMod
 
 /**
  * Gets ids of all categories from specified imodel and viewport.
- * @alpha
+ * @internal
  */
 export async function getCategories(imodel: IModelConnection, viewport?: Viewport) {
   const categories = await loadCategoriesFromViewport(imodel, viewport);
   return categories.map((category) => category.categoryId);
 }
 
-/** Changes category display in the viewport */
+/**
+ * Changes category display in the viewport.
+ * @internal
+ */
 export async function enableCategory(viewManager: ViewManager, imodel: IModelConnection, ids: string[], enabled: boolean, forAllViewports: boolean, enableAllSubCategories = true) {
   if (!viewManager.selectedView)
     return;
@@ -73,7 +78,10 @@ export async function enableCategory(viewManager: ViewManager, imodel: IModelCon
   }
 }
 
-/** Changes subcategory display in the viewport */
+/**
+ * Changes subcategory display in the viewport
+ * @internal
+ */
 export function enableSubCategory(viewManager: ViewManager, key: string, enabled: boolean, forAllViewports?: boolean) {
   if (!viewManager.selectedView)
     return;
