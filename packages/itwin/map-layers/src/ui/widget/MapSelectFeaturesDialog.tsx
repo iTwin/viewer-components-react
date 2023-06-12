@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 // cSpell:ignore Modeless WMTS
 
-import { Dialog } from "@itwin/core-react";
+import { Dialog, Icon } from "@itwin/core-react";
 import * as React from "react";
 import "./MapSelectFeaturesDialog.scss";
 
@@ -21,10 +21,15 @@ export interface MapSelectFeaturesProps {
   handleCancel: () => void;
 }
 const minHeight = 250;
+const maxSubLayers = 30;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
-  const [subLayers] = React.useState(props.subLayers);
+  const [subLayers, setSubLayers] = React.useState(props.subLayers);
+  const [NoLayersSelectedMsg] = React.useState(()=>MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.NoLayersSelected"));
+  const [dialogTitle] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.SelectLayersToCreate"));
+
+  const dialogContainer = React.useRef<HTMLDivElement>(null);
 
   const handleOk = React.useCallback(() => {
     props.handleOk(subLayers);
@@ -34,13 +39,34 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
     props.handleCancel();
   }, [props]);
 
-  const buttonCluster = React.useMemo(() => [
-    { type: DialogButtonType.OK, onClick: handleOk},
+  const hasVisibleLayers = () => subLayers.some((entry)=>entry.visible);
+  const hasTooManyVisibleLayers = () => subLayers.filter((entry)=>entry.visible).length > maxSubLayers;
+  const readyToSave = () => hasVisibleLayers();
+  const buttonCluster = [
+    { type: DialogButtonType.OK, onClick: handleOk, disabled: !readyToSave() },
     { type: DialogButtonType.Cancel, onClick: handleCancel },
-  ], [handleCancel, handleOk]);
+  ];
 
-  const dialogContainer = React.useRef<HTMLDivElement>(null);
-  const [dialogTitle] = React.useState(MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.SelectLayersToCreate"));
+  function renderWarningMessage(): React.ReactNode {
+    let warningMessage: string | undefined;
+
+    // Get the proper warning message
+    if (!hasVisibleLayers()) {
+      warningMessage = NoLayersSelectedMsg;
+    } else if (hasTooManyVisibleLayers()) {
+      warningMessage = MapLayersUI.localization.getLocalizedString("mapLayers:CustomAttach.TooManyLayersSelected", { layerCount: subLayers.filter((entry)=>entry.visible).length});
+    }
+
+    if (warningMessage !== undefined) {
+      return (
+        <div className="map-layer-source-warnMessage">
+          <Icon className="map-layer-source-warnMessage-icon" iconSpec="icon-status-warning" />
+          <span className="map-layer-source-warnMessage-label">{warningMessage}</span >
+        </div>);
+    }
+    return <></>;
+  }
+
   return (
     <div ref={dialogContainer}>
       <Dialog
@@ -59,8 +85,13 @@ export function MapSelectFeaturesDialog(props: MapSelectFeaturesProps) {
         footerStyle={{ paddingBottom: "10px", paddingRight: "10px" }}
         trapFocus={false}
       >
-        <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} />
+        <SubLayersTree expandMode="full" checkboxStyle="standard" subLayers={subLayers} onSubLayerStateChange={() => setSubLayers([...subLayers])}/>
+
+        {/* Warning message */}
+        {renderWarningMessage()}
       </Dialog>
+
+
     </div >
   );
 }

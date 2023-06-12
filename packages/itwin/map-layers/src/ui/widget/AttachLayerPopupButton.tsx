@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { IModelApp, MapLayerSource, MapLayerSourceStatus, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
+import { IModelApp, MapLayerSource, MapLayerSourceStatus, MapLayerSourceValidation, NotifyMessageDetails, OutputMessagePriority } from "@itwin/core-frontend";
 import { RelativePosition } from "@itwin/appui-abstract";
 import * as UiCore from "@itwin/core-react";
 import { UiFramework } from "@itwin/appui-react";
@@ -165,29 +165,38 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
 
   }, [attachLayer]);
 
+  const openFeatureSelectionDialog = React.useCallback((subLayers: MapSubLayerProps[], source: MapLayerSource ) => {
+    // Force sub-Layers to non-visible in the dialog
+    const clonedSubLayers = subLayers.map((value: MapSubLayerProps) => {return {...value, visible: false};});
+    UiFramework.dialogs.modal.open(
+      <MapSelectFeaturesDialog
+        handleOk={(selectedLayers) => {handleSelectFeaturesOk(source, subLayers, selectedLayers);}}
+        handleCancel={handleSelectFeaturesCancel}
+        source={source}
+        subLayers={clonedSubLayers}/>);
+  }, [handleSelectFeaturesCancel, handleSelectFeaturesOk]);
+
+  const  needsFeatureSelection = React.useCallback((source: MapLayerSource, validation: MapLayerSourceValidation ) => {
+    return source.formatId === "WMS"     // TODO, replace this with a flag in MapLayerSourceStatus
+    && validation.subLayers
+    && validation.subLayers.length;
+  }, []);
+
   const handleModalUrlDialogOk = React.useCallback((action: LayerAction, sourceState?: SourceState) => {
     UiFramework.dialogs.modal.close();
-    if (LayerAction.New === action && sourceState) {
-      const needFeatureSelection = sourceState.source.formatId === "WMS"
-      && sourceState.validation.status === MapLayerSourceStatus.Valid
-      && sourceState.validation.subLayers
-      && sourceState.validation.subLayers.length > 1;
-      if (needFeatureSelection && sourceState.validation.subLayers) {
-        const clonedSubLayers = sourceState.validation.subLayers.map((value: MapSubLayerProps) => {return {...value, visible: true};});
-        UiFramework.dialogs.modal.open(
-          <MapSelectFeaturesDialog
-            handleOk={(subLayers) => {handleSelectFeaturesOk(sourceState.source, sourceState.validation.subLayers!, subLayers);}}
-            handleCancel={handleSelectFeaturesCancel}
-            source={sourceState.source}
-            subLayers={clonedSubLayers}/>);
+    if (LayerAction.New === action
+      && sourceState
+      && (sourceState.validation.status === MapLayerSourceStatus.Valid)) {
+      if (sourceState.validation.subLayers
+        && needsFeatureSelection(sourceState.source, sourceState.validation) && sourceState.validation.subLayers) {
+        openFeatureSelectionDialog(sourceState.validation.subLayers, sourceState.source);
       } else {
         attachLayer(sourceState.source, sourceState.validation.subLayers, false);
       }
     } else {
       resumeOutsideClick();
     }
-
-  }, [attachLayer, handleSelectFeaturesCancel, handleSelectFeaturesOk, resumeOutsideClick]);
+  }, [attachLayer, needsFeatureSelection, openFeatureSelectionDialog, resumeOutsideClick]);
 
   const handleModalUrlDialogCancel = React.useCallback(() => {
     // close popup and refresh UI
@@ -213,15 +222,8 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
           const sourceValidation = await mapLayerSettings.validateSource();
           if (sourceValidation.status === MapLayerSourceStatus.Valid || sourceValidation.status === MapLayerSourceStatus.RequireAuth) {
             if (sourceValidation.status === MapLayerSourceStatus.Valid) {
-              if (mapLayerSettings.formatId === "WMS" && sourceValidation.subLayers !== undefined) { // TODO, replace this with a flag in MapLayerSourceStatus
-              // if (mapLayerSettings.formatId === "xyz" && sourceValidation.subLayers !== undefined) { // TODO, replace this with a flag in MapLayerSourceStatus
-                const clonedSubLayers = sourceValidation.subLayers.map((value: MapSubLayerProps) => {return {...value, visible: true};});
-                UiFramework.dialogs.modal.open(
-                  <MapSelectFeaturesDialog
-                    handleOk={(subLayers) => {handleSelectFeaturesOk(mapLayerSettings, sourceValidation.subLayers!, subLayers);}}
-                    handleCancel={handleSelectFeaturesCancel}
-                    source={mapLayerSettings}
-                    subLayers={clonedSubLayers} />);
+              if (sourceValidation.subLayers && needsFeatureSelection(mapLayerSettings, sourceValidation)) {
+                openFeatureSelectionDialog(sourceValidation.subLayers, mapLayerSettings);
                 if (onHandleOutsideClick) {
                   onHandleOutsideClick(false);
                 }
@@ -266,9 +268,9 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
     if (isMounted.current) {
       setLayerNameToAdd(undefined);
     }
-  }, [attachLayer, setLayerNameToAdd, layerNameToAdd, activeViewport, sources, backgroundLayers, isOverlay, overlayLayers,
+  }, [attachLayer, needsFeatureSelection, setLayerNameToAdd, layerNameToAdd, activeViewport, sources, backgroundLayers, isOverlay, overlayLayers,
     onLayerAttached, handleModalUrlDialogOk, handleSelectFeaturesCancel, handleSelectFeaturesOk, mapTypesOptions,
-    handleModalUrlDialogCancel, onHandleOutsideClick]);
+    handleModalUrlDialogCancel, onHandleOutsideClick, openFeatureSelectionDialog]);
 
   const options = React.useMemo(() => sources, [sources]);
 
