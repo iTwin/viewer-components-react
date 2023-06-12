@@ -2,6 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import "./MeasurementPropertyWidget.scss";
 import * as React from "react";
 import type { Id64String } from "@itwin/core-bentley";
 import { IModelApp, SelectionSetEventType } from "@itwin/core-frontend";
@@ -187,8 +188,11 @@ export const MeasurementPropertyWidget = () => {
     setSize({ width: w, height: h });
   }, []);
 
-  return <ResizableContainerObserver onResize={handleResize}>
-    <VirtualizedPropertyGridWithDataProvider dataProvider={dataProvider} orientation={Orientation.Vertical} height={height} width={width} />
-  </ResizableContainerObserver>;
-
+  return (
+    <div className={"measure-tools-property-widget-container"}>
+      <ResizableContainerObserver onResize={handleResize}>
+        <VirtualizedPropertyGridWithDataProvider dataProvider={dataProvider} orientation={Orientation.Vertical} height={height} width={width} />
+      </ResizableContainerObserver>
+    </div>
+  );
 };
