@@ -128,15 +128,15 @@ describe("<FilteringPropertyGrid />", () => {
                     valueFormat: PropertyValueFormat.Array,
                     itemsTypeName: "string",
                     items: [
-                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 1" }, { name: "item-prop-1", displayLabel: "Item Prop 1" }),
-                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 2" }, { name: "item-prop-2", displayLabel: "Item Prop 2" }),
+                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" }, { name: "item-prop-1", displayLabel: "Non-Empty Item 1" }),
+                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" }, { name: "item-prop-2", displayLabel: "Non-Empty Item 2" }),
                     ],
                   },
-                  { name: "test-prop1", displayLabel: "Non-null Prop" }
+                  { name: "test-prop1", displayLabel: "Non-Empty Array Prop" }
                 ),
                 createPropertyRecord(
                   { valueFormat: PropertyValueFormat.Array, itemsTypeName: "string", items: [] },
-                  { name: "test-prop2", displayLabel: "Empty Prop" }
+                  { name: "test-prop2", displayLabel: "Empty Array Prop" }
                 ),
               ],
             },
@@ -153,8 +153,63 @@ describe("<FilteringPropertyGrid />", () => {
         />
       );
 
-      await waitFor(() => getByText("Non-null Prop"));
-      expect(queryByText("Empty Prop")).to.be.null;
+      await waitFor(() => getByText(/^Non-Empty Array Prop/));
+      expect(queryByText(/^Empty Array Prop/)).to.be.null;
+    });
+
+    it("filters out array properties with empty items", async () => {
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
+      const dataProvider = {
+        onDataChanged: new PropertyDataChangeEvent(),
+        getData: async () => {
+          return {
+            categories: [{
+              expand: true,
+              label: "Test Category",
+              name: "test-category",
+            }],
+            label: PropertyRecord.fromString("Test Instance"),
+            records: {
+              ["test-category"]: [
+                createPropertyRecord(
+                  {
+                    valueFormat: PropertyValueFormat.Array,
+                    itemsTypeName: "string",
+                    items: [
+                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" }, { name: "item-prop-1", displayLabel: "Non-Empty Item 1" }),
+                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" }, { name: "item-prop-2", displayLabel: "Non-Empty Item 2" }),
+                    ],
+                  },
+                  { name: "test-prop1", displayLabel: "Non-Empty Array Prop" }
+                ),
+                createPropertyRecord(
+                  {
+                    valueFormat: PropertyValueFormat.Array,
+                    itemsTypeName: "string",
+                    items: [
+                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive }, { name: "item-prop-1", displayLabel: "Empty Item 1" }),
+                      createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive }, { name: "item-prop-2", displayLabel: "Empty Item 2" }),
+                    ],
+                  },
+                  { name: "test-prop2", displayLabel: "Empty Array Prop" }
+                ),
+              ],
+            },
+          };
+        },
+      } as IPropertyDataProvider;
+
+      const { getByText, queryByText } = render(
+        <FilteringPropertyGrid
+          height={100}
+          width={100}
+          filterer={filterer}
+          dataProvider={dataProvider}
+        />
+      );
+
+      await waitFor(() => getByText(/^Non-Empty Array Prop/));
+      expect(queryByText(/^Empty Array Prop/)).to.be.null;
     });
 
     it("filters out empty struct properties", async () => {
@@ -175,15 +230,15 @@ describe("<FilteringPropertyGrid />", () => {
                   {
                     valueFormat: PropertyValueFormat.Struct,
                     members: {
-                      member1: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 1" }, { name: "item-prop-1", displayLabel: "Item Prop 1" }),
-                      member2: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 2" }, { name: "item-prop-2", displayLabel: "Item Prop 2" }),
+                      member1: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" }, { name: "item-prop-1", displayLabel: "Member Prop 1" }),
+                      member2: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" }, { name: "item-prop-2", displayLabel: "Member Prop 2" }),
                     },
                   },
-                  { name: "test-prop1", displayLabel: "Non-null Prop" }
+                  { name: "test-prop1", displayLabel: "Non-Empty Struct Prop" }
                 ),
                 createPropertyRecord(
                   { valueFormat: PropertyValueFormat.Struct, members: {} },
-                  { name: "test-prop2", displayLabel: "Empty Prop" }
+                  { name: "test-prop2", displayLabel: "Empty Struct Prop" }
                 ),
               ],
             },
@@ -200,8 +255,61 @@ describe("<FilteringPropertyGrid />", () => {
         />
       );
 
-      await waitFor(() => getByText("Non-null Prop"));
-      expect(queryByText("Empty Prop")).to.be.null;
+      await waitFor(() => getByText("Non-Empty Struct Prop"));
+      expect(queryByText("Empty Struct Prop")).to.be.null;
+    });
+
+    it("filters out struct properties with empty members", async () => {
+      const filterer = new NonEmptyValuesPropertyDataFilterer();
+      const dataProvider = {
+        onDataChanged: new PropertyDataChangeEvent(),
+        getData: async () => {
+          return {
+            categories: [{
+              expand: true,
+              label: "Test Category",
+              name: "test-category",
+            }],
+            label: PropertyRecord.fromString("Test Instance"),
+            records: {
+              ["test-category"]: [
+                createPropertyRecord(
+                  {
+                    valueFormat: PropertyValueFormat.Struct,
+                    members: {
+                      member1: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 1", displayValue: "Item 1" }, { name: "item-prop-1", displayLabel: "Member Prop 1" }),
+                      member2: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive, value: "Item 2", displayValue: "Item 2" }, { name: "item-prop-2", displayLabel: "Member Prop 2" }),
+                    },
+                  },
+                  { name: "test-prop1", displayLabel: "Non-Empty Struct Prop" }
+                ),
+                createPropertyRecord(
+                  {
+                    valueFormat: PropertyValueFormat.Struct,
+                    members: {
+                      emptyMember1: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive }, { name: "empty-prop-1", displayLabel: "Empty Member 1" }),
+                      emptyMember2: createPropertyRecord({ valueFormat: PropertyValueFormat.Primitive }, { name: "empty-prop-2", displayLabel: "Empty Member 2" }),
+                    },
+                  },
+                  { name: "test-prop2", displayLabel: "Empty Struct Prop" }
+                ),
+              ],
+            },
+          };
+        },
+      } as IPropertyDataProvider;
+
+      const { getByText, queryByText } = render(
+        <FilteringPropertyGrid
+          height={100}
+          width={100}
+          filterer={filterer}
+          dataProvider={dataProvider}
+        />
+      );
+
+      await waitFor(() => getByText("Non-Empty Struct Prop"));
+      expect(queryByText("Empty Struct Prop")).to.be.null;
     });
   });
 });
