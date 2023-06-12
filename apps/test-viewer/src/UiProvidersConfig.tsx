@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { UiItemsProvider } from "@itwin/appui-react";
 import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
-import { PropertyGridManager, PropertyGridUiItemsProvider, createAddFavoritePropertyItemProvider, createCopyPropertyTextItemProvider, createRemoveFavoritePropertyItemProvider, createShowNullValuesSettingProvider } from "@itwin/property-grid-react";
+import { AddFavoritePropertyMenuItem, CopyPropertyTextMenuItem, PropertyGridManager, PropertyGridUiItemsProvider, RemoveFavoritePropertyMenuItem, ShowHideNullValuesSetting } from "@itwin/property-grid-react";
 import { MeasureTools, MeasureToolsUiItemsProvider, MeasurementActionToolbar } from "@itwin/measure-tools-react";
 import { BreakdownTrees } from "@itwin/breakdown-trees-react";
 import { SampleSpatialTree } from "./components/SampleSpatialTree";
@@ -78,13 +78,13 @@ const configuredUiItems = new Map<string, UiItem>([
         propertyGridProps: {
           enableAncestorNavigation: true,
           autoExpandChildCategories: true,
-          contextMenuItemProviders: [
-            createAddFavoritePropertyItemProvider(),
-            createRemoveFavoritePropertyItemProvider(),
-            createCopyPropertyTextItemProvider(),
+          contextMenuItems: [
+            (props) => <AddFavoritePropertyMenuItem {...props} />,
+            (props) => <RemoveFavoritePropertyMenuItem {...props} />,
+            (props) => <CopyPropertyTextMenuItem {...props} />,
           ],
-          settingProviders: [
-            createShowNullValuesSettingProvider(true),
+          settings: [
+            (props) => <ShowHideNullValuesSetting {...props} persist={true} />,
           ]
         }
       })],
