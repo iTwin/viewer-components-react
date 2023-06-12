@@ -3,44 +3,24 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { useMemo } from "react";
+import { Fragment } from "react";
 import { SvgMoreVertical } from "@itwin/itwinui-icons-react";
 import { DropdownMenu, IconButton, MenuItem } from "@itwin/itwinui-react";
+import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting";
 import { PropertyGridManager } from "../PropertyGridManager";
 
+import type { PropsWithChildren, ReactNode } from "react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
-import type { NullValueSetting } from "../hooks/UseNullValuesSetting";
 
 /**
- * Type definition for settings provider.
+ * Props for single setting renderer.
  * @public
  */
-export type SettingsProvider = (context: SettingContext) => SettingDefinition[];
-
-/**
- * Context provided to `SettingsProvider`.
- * @public
- */
-export interface SettingContext {
+export interface SettingProps {
   /** Data provider used by property grid. */
   dataProvider: IPresentationPropertyDataProvider;
-  /** State of `null` values setting. */
-  nullValueSetting: NullValueSetting;
-}
-
-/**
- * Definition of single settings item that should be shown in dropdown menu.
- * @public
- */
-export interface SettingDefinition {
-  /** Unique id. */
-  id: string;
-  /** Label that is shown in dropdown menu. */
-  label: string;
-  /** Description that is shown while hovering over setting. */
-  description?: string;
-  /** Action that should be performed when setting is clicked. */
-  action: () => Promise<void>;
+  /** Callback that closes dropdown menu. */
+  close: () => void;
 }
 
 /**
@@ -48,8 +28,68 @@ export interface SettingDefinition {
  * @public
  */
 export interface SettingsProps {
-  /** List of providers used to populate settings dropdown. */
-  settingProviders?: SettingsProvider[];
+  /** List of settings to render in dropdown menu. For consistent style recommend using `PropertyGridSetting` component. */
+  settings?: Array<(props: SettingProps) => ReactNode>;
+}
+
+/**
+ * Props for `PropertyGridSetting` component.
+ * @public
+ */
+export interface PropertyGridSettingProps {
+  /** Unique setting id. */
+  id: string;
+  /** Setting click event handler. */
+  onClick: () => void;
+  /** Setting title. */
+  title?: string;
+}
+
+/**
+ * Component for rendering single item in settings dropdown.
+ * @public
+ */
+export function PropertyGridSetting({ id, onClick, title, children }: PropsWithChildren<PropertyGridSettingProps>) {
+  return <MenuItem
+    key={id}
+    onClick={onClick}
+    title={title}
+  >
+    {children}
+  </MenuItem>;
+}
+
+/**
+ * Props for `ShowHideNullValuesSetting`.
+ * @public
+ */
+export interface ShowHideNullValuesSettingProps extends SettingProps {
+  /** Specifies whether setting value should be persisted on change. */
+  persist?: boolean;
+}
+
+/**
+ * Renders `Show/Hide Empty Values` setting.
+ * @public
+ */
+export function ShowHideNullValuesSetting({ close, persist }: ShowHideNullValuesSettingProps) {
+  const { showNullValues, setShowNullValues } = useNullValueSettingContext();
+
+  const label = showNullValues ? PropertyGridManager.translate("settings.hide-null.label") : PropertyGridManager.translate("settings.show-null.label");
+  const description = showNullValues ? PropertyGridManager.translate("settings.hide-null.description") : PropertyGridManager.translate("settings.show-null.description");
+
+  return (
+    <PropertyGridSetting
+      id="show-hide-null-values"
+      title={description}
+      onClick={() => {
+        void setShowNullValues(!showNullValues, { persist });
+        close();
+      }}
+    >
+      {label}
+    </PropertyGridSetting>
+  );
 }
 
 /**
@@ -58,57 +98,26 @@ export interface SettingsProps {
  */
 export interface SettingsDropdownMenuProps extends SettingsProps {
   dataProvider: IPresentationPropertyDataProvider;
-  showNullValues: boolean;
-  setShowNullValues: (value: boolean) => Promise<void>;
 }
 
 /**
  * Component that renders dropdown menu with provided settings.
  * @internal
  */
-export function SettingsDropdownMenu({ settingProviders, dataProvider, showNullValues, setShowNullValues }: SettingsDropdownMenuProps) {
-  const itemDefinitions = useMemo(() => {
-    return (settingProviders ?? []).flatMap((provider) => provider({ dataProvider, nullValueSetting: { showNullValues, setShowNullValues } }));
-  }, [settingProviders, dataProvider, showNullValues, setShowNullValues]);
-
-  if (itemDefinitions.length === 0) {
+export function SettingsDropdownMenu({ settings, dataProvider }: SettingsDropdownMenuProps) {
+  if (!settings || settings.length === 0) {
     return null;
   }
 
-  const menuItems = (close: () => void) => itemDefinitions.map((definition) => (
-    <MenuItem
-      key={definition.id}
-      onClick={() => {
-        void definition.action();
-        close();
-      }}
-      title={definition.description}
-    >
-      {definition.label}
-    </MenuItem>
-  ));
+  return <SettingsDropdown settings={settings} dataProvider={dataProvider} />;
+}
+
+function SettingsDropdown({ settings, dataProvider }: SettingsDropdownMenuProps & {settings: Array<(props: SettingProps) => ReactNode>}) {
+  const menuItems = (close: () => void) => settings.map((setting, index) => <Fragment key={index}>{setting({ dataProvider, close })}</Fragment>);
 
   return <DropdownMenu menuItems={menuItems}>
     <IconButton styleType="borderless" size="small" title={PropertyGridManager.translate("settings.label")}>
       <SvgMoreVertical />
     </IconButton>
   </DropdownMenu>;
-}
-
-/**
- * Creates provider for `Show/Hide Empty Values` setting.
- * @public
- */
-export function createShowNullValuesSettingProvider(persist?: boolean) {
-  return ({ nullValueSetting }: SettingContext) => {
-    const { showNullValues, setShowNullValues } = nullValueSetting;
-    const label = showNullValues ? PropertyGridManager.translate("settings.hide-null.label") : PropertyGridManager.translate("settings.show-null.label");
-    const description = showNullValues ? PropertyGridManager.translate("settings.hide-null.description") : PropertyGridManager.translate("settings.show-null.description");
-    return [{
-      id: "show-hide-null-values",
-      label,
-      description,
-      action: async () => setShowNullValues(!showNullValues, { persist }),
-    }];
-  };
 }

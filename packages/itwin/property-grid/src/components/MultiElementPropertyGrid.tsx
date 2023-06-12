@@ -10,6 +10,7 @@ import { SvgArrowDown, SvgArrowUp, SvgPropertiesList } from "@itwin/itwinui-icon
 import { IconButton } from "@itwin/itwinui-react";
 import { Presentation } from "@itwin/presentation-frontend";
 import { useInstanceSelection } from "../hooks/UseInstanceSelection";
+import { NullValueSettingContext } from "../hooks/UseNullValuesSetting";
 import { PropertyGridManager } from "../PropertyGridManager";
 import { ElementList as ElementListComponent } from "./ElementList";
 import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid";
@@ -102,15 +103,17 @@ export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }:
   return (
     <div className="property-grid-react-transition-container">
       <div className="property-grid-react-transition-container-inner">
-        {items.map((component, idx) => (
-          <div key={component.key} className={classnames({
-            "property-grid-react-animated-tab": true,
-            "property-grid-react-animated-tab-animate-right": idx > content,
-            "property-grid-react-animated-tab-animate-left": idx < content,
-          })} >
-            {component}
-          </div>
-        ))}
+        <NullValueSettingContext>
+          {items.map((component, idx) => (
+            <div key={component.key} className={classnames({
+              "property-grid-react-animated-tab": true,
+              "property-grid-react-animated-tab-animate-right": idx > content,
+              "property-grid-react-animated-tab-animate-left": idx < content,
+            })} >
+              {component}
+            </div>
+          ))}
+        </NullValueSettingContext>
       </div>
     </div>
   );

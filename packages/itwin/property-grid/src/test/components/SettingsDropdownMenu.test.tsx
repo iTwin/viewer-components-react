@@ -7,9 +7,15 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
-import { createShowNullValuesSettingProvider, PropertyGridManager, SettingsDropdownMenu } from "../../property-grid-react";
+import { SettingsDropdownMenu, ShowHideNullValuesSetting } from "../../components/SettingsDropdownMenu";
+import { NullValueSettingContext, SHOWNULL_KEY } from "../../hooks/UseNullValuesSetting";
+import { PropertyGridManager } from "../../PropertyGridManager";
+import { PreferencesContextProvider } from "../../PropertyGridPreferencesContext";
+import { createFunctionStub } from "../TestUtils";
 
+import type { ReactElement } from "react";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
+import type { PreferencesStorage } from "../../api/PreferencesStorage";
 
 describe("<SettingsDropdownMenu />", () => {
   before(() => {
@@ -21,19 +27,48 @@ describe("<SettingsDropdownMenu />", () => {
   });
 
   it("renders nothing if no settings provided", async () => {
-    const { container } = render(<SettingsDropdownMenu dataProvider={{} as IPresentationPropertyDataProvider} showNullValues={true} setShowNullValues={async () => {}} />);
+    const { container } = render(<SettingsDropdownMenu dataProvider={{} as IPresentationPropertyDataProvider} />);
     expect(container.children).to.have.lengthOf(0);
   });
 
   it("renders provided settings", async () => {
     const spy = sinon.spy();
-    const { getByRole, getByText } = render(
+    const { getByRole, queryByText } = render(
       <SettingsDropdownMenu
         dataProvider={{} as IPresentationPropertyDataProvider}
-        showNullValues={true}
-        setShowNullValues={async () => {}}
-        settingProviders={[
-          () => [{ id: "test-setting", label: "Test Setting", action: spy }],
+        settings={[
+          ({ close }) => <button
+            onClick={() => {
+              spy();
+              close();
+            }}
+          >
+          Test Setting
+          </button>,
+        ]}
+      />
+    );
+
+    const dropdownButton = getByRole("button", { name: "settings.label" });
+    await userEvents.click(dropdownButton);
+
+    await waitFor(() => expect(queryByText("Test Setting")).to.not.be.null);
+  });
+
+  it("closes settings menu", async () => {
+    const spy = sinon.spy();
+    const { getByRole, getByText, queryByText } = render(
+      <SettingsDropdownMenu
+        dataProvider={{} as IPresentationPropertyDataProvider}
+        settings={[
+          ({ close }) => <button
+            onClick={() => {
+              spy();
+              close();
+            }}
+          >
+          Test Setting
+          </button>,
         ]}
       />
     );
@@ -45,57 +80,104 @@ describe("<SettingsDropdownMenu />", () => {
     await userEvents.click(setting);
 
     await waitFor(() => expect(spy).to.be.calledOnce);
+    expect(queryByText("Test Setting")).to.be.null;
+  });
+});
+
+describe("Default settings", () => {
+  const storage ={
+    get: createFunctionStub<PreferencesStorage["get"]>(),
+    set: createFunctionStub<PreferencesStorage["set"]>(),
+  };
+
+  function renderWithContext(ui: ReactElement) {
+    return render(
+      <PreferencesContextProvider storage={storage}>
+        <NullValueSettingContext>
+          {ui}
+        </NullValueSettingContext>
+      </PreferencesContextProvider>
+    );
+  }
+
+  const settingProps = {
+    close: sinon.stub(),
+    dataProvider: {} as IPresentationPropertyDataProvider,
+  };
+
+  before(() => {
+    sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
   });
 
-  describe("'hide null value' setting", () => {
-    [true, false].map((persist) => {
-      it(`calls 'setShowNullValues' with 'options.persist: ${persist}'`, async () => {
-        const spy = sinon.spy();
-        const { getByRole, getByText } = render(
-          <SettingsDropdownMenu
-            dataProvider={{} as IPresentationPropertyDataProvider}
-            showNullValues={true}
-            setShowNullValues={spy}
-            settingProviders={[
-              createShowNullValuesSettingProvider(persist),
-            ]}
-          />
-        );
+  after(() => {
+    sinon.restore();
+  });
 
-        const dropdownButton = getByRole("button", { name: "settings.label" });
-        await userEvents.click(dropdownButton);
+  beforeEach(() => {
+    storage.get.reset();
+    storage.set.reset();
+    settingProps.close.reset();
+  });
 
-        const setting = await waitFor(() => getByText("settings.hide-null.label"));
-        await userEvents.click(setting);
+  describe("'Hide Empty Values' setting", () => {
+    beforeEach(() => {
+      storage.get.resolves(JSON.stringify(true));
+    });
 
-        await waitFor(() => expect(spy).to.be.calledOnceWith(false, sinon.match((options) => options.persist === persist)));
-      });
+    it("renders", async () => {
+      const { queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps}/>);
+      await waitFor(() => expect(queryByText("settings.hide-null.label")).to.not.be.null);
+    });
+
+    it("does not persist new value by default", async () => {
+      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps}/>);
+      const item = await waitFor(() => getByText("settings.hide-null.label"));
+      await userEvents.click(item);
+
+      // wait until empty values are hidden
+      await waitFor(() => expect(queryByText("settings.show-null.label")).to.not.be.null);
+      expect(storage.set).to.not.be.called;
+    });
+
+    it("persist new value", async () => {
+      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps} persist={true} />);
+      const item = await waitFor(() => getByText("settings.hide-null.label"));
+      await userEvents.click(item);
+
+      // wait until empty values are hidden
+      await waitFor(() => expect(queryByText("settings.show-null.label")).to.not.be.null);
+      expect(storage.set).to.be.calledOnceWithExactly(SHOWNULL_KEY, JSON.stringify(false));
     });
   });
 
-  describe("'show null value' setting", () => {
-    [true, false].map((persist) => {
-      it(`calls 'setShowNullValues' with 'options.persist: ${persist}'`, async () => {
-        const spy = sinon.spy();
-        const { getByRole, getByText } = render(
-          <SettingsDropdownMenu
-            dataProvider={{} as IPresentationPropertyDataProvider}
-            showNullValues={false}
-            setShowNullValues={spy}
-            settingProviders={[
-              createShowNullValuesSettingProvider(persist),
-            ]}
-          />
-        );
+  describe("'Show Empty Values' setting", () => {
+    beforeEach(() => {
+      storage.get.resolves(JSON.stringify(false));
+    });
 
-        const dropdownButton = getByRole("button", { name: "settings.label" });
-        await userEvents.click(dropdownButton);
+    it("renders", async () => {
+      const { queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps}/>);
+      await waitFor(() => expect(queryByText("settings.show-null.label")).to.not.be.null);
+    });
 
-        const setting = await waitFor(() => getByText("settings.show-null.label"));
-        await userEvents.click(setting);
+    it("does not persist new value by default", async () => {
+      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps}/>);
+      const item = await waitFor(() => getByText("settings.show-null.label"));
+      await userEvents.click(item);
 
-        await waitFor(() => expect(spy).to.be.calledOnceWith(true, sinon.match((options) => options.persist === persist)));
-      });
+      // wait until empty values are shown
+      await waitFor(() => expect(queryByText("settings.hide-null.label")).to.not.be.null);
+      expect(storage.set).to.not.be.called;
+    });
+
+    it("persist new value", async () => {
+      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps} persist={true} />);
+      const item = await waitFor(() => getByText("settings.show-null.label"));
+      await userEvents.click(item);
+
+      // wait until empty values are shown
+      await waitFor(() => expect(queryByText("settings.hide-null.label")).to.not.be.null);
+      expect(storage.set).to.be.calledOnceWithExactly(SHOWNULL_KEY, JSON.stringify(true));
     });
   });
 });

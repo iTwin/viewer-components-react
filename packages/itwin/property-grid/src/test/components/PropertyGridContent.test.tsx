@@ -9,9 +9,13 @@ import { PropertyRecord, PropertyValueFormat } from "@itwin/appui-abstract";
 import { PropertyDataChangeEvent } from "@itwin/components-react";
 import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
-import { PropertyGridContent, PropertyGridManager } from "../../property-grid-react";
+import { PropertyGridContent } from "../../components/PropertyGridContent";
+import { PropertyGridSetting, ShowHideNullValuesSetting } from "../../components/SettingsDropdownMenu";
+import { NullValueSettingContext } from "../../hooks/UseNullValuesSetting";
+import { PropertyGridManager } from "../../PropertyGridManager";
 import { createPropertyRecord, stubSelectionManager } from "../TestUtils";
 
+import type { ReactElement } from "react";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 
@@ -45,9 +49,17 @@ describe("<PropertyGridContent />", () => {
     },
   } as unknown as IPresentationPropertyDataProvider;
 
+  function renderWithContext(ui: ReactElement) {
+    return render(
+      <NullValueSettingContext>
+        {ui}
+      </NullValueSettingContext>
+    );
+  }
+
   it("renders header with instance label", async () => {
     const imodel = {} as IModelConnection;
-    const { getByText, queryByText } = render(
+    const { getByText, queryByText } = renderWithContext(
       <PropertyGridContent
         dataProvider={provider}
         imodel={imodel}
@@ -62,7 +74,7 @@ describe("<PropertyGridContent />", () => {
     const imodel = {} as IModelConnection;
     const onBackClickSpy = sinon.spy();
 
-    const { getByText, getByRole } = render(
+    const { getByText, getByRole } = renderWithContext(
       <PropertyGridContent
         dataProvider={provider}
         imodel={imodel}
@@ -80,16 +92,12 @@ describe("<PropertyGridContent />", () => {
     const imodel = {} as IModelConnection;
     const spy = sinon.spy();
 
-    const { getByText, getByRole } = render(
+    const { getByText, getByRole } = renderWithContext(
       <PropertyGridContent
         dataProvider={provider}
         imodel={imodel}
-        settingProviders={[
-          () => [{
-            id: "test-setting",
-            label: "Test Setting",
-            action: spy,
-          }],
+        settings={[
+          () => <PropertyGridSetting id="testSetting" onClick={spy}>Test Setting</PropertyGridSetting>,
         ]}
       />
     );
@@ -106,16 +114,12 @@ describe("<PropertyGridContent />", () => {
   it("allows filtering out empty values", async () => {
     const imodel = {} as IModelConnection;
 
-    const { getByText, getByRole, queryByText } = render(
+    const { getByText, getByRole, queryByText } = renderWithContext(
       <PropertyGridContent
         dataProvider={provider}
         imodel={imodel}
-        settingProviders={[
-          (context) => [{
-            id: "test-setting",
-            label: "Test Setting",
-            action: async () => context.nullValueSetting.setShowNullValues(false),
-          }],
+        settings={[
+          (props) => <ShowHideNullValuesSetting {...props} />,
         ]}
       />
     );
@@ -128,7 +132,7 @@ describe("<PropertyGridContent />", () => {
     const settingsButton = await waitFor(() => getByRole("button", { name: "settings.label" }));
     await userEvents.click(settingsButton);
 
-    const setting = await waitFor(() => getByText("Test Setting"));
+    const setting = await waitFor(() => getByText("settings.hide-null.label"));
     await userEvents.click(setting);
 
     await waitFor(() => {

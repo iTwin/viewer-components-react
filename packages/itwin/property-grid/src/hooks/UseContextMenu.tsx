@@ -5,11 +5,12 @@
 
 import { useState } from "react";
 import { assert } from "@itwin/core-bentley";
-import { ContextMenuItem, GlobalContextMenu } from "@itwin/core-react";
+import { ContextMenuItem as CoreContextMenuItem, GlobalContextMenu } from "@itwin/core-react";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
 import { copyToClipboard } from "../api/WebUtilities";
 import { PropertyGridManager } from "../PropertyGridManager";
 
+import type { PropsWithChildren, ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { Field } from "@itwin/presentation-common";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
@@ -17,27 +18,10 @@ import type { PropertyGridContextMenuArgs } from "@itwin/components-react";
 import type { IModelConnection } from "@itwin/core-frontend";
 
 /**
- * Data structure that defined single context menu item.
+ * Props for single context menu item.
  * @public
  */
-export interface ContextMenuItemDefinition {
-  /** Unique key of the context menu item. */
-  key: string;
-  /** Label of the context menu item. */
-  label: string;
-  /** Description of the context menu item. */
-  title?: string;
-  /** Callback that is invoked when context menu item is clicked. */
-  execute: () => Promise<void>;
-  /** Specifies whether context menu item should be hidden. */
-  hidden?: boolean;
-}
-
-/**
- * Context provided to menu items for performing actions and determining if item should be shown.
- * @public
- */
-export interface MenuItemContext {
+export interface ContextMenuItemProps {
   /** iModelConnection used by property grid. */
   imodel: IModelConnection;
   /** Data provider used by property grid. */
@@ -49,18 +33,113 @@ export interface MenuItemContext {
 }
 
 /**
- * Type definition for context menu item provider.
- * @public
- */
-export type ContextMenuItemProvider = (context: MenuItemContext) => ContextMenuItemDefinition;
-
-/**
  * Props for configuring property grid context menu.
  * @public
  */
 export interface ContextMenuProps {
-  /** List of providers used to populate context menu for current property. */
-  contextMenuItemProviders?: ContextMenuItemProvider[];
+  /** List of items to render in context menu. For consistent style recommend using `PropertyGridContextMenuItem` component. */
+  contextMenuItems?: Array<(props: ContextMenuItemProps) => ReactNode>;
+}
+
+/**
+ * Props for `PropertyGridContextMenuItem`.
+ * @public
+ */
+export interface PropertyGridContextMenuItemProps {
+  /** Unique id of the context menu item. */
+  id: string;
+  /** Description of the context menu item. */
+  title?: string;
+  /** Callback that is invoked when context menu item is clicked. */
+  onSelect: () => void;
+}
+
+/**
+ * Base component for rendering single context menu item.
+ * @public
+ */
+export function PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<PropertyGridContextMenuItemProps>) {
+  return <CoreContextMenuItem
+    key={id}
+    onSelect={onSelect}
+    title={title}
+  >
+    {children}
+  </CoreContextMenuItem>;
+}
+
+/**
+ * Props for `Add/Remove` favorite properties context menu items.
+ */
+export interface FavoritePropertiesContextMenuItemProps extends ContextMenuItemProps {
+  /** Scope in which favorite property should be stored. Defaults to `FavoritePropertiesScope.IModel`. */
+  scope?: FavoritePropertiesScope;
+}
+
+/**
+ * Renders `Add to Favorite` context menu item if property field is not favorite. Otherwise renders nothing.
+ * @public
+ */
+export function AddFavoritePropertyMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps) {
+  const currentScope = scope ?? FavoritePropertiesScope.IModel;
+  if (!field || Presentation.favoriteProperties.has(field, imodel, currentScope)) {
+    return null;
+  }
+
+  return (
+    <PropertyGridContextMenuItem
+      id="add-favorite"
+      onSelect={async () => {
+        assert(field !== undefined);
+        await Presentation.favoriteProperties.add(field, imodel, currentScope);
+      }}
+      title={PropertyGridManager.translate("context-menu.add-favorite.description")}
+    >
+      {PropertyGridManager.translate("context-menu.add-favorite.label")}
+    </PropertyGridContextMenuItem>
+  );
+}
+
+/**
+ * Renders `Remove from Favorite` context menu item if property field is favorite. Otherwise renders nothing.
+ * @public
+ */
+export function RemoveFavoritePropertyMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps) {
+  const currentScope = scope ?? FavoritePropertiesScope.IModel;
+  if (!field || !Presentation.favoriteProperties.has(field, imodel, currentScope)) {
+    return null;
+  }
+
+  return (
+    <PropertyGridContextMenuItem
+      id="remove-favorite"
+      onSelect={async () => {
+        assert(field !== undefined);
+        await Presentation.favoriteProperties.remove(field, imodel, currentScope);
+      }}
+      title={PropertyGridManager.translate("context-menu.remove-favorite.description")}
+    >
+      {PropertyGridManager.translate("context-menu.remove-favorite.label")}
+    </PropertyGridContextMenuItem>
+  );
+}
+
+/**
+ * Renders `Copy Text` context menu item.
+ * @public
+ */
+export function CopyPropertyTextMenuItem({ record }: ContextMenuItemProps) {
+  return (
+    <PropertyGridContextMenuItem
+      id="copy-text"
+      onSelect={async () => {
+        record.description && copyToClipboard(record.description);
+      }}
+      title={PropertyGridManager.translate("context-menu.copy-text.description")}
+    >
+      {PropertyGridManager.translate("context-menu.copy-text.label")}
+    </PropertyGridContextMenuItem>
+  );
 }
 
 /**
@@ -74,21 +153,24 @@ export interface UseContentMenuProps extends ContextMenuProps {
 
 interface ContextMenuDefinition {
   position: { x: number, y: number };
-  menuItems: ContextMenuItemDefinition[];
+  menuItems: ReactNode[];
 }
 
 /**
  * Custom hook for rendering property grid context menu.
  * @internal
  */
-export function useContextMenu({ dataProvider, imodel, contextMenuItemProviders }: UseContentMenuProps) {
+export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseContentMenuProps) {
   const [contextMenu, setContextMenu] = useState<ContextMenuDefinition>();
 
   const onPropertyContextMenu = async (args: PropertyGridContextMenuArgs) => {
     args.event.persist();
+    if (!contextMenuItems || contextMenuItems.length === 0) {
+      return;
+    }
 
     const field = await dataProvider.getFieldByPropertyDescription(args.propertyRecord.property);
-    const items = (contextMenuItemProviders ?? []).map((provider) => provider({ imodel, dataProvider, record: args.propertyRecord, field }));
+    const items = contextMenuItems.map((item) => item({ imodel, dataProvider, record: args.propertyRecord, field })).filter((item) => !!item);
 
     setContextMenu(
       items.length > 0
@@ -105,34 +187,18 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItemProviders 
       return undefined;
     }
 
-    const items = contextMenu.menuItems.map((item) => (
-      <ContextMenuItem
-        key={item.key}
-        onSelect={() => {
-          void item.execute();
-          setContextMenu(undefined);
-        }}
-        title={item.title}
-        hidden={item.hidden}
-      >
-        {item.label}
-      </ContextMenuItem>
-    ));
-
+    const close = () => setContextMenu(undefined);
     return (
       <GlobalContextMenu
         opened={true}
-        onOutsideClick={() => {
-          setContextMenu(undefined);
-        }}
-        onEsc={() => {
-          setContextMenu(undefined);
-        }}
+        onOutsideClick={close}
+        onEsc={close}
+        onSelect={close}
         identifier="PropertiesWidget"
         x={contextMenu.position.x}
         y={contextMenu.position.y}
       >
-        {items}
+        {contextMenu.menuItems}
       </GlobalContextMenu>
     );
   };
@@ -141,59 +207,4 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItemProviders 
     onPropertyContextMenu,
     renderContextMenu,
   };
-}
-
-/**
- * Creates provider for `Add Favorite` context menu item.
- * @public
- */
-export function createAddFavoritePropertyItemProvider(favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemProvider {
-  return ({ field, imodel }: MenuItemContext) => {
-    const hidden = !field || Presentation.favoriteProperties.has(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
-    return {
-      key: "add-favorite",
-      execute: async () => {
-        assert(field !== undefined);
-        await Presentation.favoriteProperties.add(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
-      },
-      title: PropertyGridManager.translate("context-menu.add-favorite.description"),
-      label: PropertyGridManager.translate("context-menu.add-favorite.label"),
-      hidden,
-    };
-  };
-}
-
-/**
- * Creates provider for `Remove Favorite` context menu item.
- * @public
- */
-export function createRemoveFavoritePropertyItemProvider(favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemProvider {
-  return ({ field, imodel }: MenuItemContext) => {
-    const hidden = !field || !Presentation.favoriteProperties.has(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
-    return {
-      key: "remove-favorite",
-      execute: async () => {
-        assert(field !== undefined);
-        await Presentation.favoriteProperties.remove(field, imodel, favoritePropertiesScope ?? FavoritePropertiesScope.IModel);
-      },
-      title: PropertyGridManager.translate("context-menu.remove-favorite.description"),
-      label: PropertyGridManager.translate("context-menu.remove-favorite.label"),
-      hidden,
-    };
-  };
-}
-
-/**
- * Creates provider for `Copy Text` context menu item.
- * @public
- */
-export function createCopyPropertyTextItemProvider(): ContextMenuItemProvider {
-  return ({ record }: MenuItemContext) => ({
-    key: "copy-text",
-    execute: async () => {
-      record.description && copyToClipboard(record.description);
-    },
-    title: PropertyGridManager.translate("context-menu.copy-text.description"),
-    label: PropertyGridManager.translate("context-menu.copy-text.label"),
-  });
 }

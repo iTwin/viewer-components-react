@@ -11,7 +11,7 @@ import { ResizableContainerObserver } from "@itwin/core-react";
 import { Text } from "@itwin/itwinui-react";
 import { useContextMenu } from "../hooks/UseContextMenu";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
-import { useNullValueSetting } from "../hooks/UseNullValuesSetting";
+import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting";
 import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "./FilteringPropertyGrid";
 import { Header } from "./Header";
 import { SettingsDropdownMenu } from "./SettingsDropdownMenu";
@@ -49,20 +49,20 @@ export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMen
 export function PropertyGridContent({
   dataProvider,
   imodel,
-  contextMenuItemProviders,
+  contextMenuItems,
   className,
   onBackButton,
   headerControls,
-  settingProviders,
+  settings,
   ...props
 }: PropertyGridContentProps) {
   const { item } = useLoadedInstanceInfo({ dataProvider });
-  const { showNullValues, setShowNullValues } = useNullValueSetting();
   const { renderContextMenu, onPropertyContextMenu } = useContextMenu({
     dataProvider,
     imodel,
-    contextMenuItemProviders,
+    contextMenuItems,
   });
+  const { showNullValues } = useNullValueSettingContext();
   const filterer = useFilterer({ showNullValues });
 
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
@@ -71,9 +71,7 @@ export function PropertyGridContent({
   }, []);
 
   const settingsProps: SettingsDropdownMenuProps = {
-    settingProviders,
-    showNullValues,
-    setShowNullValues,
+    settings,
     dataProvider,
   };
 
