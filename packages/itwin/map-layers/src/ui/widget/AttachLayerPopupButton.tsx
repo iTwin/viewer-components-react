@@ -177,7 +177,7 @@ function AttachLayerPanel({ isOverlay, onLayerAttached, onHandleOutsideClick }: 
   }, [handleSelectFeaturesCancel, handleSelectFeaturesOk]);
 
   const  needsFeatureSelection = React.useCallback((source: MapLayerSource, validation: MapLayerSourceValidation ) => {
-    return source.formatId === "WMS"     // TODO, replace this with a flag in MapLayerSourceStatus
+    return source.formatId === "ArcGISFeature"     // TODO, replace this with a flag in MapLayerSourceStatus
     && validation.subLayers
     && validation.subLayers.length;
   }, []);
