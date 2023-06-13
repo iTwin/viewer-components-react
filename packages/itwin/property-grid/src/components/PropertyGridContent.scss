@@ -3,60 +3,20 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-@import "~@itwin/core-react/lib/cjs/core-react/index";
-
-$header-height: 50px;
-
 .property-grid-widget-container {
   height: 100%;
   width: 100%;
-  position: absolute;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.property-grid-container {
-  flex: 1;
-  overflow: hidden;
 }
 
 .property-grid-react-panel-label-and-class {
   flex: 1;
-  display: block;
   overflow: hidden;
-}
 
-.property-grid-react-panel-label {
-  @include uicore-text(leading);
-  padding: var(--iui-size-xs) 0;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.property-grid-react-panel-header {
-  display: flex;
-  align-items: center;
-  margin-right: 6px;
-  height: $header-height;
-  box-sizing: border-box;
-}
-
-.property-grid-react-panel-class {
-  @include uicore-text;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-#property-grid-react-element-list-back-btn {
-  margin-right: 2px;
-  padding: 0 4px;
-
-  > svg {
-    width: 22px;
-    height: 22px;
-    margin: 0;
+  & > * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

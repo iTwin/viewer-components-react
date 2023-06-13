@@ -12,7 +12,9 @@ import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
 import * as webUtilities from "../../api/WebUtilities";
 import {
-  createAddFavoritePropertyItemProvider, createCopyPropertyTextItemProvider, createRemoveFavoritePropertyItemProvider, useContextMenu,
+  AddFavoritePropertyContextMenuItem,
+  CopyPropertyTextContextMenuItem,
+  PropertyGridContextMenuItem, RemoveFavoritePropertyContextMenuItem, useContextMenu,
 } from "../../hooks/UseContextMenu";
 import { PropertyGridManager } from "../../PropertyGridManager";
 import { createFunctionStub, createPropertyRecord, stubFavoriteProperties } from "../TestUtils";
@@ -20,7 +22,7 @@ import { createFunctionStub, createPropertyRecord, stubFavoriteProperties } from
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { MouseEvent } from "react";
-import type { ContextMenuItemDefinition, UseContentMenuProps } from "../../hooks/UseContextMenu";
+import type { ContextMenuItemProps, UseContentMenuProps } from "../../hooks/UseContextMenu";
 
 describe("useContextMenu", () => {
   const imodel = {} as IModelConnection;
@@ -39,17 +41,11 @@ describe("useContextMenu", () => {
   }
 
   it("opens context menu", async () => {
-    const contextMenuItem: ContextMenuItemDefinition = {
-      key: "test-item",
-      label: "Test Item",
-      execute: async () => {},
-    };
-
     const { getByText } = render(
       <TestComponent
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
-        contextMenuItemProviders={[() => contextMenuItem]}
+        contextMenuItems={[() => <div>Test Item</div>]}
       />
     );
 
@@ -74,18 +70,12 @@ describe("useContextMenu", () => {
   });
 
   it("closes context menu when item is clicked", async () => {
-    const executeStub = sinon.stub();
-    const contextMenuItem: ContextMenuItemDefinition = {
-      key: "test-item",
-      label: "Test Item",
-      execute: executeStub,
-    };
-
+    const selectStub = sinon.stub();
     const { getByText, queryByText } = render(
       <TestComponent
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
-        contextMenuItemProviders={[() => contextMenuItem]}
+        contextMenuItems={[() => <PropertyGridContextMenuItem id="test-item" onSelect={selectStub}>Test Item</PropertyGridContextMenuItem>]}
       />
     );
 
@@ -101,21 +91,15 @@ describe("useContextMenu", () => {
 
     // wait for item to disappear
     await waitFor(() => expect(queryByText("Test Item")).to.be.null);
-    expect(executeStub).to.be.calledOnce;
+    expect(selectStub).to.be.calledOnce;
   });
 
   it("closes context menu when `Esc` is clicked", async () => {
-    const contextMenuItem: ContextMenuItemDefinition = {
-      key: "test-item",
-      label: "Test Item",
-      execute: async () => {},
-    };
-
     const { getByText, queryByText } = render(
       <TestComponent
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
-        contextMenuItemProviders={[() => contextMenuItem]}
+        contextMenuItems={[() => <div>Test Item</div>]}
       />
     );
 
@@ -134,17 +118,11 @@ describe("useContextMenu", () => {
   });
 
   it("closes context menu when outside element is clicked", async () => {
-    const contextMenuItem: ContextMenuItemDefinition = {
-      key: "test-item",
-      label: "Test Item",
-      execute: async () => {},
-    };
-
     const { getByText, queryByText } = render(
       <TestComponent
         imodel={imodel}
         dataProvider={dataProvider as unknown as IPresentationPropertyDataProvider}
-        contextMenuItemProviders={[() => contextMenuItem]}
+        contextMenuItems={[() => <div>Test Item</div>]}
       />
     );
 
@@ -164,13 +142,19 @@ describe("useContextMenu", () => {
   });
 });
 
-describe("Default context menu item providers", () => {
+describe("Default context menu items", () => {
   const imodel = {} as IModelConnection;
   const dataProvider = {} as IPresentationPropertyDataProvider;
   const record = createRecord();
   const field: Field = createField();
 
   let favoritesManager: ReturnType<typeof stubFavoriteProperties>;
+  const itemProps: ContextMenuItemProps = {
+    imodel,
+    dataProvider,
+    record,
+    field,
+  };
 
   before(() => {
     sinon.stub(PropertyGridManager, "translate").callsFake((key) => key);
@@ -187,76 +171,87 @@ describe("Default context menu item providers", () => {
     favoritesManager.has.reset();
   });
 
-  [undefined, FavoritePropertiesScope.ITwin].map((scope) => {
-    describe("createAddFavoritePropertyItemProvider", () => {
-      it(`creates definiton for non-favorite property with ${getScopeName(scope)} scope`, async () => {
-        favoritesManager.has.returns(false);
-
-        const item = createAddFavoritePropertyItemProvider(scope)({ field, imodel, dataProvider, record });
-        expect(item.hidden).to.be.false;
-        expect(item.label).to.be.eq("context-menu.add-favorite.label");
-        expect(item.title).to.be.eq("context-menu.add-favorite.description");
-
-        await item.execute();
-        expect(favoritesManager.add).to.be.calledOnceWith(field, imodel, scope ?? FavoritePropertiesScope.IModel);
-      });
-
-      it(`creates definiton for favorite property with ${getScopeName(scope)} scope`, async () => {
-        favoritesManager.has.returns(true);
-
-        const item = createAddFavoritePropertyItemProvider(scope)({ field, imodel, dataProvider, record });
-        expect(item.hidden).to.be.true;
-        expect(item.label).to.be.eq("context-menu.add-favorite.label");
-        expect(item.title).to.be.eq("context-menu.add-favorite.description");
-      });
+  describe("AddFavoritePropertyContextMenuItem", () => {
+    it("renders item with non-favorite property", () => {
+      favoritesManager.has.returns(false);
+      const { queryByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps}/>);
+      expect(queryByText("context-menu.add-favorite.label"));
     });
 
-    describe("createRemoveFavoritePropertyItemProvider", () => {
-      it(`creates definiton for non-favorite property with ${getScopeName(scope)} scope`, async () => {
-        favoritesManager.has.returns(false);
+    it("renders nothing if property is favorite", () => {
+      favoritesManager.has.returns(true);
+      const { container } = render(<AddFavoritePropertyContextMenuItem {...itemProps}/>);
+      expect(container.children).to.have.lengthOf(0);
+    });
 
-        const item = createRemoveFavoritePropertyItemProvider(scope)({ field, imodel, dataProvider, record });
-        expect(item.hidden).to.be.true;
-        expect(item.label).to.be.eq("context-menu.remove-favorite.label");
-        expect(item.title).to.be.eq("context-menu.remove-favorite.description");
-      });
+    it("calls `Presentation.favorites.add` with default scope", async () => {
+      favoritesManager.has.returns(false);
+      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps}/>);
+      const item = getByText("context-menu.add-favorite.label");
+      await userEvents.click(item);
 
-      it(`creates definiton for favorite property with ${getScopeName(scope)} scope`, async () => {
-        favoritesManager.has.returns(true);
+      await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.IModel));
+    });
 
-        const item = createRemoveFavoritePropertyItemProvider(scope)({ field, imodel, dataProvider, record });
-        expect(item.hidden).to.be.false;
-        expect(item.label).to.be.eq("context-menu.remove-favorite.label");
-        expect(item.title).to.be.eq("context-menu.remove-favorite.description");
+    it("calls `Presentation.favorites.add` with specified scope", async () => {
+      favoritesManager.has.returns(false);
+      const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin}/>);
+      const item = getByText("context-menu.add-favorite.label");
+      await userEvents.click(item);
 
-        await item.execute();
-        expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel, scope ?? FavoritePropertiesScope.IModel);
-      });
+      await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.ITwin));
     });
   });
 
-  describe("createCopyPropertyTextItemProvider", () => {
-    it(`creates definiton`, async () => {
+  describe("RemoveFavoritePropertyContextMenuItem", () => {
+    it("renders item with favorite property", () => {
+      favoritesManager.has.returns(true);
+      const { queryByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps}/>);
+      expect(queryByText("context-menu.remove-favorite.label"));
+    });
+
+    it("renders nothing if property is not favorite", () => {
+      favoritesManager.has.returns(false);
+      const { container } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps}/>);
+      expect(container.children).to.have.lengthOf(0);
+    });
+
+    it("calls `Presentation.favorites.remove` with default scope", async () => {
+      favoritesManager.has.returns(true);
+      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps}/>);
+      const item = getByText("context-menu.remove-favorite.label");
+      await userEvents.click(item);
+
+      await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.IModel));
+    });
+
+    it("calls `Presentation.favorites.remove` with specified scope", async () => {
+      favoritesManager.has.returns(true);
+      const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin}/>);
+      const item = getByText("context-menu.remove-favorite.label");
+      await userEvents.click(item);
+
+      await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.ITwin));
+    });
+  });
+
+  describe("CopyPropertyTextContextMenuItem", () => {
+    it("renders item", () => {
+      const { queryByText } = render(<CopyPropertyTextContextMenuItem {...itemProps} />);
+      expect(queryByText("context-menu.copy-text.label"));
+    });
+
+    it("copies text when clicked", async () => {
       const copyStub = sinon.stub(webUtilities, "copyToClipboard");
+      const { getByText } = render(<CopyPropertyTextContextMenuItem {...itemProps} />);
+      const item = getByText("context-menu.copy-text.label");
 
-      const item = createCopyPropertyTextItemProvider()({ field, imodel, dataProvider, record });
-      expect(item.hidden).to.be.undefined;
-      expect(item.label).to.be.eq("context-menu.copy-text.label");
-      expect(item.title).to.be.eq("context-menu.copy-text.description");
-
-      await item.execute();
+      await userEvents.click(item);
 
       expect(copyStub).to.be.calledOnceWithExactly(record.description);
     });
   });
 });
-
-function getScopeName(scope: undefined | FavoritePropertiesScope) {
-  if (scope === undefined) {
-    return "default";
-  }
-  return "custom";
-}
 
 function createField() {
   return new Field(

@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./PropertyGrid.scss";
 import { FillCentered } from "@itwin/core-react";
+import { Text } from "@itwin/itwinui-react";
 import { usePropertyDataProviderWithUnifiedSelection } from "@itwin/presentation-components";
 import { useDataProvider } from "../hooks/UseDataProvider";
 import { PropertyGridManager } from "../PropertyGridManager";
@@ -30,9 +30,7 @@ export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps
   if (isOverLimit) {
     return (
       <FillCentered style={{ flexDirection: "column" }}>
-        <div className="property-grid-react-filtering-pg-label">
-          {PropertyGridManager.translate("selection.too-many-elements-selected")}
-        </div>
+        <Text>{PropertyGridManager.translate("selection.too-many-elements-selected")}</Text>
       </FillCentered>
     );
   }

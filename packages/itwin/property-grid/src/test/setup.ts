@@ -33,3 +33,31 @@ global.DOMRect = class DOMRect {
     return JSON.stringify(this);
   }
 };
+
+const raf = global.requestAnimationFrame;
+const caf = global.cancelAnimationFrame;
+before(() => {
+  Object.defineProperty(global, "requestAnimationFrame", {
+    writable: true,
+    value: (cb: FrameRequestCallback) => {
+      return setTimeout(cb, 0);
+    },
+  });
+  Object.defineProperty(global, "cancelAnimationFrame", {
+    writable: true,
+    value: (handle: number) => {
+      clearTimeout(handle);
+    },
+  });
+});
+
+after(() => {
+  Object.defineProperty(global, "requestAnimationFrame", {
+    writable: true,
+    value: raf,
+  });
+  Object.defineProperty(global, "cancelAnimationFrame", {
+    writable: true,
+    value: caf,
+  });
+});

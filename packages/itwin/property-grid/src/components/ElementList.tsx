@@ -6,10 +6,10 @@
 import "./ElementList.scss";
 import classnames from "classnames";
 import * as React from "react";
-import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
-import { IconButton, MenuItem } from "@itwin/itwinui-react";
+import { MenuItem, Text } from "@itwin/itwinui-react";
 import { PresentationLabelsProvider } from "@itwin/presentation-components";
 import { PropertyGridManager } from "../PropertyGridManager";
+import { Header } from "./Header";
 
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { InstanceKey } from "@itwin/presentation-common";
@@ -23,7 +23,7 @@ export interface ElementListProps {
   instanceKeys: InstanceKey[];
   onBack: () => void;
   onSelect: (instanceKey: InstanceKey) => void;
-  rootClassName?: string;
+  className?: string;
 }
 
 /**
@@ -35,7 +35,7 @@ export function ElementList({
   instanceKeys,
   onBack,
   onSelect,
-  rootClassName,
+  className,
 }: ElementListProps) {
   const [data, setData] = React.useState<string[]>();
 
@@ -53,23 +53,10 @@ export function ElementList({
   const title = `${PropertyGridManager.translate("element-list.title")} (${instanceKeys.length})`;
 
   return (
-    <div
-      className={classnames("property-grid-react-element-list", rootClassName)}
-    >
-      <div className="property-grid-react-element-list-header">
-        <IconButton
-          id="property-grid-react-element-list-back-btn"
-          styleType="borderless"
-          onClick={onBack}
-          onKeyDown={onBack}
-          title={PropertyGridManager.translate("header.back")}
-        >
-          <SvgProgressBackwardCircular />
-        </IconButton>
-        <div className="property-grid-react-element-list-title">
-          {title}
-        </div>
-      </div>
+    <div className={classnames("property-grid-react-element-list", className)}>
+      <Header onBackButtonClick={onBack}>
+        <Text className="property-grid-react-element-list-title" variant="leading">{title}</Text>
+      </Header>
       <div className="property-grid-react-element-list-container" role="list">
         {data?.map((label, index) => (
           <MenuItem

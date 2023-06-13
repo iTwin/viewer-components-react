@@ -8,21 +8,21 @@ import classnames from "classnames";
 import { useCallback, useState } from "react";
 import { PropertyValueRendererManager } from "@itwin/components-react";
 import { ResizableContainerObserver } from "@itwin/core-react";
-import { SvgProgressBackwardCircular } from "@itwin/itwinui-icons-react";
-import { IconButton } from "@itwin/itwinui-react";
+import { Text } from "@itwin/itwinui-react";
 import { useContextMenu } from "../hooks/UseContextMenu";
 import { useLoadedInstanceInfo } from "../hooks/UseInstanceInfo";
-import { useNullValueSetting } from "../hooks/UseNullValuesSetting";
-import { PropertyGridManager } from "../PropertyGridManager";
+import { useNullValueSettingContext } from "../hooks/UseNullValuesSetting";
 import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer, NoopPropertyDataFilterer } from "./FilteringPropertyGrid";
+import { Header } from "./Header";
+import { SettingsDropdownMenu } from "./SettingsDropdownMenu";
 
+import type { SettingsDropdownMenuProps, SettingsMenuProps } from "./SettingsDropdownMenu";
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type { IPresentationPropertyDataProvider } from "@itwin/presentation-components";
 import type { FilteringPropertyGridProps } from "./FilteringPropertyGrid";
 import type { ContextMenuProps } from "../hooks/UseContextMenu";
-import type { NullValueSettingProps } from "../hooks/UseNullValuesSetting";
 
 /**
  * Base props for rendering `PropertyGridContent` component.
@@ -31,16 +31,16 @@ import type { NullValueSettingProps } from "../hooks/UseNullValuesSetting";
 export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
   imodel: IModelConnection;
   dataProvider: IPresentationPropertyDataProvider;
-  rootClassName?: string;
+  className?: string;
   onBackButton?: () => void;
-  headerContent?: JSX.Element;
+  headerControls?: JSX.Element;
 }
 
 /**
  * Props for `PropertyGridContent` component.
  * @public
  */
-export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & NullValueSettingProps;
+export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & SettingsMenuProps;
 
 /**
  * Component that renders property grid with header and context menu.
@@ -49,20 +49,20 @@ export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMen
 export function PropertyGridContent({
   dataProvider,
   imodel,
-  contextMenuItemProviders,
-  persistNullValueToggle,
-  rootClassName,
+  contextMenuItems,
+  className,
   onBackButton,
-  headerContent,
+  headerControls,
+  settingsMenuItems,
   ...props
 }: PropertyGridContentProps) {
   const { item } = useLoadedInstanceInfo({ dataProvider });
-  const { showNullValues } = useNullValueSetting({ persistNullValueToggle });
   const { renderContextMenu, onPropertyContextMenu } = useContextMenu({
     dataProvider,
     imodel,
-    contextMenuItemProviders,
+    contextMenuItems,
   });
+  const { showNullValues } = useNullValueSettingContext();
   const filterer = useFilterer({ showNullValues });
 
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
@@ -70,60 +70,54 @@ export function PropertyGridContent({
     setSize({ width: w, height: h });
   }, []);
 
+  const settingsProps: SettingsDropdownMenuProps = {
+    settingsMenuItems,
+    dataProvider,
+  };
+
   return (
-    <div className={classnames("property-grid-widget-container", rootClassName)}>
-      <Header headerContent={headerContent} item={item} onBackButtonClick={onBackButton} />
-      <div className={"property-grid-container"}>
-        <ResizableContainerObserver onResize={handleResize}>
-          <FilteringPropertyGrid
-            {...props}
-            dataProvider={dataProvider}
-            filterer={filterer}
-            isPropertyHoverEnabled={true}
-            isPropertySelectionEnabled={true}
-            onPropertyContextMenu={onPropertyContextMenu}
-            width={width}
-            height={height}
-          />
-        </ResizableContainerObserver>
-      </div>
+    <div className={classnames("property-grid-widget-container", className)}>
+      <PropertyGridHeader controls={headerControls} item={item} onBackButtonClick={onBackButton} settingsProps={settingsProps} />
+      <ResizableContainerObserver onResize={handleResize}>
+        <FilteringPropertyGrid
+          {...props}
+          dataProvider={dataProvider}
+          filterer={filterer}
+          isPropertyHoverEnabled={true}
+          isPropertySelectionEnabled={true}
+          onPropertyContextMenu={onPropertyContextMenu}
+          width={width}
+          height={height}
+        />
+      </ResizableContainerObserver>
       {renderContextMenu()}
     </div>
   );
 }
 
-interface HeaderProps {
-  headerContent?: ReactNode;
+interface PropertyGridHeaderProps {
+  controls?: ReactNode;
   item?: { className: string, label: PropertyRecord };
   onBackButtonClick?: () => void;
+  settingsProps: SettingsDropdownMenuProps;
 }
 
-function Header({ item, headerContent, onBackButtonClick }: HeaderProps) {
+function PropertyGridHeader({ item, controls, settingsProps, onBackButtonClick }: PropertyGridHeaderProps) {
   if (!item) {
     return null;
   }
 
   return (
-    <div className="property-grid-react-panel-header">
-      {onBackButtonClick !== undefined && (
-        <IconButton
-          id="property-grid-react-element-list-back-btn"
-          styleType="borderless"
-          onClick={onBackButtonClick}
-          onKeyDown={onBackButtonClick}
-          title={PropertyGridManager.translate("header.back")}
-        >
-          <SvgProgressBackwardCircular />
-        </IconButton>
-      )}
+    <Header onBackButtonClick={onBackButtonClick}>
       <div className="property-grid-react-panel-label-and-class">
-        <div className="property-grid-react-panel-label">
-          {item.label && PropertyValueRendererManager.defaultManager.render(item.label)}
-        </div>
-        <div className="property-grid-react-panel-class">{item.className}</div>
+        <Text variant="leading">
+          {PropertyValueRendererManager.defaultManager.render(item.label)}
+        </Text>
+        <Text>{item.className}</Text>
       </div>
-      {headerContent}
-    </div>
+      {controls}
+      <SettingsDropdownMenu {...settingsProps}/>
+    </Header>
   );
 }
 
@@ -137,8 +131,6 @@ function useFilterer({ showNullValues }: UseFiltererProps) {
     nonEmpty: new NonEmptyValuesPropertyDataFilterer(),
   }));
 
-  // TODO: figure out a way to toggle this. https://github.com/iTwin/viewer-components-react/issues/499
-  // istanbul ignore if
   if (!showNullValues) {
     return defaultFilterers.nonEmpty;
   }

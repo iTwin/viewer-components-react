@@ -3,47 +3,48 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { useCallback, useEffect, useState } from "react";
+import type { PropsWithChildren } from "react";
+import { createContext , useCallback, useContext, useEffect, useState } from "react";
+
 import { usePreferencesContext } from "../PropertyGridPreferencesContext";
 
 /**
- * Props for `useNullValueSetting` hook.
+ * Provides context for `Show\Hide Empty Values` setting.
  * @public
  */
-export interface NullValueSettingProps {
-  /** Specifies whether setting for showing/hiding null values in property grid should be persisted. */
-  persistNullValueToggle?: boolean;
+export function NullValueSettingContext({ children }: PropsWithChildren<{}>) {
+  const { showNullValues, setShowNullValues } = useNullValueSetting();
+
+  return <nullValueSettingContext.Provider value={{ showNullValues, setShowNullValues }}>
+    {children}
+  </nullValueSettingContext.Provider>;
 }
 
 /**
  * Custom hook for tracking of "show/hide null values" setting in property grid.
  * @internal
  */
-export function useNullValueSetting({ persistNullValueToggle }: NullValueSettingProps) {
+export function useNullValueSetting() {
   const [showNullValues, setShowNullValues] = useState(true);
   const { getShowNullValuesPreference, setShowNullValuesPreference } = useNullValueStorage();
 
-  // If persisting hide/show empty values, get the preference
+  // Get value from preferences storage
   useEffect(() => {
-    const setDefaultShowNullValues = async () => {
-      if (persistNullValueToggle) {
-        const res = await getShowNullValuesPreference();
-        setShowNullValues(res);
-      }
-    };
+    void (async () => {
+      const res = await getShowNullValuesPreference();
+      setShowNullValues(res);
+    })();
+  }, [getShowNullValuesPreference]);
 
-    void setDefaultShowNullValues();
-  }, [persistNullValueToggle, getShowNullValuesPreference]);
-
-  // Fcn for updating toggle for Hide / Show Empty Fields menu options
-  const updateShowNullValues = useCallback(async (value: boolean) => {
+  // Function for updating Hide / Show Empty Fields setting
+  const updateShowNullValues = useCallback(async (value: boolean, options?: { persist?: boolean }) => {
     setShowNullValues(value);
 
     // Persist hide/show value
-    if (persistNullValueToggle) {
+    if (options && options.persist) {
       await setShowNullValuesPreference(value);
     }
-  }, [persistNullValueToggle, setShowNullValuesPreference]);
+  }, [setShowNullValuesPreference]);
 
   return {
     showNullValues,
@@ -51,7 +52,8 @@ export function useNullValueSetting({ persistNullValueToggle }: NullValueSetting
   };
 }
 
-const SHOWNULL_KEY = "showNullValues";
+/** @internal */
+export const SHOWNULL_KEY = "showNullValues";
 
 function useNullValueStorage() {
   const { storage } = usePreferencesContext();
@@ -73,4 +75,18 @@ function useNullValueStorage() {
     getShowNullValuesPreference,
     setShowNullValuesPreference,
   };
+}
+
+/** @internal */
+export interface NullValueSettingContextValue {
+  showNullValues: boolean;
+  setShowNullValues: (value: boolean, options?: { persist?: boolean }) => Promise<void>;
+}
+
+// istanbul ignore next
+const nullValueSettingContext = createContext<NullValueSettingContextValue>({ showNullValues: true, setShowNullValues: async () => {} });
+
+/** @internal */
+export function useNullValueSettingContext() {
+  return useContext(nullValueSettingContext);
 }

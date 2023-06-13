@@ -11,6 +11,7 @@ export * from "./components/PropertyGridContent";
 export * from "./components/PropertyGrid";
 export * from "./components/SingleElementPropertyGrid";
 export * from "./components/MultiElementPropertyGrid";
+export * from "./components/SettingsDropdownMenu";
 export * from "./hooks/UseContextMenu";
 export * from "./hooks/UseDataProvider";
 export * from "./hooks/UseInstanceSelection";
