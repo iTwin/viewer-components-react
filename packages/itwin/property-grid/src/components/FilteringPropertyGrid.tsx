@@ -3,7 +3,6 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import "./PropertyGrid.scss";
 import { useCallback } from "react";
 import { PropertyValueFormat } from "@itwin/appui-abstract";
 import {
@@ -83,23 +82,16 @@ export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFilter
   public async recordMatchesFilter(
     node: PropertyRecord
   ): Promise<PropertyDataFilterResult> {
-    switch(node.value.valueFormat) {
-      case PropertyValueFormat.Primitive:
-        return {
-          filteredTypes: [FilteredType.Value],
-          matchesFilter: !!node.value.displayValue,
-        };
-      case PropertyValueFormat.Array:
-        return {
-          filteredTypes: [FilteredType.Value],
-          matchesFilter: node.value.items.length > 0,
-        };
-      case PropertyValueFormat.Struct:
-        return {
-          filteredTypes: [FilteredType.Value],
-          matchesFilter: Object.keys(node.value.members).length > 0,
-        };
+    if (node.value.valueFormat !== PropertyValueFormat.Primitive) {
+      return {
+        matchesFilter: false,
+      };
     }
+
+    return {
+      filteredTypes: [FilteredType.Value],
+      matchesFilter: !!node.value.displayValue,
+    };
   }
 }
 
