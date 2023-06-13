@@ -13,19 +13,10 @@ import type { InstanceKey, KeySet } from "@itwin/presentation-common";
 const PropertyGridSelectionScope = "Property Grid";
 
 /**
- * Props for configuring ancestors navigation.
- * @public
- */
-export interface AncestorNavigationProps {
-  /** Enables navigation through instance ancestors. */
-  enableAncestorNavigation?: boolean;
-}
-
-/**
  * Props for `useInstanceSelection` hook.
  * @internal
  */
-export interface InstanceSelectionProps extends AncestorNavigationProps {
+export interface InstanceSelectionProps {
   imodel: IModelConnection;
 }
 
@@ -51,7 +42,7 @@ interface InstanceSelectionInfo {
  * - Focus single instance until `UnifiedSelection` is changed.
  * @internal
  */
-export function useInstanceSelection({ imodel, enableAncestorNavigation }: InstanceSelectionProps) {
+export function useInstanceSelection({ imodel }: InstanceSelectionProps) {
   const [{ selectedKeys, previousKeys, canNavigateUp, focusedInstanceKey }, setInfo] = useState<InstanceSelectionInfo>({
     selectedKeys: [],
     previousKeys: [],
@@ -71,7 +62,7 @@ export function useInstanceSelection({ imodel, enableAncestorNavigation }: Insta
       const selectedInstanceKeys = getInstanceKeys(selectionSet);
 
       // if only single instance is selected and navigation through ancestors is enabled determine if selected instance has single parent and we can navigate up
-      const hasParent = !!enableAncestorNavigation && selectedInstanceKeys.length === 1 && (await getParentKey(imodel, selectedInstanceKeys[0])) !== undefined;
+      const hasParent = selectedInstanceKeys.length === 1 && (await getParentKey(imodel, selectedInstanceKeys[0])) !== undefined;
 
       setInfo({
         selectedKeys: selectedInstanceKeys,
@@ -92,10 +83,10 @@ export function useInstanceSelection({ imodel, enableAncestorNavigation }: Insta
       removePresentationListener();
       removeFrontstageReadyListener();
     };
-  }, [imodel, enableAncestorNavigation]);
+  }, [imodel]);
 
   const navigateUp = async () => {
-    if (!enableAncestorNavigation || !canNavigateUp || selectedKeys.length !== 1) {
+    if (!canNavigateUp || selectedKeys.length !== 1) {
       return;
     }
 
@@ -124,7 +115,7 @@ export function useInstanceSelection({ imodel, enableAncestorNavigation }: Insta
   };
 
   const navigateDown = async () => {
-    if (!enableAncestorNavigation || previousKeys.length === 0) {
+    if (previousKeys.length === 0) {
       return;
     }
 
@@ -146,7 +137,6 @@ export function useInstanceSelection({ imodel, enableAncestorNavigation }: Insta
   };
 
   const ancestorsNavigationProps = {
-    navigationEnabled: !!enableAncestorNavigation,
     navigateDown,
     navigateUp,
     canNavigateUp,

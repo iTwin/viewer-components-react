@@ -10,7 +10,7 @@ import { KeySet } from "@itwin/presentation-common";
 import { PresentationLabelsProvider, PresentationPropertyDataProvider } from "@itwin/presentation-components";
 import { getByRole as getByRoleRTL, render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
-import { MultiElementPropertyGrid, PropertyGridManager } from "../../property-grid-react";
+import { AncestorsNavigationControls, MultiElementPropertyGrid, PropertyGridManager } from "../../property-grid-react";
 import { createPropertyRecord, stubFavoriteProperties, stubPresentation, stubSelectionManager } from "../TestUtils";
 
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -214,7 +214,7 @@ describe("<MultiElementPropertGrid />", () => {
     const { getByText, queryByRole } = render(
       <MultiElementPropertyGrid
         imodel={imodel}
-        enableAncestorNavigation={true}
+        ancestorsNavigationControls={(props) => <AncestorsNavigationControls {...props} />}
       />
     );
 

@@ -16,7 +16,7 @@ import { ElementList as ElementListComponent } from "./ElementList";
 import { PropertyGrid as PropertyGridComponent } from "./PropertyGrid";
 import { SingleElementPropertyGrid as SingleElementPropertyGridComponent } from "./SingleElementPropertyGrid";
 
-import type { AncestorNavigationProps } from "../hooks/UseInstanceSelection";
+import type { ReactNode } from "react";
 import type { PropertyGridProps } from "./PropertyGrid";
 import type { SingleElementPropertyGridProps } from "./SingleElementPropertyGrid";
 import type { InstanceKey } from "@itwin/presentation-common";
@@ -31,7 +31,10 @@ enum MultiElementPropertyContent {
  * Props for `MultiElementPropertyGrid` component.
  * @public
  */
-export type MultiElementPropertyGridProps = Omit<PropertyGridProps, "headerControls" | "onBackButton"> & AncestorNavigationProps;
+export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
+  /** Renders controls for ancestors navigation. If set to `undefined` ancestors navigation is disabled. */
+  ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
+}
 
 /**
  * Component that renders property grid for instances in `UnifiedSelection`.
@@ -39,13 +42,13 @@ export type MultiElementPropertyGridProps = Omit<PropertyGridProps, "headerContr
  * - If single instance is selected navigation through it's ancestors can be enabled.
  * @public
  */
-export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }: MultiElementPropertyGridProps) {
+export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props }: MultiElementPropertyGridProps) {
   const {
     selectedKeys,
     focusedInstanceKey,
     focusInstance,
     ancestorsNavigationProps,
-  } = useInstanceSelection({ imodel: props.imodel, enableAncestorNavigation });
+  } = useInstanceSelection({ imodel: props.imodel });
 
   const [content, setContent] = useState<MultiElementPropertyContent>(
     MultiElementPropertyContent.PropertyGrid
@@ -71,6 +74,7 @@ export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }:
           multipleElementsSelected={moreThanOneElement}
           onElementListButtonClick={openElementList}
           ancestorsNavigationProps={ancestorsNavigationProps}
+          ancestorsNavigationControls={ancestorsNavigationControls}
         />
       }
       className={classnames("property-grid-react-property-grid", props.className)}
@@ -119,51 +123,27 @@ export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }:
   );
 }
 
-interface HeaderControlsProps {
-  multipleElementsSelected: boolean;
-  ancestorsNavigationProps: AncestorsNavigationProps;
-  onElementListButtonClick: () => void;
-}
-
-function HeaderControls({
-  multipleElementsSelected,
-  ancestorsNavigationProps,
-  onElementListButtonClick,
-}: HeaderControlsProps) {
-  if (!multipleElementsSelected) {
-    return <AncestryNavigation {...ancestorsNavigationProps} />;
-  }
-
-  return <IconButton
-    className="property-grid-react-multi-select-icon"
-    size="small"
-    styleType="borderless"
-    onClick={onElementListButtonClick}
-    onKeyDown={onElementListButtonClick}
-    title={PropertyGridManager.translate("element-list.title")}
-  >
-    <SvgPropertiesList />
-  </IconButton>;
-}
-
-function SingleElementGrid({ instanceKey, ...props }: Omit<SingleElementPropertyGridProps, "instanceKey"> & {instanceKey: InstanceKey | undefined}) {
-  if (!instanceKey) {
-    return null;
-  }
-
-  return <SingleElementPropertyGridComponent {...props} instanceKey={instanceKey} />;
-}
-
-interface AncestorsNavigationProps {
-  navigationEnabled: boolean;
+/**
+ * Props for `AncestorsNavigationControls` component.
+ * @public
+ */
+export interface AncestorsNavigationControlsProps {
+  /** Navigates up to parent instance. */
   navigateUp: () => void;
+  /** Navigates down to child instance from which parent instance was reached. */
   navigateDown: () => void;
+  /** Specified whether it is possible to navigate down. */
   canNavigateDown: boolean;
+  /** Specified whether it is possible to navigate up. */
   canNavigateUp: boolean;
 }
 
-function AncestryNavigation({ navigationEnabled, navigateUp, navigateDown, canNavigateDown, canNavigateUp }: AncestorsNavigationProps) {
-  if (!navigationEnabled || (!canNavigateDown && !canNavigateUp)) {
+/**
+ * Component that renders controls for navigating through ancestors.
+ * @public
+ */
+export function AncestorsNavigationControls({ navigateUp, navigateDown, canNavigateDown, canNavigateUp }: AncestorsNavigationControlsProps) {
+  if (!canNavigateDown && !canNavigateUp) {
     return null;
   }
 
@@ -187,4 +167,41 @@ function AncestryNavigation({ navigationEnabled, navigateUp, navigateDown, canNa
       <SvgArrowDown />
     </IconButton>
   </>;
+}
+
+interface HeaderControlsProps {
+  multipleElementsSelected: boolean;
+  onElementListButtonClick: () => void;
+  ancestorsNavigationProps: AncestorsNavigationControlsProps;
+  ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
+}
+
+function HeaderControls({
+  multipleElementsSelected,
+  ancestorsNavigationProps,
+  ancestorsNavigationControls,
+  onElementListButtonClick,
+}: HeaderControlsProps) {
+  if (!multipleElementsSelected) {
+    return ancestorsNavigationControls ? <>{ancestorsNavigationControls(ancestorsNavigationProps)}</> : null;
+  }
+
+  return <IconButton
+    className="property-grid-react-multi-select-icon"
+    size="small"
+    styleType="borderless"
+    onClick={onElementListButtonClick}
+    onKeyDown={onElementListButtonClick}
+    title={PropertyGridManager.translate("element-list.title")}
+  >
+    <SvgPropertiesList />
+  </IconButton>;
+}
+
+function SingleElementGrid({ instanceKey, ...props }: Omit<SingleElementPropertyGridProps, "instanceKey"> & {instanceKey: InstanceKey | undefined}) {
+  if (!instanceKey) {
+    return null;
+  }
+
+  return <SingleElementPropertyGridComponent {...props} instanceKey={instanceKey} />;
 }

@@ -121,7 +121,6 @@ describe("useInstanceSelection", () => {
   describe("ancestors navigation", () => {
     const initialProps: InstanceSelectionProps = {
       imodel,
-      enableAncestorNavigation: true,
     };
 
     it("can navigate to parent when single instance selected", async () => {
@@ -200,12 +199,12 @@ describe("useInstanceSelection", () => {
       });
     });
 
-    it("does nothing if navigation disabled", async () => {
-      selectionManager.getSelection.returns(new KeySet([childKey]));
-      const { result } = renderHook(useInstanceSelection, { initialProps: { ...initialProps, enableAncestorNavigation: false } });
+    it("does nothing if cannot navigate", async () => {
+      selectionManager.getSelection.returns(new KeySet([parentKey, childKey]));
+      const { result } = renderHook(useInstanceSelection, { initialProps: { ...initialProps } });
 
       await waitFor(() => {
-        expect(result.current.selectedKeys[0].id).to.be.eq(childKey.id);
+        expect(result.current.selectedKeys).to.have.lengthOf(2);
       });
 
       await result.current.ancestorsNavigationProps.navigateUp();

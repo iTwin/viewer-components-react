@@ -1,7 +1,8 @@
 sep=;
 Release Tag;API Item
 public;AddFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps): JSX.Element | null
-public;AncestorNavigationProps
+public;AncestorsNavigationControls({ navigateUp, navigateDown, canNavigateDown, canNavigateUp }: AncestorsNavigationControlsProps): JSX.Element | null
+public;AncestorsNavigationControlsProps
 public;ContextMenuItemProps
 public;ContextMenuProps
 public;CopyPropertyTextContextMenuItem({ record }: ContextMenuItemProps): JSX.Element
@@ -10,9 +11,9 @@ public;FavoritePropertiesContextMenuItemProps
 internal;FilteringPropertyGrid({ filterer, dataProvider, autoExpandChildCategories, ...props }: FilteringPropertyGridProps): JSX.Element
 public;FilteringPropertyGridProps 
 public;IModelAppUserPreferencesStorage 
-internal;InstanceSelectionProps 
-public;MultiElementPropertyGrid({ enableAncestorNavigation, ...props }: MultiElementPropertyGridProps): JSX.Element
-public;MultiElementPropertyGridProps = Omit
+internal;InstanceSelectionProps
+public;MultiElementPropertyGrid({ ancestorsNavigationControls, ...props }: MultiElementPropertyGridProps): JSX.Element
+public;MultiElementPropertyGridProps 
 internal;NonEmptyValuesPropertyDataFilterer 
 internal;NoopPropertyDataFilterer 
 public;NullValueSettingContext({ children }: PropsWithChildren
@@ -47,6 +48,6 @@ public;SingleElementPropertyGridProps = Omit
 internal;UseContentMenuProps 
 internal;useContextMenu({ dataProvider, imodel, contextMenuItems }: UseContentMenuProps):
 internal;useDataProvider({ imodel, createDataProvider }: DataProviderProps &
-internal;useInstanceSelection({ imodel, enableAncestorNavigation }: InstanceSelectionProps):
+internal;useInstanceSelection({ imodel }: InstanceSelectionProps):
 internal;useNullValueSetting():
 internal;useNullValueSettingContext(): NullValueSettingContextValue
