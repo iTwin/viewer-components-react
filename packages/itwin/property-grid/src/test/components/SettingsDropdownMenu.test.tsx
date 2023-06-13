@@ -7,7 +7,7 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
-import { SettingsDropdownMenu, ShowHideNullValuesSetting } from "../../components/SettingsDropdownMenu";
+import { SettingsDropdownMenu, ShowHideNullValuesSettingsMenuItem } from "../../components/SettingsDropdownMenu";
 import { NullValueSettingContext, SHOWNULL_KEY } from "../../hooks/UseNullValuesSetting";
 import { PropertyGridManager } from "../../PropertyGridManager";
 import { PreferencesContextProvider } from "../../PropertyGridPreferencesContext";
@@ -36,7 +36,7 @@ describe("<SettingsDropdownMenu />", () => {
     const { getByRole, queryByText } = render(
       <SettingsDropdownMenu
         dataProvider={{} as IPresentationPropertyDataProvider}
-        settings={[
+        settingsMenuItems={[
           ({ close }) => <button
             onClick={() => {
               spy();
@@ -60,7 +60,7 @@ describe("<SettingsDropdownMenu />", () => {
     const { getByRole, getByText, queryByText } = render(
       <SettingsDropdownMenu
         dataProvider={{} as IPresentationPropertyDataProvider}
-        settings={[
+        settingsMenuItems={[
           ({ close }) => <button
             onClick={() => {
               spy();
@@ -125,12 +125,12 @@ describe("Default settings", () => {
     });
 
     it("renders", async () => {
-      const { queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps}/>);
+      const { queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps}/>);
       await waitFor(() => expect(queryByText("settings.hide-null.label")).to.not.be.null);
     });
 
     it("does not persist new value by default", async () => {
-      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps}/>);
+      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps}/>);
       const item = await waitFor(() => getByText("settings.hide-null.label"));
       await userEvents.click(item);
 
@@ -140,7 +140,7 @@ describe("Default settings", () => {
     });
 
     it("persist new value", async () => {
-      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps} persist={true} />);
+      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} persist={true} />);
       const item = await waitFor(() => getByText("settings.hide-null.label"));
       await userEvents.click(item);
 
@@ -156,12 +156,12 @@ describe("Default settings", () => {
     });
 
     it("renders", async () => {
-      const { queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps}/>);
+      const { queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps}/>);
       await waitFor(() => expect(queryByText("settings.show-null.label")).to.not.be.null);
     });
 
     it("does not persist new value by default", async () => {
-      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps}/>);
+      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps}/>);
       const item = await waitFor(() => getByText("settings.show-null.label"));
       await userEvents.click(item);
 
@@ -171,7 +171,7 @@ describe("Default settings", () => {
     });
 
     it("persist new value", async () => {
-      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSetting {...settingProps} persist={true} />);
+      const { getByText, queryByText } = renderWithContext(<ShowHideNullValuesSettingsMenuItem {...settingProps} persist={true} />);
       const item = await waitFor(() => getByText("settings.show-null.label"));
       await userEvents.click(item);
 

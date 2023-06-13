@@ -10,7 +10,7 @@ import { PropertyDataChangeEvent } from "@itwin/components-react";
 import { render, waitFor } from "@testing-library/react";
 import userEvents from "@testing-library/user-event";
 import { PropertyGridContent } from "../../components/PropertyGridContent";
-import { PropertyGridSetting, ShowHideNullValuesSetting } from "../../components/SettingsDropdownMenu";
+import { PropertyGridSettingsMenuItem, ShowHideNullValuesSettingsMenuItem } from "../../components/SettingsDropdownMenu";
 import { NullValueSettingContext } from "../../hooks/UseNullValuesSetting";
 import { PropertyGridManager } from "../../PropertyGridManager";
 import { createPropertyRecord, stubSelectionManager } from "../TestUtils";
@@ -96,8 +96,8 @@ describe("<PropertyGridContent />", () => {
       <PropertyGridContent
         dataProvider={provider}
         imodel={imodel}
-        settings={[
-          () => <PropertyGridSetting id="testSetting" onClick={spy}>Test Setting</PropertyGridSetting>,
+        settingsMenuItems={[
+          () => <PropertyGridSettingsMenuItem id="testSetting" onClick={spy}>Test Setting</PropertyGridSettingsMenuItem>,
         ]}
       />
     );
@@ -118,8 +118,8 @@ describe("<PropertyGridContent />", () => {
       <PropertyGridContent
         dataProvider={provider}
         imodel={imodel}
-        settings={[
-          (props) => <ShowHideNullValuesSetting {...props} />,
+        settingsMenuItems={[
+          (props) => <ShowHideNullValuesSettingsMenuItem {...props} />,
         ]}
       />
     );

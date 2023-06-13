@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { assert } from "@itwin/core-bentley";
 import { ContextMenuItem as CoreContextMenuItem, GlobalContextMenu } from "@itwin/core-react";
 import { FavoritePropertiesScope, Presentation } from "@itwin/presentation-frontend";
@@ -170,16 +170,12 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseCo
     }
 
     const field = await dataProvider.getFieldByPropertyDescription(args.propertyRecord.property);
-    const items = contextMenuItems.map((item) => item({ imodel, dataProvider, record: args.propertyRecord, field })).filter((item) => !!item);
+    const items = contextMenuItems.map((item, index) => <Fragment key={index}>{item({ imodel, dataProvider, record: args.propertyRecord, field })}</Fragment>);
 
-    setContextMenu(
-      items.length > 0
-        ? {
-          position: { x: args.event.clientX, y: args.event.clientY },
-          menuItems: items,
-        }
-        : undefined
-    );
+    setContextMenu({
+      position: { x: args.event.clientX, y: args.event.clientY },
+      menuItems: items,
+    });
   };
 
   const renderContextMenu = () => {

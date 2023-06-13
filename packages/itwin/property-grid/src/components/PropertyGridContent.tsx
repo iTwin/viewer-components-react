@@ -16,7 +16,7 @@ import { FilteringPropertyGrid, NonEmptyValuesPropertyDataFilterer, NoopProperty
 import { Header } from "./Header";
 import { SettingsDropdownMenu } from "./SettingsDropdownMenu";
 
-import type { SettingsDropdownMenuProps, SettingsProps } from "./SettingsDropdownMenu";
+import type { SettingsDropdownMenuProps, SettingsMenuProps } from "./SettingsDropdownMenu";
 import type { ReactNode } from "react";
 import type { PropertyRecord } from "@itwin/appui-abstract";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -40,7 +40,7 @@ export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGrid
  * Props for `PropertyGridContent` component.
  * @public
  */
-export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & SettingsProps;
+export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & SettingsMenuProps;
 
 /**
  * Component that renders property grid with header and context menu.
@@ -53,7 +53,7 @@ export function PropertyGridContent({
   className,
   onBackButton,
   headerControls,
-  settings,
+  settingsMenuItems,
   ...props
 }: PropertyGridContentProps) {
   const { item } = useLoadedInstanceInfo({ dataProvider });
@@ -71,7 +71,7 @@ export function PropertyGridContent({
   }, []);
 
   const settingsProps: SettingsDropdownMenuProps = {
-    settings,
+    settingsMenuItems,
     dataProvider,
   };
 
