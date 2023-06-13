@@ -184,7 +184,7 @@ describe("Default context menu items", () => {
       expect(container.children).to.have.lengthOf(0);
     });
 
-    it("calls 'Presentation.favorites.add' with default scope", async () => {
+    it("calls `Presentation.favorites.add` with default scope", async () => {
       favoritesManager.has.returns(false);
       const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps}/>);
       const item = getByText("context-menu.add-favorite.label");
@@ -193,7 +193,7 @@ describe("Default context menu items", () => {
       await waitFor(() => expect(favoritesManager.add).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.IModel));
     });
 
-    it("calls 'Presentation.favorites.add' with specified scope", async () => {
+    it("calls `Presentation.favorites.add` with specified scope", async () => {
       favoritesManager.has.returns(false);
       const { getByText } = render(<AddFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin}/>);
       const item = getByText("context-menu.add-favorite.label");
@@ -216,7 +216,7 @@ describe("Default context menu items", () => {
       expect(container.children).to.have.lengthOf(0);
     });
 
-    it("calls 'Presentation.favorites.remove' with default scope", async () => {
+    it("calls `Presentation.favorites.remove` with default scope", async () => {
       favoritesManager.has.returns(true);
       const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps}/>);
       const item = getByText("context-menu.remove-favorite.label");
@@ -225,7 +225,7 @@ describe("Default context menu items", () => {
       await waitFor(() => expect(favoritesManager.remove).to.be.calledOnceWith(field, imodel,  FavoritePropertiesScope.IModel));
     });
 
-    it("calls 'Presentation.favorites.remove' with specified scope", async () => {
+    it("calls `Presentation.favorites.remove` with specified scope", async () => {
       favoritesManager.has.returns(true);
       const { getByText } = render(<RemoveFavoritePropertyContextMenuItem {...itemProps} scope={FavoritePropertiesScope.ITwin}/>);
       const item = getByText("context-menu.remove-favorite.label");
