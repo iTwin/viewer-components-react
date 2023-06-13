@@ -70,6 +70,7 @@ export function PropertyGridContextMenuItem({ id, children, title, onSelect }: P
 
 /**
  * Props for `Add/Remove` favorite properties context menu items.
+ * @public
  */
 export interface FavoritePropertiesContextMenuItemProps extends ContextMenuItemProps {
   /** Scope in which favorite property should be stored. Defaults to `FavoritePropertiesScope.IModel`. */
@@ -80,7 +81,7 @@ export interface FavoritePropertiesContextMenuItemProps extends ContextMenuItemP
  * Renders `Add to Favorite` context menu item if property field is not favorite. Otherwise renders nothing.
  * @public
  */
-export function AddFavoritePropertyMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps) {
+export function AddFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps) {
   const currentScope = scope ?? FavoritePropertiesScope.IModel;
   if (!field || Presentation.favoriteProperties.has(field, imodel, currentScope)) {
     return null;
@@ -104,7 +105,7 @@ export function AddFavoritePropertyMenuItem({ field, imodel, scope }: FavoritePr
  * Renders `Remove from Favorite` context menu item if property field is favorite. Otherwise renders nothing.
  * @public
  */
-export function RemoveFavoritePropertyMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps) {
+export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps) {
   const currentScope = scope ?? FavoritePropertiesScope.IModel;
   if (!field || !Presentation.favoriteProperties.has(field, imodel, currentScope)) {
     return null;
@@ -128,7 +129,7 @@ export function RemoveFavoritePropertyMenuItem({ field, imodel, scope }: Favorit
  * Renders `Copy Text` context menu item.
  * @public
  */
-export function CopyPropertyTextMenuItem({ record }: ContextMenuItemProps) {
+export function CopyPropertyTextContextMenuItem({ record }: ContextMenuItemProps) {
   return (
     <PropertyGridContextMenuItem
       id="copy-text"

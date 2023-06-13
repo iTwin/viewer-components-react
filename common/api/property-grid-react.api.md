@@ -14,11 +14,12 @@ import type { IPresentationPropertyDataProvider } from '@itwin/presentation-comp
 import type { IPropertyDataFilterer } from '@itwin/components-react';
 import type { Localization } from '@itwin/core-common';
 import type { LocalizationOptions } from '@itwin/core-i18n';
-import { PresentationPropertyDataProvider } from '@itwin/presentation-components';
 import type { PropertyDataFilterResult } from '@itwin/components-react';
 import type { PropertyGridContextMenuArgs } from '@itwin/components-react';
 import type { PropertyRecord } from '@itwin/appui-abstract';
 import { PropertyRecordDataFiltererBase } from '@itwin/components-react';
+import type { PropsWithChildren } from 'react';
+import type { ReactNode } from 'react';
 import { StagePanelLocation } from '@itwin/appui-react';
 import { StagePanelSection } from '@itwin/appui-react';
 import type { UiItemsProvider } from '@itwin/appui-react';
@@ -26,39 +27,37 @@ import type { VirtualizedPropertyGridWithDataProviderProps } from '@itwin/compon
 import type { Widget } from '@itwin/appui-react';
 
 // @public
+export function AddFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
+
+// @public
 export interface AncestorNavigationProps {
     enableAncestorNavigation?: boolean;
 }
 
 // @public
-export interface ContextMenuItemDefinition {
-    execute: () => void;
-    hidden?: boolean;
-    key: string;
-    label: string;
-    title?: string;
+export interface ContextMenuItemProps {
+    dataProvider: IPresentationPropertyDataProvider;
+    field: Field | undefined;
+    imodel: IModelConnection;
+    record: PropertyRecord;
 }
-
-// @public
-export type ContextMenuItemProvider = (context: MenuItemContext) => ContextMenuItemDefinition;
 
 // @public
 export interface ContextMenuProps {
-    contextMenuItemProviders?: ContextMenuItemProvider[];
+    contextMenuItems?: Array<(props: ContextMenuItemProps) => ReactNode>;
 }
 
 // @public
-export function createAddFavoritePropertyItemProvider(favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemProvider;
-
-// @public
-export function createCopyPropertyTextItemProvider(): ContextMenuItemProvider;
-
-// @public
-export function createRemoveFavoritePropertyItemProvider(favoritePropertiesScope?: FavoritePropertiesScope): ContextMenuItemProvider;
+export function CopyPropertyTextContextMenuItem({ record }: ContextMenuItemProps): JSX.Element;
 
 // @public
 export interface DataProviderProps {
     createDataProvider?: (imodel: IModelConnection) => IPresentationPropertyDataProvider;
+}
+
+// @public
+export interface FavoritePropertiesContextMenuItemProps extends ContextMenuItemProps {
+    scope?: FavoritePropertiesScope;
 }
 
 // @internal
@@ -72,6 +71,15 @@ export interface FilteringPropertyGridProps extends VirtualizedPropertyGridWithD
     filterer: IPropertyDataFilterer;
 }
 
+// @public
+export class IModelAppUserPreferencesStorage implements PreferencesStorage {
+    constructor(_nameSpace?: string);
+    // (undocumented)
+    get(key: string): Promise<string | undefined>;
+    // (undocumented)
+    set(key: string, value: string): Promise<void>;
+}
+
 // @internal
 export interface InstanceSelectionProps extends AncestorNavigationProps {
     // (undocumented)
@@ -79,18 +87,10 @@ export interface InstanceSelectionProps extends AncestorNavigationProps {
 }
 
 // @public
-export interface MenuItemContext {
-    dataProvider: IPresentationPropertyDataProvider;
-    field: Field | undefined;
-    imodel: IModelConnection;
-    record: PropertyRecord;
-}
-
-// @public
 export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }: MultiElementPropertyGridProps): JSX.Element;
 
 // @public
-export type MultiElementPropertyGridProps = Omit<PropertyGridProps, "headerContent" | "onBackButton"> & AncestorNavigationProps;
+export type MultiElementPropertyGridProps = Omit<PropertyGridProps, "headerControls" | "onBackButton"> & AncestorNavigationProps;
 
 // @internal
 export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFiltererBase {
@@ -109,41 +109,69 @@ export class NoopPropertyDataFilterer extends PropertyRecordDataFiltererBase {
 }
 
 // @public
-export interface NullValueSettingProps {
-    persistNullValueToggle?: boolean;
+export function NullValueSettingContext({ children }: PropsWithChildren<{}>): JSX.Element;
+
+// @internal (undocumented)
+export interface NullValueSettingContextValue {
+    // (undocumented)
+    setShowNullValues: (value: boolean, options: {
+        persist?: boolean;
+    }) => Promise<void>;
+    // (undocumented)
+    showNullValues: boolean;
+}
+
+// @public
+export interface PreferencesStorage {
+    // (undocumented)
+    get(key: string): Promise<string | undefined>;
+    // (undocumented)
+    set(key: string, value: string): Promise<void>;
 }
 
 // @public
 export function PropertyGrid({ createDataProvider, ...props }: PropertyGridProps): JSX.Element;
 
 // @public
-export function PropertyGridComponent(props: PropertyGridComponentProps): JSX.Element | null;
+export function PropertyGridComponent({ preferencesStorage, ...props }: PropertyGridComponentProps): JSX.Element | null;
 
 // @public
 export const PropertyGridComponentId = "vcr:PropertyGridComponent";
 
 // @public
-export type PropertyGridComponentProps = Omit<MultiElementPropertyGridProps, "imodel">;
+export interface PropertyGridComponentProps extends Omit<MultiElementPropertyGridProps, "imodel"> {
+    preferencesStorage?: PreferencesStorage;
+}
 
 // @internal
-export function PropertyGridContent({ dataProvider, imodel, contextMenuItemProviders, persistNullValueToggle, rootClassName, onBackButton, headerContent, ...props }: PropertyGridContentProps): JSX.Element;
+export function PropertyGridContent({ dataProvider, imodel, contextMenuItems, className, onBackButton, headerControls, settingsMenuItems, ...props }: PropertyGridContentProps): JSX.Element;
 
 // @public
 export interface PropertyGridContentBaseProps extends Omit<FilteringPropertyGridProps, "dataProvider" | "filterer" | "isPropertyHoverEnabled" | "isPropertySelectionEnabled" | "onPropertyContextMenu" | "width" | "height"> {
     // (undocumented)
+    className?: string;
+    // (undocumented)
     dataProvider: IPresentationPropertyDataProvider;
     // (undocumented)
-    headerContent?: JSX.Element;
+    headerControls?: JSX.Element;
     // (undocumented)
     imodel: IModelConnection;
     // (undocumented)
     onBackButton?: () => void;
-    // (undocumented)
-    rootClassName?: string;
 }
 
 // @public
-export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & NullValueSettingProps;
+export type PropertyGridContentProps = PropertyGridContentBaseProps & ContextMenuProps & SettingsMenuProps;
+
+// @public
+export function PropertyGridContextMenuItem({ id, children, title, onSelect }: PropsWithChildren<PropertyGridContextMenuItemProps>): JSX.Element;
+
+// @public
+export interface PropertyGridContextMenuItemProps {
+    id: string;
+    onSelect: () => void;
+    title?: string;
+}
 
 // @public
 export class PropertyGridManager {
@@ -156,6 +184,16 @@ export class PropertyGridManager {
 
 // @public
 export type PropertyGridProps = Omit<PropertyGridContentProps, "dataProvider"> & DataProviderProps;
+
+// @public
+export function PropertyGridSettingsMenuItem({ id, onClick, title, children }: PropsWithChildren<PropertyGridSettingsMenuItemProps>): JSX.Element;
+
+// @public
+export interface PropertyGridSettingsMenuItemProps {
+    id: string;
+    onClick: () => void;
+    title?: string;
+}
 
 // @public
 export class PropertyGridUiItemsProvider implements UiItemsProvider {
@@ -173,6 +211,40 @@ export interface PropertyGridUiItemsProviderProps {
     defaultPanelWidgetPriority?: number;
     propertyGridProps?: PropertyGridComponentProps;
 }
+
+// @public
+export function RemoveFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
+
+// @internal
+export function SettingsDropdownMenu({ settingsMenuItems, dataProvider }: SettingsDropdownMenuProps): JSX.Element | null;
+
+// @internal
+export interface SettingsDropdownMenuProps extends SettingsMenuProps {
+    // (undocumented)
+    dataProvider: IPresentationPropertyDataProvider;
+}
+
+// @public
+export interface SettingsMenuItemProps {
+    close: () => void;
+    dataProvider: IPresentationPropertyDataProvider;
+}
+
+// @public
+export interface SettingsMenuProps {
+    settingsMenuItems?: Array<(props: SettingsMenuItemProps) => ReactNode>;
+}
+
+// @public
+export function ShowHideNullValuesSettingsMenuItem({ close, persist }: ShowHideNullValuesSettingsMenuItemProps): JSX.Element;
+
+// @public
+export interface ShowHideNullValuesSettingsMenuItemProps extends SettingsMenuItemProps {
+    persist?: boolean;
+}
+
+// @internal (undocumented)
+export const SHOWNULL_KEY = "showNullValues";
 
 // @public
 export interface SingleElementDataProviderProps extends DataProviderProps {
@@ -194,7 +266,7 @@ export interface UseContentMenuProps extends ContextMenuProps {
 }
 
 // @internal
-export function useContextMenu({ dataProvider, imodel, contextMenuItemProviders }: UseContentMenuProps): {
+export function useContextMenu({ dataProvider, imodel, contextMenuItems }: UseContentMenuProps): {
     onPropertyContextMenu: (args: PropertyGridContextMenuArgs) => Promise<void>;
     renderContextMenu: () => JSX.Element | undefined;
 };
@@ -202,7 +274,7 @@ export function useContextMenu({ dataProvider, imodel, contextMenuItemProviders 
 // @internal
 export function useDataProvider({ imodel, createDataProvider }: DataProviderProps & {
     imodel: IModelConnection;
-}): IPresentationPropertyDataProvider | PresentationPropertyDataProvider;
+}): IPresentationPropertyDataProvider;
 
 // @internal
 export function useInstanceSelection({ imodel, enableAncestorNavigation }: InstanceSelectionProps): {
@@ -219,11 +291,15 @@ export function useInstanceSelection({ imodel, enableAncestorNavigation }: Insta
 };
 
 // @internal
-export function useNullValueSetting({ persistNullValueToggle }: NullValueSettingProps): {
+export function useNullValueSetting(): {
     showNullValues: boolean;
-    filterer: IPropertyDataFilterer;
-    setShowNullValues: (value: boolean) => Promise<void>;
+    setShowNullValues: (value: boolean, options: {
+        persist?: boolean;
+    }) => Promise<void>;
 };
+
+// @internal (undocumented)
+export function useNullValueSettingContext(): NullValueSettingContextValue;
 
 // (No @packageDocumentation comment for this package)
 
