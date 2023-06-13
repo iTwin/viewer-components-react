@@ -37,11 +37,11 @@ export function useNullValueSetting() {
   }, [getShowNullValuesPreference]);
 
   // Function for updating Hide / Show Empty Fields setting
-  const updateShowNullValues = useCallback(async (value: boolean, options: { persist?: boolean }) => {
+  const updateShowNullValues = useCallback(async (value: boolean, options?: { persist?: boolean }) => {
     setShowNullValues(value);
 
     // Persist hide/show value
-    if (options.persist) {
+    if (options && options.persist) {
       await setShowNullValuesPreference(value);
     }
   }, [setShowNullValuesPreference]);
@@ -80,7 +80,7 @@ function useNullValueStorage() {
 /** @internal */
 export interface NullValueSettingContextValue {
   showNullValues: boolean;
-  setShowNullValues: (value: boolean, options: { persist?: boolean }) => Promise<void>;
+  setShowNullValues: (value: boolean, options?: { persist?: boolean }) => Promise<void>;
 }
 
 // istanbul ignore next
