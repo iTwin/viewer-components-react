@@ -191,7 +191,6 @@ function HeaderControls({
     size="small"
     styleType="borderless"
     onClick={onElementListButtonClick}
-    onKeyDown={onElementListButtonClick}
     title={PropertyGridManager.translate("element-list.title")}
   >
     <SvgPropertiesList />

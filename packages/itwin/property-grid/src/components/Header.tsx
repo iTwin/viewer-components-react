@@ -25,7 +25,6 @@ export function Header({ className, children, onBackButtonClick }: PropsWithChil
         ? <IconButton
           styleType="borderless"
           onClick={onBackButtonClick}
-          onKeyDown={onBackButtonClick}
           title={PropertyGridManager.translate("header.back")}
           className="property-grid-react-header-back-button"
         >
