@@ -30,8 +30,14 @@ import type { Widget } from '@itwin/appui-react';
 export function AddFavoritePropertyContextMenuItem({ field, imodel, scope }: FavoritePropertiesContextMenuItemProps): JSX.Element | null;
 
 // @public
-export interface AncestorNavigationProps {
-    enableAncestorNavigation?: boolean;
+export function AncestorsNavigationControls({ navigateUp, navigateDown, canNavigateDown, canNavigateUp }: AncestorsNavigationControlsProps): JSX.Element | null;
+
+// @public
+export interface AncestorsNavigationControlsProps {
+    canNavigateDown: boolean;
+    canNavigateUp: boolean;
+    navigateDown: () => void;
+    navigateUp: () => void;
 }
 
 // @public
@@ -81,16 +87,18 @@ export class IModelAppUserPreferencesStorage implements PreferencesStorage {
 }
 
 // @internal
-export interface InstanceSelectionProps extends AncestorNavigationProps {
+export interface InstanceSelectionProps {
     // (undocumented)
     imodel: IModelConnection;
 }
 
 // @public
-export function MultiElementPropertyGrid({ enableAncestorNavigation, ...props }: MultiElementPropertyGridProps): JSX.Element;
+export function MultiElementPropertyGrid({ ancestorsNavigationControls, ...props }: MultiElementPropertyGridProps): JSX.Element;
 
 // @public
-export type MultiElementPropertyGridProps = Omit<PropertyGridProps, "headerControls" | "onBackButton"> & AncestorNavigationProps;
+export interface MultiElementPropertyGridProps extends Omit<PropertyGridProps, "headerControls" | "onBackButton"> {
+    ancestorsNavigationControls?: (props: AncestorsNavigationControlsProps) => ReactNode;
+}
 
 // @internal
 export class NonEmptyValuesPropertyDataFilterer extends PropertyRecordDataFiltererBase {
@@ -114,7 +122,7 @@ export function NullValueSettingContext({ children }: PropsWithChildren<{}>): JS
 // @internal (undocumented)
 export interface NullValueSettingContextValue {
     // (undocumented)
-    setShowNullValues: (value: boolean, options: {
+    setShowNullValues: (value: boolean, options?: {
         persist?: boolean;
     }) => Promise<void>;
     // (undocumented)
@@ -277,12 +285,11 @@ export function useDataProvider({ imodel, createDataProvider }: DataProviderProp
 }): IPresentationPropertyDataProvider;
 
 // @internal
-export function useInstanceSelection({ imodel, enableAncestorNavigation }: InstanceSelectionProps): {
+export function useInstanceSelection({ imodel }: InstanceSelectionProps): {
     selectedKeys: InstanceKey[];
     focusedInstanceKey: InstanceKey | undefined;
     focusInstance: (key: InstanceKey) => void;
     ancestorsNavigationProps: {
-        navigationEnabled: boolean;
         navigateDown: () => Promise<void>;
         navigateUp: () => Promise<void>;
         canNavigateUp: boolean;
@@ -293,9 +300,9 @@ export function useInstanceSelection({ imodel, enableAncestorNavigation }: Insta
 // @internal
 export function useNullValueSetting(): {
     showNullValues: boolean;
-    setShowNullValues: (value: boolean, options: {
-        persist?: boolean;
-    }) => Promise<void>;
+    setShowNullValues: (value: boolean, options?: {
+        persist?: boolean | undefined;
+    } | undefined) => Promise<void>;
 };
 
 // @internal (undocumented)
