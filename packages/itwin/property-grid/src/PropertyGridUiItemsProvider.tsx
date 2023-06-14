@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import { StagePanelLocation, StagePanelSection, StageUsage, WidgetState } from "@itwin/appui-react";
+import { SvgInfoCircular } from "@itwin/itwinui-icons-react";
 import { PropertyGridComponent, PropertyGridComponentId } from "./PropertyGridComponent";
 import { PropertyGridManager } from "./PropertyGridManager";
 
@@ -48,7 +49,7 @@ export class PropertyGridUiItemsProvider implements UiItemsProvider {
       label: PropertyGridManager.translate("widget-label"),
       content: <PropertyGridComponent {...propertyGridProps} />,
       defaultState: WidgetState.Hidden,
-      icon: "icon-info",
+      icon: <SvgInfoCircular />,
       priority: defaultPanelWidgetPriority,
     }];
   }
