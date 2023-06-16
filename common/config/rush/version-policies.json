@@ -5,8 +5,9 @@
   },
   {
     "policyName": "itwin-tree-widget",
-    "definitionName": "individualVersion",
-    "lockedMajor": 0
+    "definitionName": "lockStepVersion",
+    "version": "1.0.0-dev.2",
+    "nextBump": "prerelease"
   },
   {
     "policyName": "itwin-property-grid",
@@ -26,7 +27,7 @@
   {
     "policyName": "itwin-geo-tools",
     "definitionName": "individualVersion",
-    "lockedMajor": 4
+    "lockedMajor": 5
   },
   {
     "policyName": "itwin-breakdown-trees",
@@ -60,8 +61,7 @@
   },
   {
     "policyName": "itwin-map-layers",
-    "definitionName": "lockStepVersion",
-    "version": "5.0.0-dev.1",
-    "nextBump": "prerelease"
+    "definitionName": "individualVersion",
+    "lockedMajor": 5
   }
 ]

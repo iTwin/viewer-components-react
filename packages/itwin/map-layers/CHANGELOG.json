@@ -2,6 +2,29 @@
   "name": "@itwin/map-layers",
   "entries": [
     {
+      "version": "5.0.0",
+      "tag": "@itwin/map-layers_v5.0.0",
+      "date": "Tue, 06 Jun 2023 10:57:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update and react to iTwin.js Core 4.0"
+          },
+          {
+            "comment": "Updated itwinjs-core to latest RC version."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue with MapLayerPreferences that would not save with the proper key with replacing an existing source. Also also added MapLayersPrefBrowserStorage as a simple/testing implementation of UserPreferencesAccess."
+          },
+          {
+            "comment": "Refactored SubLayers tree panel and made it independent from viewport"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.0",
       "tag": "@itwin/map-layers_v4.0.0",
       "date": "Thu, 04 May 2023 23:59:19 GMT",

@@ -24,7 +24,7 @@ export class NodeDetails {
 
 export interface VisibilityHandlerProps {
   rulesetId: string;
-  viewport: Viewport;
+  viewport?: Viewport;
   treeDataProvider: IPresentationTreeDataProvider;
   modelSource: TreeModelSource;
 }

@@ -2,6 +2,18 @@
   "name": "@itwin/tree-widget-react",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@itwin/tree-widget-react_v0.10.0",
+      "date": "Tue, 23 May 2023 13:16:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Updating to iTwin.js core 4.0.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.0",
       "tag": "@itwin/tree-widget-react_v0.9.0",
       "date": "Tue, 02 May 2023 16:12:17 GMT",

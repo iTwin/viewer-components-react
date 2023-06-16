@@ -1,6 +1,15 @@
 # Change Log - @itwin/reports-config-widget-react
 
-This log was last generated on Tue, 07 Mar 2023 15:47:41 GMT and should not be manually modified.
+This log was last generated on Tue, 23 May 2023 13:16:11 GMT and should not be manually modified.
+
+## 0.3.0
+Tue, 23 May 2023 13:16:11 GMT
+
+### Minor changes
+
+- Improved modularity to Reports, ReportMappings, and ReportAction components.
+- Added a ReportsConfigContext component to manage the configuration of the Reports API, including token retrieval, baseURL, iTwinId, iModelId, and bulk extraction.
+- The view of the widget is now handled by a routing component that displays different views based on the "step" of the current route.
 
 ## 0.2.1
 Tue, 07 Mar 2023 15:47:41 GMT

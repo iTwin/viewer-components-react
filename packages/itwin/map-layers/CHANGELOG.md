@@ -1,6 +1,14 @@
 # Change Log - @itwin/map-layers
 
-This log was last generated on Thu, 04 May 2023 23:59:19 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Jun 2023 10:57:06 GMT and should not be manually modified.
+
+## 5.0.0
+Tue, 06 Jun 2023 10:57:06 GMT
+
+### Patches
+
+- Fix an issue with MapLayerPreferences that would not save with the proper key with replacing an existing source. Also also added MapLayersPrefBrowserStorage as a simple/testing implementation of UserPreferencesAccess.
+- Refactored SubLayers tree panel and made it independent from viewport
 
 ## 4.0.0
 Thu, 04 May 2023 23:59:19 GMT

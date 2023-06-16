@@ -2,17 +2,15 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-@import '~@itwin/itwinui-css/scss/variables';
 
 .gmw-select-mapping-container {
   display: flex;
   flex-direction: column;
-  gap: $iui-baseline * 2;
   flex-grow: 1;
   min-height: 0;
 
   .gmw-select-mapping-table {
-    flex-grow: 1;
     overflow: auto;
+    flex-grow: 1;
   }
 }
